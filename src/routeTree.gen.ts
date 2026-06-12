@@ -9,38 +9,129 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as OrgRegisterRouteImport } from './routes/org.register'
+import { Route as MemberRegisterRouteImport } from './routes/member.register'
+import { Route as AuthenticatedOrgDashboardRouteImport } from './routes/_authenticated/org.dashboard'
+import { Route as AuthenticatedMemberPendingRouteImport } from './routes/_authenticated/member.pending'
 
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OrgRegisterRoute = OrgRegisterRouteImport.update({
+  id: '/org/register',
+  path: '/org/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MemberRegisterRoute = MemberRegisterRouteImport.update({
+  id: '/member/register',
+  path: '/member/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedOrgDashboardRoute =
+  AuthenticatedOrgDashboardRouteImport.update({
+    id: '/org/dashboard',
+    path: '/org/dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMemberPendingRoute =
+  AuthenticatedMemberPendingRouteImport.update({
+    id: '/member/pending',
+    path: '/member/pending',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/member/register': typeof MemberRegisterRoute
+  '/org/register': typeof OrgRegisterRoute
+  '/member/pending': typeof AuthenticatedMemberPendingRoute
+  '/org/dashboard': typeof AuthenticatedOrgDashboardRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/member/register': typeof MemberRegisterRoute
+  '/org/register': typeof OrgRegisterRoute
+  '/member/pending': typeof AuthenticatedMemberPendingRoute
+  '/org/dashboard': typeof AuthenticatedOrgDashboardRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/member/register': typeof MemberRegisterRoute
+  '/org/register': typeof OrgRegisterRoute
+  '/_authenticated/member/pending': typeof AuthenticatedMemberPendingRoute
+  '/_authenticated/org/dashboard': typeof AuthenticatedOrgDashboardRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/member/register'
+    | '/org/register'
+    | '/member/pending'
+    | '/org/dashboard'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/member/register'
+    | '/org/register'
+    | '/member/pending'
+    | '/org/dashboard'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/member/register'
+    | '/org/register'
+    | '/_authenticated/member/pending'
+    | '/_authenticated/org/dashboard'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  MemberRegisterRoute: typeof MemberRegisterRoute
+  OrgRegisterRoute: typeof OrgRegisterRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +139,57 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/org/register': {
+      id: '/org/register'
+      path: '/org/register'
+      fullPath: '/org/register'
+      preLoaderRoute: typeof OrgRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/member/register': {
+      id: '/member/register'
+      path: '/member/register'
+      fullPath: '/member/register'
+      preLoaderRoute: typeof MemberRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/org/dashboard': {
+      id: '/_authenticated/org/dashboard'
+      path: '/org/dashboard'
+      fullPath: '/org/dashboard'
+      preLoaderRoute: typeof AuthenticatedOrgDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/member/pending': {
+      id: '/_authenticated/member/pending'
+      path: '/member/pending'
+      fullPath: '/member/pending'
+      preLoaderRoute: typeof AuthenticatedMemberPendingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedMemberPendingRoute: typeof AuthenticatedMemberPendingRoute
+  AuthenticatedOrgDashboardRoute: typeof AuthenticatedOrgDashboardRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedMemberPendingRoute: AuthenticatedMemberPendingRoute,
+  AuthenticatedOrgDashboardRoute: AuthenticatedOrgDashboardRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
+  MemberRegisterRoute: MemberRegisterRoute,
+  OrgRegisterRoute: OrgRegisterRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
