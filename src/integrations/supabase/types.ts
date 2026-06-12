@@ -14,7 +14,95 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      members: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          org_id: string
+          phone: string | null
+          photo_url: string | null
+          reviewed_at: string | null
+          status: Database["public"]["Enums"]["member_status"]
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          org_id: string
+          phone?: string | null
+          photo_url?: string | null
+          reviewed_at?: string | null
+          status?: Database["public"]["Enums"]["member_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          org_id?: string
+          phone?: string | null
+          photo_url?: string | null
+          reviewed_at?: string | null
+          status?: Database["public"]["Enums"]["member_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "members_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          admin_user_id: string
+          created_at: string
+          email: string
+          id: string
+          logo_url: string | null
+          name: string
+          org_code: string
+          phone: string | null
+          slogan: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_user_id: string
+          created_at?: string
+          email: string
+          id?: string
+          logo_url?: string | null
+          name: string
+          org_code: string
+          phone?: string | null
+          slogan?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_user_id?: string
+          created_at?: string
+          email?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
+          org_code?: string
+          phone?: string | null
+          slogan?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +111,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      member_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +238,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      member_status: ["pending", "approved", "rejected"],
+    },
   },
 } as const
