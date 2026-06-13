@@ -69,6 +69,8 @@ export type Database = {
           admin_user_id: string
           created_at: string
           email: string
+          founders: Json
+          gov_reg_number: string | null
           id: string
           logo_url: string | null
           name: string
@@ -81,6 +83,8 @@ export type Database = {
           admin_user_id: string
           created_at?: string
           email: string
+          founders?: Json
+          gov_reg_number?: string | null
           id?: string
           logo_url?: string | null
           name: string
@@ -93,6 +97,8 @@ export type Database = {
           admin_user_id?: string
           created_at?: string
           email?: string
+          founders?: Json
+          gov_reg_number?: string | null
           id?: string
           logo_url?: string | null
           name?: string
