@@ -13,7 +13,15 @@ function genOrgCode() {
 
 export const registerOrganization = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { name: string; email: string; phone?: string; slogan?: string; logo_url?: string }) => d)
+  .inputValidator((d: {
+    name: string;
+    email: string;
+    phone?: string;
+    slogan?: string;
+    logo_url?: string;
+    gov_reg_number?: string;
+    founders?: { name: string; address?: string }[];
+  }) => d)
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const org_code = genOrgCode();
@@ -26,6 +34,8 @@ export const registerOrganization = createServerFn({ method: "POST" })
         phone: data.phone ?? null,
         slogan: data.slogan ?? null,
         logo_url: data.logo_url ?? null,
+        gov_reg_number: data.gov_reg_number ?? null,
+        founders: (data.founders ?? []).filter((f) => f.name?.trim()),
         org_code,
       })
       .select()
@@ -34,6 +44,7 @@ export const registerOrganization = createServerFn({ method: "POST" })
     const qrDataUrl = await QRCode.toDataURL(org_code, { width: 512, margin: 2 });
     return { org, qrDataUrl };
   });
+
 
 export const getMyOrg = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
