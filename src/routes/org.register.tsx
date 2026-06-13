@@ -49,8 +49,15 @@ function OrgRegister() {
         if (siErr) throw siErr;
       }
       const res = await register({ data: {
-        name: form.name, email: form.email, phone: form.phone || undefined, slogan: form.slogan || undefined,
+        name: form.name,
+        email: form.email,
+        phone: form.phone || undefined,
+        slogan: form.slogan || undefined,
+        logo_url: form.logo_url || undefined,
+        gov_reg_number: form.gov_reg_number || undefined,
+        founders: founders.filter((f) => f.name.trim()).map((f) => ({ name: f.name.trim(), address: f.address.trim() || undefined })),
       }});
+
       setResult(res);
       setStep("done");
       toast.success("Organization registered!");
