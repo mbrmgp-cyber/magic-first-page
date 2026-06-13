@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Download, RefreshCw } from "lucide-react";
+import { Download, RefreshCw, Plus, X } from "lucide-react";
+
 
 export const Route = createFileRoute("/org/register")({
   head: () => ({ meta: [{ title: "Register Organization — MBR App" }] }),
