@@ -24,8 +24,10 @@ function OrgRegister() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ org: { name: string; org_code: string }; qrDataUrl: string } | null>(null);
   const [form, setForm] = useState({
-    name: "", email: "", password: "", phone: "", slogan: "",
+    name: "", email: "", password: "", phone: "", slogan: "", logo_url: "", gov_reg_number: "",
   });
+  const [founders, setFounders] = useState<{ name: string; address: string }[]>([{ name: "", address: "" }]);
+
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
