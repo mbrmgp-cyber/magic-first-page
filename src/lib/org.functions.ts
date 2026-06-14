@@ -20,7 +20,7 @@ export const registerOrganization = createServerFn({ method: "POST" })
     slogan?: string;
     logo_url?: string;
     gov_reg_number?: string;
-    founders?: { name: string; address?: string }[];
+    founders?: { name: string; address?: string; aadhaar_url?: string }[];
   }) => d)
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
