@@ -295,7 +295,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
 }
 
 function CardFront({
-  fref, member, org, photoUrl, logoUrl, sigUrl, qrDataUrl, joined, t,
+  fref, member, org, photoUrl, logoUrl, sigUrl, qrDataUrl, joined, t, lang,
 }: {
   fref: React.RefObject<HTMLDivElement | null>;
   member: Member; org: Org | null;
@@ -303,6 +303,7 @@ function CardFront({
   qrDataUrl: string;
   joined: string;
   t: Record<string, string>;
+  lang: CardLang;
 }) {
   // Derive village & mandal: prefer explicit fields, else parse address.
   let village = member.village ?? null;
