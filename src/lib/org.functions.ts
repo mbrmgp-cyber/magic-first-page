@@ -82,6 +82,21 @@ export const regenerateOrgQr = createServerFn({ method: "POST" })
     return { org: updated, qrDataUrl };
   });
 
+export const updateOrgLogo = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { logo_url: string }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: org, error } = await supabase
+      .from("organizations")
+      .update({ logo_url: data.logo_url })
+      .eq("admin_user_id", userId)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return { org };
+  });
+
 export const validateOrgCode = createServerFn({ method: "POST" })
   .inputValidator((d: { code: string }) => d)
   .handler(async ({ data }) => {
