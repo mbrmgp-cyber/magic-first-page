@@ -340,10 +340,10 @@ function CardFront({
         )}
         <div style={{ flex: 1, minWidth: 0, lineHeight: 1.35 }}>
           <div style={{ fontFamily: TELUGU_FONT, fontSize: "3.6mm", fontWeight: 900, color: "#000080", letterSpacing: "0.05mm", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-            {org?.name ?? "Organization"}
+            {tr(org?.name ?? "Organization", lang)}
           </div>
           <div style={{ fontFamily: TELUGU_FONT, fontSize: "2.1mm", color: "#000080", fontWeight: 700, marginTop: "0.3mm", fontStyle: "italic", lineHeight: 1.3 }}>
-            {SLOGAN}
+            {lang === "te" ? SLOGAN : lang === "hi" ? "॥ मानवसेवा ही माधव सेवा ॥" : "॥ Service to Humanity is Service to God ॥"}
           </div>
           {org?.gov_reg_number && (
             <div style={{ fontSize: "1.7mm", color: "#000080", opacity: 0.85, marginTop: "0.1mm" }}>Reg: {org.gov_reg_number}</div>
