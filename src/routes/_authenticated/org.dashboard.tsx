@@ -1,64 +1,45 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getMyOrg, regenerateOrgQr, listOrgMembers, reviewMember } from "@/lib/org.functions";
+import { useQuery } from "@tanstack/react-query";
+import { getMyOrg } from "@/lib/org.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
-import { Download, RefreshCw, LogOut, Check, X } from "lucide-react";
+import { LogOut, BookOpen, Users, Briefcase, Calendar, IdCard, Wallet, MessageSquare, QrCode } from "lucide-react";
+import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 
 export const Route = createFileRoute("/_authenticated/org/dashboard")({
-  head: () => ({ meta: [{ title: "Org Dashboard — MBR App" }] }),
+  head: () => ({ meta: [{ title: "Society Dashboard — MBR App" }] }),
   component: Dashboard,
 });
 
+const MENU = [
+  { to: "/org/rules", label: "సొసైటీ రూల్స్ & హిస్టరీ", icon: BookOpen },
+  { to: "/org/members", label: "సభ్యుల వివరాలు & నమోదు", icon: Users },
+  { to: "/org/committee", label: "కార్యవర్గ కమిటీ వివరాలు", icon: Briefcase },
+  { to: "/org/events", label: "కార్యక్రమాలు, సమావేశాలు, నిర్ణయాలు", icon: Calendar },
+  { to: "/org/designs", label: "ID కార్డులు, మెమెంటోలు, లెటర్‌ప్యాడ్, స్టాంప్ డిజైన్", icon: IdCard },
+  { to: "/org/accounts", label: "అకౌంట్స్", icon: Wallet },
+  { to: "/org/chat", label: "సభ్యులతో చాటింగ్", icon: MessageSquare },
+] as const;
+
 function Dashboard() {
   const navigate = useNavigate();
-  const qc = useQueryClient();
   const fetchOrg = useServerFn(getMyOrg);
-  const fetchMembers = useServerFn(listOrgMembers);
-  const regen = useServerFn(regenerateOrgQr);
-  const review = useServerFn(reviewMember);
-
   const orgQ = useQuery({ queryKey: ["my-org"], queryFn: () => fetchOrg() });
-  const membersQ = useQuery({ queryKey: ["org-members"], queryFn: () => fetchMembers() });
-
-  const regenMut = useMutation({
-    mutationFn: () => regen(),
-    onSuccess: () => {
-      toast.success("కొత్త QR generate అయ్యింది");
-      qc.invalidateQueries({ queryKey: ["my-org"] });
-    },
-    onError: (e: any) => toast.error(e.message ?? "Failed"),
-  });
-
-  const reviewMut = useMutation({
-    mutationFn: (v: { member_id: string; action: "approve" | "reject" }) => review({ data: v }),
-    onSuccess: (_, v) => {
-      toast.success(v.action === "approve" ? "Approved" : "Rejected");
-      qc.invalidateQueries({ queryKey: ["org-members"] });
-    },
-    onError: (e: any) => toast.error(e.message ?? "Failed"),
-  });
 
   async function logout() {
     await supabase.auth.signOut();
     navigate({ to: "/auth", replace: true });
   }
 
-  if (orgQ.isLoading) return <div className="min-h-screen flex items-center justify-center">Loading…</div>;
+  if (orgQ.isLoading) return <div className="min-h-screen flex items-center justify-center bg-tricolor">Loading…</div>;
 
   const org = orgQ.data?.org;
   if (!org) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6">
-        <Card className="p-6 text-center space-y-3">
+      <div className="min-h-screen flex items-center justify-center p-6 bg-tricolor">
+        <Card className="p-6 text-center space-y-3 bg-white/90 backdrop-blur-xl">
           <p>మీకు Organization లేదు.</p>
           <Button onClick={() => navigate({ to: "/org/register" })}>Register Org</Button>
         </Card>
@@ -66,103 +47,76 @@ function Dashboard() {
     );
   }
 
-  const members = membersQ.data?.members ?? [];
-  const pending = members.filter((m) => m.status === "pending");
-  const approved = members.filter((m) => m.status === "approved");
+  const govQr = (org as any).gov_qr_url as string | undefined;
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-6">
-      <div className="max-w-3xl mx-auto space-y-6">
-        <header className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">{org.name}</h1>
-            <p className="text-sm text-muted-foreground">{org.email}</p>
-          </div>
-          <Button variant="ghost" size="sm" onClick={logout}><LogOut className="h-4 w-4 mr-2" />Logout</Button>
-        </header>
-
-        <Card className="p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="font-semibold">Organization QR Code</h2>
-            <Badge variant="outline" className="font-mono">{org.org_code}</Badge>
-          </div>
-          {orgQ.data?.qrDataUrl && (
-            <div className="flex justify-center">
-              <img src={orgQ.data.qrDataUrl} alt="QR" className="w-56 h-56 border rounded-lg" />
-            </div>
-          )}
-          <div className="flex gap-2">
-            {orgQ.data?.qrDataUrl && (
-              <a href={orgQ.data.qrDataUrl} download={`${org.org_code}.png`} className="flex-1">
-                <Button variant="outline" className="w-full"><Download className="h-4 w-4 mr-2" />Download</Button>
-              </a>
+    <div className="min-h-screen bg-tricolor p-3 md:p-6">
+      <div className="max-w-3xl mx-auto space-y-4">
+        {/* Top bar: gov QR (left) + MBR logo (right) */}
+        <div className="flex items-start justify-between">
+          <div className="w-14 h-14 rounded-md bg-white/90 backdrop-blur shadow border border-white flex items-center justify-center overflow-hidden">
+            {govQr ? (
+              <img src={govQr} alt="Gov Reg QR" className="w-full h-full object-contain" />
+            ) : (
+              <QrCode className="w-7 h-7 text-muted-foreground" aria-label="Gov QR placeholder" />
             )}
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="secondary" className="flex-1" disabled={regenMut.isPending}>
-                  <RefreshCw className={`h-4 w-4 mr-2 ${regenMut.isPending ? "animate-spin" : ""}`} />Regenerate
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>QR Regenerate చేయాలా?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    పాత QR Code invalid అవుతుంది. ఇప్పుడు పంచిన QR ఎవ్వరూ ఉపయోగించలేరు.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => regenMut.mutate()}>Regenerate</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={logout} className="text-foreground">
+              <LogOut className="h-4 w-4 mr-1" />Logout
+            </Button>
+            <img src={mbrLogo.url} alt="MBR" className="w-12 h-12 rounded-md bg-white/90 backdrop-blur shadow border border-white object-contain p-1" />
+          </div>
+        </div>
+
+        {/* Society headline card */}
+        <Card className="p-5 bg-white/92 backdrop-blur-xl shadow-2xl border-white">
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-20 shrink-0 rounded-full bg-white shadow border-2 border-[#FF9933] flex items-center justify-center overflow-hidden">
+              {org.logo_url ? (
+                <img src={org.logo_url} alt={`${org.name} logo`} className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-2xl font-bold" style={{
+                  background: "linear-gradient(90deg,#FF9933,#138808)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}>{org.name.split(" ").map(w => w[0]).join("").slice(0, 3).toUpperCase()}</span>
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl md:text-2xl font-bold leading-tight break-words">{org.name}</h1>
+              {org.slogan && (
+                <p className="text-sm italic mt-0.5" style={{
+                  background: "linear-gradient(90deg,#FF9933,#138808)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}>"{org.slogan}"</p>
+              )}
+              {org.gov_reg_number && (
+                <p className="text-xs text-muted-foreground mt-1 font-mono">Reg No : {org.gov_reg_number}</p>
+              )}
+            </div>
           </div>
         </Card>
 
-        <Card className="p-6 space-y-4">
-          <h2 className="font-semibold">Pending Requests ({pending.length})</h2>
-          {pending.length === 0 ? (
-            <p className="text-sm text-muted-foreground">పెండింగ్ requests లేవు.</p>
-          ) : (
-            <ul className="space-y-3">
-              {pending.map((m) => (
-                <li key={m.id} className="flex items-center justify-between gap-3 border rounded-lg p-3">
-                  <div className="min-w-0">
-                    <p className="font-medium truncate">{m.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">{m.email}</p>
+        {/* Menu grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {MENU.map((m) => (
+            <Link key={m.to} to={m.to}>
+              <Card className="p-4 bg-white/92 backdrop-blur hover:bg-white hover:shadow-lg transition-all border-white cursor-pointer h-full">
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-lg flex items-center justify-center shrink-0"
+                    style={{ background: "linear-gradient(135deg,#FF9933,#138808)" }}>
+                    <m.icon className="w-5 h-5 text-white" />
                   </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={() => reviewMut.mutate({ member_id: m.id, action: "approve" })}>
-                      <Check className="h-4 w-4" />
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => reviewMut.mutate({ member_id: m.id, action: "reject" })}>
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Card>
+                  <span className="font-medium text-sm leading-tight">{m.label}</span>
+                </div>
+              </Card>
+            </Link>
+          ))}
+        </div>
 
-        <Card className="p-6 space-y-4">
-          <h2 className="font-semibold">Approved Members ({approved.length})</h2>
-          {approved.length === 0 ? (
-            <p className="text-sm text-muted-foreground">ఇంకా approved members లేరు.</p>
-          ) : (
-            <ul className="space-y-2">
-              {approved.map((m) => (
-                <li key={m.id} className="flex items-center justify-between border rounded-lg p-3">
-                  <div className="min-w-0">
-                    <p className="font-medium truncate">{m.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">{m.email}</p>
-                  </div>
-                  <Badge>Approved</Badge>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Card>
+        <p className="text-center text-xs text-muted-foreground pt-2">Org Code: <span className="font-mono">{org.org_code}</span></p>
       </div>
     </div>
   );
