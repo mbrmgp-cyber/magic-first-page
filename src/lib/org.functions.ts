@@ -95,7 +95,26 @@ export const updateOrgLogo = createServerFn({ method: "POST" })
       .single();
     if (error) throw new Error(error.message);
     return { org };
+});
+
+export const updateOrgPresident = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { president_name?: string | null; president_signature_url?: string | null }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const patch: Record<string, any> = {};
+    if (data.president_name !== undefined) patch.president_name = data.president_name;
+    if (data.president_signature_url !== undefined) patch.president_signature_url = data.president_signature_url;
+    const { data: org, error } = await supabase
+      .from("organizations")
+      .update(patch)
+      .eq("admin_user_id", userId)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return { org };
   });
+
 
 export const validateOrgCode = createServerFn({ method: "POST" })
   .inputValidator((d: { code: string }) => d)
