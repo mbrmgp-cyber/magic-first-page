@@ -1,10 +1,40 @@
 import { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
+import Sanscript from "@indic-transliteration/sanscript";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Printer, IdCard, User, RotateCw, Languages } from "lucide-react";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
+
+// Transliterate Telugu-script source text into the chosen card language script.
+// Numbers, ASCII (phone, email, codes), and punctuation pass through unchanged.
+// te: no-op. hi: Telugu → Devanagari. en: Telugu → ITRANS, lightly cleaned for readability.
+function tr(text: string | null | undefined, lang: "te" | "en" | "hi"): string {
+  if (!text) return "";
+  if (lang === "te") return text;
+  const hasTelugu = /[\u0C00-\u0C7F]/.test(text);
+  if (!hasTelugu) return text;
+  if (lang === "hi") {
+    try { return Sanscript.t(text, "telugu", "devanagari"); } catch { return text; }
+  }
+  // English: telugu -> itrans, then prettify
+  let out: string;
+  try { out = Sanscript.t(text, "telugu", "itrans"); } catch { return text; }
+  return out
+    .replace(/~N|~n/g, "n")
+    .replace(/\.n/g, "n")
+    .replace(/[A-Z]/g, (c) => c.toLowerCase())
+    .replace(/aa/g, "a").replace(/ii/g, "i").replace(/uu/g, "u")
+    .replace(/RRi|R\^i/g, "ri")
+    .replace(/\^|\.|_/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(/\s+/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
 
 type Org = {
   name: string;
@@ -237,26 +267,27 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
             <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden" }}>
               <CardFront
                 fref={frontRef}
-                member={member} org={org} t={t}
+                member={member} org={org} t={t} lang={lang}
                 photoUrl={photoUrl} logoUrl={logoUrl} sigUrl={sigUrl} qrDataUrl={qrDataUrl}
                 joined={joined}
               />
             </div>
             <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
-              <CardBack bref={backRef} t={t} memberName={member.name} appQrUrl={appQrUrl} />
+              <CardBack bref={backRef} t={t} lang={lang} memberName={member.name} appQrUrl={appQrUrl} />
             </div>
           </div>
         </div>
       </ScaledCard>
 
-
-
       <div className="flex justify-between items-center gap-2 pt-2">
         <Button size="sm" variant="outline" onClick={() => setShowBack(v => !v)}>
-          <RotateCw className="w-4 h-4 mr-1" /> {showBack ? "ముందు" : "వెనుక"}
+          <RotateCw className="w-4 h-4 mr-1" />
+          {showBack ? (lang === "en" ? "Front" : lang === "hi" ? "सामने" : "ముందు")
+                    : (lang === "en" ? "Back" : lang === "hi" ? "पीछे" : "వెనుక")}
         </Button>
         <Button size="sm" onClick={handlePrint}>
-          <Printer className="w-4 h-4 mr-1" /> ప్రింట్ / PDF
+          <Printer className="w-4 h-4 mr-1" />
+          {lang === "en" ? "Print / PDF" : lang === "hi" ? "प्रिंट / PDF" : "ప్రింట్ / PDF"}
         </Button>
       </div>
     </div>
@@ -264,7 +295,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
 }
 
 function CardFront({
-  fref, member, org, photoUrl, logoUrl, sigUrl, qrDataUrl, joined, t,
+  fref, member, org, photoUrl, logoUrl, sigUrl, qrDataUrl, joined, t, lang,
 }: {
   fref: React.RefObject<HTMLDivElement | null>;
   member: Member; org: Org | null;
@@ -272,6 +303,7 @@ function CardFront({
   qrDataUrl: string;
   joined: string;
   t: Record<string, string>;
+  lang: CardLang;
 }) {
   // Derive village & mandal: prefer explicit fields, else parse address.
   let village = member.village ?? null;
@@ -308,10 +340,10 @@ function CardFront({
         )}
         <div style={{ flex: 1, minWidth: 0, lineHeight: 1.35 }}>
           <div style={{ fontFamily: TELUGU_FONT, fontSize: "3.6mm", fontWeight: 900, color: "#000080", letterSpacing: "0.05mm", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-            {org?.name ?? "Organization"}
+            {tr(org?.name ?? "Organization", lang)}
           </div>
           <div style={{ fontFamily: TELUGU_FONT, fontSize: "2.1mm", color: "#000080", fontWeight: 700, marginTop: "0.3mm", fontStyle: "italic", lineHeight: 1.3 }}>
-            {SLOGAN}
+            {lang === "te" ? SLOGAN : lang === "hi" ? "॥ मानवसेवा ही माधव सेवा ॥" : "॥ Service to Humanity is Service to God ॥"}
           </div>
           {org?.gov_reg_number && (
             <div style={{ fontSize: "1.7mm", color: "#000080", opacity: 0.85, marginTop: "0.1mm" }}>Reg: {org.gov_reg_number}</div>
@@ -364,11 +396,11 @@ function CardFront({
             {t.id}: {member.member_code ?? "—"}
           </div>
           <div style={{ fontSize: "3.4mm", fontWeight: 800, marginTop: "0.6mm", color: "#000080", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", lineHeight: 1.25 }}>
-            {member.name}
+            {tr(member.name, lang)}
           </div>
-          {member.father_name && <Row label={t.father} value={member.father_name} />}
-          {village && <Row label={t.village} value={village} />}
-          {mandal && <Row label={t.mandal} value={mandal} />}
+          {member.father_name && <Row label={t.father} value={tr(member.father_name, lang)} />}
+          {village && <Row label={t.village} value={tr(village, lang)} />}
+          {mandal && <Row label={t.mandal} value={tr(mandal, lang)} />}
           {member.phone && <Row label={t.phone} value={member.phone} />}
           <div style={{ display: "flex", gap: "1.5mm", marginTop: "0.4mm", alignItems: "center", flexWrap: "wrap" }}>
             <div style={{ fontSize: "2.1mm", color: "#222" }}>
@@ -393,7 +425,7 @@ function CardFront({
               <div style={{ height: "4.5mm" }} />
             )}
             <div style={{ borderTop: "0.2mm solid #000080", marginTop: "0.2mm", paddingTop: "0.2mm", fontSize: "1.8mm", color: "#000080", fontWeight: 700, lineHeight: 1.1 }}>
-              {org?.president_name ?? "—"}
+              {tr(org?.president_name ?? "—", lang)}
               <div style={{ fontSize: "1.5mm", color: "#666", fontWeight: 500 }}>{t.president}</div>
             </div>
           </div>
@@ -438,12 +470,13 @@ function CardFront({
 }
 
 function CardBack({
-  bref, t, memberName, appQrUrl,
+  bref, t, memberName, appQrUrl, lang,
 }: {
   bref: React.RefObject<HTMLDivElement | null>;
   t: Record<string, string>;
   memberName: string;
   appQrUrl: string;
+  lang: CardLang;
 }) {
   return (
     <div
@@ -483,7 +516,7 @@ function CardBack({
               {t.oath}
             </div>
             <div style={{ fontSize: "2mm", lineHeight: 1.3, color: "#222", fontStyle: "italic" }}>
-              "{t.oathText}" — <span style={{ fontWeight: 700, fontStyle: "normal", color: "#000080" }}>{memberName}</span>
+              "{t.oathText}" — <span style={{ fontWeight: 700, fontStyle: "normal", color: "#000080" }}>{tr(memberName, lang)}</span>
             </div>
             <div style={{ fontSize: "2.1mm", fontWeight: 800, color: "#C8102E", marginTop: "0.4mm", letterSpacing: "0.2mm" }}>
               {t.jaihind} 🇮🇳
