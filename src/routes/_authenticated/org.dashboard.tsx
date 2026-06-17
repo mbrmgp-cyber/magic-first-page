@@ -240,3 +240,74 @@ function Dashboard() {
     </div>
   );
 }
+
+function PresidentSignature({ org, onSaved }: { org: any; onSaved: () => void }) {
+  const save = useServerFn(updateOrgPresident);
+  const [name, setName] = useState<string>(org.president_name ?? "");
+  const [sigUrl, setSigUrl] = useState<string | null>(org.president_signature_url ?? null);
+  const [busy, setBusy] = useState(false);
+  const inp = useRef<HTMLInputElement>(null);
+
+  async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { toast.error("ఫైల్ 2MB మించరాదు"); return; }
+    setBusy(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Login required");
+      const ext = file.name.split(".").pop() || "png";
+      const path = `${user.id}/president-sig/${crypto.randomUUID()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("org-documents").upload(path, file, { upsert: false });
+      if (upErr) throw upErr;
+      const { data: signed } = await supabase.storage.from("org-documents").createSignedUrl(path, 60 * 60 * 24 * 365);
+      const url = signed?.signedUrl;
+      if (!url) throw new Error("URL generation failed");
+      await save({ data: { president_signature_url: url } });
+      setSigUrl(url);
+      onSaved();
+      toast.success("సంతకం అప్‌లోడ్ అయింది");
+    } catch (e: any) { toast.error(e.message); }
+    finally { setBusy(false); }
+  }
+
+  async function saveName() {
+    if (name === (org.president_name ?? "")) return;
+    setBusy(true);
+    try {
+      await save({ data: { president_name: name || null } });
+      toast.success("ప్రెసిడెంట్ పేరు సేవ్ అయింది");
+      onSaved();
+    } catch (e: any) { toast.error(e.message); }
+    finally { setBusy(false); }
+  }
+
+  return (
+    <div className="mt-4 pt-3 border-t flex flex-wrap items-end gap-3">
+      <input ref={inp} type="file" accept="image/png,image/jpeg" className="hidden" onChange={onPick} />
+      <div className="flex-1 min-w-[160px]">
+        <label className="text-xs text-muted-foreground">ప్రెసిడెంట్ పేరు (ID కార్డ్‌లో చూపబడుతుంది)</label>
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onBlur={saveName}
+          placeholder="ఉదా: M. భాస్కర్ రెడ్డి"
+          className="w-full mt-1 px-2 py-1.5 text-sm rounded-md border bg-white"
+        />
+      </div>
+      <div className="flex items-end gap-2">
+        <div className="h-12 w-28 rounded-md border bg-white flex items-center justify-center overflow-hidden">
+          {sigUrl ? (
+            <img src={sigUrl} alt="signature" className="h-full w-full object-contain" />
+          ) : (
+            <span className="text-[10px] text-muted-foreground">సంతకం</span>
+          )}
+        </div>
+        <Button size="sm" variant="outline" onClick={() => inp.current?.click()} disabled={busy}>
+          <Camera className="w-4 h-4 mr-1" /> {sigUrl ? "మార్చండి" : "అప్‌లోడ్"}
+        </Button>
+      </div>
+    </div>
+  );
+}
