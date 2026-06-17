@@ -98,8 +98,8 @@ function MembersPage() {
   );
 }
 
-function MemberCard({ member, orgId, onReview, onChange }:
-  { member: Member; orgId: string; onReview: (id: string, a: "approve" | "reject") => void; onChange: () => void }) {
+function MemberCard({ member, orgId, org, onReview, onChange }:
+  { member: Member; orgId: string; org: any; onReview: (id: string, a: "approve" | "reject") => void; onChange: () => void }) {
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
   useEffect(() => {
