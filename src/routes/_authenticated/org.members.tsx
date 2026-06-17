@@ -17,9 +17,11 @@ import {
   listOrgMembersFull, updateMemberProfile,
   listMemberLoans, listLoanPayments,
   addMemberLoan, addLoanPayment, closeLoan, deleteLoan,
-  adminAddMember, adminDeleteMember, listApprovedMembers,
+  adminAddMember, adminDeleteMember, listApprovedMembers, setMemberActive,
 } from "@/lib/members.functions";
-import { User, Plus, IndianRupee, CheckCircle2, XCircle, Trash2, Lock, UserPlus } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { User, Plus, IndianRupee, CheckCircle2, XCircle, Trash2, Lock, UserPlus, Camera } from "lucide-react";
+
 
 export const Route = createFileRoute("/_authenticated/org/members")({
   head: () => ({ meta: [{ title: "సభ్యుల వివరాలు" }] }),
