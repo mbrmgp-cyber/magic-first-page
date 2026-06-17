@@ -3,7 +3,7 @@ import QRCode from "qrcode";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Printer, IdCard, User, RotateCw } from "lucide-react";
+import { Printer, IdCard, User, RotateCw, Languages } from "lucide-react";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 
 type Org = {
@@ -31,6 +31,46 @@ type Member = {
   blood_group?: string | null;
 };
 
+type CardLang = "te" | "en" | "hi";
+
+const L: Record<CardLang, Record<string, string>> = {
+  te: {
+    member: "సభ్యుడు", id: "ఐడి", father: "తండ్రి", phone: "ఫోన్", joined: "చేరిన",
+    president: "అధ్యక్షుడు", active: "● యాక్టివ్ సభ్యుడు", inactive: "● ఇనాక్టివ్",
+    objectives: "ముఖ్య ఉద్దేశాలు", oath: "సభ్యుని ప్రమాణం",
+    return: "ఈ కార్డ్ సొసైటీ ఆస్తి. దొరికినవారు దయచేసి తిరిగి ఇవ్వగలరు.",
+    jaihind: "జై హింద్",
+    obj1: "చిట్వేల్ మండల ప్రజలకు మౌలిక సదుపాయాల (విద్య, వైద్య, పర్యావరణ) ఏర్పాటు కై ప్రయత్నం.",
+    obj2: "కుల, మత, ప్రాంత, వర్గ, రాజకీయాలకు అతీతంగా యువకులలో దేశభక్తిని పెంచడం. మానవత్వంతో నిస్వార్థ సేవ చేపట్టడం.",
+    obj3: "అత్యవసర పరిస్థితుల్లో ప్రభుత్వ అధికారులకు సహాయ సహకారాలు అందించడం. వారి నిజాయితీని గ్రహించి సన్మానించడం.",
+    oathText: "నేను నమ్మిన దైవం సాక్షిగా (భగవద్గీత / ఖురాన్ / బైబుల్) ఎటువంటి స్వార్థం లేకుండా ఈ సంఘంలోని నిబంధనలకు అనుగుణంగా నడుచుకుంటానని సభ్యునిగా ప్రమాణం చేస్తున్నాను.",
+  },
+  en: {
+    member: "MEMBER", id: "ID", father: "Father", phone: "Phone", joined: "Joined",
+    president: "President", active: "● ACTIVE MEMBER", inactive: "● INACTIVE",
+    objectives: "Key Objectives", oath: "Member's Oath",
+    return: "This card is property of the society. If found, please return.",
+    jaihind: "Jai Hind",
+    obj1: "Strive to provide basic facilities (education, healthcare, environment) for the people of Chitvel Mandal.",
+    obj2: "Foster patriotism among youth beyond caste, religion, region, class and politics. Undertake selfless service with humanity.",
+    obj3: "Assist government officials in emergencies. Recognize and honour their integrity.",
+    oathText: "In the presence of the God I believe in (Bhagavad Gita / Quran / Bible), I pledge as a member to act selflessly and in accordance with the rules of this society.",
+  },
+  hi: {
+    member: "सदस्य", id: "आईडी", father: "पिता", phone: "फ़ोन", joined: "शामिल",
+    president: "अध्यक्ष", active: "● सक्रिय सदस्य", inactive: "● निष्क्रिय",
+    objectives: "मुख्य उद्देश्य", oath: "सदस्य की शपथ",
+    return: "यह कार्ड सोसायटी की संपत्ति है। मिलने पर कृपया लौटाएँ।",
+    jaihind: "जय हिन्द",
+    obj1: "चित्वेल मंडल के लोगों के लिए मौलिक सुविधाओं (शिक्षा, चिकित्सा, पर्यावरण) की व्यवस्था का प्रयास।",
+    obj2: "जाति, धर्म, क्षेत्र, वर्ग और राजनीति से ऊपर उठकर युवाओं में देशभक्ति बढ़ाना। मानवता के साथ निःस्वार्थ सेवा करना।",
+    obj3: "आपातकालीन परिस्थितियों में सरकारी अधिकारियों को सहायता देना। उनकी ईमानदारी को पहचानकर सम्मानित करना।",
+    oathText: "मैं अपने ईश्वर की साक्षी में (भगवद्गीता / कुरान / बाइबल) बिना किसी स्वार्थ के इस संघ के नियमों के अनुसार आचरण करने की सदस्य के रूप में शपथ लेता/लेती हूँ।",
+  },
+};
+
+const SLOGAN = "॥ మానవసేవే మాధవసేవ ॥";
+
 export function MemberIdCardButton({ member, org }: { member: Member; org: Org | null }) {
   const [open, setOpen] = useState(false);
   return (
@@ -40,7 +80,7 @@ export function MemberIdCardButton({ member, org }: { member: Member; org: Org |
           <IdCard className="w-4 h-4 mr-1" /> ID కార్డ్
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-[460px] p-4">
+      <DialogContent className="max-w-[480px] p-4">
         <DialogHeader>
           <DialogTitle>సభ్యుడి ID కార్డ్</DialogTitle>
         </DialogHeader>
@@ -56,6 +96,8 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
   const [sigUrl, setSigUrl] = useState<string | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [showBack, setShowBack] = useState(false);
+  const [lang, setLang] = useState<CardLang>("te");
+  const t = L[lang];
   const frontRef = useRef<HTMLDivElement>(null);
   const backRef = useRef<HTMLDivElement>(null);
 
@@ -75,7 +117,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
         org: org?.name,
         phone: member.phone,
       });
-      const qr = await QRCode.toDataURL(payload, { margin: 0, width: 320 });
+      const qr = await QRCode.toDataURL(payload, { margin: 0, width: 240 });
       if (!cancel) setQrDataUrl(qr);
     })();
     return () => { cancel = true; };
@@ -103,11 +145,31 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
   }
 
   const joined = member.joined_date
-    ? new Date(member.joined_date).toLocaleDateString("te-IN", { day: "2-digit", month: "2-digit", year: "numeric" })
+    ? new Date(member.joined_date).toLocaleDateString(lang === "hi" ? "hi-IN" : lang === "en" ? "en-IN" : "te-IN",
+        { day: "2-digit", month: "2-digit", year: "numeric" })
     : "—";
+
+  const langs: CardLang[] = ["te", "en", "hi"];
+  const langLabel: Record<CardLang, string> = { te: "తెలుగు", en: "English", hi: "हिन्दी" };
 
   return (
     <div className="space-y-3">
+      {/* Language toggle */}
+      <div className="flex items-center gap-1 justify-center">
+        <Languages className="w-4 h-4 text-muted-foreground" />
+        {langs.map(l => (
+          <Button
+            key={l}
+            size="sm"
+            variant={lang === l ? "default" : "outline"}
+            className="h-7 px-2 text-xs"
+            onClick={() => setLang(l)}
+          >
+            {langLabel[l]}
+          </Button>
+        ))}
+      </div>
+
       <div className="relative" style={{ perspective: "1200px" }}>
         <div
           style={{
@@ -120,29 +182,23 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
             position: "relative",
           }}
         >
-          {/* FRONT */}
           <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden" }}>
             <CardFront
               fref={frontRef}
-              member={member} org={org}
-              photoUrl={photoUrl} logoUrl={logoUrl} sigUrl={sigUrl}
+              member={member} org={org} t={t}
+              photoUrl={photoUrl} logoUrl={logoUrl} sigUrl={sigUrl} qrDataUrl={qrDataUrl}
               joined={joined}
             />
           </div>
-          {/* BACK */}
           <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
-            <CardBack
-              bref={backRef}
-              member={member} org={org}
-              qrDataUrl={qrDataUrl}
-            />
+            <CardBack bref={backRef} org={org} t={t} memberName={member.name} />
           </div>
         </div>
       </div>
 
       <div className="flex justify-between items-center gap-2 pt-2">
         <Button size="sm" variant="outline" onClick={() => setShowBack(v => !v)}>
-          <RotateCw className="w-4 h-4 mr-1" /> {showBack ? "ముందు చూడండి" : "వెనుక చూడండి"}
+          <RotateCw className="w-4 h-4 mr-1" /> {showBack ? "ముందు" : "వెనుక"}
         </Button>
         <Button size="sm" onClick={handlePrint}>
           <Printer className="w-4 h-4 mr-1" /> ప్రింట్ / PDF
@@ -153,12 +209,14 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
 }
 
 function CardFront({
-  fref, member, org, photoUrl, logoUrl, sigUrl, joined,
+  fref, member, org, photoUrl, logoUrl, sigUrl, qrDataUrl, joined, t,
 }: {
   fref: React.RefObject<HTMLDivElement | null>;
   member: Member; org: Org | null;
   photoUrl: string | null; logoUrl: string | null; sigUrl: string | null;
+  qrDataUrl: string;
   joined: string;
+  t: Record<string, string>;
 }) {
   return (
     <div
@@ -171,38 +229,40 @@ function CardFront({
         fontFamily: "system-ui, sans-serif",
       }}
     >
-      {/* Saffron header */}
+      {/* Saffron header — taller, bigger logo, bolder title, slogan */}
       <div style={{
         background: "#FF9933", color: "#fff",
-        padding: "1.2mm 2.5mm", display: "flex", alignItems: "center",
-        gap: "2mm", height: "10mm",
+        padding: "1.4mm 2.5mm", display: "flex", alignItems: "center",
+        gap: "2.2mm", height: "13mm",
       }}>
         {logoUrl ? (
-          <img src={logoUrl} alt="" style={{ height: "7.5mm", width: "7.5mm", borderRadius: "50%", background: "#fff", objectFit: "cover", border: "0.2mm solid #fff" }} />
+          <img src={logoUrl} alt="" style={{ height: "11mm", width: "11mm", borderRadius: "50%", background: "#fff", objectFit: "cover", border: "0.3mm solid #fff" }} />
         ) : (
-          <div style={{ height: "7.5mm", width: "7.5mm", borderRadius: "50%", background: "#fff" }} />
+          <div style={{ height: "11mm", width: "11mm", borderRadius: "50%", background: "#fff" }} />
         )}
-        <div style={{ flex: 1, minWidth: 0, lineHeight: 1.1 }}>
-          <div style={{ fontSize: "3mm", fontWeight: 800, color: "#fff", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+        <div style={{ flex: 1, minWidth: 0, lineHeight: 1.05 }}>
+          <div style={{ fontSize: "3.6mm", fontWeight: 900, color: "#fff", letterSpacing: "0.15mm", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", textShadow: "0 0.15mm 0 rgba(0,0,0,0.18)" }}>
             {org?.name ?? "Organization"}
           </div>
+          <div style={{ fontSize: "2mm", color: "#fff", fontWeight: 600, marginTop: "0.3mm", fontStyle: "italic" }}>
+            {SLOGAN}
+          </div>
           {org?.gov_reg_number && (
-            <div style={{ fontSize: "1.9mm", color: "#fff", opacity: 0.95 }}>Reg: {org.gov_reg_number}</div>
+            <div style={{ fontSize: "1.8mm", color: "#fff", opacity: 0.95, marginTop: "0.2mm" }}>Reg: {org.gov_reg_number}</div>
           )}
         </div>
         <div style={{
           fontSize: "2.1mm", background: "#fff", color: "#000080",
           padding: "0.4mm 1.4mm", borderRadius: "1mm", fontWeight: 800,
         }}>
-          MEMBER
+          {t.member}
         </div>
       </div>
 
       {/* Body */}
-      <div style={{ display: "flex", gap: "2.2mm", padding: "2mm 2.5mm 1.5mm", height: "36mm", background: "#fff", position: "relative" }}>
-        {/* Photo */}
+      <div style={{ display: "flex", gap: "2.2mm", padding: "1.6mm 2.5mm 1.2mm", height: "33mm", background: "#fff", position: "relative" }}>
         <div style={{
-          width: "21mm", height: "26mm",
+          width: "20mm", height: "25mm",
           border: "0.3mm solid #138808",
           background: "#f5f5f5",
           display: "flex", alignItems: "center", justifyContent: "center",
@@ -211,32 +271,31 @@ function CardFront({
           {photoUrl ? (
             <img src={photoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           ) : (
-            <User style={{ width: "10mm", height: "10mm", color: "#999" }} />
+            <User style={{ width: "9mm", height: "9mm", color: "#999" }} />
           )}
         </div>
 
-        {/* Details */}
-        <div style={{ flex: 1, minWidth: 0, fontSize: "2.3mm", lineHeight: 1.3, color: "#111" }}>
+        <div style={{ flex: 1, minWidth: 0, fontSize: "2.2mm", lineHeight: 1.25, color: "#111", display: "flex", flexDirection: "column" }}>
           <div style={{
-            fontSize: "2.1mm", color: "#fff", background: "#000080", fontWeight: 700,
+            fontSize: "2mm", color: "#fff", background: "#000080", fontWeight: 700,
             letterSpacing: "0.3mm", padding: "0.4mm 1.4mm", borderRadius: "0.8mm",
-            display: "inline-block",
+            display: "inline-block", alignSelf: "flex-start",
           }}>
-            ID: {member.member_code ?? "—"}
+            {t.id}: {member.member_code ?? "—"}
           </div>
-          <div style={{ fontSize: "3.1mm", fontWeight: 800, marginTop: "0.6mm", color: "#000080", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          <div style={{ fontSize: "3mm", fontWeight: 800, marginTop: "0.5mm", color: "#000080", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
             {member.name}
           </div>
-          {member.father_name && <Row label="తండ్రి" value={member.father_name} />}
-          {member.phone && <Row label="ఫోన్" value={member.phone} />}
-          <div style={{ display: "flex", gap: "2mm", marginTop: "0.3mm" }}>
-            <div style={{ fontSize: "2.1mm", color: "#222" }}>
-              <span style={{ color: "#666" }}>చేరిన: </span>
+          {member.father_name && <Row label={t.father} value={member.father_name} />}
+          {member.phone && <Row label={t.phone} value={member.phone} />}
+          <div style={{ display: "flex", gap: "1.5mm", marginTop: "0.3mm", alignItems: "center" }}>
+            <div style={{ fontSize: "2mm", color: "#222" }}>
+              <span style={{ color: "#666" }}>{t.joined}: </span>
               <span style={{ fontWeight: 600 }}>{joined}</span>
             </div>
             {member.blood_group && (
               <div style={{
-                fontSize: "2.1mm", background: "#C8102E", color: "#fff",
+                fontSize: "2mm", background: "#C8102E", color: "#fff",
                 padding: "0.2mm 1.2mm", borderRadius: "0.8mm", fontWeight: 800,
               }}>
                 🩸 {member.blood_group}
@@ -244,33 +303,35 @@ function CardFront({
             )}
           </div>
 
-          {/* President signature block */}
-          <div style={{ marginTop: "auto", paddingTop: "1.5mm", textAlign: "right" }}>
+          {/* Signature pinned to right */}
+          <div style={{ marginTop: "auto", textAlign: "right" }}>
             {sigUrl ? (
-              <img src={sigUrl} alt="sig" style={{ height: "6mm", maxWidth: "28mm", objectFit: "contain", marginLeft: "auto", display: "block" }} />
+              <img src={sigUrl} alt="sig" style={{ height: "5mm", maxWidth: "26mm", objectFit: "contain", marginLeft: "auto", display: "block" }} />
             ) : (
-              <div style={{ height: "6mm" }} />
+              <div style={{ height: "5mm" }} />
             )}
-            <div style={{ borderTop: "0.2mm solid #000080", marginTop: "0.3mm", paddingTop: "0.3mm", fontSize: "1.9mm", color: "#000080", fontWeight: 700 }}>
-              {org?.president_name ?? "PRESIDENT"}
-              <div style={{ fontSize: "1.6mm", color: "#666", fontWeight: 500 }}>President</div>
+            <div style={{ borderTop: "0.2mm solid #000080", marginTop: "0.2mm", paddingTop: "0.2mm", fontSize: "1.8mm", color: "#000080", fontWeight: 700, lineHeight: 1.1 }}>
+              {org?.president_name ?? "—"}
+              <div style={{ fontSize: "1.5mm", color: "#666", fontWeight: 500 }}>{t.president}</div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Green footer */}
+      {/* Green footer with mini QR + MBR logo (no text) */}
       <div style={{
         background: "#138808", color: "#fff", height: "8mm",
         padding: "0 2.5mm", display: "flex", alignItems: "center",
         justifyContent: "space-between", fontSize: "2mm",
       }}>
         <span style={{ fontWeight: 700 }}>
-          {member.is_active === false ? "● INACTIVE" : "● ACTIVE MEMBER"}
+          {member.is_active === false ? t.inactive : t.active}
         </span>
-        <div style={{ display: "flex", alignItems: "center", gap: "1.2mm" }}>
-          <img src={mbrLogo.url} alt="MBR" style={{ height: "5mm", width: "5mm", borderRadius: "0.6mm", background: "#000", padding: "0.3mm", objectFit: "contain" }} />
-          <span style={{ fontSize: "1.8mm", opacity: 0.95, fontWeight: 600 }}>MBR APP</span>
+        <div style={{ display: "flex", alignItems: "center", gap: "1.4mm" }}>
+          {qrDataUrl && (
+            <img src={qrDataUrl} alt="qr" style={{ height: "6.5mm", width: "6.5mm", background: "#fff", padding: "0.3mm", borderRadius: "0.4mm" }} />
+          )}
+          <img src={mbrLogo.url} alt="MBR" style={{ height: "6mm", width: "6mm", borderRadius: "50%", background: "#fff", padding: "0.3mm", objectFit: "contain" }} />
         </div>
       </div>
     </div>
@@ -278,11 +339,12 @@ function CardFront({
 }
 
 function CardBack({
-  bref, member, org, qrDataUrl,
+  bref, org, t, memberName,
 }: {
   bref: React.RefObject<HTMLDivElement | null>;
-  member: Member; org: Org | null;
-  qrDataUrl: string;
+  org: Org | null;
+  t: Record<string, string>;
+  memberName: string;
 }) {
   return (
     <div
@@ -296,48 +358,35 @@ function CardBack({
       }}
     >
       {/* tricolor stripe */}
-      <div style={{ display: "flex", height: "2.5mm" }}>
+      <div style={{ display: "flex", height: "2mm" }}>
         <div style={{ flex: 1, background: "#FF9933" }} />
         <div style={{ flex: 1, background: "#fff" }} />
         <div style={{ flex: 1, background: "#138808" }} />
       </div>
 
-      <div style={{ display: "flex", gap: "2.5mm", padding: "2mm 2.5mm", height: "43mm" }}>
-        {/* QR */}
-        <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: "0.8mm" }}>
-          {qrDataUrl && (
-            <img src={qrDataUrl} alt="qr" style={{ width: "26mm", height: "26mm", border: "0.2mm solid #ddd" }} />
-          )}
-          <div style={{ fontSize: "1.7mm", color: "#666", fontWeight: 600 }}>SCAN TO VERIFY</div>
+      <div style={{ padding: "1.5mm 2.5mm", height: "46mm", display: "flex", flexDirection: "column", gap: "1mm" }}>
+        {/* Objectives */}
+        <div>
+          <div style={{ fontSize: "2.3mm", fontWeight: 800, color: "#000080", borderBottom: "0.2mm solid #FF9933", paddingBottom: "0.2mm", marginBottom: "0.5mm" }}>
+            {t.objectives}
+          </div>
+          <ol style={{ margin: 0, paddingLeft: "3.2mm", fontSize: "1.7mm", lineHeight: 1.25, color: "#222" }}>
+            <li style={{ marginBottom: "0.3mm" }}>{t.obj1}</li>
+            <li style={{ marginBottom: "0.3mm" }}>{t.obj2}</li>
+            <li>{t.obj3}</li>
+          </ol>
         </div>
 
-        {/* Info */}
-        <div style={{ flex: 1, minWidth: 0, fontSize: "2.1mm", lineHeight: 1.35, color: "#111" }}>
-          <div style={{ fontSize: "2.4mm", fontWeight: 800, color: "#000080", marginBottom: "0.8mm" }}>
-            సొసైటీ సంప్రదింపు
+        {/* Oath */}
+        <div style={{ marginTop: "0.4mm" }}>
+          <div style={{ fontSize: "2.3mm", fontWeight: 800, color: "#138808", borderBottom: "0.2mm solid #138808", paddingBottom: "0.2mm", marginBottom: "0.4mm" }}>
+            {t.oath}
           </div>
-          {org?.phone && (
-            <div style={{ marginBottom: "0.5mm" }}>
-              <span style={{ color: "#666" }}>📞 </span>
-              <span style={{ fontWeight: 600 }}>{org.phone}</span>
-            </div>
-          )}
-          {org?.email && (
-            <div style={{ marginBottom: "0.5mm", wordBreak: "break-all", fontSize: "1.9mm" }}>
-              <span style={{ color: "#666" }}>✉ </span>
-              <span style={{ fontWeight: 600 }}>{org.email}</span>
-            </div>
-          )}
-          {member.address && (
-            <div style={{ marginTop: "1mm", paddingTop: "0.8mm", borderTop: "0.2mm dashed #ccc" }}>
-              <div style={{ fontSize: "1.8mm", color: "#666", fontWeight: 600 }}>సభ్యుడి అడ్రస్</div>
-              <div style={{ fontSize: "1.9mm", color: "#222", marginTop: "0.3mm" }}>
-                {member.address}
-              </div>
-            </div>
-          )}
-          <div style={{ marginTop: "1.2mm", fontSize: "1.6mm", color: "#666", fontStyle: "italic" }}>
-            ఈ కార్డ్ సొసైటీ ఆస్తి. దొరికినవారు పై చిరునామాకు తిరిగి ఇవ్వగలరు.
+          <div style={{ fontSize: "1.7mm", lineHeight: 1.3, color: "#222", fontStyle: "italic" }}>
+            "{t.oathText}" — <span style={{ fontWeight: 700, fontStyle: "normal", color: "#000080" }}>{memberName}</span>
+          </div>
+          <div style={{ fontSize: "1.9mm", fontWeight: 800, color: "#C8102E", textAlign: "right", marginTop: "0.3mm", letterSpacing: "0.2mm" }}>
+            {t.jaihind} 🇮🇳
           </div>
         </div>
       </div>
@@ -346,15 +395,10 @@ function CardBack({
       <div style={{
         background: "#000080", color: "#fff", height: "6mm",
         padding: "0 2.5mm", display: "flex", alignItems: "center",
-        justifyContent: "space-between", fontSize: "1.8mm",
+        justifyContent: "space-between", fontSize: "1.7mm",
       }}>
-        <span style={{ fontWeight: 700, letterSpacing: "0.4mm" }}>
-          ID: {member.member_code ?? "—"}
-        </span>
-        <div style={{ display: "flex", alignItems: "center", gap: "1mm" }}>
-          <img src={mbrLogo.url} alt="MBR" style={{ height: "4mm", width: "4mm", borderRadius: "0.5mm", background: "#fff", padding: "0.2mm", objectFit: "contain" }} />
-          <span style={{ opacity: 0.9 }}>Powered by MBR APP</span>
-        </div>
+        <span style={{ opacity: 0.95, fontStyle: "italic" }}>{t.return}</span>
+        <img src={mbrLogo.url} alt="MBR" style={{ height: "4.5mm", width: "4.5mm", borderRadius: "50%", background: "#fff", padding: "0.2mm", objectFit: "contain" }} />
       </div>
     </div>
   );
@@ -362,7 +406,7 @@ function CardBack({
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div style={{ fontSize: "2.1mm", color: "#222", marginTop: "0.2mm", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+    <div style={{ fontSize: "2mm", color: "#222", marginTop: "0.2mm", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
       <span style={{ color: "#666" }}>{label}: </span>
       <span style={{ fontWeight: 600 }}>{value}</span>
     </div>
