@@ -516,7 +516,7 @@ function CardBack({
               {t.oath}
             </div>
             <div style={{ fontSize: "2mm", lineHeight: 1.3, color: "#222", fontStyle: "italic" }}>
-              "{t.oathText}" — <span style={{ fontWeight: 700, fontStyle: "normal", color: "#000080" }}>{memberName}</span>
+              "{t.oathText}" — <span style={{ fontWeight: 700, fontStyle: "normal", color: "#000080" }}>{tr(memberName, lang)}</span>
             </div>
             <div style={{ fontSize: "2.1mm", fontWeight: 800, color: "#C8102E", marginTop: "0.4mm", letterSpacing: "0.2mm" }}>
               {t.jaihind} 🇮🇳
