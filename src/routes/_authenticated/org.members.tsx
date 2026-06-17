@@ -21,6 +21,7 @@ import {
 } from "@/lib/members.functions";
 import { Switch } from "@/components/ui/switch";
 import { User, Plus, IndianRupee, CheckCircle2, XCircle, Trash2, Lock, UserPlus, Camera } from "lucide-react";
+import { MemberIdCardButton } from "@/components/MemberIdCard";
 
 
 export const Route = createFileRoute("/_authenticated/org/members")({
