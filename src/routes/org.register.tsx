@@ -130,8 +130,9 @@ function OrgRegister() {
 
   if (step === "done" && result) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-primary/10 via-background to-accent/20">
-        <Card className="w-full max-w-md p-6 space-y-6 text-center">
+      <div className="min-h-screen flex items-center justify-center p-6 bg-tricolor">
+        <Card className="w-full max-w-md p-6 space-y-6 text-center bg-white/92 backdrop-blur-xl shadow-2xl border-white">
+
           <div>
             <h1 className="text-2xl font-bold">{result.org.name}</h1>
             <p className="text-sm text-muted-foreground mt-1">QR Code generate అయ్యింది</p>
