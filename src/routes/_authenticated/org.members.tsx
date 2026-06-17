@@ -64,15 +64,18 @@ function MembersPage() {
 
   return (
     <SectionShell title="సభ్యుల వివరాలు">
-      <div className="flex flex-wrap gap-2">
-        {(["all", "pending", "approved", "rejected"] as const).map((s) => (
-          <Button key={s} size="sm" variant={filter === s ? "default" : "outline"} onClick={() => setFilter(s)}>
-            {s === "all" ? "అందరూ" : s === "pending" ? "Pending" : s === "approved" ? "Approved" : "Rejected"}
-            <Badge variant="secondary" className="ml-2">
-              {s === "all" ? members.length : members.filter((m) => m.status === s).length}
-            </Badge>
-          </Button>
-        ))}
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex flex-wrap gap-2">
+          {(["all", "pending", "approved", "rejected"] as const).map((s) => (
+            <Button key={s} size="sm" variant={filter === s ? "default" : "outline"} onClick={() => setFilter(s)}>
+              {s === "all" ? "అందరూ" : s === "pending" ? "Pending" : s === "approved" ? "Approved" : "Rejected"}
+              <Badge variant="secondary" className="ml-2">
+                {s === "all" ? members.length : members.filter((m) => m.status === s).length}
+              </Badge>
+            </Button>
+          ))}
+        </div>
+        {orgId && <AddMemberDialog orgId={orgId} onAdded={refresh} />}
       </div>
 
       {loading ? (
