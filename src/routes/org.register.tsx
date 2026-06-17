@@ -107,7 +107,13 @@ function OrgRegister() {
           password: form.password,
           options: { emailRedirectTo: window.location.origin },
         });
-        if (suErr) throw suErr;
+        if (suErr) {
+          const alreadyRegistered = suErr.message.toLowerCase().includes("already registered") || suErr.message.toLowerCase().includes("already been registered");
+          if (!alreadyRegistered) throw suErr;
+          setStatus({ type: "info", title: "ఖాతా ఇప్పటికే ఉంది", message: "ఇప్పుడు అదే Email/Password తో లాగిన్ చేసి సొసైటీ వివరాలు సేవ్ చేస్తున్నాం." });
+          const { error: siErr } = await supabase.auth.signInWithPassword({ email: form.email, password: form.password });
+          if (siErr) throw siErr;
+        }
       }
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
