@@ -38,6 +38,7 @@ type CardLang = "te" | "en" | "hi";
 const L: Record<CardLang, Record<string, string>> = {
   te: {
     member: "సభ్యుడు", id: "ఐడి", father: "తండ్రి", phone: "ఫోన్", joined: "చేరిన",
+    village: "గ్రామం", mandal: "మండలం",
     president: "అధ్యక్షుడు", active: "● యాక్టివ్ సభ్యుడు", inactive: "● ఇనాక్టివ్",
     objectives: "ముఖ్య ఉద్దేశాలు", oath: "సభ్యుని ప్రమాణం",
     jaihind: "జై హింద్",
@@ -49,6 +50,7 @@ const L: Record<CardLang, Record<string, string>> = {
   },
   en: {
     member: "MEMBER", id: "ID", father: "Father", phone: "Phone", joined: "Joined",
+    village: "Village", mandal: "Mandal",
     president: "President", active: "● ACTIVE MEMBER", inactive: "● INACTIVE",
     objectives: "Key Objectives", oath: "Member's Oath",
     jaihind: "Jai Hind",
@@ -60,6 +62,7 @@ const L: Record<CardLang, Record<string, string>> = {
   },
   hi: {
     member: "सदस्य", id: "आईडी", father: "पिता", phone: "फ़ोन", joined: "शामिल",
+    village: "गाँव", mandal: "मंडल",
     president: "अध्यक्ष", active: "● सक्रिय सदस्य", inactive: "● निष्क्रिय",
     objectives: "मुख्य उद्देश्य", oath: "सदस्य की शपथ",
     jaihind: "जय हिन्द",
@@ -70,6 +73,10 @@ const L: Record<CardLang, Record<string, string>> = {
     oathText: "मैं अपने ईश्वर की साक्षी में (भगवद्गीता / कुरान / बाइबल) बिना किसी स्वार्थ के इस संघ के नियमों के अनुसार आचरण करने की सदस्य के रूप में शपथ लेता/लेती हूँ।",
   },
 };
+
+const TELUGU_FONT = '"Noto Sans Telugu", "Noto Sans Devanagari", system-ui, -apple-system, sans-serif';
+const SOCIETY_EMAIL = "chitvelhelplinesociety@gmail.com";
+const SOCIETY_PHONE = "+91 90595 94989";
 
 const SLOGAN = "॥ మానవసేవే మాధవసేవ ॥";
 const MBR_APP_URL = "https://mbrapp.lovable.app";
