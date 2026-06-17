@@ -25,6 +25,8 @@ type Member = {
   phone?: string | null;
   email?: string;
   address?: string | null;
+  village?: string | null;
+  mandal?: string | null;
   joined_date?: string | null;
   photo_url?: string | null;
   is_active?: boolean;
