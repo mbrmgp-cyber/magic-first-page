@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,7 @@ import { useI18n } from "@/lib/i18n";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import logo from "@/assets/mbr-logo.png.asset.json";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Info, Mail, KeyRound } from "lucide-react";
+import { AlertCircle, Info, Mail, ExternalLink } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Login — MBR App" }] }),
@@ -21,66 +21,59 @@ function AuthPage() {
   const navigate = useNavigate();
   const { t } = useI18n();
   const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
-  const [step, setStep] = useState<"email" | "otp">("email");
+  const [step, setStep] = useState<"email" | "linkSent">("email");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<{ type: "info" | "error" | "success"; title: string; message: string } | null>(null);
+
+  async function redirectAfterLogin(userId: string) {
+    const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+    if (roles?.some((r) => r.role === "mbr_admin")) {
+      navigate({ to: "/admin" });
+      return;
+    }
+    const { data: org } = await supabase.from("organizations").select("id, approval_status").eq("admin_user_id", userId).maybeSingle();
+    if (org) {
+      navigate({ to: "/org/dashboard" });
+      return;
+    }
+    const { data: member } = await supabase.from("members").select("id").eq("user_id", userId).maybeSingle();
+    if (member) navigate({ to: "/member/pending" });
+    else navigate({ to: "/org/register" });
+  }
+
+  useEffect(() => {
+    let active = true;
+    supabase.auth.getUser().then(({ data }) => {
+      if (active && data.user) redirectAfterLogin(data.user.id);
+    });
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session?.user) redirectAfterLogin(session.user.id);
+    });
+    return () => {
+      active = false;
+      listener.subscription.unsubscribe();
+    };
+  }, []);
 
   async function sendOtp(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setStatus({ type: "info", title: "OTP పంపుతున్నాం", message: `${email} కి 6-అంకెల code పంపుతున్నాం.` });
+    setStatus({ type: "info", title: "Login link పంపుతున్నాం", message: `${email} కి secure login link పంపుతున్నాం.` });
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { shouldCreateUser: false, emailRedirectTo: window.location.origin },
+      options: { shouldCreateUser: false, emailRedirectTo: `${window.location.origin}/auth` },
     });
     setLoading(false);
     if (error) {
       const msg = error.message.toLowerCase().includes("signups not allowed")
         ? "ఈ Email కు ఖాతా లేదు. ముందుగా Society Registration చేయండి."
         : error.message;
-      setStatus({ type: "error", title: "OTP పంపలేకపోయాం", message: msg });
+      setStatus({ type: "error", title: "Login link పంపలేకపోయాం", message: msg });
       toast.error(msg);
       return;
     }
-    setStep("otp");
-    setStatus({ type: "success", title: "OTP పంపబడింది", message: "మీ Email Inbox / Spam folder చెక్ చేయండి. 6-అంకెల code ఇక్కడ enter చేయండి." });
-  }
-
-  async function verifyOtp(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setStatus({ type: "info", title: "OTP verify చేస్తున్నాం", message: "" });
-    const { error } = await supabase.auth.verifyOtp({ email, token: otp.trim(), type: "email" });
-    if (error) {
-      setLoading(false);
-      const msg = error.message.toLowerCase().includes("expired") || error.message.toLowerCase().includes("invalid")
-        ? "OTP తప్పు లేదా expire అయింది. మళ్లీ కొత్త code పంపండి."
-        : error.message;
-      setStatus({ type: "error", title: "Verify కాలేదు", message: msg });
-      toast.error(msg);
-      return;
-    }
-    const { data: { user } } = await supabase.auth.getUser();
-    setLoading(false);
-    if (!user) return;
-    // MBR admin shortcut
-    const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
-    if (roles?.some((r) => r.role === "mbr_admin")) {
-      navigate({ to: "/admin" });
-      return;
-    }
-    const { data: org } = await supabase.from("organizations").select("id, approval_status").eq("admin_user_id", user.id).maybeSingle();
-    if (org) {
-      navigate({ to: "/org/dashboard" });
-      return;
-    }
-    const { data: member } = await supabase.from("members").select("id").eq("user_id", user.id).maybeSingle();
-    if (member) navigate({ to: "/member/pending" });
-    else {
-      toast.info("Society Registration పూర్తి చేయండి");
-      navigate({ to: "/org/register" });
-    }
+    setStep("linkSent");
+    setStatus({ type: "success", title: "Login link పంపబడింది", message: "మీ Email Inbox / Spam folder లో వచ్చిన email open చేసి, అందులో ఉన్న Log In button నొక్కండి. 6-అంకెల code రావదు." });
   }
 
   return (
@@ -98,7 +91,7 @@ function AuthPage() {
         <div className="text-center space-y-3">
           <img src={logo.url} alt="MBR" className="mx-auto w-24 rounded-md bg-black p-2" />
           <h1 className="text-2xl font-bold text-foreground">{t("login")}</h1>
-          <p className="text-sm text-muted-foreground">Email OTP తో సురక్షితంగా లాగిన్</p>
+          <p className="text-sm text-muted-foreground">Email login link తో సురక్షితంగా లాగిన్</p>
           <div className="h-[3px] w-24 mx-auto rounded-full" style={{ background: "var(--gradient-saffron-green)" }} />
         </div>
 
@@ -127,34 +120,23 @@ function AuthPage() {
               </div>
             </div>
             <Button type="submit" className="w-full btn-saffron-green font-semibold border-0" disabled={loading}>
-              {loading ? "OTP పంపుతున్నాం…" : "OTP పంపండి"}
+              {loading ? "Login link పంపుతున్నాం…" : "Login link పంపండి"}
             </Button>
           </form>
         ) : (
-          <form onSubmit={verifyOtp} className="space-y-4">
-            <div className="space-y-2">
-              <Label>6-అంకెల OTP</Label>
-              <div className="relative">
-                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  inputMode="numeric"
-                  maxLength={6}
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                  required
-                  placeholder="123456"
-                  className="pl-9 tracking-[0.5em] text-center font-mono text-lg focus-visible:ring-[#FF9933]"
-                />
-              </div>
-              <p className="text-xs text-muted-foreground">{email} కి పంపబడింది</p>
+          <div className="space-y-4 text-center">
+            <div className="rounded-md border border-green-600/30 bg-green-50 p-4 text-green-900">
+              <ExternalLink className="mx-auto mb-2 h-6 w-6" />
+              <p className="font-semibold">Email లోని “Log In” button నొక్కండి</p>
+              <p className="mt-1 text-sm">Code enter చేయాల్సిన అవసరం లేదు. Link ఒకసారి మాత్రమే పని చేస్తుంది.</p>
             </div>
-            <Button type="submit" className="w-full btn-saffron-green font-semibold border-0" disabled={loading || otp.length < 6}>
-              {loading ? "Verify…" : "Verify & Login"}
+            <Button type="button" className="w-full btn-saffron-green font-semibold border-0" onClick={() => navigate({ to: "/" })}>
+              Link క్లిక్ చేసిన తర్వాత కొనసాగండి
             </Button>
-            <Button type="button" variant="ghost" size="sm" className="w-full" onClick={() => { setStep("email"); setOtp(""); setStatus(null); }}>
+            <Button type="button" variant="ghost" size="sm" className="w-full" onClick={() => { setStep("email"); setStatus(null); }}>
               ← Email మార్చండి
             </Button>
-          </form>
+          </div>
         )}
 
         <div className="text-center text-sm text-muted-foreground">
