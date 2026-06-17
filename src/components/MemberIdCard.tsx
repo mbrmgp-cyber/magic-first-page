@@ -1,10 +1,41 @@
 import { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
+// @ts-expect-error - no types shipped
+import Sanscript from "@indic-transliteration/sanscript";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Printer, IdCard, User, RotateCw, Languages } from "lucide-react";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
+
+// Transliterate Telugu-script source text into the chosen card language script.
+// Numbers, ASCII (phone, email, codes), and punctuation pass through unchanged.
+// te: no-op. hi: Telugu → Devanagari. en: Telugu → ITRANS, lightly cleaned for readability.
+function tr(text: string | null | undefined, lang: "te" | "en" | "hi"): string {
+  if (!text) return "";
+  if (lang === "te") return text;
+  const hasTelugu = /[\u0C00-\u0C7F]/.test(text);
+  if (!hasTelugu) return text;
+  if (lang === "hi") {
+    try { return Sanscript.t(text, "telugu", "devanagari"); } catch { return text; }
+  }
+  // English: telugu -> itrans, then prettify
+  let out: string;
+  try { out = Sanscript.t(text, "telugu", "itrans"); } catch { return text; }
+  return out
+    .replace(/~N|~n/g, "n")
+    .replace(/\.n/g, "n")
+    .replace(/[A-Z]/g, (c) => c.toLowerCase())
+    .replace(/aa/g, "a").replace(/ii/g, "i").replace(/uu/g, "u")
+    .replace(/RRi|R\^i/g, "ri")
+    .replace(/\^|\.|_/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(/\s+/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
 
 type Org = {
   name: string;
