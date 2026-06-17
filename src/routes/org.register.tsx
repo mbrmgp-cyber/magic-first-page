@@ -240,9 +240,10 @@ function OrgRegister() {
             ))}
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full btn-saffron-green font-semibold border-0" disabled={loading}>
             {loading ? <RefreshCw className="h-4 w-4 animate-spin" /> : "Register & Generate QR"}
           </Button>
+
         </form>
       </Card>
     </div>
