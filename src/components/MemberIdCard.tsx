@@ -155,7 +155,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
 function CardFront({
   fref, member, org, photoUrl, logoUrl, sigUrl, joined,
 }: {
-  fref: React.RefObject<HTMLDivElement>;
+  fref: React.RefObject<HTMLDivElement | null>;
   member: Member; org: Org | null;
   photoUrl: string | null; logoUrl: string | null; sigUrl: string | null;
   joined: string;
@@ -280,7 +280,7 @@ function CardFront({
 function CardBack({
   bref, member, org, qrDataUrl,
 }: {
-  bref: React.RefObject<HTMLDivElement>;
+  bref: React.RefObject<HTMLDivElement | null>;
   member: Member; org: Org | null;
   qrDataUrl: string;
 }) {
