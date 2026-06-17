@@ -157,31 +157,33 @@ function OrgRegister() {
   if (step === "done" && result) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6 bg-tricolor">
-        <Card className="w-full max-w-md p-6 space-y-6 text-center bg-white/92 backdrop-blur-xl shadow-2xl border-white">
-
+        <Card className="w-full max-w-md p-6 space-y-5 text-center bg-white/92 backdrop-blur-xl shadow-2xl border-white">
           <div>
             <h1 className="text-2xl font-bold">{result.org.name}</h1>
-            <p className="text-sm text-muted-foreground mt-1">QR Code generate అయ్యింది</p>
+            <p className="text-sm text-muted-foreground mt-1">Registration submitted</p>
           </div>
-          <div className="flex justify-center">
-            <img src={result.qrDataUrl} alt="Org QR" className="w-64 h-64 border rounded-lg" />
+          <Alert className="text-left border-amber-300 bg-amber-50">
+            <Info className="h-4 w-4 text-amber-700" />
+            <AlertTitle className="text-amber-900">MBR సమీక్షలో ఉంది</AlertTitle>
+            <AlertDescription className="text-amber-800 text-xs">
+              MBR admin మీ Logo, Government Registration, Founders ID ధృవీకరించిన తర్వాత Email ద్వారా approval వస్తుంది. తరువాత OTP తో login చేసి Dashboard access చేయండి.
+            </AlertDescription>
+          </Alert>
+          <div className="flex justify-center opacity-60">
+            <img src={result.qrDataUrl} alt="Org QR" className="w-48 h-48 border rounded-lg" />
           </div>
-          <div className="font-mono text-lg tracking-wider bg-muted py-2 rounded">{result.org.org_code}</div>
-          <p className="text-sm text-muted-foreground">
-            ఈ QR Code మీ సభ్యులకు పంచండి. వారు register అయినప్పుడు ఈ code ఇవ్వాలి.
+          <div className="font-mono text-sm tracking-wider bg-muted py-2 rounded">{result.org.org_code}</div>
+          <p className="text-xs text-muted-foreground">
+            Approval తర్వాత ఈ QR Code activate అవుతుంది.
           </p>
-          <div className="flex flex-col gap-2">
-            <a href={result.qrDataUrl} download={`${result.org.org_code}.png`}>
-              <Button variant="outline" className="w-full"><Download className="h-4 w-4 mr-2" />QR Download</Button>
-            </a>
-            <Button onClick={() => navigate({ to: "/org/dashboard" })} className="w-full">
-              Dashboard కి వెళ్ళండి
-            </Button>
-          </div>
+          <Button onClick={() => navigate({ to: "/auth" })} className="w-full">
+            Login పేజీకి వెళ్ళండి
+          </Button>
         </Card>
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-tricolor">
