@@ -25,6 +25,8 @@ type Member = {
   phone?: string | null;
   email?: string;
   address?: string | null;
+  village?: string | null;
+  mandal?: string | null;
   joined_date?: string | null;
   photo_url?: string | null;
   is_active?: boolean;
@@ -36,6 +38,7 @@ type CardLang = "te" | "en" | "hi";
 const L: Record<CardLang, Record<string, string>> = {
   te: {
     member: "సభ్యుడు", id: "ఐడి", father: "తండ్రి", phone: "ఫోన్", joined: "చేరిన",
+    village: "గ్రామం", mandal: "మండలం",
     president: "అధ్యక్షుడు", active: "● యాక్టివ్ సభ్యుడు", inactive: "● ఇనాక్టివ్",
     objectives: "ముఖ్య ఉద్దేశాలు", oath: "సభ్యుని ప్రమాణం",
     jaihind: "జై హింద్",
@@ -47,6 +50,7 @@ const L: Record<CardLang, Record<string, string>> = {
   },
   en: {
     member: "MEMBER", id: "ID", father: "Father", phone: "Phone", joined: "Joined",
+    village: "Village", mandal: "Mandal",
     president: "President", active: "● ACTIVE MEMBER", inactive: "● INACTIVE",
     objectives: "Key Objectives", oath: "Member's Oath",
     jaihind: "Jai Hind",
@@ -58,6 +62,7 @@ const L: Record<CardLang, Record<string, string>> = {
   },
   hi: {
     member: "सदस्य", id: "आईडी", father: "पिता", phone: "फ़ोन", joined: "शामिल",
+    village: "गाँव", mandal: "मंडल",
     president: "अध्यक्ष", active: "● सक्रिय सदस्य", inactive: "● निष्क्रिय",
     objectives: "मुख्य उद्देश्य", oath: "सदस्य की शपथ",
     jaihind: "जय हिन्द",
@@ -68,6 +73,10 @@ const L: Record<CardLang, Record<string, string>> = {
     oathText: "मैं अपने ईश्वर की साक्षी में (भगवद्गीता / कुरान / बाइबल) बिना किसी स्वार्थ के इस संघ के नियमों के अनुसार आचरण करने की सदस्य के रूप में शपथ लेता/लेती हूँ।",
   },
 };
+
+const TELUGU_FONT = '"Noto Sans Telugu", "Noto Sans Devanagari", system-ui, -apple-system, sans-serif';
+const SOCIETY_EMAIL = "chitvelhelplinesociety@gmail.com";
+const SOCIETY_PHONE = "+91 90595 94989";
 
 const SLOGAN = "॥ మానవసేవే మాధవసేవ ॥";
 const MBR_APP_URL = "https://mbrapp.lovable.app";
@@ -135,10 +144,13 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
     const w = window.open("", "_blank", "width=900,height=700");
     if (!w) return;
     w.document.write(`<!DOCTYPE html><html><head><title>ID Card - ${member.name}</title>
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;600;700;800;900&family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap">
       <style>
         @page { size: 85.6mm 54mm; margin: 0; }
         * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
+        body { margin: 0; font-family: "Noto Sans Telugu", "Noto Sans Devanagari", system-ui, -apple-system, sans-serif; }
         .pg { page-break-after: always; }
         .pg:last-child { page-break-after: auto; }
       </style></head><body>
@@ -223,6 +235,17 @@ function CardFront({
   joined: string;
   t: Record<string, string>;
 }) {
+  // Derive village & mandal: prefer explicit fields, else parse address.
+  let village = member.village ?? null;
+  let mandal = member.mandal ?? null;
+  if ((!village || !mandal) && member.address) {
+    const parts = member.address.split(",").map(s => s.trim()).filter(Boolean);
+    if (!village && parts[0]) village = parts[0];
+    if (!mandal && parts[1]) mandal = parts[1];
+  }
+  const societyEmail = org?.email || SOCIETY_EMAIL;
+  const societyPhone = org?.phone || SOCIETY_PHONE;
+
   return (
     <div
       ref={fref}
@@ -231,10 +254,10 @@ function CardFront({
         width: "85.6mm", height: "54mm",
         borderRadius: "3mm",
         border: "0.3mm solid #000080",
-        fontFamily: "system-ui, sans-serif",
+        fontFamily: TELUGU_FONT,
       }}
     >
-      {/* Saffron header — title in dark blue so Telugu vattulu render clearly */}
+      {/* Saffron header — title in dark blue with Telugu font so vattulu render clearly */}
       <div style={{
         background: "#FF9933",
         padding: "1.4mm 2.5mm", display: "flex", alignItems: "center",
@@ -245,30 +268,30 @@ function CardFront({
         ) : (
           <div style={{ height: "11mm", width: "11mm", borderRadius: "50%", background: "#fff" }} />
         )}
-        <div style={{ flex: 1, minWidth: 0, lineHeight: 1.1 }}>
-          <div style={{ fontSize: "3.8mm", fontWeight: 900, color: "#000080", letterSpacing: "0.1mm", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+        <div style={{ flex: 1, minWidth: 0, lineHeight: 1.35 }}>
+          <div style={{ fontFamily: TELUGU_FONT, fontSize: "3.6mm", fontWeight: 900, color: "#000080", letterSpacing: "0.05mm", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
             {org?.name ?? "Organization"}
           </div>
-          <div style={{ fontSize: "2.1mm", color: "#000080", fontWeight: 700, marginTop: "0.4mm", fontStyle: "italic" }}>
+          <div style={{ fontFamily: TELUGU_FONT, fontSize: "2.1mm", color: "#000080", fontWeight: 700, marginTop: "0.3mm", fontStyle: "italic", lineHeight: 1.3 }}>
             {SLOGAN}
           </div>
           {org?.gov_reg_number && (
-            <div style={{ fontSize: "1.8mm", color: "#000080", opacity: 0.85, marginTop: "0.2mm" }}>Reg: {org.gov_reg_number}</div>
+            <div style={{ fontSize: "1.7mm", color: "#000080", opacity: 0.85, marginTop: "0.1mm" }}>Reg: {org.gov_reg_number}</div>
           )}
         </div>
         <div style={{
-          fontSize: "2.1mm", background: "#000080", color: "#fff",
-          padding: "0.4mm 1.4mm", borderRadius: "1mm", fontWeight: 800,
+          fontSize: "2mm", background: "#000080", color: "#fff",
+          padding: "0.4mm 1.2mm", borderRadius: "1mm", fontWeight: 800,
         }}>
           {t.member}
         </div>
       </div>
 
       {/* Body */}
-      <div style={{ display: "flex", gap: "2.2mm", padding: "1.6mm 2.5mm 1mm", height: "35mm", background: "#fff", position: "relative" }}>
-        <div style={{ width: "20mm", flexShrink: 0, display: "flex", flexDirection: "column", gap: "0.6mm" }}>
+      <div style={{ display: "flex", gap: "2.2mm", padding: "1.4mm 2.5mm 1mm", height: "32mm", background: "#fff", position: "relative" }}>
+        <div style={{ width: "20mm", flexShrink: 0, display: "flex", flexDirection: "column" }}>
           <div style={{
-            width: "20mm", height: "25mm",
+            width: "20mm", height: "24mm",
             border: "0.3mm solid #138808",
             background: "#f5f5f5",
             display: "flex", alignItems: "center", justifyContent: "center",
@@ -280,19 +303,21 @@ function CardFront({
               <User style={{ width: "9mm", height: "9mm", color: "#999" }} />
             )}
           </div>
-          {/* Active status badge under the photo */}
+          {/* Active status badge — pushed slightly down with margin */}
           <div style={{
-            fontSize: "1.8mm", fontWeight: 800,
-            color: member.is_active === false ? "#fff" : "#fff",
+            marginTop: "1.4mm",
+            fontFamily: TELUGU_FONT,
+            fontSize: "1.7mm", fontWeight: 800,
+            color: "#fff",
             background: member.is_active === false ? "#666" : "#138808",
-            textAlign: "center", padding: "0.4mm 0.6mm", borderRadius: "0.8mm",
-            letterSpacing: "0.1mm",
+            textAlign: "center", padding: "0.5mm 0.6mm", borderRadius: "0.8mm",
+            letterSpacing: "0.1mm", lineHeight: 1.2,
           }}>
             {member.is_active === false ? t.inactive : t.active}
           </div>
         </div>
 
-        <div style={{ flex: 1, minWidth: 0, fontSize: "2.4mm", lineHeight: 1.3, color: "#111", display: "flex", flexDirection: "column" }}>
+        <div style={{ flex: 1, minWidth: 0, fontFamily: TELUGU_FONT, fontSize: "2.4mm", lineHeight: 1.35, color: "#111", display: "flex", flexDirection: "column" }}>
           <div style={{
             fontSize: "2.2mm", color: "#fff", background: "#000080", fontWeight: 700,
             letterSpacing: "0.3mm", padding: "0.4mm 1.4mm", borderRadius: "0.8mm",
@@ -300,19 +325,21 @@ function CardFront({
           }}>
             {t.id}: {member.member_code ?? "—"}
           </div>
-          <div style={{ fontSize: "3.4mm", fontWeight: 800, marginTop: "0.6mm", color: "#000080", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          <div style={{ fontSize: "3.4mm", fontWeight: 800, marginTop: "0.6mm", color: "#000080", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", lineHeight: 1.25 }}>
             {member.name}
           </div>
           {member.father_name && <Row label={t.father} value={member.father_name} />}
+          {village && <Row label={t.village} value={village} />}
+          {mandal && <Row label={t.mandal} value={mandal} />}
           {member.phone && <Row label={t.phone} value={member.phone} />}
           <div style={{ display: "flex", gap: "1.5mm", marginTop: "0.4mm", alignItems: "center", flexWrap: "wrap" }}>
-            <div style={{ fontSize: "2.2mm", color: "#222" }}>
+            <div style={{ fontSize: "2.1mm", color: "#222" }}>
               <span style={{ color: "#666" }}>{t.joined}: </span>
               <span style={{ fontWeight: 600 }}>{joined}</span>
             </div>
             {member.blood_group && (
               <div style={{
-                fontSize: "2.2mm", background: "#C8102E", color: "#fff",
+                fontSize: "2.1mm", background: "#C8102E", color: "#fff",
                 padding: "0.2mm 1.4mm", borderRadius: "0.8mm", fontWeight: 800,
               }}>
                 🩸 {member.blood_group}
@@ -323,34 +350,47 @@ function CardFront({
           {/* Signature pinned bottom-right */}
           <div style={{ marginTop: "auto", textAlign: "right" }}>
             {sigUrl ? (
-              <img src={sigUrl} alt="sig" style={{ height: "5mm", maxWidth: "28mm", objectFit: "contain", marginLeft: "auto", display: "block" }} />
+              <img src={sigUrl} alt="sig" style={{ height: "4.5mm", maxWidth: "28mm", objectFit: "contain", marginLeft: "auto", display: "block" }} />
             ) : (
-              <div style={{ height: "5mm" }} />
+              <div style={{ height: "4.5mm" }} />
             )}
-            <div style={{ borderTop: "0.2mm solid #000080", marginTop: "0.2mm", paddingTop: "0.2mm", fontSize: "1.9mm", color: "#000080", fontWeight: 700, lineHeight: 1.1 }}>
+            <div style={{ borderTop: "0.2mm solid #000080", marginTop: "0.2mm", paddingTop: "0.2mm", fontSize: "1.8mm", color: "#000080", fontWeight: 700, lineHeight: 1.1 }}>
               {org?.president_name ?? "—"}
-              <div style={{ fontSize: "1.6mm", color: "#666", fontWeight: 500 }}>{t.president}</div>
+              <div style={{ fontSize: "1.5mm", color: "#666", fontWeight: 500 }}>{t.president}</div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Footer: QR (left) <-> MBR logo on black bg (right) */}
+      {/* Footer (green): QR (left) — society email/phone (center, two lines) — MBR logo on black (right) */}
       <div style={{
         background: "#138808",
-        height: "6mm",
-        padding: "0 2mm", display: "flex", alignItems: "center",
-        justifyContent: "space-between",
+        height: "9mm",
+        padding: "0.6mm 2mm", display: "flex", alignItems: "center",
+        justifyContent: "space-between", gap: "1.5mm",
       }}>
         {qrDataUrl ? (
-          <img src={qrDataUrl} alt="qr" style={{ height: "5mm", width: "5mm", background: "#fff", padding: "0.3mm", borderRadius: "0.4mm" }} />
-        ) : <div style={{ width: "5mm" }} />}
+          <img src={qrDataUrl} alt="qr" style={{ height: "7.6mm", width: "7.6mm", background: "#fff", padding: "0.3mm", borderRadius: "0.5mm", flexShrink: 0 }} />
+        ) : <div style={{ width: "7.6mm" }} />}
+
         <div style={{
-          height: "5.4mm", width: "5.4mm",
+          flex: 1, minWidth: 0, color: "#fff", textAlign: "center",
+          fontFamily: TELUGU_FONT, lineHeight: 1.25,
+        }}>
+          <div style={{ fontSize: "1.9mm", fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            ✉ {societyEmail}
+          </div>
+          <div style={{ fontSize: "1.9mm", fontWeight: 700, marginTop: "0.3mm" }}>
+            ☎ {societyPhone}
+          </div>
+        </div>
+
+        <div style={{
+          height: "7.6mm", width: "7.6mm",
           background: "#000",
           borderRadius: "50%",
           display: "flex", alignItems: "center", justifyContent: "center",
-          padding: "0.5mm",
+          padding: "0.7mm", flexShrink: 0,
         }}>
           <img src={mbrLogo.url} alt="MBR" style={{ height: "100%", width: "100%", objectFit: "contain" }} />
         </div>
@@ -375,7 +415,7 @@ function CardBack({
         width: "85.6mm", height: "54mm",
         borderRadius: "3mm",
         border: "0.3mm solid #000080",
-        fontFamily: "system-ui, sans-serif",
+        fontFamily: TELUGU_FONT,
       }}
     >
       {/* tricolor stripe */}
