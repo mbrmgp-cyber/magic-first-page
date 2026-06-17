@@ -117,7 +117,7 @@ export const updateMemberProfile = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase } = context;
     const { member_id, ...patch } = data;
-    const { error } = await supabase.from("members").update(patch).eq("id", member_id);
+    const { error } = await supabase.from("members").update(patch as any).eq("id", member_id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
