@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
-// @ts-expect-error - no types shipped
 import Sanscript from "@indic-transliteration/sanscript";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
