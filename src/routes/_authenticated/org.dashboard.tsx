@@ -107,7 +107,7 @@ function Dashboard() {
             <Button variant="ghost" size="sm" onClick={logout} className="text-foreground">
               <LogOut className="h-4 w-4 mr-1" />Logout
             </Button>
-            <img src={mbrLogo.url} alt="MBR" className="w-12 h-12 rounded-md bg-white/90 backdrop-blur shadow border border-white object-contain p-1" />
+            <img src={mbrLogo.url} alt="MBR" className="w-12 h-12 rounded-md bg-black shadow border border-black object-contain p-1 select-none pointer-events-none" draggable={false} />
           </div>
         </div>
 
@@ -136,7 +136,7 @@ function Dashboard() {
               </span>
             </button>
             <div className="min-w-0 flex-1">
-              <h1 className="text-xl md:text-2xl font-bold leading-tight break-words">{org.name}</h1>
+              <h1 className="font-bold leading-tight whitespace-nowrap overflow-hidden" style={{ fontSize: "clamp(0.78rem, 4.2vw, 1.5rem)" }}>{org.name}</h1>
               {org.slogan && (
                 <p className="text-sm italic mt-0.5" style={{
                   background: "linear-gradient(90deg,#FF9933,#138808)",
