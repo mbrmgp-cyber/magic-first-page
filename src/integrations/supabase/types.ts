@@ -19,6 +19,7 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          is_committee: boolean
           name: string
           org_id: string
           phone: string | null
@@ -32,6 +33,7 @@ export type Database = {
           created_at?: string
           email: string
           id?: string
+          is_committee?: boolean
           name: string
           org_id: string
           phone?: string | null
@@ -45,6 +47,7 @@ export type Database = {
           created_at?: string
           email?: string
           id?: string
+          is_committee?: boolean
           name?: string
           org_id?: string
           phone?: string | null
@@ -57,6 +60,91 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "members_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_milestones: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          event_date: string
+          id: string
+          org_id: string
+          photo_url: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          event_date: string
+          id?: string
+          org_id: string
+          photo_url?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          event_date?: string
+          id?: string
+          org_id?: string
+          photo_url?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_milestones_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_rules: {
+        Row: {
+          category: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          org_id: string
+          position: number
+          text: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          org_id: string
+          position?: number
+          text: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          org_id?: string
+          position?: number
+          text?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_rules_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -147,6 +235,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_edit_org: { Args: { _org_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
