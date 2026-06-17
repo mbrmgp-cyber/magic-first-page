@@ -90,7 +90,7 @@ function MembersPage() {
       ) : (
         <div className="space-y-3">
           {filtered.map((m) => (
-            <MemberCard key={m.id} member={m} orgId={orgId!} onReview={onReview} onChange={refresh} />
+            <MemberCard key={m.id} member={m} orgId={orgId!} org={org} onReview={onReview} onChange={refresh} />
           ))}
         </div>
       )}
