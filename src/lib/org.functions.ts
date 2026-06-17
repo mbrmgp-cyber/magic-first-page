@@ -186,3 +186,76 @@ export const reviewMember = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// ===== MBR Admin: approval workflow =====
+
+export const getMyRoles = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+    return { roles: (data ?? []).map((r) => r.role), userId };
+  });
+
+// First-claim bootstrap: if no MBR admin exists yet, the caller becomes admin.
+export const claimMbrAdmin = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { count } = await supabaseAdmin
+      .from("user_roles")
+      .select("*", { count: "exact", head: true })
+      .eq("role", "mbr_admin");
+    if ((count ?? 0) > 0) {
+      const { data: mine } = await supabaseAdmin
+        .from("user_roles")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("role", "mbr_admin")
+        .maybeSingle();
+      if (!mine) throw new Error("MBR admin ఇప్పటికే assign అయ్యారు");
+      return { ok: true, alreadyMine: true };
+    }
+    const { error } = await supabaseAdmin
+      .from("user_roles")
+      .insert({ user_id: userId, role: "mbr_admin" });
+    if (error) throw new Error(error.message);
+    return { ok: true, claimed: true };
+  });
+
+export const listAllOrgsForAdmin = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "mbr_admin" });
+    if (!isAdmin) throw new Error("Forbidden");
+    const { data: orgs, error } = await supabase
+      .from("organizations")
+      .select("id, name, email, phone, slogan, logo_url, gov_reg_number, founders, org_code, approval_status, approval_notes, approved_at, created_at")
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return { orgs: orgs ?? [] };
+  });
+
+export const reviewOrganization = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { org_id: string; action: "approve" | "reject"; notes?: string }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "mbr_admin" });
+    if (!isAdmin) throw new Error("Forbidden");
+    const status = data.action === "approve" ? "approved" : "rejected";
+    const { error } = await supabase
+      .from("organizations")
+      .update({
+        approval_status: status,
+        approval_notes: data.notes ?? null,
+        approved_at: new Date().toISOString(),
+        approved_by: userId,
+      })
+      .eq("id", data.org_id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+

@@ -84,6 +84,43 @@ function Dashboard() {
     );
   }
 
+  if (org.approval_status !== "approved") {
+    const pending = org.approval_status === "pending";
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 bg-tricolor">
+        <Card className="w-full max-w-md p-6 text-center space-y-4 bg-white/92 backdrop-blur-xl shadow-2xl border-white">
+          <img src={mbrLogo.url} alt="MBR" className="w-16 h-16 mx-auto rounded-md bg-black p-1.5" />
+          <h2 className="text-xl font-bold">{pending ? "MBR సమీక్షలో ఉంది" : "Application Rejected"}</h2>
+          {pending ? (
+            <>
+              <p className="text-sm text-muted-foreground">
+                మీ Society registration MBR admin సమీక్షిస్తున్నారు. Logo, Government Registration, Founders ID ధృవీకరణ తర్వాత Email ద్వారా approval వస్తుంది. తరువాత మళ్లీ login చేయండి.
+              </p>
+              <div className="text-xs bg-amber-50 border border-amber-200 rounded-md p-3 text-amber-900">
+                Status: <span className="font-bold">PENDING REVIEW</span>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-destructive">
+                మీ application reject అయింది.
+              </p>
+              {org.approval_notes && (
+                <div className="text-xs bg-red-50 border border-red-200 rounded-md p-3 text-red-900 text-left">
+                  <strong>కారణం:</strong> {org.approval_notes}
+                </div>
+              )}
+            </>
+          )}
+          <Button onClick={logout} variant="outline" className="w-full">
+            <LogOut className="h-4 w-4 mr-2" />Logout
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
+
   return (
     <div className="min-h-screen bg-tricolor p-3 md:p-6">
       <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onLogoPicked} />

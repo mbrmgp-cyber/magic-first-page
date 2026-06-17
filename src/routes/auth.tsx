@@ -10,7 +10,7 @@ import { useI18n } from "@/lib/i18n";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import logo from "@/assets/mbr-logo.png.asset.json";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Info } from "lucide-react";
+import { AlertCircle, Info, Mail, KeyRound } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Login — MBR App" }] }),
@@ -21,37 +21,65 @@ function AuthPage() {
   const navigate = useNavigate();
   const { t } = useI18n();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [step, setStep] = useState<"email" | "otp">("email");
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState<{ type: "info" | "error"; title: string; message: string } | null>(null);
+  const [status, setStatus] = useState<{ type: "info" | "error" | "success"; title: string; message: string } | null>(null);
 
-  async function handleLogin(e: React.FormEvent) {
+  async function sendOtp(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setStatus({ type: "info", title: "లాగిన్ చెక్ చేస్తున్నాం", message: "మీ Email/Password సరైందో లేదో చూస్తున్నాం." });
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setStatus({ type: "info", title: "OTP పంపుతున్నాం", message: `${email} కి 6-అంకెల code పంపుతున్నాం.` });
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: false, emailRedirectTo: window.location.origin },
+    });
     setLoading(false);
     if (error) {
-      const message = error.message.toLowerCase().includes("email not confirmed")
-        ? "మీ Email ఇంకా confirm కాలేదు. Email inbox లో వచ్చిన confirmation link click చేసి, తరువాత మళ్లీ Login చేయండి."
-        : error.message.toLowerCase().includes("invalid login")
-        ? "Email లేదా Password సరిపోలలేదు. Registration లో ఇచ్చిన అదే Email/Password వాడండి."
+      const msg = error.message.toLowerCase().includes("signups not allowed")
+        ? "ఈ Email కు ఖాతా లేదు. ముందుగా Society Registration చేయండి."
         : error.message;
-      setStatus({ type: "error", title: "లాగిన్ కాలేదు", message });
-      return toast.error(message);
+      setStatus({ type: "error", title: "OTP పంపలేకపోయాం", message: msg });
+      toast.error(msg);
+      return;
+    }
+    setStep("otp");
+    setStatus({ type: "success", title: "OTP పంపబడింది", message: "మీ Email Inbox / Spam folder చెక్ చేయండి. 6-అంకెల code ఇక్కడ enter చేయండి." });
+  }
+
+  async function verifyOtp(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setStatus({ type: "info", title: "OTP verify చేస్తున్నాం", message: "" });
+    const { error } = await supabase.auth.verifyOtp({ email, token: otp.trim(), type: "email" });
+    if (error) {
+      setLoading(false);
+      const msg = error.message.toLowerCase().includes("expired") || error.message.toLowerCase().includes("invalid")
+        ? "OTP తప్పు లేదా expire అయింది. మళ్లీ కొత్త code పంపండి."
+        : error.message;
+      setStatus({ type: "error", title: "Verify కాలేదు", message: msg });
+      toast.error(msg);
+      return;
     }
     const { data: { user } } = await supabase.auth.getUser();
+    setLoading(false);
     if (!user) return;
-    const { data: org } = await supabase.from("organizations").select("id").eq("admin_user_id", user.id).maybeSingle();
-    if (org) navigate({ to: "/org/dashboard" });
+    // MBR admin shortcut
+    const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
+    if (roles?.some((r) => r.role === "mbr_admin")) {
+      navigate({ to: "/admin" });
+      return;
+    }
+    const { data: org } = await supabase.from("organizations").select("id, approval_status").eq("admin_user_id", user.id).maybeSingle();
+    if (org) {
+      navigate({ to: "/org/dashboard" });
+      return;
+    }
+    const { data: member } = await supabase.from("members").select("id").eq("user_id", user.id).maybeSingle();
+    if (member) navigate({ to: "/member/pending" });
     else {
-      const { data: member } = await supabase.from("members").select("id").eq("user_id", user.id).maybeSingle();
-      if (member) navigate({ to: "/member/pending" });
-      else {
-        setStatus({ type: "error", title: "లాగిన్ అయ్యింది, కానీ సొసైటీ రిజిస్ట్రేషన్ పూర్తికాలేదు", message: "ఈ Email కు Society record లేదు. ఇప్పుడు Society Registration పేజీకి వెళ్లి Register & Generate QR నొక్కండి." });
-        toast.error("Society registration record లేదు");
-        navigate({ to: "/org/register" });
-      }
+      toast.info("Society Registration పూర్తి చేయండి");
+      navigate({ to: "/org/register" });
     }
   }
 
@@ -68,47 +96,67 @@ function AuthPage() {
 
       <Card className="w-full max-w-md p-6 space-y-6 bg-white/90 backdrop-blur-xl border-white shadow-2xl relative z-[1]">
         <div className="text-center space-y-3">
-          <img src={logo.url} alt="MBR" className="mx-auto w-24" />
+          <img src={logo.url} alt="MBR" className="mx-auto w-24 rounded-md bg-black p-2" />
           <h1 className="text-2xl font-bold text-foreground">{t("login")}</h1>
-          <p className="text-sm text-muted-foreground">{t("loginSubtitle")}</p>
+          <p className="text-sm text-muted-foreground">Email OTP తో సురక్షితంగా లాగిన్</p>
           <div className="h-[3px] w-24 mx-auto rounded-full" style={{ background: "var(--gradient-saffron-green)" }} />
         </div>
-        <form onSubmit={handleLogin} className="space-y-4">
-          {status && (
-            <Alert variant={status.type === "error" ? "destructive" : "default"}>
-              {status.type === "error" ? <AlertCircle className="h-4 w-4" /> : <Info className="h-4 w-4" />}
-              <AlertTitle>{status.title}</AlertTitle>
-              <AlertDescription>{status.message}</AlertDescription>
-            </Alert>
-          )}
-          <div className="space-y-2">
-            <Label>{t("email")}</Label>
-            <Input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="focus-visible:ring-[#FF9933]"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>{t("password")}</Label>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="focus-visible:ring-[#FF9933]"
-            />
-          </div>
-          <Button
-            type="submit"
-            className="w-full btn-saffron-green font-semibold border-0"
-            disabled={loading}
-          >
-            {loading ? "..." : t("login")}
-          </Button>
-        </form>
+
+        {status && (
+          <Alert variant={status.type === "error" ? "destructive" : "default"} className={status.type === "success" ? "border-green-600/40 bg-green-50 text-green-900" : ""}>
+            {status.type === "error" ? <AlertCircle className="h-4 w-4" /> : <Info className="h-4 w-4" />}
+            <AlertTitle>{status.title}</AlertTitle>
+            <AlertDescription>{status.message}</AlertDescription>
+          </Alert>
+        )}
+
+        {step === "email" ? (
+          <form onSubmit={sendOtp} className="space-y-4">
+            <div className="space-y-2">
+              <Label>{t("email")}</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="you@example.com"
+                  className="pl-9 focus-visible:ring-[#FF9933]"
+                />
+              </div>
+            </div>
+            <Button type="submit" className="w-full btn-saffron-green font-semibold border-0" disabled={loading}>
+              {loading ? "OTP పంపుతున్నాం…" : "OTP పంపండి"}
+            </Button>
+          </form>
+        ) : (
+          <form onSubmit={verifyOtp} className="space-y-4">
+            <div className="space-y-2">
+              <Label>6-అంకెల OTP</Label>
+              <div className="relative">
+                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                  required
+                  placeholder="123456"
+                  className="pl-9 tracking-[0.5em] text-center font-mono text-lg focus-visible:ring-[#FF9933]"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">{email} కి పంపబడింది</p>
+            </div>
+            <Button type="submit" className="w-full btn-saffron-green font-semibold border-0" disabled={loading || otp.length < 6}>
+              {loading ? "Verify…" : "Verify & Login"}
+            </Button>
+            <Button type="button" variant="ghost" size="sm" className="w-full" onClick={() => { setStep("email"); setOtp(""); setStatus(null); }}>
+              ← Email మార్చండి
+            </Button>
+          </form>
+        )}
+
         <div className="text-center text-sm text-muted-foreground">
           <Link to="/" className="text-[#138808] font-medium hover:underline">{t("noAccount")}</Link>
         </div>
