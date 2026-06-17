@@ -149,77 +149,49 @@ function Dashboard() {
         </div>
 
         {/* Society headline card */}
-        <Card className="relative overflow-hidden p-0 bg-white/95 backdrop-blur-xl shadow-2xl border-white">
-          <div className="h-1.5 w-full" style={{ background: "linear-gradient(90deg,#FF9933 0%,#FFFFFF 50%,#138808 100%)" }} />
-          <div className="absolute inset-0 pointer-events-none opacity-[0.07]" style={{ background: "radial-gradient(circle at 0% 0%, #FF9933, transparent 55%), radial-gradient(circle at 100% 100%, #138808, transparent 55%)" }} />
-
-          <div className="relative p-4 sm:p-5">
-            <div className="flex items-start gap-4">
-              <button
-                type="button"
-                onClick={() => fileRef.current?.click()}
-                disabled={uploading}
-                className="relative w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-full bg-white flex items-center justify-center overflow-hidden group"
-                style={{ boxShadow: "0 0 0 3px #FF9933, 0 0 0 5px #FFFFFF, 0 0 0 7px #138808, 0 8px 20px -8px rgba(0,0,0,0.25)" }}
-                aria-label="సొసైటీ లోగో మార్చండి"
-                title="సొసైటీ లోగో మార్చండి / అప్‌లోడ్ చేయండి"
-              >
-                {org.logo_url ? (
-                  <img src={org.logo_url} alt={`${org.name} logo`} className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-2xl font-bold" style={{
-                    background: "linear-gradient(90deg,#FF9933,#138808)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                  }}>{org.name.split(" ").map(w => w[0]).join("").slice(0, 3).toUpperCase()}</span>
-                )}
-                <span className="absolute inset-0 bg-black/45 text-white text-[10px] font-medium flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition">
-                  {uploading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <><Camera className="w-5 h-5 mb-0.5" />మార్చండి</>}
+        <Card className="p-4 bg-white/95 backdrop-blur-xl shadow-xl border-white">
+          <div className="flex items-start gap-4">
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="relative w-20 h-20 shrink-0 rounded-full bg-white flex items-center justify-center overflow-hidden group border border-border shadow-sm"
+              aria-label="సొసైటీ లోగో మార్చండి"
+              title="సొసైటీ లోగో మార్చండి / అప్‌లోడ్ చేయండి"
+            >
+              {org.logo_url ? (
+                <img src={org.logo_url} alt={`${org.name} logo`} className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-2xl font-bold text-muted-foreground">
+                  {org.name.split(" ").map(w => w[0]).join("").slice(0, 3).toUpperCase()}
                 </span>
-              </button>
+              )}
+              <span className="absolute inset-0 bg-black/45 text-white text-[10px] font-medium flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                {uploading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <><Camera className="w-5 h-5 mb-0.5" />మార్చండి</>}
+              </span>
+            </button>
 
-              <div className="min-w-0 flex-1">
-                <h1
-                  className="font-extrabold leading-tight whitespace-nowrap overflow-hidden tracking-tight"
-                  style={{
-                    fontSize: "clamp(0.85rem, 4.6vw, 1.6rem)",
-                    background: "linear-gradient(90deg,#B85C00 0%,#0B5C06 100%)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                  }}
-                >
-                  {org.name}
-                </h1>
-
-                <div className="h-[3px] w-16 mt-1 rounded-full" style={{ background: "linear-gradient(90deg,#FF9933,#138808)" }} />
-
-                {org.slogan && (
-                  <p className="mt-2 text-sm sm:text-base italic font-medium" style={{
-                    background: "linear-gradient(90deg,#FF9933,#138808)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                  }}>
-                    <span className="not-italic opacity-70 mr-0.5">❝</span>{org.slogan}<span className="not-italic opacity-70 ml-0.5">❞</span>
-                  </p>
-                )}
-
-                {org.gov_reg_number && (
-                  <div className="mt-2.5 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-wide border shadow-sm"
-                    style={{
-                      background: "linear-gradient(135deg, rgba(255,153,51,0.12), rgba(19,136,8,0.12))",
-                      borderColor: "rgba(255,153,51,0.35)",
-                      color: "#0B5C06",
-                    }}>
-                    <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "linear-gradient(90deg,#FF9933,#138808)" }} />
-                    Reg No <span className="opacity-60">•</span> <span className="font-mono">{org.gov_reg_number}</span>
-                  </div>
-                )}
-              </div>
+            <div className="min-w-0 flex-1">
+              <h1
+                className="font-extrabold leading-tight whitespace-nowrap overflow-hidden tracking-tight"
+                style={{
+                  fontSize: "clamp(0.85rem, 4.6vw, 1.6rem)",
+                  background: "linear-gradient(90deg,#B85C00 0%,#0B5C06 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                {org.name}
+              </h1>
+              {org.slogan && (
+                <p className="mt-1 text-sm text-muted-foreground italic">{org.slogan}</p>
+              )}
+              {org.gov_reg_number && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Reg No: <span className="font-mono text-foreground">{org.gov_reg_number}</span>
+                </p>
+              )}
             </div>
-
-            <p className="text-[11px] text-muted-foreground mt-3 pt-3 border-t border-dashed border-amber-200/70">
-              💡 లోగో మార్చడానికి పై వృత్తాన్ని తాకండి. QR కోసం ఎడమ పైన ఉన్న చిహ్నాన్ని తాకండి.
-            </p>
           </div>
         </Card>
 
