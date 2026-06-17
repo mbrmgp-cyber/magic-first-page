@@ -74,12 +74,119 @@ export type Database = {
           },
         ]
       }
+      member_loan_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          loan_id: string
+          notes: string | null
+          org_id: string
+          payment_date: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          loan_id: string
+          notes?: string | null
+          org_id: string
+          payment_date?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          loan_id?: string
+          notes?: string | null
+          org_id?: string
+          payment_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_loan_payments_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "member_loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_loan_payments_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      member_loans: {
+        Row: {
+          closed_at: string | null
+          created_at: string
+          id: string
+          interest_rate_monthly: number
+          member_id: string
+          org_id: string
+          principal: number
+          purpose: string | null
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          closed_at?: string | null
+          created_at?: string
+          id?: string
+          interest_rate_monthly?: number
+          member_id: string
+          org_id: string
+          principal: number
+          purpose?: string | null
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          closed_at?: string | null
+          created_at?: string
+          id?: string
+          interest_rate_monthly?: number
+          member_id?: string
+          org_id?: string
+          principal?: number
+          purpose?: string | null
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_loans_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_loans_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       members: {
         Row: {
+          address: string | null
+          committee_fee_paid: number | null
           created_at: string
           email: string
+          father_name: string | null
           id: string
+          introducer_member_id: string | null
           is_committee: boolean
+          joined_date: string | null
           name: string
           org_id: string
           phone: string | null
@@ -90,10 +197,15 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          address?: string | null
+          committee_fee_paid?: number | null
           created_at?: string
           email: string
+          father_name?: string | null
           id?: string
+          introducer_member_id?: string | null
           is_committee?: boolean
+          joined_date?: string | null
           name: string
           org_id: string
           phone?: string | null
@@ -104,10 +216,15 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          address?: string | null
+          committee_fee_paid?: number | null
           created_at?: string
           email?: string
+          father_name?: string | null
           id?: string
+          introducer_member_id?: string | null
           is_committee?: boolean
+          joined_date?: string | null
           name?: string
           org_id?: string
           phone?: string | null
@@ -118,6 +235,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "members_introducer_member_id_fkey"
+            columns: ["introducer_member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "members_org_id_fkey"
             columns: ["org_id"]
@@ -306,6 +430,19 @@ export type Database = {
       get_committee_role: {
         Args: { _org_id: string; _user_id: string }
         Returns: Database["public"]["Enums"]["committee_role"]
+      }
+      get_loan_summary: {
+        Args: { _loan_id: string }
+        Returns: {
+          accrued_interest: number
+          balance: number
+          interest_rate_monthly: number
+          loan_id: string
+          months_elapsed: number
+          principal: number
+          total_due: number
+          total_paid: number
+        }[]
       }
       has_role: {
         Args: {
