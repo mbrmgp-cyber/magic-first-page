@@ -185,6 +185,7 @@ export type Database = {
           father_name: string | null
           id: string
           introducer_member_id: string | null
+          is_active: boolean
           is_committee: boolean
           joined_date: string | null
           name: string
@@ -204,6 +205,7 @@ export type Database = {
           father_name?: string | null
           id?: string
           introducer_member_id?: string | null
+          is_active?: boolean
           is_committee?: boolean
           joined_date?: string | null
           name: string
@@ -223,6 +225,7 @@ export type Database = {
           father_name?: string | null
           id?: string
           introducer_member_id?: string | null
+          is_active?: boolean
           is_committee?: boolean
           joined_date?: string | null
           name?: string

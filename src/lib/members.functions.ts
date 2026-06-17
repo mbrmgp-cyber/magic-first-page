@@ -59,13 +59,15 @@ export const adminAddMember = createServerFn({ method: "POST" })
     joined_date?: string | null;
     introducer_member_id?: string | null;
     committee_fee_paid?: number | null;
+    photo_url?: string | null;
+    is_active?: boolean;
     status?: "pending" | "approved";
   }) => d)
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const orgId = await getOrgForUser(supabase, userId);
     if (!orgId) throw new Error("Organization కనపడలేదు");
-    const { error } = await supabase.from("members").insert({
+    const { data: row, error } = await supabase.from("members").insert({
       org_id: orgId,
       name: data.name,
       email: data.email,
@@ -75,10 +77,12 @@ export const adminAddMember = createServerFn({ method: "POST" })
       joined_date: data.joined_date ?? null,
       introducer_member_id: data.introducer_member_id ?? null,
       committee_fee_paid: data.committee_fee_paid ?? 0,
+      photo_url: data.photo_url ?? null,
+      is_active: data.is_active ?? true,
       status: data.status ?? "approved",
-    });
+    }).select("id").single();
     if (error) throw new Error(error.message);
-    return { ok: true };
+    return { ok: true, id: row?.id, orgId };
   });
 
 export const adminDeleteMember = createServerFn({ method: "POST" })
@@ -102,6 +106,7 @@ export const updateMemberProfile = createServerFn({ method: "POST" })
     introducer_member_id?: string | null;
     committee_fee_paid?: number | null;
     photo_url?: string | null;
+    is_active?: boolean;
   }) => d)
   .handler(async ({ data, context }) => {
     const { supabase } = context;
@@ -110,6 +115,18 @@ export const updateMemberProfile = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const setMemberActive = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { member_id: string; is_active: boolean }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { error } = await supabase.from("members")
+      .update({ is_active: data.is_active }).eq("id", data.member_id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 
 // ===== Loans =====
 
