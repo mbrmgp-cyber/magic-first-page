@@ -17,8 +17,9 @@ import {
   listOrgMembersFull, updateMemberProfile,
   listMemberLoans, listLoanPayments,
   addMemberLoan, addLoanPayment, closeLoan, deleteLoan,
+  adminAddMember, adminDeleteMember, listApprovedMembers,
 } from "@/lib/members.functions";
-import { User, Plus, IndianRupee, CheckCircle2, XCircle, Trash2, Lock } from "lucide-react";
+import { User, Plus, IndianRupee, CheckCircle2, XCircle, Trash2, Lock, UserPlus } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/org/members")({
   head: () => ({ meta: [{ title: "సభ్యుల వివరాలు" }] }),
