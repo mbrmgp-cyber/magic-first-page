@@ -37,15 +37,17 @@ function MembersPage() {
   const review = useServerFn(reviewMember);
   const [members, setMembers] = useState<Member[]>([]);
   const [orgId, setOrgId] = useState<string | null>(null);
+  const [org, setOrg] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
 
   async function refresh() {
     setLoading(true);
     try {
-      const r = await list();
+      const r: any = await list();
       setMembers(r.members);
       setOrgId(r.orgId);
+      setOrg(r.org ?? null);
     } catch (e: any) {
       toast.error(e.message);
     } finally { setLoading(false); }
