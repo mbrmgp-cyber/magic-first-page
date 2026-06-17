@@ -412,7 +412,7 @@ function CardBack({
         width: "85.6mm", height: "54mm",
         borderRadius: "3mm",
         border: "0.3mm solid #000080",
-        fontFamily: "system-ui, sans-serif",
+        fontFamily: TELUGU_FONT,
       }}
     >
       {/* tricolor stripe */}
