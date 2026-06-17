@@ -10,6 +10,7 @@ import {
 import { useEffect, useState, type ReactNode } from "react";
 import { LanguageProvider } from "@/lib/i18n";
 import { SplashScreen } from "@/components/SplashScreen";
+import { Toaster } from "@/components/ui/sonner";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -136,6 +137,7 @@ function RootComponent() {
         {showSplash && <SplashScreen onDone={handleSplashDone} />}
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
+        <Toaster position="top-center" richColors closeButton />
       </LanguageProvider>
     </QueryClientProvider>
   );
