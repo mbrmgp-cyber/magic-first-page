@@ -124,6 +124,11 @@ function MemberCard({ member, orgId, onReview, onChange }:
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2">
+            {member.member_code && (
+              <span className="text-xs font-mono bg-primary/10 text-primary px-2 py-0.5 rounded">
+                {member.member_code}
+              </span>
+            )}
             <h3 className="font-semibold truncate">{member.name}</h3>
             <span className={`text-xs px-2 py-0.5 rounded-full ${statusColor}`}>{member.status}</span>
             {member.status === "approved" && (
@@ -132,6 +137,7 @@ function MemberCard({ member, orgId, onReview, onChange }:
               </span>
             )}
           </div>
+
 
           {member.father_name && <p className="text-xs text-muted-foreground">తండ్రి: {member.father_name}</p>}
           <p className="text-xs text-muted-foreground truncate">{member.email}</p>
