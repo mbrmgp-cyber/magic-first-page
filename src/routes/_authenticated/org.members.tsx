@@ -17,8 +17,9 @@ import {
   listOrgMembersFull, updateMemberProfile,
   listMemberLoans, listLoanPayments,
   addMemberLoan, addLoanPayment, closeLoan, deleteLoan,
+  adminAddMember, adminDeleteMember, listApprovedMembers,
 } from "@/lib/members.functions";
-import { User, Plus, IndianRupee, CheckCircle2, XCircle, Trash2, Lock } from "lucide-react";
+import { User, Plus, IndianRupee, CheckCircle2, XCircle, Trash2, Lock, UserPlus } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/org/members")({
   head: () => ({ meta: [{ title: "సభ్యుల వివరాలు" }] }),
@@ -63,15 +64,18 @@ function MembersPage() {
 
   return (
     <SectionShell title="సభ్యుల వివరాలు">
-      <div className="flex flex-wrap gap-2">
-        {(["all", "pending", "approved", "rejected"] as const).map((s) => (
-          <Button key={s} size="sm" variant={filter === s ? "default" : "outline"} onClick={() => setFilter(s)}>
-            {s === "all" ? "అందరూ" : s === "pending" ? "Pending" : s === "approved" ? "Approved" : "Rejected"}
-            <Badge variant="secondary" className="ml-2">
-              {s === "all" ? members.length : members.filter((m) => m.status === s).length}
-            </Badge>
-          </Button>
-        ))}
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex flex-wrap gap-2">
+          {(["all", "pending", "approved", "rejected"] as const).map((s) => (
+            <Button key={s} size="sm" variant={filter === s ? "default" : "outline"} onClick={() => setFilter(s)}>
+              {s === "all" ? "అందరూ" : s === "pending" ? "Pending" : s === "approved" ? "Approved" : "Rejected"}
+              <Badge variant="secondary" className="ml-2">
+                {s === "all" ? members.length : members.filter((m) => m.status === s).length}
+              </Badge>
+            </Button>
+          ))}
+        </div>
+        {orgId && <AddMemberDialog orgId={orgId} onAdded={refresh} />}
       </div>
 
       {loading ? (
@@ -152,6 +156,96 @@ function MemberCard({ member, orgId, onReview, onChange }:
         )}
       </div>
     </Card>
+  );
+}
+
+function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => void }) {
+  const add = useServerFn(adminAddMember);
+  const listAppr = useServerFn(listApprovedMembers);
+  const [open, setOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [introducers, setIntroducers] = useState<{ id: string; name: string }[]>([]);
+  const today = new Date().toISOString().slice(0, 10);
+  const [f, setF] = useState({
+    name: "", email: "", phone: "", father_name: "", address: "",
+    joined_date: today, introducer_member_id: "", committee_fee_paid: "0",
+  });
+
+  useEffect(() => {
+    if (!open) return;
+    listAppr().then((r) => setIntroducers(r.members ?? [])).catch(() => {});
+  }, [open]);
+
+  async function submit() {
+    if (!f.name.trim() || !f.email.trim()) { toast.error("పేరు మరియు Email ఇవ్వండి"); return; }
+    setSaving(true);
+    try {
+      await add({
+        data: {
+          name: f.name.trim(),
+          email: f.email.trim(),
+          phone: f.phone || null,
+          father_name: f.father_name || null,
+          address: f.address || null,
+          joined_date: f.joined_date || null,
+          introducer_member_id: f.introducer_member_id || null,
+          committee_fee_paid: Number(f.committee_fee_paid || 0),
+          status: "approved",
+        },
+      });
+      toast.success("సభ్యుడు చేర్చబడ్డారు");
+      setOpen(false);
+      setF({ name: "", email: "", phone: "", father_name: "", address: "",
+        joined_date: today, introducer_member_id: "", committee_fee_paid: "0" });
+      onAdded();
+    } catch (e: any) { toast.error(e.message); }
+    finally { setSaving(false); }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700">
+          <UserPlus className="w-4 h-4 mr-1" /> సభ్యుడిని చేర్చు
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader><DialogTitle>కొత్త సభ్యుడు</DialogTitle></DialogHeader>
+        <div className="space-y-3 pt-2">
+          <div><Label>పూర్తి పేరు *</Label>
+            <Input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></div>
+          <div><Label>తండ్రి పేరు</Label>
+            <Input value={f.father_name} onChange={(e) => setF({ ...f, father_name: e.target.value })} /></div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><Label>Email *</Label>
+              <Input type="email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} /></div>
+            <div><Label>Phone</Label>
+              <Input value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} /></div>
+          </div>
+          <div><Label>అడ్రస్</Label>
+            <Textarea rows={2} value={f.address} onChange={(e) => setF({ ...f, address: e.target.value })} /></div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><Label>చేరిన తేదీ</Label>
+              <Input type="date" value={f.joined_date} onChange={(e) => setF({ ...f, joined_date: e.target.value })} /></div>
+            <div><Label>కమిటీ Fee ₹</Label>
+              <Input type="number" step="0.01" value={f.committee_fee_paid}
+                onChange={(e) => setF({ ...f, committee_fee_paid: e.target.value })} /></div>
+          </div>
+          <div>
+            <Label>పరిచయం చేసిన సభ్యుడు</Label>
+            <select className="w-full h-9 rounded-md border bg-background px-2 text-sm"
+              value={f.introducer_member_id}
+              onChange={(e) => setF({ ...f, introducer_member_id: e.target.value })}>
+              <option value="">— ఎవరూ లేరు —</option>
+              {introducers.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
+            </select>
+          </div>
+          <Button onClick={submit} disabled={saving} className="w-full">
+            {saving ? "చేర్చుతోంది…" : "చేర్చు"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
