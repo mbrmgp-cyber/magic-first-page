@@ -327,6 +327,7 @@ function MemberDetailsDialog({ member, orgId, onChange }:
 
 function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void }) {
   const upd = useServerFn(updateMemberProfile);
+  const toggleActive = useServerFn(setMemberActive);
   const [f, setF] = useState({
     father_name: member.father_name ?? "",
     address: member.address ?? "",
@@ -334,11 +335,41 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
     joined_date: member.joined_date ?? "",
     committee_fee_paid: String(member.committee_fee_paid ?? 0),
   });
+  const [active, setActive] = useState<boolean>(member.is_active !== false);
   const [saving, setSaving] = useState(false);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [currentPhotoUrl, setCurrentPhotoUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!member.photo_url) return;
+    let cancelled = false;
+    supabase.storage.from("member-photos")
+      .createSignedUrl(member.photo_url, 3600)
+      .then(({ data }) => { if (!cancelled && data?.signedUrl) setCurrentPhotoUrl(data.signedUrl); });
+    return () => { cancelled = true; };
+  }, [member.photo_url]);
+
+  function onPickPhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("ఫైల్ 5MB మించరాదు"); return; }
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
+  }
 
   async function save() {
     setSaving(true);
     try {
+      let photo_url: string | undefined;
+      if (photoFile) {
+        const ext = photoFile.name.split(".").pop() || "jpg";
+        const path = `admin/${member.org_id}/${member.id}/${Date.now()}.${ext}`;
+        const { error: upErr } = await supabase.storage.from("member-photos")
+          .upload(path, photoFile, { upsert: true, contentType: photoFile.type });
+        if (upErr) throw new Error("ఫోటో అప్‌లోడ్ విఫలం: " + upErr.message);
+        photo_url = path;
+      }
       await upd({
         data: {
           member_id: member.id,
@@ -347,16 +378,51 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
           phone: f.phone || null,
           joined_date: f.joined_date || null,
           committee_fee_paid: Number(f.committee_fee_paid || 0),
+          is_active: active,
+          ...(photo_url ? { photo_url } : {}),
         },
       });
       toast.success("Saved");
+      setPhotoFile(null); setPhotoPreview(null);
       onSaved();
     } catch (e: any) { toast.error(e.message); }
     finally { setSaving(false); }
   }
 
+  async function quickToggle(v: boolean) {
+    setActive(v);
+    try {
+      await toggleActive({ data: { member_id: member.id, is_active: v } });
+      toast.success(v ? "యాక్టివ్ చేయబడింది" : "ఇనాక్టివ్ చేయబడింది");
+      onSaved();
+    } catch (e: any) { toast.error(e.message); setActive(!v); }
+  }
+
+  const shownPhoto = photoPreview ?? currentPhotoUrl;
+
   return (
     <div className="space-y-3 pt-3">
+      <div className="flex items-center gap-3">
+        <div className="h-20 w-20 rounded-full overflow-hidden bg-muted flex items-center justify-center shrink-0 border">
+          {shownPhoto ? <img src={shownPhoto} className="h-full w-full object-cover" />
+            : <User className="w-8 h-8 text-muted-foreground" />}
+        </div>
+        <label className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-md border cursor-pointer hover:bg-accent">
+          <Camera className="w-4 h-4" /> ఫోటో మార్చండి
+          <input type="file" accept="image/*" className="hidden" onChange={onPickPhoto} />
+        </label>
+      </div>
+      <div className="flex items-center justify-between rounded-md border p-3">
+        <div>
+          <Label className="text-sm">సభ్యత్వం యాక్టివ్</Label>
+          <p className="text-xs text-muted-foreground">
+            ప్రస్తుత స్థితి: <span className={active ? "text-emerald-600 font-medium" : "text-gray-500 font-medium"}>
+              {active ? "● Active" : "● Inactive"}
+            </span>
+          </p>
+        </div>
+        <Switch checked={active} onCheckedChange={quickToggle} />
+      </div>
       <div><Label>తండ్రి పేరు</Label><Input value={f.father_name} onChange={(e) => setF({ ...f, father_name: e.target.value })} /></div>
       <div><Label>అడ్రస్</Label><Textarea rows={2} value={f.address} onChange={(e) => setF({ ...f, address: e.target.value })} /></div>
       <div className="grid grid-cols-2 gap-3">
@@ -369,6 +435,7 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
     </div>
   );
 }
+
 
 function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
   const listL = useServerFn(listMemberLoans);
