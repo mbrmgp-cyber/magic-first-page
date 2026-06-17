@@ -124,6 +124,11 @@ function MemberCard({ member, orgId, onReview, onChange }:
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2">
+            {member.member_code && (
+              <span className="text-xs font-mono bg-primary/10 text-primary px-2 py-0.5 rounded">
+                {member.member_code}
+              </span>
+            )}
             <h3 className="font-semibold truncate">{member.name}</h3>
             <span className={`text-xs px-2 py-0.5 rounded-full ${statusColor}`}>{member.status}</span>
             {member.status === "approved" && (
@@ -132,6 +137,7 @@ function MemberCard({ member, orgId, onReview, onChange }:
               </span>
             )}
           </div>
+
 
           {member.father_name && <p className="text-xs text-muted-foreground">తండ్రి: {member.father_name}</p>}
           <p className="text-xs text-muted-foreground truncate">{member.email}</p>
@@ -402,7 +408,16 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
 
   return (
     <div className="space-y-3 pt-3">
+      {member.member_code && (
+        <div className="rounded-md border bg-primary/5 p-3 flex items-center justify-between">
+          <div>
+            <Label className="text-xs text-muted-foreground">ఐడి నెంబర్ (మార్చలేరు)</Label>
+            <p className="font-mono text-lg font-semibold text-primary">{member.member_code}</p>
+          </div>
+        </div>
+      )}
       <div className="flex items-center gap-3">
+
         <div className="h-20 w-20 rounded-full overflow-hidden bg-muted flex items-center justify-center shrink-0 border">
           {shownPhoto ? <img src={shownPhoto} className="h-full w-full object-cover" />
             : <User className="w-8 h-8 text-muted-foreground" />}

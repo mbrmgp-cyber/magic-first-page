@@ -188,6 +188,7 @@ export type Database = {
           is_active: boolean
           is_committee: boolean
           joined_date: string | null
+          member_code: string | null
           name: string
           org_id: string
           phone: string | null
@@ -208,6 +209,7 @@ export type Database = {
           is_active?: boolean
           is_committee?: boolean
           joined_date?: string | null
+          member_code?: string | null
           name: string
           org_id: string
           phone?: string | null
@@ -228,6 +230,7 @@ export type Database = {
           is_active?: boolean
           is_committee?: boolean
           joined_date?: string | null
+          member_code?: string | null
           name?: string
           org_id?: string
           phone?: string | null
@@ -352,6 +355,7 @@ export type Database = {
           founders: Json
           gov_reg_number: string | null
           id: string
+          letter_code: string | null
           logo_url: string | null
           name: string
           org_code: string
@@ -371,6 +375,7 @@ export type Database = {
           founders?: Json
           gov_reg_number?: string | null
           id?: string
+          letter_code?: string | null
           logo_url?: string | null
           name: string
           org_code: string
@@ -390,6 +395,7 @@ export type Database = {
           founders?: Json
           gov_reg_number?: string | null
           id?: string
+          letter_code?: string | null
           logo_url?: string | null
           name?: string
           org_code?: string
@@ -454,6 +460,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      int_to_letters: { Args: { n: number }; Returns: string }
       is_approved_member: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
