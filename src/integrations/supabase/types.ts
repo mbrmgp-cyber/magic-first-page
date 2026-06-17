@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      committee_members: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          member_id: string
+          org_id: string
+          position_number: number
+          qualifications: string | null
+          responsibilities: string | null
+          role: Database["public"]["Enums"]["committee_role"]
+          term_end_date: string
+          term_start_date: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          member_id: string
+          org_id: string
+          position_number?: number
+          qualifications?: string | null
+          responsibilities?: string | null
+          role: Database["public"]["Enums"]["committee_role"]
+          term_end_date: string
+          term_start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          member_id?: string
+          org_id?: string
+          position_number?: number
+          qualifications?: string | null
+          responsibilities?: string | null
+          role?: Database["public"]["Enums"]["committee_role"]
+          term_end_date?: string
+          term_start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "committee_members_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "committee_members_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       members: {
         Row: {
           created_at: string
@@ -159,6 +219,7 @@ export type Database = {
           approval_status: Database["public"]["Enums"]["org_approval_status"]
           approved_at: string | null
           approved_by: string | null
+          committee_term_years: number
           created_at: string
           email: string
           founders: Json
@@ -177,6 +238,7 @@ export type Database = {
           approval_status?: Database["public"]["Enums"]["org_approval_status"]
           approved_at?: string | null
           approved_by?: string | null
+          committee_term_years?: number
           created_at?: string
           email: string
           founders?: Json
@@ -195,6 +257,7 @@ export type Database = {
           approval_status?: Database["public"]["Enums"]["org_approval_status"]
           approved_at?: string | null
           approved_by?: string | null
+          committee_term_years?: number
           created_at?: string
           email?: string
           founders?: Json
@@ -235,7 +298,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_edit_accounts: { Args: { _org_id: string }; Returns: boolean }
+      can_edit_events: { Args: { _org_id: string }; Returns: boolean }
       can_edit_org: { Args: { _org_id: string }; Returns: boolean }
+      can_edit_rules: { Args: { _org_id: string }; Returns: boolean }
+      can_manage_committee: { Args: { _org_id: string }; Returns: boolean }
+      get_committee_role: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: Database["public"]["Enums"]["committee_role"]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -246,6 +317,13 @@ export type Database = {
     }
     Enums: {
       app_role: "mbr_admin"
+      committee_role:
+        | "president"
+        | "vice_president"
+        | "advisor"
+        | "treasurer"
+        | "executive"
+        | "worker"
       member_status: "pending" | "approved" | "rejected"
       org_approval_status: "pending" | "approved" | "rejected"
     }
@@ -376,6 +454,14 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["mbr_admin"],
+      committee_role: [
+        "president",
+        "vice_president",
+        "advisor",
+        "treasurer",
+        "executive",
+        "worker",
+      ],
       member_status: ["pending", "approved", "rejected"],
       org_approval_status: ["pending", "approved", "rejected"],
     },
