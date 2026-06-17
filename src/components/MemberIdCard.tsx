@@ -81,6 +81,39 @@ const SOCIETY_PHONE = "+91 90595 94989";
 const SLOGAN = "॥ మానవసేవే మాధవసేవ ॥";
 const MBR_APP_URL = "https://mbrapp.lovable.app";
 
+// Intrinsic card size at 96dpi: 85.6mm × 54mm ≈ 323.6px × 204.1px
+const CARD_PX_W = 323.6;
+const CARD_PX_H = 204.1;
+
+function ScaledCard({ children }: { children: React.ReactNode }) {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const update = () => {
+      const w = el.clientWidth;
+      if (!w) return;
+      // never upscale beyond 1, only shrink to fit
+      setScale(Math.min(1, w / CARD_PX_W));
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    window.addEventListener("resize", update);
+    return () => { ro.disconnect(); window.removeEventListener("resize", update); };
+  }, []);
+  return (
+    <div ref={wrapRef} style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+      <div style={{ width: CARD_PX_W * scale, height: CARD_PX_H * scale }}>
+        <div style={{ width: CARD_PX_W, height: CARD_PX_H, transform: `scale(${scale})`, transformOrigin: "top left" }}>
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function MemberIdCardButton({ member, org }: { member: Member; org: Org | null }) {
   const [open, setOpen] = useState(false);
   return (
