@@ -81,6 +81,39 @@ const SOCIETY_PHONE = "+91 90595 94989";
 const SLOGAN = "॥ మానవసేవే మాధవసేవ ॥";
 const MBR_APP_URL = "https://mbrapp.lovable.app";
 
+// Intrinsic card size at 96dpi: 85.6mm × 54mm ≈ 323.6px × 204.1px
+const CARD_PX_W = 323.6;
+const CARD_PX_H = 204.1;
+
+function ScaledCard({ children }: { children: React.ReactNode }) {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const update = () => {
+      const w = el.clientWidth;
+      if (!w) return;
+      // never upscale beyond 1, only shrink to fit
+      setScale(Math.min(1, w / CARD_PX_W));
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    window.addEventListener("resize", update);
+    return () => { ro.disconnect(); window.removeEventListener("resize", update); };
+  }, []);
+  return (
+    <div ref={wrapRef} style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+      <div style={{ width: CARD_PX_W * scale, height: CARD_PX_H * scale }}>
+        <div style={{ width: CARD_PX_W, height: CARD_PX_H, transform: `scale(${scale})`, transformOrigin: "top left" }}>
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function MemberIdCardButton({ member, org }: { member: Member; org: Org | null }) {
   const [open, setOpen] = useState(false);
   return (
@@ -187,31 +220,36 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
         ))}
       </div>
 
-      <div className="relative" style={{ perspective: "1200px" }}>
-        <div
-          style={{
-            transition: "transform 0.6s",
-            transformStyle: "preserve-3d",
-            transform: showBack ? "rotateY(180deg)" : "rotateY(0deg)",
-            width: "85.6mm",
-            height: "54mm",
-            margin: "0 auto",
-            position: "relative",
-          }}
-        >
-          <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden" }}>
-            <CardFront
-              fref={frontRef}
-              member={member} org={org} t={t}
-              photoUrl={photoUrl} logoUrl={logoUrl} sigUrl={sigUrl} qrDataUrl={qrDataUrl}
-              joined={joined}
-            />
-          </div>
-          <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
-            <CardBack bref={backRef} t={t} memberName={member.name} appQrUrl={appQrUrl} />
+      {/* Auto-scale wrapper: card is fixed at 85.6mm × 54mm (~324×204px), scale to fit container width on mobile */}
+      <ScaledCard>
+        <div className="relative" style={{ perspective: "1200px" }}>
+          <div
+            style={{
+              transition: "transform 0.6s",
+              transformStyle: "preserve-3d",
+              transform: showBack ? "rotateY(180deg)" : "rotateY(0deg)",
+              width: "85.6mm",
+              height: "54mm",
+              margin: "0 auto",
+              position: "relative",
+            }}
+          >
+            <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden" }}>
+              <CardFront
+                fref={frontRef}
+                member={member} org={org} t={t}
+                photoUrl={photoUrl} logoUrl={logoUrl} sigUrl={sigUrl} qrDataUrl={qrDataUrl}
+                joined={joined}
+              />
+            </div>
+            <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
+              <CardBack bref={backRef} t={t} memberName={member.name} appQrUrl={appQrUrl} />
+            </div>
           </div>
         </div>
-      </div>
+      </ScaledCard>
+
+
 
       <div className="flex justify-between items-center gap-2 pt-2">
         <Button size="sm" variant="outline" onClick={() => setShowBack(v => !v)}>
