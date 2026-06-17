@@ -21,6 +21,7 @@ import {
 } from "@/lib/members.functions";
 import { Switch } from "@/components/ui/switch";
 import { User, Plus, IndianRupee, CheckCircle2, XCircle, Trash2, Lock, UserPlus, Camera } from "lucide-react";
+import { MemberIdCardButton } from "@/components/MemberIdCard";
 
 
 export const Route = createFileRoute("/_authenticated/org/members")({
@@ -36,15 +37,17 @@ function MembersPage() {
   const review = useServerFn(reviewMember);
   const [members, setMembers] = useState<Member[]>([]);
   const [orgId, setOrgId] = useState<string | null>(null);
+  const [org, setOrg] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
 
   async function refresh() {
     setLoading(true);
     try {
-      const r = await list();
+      const r: any = await list();
       setMembers(r.members);
       setOrgId(r.orgId);
+      setOrg(r.org ?? null);
     } catch (e: any) {
       toast.error(e.message);
     } finally { setLoading(false); }
@@ -87,7 +90,7 @@ function MembersPage() {
       ) : (
         <div className="space-y-3">
           {filtered.map((m) => (
-            <MemberCard key={m.id} member={m} orgId={orgId!} onReview={onReview} onChange={refresh} />
+            <MemberCard key={m.id} member={m} orgId={orgId!} org={org} onReview={onReview} onChange={refresh} />
           ))}
         </div>
       )}
@@ -95,8 +98,8 @@ function MembersPage() {
   );
 }
 
-function MemberCard({ member, orgId, onReview, onChange }:
-  { member: Member; orgId: string; onReview: (id: string, a: "approve" | "reject") => void; onChange: () => void }) {
+function MemberCard({ member, orgId, org, onReview, onChange }:
+  { member: Member; orgId: string; org: any; onReview: (id: string, a: "approve" | "reject") => void; onChange: () => void }) {
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -166,7 +169,10 @@ function MemberCard({ member, orgId, onReview, onChange }:
           </>
         )}
         {member.status === "approved" && (
-          <MemberDetailsDialog member={member} orgId={orgId} onChange={onChange} />
+          <>
+            <MemberDetailsDialog member={member} orgId={orgId} onChange={onChange} />
+            <MemberIdCardButton member={member} org={org} />
+          </>
         )}
       </div>
     </Card>
