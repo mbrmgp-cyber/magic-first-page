@@ -1,0 +1,161 @@
+import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
+// Helper: org admin or committee president/treasurer/VP (treasurer can edit accounts)
+async function getOrgForUser(supabase: any, userId: string) {
+  const { data: org } = await supabase
+    .from("organizations")
+    .select("id")
+    .eq("admin_user_id", userId)
+    .maybeSingle();
+  if (org) return org.id as string;
+  const { data: m } = await supabase
+    .from("members")
+    .select("org_id")
+    .eq("user_id", userId)
+    .eq("status", "approved")
+    .maybeSingle();
+  return (m?.org_id as string) ?? null;
+}
+
+export const listOrgMembersFull = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const orgId = await getOrgForUser(supabase, userId);
+    if (!orgId) return { members: [], orgId: null };
+    const { data, error } = await supabase
+      .from("members")
+      .select("*, introducer:introducer_member_id(id,name)")
+      .eq("org_id", orgId)
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return { members: data ?? [], orgId };
+  });
+
+export const listApprovedMembers = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const orgId = await getOrgForUser(supabase, userId);
+    if (!orgId) return { members: [] };
+    const { data } = await supabase
+      .from("members")
+      .select("id, name")
+      .eq("org_id", orgId)
+      .eq("status", "approved")
+      .order("name");
+    return { members: data ?? [] };
+  });
+
+export const updateMemberProfile = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: {
+    member_id: string;
+    father_name?: string | null;
+    address?: string | null;
+    phone?: string | null;
+    joined_date?: string | null;
+    introducer_member_id?: string | null;
+    committee_fee_paid?: number | null;
+    photo_url?: string | null;
+  }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { member_id, ...patch } = data;
+    const { error } = await supabase.from("members").update(patch).eq("id", member_id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// ===== Loans =====
+
+export const listMemberLoans = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { member_id: string }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { data: loans, error } = await supabase
+      .from("member_loans")
+      .select("*")
+      .eq("member_id", data.member_id)
+      .order("start_date", { ascending: false });
+    if (error) throw new Error(error.message);
+    const withSummary = await Promise.all(
+      (loans ?? []).map(async (loan: any) => {
+        const { data: s } = await supabase.rpc("get_loan_summary", { _loan_id: loan.id });
+        return { ...loan, summary: Array.isArray(s) ? s[0] : s };
+      })
+    );
+    return { loans: withSummary };
+  });
+
+export const listLoanPayments = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { loan_id: string }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { data: pays, error } = await supabase
+      .from("member_loan_payments")
+      .select("*")
+      .eq("loan_id", data.loan_id)
+      .order("payment_date", { ascending: false });
+    if (error) throw new Error(error.message);
+    return { payments: pays ?? [] };
+  });
+
+export const addMemberLoan = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: {
+    org_id: string;
+    member_id: string;
+    principal: number;
+    interest_rate_monthly: number;
+    start_date: string;
+    purpose?: string;
+  }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { error } = await supabase.from("member_loans").insert(data);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const addLoanPayment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: {
+    loan_id: string;
+    org_id: string;
+    amount: number;
+    payment_date: string;
+    notes?: string;
+  }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { error } = await supabase.from("member_loan_payments").insert(data);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const closeLoan = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { loan_id: string }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { error } = await supabase
+      .from("member_loans")
+      .update({ status: "closed", closed_at: new Date().toISOString() })
+      .eq("id", data.loan_id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const deleteLoan = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { loan_id: string }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { error } = await supabase.from("member_loans").delete().eq("id", data.loan_id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
