@@ -425,7 +425,7 @@ function CardFront({
               <div style={{ height: "4.5mm" }} />
             )}
             <div style={{ borderTop: "0.2mm solid #000080", marginTop: "0.2mm", paddingTop: "0.2mm", fontSize: "1.8mm", color: "#000080", fontWeight: 700, lineHeight: 1.1 }}>
-              {org?.president_name ?? "—"}
+              {tr(org?.president_name ?? "—", lang)}
               <div style={{ fontSize: "1.5mm", color: "#666", fontWeight: 500 }}>{t.president}</div>
             </div>
           </div>
