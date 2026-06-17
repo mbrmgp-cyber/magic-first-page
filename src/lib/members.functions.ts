@@ -23,14 +23,19 @@ export const listOrgMembersFull = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
     const orgId = await getOrgForUser(supabase, userId);
-    if (!orgId) return { members: [], orgId: null };
+    if (!orgId) return { members: [], orgId: null, org: null };
     const { data, error } = await supabase
       .from("members")
       .select("*, introducer:introducer_member_id(id,name)")
       .eq("org_id", orgId)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
-    return { members: data ?? [], orgId };
+    const { data: org } = await supabase
+      .from("organizations")
+      .select("id, name, logo_url, letter_code, registration_number, address")
+      .eq("id", orgId)
+      .maybeSingle();
+    return { members: data ?? [], orgId, org };
   });
 
 export const listApprovedMembers = createServerFn({ method: "GET" })
