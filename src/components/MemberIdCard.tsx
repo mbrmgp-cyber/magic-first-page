@@ -38,8 +38,8 @@ const L: Record<CardLang, Record<string, string>> = {
     member: "సభ్యుడు", id: "ఐడి", father: "తండ్రి", phone: "ఫోన్", joined: "చేరిన",
     president: "అధ్యక్షుడు", active: "● యాక్టివ్ సభ్యుడు", inactive: "● ఇనాక్టివ్",
     objectives: "ముఖ్య ఉద్దేశాలు", oath: "సభ్యుని ప్రమాణం",
-    return: "ఈ కార్డ్ సొసైటీ ఆస్తి. దొరికినవారు దయచేసి తిరిగి ఇవ్వగలరు.",
     jaihind: "జై హింద్",
+    mbrApp: "MBR APP డౌన్‌లోడ్",
     obj1: "చిట్వేల్ మండల ప్రజలకు మౌలిక సదుపాయాల (విద్య, వైద్య, పర్యావరణ) ఏర్పాటు కై ప్రయత్నం.",
     obj2: "కుల, మత, ప్రాంత, వర్గ, రాజకీయాలకు అతీతంగా యువకులలో దేశభక్తిని పెంచడం. మానవత్వంతో నిస్వార్థ సేవ చేపట్టడం.",
     obj3: "అత్యవసర పరిస్థితుల్లో ప్రభుత్వ అధికారులకు సహాయ సహకారాలు అందించడం. వారి నిజాయితీని గ్రహించి సన్మానించడం.",
@@ -49,8 +49,8 @@ const L: Record<CardLang, Record<string, string>> = {
     member: "MEMBER", id: "ID", father: "Father", phone: "Phone", joined: "Joined",
     president: "President", active: "● ACTIVE MEMBER", inactive: "● INACTIVE",
     objectives: "Key Objectives", oath: "Member's Oath",
-    return: "This card is property of the society. If found, please return.",
     jaihind: "Jai Hind",
+    mbrApp: "Download MBR APP",
     obj1: "Strive to provide basic facilities (education, healthcare, environment) for the people of Chitvel Mandal.",
     obj2: "Foster patriotism among youth beyond caste, religion, region, class and politics. Undertake selfless service with humanity.",
     obj3: "Assist government officials in emergencies. Recognize and honour their integrity.",
@@ -60,8 +60,8 @@ const L: Record<CardLang, Record<string, string>> = {
     member: "सदस्य", id: "आईडी", father: "पिता", phone: "फ़ोन", joined: "शामिल",
     president: "अध्यक्ष", active: "● सक्रिय सदस्य", inactive: "● निष्क्रिय",
     objectives: "मुख्य उद्देश्य", oath: "सदस्य की शपथ",
-    return: "यह कार्ड सोसायटी की संपत्ति है। मिलने पर कृपया लौटाएँ।",
     jaihind: "जय हिन्द",
+    mbrApp: "MBR APP डाउनलोड",
     obj1: "चित्वेल मंडल के लोगों के लिए मौलिक सुविधाओं (शिक्षा, चिकित्सा, पर्यावरण) की व्यवस्था का प्रयास।",
     obj2: "जाति, धर्म, क्षेत्र, वर्ग और राजनीति से ऊपर उठकर युवाओं में देशभक्ति बढ़ाना। मानवता के साथ निःस्वार्थ सेवा करना।",
     obj3: "आपातकालीन परिस्थितियों में सरकारी अधिकारियों को सहायता देना। उनकी ईमानदारी को पहचानकर सम्मानित करना।",
@@ -70,6 +70,7 @@ const L: Record<CardLang, Record<string, string>> = {
 };
 
 const SLOGAN = "॥ మానవసేవే మాధవసేవ ॥";
+const MBR_APP_URL = "https://mbrapp.lovable.app";
 
 export function MemberIdCardButton({ member, org }: { member: Member; org: Org | null }) {
   const [open, setOpen] = useState(false);
@@ -95,6 +96,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [sigUrl, setSigUrl] = useState<string | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
+  const [appQrUrl, setAppQrUrl] = useState<string>("");
   const [showBack, setShowBack] = useState(false);
   const [lang, setLang] = useState<CardLang>("te");
   const t = L[lang];
@@ -118,7 +120,11 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
         phone: member.phone,
       });
       const qr = await QRCode.toDataURL(payload, { margin: 0, width: 240 });
-      if (!cancel) setQrDataUrl(qr);
+      const appQr = await QRCode.toDataURL(MBR_APP_URL, { margin: 0, width: 240 });
+      if (!cancel) {
+        setQrDataUrl(qr);
+        setAppQrUrl(appQr);
+      }
     })();
     return () => { cancel = true; };
   }, [member.id, member.photo_url, org?.logo_url, org?.president_signature_url]);
@@ -154,7 +160,6 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
 
   return (
     <div className="space-y-3">
-      {/* Language toggle */}
       <div className="flex items-center gap-1 justify-center">
         <Languages className="w-4 h-4 text-muted-foreground" />
         {langs.map(l => (
@@ -191,7 +196,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
             />
           </div>
           <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
-            <CardBack bref={backRef} org={org} t={t} memberName={member.name} />
+            <CardBack bref={backRef} t={t} memberName={member.name} appQrUrl={appQrUrl} />
           </div>
         </div>
       </div>
@@ -229,9 +234,9 @@ function CardFront({
         fontFamily: "system-ui, sans-serif",
       }}
     >
-      {/* Saffron header — taller, bigger logo, bolder title, slogan */}
+      {/* Saffron header — title in dark blue so Telugu vattulu render clearly */}
       <div style={{
-        background: "#FF9933", color: "#fff",
+        background: "#FF9933",
         padding: "1.4mm 2.5mm", display: "flex", alignItems: "center",
         gap: "2.2mm", height: "13mm",
       }}>
@@ -240,19 +245,19 @@ function CardFront({
         ) : (
           <div style={{ height: "11mm", width: "11mm", borderRadius: "50%", background: "#fff" }} />
         )}
-        <div style={{ flex: 1, minWidth: 0, lineHeight: 1.05 }}>
-          <div style={{ fontSize: "3.6mm", fontWeight: 900, color: "#fff", letterSpacing: "0.15mm", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", textShadow: "0 0.15mm 0 rgba(0,0,0,0.18)" }}>
+        <div style={{ flex: 1, minWidth: 0, lineHeight: 1.1 }}>
+          <div style={{ fontSize: "3.8mm", fontWeight: 900, color: "#000080", letterSpacing: "0.1mm", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
             {org?.name ?? "Organization"}
           </div>
-          <div style={{ fontSize: "2mm", color: "#fff", fontWeight: 600, marginTop: "0.3mm", fontStyle: "italic" }}>
+          <div style={{ fontSize: "2.1mm", color: "#000080", fontWeight: 700, marginTop: "0.4mm", fontStyle: "italic" }}>
             {SLOGAN}
           </div>
           {org?.gov_reg_number && (
-            <div style={{ fontSize: "1.8mm", color: "#fff", opacity: 0.95, marginTop: "0.2mm" }}>Reg: {org.gov_reg_number}</div>
+            <div style={{ fontSize: "1.8mm", color: "#000080", opacity: 0.85, marginTop: "0.2mm" }}>Reg: {org.gov_reg_number}</div>
           )}
         </div>
         <div style={{
-          fontSize: "2.1mm", background: "#fff", color: "#000080",
+          fontSize: "2.1mm", background: "#000080", color: "#fff",
           padding: "0.4mm 1.4mm", borderRadius: "1mm", fontWeight: 800,
         }}>
           {t.member}
@@ -260,78 +265,94 @@ function CardFront({
       </div>
 
       {/* Body */}
-      <div style={{ display: "flex", gap: "2.2mm", padding: "1.6mm 2.5mm 1.2mm", height: "33mm", background: "#fff", position: "relative" }}>
-        <div style={{
-          width: "20mm", height: "25mm",
-          border: "0.3mm solid #138808",
-          background: "#f5f5f5",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          overflow: "hidden", flexShrink: 0,
-        }}>
-          {photoUrl ? (
-            <img src={photoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          ) : (
-            <User style={{ width: "9mm", height: "9mm", color: "#999" }} />
-          )}
+      <div style={{ display: "flex", gap: "2.2mm", padding: "1.6mm 2.5mm 1mm", height: "35mm", background: "#fff", position: "relative" }}>
+        <div style={{ width: "20mm", flexShrink: 0, display: "flex", flexDirection: "column", gap: "0.6mm" }}>
+          <div style={{
+            width: "20mm", height: "25mm",
+            border: "0.3mm solid #138808",
+            background: "#f5f5f5",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            overflow: "hidden",
+          }}>
+            {photoUrl ? (
+              <img src={photoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            ) : (
+              <User style={{ width: "9mm", height: "9mm", color: "#999" }} />
+            )}
+          </div>
+          {/* Active status badge under the photo */}
+          <div style={{
+            fontSize: "1.8mm", fontWeight: 800,
+            color: member.is_active === false ? "#fff" : "#fff",
+            background: member.is_active === false ? "#666" : "#138808",
+            textAlign: "center", padding: "0.4mm 0.6mm", borderRadius: "0.8mm",
+            letterSpacing: "0.1mm",
+          }}>
+            {member.is_active === false ? t.inactive : t.active}
+          </div>
         </div>
 
-        <div style={{ flex: 1, minWidth: 0, fontSize: "2.2mm", lineHeight: 1.25, color: "#111", display: "flex", flexDirection: "column" }}>
+        <div style={{ flex: 1, minWidth: 0, fontSize: "2.4mm", lineHeight: 1.3, color: "#111", display: "flex", flexDirection: "column" }}>
           <div style={{
-            fontSize: "2mm", color: "#fff", background: "#000080", fontWeight: 700,
+            fontSize: "2.2mm", color: "#fff", background: "#000080", fontWeight: 700,
             letterSpacing: "0.3mm", padding: "0.4mm 1.4mm", borderRadius: "0.8mm",
             display: "inline-block", alignSelf: "flex-start",
           }}>
             {t.id}: {member.member_code ?? "—"}
           </div>
-          <div style={{ fontSize: "3mm", fontWeight: 800, marginTop: "0.5mm", color: "#000080", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          <div style={{ fontSize: "3.4mm", fontWeight: 800, marginTop: "0.6mm", color: "#000080", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
             {member.name}
           </div>
           {member.father_name && <Row label={t.father} value={member.father_name} />}
           {member.phone && <Row label={t.phone} value={member.phone} />}
-          <div style={{ display: "flex", gap: "1.5mm", marginTop: "0.3mm", alignItems: "center" }}>
-            <div style={{ fontSize: "2mm", color: "#222" }}>
+          <div style={{ display: "flex", gap: "1.5mm", marginTop: "0.4mm", alignItems: "center", flexWrap: "wrap" }}>
+            <div style={{ fontSize: "2.2mm", color: "#222" }}>
               <span style={{ color: "#666" }}>{t.joined}: </span>
               <span style={{ fontWeight: 600 }}>{joined}</span>
             </div>
             {member.blood_group && (
               <div style={{
-                fontSize: "2mm", background: "#C8102E", color: "#fff",
-                padding: "0.2mm 1.2mm", borderRadius: "0.8mm", fontWeight: 800,
+                fontSize: "2.2mm", background: "#C8102E", color: "#fff",
+                padding: "0.2mm 1.4mm", borderRadius: "0.8mm", fontWeight: 800,
               }}>
                 🩸 {member.blood_group}
               </div>
             )}
           </div>
 
-          {/* Signature pinned to right */}
+          {/* Signature pinned bottom-right */}
           <div style={{ marginTop: "auto", textAlign: "right" }}>
             {sigUrl ? (
-              <img src={sigUrl} alt="sig" style={{ height: "5mm", maxWidth: "26mm", objectFit: "contain", marginLeft: "auto", display: "block" }} />
+              <img src={sigUrl} alt="sig" style={{ height: "5mm", maxWidth: "28mm", objectFit: "contain", marginLeft: "auto", display: "block" }} />
             ) : (
               <div style={{ height: "5mm" }} />
             )}
-            <div style={{ borderTop: "0.2mm solid #000080", marginTop: "0.2mm", paddingTop: "0.2mm", fontSize: "1.8mm", color: "#000080", fontWeight: 700, lineHeight: 1.1 }}>
+            <div style={{ borderTop: "0.2mm solid #000080", marginTop: "0.2mm", paddingTop: "0.2mm", fontSize: "1.9mm", color: "#000080", fontWeight: 700, lineHeight: 1.1 }}>
               {org?.president_name ?? "—"}
-              <div style={{ fontSize: "1.5mm", color: "#666", fontWeight: 500 }}>{t.president}</div>
+              <div style={{ fontSize: "1.6mm", color: "#666", fontWeight: 500 }}>{t.president}</div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Green footer with mini QR + MBR logo (no text) */}
+      {/* Footer: QR (left) <-> MBR logo on black bg (right) */}
       <div style={{
-        background: "#138808", color: "#fff", height: "8mm",
-        padding: "0 2.5mm", display: "flex", alignItems: "center",
-        justifyContent: "space-between", fontSize: "2mm",
+        background: "#138808",
+        height: "6mm",
+        padding: "0 2mm", display: "flex", alignItems: "center",
+        justifyContent: "space-between",
       }}>
-        <span style={{ fontWeight: 700 }}>
-          {member.is_active === false ? t.inactive : t.active}
-        </span>
-        <div style={{ display: "flex", alignItems: "center", gap: "1.4mm" }}>
-          {qrDataUrl && (
-            <img src={qrDataUrl} alt="qr" style={{ height: "6.5mm", width: "6.5mm", background: "#fff", padding: "0.3mm", borderRadius: "0.4mm" }} />
-          )}
-          <img src={mbrLogo.url} alt="MBR" style={{ height: "6mm", width: "6mm", borderRadius: "50%", background: "#fff", padding: "0.3mm", objectFit: "contain" }} />
+        {qrDataUrl ? (
+          <img src={qrDataUrl} alt="qr" style={{ height: "5mm", width: "5mm", background: "#fff", padding: "0.3mm", borderRadius: "0.4mm" }} />
+        ) : <div style={{ width: "5mm" }} />}
+        <div style={{
+          height: "5.4mm", width: "5.4mm",
+          background: "#000",
+          borderRadius: "50%",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          padding: "0.5mm",
+        }}>
+          <img src={mbrLogo.url} alt="MBR" style={{ height: "100%", width: "100%", objectFit: "contain" }} />
         </div>
       </div>
     </div>
@@ -339,12 +360,12 @@ function CardFront({
 }
 
 function CardBack({
-  bref, org, t, memberName,
+  bref, t, memberName, appQrUrl,
 }: {
   bref: React.RefObject<HTMLDivElement | null>;
-  org: Org | null;
   t: Record<string, string>;
   memberName: string;
+  appQrUrl: string;
 }) {
   return (
     <div
@@ -364,41 +385,41 @@ function CardBack({
         <div style={{ flex: 1, background: "#138808" }} />
       </div>
 
-      <div style={{ padding: "1.5mm 2.5mm", height: "46mm", display: "flex", flexDirection: "column", gap: "1mm" }}>
+      <div style={{ padding: "1.5mm 2.5mm", height: "52mm", display: "flex", flexDirection: "column", gap: "1mm" }}>
         {/* Objectives */}
         <div>
-          <div style={{ fontSize: "2.3mm", fontWeight: 800, color: "#000080", borderBottom: "0.2mm solid #FF9933", paddingBottom: "0.2mm", marginBottom: "0.5mm" }}>
+          <div style={{ fontSize: "2.5mm", fontWeight: 800, color: "#000080", borderBottom: "0.2mm solid #FF9933", paddingBottom: "0.2mm", marginBottom: "0.5mm" }}>
             {t.objectives}
           </div>
-          <ol style={{ margin: 0, paddingLeft: "3.2mm", fontSize: "1.7mm", lineHeight: 1.25, color: "#222" }}>
-            <li style={{ marginBottom: "0.3mm" }}>{t.obj1}</li>
-            <li style={{ marginBottom: "0.3mm" }}>{t.obj2}</li>
+          <ol style={{ margin: 0, paddingLeft: "3.5mm", fontSize: "2mm", lineHeight: 1.3, color: "#222" }}>
+            <li style={{ marginBottom: "0.4mm" }}>{t.obj1}</li>
+            <li style={{ marginBottom: "0.4mm" }}>{t.obj2}</li>
             <li>{t.obj3}</li>
           </ol>
         </div>
 
-        {/* Oath */}
-        <div style={{ marginTop: "0.4mm" }}>
-          <div style={{ fontSize: "2.3mm", fontWeight: 800, color: "#138808", borderBottom: "0.2mm solid #138808", paddingBottom: "0.2mm", marginBottom: "0.4mm" }}>
-            {t.oath}
+        {/* Oath + MBR app QR side-by-side */}
+        <div style={{ marginTop: "0.4mm", display: "flex", gap: "2mm", alignItems: "flex-start" }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: "2.5mm", fontWeight: 800, color: "#138808", borderBottom: "0.2mm solid #138808", paddingBottom: "0.2mm", marginBottom: "0.4mm" }}>
+              {t.oath}
+            </div>
+            <div style={{ fontSize: "2mm", lineHeight: 1.3, color: "#222", fontStyle: "italic" }}>
+              "{t.oathText}" — <span style={{ fontWeight: 700, fontStyle: "normal", color: "#000080" }}>{memberName}</span>
+            </div>
+            <div style={{ fontSize: "2.1mm", fontWeight: 800, color: "#C8102E", marginTop: "0.4mm", letterSpacing: "0.2mm" }}>
+              {t.jaihind} 🇮🇳
+            </div>
           </div>
-          <div style={{ fontSize: "1.7mm", lineHeight: 1.3, color: "#222", fontStyle: "italic" }}>
-            "{t.oathText}" — <span style={{ fontWeight: 700, fontStyle: "normal", color: "#000080" }}>{memberName}</span>
-          </div>
-          <div style={{ fontSize: "1.9mm", fontWeight: 800, color: "#C8102E", textAlign: "right", marginTop: "0.3mm", letterSpacing: "0.2mm" }}>
-            {t.jaihind} 🇮🇳
+          <div style={{ flexShrink: 0, textAlign: "center" }}>
+            {appQrUrl && (
+              <img src={appQrUrl} alt="MBR APP" style={{ height: "11mm", width: "11mm", border: "0.2mm solid #000080", padding: "0.3mm", background: "#fff" }} />
+            )}
+            <div style={{ fontSize: "1.5mm", fontWeight: 700, color: "#000080", marginTop: "0.3mm", lineHeight: 1.1, maxWidth: "13mm" }}>
+              {t.mbrApp}
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Footer */}
-      <div style={{
-        background: "#000080", color: "#fff", height: "6mm",
-        padding: "0 2.5mm", display: "flex", alignItems: "center",
-        justifyContent: "space-between", fontSize: "1.7mm",
-      }}>
-        <span style={{ opacity: 0.95, fontStyle: "italic" }}>{t.return}</span>
-        <img src={mbrLogo.url} alt="MBR" style={{ height: "4.5mm", width: "4.5mm", borderRadius: "50%", background: "#fff", padding: "0.2mm", objectFit: "contain" }} />
       </div>
     </div>
   );
@@ -406,7 +427,7 @@ function CardBack({
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div style={{ fontSize: "2mm", color: "#222", marginTop: "0.2mm", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+    <div style={{ fontSize: "2.2mm", color: "#222", marginTop: "0.3mm", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
       <span style={{ color: "#666" }}>{label}: </span>
       <span style={{ fontWeight: 600 }}>{value}</span>
     </div>
