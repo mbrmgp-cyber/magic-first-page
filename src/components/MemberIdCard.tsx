@@ -187,31 +187,36 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
         ))}
       </div>
 
-      <div className="relative" style={{ perspective: "1200px" }}>
-        <div
-          style={{
-            transition: "transform 0.6s",
-            transformStyle: "preserve-3d",
-            transform: showBack ? "rotateY(180deg)" : "rotateY(0deg)",
-            width: "85.6mm",
-            height: "54mm",
-            margin: "0 auto",
-            position: "relative",
-          }}
-        >
-          <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden" }}>
-            <CardFront
-              fref={frontRef}
-              member={member} org={org} t={t}
-              photoUrl={photoUrl} logoUrl={logoUrl} sigUrl={sigUrl} qrDataUrl={qrDataUrl}
-              joined={joined}
-            />
-          </div>
-          <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
-            <CardBack bref={backRef} t={t} memberName={member.name} appQrUrl={appQrUrl} />
+      {/* Auto-scale wrapper: card is fixed at 85.6mm × 54mm (~324×204px), scale to fit container width on mobile */}
+      <ScaledCard>
+        <div className="relative" style={{ perspective: "1200px" }}>
+          <div
+            style={{
+              transition: "transform 0.6s",
+              transformStyle: "preserve-3d",
+              transform: showBack ? "rotateY(180deg)" : "rotateY(0deg)",
+              width: "85.6mm",
+              height: "54mm",
+              margin: "0 auto",
+              position: "relative",
+            }}
+          >
+            <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden" }}>
+              <CardFront
+                fref={frontRef}
+                member={member} org={org} t={t}
+                photoUrl={photoUrl} logoUrl={logoUrl} sigUrl={sigUrl} qrDataUrl={qrDataUrl}
+                joined={joined}
+              />
+            </div>
+            <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
+              <CardBack bref={backRef} t={t} memberName={member.name} appQrUrl={appQrUrl} />
+            </div>
           </div>
         </div>
-      </div>
+      </ScaledCard>
+
+
 
       <div className="flex justify-between items-center gap-2 pt-2">
         <Button size="sm" variant="outline" onClick={() => setShowBack(v => !v)}>
