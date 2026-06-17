@@ -14,7 +14,14 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as OrgRegisterRouteImport } from './routes/org.register'
 import { Route as MemberRegisterRouteImport } from './routes/member.register'
+import { Route as AuthenticatedOrgRulesRouteImport } from './routes/_authenticated/org.rules'
+import { Route as AuthenticatedOrgMembersRouteImport } from './routes/_authenticated/org.members'
+import { Route as AuthenticatedOrgEventsRouteImport } from './routes/_authenticated/org.events'
+import { Route as AuthenticatedOrgDesignsRouteImport } from './routes/_authenticated/org.designs'
 import { Route as AuthenticatedOrgDashboardRouteImport } from './routes/_authenticated/org.dashboard'
+import { Route as AuthenticatedOrgCommitteeRouteImport } from './routes/_authenticated/org.committee'
+import { Route as AuthenticatedOrgChatRouteImport } from './routes/_authenticated/org.chat'
+import { Route as AuthenticatedOrgAccountsRouteImport } from './routes/_authenticated/org.accounts'
 import { Route as AuthenticatedMemberPendingRouteImport } from './routes/_authenticated/member.pending'
 
 const AuthRoute = AuthRouteImport.update({
@@ -41,10 +48,47 @@ const MemberRegisterRoute = MemberRegisterRouteImport.update({
   path: '/member/register',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedOrgRulesRoute = AuthenticatedOrgRulesRouteImport.update({
+  id: '/org/rules',
+  path: '/org/rules',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOrgMembersRoute = AuthenticatedOrgMembersRouteImport.update({
+  id: '/org/members',
+  path: '/org/members',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOrgEventsRoute = AuthenticatedOrgEventsRouteImport.update({
+  id: '/org/events',
+  path: '/org/events',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOrgDesignsRoute = AuthenticatedOrgDesignsRouteImport.update({
+  id: '/org/designs',
+  path: '/org/designs',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedOrgDashboardRoute =
   AuthenticatedOrgDashboardRouteImport.update({
     id: '/org/dashboard',
     path: '/org/dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOrgCommitteeRoute =
+  AuthenticatedOrgCommitteeRouteImport.update({
+    id: '/org/committee',
+    path: '/org/committee',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOrgChatRoute = AuthenticatedOrgChatRouteImport.update({
+  id: '/org/chat',
+  path: '/org/chat',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOrgAccountsRoute =
+  AuthenticatedOrgAccountsRouteImport.update({
+    id: '/org/accounts',
+    path: '/org/accounts',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedMemberPendingRoute =
@@ -60,7 +104,14 @@ export interface FileRoutesByFullPath {
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
   '/member/pending': typeof AuthenticatedMemberPendingRoute
+  '/org/accounts': typeof AuthenticatedOrgAccountsRoute
+  '/org/chat': typeof AuthenticatedOrgChatRoute
+  '/org/committee': typeof AuthenticatedOrgCommitteeRoute
   '/org/dashboard': typeof AuthenticatedOrgDashboardRoute
+  '/org/designs': typeof AuthenticatedOrgDesignsRoute
+  '/org/events': typeof AuthenticatedOrgEventsRoute
+  '/org/members': typeof AuthenticatedOrgMembersRoute
+  '/org/rules': typeof AuthenticatedOrgRulesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -68,7 +119,14 @@ export interface FileRoutesByTo {
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
   '/member/pending': typeof AuthenticatedMemberPendingRoute
+  '/org/accounts': typeof AuthenticatedOrgAccountsRoute
+  '/org/chat': typeof AuthenticatedOrgChatRoute
+  '/org/committee': typeof AuthenticatedOrgCommitteeRoute
   '/org/dashboard': typeof AuthenticatedOrgDashboardRoute
+  '/org/designs': typeof AuthenticatedOrgDesignsRoute
+  '/org/events': typeof AuthenticatedOrgEventsRoute
+  '/org/members': typeof AuthenticatedOrgMembersRoute
+  '/org/rules': typeof AuthenticatedOrgRulesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -78,7 +136,14 @@ export interface FileRoutesById {
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
   '/_authenticated/member/pending': typeof AuthenticatedMemberPendingRoute
+  '/_authenticated/org/accounts': typeof AuthenticatedOrgAccountsRoute
+  '/_authenticated/org/chat': typeof AuthenticatedOrgChatRoute
+  '/_authenticated/org/committee': typeof AuthenticatedOrgCommitteeRoute
   '/_authenticated/org/dashboard': typeof AuthenticatedOrgDashboardRoute
+  '/_authenticated/org/designs': typeof AuthenticatedOrgDesignsRoute
+  '/_authenticated/org/events': typeof AuthenticatedOrgEventsRoute
+  '/_authenticated/org/members': typeof AuthenticatedOrgMembersRoute
+  '/_authenticated/org/rules': typeof AuthenticatedOrgRulesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -88,7 +153,14 @@ export interface FileRouteTypes {
     | '/member/register'
     | '/org/register'
     | '/member/pending'
+    | '/org/accounts'
+    | '/org/chat'
+    | '/org/committee'
     | '/org/dashboard'
+    | '/org/designs'
+    | '/org/events'
+    | '/org/members'
+    | '/org/rules'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -96,7 +168,14 @@ export interface FileRouteTypes {
     | '/member/register'
     | '/org/register'
     | '/member/pending'
+    | '/org/accounts'
+    | '/org/chat'
+    | '/org/committee'
     | '/org/dashboard'
+    | '/org/designs'
+    | '/org/events'
+    | '/org/members'
+    | '/org/rules'
   id:
     | '__root__'
     | '/'
@@ -105,7 +184,14 @@ export interface FileRouteTypes {
     | '/member/register'
     | '/org/register'
     | '/_authenticated/member/pending'
+    | '/_authenticated/org/accounts'
+    | '/_authenticated/org/chat'
+    | '/_authenticated/org/committee'
     | '/_authenticated/org/dashboard'
+    | '/_authenticated/org/designs'
+    | '/_authenticated/org/events'
+    | '/_authenticated/org/members'
+    | '/_authenticated/org/rules'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -153,11 +239,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MemberRegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/org/rules': {
+      id: '/_authenticated/org/rules'
+      path: '/org/rules'
+      fullPath: '/org/rules'
+      preLoaderRoute: typeof AuthenticatedOrgRulesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/members': {
+      id: '/_authenticated/org/members'
+      path: '/org/members'
+      fullPath: '/org/members'
+      preLoaderRoute: typeof AuthenticatedOrgMembersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/events': {
+      id: '/_authenticated/org/events'
+      path: '/org/events'
+      fullPath: '/org/events'
+      preLoaderRoute: typeof AuthenticatedOrgEventsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/designs': {
+      id: '/_authenticated/org/designs'
+      path: '/org/designs'
+      fullPath: '/org/designs'
+      preLoaderRoute: typeof AuthenticatedOrgDesignsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/org/dashboard': {
       id: '/_authenticated/org/dashboard'
       path: '/org/dashboard'
       fullPath: '/org/dashboard'
       preLoaderRoute: typeof AuthenticatedOrgDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/committee': {
+      id: '/_authenticated/org/committee'
+      path: '/org/committee'
+      fullPath: '/org/committee'
+      preLoaderRoute: typeof AuthenticatedOrgCommitteeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/chat': {
+      id: '/_authenticated/org/chat'
+      path: '/org/chat'
+      fullPath: '/org/chat'
+      preLoaderRoute: typeof AuthenticatedOrgChatRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/accounts': {
+      id: '/_authenticated/org/accounts'
+      path: '/org/accounts'
+      fullPath: '/org/accounts'
+      preLoaderRoute: typeof AuthenticatedOrgAccountsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/member/pending': {
@@ -172,12 +307,26 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedMemberPendingRoute: typeof AuthenticatedMemberPendingRoute
+  AuthenticatedOrgAccountsRoute: typeof AuthenticatedOrgAccountsRoute
+  AuthenticatedOrgChatRoute: typeof AuthenticatedOrgChatRoute
+  AuthenticatedOrgCommitteeRoute: typeof AuthenticatedOrgCommitteeRoute
   AuthenticatedOrgDashboardRoute: typeof AuthenticatedOrgDashboardRoute
+  AuthenticatedOrgDesignsRoute: typeof AuthenticatedOrgDesignsRoute
+  AuthenticatedOrgEventsRoute: typeof AuthenticatedOrgEventsRoute
+  AuthenticatedOrgMembersRoute: typeof AuthenticatedOrgMembersRoute
+  AuthenticatedOrgRulesRoute: typeof AuthenticatedOrgRulesRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMemberPendingRoute: AuthenticatedMemberPendingRoute,
+  AuthenticatedOrgAccountsRoute: AuthenticatedOrgAccountsRoute,
+  AuthenticatedOrgChatRoute: AuthenticatedOrgChatRoute,
+  AuthenticatedOrgCommitteeRoute: AuthenticatedOrgCommitteeRoute,
   AuthenticatedOrgDashboardRoute: AuthenticatedOrgDashboardRoute,
+  AuthenticatedOrgDesignsRoute: AuthenticatedOrgDesignsRoute,
+  AuthenticatedOrgEventsRoute: AuthenticatedOrgEventsRoute,
+  AuthenticatedOrgMembersRoute: AuthenticatedOrgMembersRoute,
+  AuthenticatedOrgRulesRoute: AuthenticatedOrgRulesRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -193,13 +342,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
