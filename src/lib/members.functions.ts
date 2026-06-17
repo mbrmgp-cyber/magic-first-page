@@ -32,7 +32,7 @@ export const listOrgMembersFull = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     const { data: org } = await supabase
       .from("organizations")
-      .select("id, name, logo_url, letter_code, registration_number, address")
+      .select("id, name, logo_url, letter_code, gov_reg_number, slogan, phone, email")
       .eq("id", orgId)
       .maybeSingle();
     return { members: data ?? [], orgId, org };
