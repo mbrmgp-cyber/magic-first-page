@@ -130,8 +130,9 @@ function OrgRegister() {
 
   if (step === "done" && result) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-primary/10 via-background to-accent/20">
-        <Card className="w-full max-w-md p-6 space-y-6 text-center">
+      <div className="min-h-screen flex items-center justify-center p-6 bg-tricolor">
+        <Card className="w-full max-w-md p-6 space-y-6 text-center bg-white/92 backdrop-blur-xl shadow-2xl border-white">
+
           <div>
             <h1 className="text-2xl font-bold">{result.org.name}</h1>
             <p className="text-sm text-muted-foreground mt-1">QR Code generate అయ్యింది</p>
@@ -157,8 +158,9 @@ function OrgRegister() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-primary/10 via-background to-accent/20">
-      <Card className="w-full max-w-md p-6 space-y-6">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-tricolor">
+      <Card className="w-full max-w-md p-6 space-y-6 bg-white/92 backdrop-blur-xl shadow-2xl border-white">
+
         <div>
           <h1 className="text-2xl font-bold">Organization Register</h1>
           <p className="text-sm text-muted-foreground">వివరాలు పూరించండి</p>
@@ -238,9 +240,10 @@ function OrgRegister() {
             ))}
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full btn-saffron-green font-semibold border-0" disabled={loading}>
             {loading ? <RefreshCw className="h-4 w-4 animate-spin" /> : "Register & Generate QR"}
           </Button>
+
         </form>
       </Card>
     </div>

@@ -132,6 +132,16 @@
   --sidebar-ring: oklch(0.551 0.027 264.364);
 }
 
+:root {
+  --saffron: #FF9933;
+  --india-green: #138808;
+  --cream: #FFF7E6;
+  --gradient-tricolor: linear-gradient(135deg, #FF9933 0%, #FFF7E6 50%, #138808 100%);
+  --gradient-tricolor-soft: linear-gradient(135deg, #FFE2C2 0%, #FFFBEF 50%, #C9E8C0 100%);
+  --gradient-saffron-green: linear-gradient(90deg, #FF9933 0%, #138808 100%);
+  --shadow-warm: 0 10px 30px -10px rgba(255, 153, 51, 0.45);
+}
+
 @layer base {
   * {
     border-color: var(--color-border);
@@ -142,3 +152,19 @@
     color: var(--color-foreground);
   }
 }
+
+.bg-tricolor {
+  background: var(--gradient-tricolor-soft);
+}
+.bg-tricolor-strong {
+  background: var(--gradient-tricolor);
+}
+.btn-saffron-green {
+  background: var(--gradient-saffron-green);
+  color: white;
+  box-shadow: var(--shadow-warm);
+}
+.btn-saffron-green:hover {
+  filter: brightness(1.05);
+}
+

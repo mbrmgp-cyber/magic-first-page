@@ -71,7 +71,7 @@ function MemberRegister() {
 
   if (stage === "done") {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 bg-background">
+      <div className="min-h-screen flex items-center justify-center p-6 bg-tricolor">
         <Card className="w-full max-w-md p-6 space-y-4 text-center">
           <h1 className="text-2xl font-bold">Request Submitted</h1>
           <p className="text-muted-foreground">
@@ -85,7 +85,7 @@ function MemberRegister() {
 
   if (stage === "form") {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 bg-background">
+      <div className="min-h-screen flex items-center justify-center p-6 bg-tricolor">
         <Card className="w-full max-w-md p-6 space-y-6">
           <div>
             <h1 className="text-2xl font-bold">{orgName}</h1>
@@ -107,7 +107,7 @@ function MemberRegister() {
 
   if (stage === "scan") {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 bg-background">
+      <div className="min-h-screen flex items-center justify-center p-6 bg-tricolor">
         <Card className="w-full max-w-md p-6 space-y-4">
           <h1 className="text-xl font-bold">QR Scan చేయండి</h1>
           <QrScanner onScan={(t) => verifyCode(t)} onError={(e) => toast.error(e)} />
@@ -118,7 +118,7 @@ function MemberRegister() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-background">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-tricolor">
       <Card className="w-full max-w-md p-6 space-y-6">
         <div>
           <h1 className="text-2xl font-bold">Organization QR / Code</h1>
