@@ -169,26 +169,39 @@ function MemberCard({ member, orgId, onReview, onChange }:
 
 function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => void }) {
   const add = useServerFn(adminAddMember);
+  const upd = useServerFn(updateMemberProfile);
   const listAppr = useServerFn(listApprovedMembers);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [introducers, setIntroducers] = useState<{ id: string; name: string }[]>([]);
   const today = new Date().toISOString().slice(0, 10);
-  const [f, setF] = useState({
+  const initial = {
     name: "", email: "", phone: "", father_name: "", address: "",
     joined_date: today, introducer_member_id: "", committee_fee_paid: "0",
-  });
+    is_active: true,
+  };
+  const [f, setF] = useState(initial);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
     listAppr().then((r) => setIntroducers(r.members ?? [])).catch(() => {});
   }, [open]);
 
+  function onPickPhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("ఫైల్ 5MB మించరాదు"); return; }
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
+  }
+
   async function submit() {
     if (!f.name.trim() || !f.email.trim()) { toast.error("పేరు మరియు Email ఇవ్వండి"); return; }
     setSaving(true);
     try {
-      await add({
+      const r = await add({
         data: {
           name: f.name.trim(),
           email: f.email.trim(),
@@ -198,13 +211,23 @@ function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => voi
           joined_date: f.joined_date || null,
           introducer_member_id: f.introducer_member_id || null,
           committee_fee_paid: Number(f.committee_fee_paid || 0),
+          is_active: f.is_active,
           status: "approved",
         },
       });
+      // Upload photo if picked
+      if (photoFile && r.id && r.orgId) {
+        const ext = photoFile.name.split(".").pop() || "jpg";
+        const path = `admin/${r.orgId}/${r.id}/${Date.now()}.${ext}`;
+        const { error: upErr } = await supabase.storage.from("member-photos")
+          .upload(path, photoFile, { upsert: true, contentType: photoFile.type });
+        if (upErr) toast.error("ఫోటో అప్‌లోడ్ విఫలమైంది: " + upErr.message);
+        else await upd({ data: { member_id: r.id, photo_url: path } });
+      }
       toast.success("సభ్యుడు చేర్చబడ్డారు");
       setOpen(false);
-      setF({ name: "", email: "", phone: "", father_name: "", address: "",
-        joined_date: today, introducer_member_id: "", committee_fee_paid: "0" });
+      setF(initial);
+      setPhotoFile(null); setPhotoPreview(null);
       onAdded();
     } catch (e: any) { toast.error(e.message); }
     finally { setSaving(false); }
@@ -220,6 +243,16 @@ function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => voi
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>కొత్త సభ్యుడు</DialogTitle></DialogHeader>
         <div className="space-y-3 pt-2">
+          <div className="flex items-center gap-3">
+            <div className="h-20 w-20 rounded-full overflow-hidden bg-muted flex items-center justify-center shrink-0 border">
+              {photoPreview ? <img src={photoPreview} className="h-full w-full object-cover" />
+                : <User className="w-8 h-8 text-muted-foreground" />}
+            </div>
+            <label className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-md border cursor-pointer hover:bg-accent">
+              <Camera className="w-4 h-4" /> ఫోటో ఎంచుకోండి
+              <input type="file" accept="image/*" className="hidden" onChange={onPickPhoto} />
+            </label>
+          </div>
           <div><Label>పూర్తి పేరు *</Label>
             <Input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></div>
           <div><Label>తండ్రి పేరు</Label>
@@ -248,6 +281,13 @@ function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => voi
               {introducers.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
             </select>
           </div>
+          <div className="flex items-center justify-between rounded-md border p-3">
+            <div>
+              <Label className="text-sm">సభ్యత్వం యాక్టివ్</Label>
+              <p className="text-xs text-muted-foreground">ఇనాక్టివ్ చేస్తే సదుపాయాలు పనిచేయవు</p>
+            </div>
+            <Switch checked={f.is_active} onCheckedChange={(v) => setF({ ...f, is_active: v })} />
+          </div>
           <Button onClick={submit} disabled={saving} className="w-full">
             {saving ? "చేర్చుతోంది…" : "చేర్చు"}
           </Button>
@@ -256,6 +296,7 @@ function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => voi
     </Dialog>
   );
 }
+
 
 function MemberDetailsDialog({ member, orgId, onChange }:
   { member: Member; orgId: string; onChange: () => void }) {
