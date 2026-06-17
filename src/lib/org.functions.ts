@@ -107,7 +107,7 @@ export const updateOrgPresident = createServerFn({ method: "POST" })
     if (data.president_signature_url !== undefined) patch.president_signature_url = data.president_signature_url;
     const { data: org, error } = await supabase
       .from("organizations")
-      .update(patch)
+      .update(patch as any)
       .eq("admin_user_id", userId)
       .select()
       .single();
