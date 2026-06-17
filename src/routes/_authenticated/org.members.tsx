@@ -346,6 +346,7 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
     phone: member.phone ?? "",
     joined_date: member.joined_date ?? "",
     committee_fee_paid: String(member.committee_fee_paid ?? 0),
+    blood_group: (member as any).blood_group ?? "",
   });
   const [active, setActive] = useState<boolean>(member.is_active !== false);
   const [saving, setSaving] = useState(false);
@@ -390,6 +391,7 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
           phone: f.phone || null,
           joined_date: f.joined_date || null,
           committee_fee_paid: Number(f.committee_fee_paid || 0),
+          blood_group: f.blood_group || null,
           is_active: active,
           ...(photo_url ? { photo_url } : {}),
         },
@@ -450,8 +452,12 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
         <div><Label>Phone</Label><Input value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} /></div>
         <div><Label>చేరిన తేదీ</Label><Input type="date" value={f.joined_date ?? ""} onChange={(e) => setF({ ...f, joined_date: e.target.value })} /></div>
       </div>
-      <div><Label>కమిటీ Fee (₹)</Label>
-        <Input type="number" step="0.01" value={f.committee_fee_paid} onChange={(e) => setF({ ...f, committee_fee_paid: e.target.value })} /></div>
+      <div className="grid grid-cols-2 gap-3">
+        <div><Label>బ్లడ్ గ్రూప్</Label>
+          <Input placeholder="A+ / B+ / O+ ..." value={f.blood_group} onChange={(e) => setF({ ...f, blood_group: e.target.value })} /></div>
+        <div><Label>కమిటీ Fee (₹)</Label>
+          <Input type="number" step="0.01" value={f.committee_fee_paid} onChange={(e) => setF({ ...f, committee_fee_paid: e.target.value })} /></div>
+      </div>
       <Button onClick={save} disabled={saving} className="w-full">{saving ? "Saving…" : "Save"}</Button>
     </div>
   );

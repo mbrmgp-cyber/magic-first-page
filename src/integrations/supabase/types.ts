@@ -179,6 +179,7 @@ export type Database = {
       members: {
         Row: {
           address: string | null
+          blood_group: string | null
           committee_fee_paid: number | null
           created_at: string
           email: string
@@ -200,6 +201,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          blood_group?: string | null
           committee_fee_paid?: number | null
           created_at?: string
           email: string
@@ -221,6 +223,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          blood_group?: string | null
           committee_fee_paid?: number | null
           created_at?: string
           email?: string
@@ -360,6 +363,8 @@ export type Database = {
           name: string
           org_code: string
           phone: string | null
+          president_name: string | null
+          president_signature_url: string | null
           slogan: string | null
           updated_at: string
         }
@@ -380,6 +385,8 @@ export type Database = {
           name: string
           org_code: string
           phone?: string | null
+          president_name?: string | null
+          president_signature_url?: string | null
           slogan?: string | null
           updated_at?: string
         }
@@ -400,6 +407,8 @@ export type Database = {
           name?: string
           org_code?: string
           phone?: string | null
+          president_name?: string | null
+          president_signature_url?: string | null
           slogan?: string | null
           updated_at?: string
         }

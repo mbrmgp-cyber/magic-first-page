@@ -32,7 +32,7 @@ export const listOrgMembersFull = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     const { data: org } = await supabase
       .from("organizations")
-      .select("id, name, logo_url, letter_code, gov_reg_number, slogan, phone, email")
+      .select("id, name, logo_url, letter_code, gov_reg_number, slogan, phone, email, president_name, president_signature_url")
       .eq("id", orgId)
       .maybeSingle();
     return { members: data ?? [], orgId, org };
@@ -112,11 +112,12 @@ export const updateMemberProfile = createServerFn({ method: "POST" })
     committee_fee_paid?: number | null;
     photo_url?: string | null;
     is_active?: boolean;
+    blood_group?: string | null;
   }) => d)
   .handler(async ({ data, context }) => {
     const { supabase } = context;
     const { member_id, ...patch } = data;
-    const { error } = await supabase.from("members").update(patch).eq("id", member_id);
+    const { error } = await supabase.from("members").update(patch as any).eq("id", member_id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
