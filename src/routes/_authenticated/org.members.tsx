@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { SectionShell } from "./org.rules";
+import { SectionShell } from "@/components/SectionShell";
 
 export const Route = createFileRoute("/_authenticated/org/members")({
   head: () => ({ meta: [{ title: "Members" }] }),
