@@ -1,7 +1,405 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { SectionShell } from "@/components/SectionShell";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { toast } from "sonner";
+import { reviewMember } from "@/lib/org.functions";
+import {
+  listOrgMembersFull, updateMemberProfile,
+  listMemberLoans, listLoanPayments,
+  addMemberLoan, addLoanPayment, closeLoan, deleteLoan,
+} from "@/lib/members.functions";
+import { User, Plus, IndianRupee, CheckCircle2, XCircle, Trash2, Lock } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/org/members")({
-  head: () => ({ meta: [{ title: "Members" }] }),
-  component: () => <SectionShell title="సభ్యుల వివరాలు & నమోదు" />,
+  head: () => ({ meta: [{ title: "సభ్యుల వివరాలు" }] }),
+  component: MembersPage,
 });
+
+type Member = any;
+type Loan = any;
+
+function MembersPage() {
+  const list = useServerFn(listOrgMembersFull);
+  const review = useServerFn(reviewMember);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [orgId, setOrgId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
+
+  async function refresh() {
+    setLoading(true);
+    try {
+      const r = await list();
+      setMembers(r.members);
+      setOrgId(r.orgId);
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally { setLoading(false); }
+  }
+  useEffect(() => { refresh(); }, []);
+
+  const filtered = useMemo(
+    () => filter === "all" ? members : members.filter((m) => m.status === filter),
+    [members, filter]
+  );
+
+  async function onReview(id: string, action: "approve" | "reject") {
+    try {
+      await review({ data: { member_id: id, action } });
+      toast.success(action === "approve" ? "Approved" : "Rejected");
+      refresh();
+    } catch (e: any) { toast.error(e.message); }
+  }
+
+  return (
+    <SectionShell title="సభ్యుల వివరాలు">
+      <div className="flex flex-wrap gap-2">
+        {(["all", "pending", "approved", "rejected"] as const).map((s) => (
+          <Button key={s} size="sm" variant={filter === s ? "default" : "outline"} onClick={() => setFilter(s)}>
+            {s === "all" ? "అందరూ" : s === "pending" ? "Pending" : s === "approved" ? "Approved" : "Rejected"}
+            <Badge variant="secondary" className="ml-2">
+              {s === "all" ? members.length : members.filter((m) => m.status === s).length}
+            </Badge>
+          </Button>
+        ))}
+      </div>
+
+      {loading ? (
+        <Card className="p-6 text-center text-muted-foreground">Loading…</Card>
+      ) : filtered.length === 0 ? (
+        <Card className="p-6 text-center text-muted-foreground">సభ్యులు లేరు</Card>
+      ) : (
+        <div className="space-y-3">
+          {filtered.map((m) => (
+            <MemberCard key={m.id} member={m} orgId={orgId!} onReview={onReview} onChange={refresh} />
+          ))}
+        </div>
+      )}
+    </SectionShell>
+  );
+}
+
+function MemberCard({ member, orgId, onReview, onChange }:
+  { member: Member; orgId: string; onReview: (id: string, a: "approve" | "reject") => void; onChange: () => void }) {
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!member.photo_url) return;
+    let revoked = false;
+    (async () => {
+      const { data } = await supabase.storage.from("member-photos")
+        .createSignedUrl(member.photo_url, 3600);
+      if (!revoked && data?.signedUrl) setPhotoUrl(data.signedUrl);
+    })();
+    return () => { revoked = true; };
+  }, [member.photo_url]);
+
+  const statusColor =
+    member.status === "approved" ? "bg-emerald-100 text-emerald-700" :
+    member.status === "rejected" ? "bg-rose-100 text-rose-700" :
+    "bg-amber-100 text-amber-700";
+
+  return (
+    <Card className="p-4 bg-white/95">
+      <div className="flex gap-3 items-start">
+        <div className="h-14 w-14 rounded-full overflow-hidden bg-muted flex items-center justify-center shrink-0">
+          {photoUrl ? <img src={photoUrl} className="h-full w-full object-cover" />
+            : <User className="w-7 h-7 text-muted-foreground" />}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="font-semibold truncate">{member.name}</h3>
+            <span className={`text-xs px-2 py-0.5 rounded-full ${statusColor}`}>{member.status}</span>
+          </div>
+          {member.father_name && <p className="text-xs text-muted-foreground">తండ్రి: {member.father_name}</p>}
+          <p className="text-xs text-muted-foreground truncate">{member.email}</p>
+          {member.phone && <p className="text-xs text-muted-foreground">📞 {member.phone}</p>}
+          {member.address && <p className="text-xs text-muted-foreground line-clamp-2">📍 {member.address}</p>}
+          {member.joined_date && (
+            <p className="text-xs text-muted-foreground">చేరిన తేదీ: {new Date(member.joined_date).toLocaleDateString("te-IN")}</p>
+          )}
+          {member.introducer && (
+            <p className="text-xs text-muted-foreground">పరిచయం: {member.introducer.name}</p>
+          )}
+          {Number(member.committee_fee_paid) > 0 && (
+            <p className="text-xs">కమిటీ Fee: ₹{Number(member.committee_fee_paid).toFixed(2)}</p>
+          )}
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-2 mt-3">
+        {member.status === "pending" && (
+          <>
+            <Button size="sm" onClick={() => onReview(member.id, "approve")} className="bg-emerald-600 hover:bg-emerald-700">
+              <CheckCircle2 className="w-4 h-4 mr-1" /> Approve
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => onReview(member.id, "reject")}>
+              <XCircle className="w-4 h-4 mr-1" /> Reject
+            </Button>
+          </>
+        )}
+        {member.status === "approved" && (
+          <MemberDetailsDialog member={member} orgId={orgId} onChange={onChange} />
+        )}
+      </div>
+    </Card>
+  );
+}
+
+function MemberDetailsDialog({ member, orgId, onChange }:
+  { member: Member; orgId: string; onChange: () => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="outline"><IndianRupee className="w-4 h-4 mr-1" /> వివరాలు & Loans</Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader><DialogTitle>{member.name}</DialogTitle></DialogHeader>
+        <Tabs defaultValue="profile">
+          <TabsList className="w-full">
+            <TabsTrigger value="profile" className="flex-1">Profile</TabsTrigger>
+            <TabsTrigger value="loans" className="flex-1">Loans / Interest</TabsTrigger>
+          </TabsList>
+          <TabsContent value="profile">
+            <ProfileEdit member={member} onSaved={() => { onChange(); }} />
+          </TabsContent>
+          <TabsContent value="loans">
+            <LoansPanel member={member} orgId={orgId} />
+          </TabsContent>
+        </Tabs>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void }) {
+  const upd = useServerFn(updateMemberProfile);
+  const [f, setF] = useState({
+    father_name: member.father_name ?? "",
+    address: member.address ?? "",
+    phone: member.phone ?? "",
+    joined_date: member.joined_date ?? "",
+    committee_fee_paid: String(member.committee_fee_paid ?? 0),
+  });
+  const [saving, setSaving] = useState(false);
+
+  async function save() {
+    setSaving(true);
+    try {
+      await upd({
+        data: {
+          member_id: member.id,
+          father_name: f.father_name || null,
+          address: f.address || null,
+          phone: f.phone || null,
+          joined_date: f.joined_date || null,
+          committee_fee_paid: Number(f.committee_fee_paid || 0),
+        },
+      });
+      toast.success("Saved");
+      onSaved();
+    } catch (e: any) { toast.error(e.message); }
+    finally { setSaving(false); }
+  }
+
+  return (
+    <div className="space-y-3 pt-3">
+      <div><Label>తండ్రి పేరు</Label><Input value={f.father_name} onChange={(e) => setF({ ...f, father_name: e.target.value })} /></div>
+      <div><Label>అడ్రస్</Label><Textarea rows={2} value={f.address} onChange={(e) => setF({ ...f, address: e.target.value })} /></div>
+      <div className="grid grid-cols-2 gap-3">
+        <div><Label>Phone</Label><Input value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} /></div>
+        <div><Label>చేరిన తేదీ</Label><Input type="date" value={f.joined_date ?? ""} onChange={(e) => setF({ ...f, joined_date: e.target.value })} /></div>
+      </div>
+      <div><Label>కమిటీ Fee (₹)</Label>
+        <Input type="number" step="0.01" value={f.committee_fee_paid} onChange={(e) => setF({ ...f, committee_fee_paid: e.target.value })} /></div>
+      <Button onClick={save} disabled={saving} className="w-full">{saving ? "Saving…" : "Save"}</Button>
+    </div>
+  );
+}
+
+function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
+  const listL = useServerFn(listMemberLoans);
+  const addL = useServerFn(addMemberLoan);
+  const closeL = useServerFn(closeLoan);
+  const delL = useServerFn(deleteLoan);
+
+  const [loans, setLoans] = useState<Loan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showAdd, setShowAdd] = useState(false);
+  const [nf, setNf] = useState({
+    principal: "", interest_rate_monthly: "1.5",
+    start_date: new Date().toISOString().slice(0, 10), purpose: "",
+  });
+
+  async function refresh() {
+    setLoading(true);
+    try {
+      const r = await listL({ data: { member_id: member.id } });
+      setLoans(r.loans);
+    } catch (e: any) { toast.error(e.message); }
+    finally { setLoading(false); }
+  }
+  useEffect(() => { refresh(); }, [member.id]);
+
+  async function addNew() {
+    if (!nf.principal || Number(nf.principal) <= 0) { toast.error("Principal ఇవ్వండి"); return; }
+    try {
+      await addL({
+        data: {
+          org_id: orgId, member_id: member.id,
+          principal: Number(nf.principal),
+          interest_rate_monthly: Number(nf.interest_rate_monthly || 0),
+          start_date: nf.start_date,
+          purpose: nf.purpose || undefined,
+        },
+      });
+      toast.success("Loan added");
+      setShowAdd(false);
+      setNf({ principal: "", interest_rate_monthly: "1.5", start_date: new Date().toISOString().slice(0, 10), purpose: "" });
+      refresh();
+    } catch (e: any) { toast.error(e.message); }
+  }
+
+  return (
+    <div className="space-y-3 pt-3">
+      <div className="flex justify-end">
+        <Button size="sm" onClick={() => setShowAdd((s) => !s)}>
+          <Plus className="w-4 h-4 mr-1" /> కొత్త Loan
+        </Button>
+      </div>
+
+      {showAdd && (
+        <Card className="p-3 space-y-2 border-dashed">
+          <div className="grid grid-cols-2 gap-2">
+            <div><Label>Principal ₹ *</Label>
+              <Input type="number" step="0.01" value={nf.principal} onChange={(e) => setNf({ ...nf, principal: e.target.value })} /></div>
+            <div><Label>నెల Interest %</Label>
+              <Input type="number" step="0.01" value={nf.interest_rate_monthly} onChange={(e) => setNf({ ...nf, interest_rate_monthly: e.target.value })} /></div>
+            <div><Label>Start Date</Label>
+              <Input type="date" value={nf.start_date} onChange={(e) => setNf({ ...nf, start_date: e.target.value })} /></div>
+            <div><Label>Purpose</Label>
+              <Input value={nf.purpose} onChange={(e) => setNf({ ...nf, purpose: e.target.value })} /></div>
+          </div>
+          <Button onClick={addNew} className="w-full">Add</Button>
+        </Card>
+      )}
+
+      {loading ? <p className="text-sm text-muted-foreground">Loading…</p>
+        : loans.length === 0 ? <p className="text-sm text-muted-foreground">Loans లేవు</p>
+        : loans.map((l) => (
+          <LoanCard key={l.id} loan={l} orgId={orgId} onChange={refresh}
+            onClose={async () => { await closeL({ data: { loan_id: l.id } }); refresh(); }}
+            onDelete={async () => {
+              if (!confirm("Delete this loan?")) return;
+              await delL({ data: { loan_id: l.id } }); refresh();
+            }}
+          />
+        ))}
+    </div>
+  );
+}
+
+function LoanCard({ loan, orgId, onChange, onClose, onDelete }:
+  { loan: Loan; orgId: string; onChange: () => void; onClose: () => void; onDelete: () => void }) {
+  const listP = useServerFn(listLoanPayments);
+  const addP = useServerFn(addLoanPayment);
+  const [pays, setPays] = useState<any[]>([]);
+  const [open, setOpen] = useState(false);
+  const [amt, setAmt] = useState("");
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+
+  async function loadPays() {
+    const r = await listP({ data: { loan_id: loan.id } });
+    setPays(r.payments);
+  }
+  useEffect(() => { if (open) loadPays(); }, [open]);
+
+  async function payNow() {
+    if (!amt || Number(amt) <= 0) { toast.error("Amount ఇవ్వండి"); return; }
+    try {
+      await addP({ data: { loan_id: loan.id, org_id: orgId, amount: Number(amt), payment_date: date } });
+      setAmt("");
+      toast.success("Payment recorded");
+      loadPays(); onChange();
+    } catch (e: any) { toast.error(e.message); }
+  }
+
+  const s = loan.summary ?? {};
+  return (
+    <Card className={`p-3 ${loan.status === "closed" ? "opacity-70" : ""}`}>
+      <div className="flex justify-between items-start gap-2">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-semibold">₹{Number(loan.principal).toLocaleString("en-IN")}</span>
+            <Badge variant="outline" className="text-xs">{loan.interest_rate_monthly}% /నెల</Badge>
+            {loan.status === "closed" && <Badge className="bg-emerald-600">Closed</Badge>}
+          </div>
+          {loan.purpose && <p className="text-xs text-muted-foreground">{loan.purpose}</p>}
+          <p className="text-xs text-muted-foreground">Start: {new Date(loan.start_date).toLocaleDateString("te-IN")}</p>
+        </div>
+        <Button size="sm" variant="ghost" onClick={onDelete}><Trash2 className="w-4 h-4 text-rose-600" /></Button>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2 mt-2 text-center text-xs">
+        <div className="bg-blue-50 rounded p-2">
+          <div className="text-muted-foreground">Total Due</div>
+          <div className="font-semibold">₹{Number(s.total_due ?? loan.principal).toLocaleString("en-IN")}</div>
+        </div>
+        <div className="bg-emerald-50 rounded p-2">
+          <div className="text-muted-foreground">Paid</div>
+          <div className="font-semibold">₹{Number(s.total_paid ?? 0).toLocaleString("en-IN")}</div>
+        </div>
+        <div className="bg-rose-50 rounded p-2">
+          <div className="text-muted-foreground">Balance</div>
+          <div className="font-semibold">₹{Number(s.balance ?? 0).toLocaleString("en-IN")}</div>
+        </div>
+      </div>
+      <p className="text-[10px] text-muted-foreground mt-1 text-center">
+        Interest accrued: ₹{Number(s.accrued_interest ?? 0).toLocaleString("en-IN")} · {Number(s.months_elapsed ?? 0).toFixed(1)} నెలలు
+      </p>
+
+      <Button size="sm" variant="outline" className="w-full mt-2" onClick={() => setOpen((o) => !o)}>
+        {open ? "మూసివేయి" : "Payments / Pay"}
+      </Button>
+
+      {open && (
+        <div className="mt-2 space-y-2 border-t pt-2">
+          {loan.status !== "closed" && (
+            <div className="flex gap-2 items-end">
+              <div className="flex-1"><Label className="text-xs">Amount ₹</Label>
+                <Input type="number" step="0.01" value={amt} onChange={(e) => setAmt(e.target.value)} /></div>
+              <div><Label className="text-xs">Date</Label>
+                <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
+              <Button size="sm" onClick={payNow}>Pay</Button>
+            </div>
+          )}
+          {pays.length > 0 ? (
+            <div className="text-xs space-y-1">
+              {pays.map((p) => (
+                <div key={p.id} className="flex justify-between border-b pb-1">
+                  <span>{new Date(p.payment_date).toLocaleDateString("te-IN")}</span>
+                  <span className="font-medium">₹{Number(p.amount).toLocaleString("en-IN")}</span>
+                </div>
+              ))}
+            </div>
+          ) : <p className="text-xs text-muted-foreground">No payments yet</p>}
+          {loan.status !== "closed" && (
+            <Button size="sm" variant="outline" className="w-full" onClick={onClose}>
+              <Lock className="w-3 h-3 mr-1" /> Loan Close చేయి
+            </Button>
+          )}
+        </div>
+      )}
+    </Card>
+  );
+}
