@@ -470,12 +470,13 @@ function CardFront({
 }
 
 function CardBack({
-  bref, t, memberName, appQrUrl,
+  bref, t, memberName, appQrUrl, lang,
 }: {
   bref: React.RefObject<HTMLDivElement | null>;
   t: Record<string, string>;
   memberName: string;
   appQrUrl: string;
+  lang: CardLang;
 }) {
   return (
     <div
