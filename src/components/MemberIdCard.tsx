@@ -396,11 +396,11 @@ function CardFront({
             {t.id}: {member.member_code ?? "—"}
           </div>
           <div style={{ fontSize: "3.4mm", fontWeight: 800, marginTop: "0.6mm", color: "#000080", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", lineHeight: 1.25 }}>
-            {member.name}
+            {tr(member.name, lang)}
           </div>
-          {member.father_name && <Row label={t.father} value={member.father_name} />}
-          {village && <Row label={t.village} value={village} />}
-          {mandal && <Row label={t.mandal} value={mandal} />}
+          {member.father_name && <Row label={t.father} value={tr(member.father_name, lang)} />}
+          {village && <Row label={t.village} value={tr(village, lang)} />}
+          {mandal && <Row label={t.mandal} value={tr(mandal, lang)} />}
           {member.phone && <Row label={t.phone} value={member.phone} />}
           <div style={{ display: "flex", gap: "1.5mm", marginTop: "0.4mm", alignItems: "center", flexWrap: "wrap" }}>
             <div style={{ fontSize: "2.1mm", color: "#222" }}>
