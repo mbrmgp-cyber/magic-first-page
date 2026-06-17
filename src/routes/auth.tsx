@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,13 +25,43 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<{ type: "info" | "error" | "success"; title: string; message: string } | null>(null);
 
+  async function redirectAfterLogin(userId: string) {
+    const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+    if (roles?.some((r) => r.role === "mbr_admin")) {
+      navigate({ to: "/admin" });
+      return;
+    }
+    const { data: org } = await supabase.from("organizations").select("id, approval_status").eq("admin_user_id", userId).maybeSingle();
+    if (org) {
+      navigate({ to: "/org/dashboard" });
+      return;
+    }
+    const { data: member } = await supabase.from("members").select("id").eq("user_id", userId).maybeSingle();
+    if (member) navigate({ to: "/member/pending" });
+    else navigate({ to: "/org/register" });
+  }
+
+  useEffect(() => {
+    let active = true;
+    supabase.auth.getUser().then(({ data }) => {
+      if (active && data.user) redirectAfterLogin(data.user.id);
+    });
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session?.user) redirectAfterLogin(session.user.id);
+    });
+    return () => {
+      active = false;
+      listener.subscription.unsubscribe();
+    };
+  }, []);
+
   async function sendOtp(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setStatus({ type: "info", title: "Login link పంపుతున్నాం", message: `${email} కి secure login link పంపుతున్నాం.` });
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { shouldCreateUser: false, emailRedirectTo: window.location.origin },
+      options: { shouldCreateUser: false, emailRedirectTo: `${window.location.origin}/auth` },
     });
     setLoading(false);
     if (error) {
