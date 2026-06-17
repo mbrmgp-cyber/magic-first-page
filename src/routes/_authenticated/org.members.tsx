@@ -408,7 +408,16 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
 
   return (
     <div className="space-y-3 pt-3">
+      {member.member_code && (
+        <div className="rounded-md border bg-primary/5 p-3 flex items-center justify-between">
+          <div>
+            <Label className="text-xs text-muted-foreground">ఐడి నెంబర్ (మార్చలేరు)</Label>
+            <p className="font-mono text-lg font-semibold text-primary">{member.member_code}</p>
+          </div>
+        </div>
+      )}
       <div className="flex items-center gap-3">
+
         <div className="h-20 w-20 rounded-full overflow-hidden bg-muted flex items-center justify-center shrink-0 border">
           {shownPhoto ? <img src={shownPhoto} className="h-full w-full object-cover" />
             : <User className="w-8 h-8 text-muted-foreground" />}
