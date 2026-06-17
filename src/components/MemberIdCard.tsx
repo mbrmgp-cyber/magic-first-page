@@ -267,26 +267,27 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
             <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden" }}>
               <CardFront
                 fref={frontRef}
-                member={member} org={org} t={t}
+                member={member} org={org} t={t} lang={lang}
                 photoUrl={photoUrl} logoUrl={logoUrl} sigUrl={sigUrl} qrDataUrl={qrDataUrl}
                 joined={joined}
               />
             </div>
             <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
-              <CardBack bref={backRef} t={t} memberName={member.name} appQrUrl={appQrUrl} />
+              <CardBack bref={backRef} t={t} lang={lang} memberName={member.name} appQrUrl={appQrUrl} />
             </div>
           </div>
         </div>
       </ScaledCard>
 
-
-
       <div className="flex justify-between items-center gap-2 pt-2">
         <Button size="sm" variant="outline" onClick={() => setShowBack(v => !v)}>
-          <RotateCw className="w-4 h-4 mr-1" /> {showBack ? "ముందు" : "వెనుక"}
+          <RotateCw className="w-4 h-4 mr-1" />
+          {showBack ? (lang === "en" ? "Front" : lang === "hi" ? "सामने" : "ముందు")
+                    : (lang === "en" ? "Back" : lang === "hi" ? "पीछे" : "వెనుక")}
         </Button>
         <Button size="sm" onClick={handlePrint}>
-          <Printer className="w-4 h-4 mr-1" /> ప్రింట్ / PDF
+          <Printer className="w-4 h-4 mr-1" />
+          {lang === "en" ? "Print / PDF" : lang === "hi" ? "प्रिंट / PDF" : "ప్రింట్ / PDF"}
         </Button>
       </div>
     </div>
