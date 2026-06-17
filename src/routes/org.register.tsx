@@ -79,8 +79,14 @@ function OrgRegister() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ org: { name: string; org_code: string }; qrDataUrl: string } | null>(null);
   const [form, setForm] = useState({
-    name: "", email: "", password: "", phone: "", slogan: "", logo_url: "",
-    gov_reg_number: "", gov_qr_url: "",
+    name: "చిట్వేల్ హెల్ప్ లైన్ సొసైటీ",
+    email: "",
+    password: "",
+    phone: "",
+    slogan: "మానవసేవే మాధవసేవ",
+    logo_url: "",
+    gov_reg_number: "356/16",
+    gov_qr_url: "",
   });
   const [founders, setFounders] = useState<{ name: string; address: string; aadhaar_url: string }[]>([
     { name: "", address: "", aadhaar_url: "" },
