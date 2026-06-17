@@ -48,6 +48,49 @@ export const listApprovedMembers = createServerFn({ method: "GET" })
     return { members: data ?? [] };
   });
 
+export const adminAddMember = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: {
+    name: string;
+    email: string;
+    phone?: string | null;
+    father_name?: string | null;
+    address?: string | null;
+    joined_date?: string | null;
+    introducer_member_id?: string | null;
+    committee_fee_paid?: number | null;
+    status?: "pending" | "approved";
+  }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const orgId = await getOrgForUser(supabase, userId);
+    if (!orgId) throw new Error("Organization కనపడలేదు");
+    const { error } = await supabase.from("members").insert({
+      org_id: orgId,
+      name: data.name,
+      email: data.email,
+      phone: data.phone ?? null,
+      father_name: data.father_name ?? null,
+      address: data.address ?? null,
+      joined_date: data.joined_date ?? null,
+      introducer_member_id: data.introducer_member_id ?? null,
+      committee_fee_paid: data.committee_fee_paid ?? 0,
+      status: data.status ?? "approved",
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminDeleteMember = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { member_id: string }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { error } = await supabase.from("members").delete().eq("id", data.member_id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const updateMemberProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: {
