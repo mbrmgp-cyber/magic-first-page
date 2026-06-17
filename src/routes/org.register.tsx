@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Download, RefreshCw, Plus, X, Upload, Image as ImageIcon } from "lucide-react";
+import { Download, RefreshCw, Plus, X, Upload, Image as ImageIcon, AlertCircle, CheckCircle2, Info } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export const Route = createFileRoute("/org/register")({
   head: () => ({ meta: [{ title: "Register Organization — MBR App" }] }),
@@ -77,6 +78,7 @@ function OrgRegister() {
   const register = useServerFn(registerOrganization);
   const [step, setStep] = useState<"form" | "done">("form");
   const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<{ type: "info" | "success" | "error"; title: string; message: string } | null>(null);
   const [result, setResult] = useState<{ org: { name: string; org_code: string }; qrDataUrl: string } | null>(null);
   const [form, setForm] = useState({
     name: "చిట్వేల్ హెల్ప్ లైన్ సొసైటీ",
@@ -95,9 +97,11 @@ function OrgRegister() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
+    setStatus({ type: "info", title: "రిజిస్ట్రేషన్ జరుగుతోంది", message: "దయచేసి కొద్దిసేపు ఆగండి. మీ ఖాతా మరియు సొసైటీ వివరాలు సేవ్ చేస్తున్నాం." });
     try {
       const { data: existing } = await supabase.auth.getUser();
       if (!existing.user) {
+        setStatus({ type: "info", title: "ఖాతా సృష్టిస్తున్నాం", message: "మీ Email/Password తో ఖాతా సిద్ధం చేస్తున్నాం." });
         const { error: suErr } = await supabase.auth.signUp({
           email: form.email,
           password: form.password,
@@ -107,9 +111,11 @@ function OrgRegister() {
       }
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
+        setStatus({ type: "info", title: "లాగిన్ చేస్తున్నాం", message: "ఖాతా సిద్ధమైన వెంటనే ఆటోమేటిక్‌గా లాగిన్ చేస్తున్నాం." });
         const { error: siErr } = await supabase.auth.signInWithPassword({ email: form.email, password: form.password });
         if (siErr) throw siErr;
       }
+      setStatus({ type: "info", title: "సొసైటీ వివరాలు సేవ్ చేస్తున్నాం", message: "రిజిస్ట్రేషన్ పూర్తయిన తర్వాత QR Code కనిపిస్తుంది." });
       const res = await register({ data: {
         name: form.name,
         email: form.email,
@@ -126,9 +132,17 @@ function OrgRegister() {
 
       setResult(res);
       setStep("done");
+      setStatus({ type: "success", title: "రిజిస్ట్రేషన్ పూర్తయింది", message: "మీ సొసైటీ QR Code తయారైంది. ఇప్పుడు Dashboard కి వెళ్లవచ్చు." });
       toast.success("Organization registered!");
     } catch (e: any) {
-      toast.error(e.message ?? "Failed");
+      const rawMessage = String(e?.message ?? "Failed");
+      const message = rawMessage.toLowerCase().includes("email not confirmed")
+        ? "Email confirm చేసిన తర్వాత, అదే Email/Password తో Login పేజీలో లాగిన్ అవ్వండి. Confirm link వేరే browser లో open అయితే ఇక్కడ మళ్లీ Login చేయాలి."
+        : rawMessage.toLowerCase().includes("already registered") || rawMessage.toLowerCase().includes("already been registered")
+        ? "ఈ Email తో ఖాతా ఇప్పటికే ఉంది. Home లో ‘ఇప్పటికే ఖాతా ఉందా?’ ద్వారా Login చేయండి."
+        : rawMessage;
+      setStatus({ type: "error", title: "రిజిస్ట్రేషన్ ఆగిపోయింది", message });
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -172,6 +186,13 @@ function OrgRegister() {
           <p className="text-sm text-muted-foreground">వివరాలు పూరించండి</p>
         </div>
         <form onSubmit={onSubmit} className="space-y-4">
+          {status && (
+            <Alert variant={status.type === "error" ? "destructive" : "default"} className={status.type === "success" ? "border-green-600/40 bg-green-50 text-green-900" : ""}>
+              {status.type === "error" ? <AlertCircle className="h-4 w-4" /> : status.type === "success" ? <CheckCircle2 className="h-4 w-4 text-green-700" /> : <Info className="h-4 w-4" />}
+              <AlertTitle>{status.title}</AlertTitle>
+              <AlertDescription>{status.message}</AlertDescription>
+            </Alert>
+          )}
           <div className="space-y-2">
             <Label>Org Name *</Label>
             <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
@@ -247,7 +268,7 @@ function OrgRegister() {
           </div>
 
           <Button type="submit" className="w-full btn-saffron-green font-semibold border-0" disabled={loading}>
-            {loading ? <RefreshCw className="h-4 w-4 animate-spin" /> : "Register & Generate QR"}
+            {loading ? <><RefreshCw className="h-4 w-4 animate-spin" /> Registering...</> : "Register & Generate QR"}
           </Button>
 
         </form>
