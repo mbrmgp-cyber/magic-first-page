@@ -113,7 +113,14 @@ export const validateOrgCode = createServerFn({ method: "POST" })
 
 export const submitMemberRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { code: string; name: string; email: string; phone?: string; photo_url?: string }) => d)
+  .inputValidator((d: {
+    code: string; name: string; email: string;
+    phone?: string; photo_url?: string;
+    father_name?: string; address?: string;
+    joined_date?: string;
+    introducer_member_id?: string;
+    committee_fee_paid?: number;
+  }) => d)
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const code = data.code.trim().toUpperCase();
@@ -133,8 +140,13 @@ export const submitMemberRequest = createServerFn({ method: "POST" })
         email: data.email,
         phone: data.phone ?? null,
         photo_url: data.photo_url ?? null,
+        father_name: data.father_name ?? null,
+        address: data.address ?? null,
+        joined_date: data.joined_date ?? null,
+        introducer_member_id: data.introducer_member_id ?? null,
+        committee_fee_paid: data.committee_fee_paid ?? 0,
         status: "pending",
-      })
+      } as any)
       .select()
       .single();
     if (error) throw new Error(error.message);
