@@ -54,7 +54,7 @@ export function QrScanner({ onScan, onError }: Props) {
       // eslint-disable-next-line new-cap
       const fileScanner = new mod.Html5Qrcode(idRef.current);
       const result = await fileScanner.scanFile(file, true);
-      await fileScanner.clear().catch(() => {});
+      try { await fileScanner.clear(); } catch {}
       onScan(result);
     } catch (err: any) {
       onError?.(err?.message ?? "Could not read QR from image");
