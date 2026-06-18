@@ -19,7 +19,7 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [email, setEmail] = useState("");
   const [step, setStep] = useState<"email" | "linkSent">("email");
   const [loading, setLoading] = useState(false);
@@ -61,7 +61,7 @@ function AuthPage() {
     setStatus({ type: "info", title: t("sendingTitle"), message: t("sendingMsg") });
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { shouldCreateUser: false, emailRedirectTo: `${window.location.origin}/auth` },
+      options: { shouldCreateUser: false, emailRedirectTo: `${window.location.origin}/auth?lang=${encodeURIComponent(lang)}` },
     });
     setLoading(false);
     if (error) {

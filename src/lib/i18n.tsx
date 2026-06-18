@@ -151,7 +151,15 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("te");
 
   useEffect(() => {
-    const saved = (typeof window !== "undefined" && (localStorage.getItem("mbr_lang") as Lang)) || "te";
+    if (typeof window === "undefined") return;
+    const urlLang = new URLSearchParams(window.location.search).get("lang");
+    const valid = urlLang && LANG_OPTIONS.some((o) => o.code === urlLang) ? urlLang : null;
+    if (valid) {
+      localStorage.setItem("mbr_lang", valid);
+      setLangState(valid);
+      return;
+    }
+    const saved = (localStorage.getItem("mbr_lang") as Lang) || "te";
     setLangState(saved);
   }, []);
 
