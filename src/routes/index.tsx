@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Building2, Users } from "lucide-react";
+import { Building2, Users, IdCard } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import logo from "@/assets/mbr-logo.png.asset.json";
@@ -62,6 +62,20 @@ function Home() {
                 <div className="flex-1">
                   <h2 className="font-semibold text-lg text-white">{t("member")}</h2>
                   <p className="text-sm text-white/60 mt-1">{t("memberDesc")}</p>
+                </div>
+              </div>
+            </Card>
+          </Link>
+
+          <Link to="/member/pending">
+            <Card className="p-5 bg-white/5 border-white/10 backdrop-blur hover:border-[#ff8c28] hover:bg-white/10 transition-all cursor-pointer group">
+              <div className="flex items-start gap-4">
+                <div className="rounded-xl bg-[#ff8c28]/15 p-3 group-hover:bg-[#ff8c28]/25 transition-colors">
+                  <IdCard className="h-6 w-6 text-[#ff8c28]" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="font-semibold text-lg text-white">{t("viewIdCard")}</h2>
+                  <p className="text-sm text-white/60 mt-1">{t("viewIdCardDesc")}</p>
                 </div>
               </div>
             </Card>

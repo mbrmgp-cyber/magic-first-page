@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { MemberIdCard } from "@/components/MemberIdCard";
 import { LogOut, Clock, CheckCircle2, XCircle } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/member/pending")({
@@ -60,6 +61,12 @@ function Pending() {
           <h2 className="text-lg font-semibold">{(m as any).organizations?.name}</h2>
           <p className="text-sm text-muted-foreground">{msg}</p>
         </Card>
+        {status === "approved" && (
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-muted-foreground text-center">మీ ID కార్డ్</h3>
+            <MemberIdCard member={m as any} org={(m as any).organizations ?? null} />
+          </div>
+        )}
       </div>
     </div>
   );
