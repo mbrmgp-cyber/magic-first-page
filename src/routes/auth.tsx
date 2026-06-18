@@ -61,7 +61,7 @@ function AuthPage() {
     setStatus({ type: "info", title: t("sendingTitle"), message: t("sendingMsg") });
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { shouldCreateUser: false, emailRedirectTo: `${window.location.origin}/auth` },
+      options: { shouldCreateUser: false, emailRedirectTo: `${window.location.origin}/auth?lang=${encodeURIComponent(lang)}` },
     });
     setLoading(false);
     if (error) {
