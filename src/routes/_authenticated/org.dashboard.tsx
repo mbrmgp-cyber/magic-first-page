@@ -193,7 +193,6 @@ function Dashboard() {
               )}
             </div>
           </div>
-          <PresidentSignature org={org} onSaved={() => qc.invalidateQueries({ queryKey: ["my-org"] })} />
         </Card>
 
         {/* Menu grid */}
