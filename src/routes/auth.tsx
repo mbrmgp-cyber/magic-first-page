@@ -19,7 +19,7 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [email, setEmail] = useState("");
   const [step, setStep] = useState<"email" | "linkSent">("email");
   const [loading, setLoading] = useState(false);
