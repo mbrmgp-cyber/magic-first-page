@@ -49,6 +49,47 @@ const DICT: Dict = {
     en: "Login to view your approved member ID card",
     hi: "लॉगिन करके अपना सदस्य ID कार्ड देखें",
   },
+  authSubtitle: {
+    te: "Email login link తో సురక్షితంగా లాగిన్",
+    en: "Secure login with an email magic link",
+    hi: "ईमेल लॉगिन लिंक से सुरक्षित लॉगिन",
+  },
+  sendingLink: { te: "Login link పంపుతున్నాం…", en: "Sending login link…", hi: "लॉगिन लिंक भेजा जा रहा है…" },
+  sendLink: { te: "Login link పంపండి", en: "Send Login link", hi: "लॉगिन लिंक भेजें" },
+  sendingTitle: { te: "Login link పంపుతున్నాం", en: "Sending login link", hi: "लॉगिन लिंक भेजा जा रहा है" },
+  sendingMsg: {
+    te: "మీ Email కి secure login link పంపుతున్నాం.",
+    en: "Sending a secure login link to your email.",
+    hi: "आपके ईमेल पर सुरक्षित लॉगिन लिंक भेजा जा रहा है।",
+  },
+  sendFailedTitle: { te: "Login link పంపలేకపోయాం", en: "Could not send login link", hi: "लॉगिन लिंक नहीं भेज सके" },
+  noAccountErr: {
+    te: "ఈ Email కు ఖాతా లేదు. ముందుగా Society Registration చేయండి.",
+    en: "No account for this email. Please register your Society first.",
+    hi: "इस ईमेल पर कोई खाता नहीं है। पहले सोसाइटी पंजीकरण करें।",
+  },
+  linkSentTitle: { te: "Login link పంపబడింది", en: "Login link sent", hi: "लॉगिन लिंक भेज दिया गया" },
+  linkSentMsg: {
+    te: "మీ Email Inbox / Spam folder లో వచ్చిన email open చేసి, అందులో ఉన్న Log In button నొక్కండి. 6-అంకెల code రాదు.",
+    en: "Open the email in your Inbox / Spam folder and tap the Log In button. There is no 6-digit code.",
+    hi: "अपने Inbox / Spam folder में आए ईमेल को खोलें और Log In बटन दबाएँ। कोई 6-अंक का कोड नहीं आएगा।",
+  },
+  clickLoginInEmail: {
+    te: "Email లోని \"Log In\" button నొక్కండి",
+    en: "Tap the \"Log In\" button in your email",
+    hi: "ईमेल में \"Log In\" बटन दबाएँ",
+  },
+  oneTimeLink: {
+    te: "Code enter చేయాల్సిన అవసరం లేదు. Link ఒకసారి మాత్రమే పని చేస్తుంది.",
+    en: "No code to enter. The link works only once.",
+    hi: "कोई कोड दर्ज करने की आवश्यकता नहीं है। लिंक केवल एक बार काम करेगा।",
+  },
+  continueAfterClick: {
+    te: "Link క్లిక్ చేసిన తర్వాత కొనసాగండి",
+    en: "Continue after clicking the link",
+    hi: "लिंक क्लिक करने के बाद जारी रखें",
+  },
+  changeEmail: { te: "← Email మార్చండి", en: "← Change email", hi: "← ईमेल बदलें" },
 };
 
 // Indian languages – supported via Sanscript transliteration from Hindi (Devanagari)

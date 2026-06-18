@@ -58,7 +58,7 @@ function AuthPage() {
   async function sendOtp(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setStatus({ type: "info", title: "Login link పంపుతున్నాం", message: `${email} కి secure login link పంపుతున్నాం.` });
+    setStatus({ type: "info", title: t("sendingTitle"), message: t("sendingMsg") });
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: { shouldCreateUser: false, emailRedirectTo: `${window.location.origin}/auth` },
@@ -66,14 +66,14 @@ function AuthPage() {
     setLoading(false);
     if (error) {
       const msg = error.message.toLowerCase().includes("signups not allowed")
-        ? "ఈ Email కు ఖాతా లేదు. ముందుగా Society Registration చేయండి."
+        ? t("noAccountErr")
         : error.message;
-      setStatus({ type: "error", title: "Login link పంపలేకపోయాం", message: msg });
+      setStatus({ type: "error", title: t("sendFailedTitle"), message: msg });
       toast.error(msg);
       return;
     }
     setStep("linkSent");
-    setStatus({ type: "success", title: "Login link పంపబడింది", message: "మీ Email Inbox / Spam folder లో వచ్చిన email open చేసి, అందులో ఉన్న Log In button నొక్కండి. 6-అంకెల code రావదు." });
+    setStatus({ type: "success", title: t("linkSentTitle"), message: t("linkSentMsg") });
   }
 
   return (
@@ -91,7 +91,7 @@ function AuthPage() {
         <div className="text-center space-y-3">
           <img src={logo.url} alt="MBR" className="mx-auto w-24 rounded-md bg-black p-2" />
           <h1 className="text-2xl font-bold text-foreground">{t("login")}</h1>
-          <p className="text-sm text-muted-foreground">Email login link తో సురక్షితంగా లాగిన్</p>
+          <p className="text-sm text-muted-foreground">{t("authSubtitle")}</p>
           <div className="h-[3px] w-24 mx-auto rounded-full" style={{ background: "var(--gradient-saffron-green)" }} />
         </div>
 
@@ -120,21 +120,21 @@ function AuthPage() {
               </div>
             </div>
             <Button type="submit" className="w-full btn-saffron-green font-semibold border-0" disabled={loading}>
-              {loading ? "Login link పంపుతున్నాం…" : "Login link పంపండి"}
+              {loading ? t("sendingLink") : t("sendLink")}
             </Button>
           </form>
         ) : (
           <div className="space-y-4 text-center">
             <div className="rounded-md border border-green-600/30 bg-green-50 p-4 text-green-900">
               <ExternalLink className="mx-auto mb-2 h-6 w-6" />
-              <p className="font-semibold">Email లోని “Log In” button నొక్కండి</p>
-              <p className="mt-1 text-sm">Code enter చేయాల్సిన అవసరం లేదు. Link ఒకసారి మాత్రమే పని చేస్తుంది.</p>
+              <p className="font-semibold">{t("clickLoginInEmail")}</p>
+              <p className="mt-1 text-sm">{t("oneTimeLink")}</p>
             </div>
             <Button type="button" className="w-full btn-saffron-green font-semibold border-0" onClick={() => navigate({ to: "/" })}>
-              Link క్లిక్ చేసిన తర్వాత కొనసాగండి
+              {t("continueAfterClick")}
             </Button>
             <Button type="button" variant="ghost" size="sm" className="w-full" onClick={() => { setStep("email"); setStatus(null); }}>
-              ← Email మార్చండి
+              {t("changeEmail")}
             </Button>
           </div>
         )}

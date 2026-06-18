@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,13 +8,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Plus, Pencil, Trash2, X, Check, Crown, Users, Settings } from "lucide-react";
+import { ArrowLeft, Plus, Pencil, Trash2, X, Check, Crown, Users, Settings, Camera } from "lucide-react";
 import { toast } from "sonner";
 import {
   listCommittee, listEligibleMembers, appointCommitteeMember,
   updateCommitteeMember, removeCommitteeMember, updateTermYears,
   type CommitteeRole,
 } from "@/lib/committee.functions";
+import { getMyOrg, updateOrgPresident } from "@/lib/org.functions";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 type CM = {
   id: string;
@@ -246,6 +249,10 @@ function CommitteePage() {
         </Card>
 
         {data.canManage && (
+          <PresidentSignatureSection />
+        )}
+
+        {data.canManage && (
           <Button onClick={openAdd} className="w-full" style={{ background: "linear-gradient(90deg,#B85C00,#0B5C06)" }}>
             <Plus className="w-4 h-4 mr-1" /> సభ్యునిని నియమించండి
           </Button>
@@ -430,3 +437,95 @@ export const Route = createFileRoute("/_authenticated/org/committee")({
   head: () => ({ meta: [{ title: "కార్యవర్గం" }] }),
   component: CommitteePage,
 });
+
+function PresidentSignatureSection() {
+  const qc = useQueryClient();
+  const fetchOrg = useServerFn(getMyOrg);
+  const save = useServerFn(updateOrgPresident);
+  const orgQ = useQuery({ queryKey: ["my-org"], queryFn: () => fetchOrg() });
+  const org = orgQ.data?.org as any;
+  const [name, setName] = useState<string>("");
+  const [sigUrl, setSigUrl] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const inp = useRef<HTMLInputElement>(null);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    if (org && !hydrated) {
+      setName(org.president_name ?? "");
+      setSigUrl(org.president_signature_url ?? null);
+      setHydrated(true);
+    }
+  }, [org, hydrated]);
+
+  if (!org) return null;
+
+  async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { toast.error("ఫైల్ 2MB మించరాదు"); return; }
+    setBusy(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Login required");
+      const ext = file.name.split(".").pop() || "png";
+      const path = `${user.id}/president-sig/${crypto.randomUUID()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("org-documents").upload(path, file, { upsert: false });
+      if (upErr) throw upErr;
+      const { data: signed } = await supabase.storage.from("org-documents").createSignedUrl(path, 60 * 60 * 24 * 365);
+      const url = signed?.signedUrl;
+      if (!url) throw new Error("URL generation failed");
+      await save({ data: { president_signature_url: url } });
+      setSigUrl(url);
+      qc.invalidateQueries({ queryKey: ["my-org"] });
+      toast.success("సంతకం అప్‌లోడ్ అయింది");
+    } catch (e: any) { toast.error(e.message); }
+    finally { setBusy(false); }
+  }
+
+  async function saveName() {
+    if (name === (org.president_name ?? "")) return;
+    setBusy(true);
+    try {
+      await save({ data: { president_name: name || null } });
+      qc.invalidateQueries({ queryKey: ["my-org"] });
+      toast.success("ప్రెసిడెంట్ పేరు సేవ్ అయింది");
+    } catch (e: any) { toast.error(e.message); }
+    finally { setBusy(false); }
+  }
+
+  return (
+    <Card className="p-4 bg-white/95 backdrop-blur-xl shadow-xl border-white">
+      <div className="flex items-center gap-2 mb-3">
+        <Crown className="w-4 h-4 text-amber-600" />
+        <h3 className="text-sm font-semibold">అధ్యక్షుని పేరు & సంతకం (ID కార్డ్‌లో చూపబడుతుంది)</h3>
+      </div>
+      <input ref={inp} type="file" accept="image/png,image/jpeg" className="hidden" onChange={onPick} />
+      <div className="flex flex-wrap items-end gap-3">
+        <div className="flex-1 min-w-[160px]">
+          <label className="text-xs text-muted-foreground">ప్రెసిడెంట్ పేరు</label>
+          <Input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onBlur={saveName}
+            placeholder="ఉదా: M. భాస్కర్ రెడ్డి"
+            className="mt-1"
+          />
+        </div>
+        <div className="flex items-end gap-2">
+          <div className="h-12 w-28 rounded-md border bg-white flex items-center justify-center overflow-hidden">
+            {sigUrl ? (
+              <img src={sigUrl} alt="signature" className="h-full w-full object-contain" />
+            ) : (
+              <span className="text-[10px] text-muted-foreground">సంతకం</span>
+            )}
+          </div>
+          <Button size="sm" variant="outline" onClick={() => inp.current?.click()} disabled={busy}>
+            <Camera className="w-4 h-4 mr-1" /> {sigUrl ? "మార్చండి" : "అప్‌లోడ్"}
+          </Button>
+        </div>
+      </div>
+    </Card>
+  );
+}
