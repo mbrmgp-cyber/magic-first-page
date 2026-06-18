@@ -1,4 +1,4 @@
-import { useI18n, type Lang } from "@/lib/i18n";
+import { useI18n, LANG_OPTIONS } from "@/lib/i18n";
 import { Globe, Check } from "lucide-react";
 import {
   DropdownMenu,
@@ -7,15 +7,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const OPTIONS: { code: Lang; label: string; short: string }[] = [
-  { code: "te", label: "తెలుగు", short: "తె" },
-  { code: "en", label: "English", short: "EN" },
-  { code: "hi", label: "हिंदी", short: "हि" },
-];
-
 export function LanguageToggle({ className = "" }: { className?: string }) {
   const { lang, setLang, t } = useI18n();
-  const current = OPTIONS.find((o) => o.code === lang) ?? OPTIONS[0];
+  const current = LANG_OPTIONS.find((o) => o.code === lang) ?? LANG_OPTIONS[0];
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -25,8 +19,11 @@ export function LanguageToggle({ className = "" }: { className?: string }) {
         <span className="font-medium">{t("language")}</span>
         <span className="text-white/60">· {current.short}</span>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-[10rem]">
-        {OPTIONS.map((o) => (
+      <DropdownMenuContent
+        align="end"
+        className="min-w-[12rem] max-h-[70vh] overflow-y-auto"
+      >
+        {LANG_OPTIONS.map((o) => (
           <DropdownMenuItem
             key={o.code}
             onClick={() => setLang(o.code)}

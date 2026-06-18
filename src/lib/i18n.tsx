@@ -1,8 +1,10 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import Sanscript from "@indic-transliteration/sanscript";
 
-export type Lang = "te" | "en" | "hi";
+export type Lang = string;
 
-type Dict = Record<string, { te: string; en: string; hi: string }>;
+type Entry = { te: string; en: string; hi: string };
+type Dict = Record<string, Entry>;
 
 const DICT: Dict = {
   appTagline: {
@@ -49,7 +51,56 @@ const DICT: Dict = {
   },
 };
 
-const Ctx = createContext<{ lang: Lang; setLang: (l: Lang) => void; t: (k: keyof typeof DICT) => string }>({
+// Indian languages – supported via Sanscript transliteration from Hindi (Devanagari)
+// or Telugu source, with English fallback for non-Indic scripts.
+export const LANG_OPTIONS: { code: string; label: string; short: string; script: "te" | "hi" | "en" | string }[] = [
+  { code: "te", label: "తెలుగు", short: "తె", script: "te" },
+  { code: "en", label: "English", short: "EN", script: "en" },
+  { code: "hi", label: "हिन्दी", short: "हि", script: "hi" },
+  { code: "mr", label: "मराठी", short: "म", script: "devanagari" },
+  { code: "ne", label: "नेपाली", short: "ने", script: "devanagari" },
+  { code: "sa", label: "संस्कृतम्", short: "सं", script: "devanagari" },
+  { code: "bn", label: "বাংলা", short: "বা", script: "bengali" },
+  { code: "as", label: "অসমীয়া", short: "অ", script: "bengali" },
+  { code: "or", label: "ଓଡ଼ିଆ", short: "ଓ", script: "oriya" },
+  { code: "gu", label: "ગુજરાતી", short: "ગુ", script: "gujarati" },
+  { code: "pa", label: "ਪੰਜਾਬੀ", short: "ਪੰ", script: "gurmukhi" },
+  { code: "ta", label: "தமிழ்", short: "த", script: "tamil" },
+  { code: "kn", label: "ಕನ್ನಡ", short: "ಕ", script: "kannada" },
+  { code: "ml", label: "മലയാളം", short: "മ", script: "malayalam" },
+  { code: "ur", label: "اردو", short: "ار", script: "en" },
+];
+
+function translit(text: string, target: string): string {
+  if (!text) return text;
+  try {
+    const hasDeva = /[\u0900-\u097F]/.test(text);
+    const hasTelu = /[\u0C00-\u0C7F]/.test(text);
+    if (!hasDeva && !hasTelu) return text;
+    const from = hasDeva ? "devanagari" : "telugu";
+    if (target === from) return text;
+    return Sanscript.t(text, from, target);
+  } catch {
+    return text;
+  }
+}
+
+function resolve(entry: Entry | undefined, lang: string): string {
+  if (!entry) return "";
+  const opt = LANG_OPTIONS.find((o) => o.code === lang);
+  const script = opt?.script ?? "en";
+  if (script === "te") return entry.te;
+  if (script === "en") return entry.en;
+  if (script === "hi") return entry.hi;
+  // Indic script – transliterate from Hindi (Devanagari) source.
+  return translit(entry.hi, script);
+}
+
+const Ctx = createContext<{
+  lang: Lang;
+  setLang: (l: Lang) => void;
+  t: (k: keyof typeof DICT) => string;
+}>({
   lang: "te",
   setLang: () => {},
   t: (k) => DICT[k]?.te ?? String(k),
@@ -68,8 +119,16 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     if (typeof window !== "undefined") localStorage.setItem("mbr_lang", l);
   };
 
-  const t = (k: keyof typeof DICT) => DICT[k]?.[lang] ?? String(k);
-  return <Ctx.Provider value={{ lang, setLang, t }}>{children}</Ctx.Provider>;
+  const value = useMemo(
+    () => ({
+      lang,
+      setLang,
+      t: (k: keyof typeof DICT) => resolve(DICT[k], lang),
+    }),
+    [lang]
+  );
+
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
 export const useI18n = () => useContext(Ctx);
