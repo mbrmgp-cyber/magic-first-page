@@ -249,6 +249,10 @@ function CommitteePage() {
         </Card>
 
         {data.canManage && (
+          <PresidentSignatureSection />
+        )}
+
+        {data.canManage && (
           <Button onClick={openAdd} className="w-full" style={{ background: "linear-gradient(90deg,#B85C00,#0B5C06)" }}>
             <Plus className="w-4 h-4 mr-1" /> సభ్యునిని నియమించండి
           </Button>
