@@ -41,6 +41,12 @@ const DICT: Dict = {
     hi: "खाता नहीं है? पंजीकरण करें",
   },
   language: { te: "భాష", en: "Language", hi: "भाषा" },
+  viewIdCard: { te: "నా ID కార్డ్ చూడండి", en: "View my ID Card", hi: "मेरा ID कार्ड देखें" },
+  viewIdCardDesc: {
+    te: "Login చేసి approved సభ్యుని ID card చూసుకోండి",
+    en: "Login to view your approved member ID card",
+    hi: "लॉगिन करके अपना सदस्य ID कार्ड देखें",
+  },
 };
 
 const Ctx = createContext<{ lang: Lang; setLang: (l: Lang) => void; t: (k: keyof typeof DICT) => string }>({
