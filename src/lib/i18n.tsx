@@ -43,6 +43,17 @@ const DICT: Dict = {
     hi: "खाता नहीं है? पंजीकरण करें",
   },
   language: { te: "భాష", en: "Language", hi: "भाषा" },
+  welcome: { te: "స్వాగతం", en: "Welcome", hi: "स्वागत" },
+  loginWithEmail: {
+    te: "ఈమెయిల్ తో లాగిన్ (ఇప్పటికే రిజిస్టర్ అయ్యారా?)",
+    en: "Login with Email (Already registered?)",
+    hi: "ईमेल से लॉगिन (पहले से पंजीकृत?)",
+  },
+  loginWithEmailDesc: {
+    te: "మీ Email ఎంటర్ చేయండి, login link మీ Email కి వస్తుంది",
+    en: "Enter your email — a secure login link will be sent",
+    hi: "अपना ईमेल दर्ज करें — एक सुरक्षित लॉगिन लिंक भेजा जाएगा",
+  },
   viewIdCard: { te: "నా ID కార్డ్ చూడండి", en: "View my ID Card", hi: "मेरा ID कार्ड देखें" },
   viewIdCardDesc: {
     te: "Login చేసి approved సభ్యుని ID card చూసుకోండి",
