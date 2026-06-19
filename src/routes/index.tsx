@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Building2, Users, IdCard } from "lucide-react";
+import { Building2, Users, LogIn } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import logo from "@/assets/mbr-logo.png.asset.json";
@@ -20,6 +19,12 @@ function Home() {
   const { t } = useI18n();
   return (
     <div className="min-h-screen relative flex flex-col items-center justify-center p-6 overflow-hidden bg-[radial-gradient(ellipse_at_top,_#1a1a2e_0%,_#0a0a14_60%,_#000_100%)]">
+      <div className="absolute top-4 left-4 z-10">
+        <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/40 backdrop-blur px-3 py-1.5 text-xs text-white/90">
+          <span aria-hidden>🙏</span>
+          <span className="font-medium">{t("welcome")}</span>
+        </span>
+      </div>
       <div className="absolute top-4 right-4 z-10">
         <LanguageToggle />
       </div>
@@ -67,26 +72,18 @@ function Home() {
             </Card>
           </Link>
 
-          <Link to="/member/pending">
+          <Link to="/auth">
             <Card className="p-5 bg-white/5 border-white/10 backdrop-blur hover:border-[#ff8c28] hover:bg-white/10 transition-all cursor-pointer group">
               <div className="flex items-start gap-4">
                 <div className="rounded-xl bg-[#ff8c28]/15 p-3 group-hover:bg-[#ff8c28]/25 transition-colors">
-                  <IdCard className="h-6 w-6 text-[#ff8c28]" />
+                  <LogIn className="h-6 w-6 text-[#ff8c28]" />
                 </div>
                 <div className="flex-1">
-                  <h2 className="font-semibold text-lg text-white">{t("viewIdCard")}</h2>
-                  <p className="text-sm text-white/60 mt-1">{t("viewIdCardDesc")}</p>
+                  <h2 className="font-semibold text-lg text-white">{t("loginWithEmail")}</h2>
+                  <p className="text-sm text-white/60 mt-1">{t("loginWithEmailDesc")}</p>
                 </div>
               </div>
             </Card>
-          </Link>
-        </div>
-
-        <div className="text-center">
-          <Link to="/auth">
-            <Button variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10">
-              {t("haveAccount")}
-            </Button>
           </Link>
         </div>
       </div>
