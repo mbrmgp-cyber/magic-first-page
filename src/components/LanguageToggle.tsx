@@ -14,10 +14,10 @@ export function LanguageToggle({ className = "" }: { className?: string }) {
     <DropdownMenu>
       <DropdownMenuTrigger
         className={`inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/40 backdrop-blur px-3 py-1.5 text-xs text-white/90 hover:bg-white/10 transition-colors cursor-pointer ${className}`}
+        aria-label={t("language")}
       >
         <Globe className="h-4 w-4 text-[#ff8c28]" />
-        <span className="font-medium">{t("language")}</span>
-        <span className="text-white/60">· {current.short}</span>
+        <span className="font-medium">{current.label}</span>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
