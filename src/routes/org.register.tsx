@@ -171,24 +171,24 @@ function OrgRegister() {
 
   if (step === "done" && result) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 bg-tricolor">
-        <Card className="w-full max-w-md p-6 space-y-5 text-center bg-white/92 backdrop-blur-xl shadow-2xl border-white">
+      <div className="min-h-screen flex items-center justify-center p-6 bg-black">
+        <Card className="w-full max-w-md p-6 space-y-5 text-center bg-zinc-950 border-zinc-800 shadow-[0_0_60px_rgba(255,140,40,0.15)] text-white">
           <div>
-            <h1 className="text-2xl font-bold">{result.org.name}</h1>
-            <p className="text-sm text-muted-foreground mt-1">{t("registrationDoneTitle")}</p>
+            <h1 className="text-2xl font-bold text-white">{result.org.name}</h1>
+            <p className="text-sm text-zinc-400 mt-1">{t("registrationDoneTitle")}</p>
           </div>
-          <Alert className="text-left border-amber-300 bg-amber-50">
-            <Info className="h-4 w-4 text-amber-700" />
-            <AlertTitle className="text-amber-900">{t("underReviewTitle")}</AlertTitle>
-            <AlertDescription className="text-amber-800 text-xs">
+          <Alert className="text-left border-[#ff8c28]/40 bg-[#ff8c28]/10">
+            <Info className="h-4 w-4 text-[#ff8c28]" />
+            <AlertTitle className="text-[#ffb072]">{t("underReviewTitle")}</AlertTitle>
+            <AlertDescription className="text-zinc-300 text-xs">
               {t("underReviewMsg")}
             </AlertDescription>
           </Alert>
-          <div className="flex justify-center opacity-60">
-            <img src={result.qrDataUrl} alt="Org QR" className="w-48 h-48 border rounded-lg" />
+          <div className="flex justify-center">
+            <img src={result.qrDataUrl} alt="Org QR" className="w-48 h-48 border border-zinc-700 rounded-lg bg-white p-2" />
           </div>
-          <div className="font-mono text-sm tracking-wider bg-muted py-2 rounded">{result.org.org_code}</div>
-          <Button onClick={() => navigate({ to: "/auth" })} className="w-full">
+          <div className="font-mono text-sm tracking-wider bg-zinc-900 border border-zinc-800 text-[#ff8c28] py-2 rounded">{result.org.org_code}</div>
+          <Button onClick={() => navigate({ to: "/auth" })} className="w-full bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white font-semibold border-0 shadow-[0_0_24px_rgba(255,140,40,0.45)]">
             {t("goToLogin")}
           </Button>
         </Card>
