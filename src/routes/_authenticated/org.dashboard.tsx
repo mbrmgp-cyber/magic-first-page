@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import {
   LogOut, BookOpen, Users, Briefcase, Calendar, IdCard, Wallet,
   MessageSquare, QrCode, Camera, Download, RefreshCw, Settings, AlertTriangle,
-  Upload, ShieldAlert, FileDown, CheckCircle2,
+  Upload, ShieldAlert, FileDown, CheckCircle2, Vote,
 } from "lucide-react";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 
@@ -28,15 +28,16 @@ const MENU = [
   { to: "/org/designs", label: "ID కార్డులు, మెమెంటోలు, లెటర్‌ప్యాడ్, స్టాంప్ డిజైన్", icon: IdCard },
   { to: "/org/accounts", label: "అకౌంట్స్", icon: Wallet },
   { to: "/org/chat", label: "సభ్యులతో చాటింగ్", icon: MessageSquare },
+  { to: "/org/elections", label: "Board Elections / బోర్డు ఎన్నికలు", icon: Vote },
 ] as const;
 
-function MetricCard({ label, sub, value }: { label: string; sub: string; value: string }) {
+function MetricItem({ label, sub, value }: { label: string; sub: string; value: string }) {
   return (
-    <Card className="p-3 bg-zinc-950 border-zinc-800 shadow-[0_0_30px_rgba(255,140,40,0.08)]">
-      <p className="text-[10px] uppercase tracking-wider text-[#ff8c28] font-semibold leading-tight">{label}</p>
-      <p className="text-[10px] text-zinc-400 leading-tight">{sub}</p>
-      <p className="mt-2 text-lg font-bold text-white">{value}</p>
-    </Card>
+    <div className="flex-1 min-w-0 px-2">
+      <p className="text-[10px] uppercase tracking-wider text-[#ff8c28] font-semibold leading-tight truncate">{label}</p>
+      <p className="text-[10px] text-zinc-400 leading-tight truncate">{sub}</p>
+      <p className="mt-1.5 text-base md:text-lg font-bold text-white">{value}</p>
+    </div>
   );
 }
 
@@ -276,12 +277,18 @@ function Dashboard() {
           </div>
         </Card>
 
-        {/* Financial metrics */}
-        <div className="grid grid-cols-3 gap-2">
-          <MetricCard label="Total Funds" sub="మొత్తం నిధులు" value="₹ 0" />
-          <MetricCard label="Loans Disbursed" sub="మార్కెట్ అప్పులు" value="₹ 0" />
-          <MetricCard label="Interest Collected" sub="వచ్చిన వడ్డీ" value="₹ 0" />
-        </div>
+        {/* Accounts Summary — unified card */}
+        <Card className="p-4 bg-zinc-950 border-zinc-800 shadow-[0_0_30px_rgba(255,140,40,0.1)]">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-white">Accounts Summary</h2>
+            <span className="text-xs text-zinc-400">అకౌంట్స్ వివరాలు</span>
+          </div>
+          <div className="flex items-stretch divide-x divide-zinc-800">
+            <MetricItem label="Total Funds" sub="మొత్తం నిధులు" value="₹ 0" />
+            <MetricItem label="Loans Disbursed" sub="మార్కెట్ అప్పులు" value="₹ 0" />
+            <MetricItem label="Interest Collected" sub="వచ్చిన వడ్డీ" value="₹ 0" />
+          </div>
+        </Card>
 
         {/* Menu 2-col grid */}
         <div className="grid grid-cols-2 gap-3">
