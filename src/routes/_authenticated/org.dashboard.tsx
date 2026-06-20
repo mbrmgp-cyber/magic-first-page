@@ -28,6 +28,7 @@ const MENU = [
   { to: "/org/designs", label: "ID కార్డులు, మెమెంటోలు, లెటర్‌ప్యాడ్, స్టాంప్ డిజైన్", icon: IdCard },
   { to: "/org/accounts", label: "అకౌంట్స్", icon: Wallet },
   { to: "/org/chat", label: "సభ్యులతో చాటింగ్", icon: MessageSquare },
+  { to: "/org/elections", label: "Board Elections / బోర్డు ఎన్నికలు", icon: Vote },
 ] as const;
 
 function MetricCard({ label, sub, value }: { label: string; sub: string; value: string }) {
