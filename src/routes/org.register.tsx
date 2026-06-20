@@ -254,12 +254,8 @@ function OrgRegister() {
           />
 
           <div className="space-y-2">
-            <Label>{t("orgEmail")} *</Label>
+            <Label>{isGov ? t("orgEmail") : t("committeeEmail")} *</Label>
             <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
-          </div>
-          <div className="space-y-2">
-            <Label>{t("passwordLabel")} *</Label>
-            <Input type="password" minLength={6} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
           </div>
           <div className="space-y-2">
             <Label>{t("orgPhone")}</Label>
