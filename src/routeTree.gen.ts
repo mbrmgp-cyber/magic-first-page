@@ -18,6 +18,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedOrgRulesRouteImport } from './routes/_authenticated/org.rules'
 import { Route as AuthenticatedOrgMembersRouteImport } from './routes/_authenticated/org.members'
 import { Route as AuthenticatedOrgEventsRouteImport } from './routes/_authenticated/org.events'
+import { Route as AuthenticatedOrgElectionsRouteImport } from './routes/_authenticated/org.elections'
 import { Route as AuthenticatedOrgDesignsRouteImport } from './routes/_authenticated/org.designs'
 import { Route as AuthenticatedOrgDashboardRouteImport } from './routes/_authenticated/org.dashboard'
 import { Route as AuthenticatedOrgCommitteeRouteImport } from './routes/_authenticated/org.committee'
@@ -69,6 +70,12 @@ const AuthenticatedOrgEventsRoute = AuthenticatedOrgEventsRouteImport.update({
   path: '/org/events',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedOrgElectionsRoute =
+  AuthenticatedOrgElectionsRouteImport.update({
+    id: '/org/elections',
+    path: '/org/elections',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedOrgDesignsRoute = AuthenticatedOrgDesignsRouteImport.update({
   id: '/org/designs',
   path: '/org/designs',
@@ -116,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/org/committee': typeof AuthenticatedOrgCommitteeRoute
   '/org/dashboard': typeof AuthenticatedOrgDashboardRoute
   '/org/designs': typeof AuthenticatedOrgDesignsRoute
+  '/org/elections': typeof AuthenticatedOrgElectionsRoute
   '/org/events': typeof AuthenticatedOrgEventsRoute
   '/org/members': typeof AuthenticatedOrgMembersRoute
   '/org/rules': typeof AuthenticatedOrgRulesRoute
@@ -132,6 +140,7 @@ export interface FileRoutesByTo {
   '/org/committee': typeof AuthenticatedOrgCommitteeRoute
   '/org/dashboard': typeof AuthenticatedOrgDashboardRoute
   '/org/designs': typeof AuthenticatedOrgDesignsRoute
+  '/org/elections': typeof AuthenticatedOrgElectionsRoute
   '/org/events': typeof AuthenticatedOrgEventsRoute
   '/org/members': typeof AuthenticatedOrgMembersRoute
   '/org/rules': typeof AuthenticatedOrgRulesRoute
@@ -150,6 +159,7 @@ export interface FileRoutesById {
   '/_authenticated/org/committee': typeof AuthenticatedOrgCommitteeRoute
   '/_authenticated/org/dashboard': typeof AuthenticatedOrgDashboardRoute
   '/_authenticated/org/designs': typeof AuthenticatedOrgDesignsRoute
+  '/_authenticated/org/elections': typeof AuthenticatedOrgElectionsRoute
   '/_authenticated/org/events': typeof AuthenticatedOrgEventsRoute
   '/_authenticated/org/members': typeof AuthenticatedOrgMembersRoute
   '/_authenticated/org/rules': typeof AuthenticatedOrgRulesRoute
@@ -168,6 +178,7 @@ export interface FileRouteTypes {
     | '/org/committee'
     | '/org/dashboard'
     | '/org/designs'
+    | '/org/elections'
     | '/org/events'
     | '/org/members'
     | '/org/rules'
@@ -184,6 +195,7 @@ export interface FileRouteTypes {
     | '/org/committee'
     | '/org/dashboard'
     | '/org/designs'
+    | '/org/elections'
     | '/org/events'
     | '/org/members'
     | '/org/rules'
@@ -201,6 +213,7 @@ export interface FileRouteTypes {
     | '/_authenticated/org/committee'
     | '/_authenticated/org/dashboard'
     | '/_authenticated/org/designs'
+    | '/_authenticated/org/elections'
     | '/_authenticated/org/events'
     | '/_authenticated/org/members'
     | '/_authenticated/org/rules'
@@ -279,6 +292,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOrgEventsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/org/elections': {
+      id: '/_authenticated/org/elections'
+      path: '/org/elections'
+      fullPath: '/org/elections'
+      preLoaderRoute: typeof AuthenticatedOrgElectionsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/org/designs': {
       id: '/_authenticated/org/designs'
       path: '/org/designs'
@@ -332,6 +352,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedOrgCommitteeRoute: typeof AuthenticatedOrgCommitteeRoute
   AuthenticatedOrgDashboardRoute: typeof AuthenticatedOrgDashboardRoute
   AuthenticatedOrgDesignsRoute: typeof AuthenticatedOrgDesignsRoute
+  AuthenticatedOrgElectionsRoute: typeof AuthenticatedOrgElectionsRoute
   AuthenticatedOrgEventsRoute: typeof AuthenticatedOrgEventsRoute
   AuthenticatedOrgMembersRoute: typeof AuthenticatedOrgMembersRoute
   AuthenticatedOrgRulesRoute: typeof AuthenticatedOrgRulesRoute
@@ -345,6 +366,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedOrgCommitteeRoute: AuthenticatedOrgCommitteeRoute,
   AuthenticatedOrgDashboardRoute: AuthenticatedOrgDashboardRoute,
   AuthenticatedOrgDesignsRoute: AuthenticatedOrgDesignsRoute,
+  AuthenticatedOrgElectionsRoute: AuthenticatedOrgElectionsRoute,
   AuthenticatedOrgEventsRoute: AuthenticatedOrgEventsRoute,
   AuthenticatedOrgMembersRoute: AuthenticatedOrgMembersRoute,
   AuthenticatedOrgRulesRoute: AuthenticatedOrgRulesRoute,
