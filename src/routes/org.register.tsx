@@ -341,7 +341,7 @@ function OrgRegister() {
                 </Button>
               </div>
               {founders.map((f, i) => (
-                <div key={i} className="space-y-2 p-3 border rounded-md relative bg-card">
+                <div key={i} className="space-y-2 p-3 border border-zinc-800 rounded-md relative bg-zinc-900 [&_label]:text-zinc-100">
                   {founders.length > 1 && (
                     <button type="button" onClick={() => setFounders(founders.filter((_, j) => j !== i))}
                       className="absolute top-1 right-1 text-muted-foreground hover:text-destructive">
