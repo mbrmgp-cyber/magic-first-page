@@ -68,7 +68,7 @@ function FilePicker({ label, value, onChange, accept = "image/*" }: {
               }
             }}
           />
-          <div className="cursor-pointer inline-flex items-center justify-center gap-2 h-9 px-4 rounded-md border bg-background hover:bg-accent text-sm font-medium w-full">
+          <div className="cursor-pointer inline-flex items-center justify-center gap-2 h-9 px-4 rounded-md border border-zinc-300 bg-white hover:bg-zinc-100 text-sm font-semibold text-zinc-900 w-full">
             {busy ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
             {value ? t("changeFile") : t("uploadFromGallery")}
           </div>
