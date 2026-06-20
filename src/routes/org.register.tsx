@@ -87,10 +87,12 @@ function OrgRegister() {
   const [status, setStatus] = useState<{ type: "info" | "success" | "error"; title: string; message: string } | null>(null);
   const [result, setResult] = useState<{ org: { name: string; org_code: string }; qrDataUrl: string } | null>(null);
   const [isGov, setIsGov] = useState<boolean>(true);
+  const [aadhaarOtpOpen, setAadhaarOtpOpen] = useState(false);
+  const [aadhaarOtpValue, setAadhaarOtpValue] = useState("");
+  const [aadhaarVerified, setAadhaarVerified] = useState(false);
   const [form, setForm] = useState({
     name: "",
     email: "",
-    password: "",
     phone: "",
     slogan: "",
     logo_url: "",
