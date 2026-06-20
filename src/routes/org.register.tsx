@@ -217,20 +217,20 @@ function OrgRegister() {
           )}
 
           {/* Government registered toggle */}
-          <div className="space-y-2 p-3 rounded-md border bg-muted/30">
-            <Label className="text-sm font-semibold">{t("govRegisteredQ")}</Label>
+          <div className="space-y-2 p-3 rounded-md border border-zinc-800 bg-zinc-900/60">
+            <Label className="text-sm font-semibold text-zinc-100">{t("govRegisteredQ")}</Label>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => setIsGov(true)}
-                className={`h-10 rounded-md border text-sm font-medium transition-colors ${isGov ? "bg-[#ff8c28] text-white border-[#ff8c28]" : "bg-background hover:bg-accent"}`}
+                className={`h-10 rounded-md border text-sm font-medium transition-colors ${isGov ? "bg-[#ff8c28] text-white border-[#ff8c28] shadow-[0_0_18px_rgba(255,140,40,0.45)]" : "bg-zinc-900 text-zinc-200 border-zinc-700 hover:bg-zinc-800"}`}
               >
                 {t("yes")}
               </button>
               <button
                 type="button"
                 onClick={() => setIsGov(false)}
-                className={`h-10 rounded-md border text-sm font-medium transition-colors ${!isGov ? "bg-[#ff8c28] text-white border-[#ff8c28]" : "bg-background hover:bg-accent"}`}
+                className={`h-10 rounded-md border text-sm font-medium transition-colors ${!isGov ? "bg-[#ff8c28] text-white border-[#ff8c28] shadow-[0_0_18px_rgba(255,140,40,0.45)]" : "bg-zinc-900 text-zinc-200 border-zinc-700 hover:bg-zinc-800"}`}
               >
                 {t("no")}
               </button>
