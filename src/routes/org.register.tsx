@@ -275,14 +275,14 @@ function OrgRegister() {
                 <Input value={form.bank_ifsc} onChange={(e) => setForm({ ...form, bank_ifsc: e.target.value })} />
               </div>
 
-              <div className="space-y-3 p-3 rounded-md border bg-muted/30">
-                <Label className="text-sm font-semibold">{t("govRegNumber")}</Label>
+              <div className="space-y-3 p-3 rounded-md border border-zinc-800 bg-zinc-900/60">
+                <Label className="text-sm font-semibold text-zinc-100">{t("govRegNumber")}</Label>
                 <Input
                   value={form.gov_reg_number}
                   onChange={(e) => setForm({ ...form, gov_reg_number: e.target.value })}
                   placeholder="Reg No / Society / Trust No"
                 />
-                <div className="text-center text-xs text-muted-foreground">{t("orRule")}</div>
+                <div className="text-center text-xs text-zinc-500">{t("orRule")}</div>
                 <FilePicker
                   label={t("govQrUpload")}
                   value={form.gov_qr_url}
