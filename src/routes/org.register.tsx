@@ -9,8 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Download, RefreshCw, Plus, X, Upload, Image as ImageIcon, AlertCircle, CheckCircle2, Info } from "lucide-react";
+import { RefreshCw, Plus, X, Upload, Image as ImageIcon, AlertCircle, CheckCircle2, Info } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useI18n } from "@/lib/i18n";
+import { LanguageToggle } from "@/components/LanguageToggle";
 
 export const Route = createFileRoute("/org/register")({
   head: () => ({ meta: [{ title: "Register Organization — MBR App" }] }),
@@ -31,6 +33,7 @@ async function uploadFile(file: File, folder: string): Promise<string> {
 function FilePicker({ label, value, onChange, accept = "image/*" }: {
   label: string; value?: string; onChange: (url: string) => void; accept?: string;
 }) {
+  const { t } = useI18n();
   const [busy, setBusy] = useState(false);
   return (
     <div className="space-y-2">
@@ -65,7 +68,7 @@ function FilePicker({ label, value, onChange, accept = "image/*" }: {
           />
           <div className="cursor-pointer inline-flex items-center justify-center gap-2 h-9 px-4 rounded-md border bg-background hover:bg-accent text-sm font-medium w-full">
             {busy ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-            {value ? "మార్చండి" : "గ్యాలరీ నుండి ఎంచుకోండి"}
+            {value ? t("changeFile") : t("uploadFromGallery")}
           </div>
         </label>
       </div>
@@ -76,19 +79,28 @@ function FilePicker({ label, value, onChange, accept = "image/*" }: {
 function OrgRegister() {
   const navigate = useNavigate();
   const register = useServerFn(registerOrganization);
+  const { t } = useI18n();
   const [step, setStep] = useState<"form" | "done">("form");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<{ type: "info" | "success" | "error"; title: string; message: string } | null>(null);
   const [result, setResult] = useState<{ org: { name: string; org_code: string }; qrDataUrl: string } | null>(null);
+  const [isGov, setIsGov] = useState<boolean>(true);
   const [form, setForm] = useState({
-    name: "చిట్వేల్ హెల్ప్ లైన్ సొసైటీ",
+    name: "",
     email: "",
     password: "",
     phone: "",
-    slogan: "మానవసేవే మాధవసేవ",
+    slogan: "",
     logo_url: "",
-    gov_reg_number: "356/16",
+    gov_reg_number: "",
     gov_qr_url: "",
+    registration_certificate_url: "",
+    pan_card_url: "",
+    bank_account_number: "",
+    bank_ifsc: "",
+    admin_name: "",
+    admin_designation: "",
+    admin_aadhaar_url: "",
   });
   const [founders, setFounders] = useState<{ name: string; address: string; aadhaar_url: string }[]>([
     { name: "", address: "", aadhaar_url: "" },
@@ -97,11 +109,10 @@ function OrgRegister() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setStatus({ type: "info", title: "రిజిస్ట్రేషన్ జరుగుతోంది", message: "దయచేసి కొద్దిసేపు ఆగండి. మీ ఖాతా మరియు సొసైటీ వివరాలు సేవ్ చేస్తున్నాం." });
+    setStatus({ type: "info", title: t("registering"), message: t("pleaseWait") });
     try {
       const { data: existing } = await supabase.auth.getUser();
       if (!existing.user) {
-        setStatus({ type: "info", title: "ఖాతా సృష్టిస్తున్నాం", message: "మీ Email/Password తో ఖాతా సిద్ధం చేస్తున్నాం." });
         const { error: suErr } = await supabase.auth.signUp({
           email: form.email,
           password: form.password,
@@ -110,25 +121,30 @@ function OrgRegister() {
         if (suErr) {
           const alreadyRegistered = suErr.message.toLowerCase().includes("already registered") || suErr.message.toLowerCase().includes("already been registered");
           if (!alreadyRegistered) throw suErr;
-          setStatus({ type: "info", title: "ఖాతా ఇప్పటికే ఉంది", message: "ఇప్పుడు అదే Email/Password తో లాగిన్ చేసి సొసైటీ వివరాలు సేవ్ చేస్తున్నాం." });
           const { error: siErr } = await supabase.auth.signInWithPassword({ email: form.email, password: form.password });
           if (siErr) throw siErr;
         }
       }
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        setStatus({ type: "info", title: "లాగిన్ చేస్తున్నాం", message: "ఖాతా సిద్ధమైన వెంటనే ఆటోమేటిక్‌గా లాగిన్ చేస్తున్నాం." });
         const { error: siErr } = await supabase.auth.signInWithPassword({ email: form.email, password: form.password });
         if (siErr) throw siErr;
       }
-      setStatus({ type: "info", title: "సొసైటీ వివరాలు సేవ్ చేస్తున్నాం", message: "రిజిస్ట్రేషన్ పూర్తయిన తర్వాత QR Code కనిపిస్తుంది." });
       const res = await register({ data: {
         name: form.name,
         email: form.email,
         phone: form.phone || undefined,
         slogan: form.slogan || undefined,
         logo_url: form.logo_url || undefined,
-        gov_reg_number: form.gov_reg_number || form.gov_qr_url || undefined,
+        is_gov_registered: isGov,
+        gov_reg_number: isGov ? (form.gov_reg_number || form.gov_qr_url || undefined) : undefined,
+        registration_certificate_url: isGov ? (form.registration_certificate_url || undefined) : undefined,
+        pan_card_url: isGov ? (form.pan_card_url || undefined) : undefined,
+        bank_account_number: form.bank_account_number || undefined,
+        bank_ifsc: isGov ? (form.bank_ifsc || undefined) : undefined,
+        admin_name: form.admin_name || undefined,
+        admin_designation: form.admin_designation || undefined,
+        admin_aadhaar_url: form.admin_aadhaar_url || undefined,
         founders: founders.filter((f) => f.name.trim()).map((f) => ({
           name: f.name.trim(),
           address: f.address.trim() || undefined,
@@ -138,16 +154,10 @@ function OrgRegister() {
 
       setResult(res);
       setStep("done");
-      setStatus({ type: "success", title: "రిజిస్ట్రేషన్ పూర్తయింది", message: "మీ సొసైటీ QR Code తయారైంది. ఇప్పుడు Dashboard కి వెళ్లవచ్చు." });
-      toast.success("Organization registered!");
+      toast.success("Registered!");
     } catch (e: any) {
-      const rawMessage = String(e?.message ?? "Failed");
-      const message = rawMessage.toLowerCase().includes("email not confirmed")
-        ? "Email confirm చేసిన తర్వాత, అదే Email/Password తో Login పేజీలో లాగిన్ అవ్వండి. Confirm link వేరే browser లో open అయితే ఇక్కడ మళ్లీ Login చేయాలి."
-        : rawMessage.toLowerCase().includes("already registered") || rawMessage.toLowerCase().includes("already been registered")
-        ? "ఈ Email తో ఖాతా ఇప్పటికే ఉంది. Home లో ‘ఇప్పటికే ఖాతా ఉందా?’ ద్వారా Login చేయండి."
-        : rawMessage;
-      setStatus({ type: "error", title: "రిజిస్ట్రేషన్ ఆగిపోయింది", message });
+      const message = String(e?.message ?? "Failed");
+      setStatus({ type: "error", title: "Error", message });
       toast.error(message);
     } finally {
       setLoading(false);
@@ -160,39 +170,38 @@ function OrgRegister() {
         <Card className="w-full max-w-md p-6 space-y-5 text-center bg-white/92 backdrop-blur-xl shadow-2xl border-white">
           <div>
             <h1 className="text-2xl font-bold">{result.org.name}</h1>
-            <p className="text-sm text-muted-foreground mt-1">Registration submitted</p>
+            <p className="text-sm text-muted-foreground mt-1">{t("registrationDoneTitle")}</p>
           </div>
           <Alert className="text-left border-amber-300 bg-amber-50">
             <Info className="h-4 w-4 text-amber-700" />
-            <AlertTitle className="text-amber-900">MBR సమీక్షలో ఉంది</AlertTitle>
+            <AlertTitle className="text-amber-900">{t("underReviewTitle")}</AlertTitle>
             <AlertDescription className="text-amber-800 text-xs">
-              MBR admin మీ Logo, Government Registration, Founders ID ధృవీకరించిన తర్వాత Email ద్వారా approval వస్తుంది. తరువాత OTP తో login చేసి Dashboard access చేయండి.
+              {t("underReviewMsg")}
             </AlertDescription>
           </Alert>
           <div className="flex justify-center opacity-60">
             <img src={result.qrDataUrl} alt="Org QR" className="w-48 h-48 border rounded-lg" />
           </div>
           <div className="font-mono text-sm tracking-wider bg-muted py-2 rounded">{result.org.org_code}</div>
-          <p className="text-xs text-muted-foreground">
-            Approval తర్వాత ఈ QR Code activate అవుతుంది.
-          </p>
           <Button onClick={() => navigate({ to: "/auth" })} className="w-full">
-            Login పేజీకి వెళ్ళండి
+            {t("goToLogin")}
           </Button>
         </Card>
       </div>
     );
   }
 
-
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-tricolor">
       <Card className="w-full max-w-md p-6 space-y-6 bg-white/92 backdrop-blur-xl shadow-2xl border-white">
-
-        <div>
-          <h1 className="text-2xl font-bold">Organization Register</h1>
-          <p className="text-sm text-muted-foreground">వివరాలు పూరించండి</p>
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            <h1 className="text-2xl font-bold">{t("orgRegisterTitle")}</h1>
+            <p className="text-sm text-muted-foreground">{t("orgRegisterSubtitle")}</p>
+          </div>
+          <LanguageToggle />
         </div>
+
         <form onSubmit={onSubmit} className="space-y-4">
           {status && (
             <Alert variant={status.type === "error" ? "destructive" : "default"} className={status.type === "success" ? "border-green-600/40 bg-green-50 text-green-900" : ""}>
@@ -201,84 +210,149 @@ function OrgRegister() {
               <AlertDescription>{status.message}</AlertDescription>
             </Alert>
           )}
+
+          {/* Government registered toggle */}
+          <div className="space-y-2 p-3 rounded-md border bg-muted/30">
+            <Label className="text-sm font-semibold">{t("govRegisteredQ")}</Label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setIsGov(true)}
+                className={`h-10 rounded-md border text-sm font-medium transition-colors ${isGov ? "bg-[#ff8c28] text-white border-[#ff8c28]" : "bg-background hover:bg-accent"}`}
+              >
+                {t("yes")}
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsGov(false)}
+                className={`h-10 rounded-md border text-sm font-medium transition-colors ${!isGov ? "bg-[#ff8c28] text-white border-[#ff8c28]" : "bg-background hover:bg-accent"}`}
+              >
+                {t("no")}
+              </button>
+            </div>
+          </div>
+
           <div className="space-y-2">
-            <Label>Org Name *</Label>
+            <Label>{isGov ? t("orgName") : t("committeeName")} *</Label>
             <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
           </div>
+
           <div className="space-y-2">
-            <Label>Email *</Label>
-            <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
-          </div>
-          <div className="space-y-2">
-            <Label>Password *</Label>
-            <Input type="password" minLength={6} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
-          </div>
-          <div className="space-y-2">
-            <Label>Phone</Label>
-            <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-          </div>
-          <div className="space-y-2">
-            <Label>Slogan</Label>
+            <Label>{t("orgSlogan")}</Label>
             <Textarea value={form.slogan} onChange={(e) => setForm({ ...form, slogan: e.target.value })} rows={2} />
           </div>
 
           <FilePicker
-            label="Organization Logo"
+            label={isGov ? t("orgLogo") : t("committeeLogo")}
             value={form.logo_url}
             onChange={(url) => setForm({ ...form, logo_url: url })}
           />
 
-          <div className="space-y-3 p-3 rounded-md border bg-muted/30">
-            <Label className="text-sm font-semibold">Government Registration</Label>
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Registration Number</Label>
-              <Input
-                value={form.gov_reg_number}
-                onChange={(e) => setForm({ ...form, gov_reg_number: e.target.value })}
-                placeholder="Reg No / Society / Trust No"
-              />
-            </div>
-            <div className="text-center text-xs text-muted-foreground">— లేదా —</div>
-            <FilePicker
-              label="Government QR Code"
-              value={form.gov_qr_url}
-              onChange={(url) => setForm({ ...form, gov_qr_url: url })}
-            />
+          <div className="space-y-2">
+            <Label>{t("orgEmail")} *</Label>
+            <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+          </div>
+          <div className="space-y-2">
+            <Label>{t("passwordLabel")} *</Label>
+            <Input type="password" minLength={6} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
+          </div>
+          <div className="space-y-2">
+            <Label>{t("orgPhone")}</Label>
+            <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
           </div>
 
+          {/* Bank account — both flows */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label>వ్యవస్థాపకులు (Founders)</Label>
-              <Button type="button" size="sm" variant="outline"
-                onClick={() => setFounders([...founders, { name: "", address: "", aadhaar_url: "" }])}>
-                <Plus className="h-3 w-3 mr-1" />Add
-              </Button>
-            </div>
-            {founders.map((f, i) => (
-              <div key={i} className="space-y-2 p-3 border rounded-md relative bg-card">
-                {founders.length > 1 && (
-                  <button type="button" onClick={() => setFounders(founders.filter((_, j) => j !== i))}
-                    className="absolute top-1 right-1 text-muted-foreground hover:text-destructive">
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-                <Input placeholder="Name" value={f.name}
-                  onChange={(e) => setFounders(founders.map((x, j) => j === i ? { ...x, name: e.target.value } : x))} />
-                <Input placeholder="Address" value={f.address}
-                  onChange={(e) => setFounders(founders.map((x, j) => j === i ? { ...x, address: e.target.value } : x))} />
+            <Label>{t("bankAccount")}</Label>
+            <Input value={form.bank_account_number} onChange={(e) => setForm({ ...form, bank_account_number: e.target.value })} />
+          </div>
+
+          {isGov && (
+            <>
+              <div className="space-y-2">
+                <Label>{t("bankIfsc")}</Label>
+                <Input value={form.bank_ifsc} onChange={(e) => setForm({ ...form, bank_ifsc: e.target.value })} />
+              </div>
+
+              <div className="space-y-3 p-3 rounded-md border bg-muted/30">
+                <Label className="text-sm font-semibold">{t("govRegNumber")}</Label>
+                <Input
+                  value={form.gov_reg_number}
+                  onChange={(e) => setForm({ ...form, gov_reg_number: e.target.value })}
+                  placeholder="Reg No / Society / Trust No"
+                />
+                <div className="text-center text-xs text-muted-foreground">{t("orRule")}</div>
                 <FilePicker
-                  label="Aadhaar Card"
-                  value={f.aadhaar_url}
-                  onChange={(url) => setFounders(founders.map((x, j) => j === i ? { ...x, aadhaar_url: url } : x))}
+                  label={t("govQrUpload")}
+                  value={form.gov_qr_url}
+                  onChange={(url) => setForm({ ...form, gov_qr_url: url })}
                 />
               </div>
-            ))}
+
+              <FilePicker
+                label={t("registrationCertificate")}
+                value={form.registration_certificate_url}
+                onChange={(url) => setForm({ ...form, registration_certificate_url: url })}
+              />
+
+              <FilePicker
+                label={t("panCard")}
+                value={form.pan_card_url}
+                onChange={(url) => setForm({ ...form, pan_card_url: url })}
+              />
+            </>
+          )}
+
+          {/* Admin */}
+          <div className="space-y-2">
+            <Label>{t("adminName")}</Label>
+            <Input value={form.admin_name} onChange={(e) => setForm({ ...form, admin_name: e.target.value })} />
           </div>
+          <div className="space-y-2">
+            <Label>{t("adminDesignation")}</Label>
+            <Input value={form.admin_designation} onChange={(e) => setForm({ ...form, admin_designation: e.target.value })} />
+          </div>
+          <FilePicker
+            label={t("adminAadhaar")}
+            value={form.admin_aadhaar_url}
+            onChange={(url) => setForm({ ...form, admin_aadhaar_url: url })}
+          />
 
-          <Button type="submit" className="w-full btn-saffron-green font-semibold border-0" disabled={loading}>
-            {loading ? <><RefreshCw className="h-4 w-4 animate-spin" /> Registering...</> : "Register & Generate QR"}
+          {/* Founders only when gov registered */}
+          {isGov && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>{t("foundersHeading")}</Label>
+                <Button type="button" size="sm" variant="outline"
+                  onClick={() => setFounders([...founders, { name: "", address: "", aadhaar_url: "" }])}>
+                  <Plus className="h-3 w-3 mr-1" />{t("add")}
+                </Button>
+              </div>
+              {founders.map((f, i) => (
+                <div key={i} className="space-y-2 p-3 border rounded-md relative bg-card">
+                  {founders.length > 1 && (
+                    <button type="button" onClick={() => setFounders(founders.filter((_, j) => j !== i))}
+                      className="absolute top-1 right-1 text-muted-foreground hover:text-destructive">
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                  <Input placeholder={t("founderNamePh")} value={f.name}
+                    onChange={(e) => setFounders(founders.map((x, j) => j === i ? { ...x, name: e.target.value } : x))} />
+                  <Input placeholder={t("founderAddrPh")} value={f.address}
+                    onChange={(e) => setFounders(founders.map((x, j) => j === i ? { ...x, address: e.target.value } : x))} />
+                  <FilePicker
+                    label={t("aadhaarCard")}
+                    value={f.aadhaar_url}
+                    onChange={(url) => setFounders(founders.map((x, j) => j === i ? { ...x, aadhaar_url: url } : x))}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          <Button type="submit" className="w-full bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white font-semibold border-0" disabled={loading}>
+            {loading ? <><RefreshCw className="h-4 w-4 animate-spin" /> {t("registering")}</> : `➔ ${t("submitForVerification")}`}
           </Button>
-
         </form>
       </Card>
     </div>

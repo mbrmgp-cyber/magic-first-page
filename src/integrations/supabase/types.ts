@@ -347,68 +347,92 @@ export type Database = {
       }
       organizations: {
         Row: {
+          admin_aadhaar_url: string | null
+          admin_designation: string | null
+          admin_name: string | null
           admin_user_id: string
           approval_notes: string | null
           approval_status: Database["public"]["Enums"]["org_approval_status"]
           approved_at: string | null
           approved_by: string | null
+          bank_account_number: string | null
+          bank_ifsc: string | null
           committee_term_years: number
           created_at: string
           email: string
           founders: Json
           gov_reg_number: string | null
           id: string
+          is_gov_registered: boolean
           letter_code: string | null
           logo_url: string | null
           name: string
           org_code: string
+          pan_card_url: string | null
           phone: string | null
           president_name: string | null
           president_signature_url: string | null
+          registration_certificate_url: string | null
           slogan: string | null
           updated_at: string
         }
         Insert: {
+          admin_aadhaar_url?: string | null
+          admin_designation?: string | null
+          admin_name?: string | null
           admin_user_id: string
           approval_notes?: string | null
           approval_status?: Database["public"]["Enums"]["org_approval_status"]
           approved_at?: string | null
           approved_by?: string | null
+          bank_account_number?: string | null
+          bank_ifsc?: string | null
           committee_term_years?: number
           created_at?: string
           email: string
           founders?: Json
           gov_reg_number?: string | null
           id?: string
+          is_gov_registered?: boolean
           letter_code?: string | null
           logo_url?: string | null
           name: string
           org_code: string
+          pan_card_url?: string | null
           phone?: string | null
           president_name?: string | null
           president_signature_url?: string | null
+          registration_certificate_url?: string | null
           slogan?: string | null
           updated_at?: string
         }
         Update: {
+          admin_aadhaar_url?: string | null
+          admin_designation?: string | null
+          admin_name?: string | null
           admin_user_id?: string
           approval_notes?: string | null
           approval_status?: Database["public"]["Enums"]["org_approval_status"]
           approved_at?: string | null
           approved_by?: string | null
+          bank_account_number?: string | null
+          bank_ifsc?: string | null
           committee_term_years?: number
           created_at?: string
           email?: string
           founders?: Json
           gov_reg_number?: string | null
           id?: string
+          is_gov_registered?: boolean
           letter_code?: string | null
           logo_url?: string | null
           name?: string
           org_code?: string
+          pan_card_url?: string | null
           phone?: string | null
           president_name?: string | null
           president_signature_url?: string | null
+          registration_certificate_url?: string | null
           slogan?: string | null
           updated_at?: string
         }
