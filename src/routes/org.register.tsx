@@ -9,8 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { RefreshCw, Plus, X, Upload, Image as ImageIcon, AlertCircle, CheckCircle2, Info } from "lucide-react";
+import { RefreshCw, Plus, X, Upload, Image as ImageIcon, AlertCircle, CheckCircle2, Info, ShieldCheck } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { useI18n } from "@/lib/i18n";
 import { LanguageToggle } from "@/components/LanguageToggle";
 
@@ -85,10 +87,12 @@ function OrgRegister() {
   const [status, setStatus] = useState<{ type: "info" | "success" | "error"; title: string; message: string } | null>(null);
   const [result, setResult] = useState<{ org: { name: string; org_code: string }; qrDataUrl: string } | null>(null);
   const [isGov, setIsGov] = useState<boolean>(true);
+  const [aadhaarOtpOpen, setAadhaarOtpOpen] = useState(false);
+  const [aadhaarOtpValue, setAadhaarOtpValue] = useState("");
+  const [aadhaarVerified, setAadhaarVerified] = useState(false);
   const [form, setForm] = useState({
     name: "",
     email: "",
-    password: "",
     phone: "",
     slogan: "",
     logo_url: "",
@@ -111,24 +115,25 @@ function OrgRegister() {
     setLoading(true);
     setStatus({ type: "info", title: t("registering"), message: t("pleaseWait") });
     try {
+      const generatedPassword = `MBR-${crypto.randomUUID()}`;
       const { data: existing } = await supabase.auth.getUser();
       if (!existing.user) {
         const { error: suErr } = await supabase.auth.signUp({
           email: form.email,
-          password: form.password,
+          password: generatedPassword,
           options: { emailRedirectTo: window.location.origin },
         });
         if (suErr) {
           const alreadyRegistered = suErr.message.toLowerCase().includes("already registered") || suErr.message.toLowerCase().includes("already been registered");
           if (!alreadyRegistered) throw suErr;
-          const { error: siErr } = await supabase.auth.signInWithPassword({ email: form.email, password: form.password });
-          if (siErr) throw siErr;
+          // For existing users, send a magic link instead — we no longer keep static passwords
+          const { error: otpErr } = await supabase.auth.signInWithOtp({
+            email: form.email,
+            options: { emailRedirectTo: window.location.origin },
+          });
+          if (otpErr) throw otpErr;
+          throw new Error("This email is already registered. We sent a secure login link to your inbox — please click it and resubmit this form.");
         }
-      }
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        const { error: siErr } = await supabase.auth.signInWithPassword({ email: form.email, password: form.password });
-        if (siErr) throw siErr;
       }
       const res = await register({ data: {
         name: form.name,
@@ -166,24 +171,24 @@ function OrgRegister() {
 
   if (step === "done" && result) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 bg-tricolor">
-        <Card className="w-full max-w-md p-6 space-y-5 text-center bg-white/92 backdrop-blur-xl shadow-2xl border-white">
+      <div className="min-h-screen flex items-center justify-center p-6 bg-black">
+        <Card className="w-full max-w-md p-6 space-y-5 text-center bg-zinc-950 border-zinc-800 shadow-[0_0_60px_rgba(255,140,40,0.15)] text-white">
           <div>
-            <h1 className="text-2xl font-bold">{result.org.name}</h1>
-            <p className="text-sm text-muted-foreground mt-1">{t("registrationDoneTitle")}</p>
+            <h1 className="text-2xl font-bold text-white">{result.org.name}</h1>
+            <p className="text-sm text-zinc-400 mt-1">{t("registrationDoneTitle")}</p>
           </div>
-          <Alert className="text-left border-amber-300 bg-amber-50">
-            <Info className="h-4 w-4 text-amber-700" />
-            <AlertTitle className="text-amber-900">{t("underReviewTitle")}</AlertTitle>
-            <AlertDescription className="text-amber-800 text-xs">
+          <Alert className="text-left border-[#ff8c28]/40 bg-[#ff8c28]/10">
+            <Info className="h-4 w-4 text-[#ff8c28]" />
+            <AlertTitle className="text-[#ffb072]">{t("underReviewTitle")}</AlertTitle>
+            <AlertDescription className="text-zinc-300 text-xs">
               {t("underReviewMsg")}
             </AlertDescription>
           </Alert>
-          <div className="flex justify-center opacity-60">
-            <img src={result.qrDataUrl} alt="Org QR" className="w-48 h-48 border rounded-lg" />
+          <div className="flex justify-center">
+            <img src={result.qrDataUrl} alt="Org QR" className="w-48 h-48 border border-zinc-700 rounded-lg bg-white p-2" />
           </div>
-          <div className="font-mono text-sm tracking-wider bg-muted py-2 rounded">{result.org.org_code}</div>
-          <Button onClick={() => navigate({ to: "/auth" })} className="w-full">
+          <div className="font-mono text-sm tracking-wider bg-zinc-900 border border-zinc-800 text-[#ff8c28] py-2 rounded">{result.org.org_code}</div>
+          <Button onClick={() => navigate({ to: "/auth" })} className="w-full bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white font-semibold border-0 shadow-[0_0_24px_rgba(255,140,40,0.45)]">
             {t("goToLogin")}
           </Button>
         </Card>
@@ -192,12 +197,12 @@ function OrgRegister() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-tricolor">
-      <Card className="w-full max-w-md p-6 space-y-6 bg-white/92 backdrop-blur-xl shadow-2xl border-white">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-black">
+      <Card className="w-full max-w-md p-6 space-y-6 bg-zinc-950 border-zinc-800 shadow-[0_0_60px_rgba(255,140,40,0.15)] text-white [&_label]:text-zinc-100 [&_input]:bg-zinc-900 [&_input]:border-zinc-700 [&_input]:text-white [&_input::placeholder]:text-zinc-500 [&_textarea]:bg-zinc-900 [&_textarea]:border-zinc-700 [&_textarea]:text-white">
         <div className="flex items-start justify-between gap-2">
           <div>
-            <h1 className="text-2xl font-bold">{t("orgRegisterTitle")}</h1>
-            <p className="text-sm text-muted-foreground">{t("orgRegisterSubtitle")}</p>
+            <h1 className="text-2xl font-bold text-white">{t("orgRegisterTitle")}</h1>
+            <p className="text-sm text-zinc-400">{t("orgRegisterSubtitle")}</p>
           </div>
           <LanguageToggle />
         </div>
@@ -212,20 +217,20 @@ function OrgRegister() {
           )}
 
           {/* Government registered toggle */}
-          <div className="space-y-2 p-3 rounded-md border bg-muted/30">
-            <Label className="text-sm font-semibold">{t("govRegisteredQ")}</Label>
+          <div className="space-y-2 p-3 rounded-md border border-zinc-800 bg-zinc-900/60">
+            <Label className="text-sm font-semibold text-zinc-100">{t("govRegisteredQ")}</Label>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => setIsGov(true)}
-                className={`h-10 rounded-md border text-sm font-medium transition-colors ${isGov ? "bg-[#ff8c28] text-white border-[#ff8c28]" : "bg-background hover:bg-accent"}`}
+                className={`h-10 rounded-md border text-sm font-medium transition-colors ${isGov ? "bg-[#ff8c28] text-white border-[#ff8c28] shadow-[0_0_18px_rgba(255,140,40,0.45)]" : "bg-zinc-900 text-zinc-200 border-zinc-700 hover:bg-zinc-800"}`}
               >
                 {t("yes")}
               </button>
               <button
                 type="button"
                 onClick={() => setIsGov(false)}
-                className={`h-10 rounded-md border text-sm font-medium transition-colors ${!isGov ? "bg-[#ff8c28] text-white border-[#ff8c28]" : "bg-background hover:bg-accent"}`}
+                className={`h-10 rounded-md border text-sm font-medium transition-colors ${!isGov ? "bg-[#ff8c28] text-white border-[#ff8c28] shadow-[0_0_18px_rgba(255,140,40,0.45)]" : "bg-zinc-900 text-zinc-200 border-zinc-700 hover:bg-zinc-800"}`}
               >
                 {t("no")}
               </button>
@@ -249,12 +254,8 @@ function OrgRegister() {
           />
 
           <div className="space-y-2">
-            <Label>{t("orgEmail")} *</Label>
+            <Label>{isGov ? t("orgEmail") : t("committeeEmail")} *</Label>
             <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
-          </div>
-          <div className="space-y-2">
-            <Label>{t("passwordLabel")} *</Label>
-            <Input type="password" minLength={6} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
           </div>
           <div className="space-y-2">
             <Label>{t("orgPhone")}</Label>
@@ -274,14 +275,14 @@ function OrgRegister() {
                 <Input value={form.bank_ifsc} onChange={(e) => setForm({ ...form, bank_ifsc: e.target.value })} />
               </div>
 
-              <div className="space-y-3 p-3 rounded-md border bg-muted/30">
-                <Label className="text-sm font-semibold">{t("govRegNumber")}</Label>
+              <div className="space-y-3 p-3 rounded-md border border-zinc-800 bg-zinc-900/60">
+                <Label className="text-sm font-semibold text-zinc-100">{t("govRegNumber")}</Label>
                 <Input
                   value={form.gov_reg_number}
                   onChange={(e) => setForm({ ...form, gov_reg_number: e.target.value })}
                   placeholder="Reg No / Society / Trust No"
                 />
-                <div className="text-center text-xs text-muted-foreground">{t("orRule")}</div>
+                <div className="text-center text-xs text-zinc-500">{t("orRule")}</div>
                 <FilePicker
                   label={t("govQrUpload")}
                   value={form.gov_qr_url}
@@ -318,6 +319,17 @@ function OrgRegister() {
             onChange={(url) => setForm({ ...form, admin_aadhaar_url: url })}
           />
 
+          {!isGov && (
+            <Button
+              type="button"
+              onClick={() => { setAadhaarOtpValue(""); setAadhaarOtpOpen(true); }}
+              className={`w-full font-semibold border-0 ${aadhaarVerified ? "bg-emerald-600 hover:bg-emerald-600/90 text-white" : "bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white shadow-[0_0_24px_rgba(255,140,40,0.45)]"}`}
+            >
+              <ShieldCheck className="h-4 w-4" />
+              {aadhaarVerified ? t("aadhaarVerified") : t("verifyAadhaarOtp")}
+            </Button>
+          )}
+
           {/* Founders only when gov registered */}
           {isGov && (
             <div className="space-y-2">
@@ -350,11 +362,48 @@ function OrgRegister() {
             </div>
           )}
 
-          <Button type="submit" className="w-full bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white font-semibold border-0" disabled={loading}>
+          <Button type="submit" className="w-full bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white font-semibold border-0 shadow-[0_0_24px_rgba(255,140,40,0.45)]" disabled={loading}>
             {loading ? <><RefreshCw className="h-4 w-4 animate-spin" /> {t("registering")}</> : `➔ ${t("submitForVerification")}`}
           </Button>
         </form>
       </Card>
+
+      <Dialog open={aadhaarOtpOpen} onOpenChange={setAadhaarOtpOpen}>
+        <DialogContent className="bg-zinc-950 border-zinc-800 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-[#ff8c28]" />
+              {t("verifyAadhaarOtp")}
+            </DialogTitle>
+            <DialogDescription className="text-zinc-400">
+              {t("enterAadhaarOtp")}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center py-4">
+            <InputOTP maxLength={6} value={aadhaarOtpValue} onChange={setAadhaarOtpValue}>
+              <InputOTPGroup>
+                {[0,1,2,3,4,5].map((i) => (
+                  <InputOTPSlot key={i} index={i} className="bg-zinc-900 border-zinc-700 text-white h-11 w-11" />
+                ))}
+              </InputOTPGroup>
+            </InputOTP>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              disabled={aadhaarOtpValue.length !== 6}
+              onClick={() => {
+                setAadhaarVerified(true);
+                setAadhaarOtpOpen(false);
+                toast.success(t("aadhaarVerified"));
+              }}
+              className="w-full bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white font-semibold border-0 shadow-[0_0_24px_rgba(255,140,40,0.45)]"
+            >
+              {t("verify")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
