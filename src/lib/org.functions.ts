@@ -20,6 +20,14 @@ export const registerOrganization = createServerFn({ method: "POST" })
     slogan?: string;
     logo_url?: string;
     gov_reg_number?: string;
+    is_gov_registered?: boolean;
+    registration_certificate_url?: string;
+    pan_card_url?: string;
+    bank_account_number?: string;
+    bank_ifsc?: string;
+    admin_name?: string;
+    admin_designation?: string;
+    admin_aadhaar_url?: string;
     founders?: { name: string; address?: string; aadhaar_url?: string }[];
   }) => d)
   .handler(async ({ data, context }) => {
@@ -35,9 +43,17 @@ export const registerOrganization = createServerFn({ method: "POST" })
         slogan: data.slogan ?? null,
         logo_url: data.logo_url ?? null,
         gov_reg_number: data.gov_reg_number ?? null,
+        is_gov_registered: data.is_gov_registered ?? true,
+        registration_certificate_url: data.registration_certificate_url ?? null,
+        pan_card_url: data.pan_card_url ?? null,
+        bank_account_number: data.bank_account_number ?? null,
+        bank_ifsc: data.bank_ifsc ?? null,
+        admin_name: data.admin_name ?? null,
+        admin_designation: data.admin_designation ?? null,
+        admin_aadhaar_url: data.admin_aadhaar_url ?? null,
         founders: (data.founders ?? []).filter((f) => f.name?.trim()),
         org_code,
-      })
+      } as any)
       .select()
       .single();
     if (error) throw new Error(error.message);
