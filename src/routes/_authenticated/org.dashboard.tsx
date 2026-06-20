@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import {
   LogOut, BookOpen, Users, Briefcase, Calendar, IdCard, Wallet,
   MessageSquare, QrCode, Camera, Download, RefreshCw, Settings, AlertTriangle,
-  Upload, ShieldAlert, FileDown, CheckCircle2,
+  Upload, ShieldAlert, FileDown, CheckCircle2, Vote,
 } from "lucide-react";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 
