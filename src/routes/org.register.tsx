@@ -115,24 +115,25 @@ function OrgRegister() {
     setLoading(true);
     setStatus({ type: "info", title: t("registering"), message: t("pleaseWait") });
     try {
+      const generatedPassword = `MBR-${crypto.randomUUID()}`;
       const { data: existing } = await supabase.auth.getUser();
       if (!existing.user) {
         const { error: suErr } = await supabase.auth.signUp({
           email: form.email,
-          password: form.password,
+          password: generatedPassword,
           options: { emailRedirectTo: window.location.origin },
         });
         if (suErr) {
           const alreadyRegistered = suErr.message.toLowerCase().includes("already registered") || suErr.message.toLowerCase().includes("already been registered");
           if (!alreadyRegistered) throw suErr;
-          const { error: siErr } = await supabase.auth.signInWithPassword({ email: form.email, password: form.password });
-          if (siErr) throw siErr;
+          // For existing users, send a magic link instead — we no longer keep static passwords
+          const { error: otpErr } = await supabase.auth.signInWithOtp({
+            email: form.email,
+            options: { emailRedirectTo: window.location.origin },
+          });
+          if (otpErr) throw otpErr;
+          throw new Error("This email is already registered. We sent a secure login link to your inbox — please click it and resubmit this form.");
         }
-      }
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        const { error: siErr } = await supabase.auth.signInWithPassword({ email: form.email, password: form.password });
-        if (siErr) throw siErr;
       }
       const res = await register({ data: {
         name: form.name,
