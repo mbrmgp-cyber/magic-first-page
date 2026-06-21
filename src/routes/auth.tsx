@@ -76,22 +76,18 @@ function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center p-6 overflow-hidden bg-tricolor">
-      <div className="absolute top-4 right-4 z-10">
-        <LanguageToggle />
-      </div>
-
+    <div className="min-h-screen relative flex items-center justify-center p-6 overflow-hidden bg-black">
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -top-32 -left-32 h-72 w-72 rounded-full bg-[#FF9933]/30 blur-3xl" />
-        <div className="absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-[#138808]/25 blur-3xl" />
+        <div className="absolute -top-32 -left-32 h-72 w-72 rounded-full bg-[#ff8c28]/15 blur-3xl" />
+        <div className="absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-[#ff8c28]/10 blur-3xl" />
       </div>
 
-      <Card className="w-full max-w-md p-6 space-y-6 bg-white/90 backdrop-blur-xl border-white shadow-2xl relative z-[1]">
+      <Card className="w-full max-w-md p-6 space-y-6 bg-zinc-950 border-zinc-800 shadow-[0_0_60px_rgba(255,140,40,0.15)] text-white relative z-[1]">
         <div className="text-center space-y-3">
           <img src={logo.url} alt="MBR" className="mx-auto w-24 rounded-md bg-black p-2" />
-          <h1 className="text-2xl font-bold text-foreground">{t("login")}</h1>
-          <p className="text-sm text-muted-foreground">{t("authSubtitle")}</p>
-          <div className="h-[3px] w-24 mx-auto rounded-full" style={{ background: "var(--gradient-saffron-green)" }} />
+          <h1 className="text-2xl font-bold text-white">{t("login")}</h1>
+          <p className="text-sm text-zinc-400">{t("authSubtitle")}</p>
+          <div className="h-[3px] w-24 mx-auto rounded-full bg-[#ff8c28]" />
         </div>
 
         {status && (
