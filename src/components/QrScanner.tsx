@@ -42,7 +42,7 @@ export function QrScanner({ onScan, onError }: Props) {
     return () => {
       cancelled = true;
       const s = scannerRef.current;
-      if (s) s.stop().catch(() => {}).then(() => s.clear?.().catch(() => {}));
+      if (s) s.stop().catch(() => {}).then(() => { try { s.clear?.(); } catch {} });
     };
   }, [onScan, onError]);
 
