@@ -203,13 +203,11 @@ function OrgRegister() {
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-black">
       <Card className="w-full max-w-md p-6 space-y-6 bg-zinc-950 border-zinc-800 shadow-[0_0_60px_rgba(255,140,40,0.15)] text-white [&_label]:text-zinc-100 [&_input]:bg-zinc-900 [&_input]:border-zinc-700 [&_input]:text-white [&_input::placeholder]:text-zinc-500 [&_textarea]:bg-zinc-900 [&_textarea]:border-zinc-700 [&_textarea]:text-white">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <h1 className="text-2xl font-bold text-white">{t("orgRegisterTitle")}</h1>
-            <p className="text-sm text-zinc-400">{t("orgRegisterSubtitle")}</p>
-          </div>
-          <LanguageToggle />
+        <div>
+          <h1 className="text-2xl font-bold text-white">{t("orgRegisterTitle")}</h1>
+          <p className="text-sm text-zinc-400">{t("orgRegisterSubtitle")}</p>
         </div>
+
 
         <form onSubmit={onSubmit} className="space-y-4">
           {status && (
