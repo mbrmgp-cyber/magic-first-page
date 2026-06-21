@@ -1,14 +1,14 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { validateOrgCode, submitMemberRequest } from "@/lib/org.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { QrCode, ScanLine, RefreshCw, Camera, Plus, CheckCircle2, ShieldCheck } from "lucide-react";
-import { QrScanner } from "@/components/QrScanner";
+import { Image as ImageIcon, QrCode, ScanLine, RefreshCw, Camera, Plus, CheckCircle2, ShieldCheck } from "lucide-react";
+import { decodeQrFromFile, QrScanner } from "@/components/QrScanner";
 import { localizeText, useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/member/register")({
@@ -37,6 +37,8 @@ function MemberRegister() {
   const [orgId, setOrgId] = useState<string | null>(null);
   const [orgName, setOrgName] = useState("");
   const [loading, setLoading] = useState(false);
+  const qrFileRef = useRef<HTMLInputElement>(null);
+  const qrHostId = useRef(`qr-file-${Math.random().toString(36).slice(2)}`);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [showBank, setShowBank] = useState(false);
@@ -71,6 +73,21 @@ function MemberRegister() {
     if (f.size > 5 * 1024 * 1024) { toast.error(lt("Photo must be under 5MB", "ఫోటో 5MB లోపు ఉండాలి")); return; }
     setPhotoFile(f);
     setPhotoPreview(URL.createObjectURL(f));
+  }
+
+  async function onQrImage(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setLoading(true);
+    try {
+      const text = await decodeQrFromFile(f, qrHostId.current, false);
+      await verifyCode(text);
+    } catch (err: any) {
+      toast.error(err?.message ?? lt("Could not read QR from image", "చిత్రం నుండి QR చదవలేకపోయాం"));
+    } finally {
+      setLoading(false);
+      if (qrFileRef.current) qrFileRef.current.value = "";
+    }
   }
 
   function fileToDataUrl(file: File) {
@@ -280,6 +297,13 @@ function MemberRegister() {
         <Button onClick={() => setStage("scan")}
           className="w-full bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white shadow-[0_0_24px_rgba(255,140,40,0.45)]">
           <ScanLine className="h-4 w-4 mr-2" /> {lt("Scan QR with Camera", "కెమెరాతో QR స్కాన్")}
+        </Button>
+        <div id={qrHostId.current} className="hidden" />
+        <input ref={qrFileRef} type="file" accept="image/*" className="hidden" onChange={onQrImage} />
+        <Button type="button" onClick={() => qrFileRef.current?.click()} disabled={loading}
+          className="w-full bg-zinc-900 hover:bg-zinc-800 border border-[#ff8c28]/60 text-[#ff8c28] font-semibold">
+          {loading ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <ImageIcon className="h-4 w-4 mr-2" />}
+          {lt("Upload QR from Gallery", "గ్యాలరీ నుండి QR అప్లోడ్")}
         </Button>
         <div className="space-y-2">
           <Label className="text-zinc-200">{lt("Or type the code", "లేదా కోడ్ టైప్ చేయండి")}</Label>
