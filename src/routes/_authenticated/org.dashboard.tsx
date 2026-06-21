@@ -14,6 +14,7 @@ import {
   Upload, ShieldAlert, FileDown, CheckCircle2, Vote,
 } from "lucide-react";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
+import { localizeText, transliterateText, useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/org/dashboard")({
   head: () => ({ meta: [{ title: "Society Dashboard — MBR App" }] }),
@@ -21,14 +22,14 @@ export const Route = createFileRoute("/_authenticated/org/dashboard")({
 });
 
 const MENU = [
-  { to: "/org/rules", label: "సొసైటీ రూల్స్ & హిస్టరీ", icon: BookOpen },
-  { to: "/org/members", label: "సభ్యుల వివరాలు & నమోదు", icon: Users },
-  { to: "/org/committee", label: "కార్యవర్గ కమిటీ వివరాలు", icon: Briefcase },
-  { to: "/org/events", label: "కార్యక్రమాలు, సమావేశాలు, నిర్ణయాలు", icon: Calendar },
-  { to: "/org/designs", label: "ID కార్డులు, మెమెంటోలు, లెటర్‌ప్యాడ్, స్టాంప్ డిజైన్", icon: IdCard },
-  { to: "/org/accounts", label: "అకౌంట్స్", icon: Wallet },
-  { to: "/org/chat", label: "సభ్యులతో చాటింగ్", icon: MessageSquare },
-  { to: "/org/elections", label: "Board Elections / బోర్డు ఎన్నికలు", icon: Vote },
+  { to: "/org/rules", en: "Society Rules & History", te: "సొసైటీ రూల్స్ & హిస్టరీ", icon: BookOpen },
+  { to: "/org/members", en: "Members & Registration", te: "సభ్యుల వివరాలు & నమోదు", icon: Users },
+  { to: "/org/committee", en: "Executive Committee", te: "కార్యవర్గ కమిటీ వివరాలు", icon: Briefcase },
+  { to: "/org/events", en: "Events, Meetings, Decisions", te: "కార్యక్రమాలు, సమావేశాలు, నిర్ణయాలు", icon: Calendar },
+  { to: "/org/designs", en: "ID Cards, Mementos, Letterhead, Stamp Design", te: "ID కార్డులు, మెమెంటోలు, లెటర్‌ప్యాడ్, స్టాంప్ డిజైన్", icon: IdCard },
+  { to: "/org/accounts", en: "Accounts", te: "అకౌంట్స్", icon: Wallet },
+  { to: "/org/chat", en: "Member Chat", te: "సభ్యులతో చాటింగ్", icon: MessageSquare },
+  { to: "/org/elections", en: "Board Elections", te: "బోర్డు ఎన్నికలు", icon: Vote },
 ] as const;
 
 function MetricItem({ label, sub, value }: { label: string; sub: string; value: string }) {
