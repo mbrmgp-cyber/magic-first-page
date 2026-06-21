@@ -18,7 +18,7 @@ export const Route = createFileRoute("/")({
 function Home() {
   const { t } = useI18n();
   return (
-    <div className="min-h-screen relative flex flex-col items-center justify-center p-6 overflow-hidden bg-[radial-gradient(ellipse_at_top,_#1a1a2e_0%,_#0a0a14_60%,_#000_100%)]">
+    <div className="min-h-screen relative flex flex-col items-center justify-center p-6 overflow-hidden bg-black">
       <div className="absolute top-4 left-4 z-10">
         <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/40 backdrop-blur px-3 py-1.5 text-xs text-white/90">
           <span aria-hidden>🙏</span>
