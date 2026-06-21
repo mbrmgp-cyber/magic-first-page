@@ -79,16 +79,17 @@ function MemberRegister() {
       const generatedPassword = `MBR-${crypto.randomUUID()}`;
       const { data: existing } = await supabase.auth.getUser();
       if (!existing.user) {
+        const _lang = encodeURIComponent(localStorage.getItem("mbr_lang") || "te");
         const signup = await supabase.auth.signUp({
           email: form.email, password: generatedPassword,
-          options: { emailRedirectTo: window.location.origin },
+          options: { emailRedirectTo: `${window.location.origin}/auth?lang=${_lang}` },
         });
         if (signup.error && !/already/i.test(signup.error.message)) throw signup.error;
         if (signup.error) {
           // Already registered → send magic link
           const ml = await supabase.auth.signInWithOtp({
             email: form.email,
-            options: { emailRedirectTo: window.location.origin + "/member/pending" },
+            options: { emailRedirectTo: `${window.location.origin}/member/pending?lang=${_lang}` },
           });
           if (ml.error) throw ml.error;
           toast.message("A login link has been sent to your email.");
@@ -98,15 +99,17 @@ function MemberRegister() {
       }
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
+        const _lang = encodeURIComponent(localStorage.getItem("mbr_lang") || "te");
         // signUp without auto-confirm — send magic link
         await supabase.auth.signInWithOtp({
           email: form.email,
-          options: { emailRedirectTo: window.location.origin + "/member/pending" },
+          options: { emailRedirectTo: `${window.location.origin}/member/pending?lang=${_lang}` },
         });
         toast.message("Login link sent — open it to complete registration.");
         setStage("done");
         return;
       }
+
 
       let photo_url: string | undefined;
       if (photoFile) {
