@@ -155,6 +155,13 @@ export const submitMemberRequest = createServerFn({ method: "POST" })
     joined_date?: string;
     introducer_member_id?: string;
     committee_fee_paid?: number;
+    first_name?: string;
+    last_name?: string;
+    village?: string;
+    pin_code?: string;
+    bank_name?: string;
+    bank_account_number?: string;
+    bank_ifsc?: string;
   }) => d)
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
@@ -165,7 +172,7 @@ export const submitMemberRequest = createServerFn({ method: "POST" })
       .select("id")
       .eq("org_code", code)
       .maybeSingle();
-    if (!org) throw new Error("సరైన QR / Code కాదు");
+    if (!org) throw new Error("Invalid QR / Code");
     const { data: member, error } = await supabase
       .from("members")
       .insert({
@@ -180,6 +187,13 @@ export const submitMemberRequest = createServerFn({ method: "POST" })
         joined_date: data.joined_date ?? null,
         introducer_member_id: data.introducer_member_id ?? null,
         committee_fee_paid: data.committee_fee_paid ?? 0,
+        first_name: data.first_name ?? null,
+        last_name: data.last_name ?? null,
+        village: data.village ?? null,
+        pin_code: data.pin_code ?? null,
+        bank_name: data.bank_name ?? null,
+        bank_account_number: data.bank_account_number ?? null,
+        bank_ifsc: data.bank_ifsc ?? null,
         status: "pending",
       } as any)
       .select()

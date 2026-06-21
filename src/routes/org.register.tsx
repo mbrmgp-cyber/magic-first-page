@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { RefreshCw, Plus, X, Upload, Image as ImageIcon, AlertCircle, CheckCircle2, Info, ShieldCheck } from "lucide-react";
+import { RefreshCw, Plus, X, AlertCircle, CheckCircle2, Info, ShieldCheck } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
@@ -44,8 +44,8 @@ function FilePicker({ label, value, onChange, accept = "image/*" }: {
         {value ? (
           <img src={value} alt="" className="h-16 w-16 rounded-md border object-cover bg-muted" />
         ) : (
-          <div className="h-16 w-16 rounded-md border border-dashed flex items-center justify-center bg-muted/40">
-            <ImageIcon className="h-5 w-5 text-muted-foreground" />
+          <div className="h-16 w-16 rounded-md border border-dashed border-[#ff8c28]/40 flex items-center justify-center bg-zinc-900/60">
+            <Plus className="h-6 w-6 text-[#ff8c28]" />
           </div>
         )}
         <label className="flex-1">
@@ -68,9 +68,9 @@ function FilePicker({ label, value, onChange, accept = "image/*" }: {
               }
             }}
           />
-          <div className="cursor-pointer inline-flex items-center justify-center gap-2 h-9 px-4 rounded-md border border-zinc-300 bg-white hover:bg-zinc-100 text-sm font-semibold text-zinc-900 w-full">
-            {busy ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-            {value ? t("changeFile") : t("uploadFromGallery")}
+          <div className="cursor-pointer inline-flex items-center justify-center gap-2 h-9 px-4 rounded-md border border-[#ff8c28]/60 bg-zinc-900 hover:bg-zinc-800 text-sm font-semibold text-[#ff8c28] w-full">
+            {busy ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+            {value ? t("changeFile") : `+ ${t("add")} / ${t("uploadFromGallery")}`}
           </div>
         </label>
       </div>

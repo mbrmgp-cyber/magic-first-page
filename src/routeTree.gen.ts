@@ -25,6 +25,7 @@ import { Route as AuthenticatedOrgCommitteeRouteImport } from './routes/_authent
 import { Route as AuthenticatedOrgChatRouteImport } from './routes/_authenticated/org.chat'
 import { Route as AuthenticatedOrgAccountsRouteImport } from './routes/_authenticated/org.accounts'
 import { Route as AuthenticatedMemberPendingRouteImport } from './routes/_authenticated/member.pending'
+import { Route as AuthenticatedMemberDashboardRouteImport } from './routes/_authenticated/member.dashboard'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -110,6 +111,12 @@ const AuthenticatedMemberPendingRoute =
     path: '/member/pending',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedMemberDashboardRoute =
+  AuthenticatedMemberDashboardRouteImport.update({
+    id: '/member/dashboard',
+    path: '/member/dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -117,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
+  '/member/dashboard': typeof AuthenticatedMemberDashboardRoute
   '/member/pending': typeof AuthenticatedMemberPendingRoute
   '/org/accounts': typeof AuthenticatedOrgAccountsRoute
   '/org/chat': typeof AuthenticatedOrgChatRoute
@@ -134,6 +142,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
+  '/member/dashboard': typeof AuthenticatedMemberDashboardRoute
   '/member/pending': typeof AuthenticatedMemberPendingRoute
   '/org/accounts': typeof AuthenticatedOrgAccountsRoute
   '/org/chat': typeof AuthenticatedOrgChatRoute
@@ -153,6 +162,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
+  '/_authenticated/member/dashboard': typeof AuthenticatedMemberDashboardRoute
   '/_authenticated/member/pending': typeof AuthenticatedMemberPendingRoute
   '/_authenticated/org/accounts': typeof AuthenticatedOrgAccountsRoute
   '/_authenticated/org/chat': typeof AuthenticatedOrgChatRoute
@@ -172,6 +182,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/member/register'
     | '/org/register'
+    | '/member/dashboard'
     | '/member/pending'
     | '/org/accounts'
     | '/org/chat'
@@ -189,6 +200,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/member/register'
     | '/org/register'
+    | '/member/dashboard'
     | '/member/pending'
     | '/org/accounts'
     | '/org/chat'
@@ -207,6 +219,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/member/register'
     | '/org/register'
+    | '/_authenticated/member/dashboard'
     | '/_authenticated/member/pending'
     | '/_authenticated/org/accounts'
     | '/_authenticated/org/chat'
@@ -341,11 +354,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMemberPendingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/member/dashboard': {
+      id: '/_authenticated/member/dashboard'
+      path: '/member/dashboard'
+      fullPath: '/member/dashboard'
+      preLoaderRoute: typeof AuthenticatedMemberDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedMemberDashboardRoute: typeof AuthenticatedMemberDashboardRoute
   AuthenticatedMemberPendingRoute: typeof AuthenticatedMemberPendingRoute
   AuthenticatedOrgAccountsRoute: typeof AuthenticatedOrgAccountsRoute
   AuthenticatedOrgChatRoute: typeof AuthenticatedOrgChatRoute
@@ -360,6 +381,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedMemberDashboardRoute: AuthenticatedMemberDashboardRoute,
   AuthenticatedMemberPendingRoute: AuthenticatedMemberPendingRoute,
   AuthenticatedOrgAccountsRoute: AuthenticatedOrgAccountsRoute,
   AuthenticatedOrgChatRoute: AuthenticatedOrgChatRoute,

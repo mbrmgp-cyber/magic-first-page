@@ -27,6 +27,12 @@ function Pending() {
   if (meQ.isLoading) return <div className="min-h-screen flex items-center justify-center">Loading…</div>;
   const m = meQ.data?.membership;
 
+  // Approved members go straight to the member dashboard.
+  if (m && m.status === "approved") {
+    if (typeof window !== "undefined") navigate({ to: "/member/dashboard", replace: true });
+    return null;
+  }
+
   if (!m) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">

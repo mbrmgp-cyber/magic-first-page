@@ -33,10 +33,10 @@ const MENU = [
 
 function MetricItem({ label, sub, value }: { label: string; sub: string; value: string }) {
   return (
-    <div className="flex-1 min-w-0 px-2">
-      <p className="text-[10px] uppercase tracking-wider text-[#ff8c28] font-semibold leading-tight truncate">{label}</p>
-      <p className="text-[10px] text-zinc-400 leading-tight truncate">{sub}</p>
-      <p className="mt-1.5 text-base md:text-lg font-bold text-white">{value}</p>
+    <div className="flex-1 min-w-0 px-1.5">
+      <p className="text-[9px] uppercase tracking-wide text-[#ff8c28] font-semibold leading-tight truncate">{label}</p>
+      <p className="text-[9px] text-zinc-400 leading-tight truncate">{sub}</p>
+      <p className="mt-1 text-sm md:text-base font-bold text-white truncate">{value}</p>
     </div>
   );
 }
