@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Image as ImageIcon } from "lucide-react";
+import { localizeText, useI18n } from "@/lib/i18n";
 
 interface Props {
   onScan: (text: string) => void;
@@ -13,6 +14,8 @@ export function QrScanner({ onScan, onError }: Props) {
   const scannerRef = useRef<any>(null);
   const idRef = useRef(`qr-${Math.random().toString(36).slice(2)}`);
   const [busy, setBusy] = useState(false);
+  const { lang } = useI18n();
+  const lt = (en: string, te: string) => localizeText({ en, te }, lang);
 
   useEffect(() => {
     let cancelled = false;
@@ -25,7 +28,7 @@ export function QrScanner({ onScan, onError }: Props) {
       try {
         await scanner.start(
           { facingMode: "environment" },
-          { fps: 10, qrbox: 240 },
+          { fps: 10, qrbox: { width: 240, height: 240 }, aspectRatio: 1 },
           (text: string) => {
             scanner.stop().catch(() => {});
             onScan(text);
@@ -33,7 +36,7 @@ export function QrScanner({ onScan, onError }: Props) {
           () => {}
         );
       } catch (e: any) {
-        onError?.(e.message ?? "Camera access denied");
+        onError?.(e.message ?? lt("Camera access denied", "కెమెరా అనుమతి లేదు"));
       }
     })();
     return () => {
@@ -49,15 +52,17 @@ export function QrScanner({ onScan, onError }: Props) {
     setBusy(true);
     try {
       const mod = await import("html5-qrcode");
-      // Stop live scan while reading file.
       try { await scannerRef.current?.stop(); } catch {}
+      try { scannerRef.current?.clear(); } catch {}
+      if (ref.current) ref.current.innerHTML = "";
       // eslint-disable-next-line new-cap
       const fileScanner = new mod.Html5Qrcode(idRef.current);
-      const result = await fileScanner.scanFile(file, true);
-      try { await fileScanner.clear(); } catch {}
+      scannerRef.current = fileScanner;
+      const result = await fileScanner.scanFile(file, false);
+      try { fileScanner.clear(); } catch {}
       onScan(result);
     } catch (err: any) {
-      onError?.(err?.message ?? "Could not read QR from image");
+      onError?.(err?.message ?? lt("Could not read QR from image", "చిత్రం నుండి QR చదవలేకపోయాం"));
     } finally {
       setBusy(false);
       if (fileRef.current) fileRef.current.value = "";
@@ -82,7 +87,7 @@ export function QrScanner({ onScan, onError }: Props) {
           className="gap-2 w-full bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white font-semibold border-0 shadow-[0_0_24px_rgba(255,140,40,0.4)]"
         >
           <ImageIcon className="h-4 w-4" />
-          {busy ? "Reading…" : "Upload QR from Gallery / గ్యాలరీ నుండి QR"}
+          {busy ? lt("Reading…", "చదువుతున్నాం…") : lt("Upload QR from Gallery", "గ్యాలరీ నుండి QR అప్లోడ్")}
         </Button>
       </div>
     </div>
