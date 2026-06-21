@@ -179,69 +179,90 @@ export type Database = {
       members: {
         Row: {
           address: string | null
+          bank_account_number: string | null
+          bank_ifsc: string | null
+          bank_name: string | null
           blood_group: string | null
           committee_fee_paid: number | null
           created_at: string
           email: string
           father_name: string | null
+          first_name: string | null
           id: string
           introducer_member_id: string | null
           is_active: boolean
           is_committee: boolean
           joined_date: string | null
+          last_name: string | null
           member_code: string | null
           name: string
           org_id: string
           phone: string | null
           photo_url: string | null
+          pin_code: string | null
           reviewed_at: string | null
           status: Database["public"]["Enums"]["member_status"]
           updated_at: string
           user_id: string | null
+          village: string | null
         }
         Insert: {
           address?: string | null
+          bank_account_number?: string | null
+          bank_ifsc?: string | null
+          bank_name?: string | null
           blood_group?: string | null
           committee_fee_paid?: number | null
           created_at?: string
           email: string
           father_name?: string | null
+          first_name?: string | null
           id?: string
           introducer_member_id?: string | null
           is_active?: boolean
           is_committee?: boolean
           joined_date?: string | null
+          last_name?: string | null
           member_code?: string | null
           name: string
           org_id: string
           phone?: string | null
           photo_url?: string | null
+          pin_code?: string | null
           reviewed_at?: string | null
           status?: Database["public"]["Enums"]["member_status"]
           updated_at?: string
           user_id?: string | null
+          village?: string | null
         }
         Update: {
           address?: string | null
+          bank_account_number?: string | null
+          bank_ifsc?: string | null
+          bank_name?: string | null
           blood_group?: string | null
           committee_fee_paid?: number | null
           created_at?: string
           email?: string
           father_name?: string | null
+          first_name?: string | null
           id?: string
           introducer_member_id?: string | null
           is_active?: boolean
           is_committee?: boolean
           joined_date?: string | null
+          last_name?: string | null
           member_code?: string | null
           name?: string
           org_id?: string
           phone?: string | null
           photo_url?: string | null
+          pin_code?: string | null
           reviewed_at?: string | null
           status?: Database["public"]["Enums"]["member_status"]
           updated_at?: string
           user_id?: string | null
+          village?: string | null
         }
         Relationships: [
           {
