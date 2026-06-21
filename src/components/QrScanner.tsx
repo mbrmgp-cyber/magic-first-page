@@ -66,7 +66,7 @@ export function QrScanner({ onScan, onError }: Props) {
 
   return (
     <div className="space-y-3">
-      <div id={idRef.current} ref={ref} className="w-full rounded-lg overflow-hidden bg-black" />
+      <div id={idRef.current} ref={ref} className="w-full rounded-lg overflow-hidden bg-black aspect-square" />
       <div className="flex justify-center">
         <input
           ref={fileRef}
@@ -77,13 +77,12 @@ export function QrScanner({ onScan, onError }: Props) {
         />
         <Button
           type="button"
-          variant="outline"
           onClick={() => fileRef.current?.click()}
           disabled={busy}
-          className="gap-2"
+          className="gap-2 w-full bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white font-semibold border-0 shadow-[0_0_24px_rgba(255,140,40,0.4)]"
         >
           <ImageIcon className="h-4 w-4" />
-          {busy ? "Reading…" : "Upload from gallery"}
+          {busy ? "Reading…" : "Upload QR from Gallery / గ్యాలరీ నుండి QR"}
         </Button>
       </div>
     </div>

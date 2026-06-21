@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { registerOrganization } from "@/lib/org.functions";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { useI18n } from "@/lib/i18n";
-import { LanguageToggle } from "@/components/LanguageToggle";
 
 export const Route = createFileRoute("/org/register")({
   head: () => ({ meta: [{ title: "Register Organization — MBR App" }] }),
@@ -37,42 +36,47 @@ function FilePicker({ label, value, onChange, accept = "image/*" }: {
 }) {
   const { t } = useI18n();
   const [busy, setBusy] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
   return (
     <div className="space-y-2">
-      <Label>{label}</Label>
+      <Label className="text-zinc-100">{label}</Label>
       <div className="flex items-center gap-3">
         {value ? (
           <img src={value} alt="" className="h-16 w-16 rounded-md border object-cover bg-muted" />
         ) : (
-          <div className="h-16 w-16 rounded-md border border-dashed border-[#ff8c28]/40 flex items-center justify-center bg-zinc-900/60">
+          <div className="h-16 w-16 rounded-md border border-dashed border-[#ff8c28]/40 flex items-center justify-center bg-zinc-900/60 shrink-0">
             <Plus className="h-6 w-6 text-[#ff8c28]" />
           </div>
         )}
-        <label className="flex-1">
-          <input
-            type="file"
-            accept={accept}
-            className="hidden"
-            onChange={async (e) => {
-              const f = e.target.files?.[0];
-              if (!f) return;
-              setBusy(true);
-              try {
-                const url = await uploadFile(f, label.replace(/\s+/g, "_").toLowerCase());
-                onChange(url);
-                toast.success("Uploaded");
-              } catch (err: any) {
-                toast.error(err.message ?? "Upload failed");
-              } finally {
-                setBusy(false);
-              }
-            }}
-          />
-          <div className="cursor-pointer inline-flex items-center justify-center gap-2 h-9 px-4 rounded-md border border-[#ff8c28]/60 bg-zinc-900 hover:bg-zinc-800 text-sm font-semibold text-[#ff8c28] w-full">
-            {busy ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-            {value ? t("changeFile") : `+ ${t("add")} / ${t("uploadFromGallery")}`}
-          </div>
-        </label>
+        <input
+          ref={inputRef}
+          type="file"
+          accept={accept}
+          className="hidden"
+          onChange={async (e) => {
+            const f = e.target.files?.[0];
+            if (!f) return;
+            setBusy(true);
+            try {
+              const url = await uploadFile(f, label.replace(/\s+/g, "_").toLowerCase());
+              onChange(url);
+              toast.success("Uploaded");
+            } catch (err: any) {
+              toast.error(err.message ?? "Upload failed");
+            } finally {
+              setBusy(false);
+              if (inputRef.current) inputRef.current.value = "";
+            }
+          }}
+        />
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 px-2 rounded-md border border-[#ff8c28]/60 bg-zinc-900 hover:bg-zinc-800 text-[11px] font-semibold text-[#ff8c28] leading-tight"
+        >
+          {busy ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+          <span className="truncate">{value ? t("changeFile") : t("uploadFromGallery")}</span>
+        </button>
       </div>
     </div>
   );
@@ -121,7 +125,7 @@ function OrgRegister() {
         const { error: suErr } = await supabase.auth.signUp({
           email: form.email,
           password: generatedPassword,
-          options: { emailRedirectTo: window.location.origin },
+          options: { emailRedirectTo: `${window.location.origin}/auth?lang=${encodeURIComponent(localStorage.getItem("mbr_lang") || "te")}` },
         });
         if (suErr) {
           const alreadyRegistered = suErr.message.toLowerCase().includes("already registered") || suErr.message.toLowerCase().includes("already been registered");
@@ -129,7 +133,7 @@ function OrgRegister() {
           // For existing users, send a magic link instead — we no longer keep static passwords
           const { error: otpErr } = await supabase.auth.signInWithOtp({
             email: form.email,
-            options: { emailRedirectTo: window.location.origin },
+            options: { emailRedirectTo: `${window.location.origin}/auth?lang=${encodeURIComponent(localStorage.getItem("mbr_lang") || "te")}` },
           });
           if (otpErr) throw otpErr;
           throw new Error("This email is already registered. We sent a secure login link to your inbox — please click it and resubmit this form.");
@@ -199,13 +203,11 @@ function OrgRegister() {
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-black">
       <Card className="w-full max-w-md p-6 space-y-6 bg-zinc-950 border-zinc-800 shadow-[0_0_60px_rgba(255,140,40,0.15)] text-white [&_label]:text-zinc-100 [&_input]:bg-zinc-900 [&_input]:border-zinc-700 [&_input]:text-white [&_input::placeholder]:text-zinc-500 [&_textarea]:bg-zinc-900 [&_textarea]:border-zinc-700 [&_textarea]:text-white">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <h1 className="text-2xl font-bold text-white">{t("orgRegisterTitle")}</h1>
-            <p className="text-sm text-zinc-400">{t("orgRegisterSubtitle")}</p>
-          </div>
-          <LanguageToggle />
+        <div>
+          <h1 className="text-2xl font-bold text-white">{t("orgRegisterTitle")}</h1>
+          <p className="text-sm text-zinc-400">{t("orgRegisterSubtitle")}</p>
         </div>
+
 
         <form onSubmit={onSubmit} className="space-y-4">
           {status && (
@@ -335,8 +337,9 @@ function OrgRegister() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label>{t("foundersHeading")}</Label>
-                <Button type="button" size="sm" variant="outline"
-                  onClick={() => setFounders([...founders, { name: "", address: "", aadhaar_url: "" }])}>
+                <Button type="button" size="sm"
+                  onClick={() => setFounders([...founders, { name: "", address: "", aadhaar_url: "" }])}
+                  className="bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white border-0 shadow-[0_0_18px_rgba(255,140,40,0.4)]">
                   <Plus className="h-3 w-3 mr-1" />{t("add")}
                 </Button>
               </div>
