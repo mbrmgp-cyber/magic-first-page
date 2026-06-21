@@ -101,41 +101,41 @@ function AuthPage() {
         {step === "email" ? (
           <form onSubmit={sendOtp} className="space-y-4">
             <div className="space-y-2">
-              <Label>{t("email")}</Label>
+              <Label className="text-zinc-200">{t("email")}</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                 <Input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   placeholder="you@example.com"
-                  className="pl-9 focus-visible:ring-[#FF9933]"
+                  className="pl-9 bg-zinc-900 border-zinc-700 text-white focus-visible:ring-[#ff8c28]"
                 />
               </div>
             </div>
-            <Button type="submit" className="w-full btn-saffron-green font-semibold border-0" disabled={loading}>
+            <Button type="submit" className="w-full bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white font-semibold border-0 shadow-[0_0_24px_rgba(255,140,40,0.45)]" disabled={loading}>
               {loading ? t("sendingLink") : t("sendLink")}
             </Button>
           </form>
         ) : (
           <div className="space-y-4 text-center">
-            <div className="rounded-md border border-green-600/30 bg-green-50 p-4 text-green-900">
-              <ExternalLink className="mx-auto mb-2 h-6 w-6" />
+            <div className="rounded-md border border-[#ff8c28]/30 bg-[#ff8c28]/10 p-4 text-zinc-100">
+              <ExternalLink className="mx-auto mb-2 h-6 w-6 text-[#ff8c28]" />
               <p className="font-semibold">{t("clickLoginInEmail")}</p>
-              <p className="mt-1 text-sm">{t("oneTimeLink")}</p>
+              <p className="mt-1 text-sm text-zinc-300">{t("oneTimeLink")}</p>
             </div>
-            <Button type="button" className="w-full btn-saffron-green font-semibold border-0" onClick={() => navigate({ to: "/" })}>
+            <Button type="button" className="w-full bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white font-semibold border-0" onClick={() => navigate({ to: "/" })}>
               {t("continueAfterClick")}
             </Button>
-            <Button type="button" variant="ghost" size="sm" className="w-full" onClick={() => { setStep("email"); setStatus(null); }}>
+            <Button type="button" variant="ghost" size="sm" className="w-full text-zinc-400 hover:text-white hover:bg-zinc-900" onClick={() => { setStep("email"); setStatus(null); }}>
               {t("changeEmail")}
             </Button>
           </div>
         )}
 
-        <div className="text-center text-sm text-muted-foreground">
-          <Link to="/" className="text-[#138808] font-medium hover:underline">{t("noAccount")}</Link>
+        <div className="text-center text-sm text-zinc-400">
+          <Link to="/" className="text-[#ff8c28] font-medium hover:underline">{t("noAccount")}</Link>
         </div>
       </Card>
     </div>
