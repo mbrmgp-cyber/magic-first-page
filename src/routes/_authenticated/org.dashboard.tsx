@@ -47,6 +47,8 @@ function Dashboard() {
   const qc = useQueryClient();
   const fetchOrg = useServerFn(getMyOrg);
   const saveLogo = useServerFn(updateOrgLogo);
+  const { lang } = useI18n();
+  const lt = (en: string, te: string) => localizeText({ en, te }, lang);
   const orgQ = useQuery({ queryKey: ["my-org"], queryFn: () => fetchOrg() });
   const [qrOpen, setQrOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -266,9 +268,9 @@ function Dashboard() {
             </button>
             <div className="min-w-0 flex-1">
               <h1 className="font-extrabold leading-tight tracking-tight text-white" style={{ fontSize: "clamp(0.95rem, 4.6vw, 1.6rem)" }}>
-                {org.name}
+                {transliterateText(org.name, lang)}
               </h1>
-              {org.slogan && <p className="mt-1 text-sm text-zinc-400 italic">{org.slogan}</p>}
+              {org.slogan && <p className="mt-1 text-sm text-zinc-400 italic">{transliterateText(org.slogan, lang)}</p>}
               {org.gov_reg_number && (
                 <p className="mt-1 text-xs text-zinc-500">
                   Reg No: <span className="font-mono text-[#ff8c28]">{org.gov_reg_number}</span>
@@ -281,13 +283,12 @@ function Dashboard() {
         {/* Accounts Summary — unified card */}
         <Card className="p-4 bg-zinc-950 border-zinc-800 shadow-[0_0_30px_rgba(255,140,40,0.1)]">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-white">Accounts Summary</h2>
-            <span className="text-xs text-zinc-400">అకౌంట్స్ వివరాలు</span>
+            <h2 className="text-sm font-semibold text-white">{lt("Accounts Summary", "అకౌంట్స్ వివరాలు")}</h2>
           </div>
           <div className="flex items-stretch divide-x divide-zinc-800">
-            <MetricItem label="Total Funds" sub="మొత్తం నిధులు" value="₹ 0" />
-            <MetricItem label="Loans Disbursed" sub="మార్కెట్ అప్పులు" value="₹ 0" />
-            <MetricItem label="Interest Collected" sub="వచ్చిన వడ్డీ" value="₹ 0" />
+            <MetricItem label={lt("Total Funds", "మొత్తం నిధులు")} sub="" value="₹ 0" />
+            <MetricItem label={lt("Loans Disbursed", "మార్కెట్ అప్పులు")} sub="" value="₹ 0" />
+            <MetricItem label={lt("Interest Collected", "వచ్చిన వడ్డీ")} sub="" value="₹ 0" />
           </div>
         </Card>
 
@@ -300,7 +301,7 @@ function Dashboard() {
                   <div className="w-11 h-11 rounded-lg flex items-center justify-center bg-[#ff8c28]/15 border border-[#ff8c28]/40">
                     <m.icon className="w-5 h-5 text-[#ff8c28]" />
                   </div>
-                  <span className="font-medium text-xs leading-tight text-zinc-100">{m.label}</span>
+                  <span className="font-medium text-xs leading-tight text-zinc-100">{lt(m.en, m.te)}</span>
                 </div>
               </Card>
             </Link>
