@@ -177,13 +177,13 @@ export const submitMemberRequest = createServerFn({ method: "POST" })
       const match = data.photo_data_url.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
       if (!match) throw new Error("Invalid photo file");
       const contentType = match[1];
-      const buffer = Buffer.from(match[2], "base64");
-      if (buffer.byteLength > 5 * 1024 * 1024) throw new Error("Photo must be under 5MB");
+      const bytes = Uint8Array.from(atob(match[2]), (char) => char.charCodeAt(0));
+      if (bytes.byteLength > 5 * 1024 * 1024) throw new Error("Photo must be under 5MB");
       const ext = contentType.split("/")[1]?.replace("jpeg", "jpg") || "jpg";
       const path = `public-requests/${org.id}/${crypto.randomUUID()}.${ext}`;
       const { error: uploadError } = await supabaseAdmin.storage
         .from("member-photos")
-        .upload(path, buffer, { contentType, upsert: false });
+        .upload(path, bytes, { contentType, upsert: false });
       if (uploadError) throw new Error(uploadError.message);
       photo_url = path;
     }
