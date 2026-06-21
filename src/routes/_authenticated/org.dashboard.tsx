@@ -14,6 +14,7 @@ import {
   Upload, ShieldAlert, FileDown, CheckCircle2, Vote,
 } from "lucide-react";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
+import { localizeText, transliterateText, useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/org/dashboard")({
   head: () => ({ meta: [{ title: "Society Dashboard — MBR App" }] }),
@@ -21,14 +22,14 @@ export const Route = createFileRoute("/_authenticated/org/dashboard")({
 });
 
 const MENU = [
-  { to: "/org/rules", label: "సొసైటీ రూల్స్ & హిస్టరీ", icon: BookOpen },
-  { to: "/org/members", label: "సభ్యుల వివరాలు & నమోదు", icon: Users },
-  { to: "/org/committee", label: "కార్యవర్గ కమిటీ వివరాలు", icon: Briefcase },
-  { to: "/org/events", label: "కార్యక్రమాలు, సమావేశాలు, నిర్ణయాలు", icon: Calendar },
-  { to: "/org/designs", label: "ID కార్డులు, మెమెంటోలు, లెటర్‌ప్యాడ్, స్టాంప్ డిజైన్", icon: IdCard },
-  { to: "/org/accounts", label: "అకౌంట్స్", icon: Wallet },
-  { to: "/org/chat", label: "సభ్యులతో చాటింగ్", icon: MessageSquare },
-  { to: "/org/elections", label: "Board Elections / బోర్డు ఎన్నికలు", icon: Vote },
+  { to: "/org/rules", en: "Society Rules & History", te: "సొసైటీ రూల్స్ & హిస్టరీ", icon: BookOpen },
+  { to: "/org/members", en: "Members & Registration", te: "సభ్యుల వివరాలు & నమోదు", icon: Users },
+  { to: "/org/committee", en: "Executive Committee", te: "కార్యవర్గ కమిటీ వివరాలు", icon: Briefcase },
+  { to: "/org/events", en: "Events, Meetings, Decisions", te: "కార్యక్రమాలు, సమావేశాలు, నిర్ణయాలు", icon: Calendar },
+  { to: "/org/designs", en: "ID Cards, Mementos, Letterhead, Stamp Design", te: "ID కార్డులు, మెమెంటోలు, లెటర్‌ప్యాడ్, స్టాంప్ డిజైన్", icon: IdCard },
+  { to: "/org/accounts", en: "Accounts", te: "అకౌంట్స్", icon: Wallet },
+  { to: "/org/chat", en: "Member Chat", te: "సభ్యులతో చాటింగ్", icon: MessageSquare },
+  { to: "/org/elections", en: "Board Elections", te: "బోర్డు ఎన్నికలు", icon: Vote },
 ] as const;
 
 function MetricItem({ label, sub, value }: { label: string; sub: string; value: string }) {
@@ -46,6 +47,8 @@ function Dashboard() {
   const qc = useQueryClient();
   const fetchOrg = useServerFn(getMyOrg);
   const saveLogo = useServerFn(updateOrgLogo);
+  const { lang } = useI18n();
+  const lt = (en: string, te: string) => localizeText({ en, te }, lang);
   const orgQ = useQuery({ queryKey: ["my-org"], queryFn: () => fetchOrg() });
   const [qrOpen, setQrOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -237,7 +240,7 @@ function Dashboard() {
               <Settings className="h-4 w-4" />
             </Button>
             <Button variant="ghost" size="sm" onClick={logout} className="text-zinc-200 hover:bg-zinc-900 hover:text-white">
-              <LogOut className="h-4 w-4 mr-1" />Logout
+              <LogOut className="h-4 w-4 mr-1" />{lt("Logout", "లాగ్ అవుట్")}
             </Button>
             <img src={mbrLogo.url} alt="MBR" className="w-12 h-12 rounded-md bg-black border border-zinc-800 object-contain p-1" />
           </div>
@@ -265,12 +268,12 @@ function Dashboard() {
             </button>
             <div className="min-w-0 flex-1">
               <h1 className="font-extrabold leading-tight tracking-tight text-white" style={{ fontSize: "clamp(0.95rem, 4.6vw, 1.6rem)" }}>
-                {org.name}
+                {transliterateText(org.name, lang)}
               </h1>
-              {org.slogan && <p className="mt-1 text-sm text-zinc-400 italic">{org.slogan}</p>}
+              {org.slogan && <p className="mt-1 text-sm text-zinc-400 italic">{transliterateText(org.slogan, lang)}</p>}
               {org.gov_reg_number && (
                 <p className="mt-1 text-xs text-zinc-500">
-                  Reg No: <span className="font-mono text-[#ff8c28]">{org.gov_reg_number}</span>
+                  {lt("Reg No", "నమోదు సంఖ్య")}: <span className="font-mono text-[#ff8c28]">{org.gov_reg_number}</span>
                 </p>
               )}
             </div>
@@ -280,13 +283,12 @@ function Dashboard() {
         {/* Accounts Summary — unified card */}
         <Card className="p-4 bg-zinc-950 border-zinc-800 shadow-[0_0_30px_rgba(255,140,40,0.1)]">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-white">Accounts Summary</h2>
-            <span className="text-xs text-zinc-400">అకౌంట్స్ వివరాలు</span>
+            <h2 className="text-sm font-semibold text-white">{lt("Accounts Summary", "అకౌంట్స్ వివరాలు")}</h2>
           </div>
           <div className="flex items-stretch divide-x divide-zinc-800">
-            <MetricItem label="Total Funds" sub="మొత్తం నిధులు" value="₹ 0" />
-            <MetricItem label="Loans Disbursed" sub="మార్కెట్ అప్పులు" value="₹ 0" />
-            <MetricItem label="Interest Collected" sub="వచ్చిన వడ్డీ" value="₹ 0" />
+            <MetricItem label={lt("Total Funds", "మొత్తం నిధులు")} sub="" value="₹ 0" />
+            <MetricItem label={lt("Loans Disbursed", "మార్కెట్ అప్పులు")} sub="" value="₹ 0" />
+            <MetricItem label={lt("Interest Collected", "వచ్చిన వడ్డీ")} sub="" value="₹ 0" />
           </div>
         </Card>
 
@@ -299,7 +301,7 @@ function Dashboard() {
                   <div className="w-11 h-11 rounded-lg flex items-center justify-center bg-[#ff8c28]/15 border border-[#ff8c28]/40">
                     <m.icon className="w-5 h-5 text-[#ff8c28]" />
                   </div>
-                  <span className="font-medium text-xs leading-tight text-zinc-100">{m.label}</span>
+                  <span className="font-medium text-xs leading-tight text-zinc-100">{lt(m.en, m.te)}</span>
                 </div>
               </Card>
             </Link>
