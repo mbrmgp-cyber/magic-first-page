@@ -200,7 +200,8 @@ function readUrlLang(): Lang | null {
   if (typeof window === "undefined") return null;
   const searchLang = new URLSearchParams(window.location.search).get("lang");
   if (isValidLang(searchLang)) return searchLang;
-  const hashQuery = window.location.hash.includes("?") ? window.location.hash.split("?")[1] : "";
+  const hash = window.location.hash.replace(/^#/, "");
+  const hashQuery = hash.includes("?") ? hash.split("?")[1] : hash;
   const hashLang = new URLSearchParams(hashQuery).get("lang");
   return isValidLang(hashLang) ? hashLang : null;
 }
