@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import Sanscript from "@indic-transliteration/sanscript";
 
 export type Lang = string;
+export type LocalizedEntry = { te: string; en: string; hi?: string };
 
 type Entry = { te: string; en: string; hi: string };
 type Dict = Record<string, Entry>;
@@ -187,15 +188,52 @@ function translit(text: string, target: string): string {
   }
 }
 
-function resolve(entry: Entry | undefined, lang: string): string {
-  if (!entry) return "";
-  const opt = LANG_OPTIONS.find((o) => o.code === lang);
-  const script = opt?.script ?? "en";
+function scriptForLang(lang: string) {
+  return LANG_OPTIONS.find((o) => o.code === lang)?.script ?? "en";
+}
+
+function isValidLang(lang: string | null): lang is Lang {
+  return !!lang && LANG_OPTIONS.some((o) => o.code === lang);
+}
+
+function readUrlLang(): Lang | null {
+  if (typeof window === "undefined") return null;
+  const searchLang = new URLSearchParams(window.location.search).get("lang");
+  if (isValidLang(searchLang)) return searchLang;
+  const hashQuery = window.location.hash.includes("?") ? window.location.hash.split("?")[1] : "";
+  const hashLang = new URLSearchParams(hashQuery).get("lang");
+  return isValidLang(hashLang) ? hashLang : null;
+}
+
+function initialLang(): Lang {
+  if (typeof window === "undefined") return "te";
+  const urlLang = readUrlLang();
+  if (urlLang) return urlLang;
+  const saved = localStorage.getItem("mbr_lang");
+  if (isValidLang(saved)) return saved;
+  const browserLang = navigator.language?.split("-")[0] ?? "";
+  return isValidLang(browserLang) ? browserLang : "te";
+}
+
+export function localizeText(entry: LocalizedEntry, lang: string): string {
+  const script = scriptForLang(lang);
   if (script === "te") return entry.te;
   if (script === "en") return entry.en;
-  if (script === "hi") return entry.hi;
-  // Indic script – transliterate from Hindi (Devanagari) source.
-  return translit(entry.hi, script);
+  if (script === "hi") return entry.hi ?? translit(entry.te, "devanagari");
+  return translit(entry.te, script);
+}
+
+export function transliterateText(text: string | null | undefined, lang: string): string {
+  if (!text) return "";
+  const script = scriptForLang(lang);
+  if (script === "en") return text;
+  if (script === "te") return text;
+  return translit(text, script === "hi" ? "devanagari" : script);
+}
+
+function resolve(entry: Entry | undefined, lang: string): string {
+  if (!entry) return "";
+  return localizeText(entry, lang);
 }
 
 const Ctx = createContext<{
@@ -209,20 +247,21 @@ const Ctx = createContext<{
 });
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>("te");
+  const [lang, setLangState] = useState<Lang>(() => initialLang());
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const urlLang = new URLSearchParams(window.location.search).get("lang");
-    const valid = urlLang && LANG_OPTIONS.some((o) => o.code === urlLang) ? urlLang : null;
+    const valid = readUrlLang();
     if (valid) {
       localStorage.setItem("mbr_lang", valid);
       setLangState(valid);
       return;
     }
-    const saved = (localStorage.getItem("mbr_lang") as Lang) || "te";
-    setLangState(saved);
   }, []);
+
+  useEffect(() => {
+    if (typeof document !== "undefined") document.documentElement.lang = lang;
+  }, [lang]);
 
   const setLang = (l: Lang) => {
     setLangState(l);
