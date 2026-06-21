@@ -36,42 +36,47 @@ function FilePicker({ label, value, onChange, accept = "image/*" }: {
 }) {
   const { t } = useI18n();
   const [busy, setBusy] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
   return (
     <div className="space-y-2">
-      <Label>{label}</Label>
+      <Label className="text-zinc-100">{label}</Label>
       <div className="flex items-center gap-3">
         {value ? (
           <img src={value} alt="" className="h-16 w-16 rounded-md border object-cover bg-muted" />
         ) : (
-          <div className="h-16 w-16 rounded-md border border-dashed border-[#ff8c28]/40 flex items-center justify-center bg-zinc-900/60">
+          <div className="h-16 w-16 rounded-md border border-dashed border-[#ff8c28]/40 flex items-center justify-center bg-zinc-900/60 shrink-0">
             <Plus className="h-6 w-6 text-[#ff8c28]" />
           </div>
         )}
-        <label className="flex-1">
-          <input
-            type="file"
-            accept={accept}
-            className="hidden"
-            onChange={async (e) => {
-              const f = e.target.files?.[0];
-              if (!f) return;
-              setBusy(true);
-              try {
-                const url = await uploadFile(f, label.replace(/\s+/g, "_").toLowerCase());
-                onChange(url);
-                toast.success("Uploaded");
-              } catch (err: any) {
-                toast.error(err.message ?? "Upload failed");
-              } finally {
-                setBusy(false);
-              }
-            }}
-          />
-          <div className="cursor-pointer inline-flex items-center justify-center gap-2 h-9 px-4 rounded-md border border-[#ff8c28]/60 bg-zinc-900 hover:bg-zinc-800 text-sm font-semibold text-[#ff8c28] w-full">
-            {busy ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-            {value ? t("changeFile") : `+ ${t("add")} / ${t("uploadFromGallery")}`}
-          </div>
-        </label>
+        <input
+          ref={inputRef}
+          type="file"
+          accept={accept}
+          className="hidden"
+          onChange={async (e) => {
+            const f = e.target.files?.[0];
+            if (!f) return;
+            setBusy(true);
+            try {
+              const url = await uploadFile(f, label.replace(/\s+/g, "_").toLowerCase());
+              onChange(url);
+              toast.success("Uploaded");
+            } catch (err: any) {
+              toast.error(err.message ?? "Upload failed");
+            } finally {
+              setBusy(false);
+              if (inputRef.current) inputRef.current.value = "";
+            }
+          }}
+        />
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 px-2 rounded-md border border-[#ff8c28]/60 bg-zinc-900 hover:bg-zinc-800 text-[11px] font-semibold text-[#ff8c28] leading-tight"
+        >
+          {busy ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+          <span className="truncate">{value ? t("changeFile") : t("uploadFromGallery")}</span>
+        </button>
       </div>
     </div>
   );
