@@ -147,10 +147,9 @@ export const validateOrgCode = createServerFn({ method: "POST" })
   });
 
 export const submitMemberRequest = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((d: {
     code: string; name: string; email: string;
-    phone?: string; photo_url?: string;
+    phone?: string; photo_url?: string; photo_data_url?: string;
     father_name?: string; address?: string;
     joined_date?: string;
     introducer_member_id?: string;
@@ -163,8 +162,7 @@ export const submitMemberRequest = createServerFn({ method: "POST" })
     bank_account_number?: string;
     bank_ifsc?: string;
   }) => d)
-  .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
+  .handler(async ({ data }) => {
     const code = data.code.trim().toUpperCase();
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: org } = await supabaseAdmin
@@ -173,15 +171,32 @@ export const submitMemberRequest = createServerFn({ method: "POST" })
       .eq("org_code", code)
       .maybeSingle();
     if (!org) throw new Error("Invalid QR / Code");
-    const { data: member, error } = await supabase
+
+    let photo_url = data.photo_url ?? null;
+    if (data.photo_data_url?.startsWith("data:image/")) {
+      const match = data.photo_data_url.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
+      if (!match) throw new Error("Invalid photo file");
+      const contentType = match[1];
+      const buffer = Buffer.from(match[2], "base64");
+      if (buffer.byteLength > 5 * 1024 * 1024) throw new Error("Photo must be under 5MB");
+      const ext = contentType.split("/")[1]?.replace("jpeg", "jpg") || "jpg";
+      const path = `public-requests/${org.id}/${crypto.randomUUID()}.${ext}`;
+      const { error: uploadError } = await supabaseAdmin.storage
+        .from("member-photos")
+        .upload(path, buffer, { contentType, upsert: false });
+      if (uploadError) throw new Error(uploadError.message);
+      photo_url = path;
+    }
+
+    const { data: member, error } = await supabaseAdmin
       .from("members")
       .insert({
         org_id: org.id,
-        user_id: userId,
+        user_id: null,
         name: data.name,
         email: data.email,
         phone: data.phone ?? null,
-        photo_url: data.photo_url ?? null,
+        photo_url,
         father_name: data.father_name ?? null,
         address: data.address ?? null,
         joined_date: data.joined_date ?? null,
