@@ -125,7 +125,7 @@ function OrgRegister() {
         const { error: suErr } = await supabase.auth.signUp({
           email: form.email,
           password: generatedPassword,
-          options: { emailRedirectTo: window.location.origin },
+          options: { emailRedirectTo: `${window.location.origin}/auth?lang=${encodeURIComponent(localStorage.getItem("mbr_lang") || "te")}` },
         });
         if (suErr) {
           const alreadyRegistered = suErr.message.toLowerCase().includes("already registered") || suErr.message.toLowerCase().includes("already been registered");
