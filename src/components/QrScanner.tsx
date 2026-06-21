@@ -8,6 +8,19 @@ interface Props {
   onError?: (err: string) => void;
 }
 
+export async function decodeQrFromFile(file: File, elementId: string, showImage = false) {
+  const mod = await import("html5-qrcode");
+  const host = document.getElementById(elementId);
+  if (host) host.innerHTML = "";
+  // eslint-disable-next-line new-cap
+  const scanner = new mod.Html5Qrcode(elementId);
+  try {
+    return await scanner.scanFile(file, showImage);
+  } finally {
+    try { scanner.clear(); } catch {}
+  }
+}
+
 export function QrScanner({ onScan, onError }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -51,15 +64,9 @@ export function QrScanner({ onScan, onError }: Props) {
     if (!file) return;
     setBusy(true);
     try {
-      const mod = await import("html5-qrcode");
       try { await scannerRef.current?.stop(); } catch {}
       try { scannerRef.current?.clear(); } catch {}
-      if (ref.current) ref.current.innerHTML = "";
-      // eslint-disable-next-line new-cap
-      const fileScanner = new mod.Html5Qrcode(idRef.current);
-      scannerRef.current = fileScanner;
-      const result = await fileScanner.scanFile(file, false);
-      try { fileScanner.clear(); } catch {}
+      const result = await decodeQrFromFile(file, idRef.current, false);
       onScan(result);
     } catch (err: any) {
       onError?.(err?.message ?? lt("Could not read QR from image", "చిత్రం నుండి QR చదవలేకపోయాం"));
