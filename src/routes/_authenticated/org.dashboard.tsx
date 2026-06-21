@@ -240,7 +240,7 @@ function Dashboard() {
               <Settings className="h-4 w-4" />
             </Button>
             <Button variant="ghost" size="sm" onClick={logout} className="text-zinc-200 hover:bg-zinc-900 hover:text-white">
-              <LogOut className="h-4 w-4 mr-1" />Logout
+              <LogOut className="h-4 w-4 mr-1" />{lt("Logout", "లాగ్ అవుట్")}
             </Button>
             <img src={mbrLogo.url} alt="MBR" className="w-12 h-12 rounded-md bg-black border border-zinc-800 object-contain p-1" />
           </div>
@@ -273,7 +273,7 @@ function Dashboard() {
               {org.slogan && <p className="mt-1 text-sm text-zinc-400 italic">{transliterateText(org.slogan, lang)}</p>}
               {org.gov_reg_number && (
                 <p className="mt-1 text-xs text-zinc-500">
-                  Reg No: <span className="font-mono text-[#ff8c28]">{org.gov_reg_number}</span>
+                  {lt("Reg No", "నమోదు సంఖ్య")}: <span className="font-mono text-[#ff8c28]">{org.gov_reg_number}</span>
                 </p>
               )}
             </div>
