@@ -133,7 +133,7 @@ function OrgRegister() {
           // For existing users, send a magic link instead — we no longer keep static passwords
           const { error: otpErr } = await supabase.auth.signInWithOtp({
             email: form.email,
-            options: { emailRedirectTo: window.location.origin },
+            options: { emailRedirectTo: `${window.location.origin}/auth?lang=${encodeURIComponent(localStorage.getItem("mbr_lang") || "te")}` },
           });
           if (otpErr) throw otpErr;
           throw new Error("This email is already registered. We sent a secure login link to your inbox — please click it and resubmit this form.");
