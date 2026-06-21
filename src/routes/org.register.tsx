@@ -337,8 +337,9 @@ function OrgRegister() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label>{t("foundersHeading")}</Label>
-                <Button type="button" size="sm" variant="outline"
-                  onClick={() => setFounders([...founders, { name: "", address: "", aadhaar_url: "" }])}>
+                <Button type="button" size="sm"
+                  onClick={() => setFounders([...founders, { name: "", address: "", aadhaar_url: "" }])}
+                  className="bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white border-0 shadow-[0_0_18px_rgba(255,140,40,0.4)]">
                   <Plus className="h-3 w-3 mr-1" />{t("add")}
                 </Button>
               </div>
