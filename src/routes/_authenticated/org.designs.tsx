@@ -912,7 +912,7 @@ function StandardBackPreview({
               <QrCode style={{ width: "100%", height: "100%", color: "#111" }} />
             </div>
             <div style={{ fontSize: 6.5, fontWeight: 700, color: navy, marginTop: 2, lineHeight: 1.05, maxWidth: 48 }}>
-              MBR APP డౌన్‌లోడ్
+              కొత్త సభ్యుల నమోదు
             </div>
           </div>
         </div>
@@ -1179,7 +1179,7 @@ function OfficialSaffronPreview({
               <QrCode style={{ width: "100%", height: "100%", color: "#111" }} />
             </div>
             <div style={{ fontSize: 6.5, fontWeight: 700, color: navy, marginTop: 2, lineHeight: 1.05, maxWidth: 48 }}>
-              MBR APP డౌన్‌లోడ్
+              కొత్త సభ్యుల నమోదు
             </div>
           </div>
         </div>

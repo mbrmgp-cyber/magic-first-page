@@ -40,6 +40,7 @@ type Org = {
   name: string;
   logo_url?: string | null;
   letter_code?: string | null;
+  org_code?: string | null;
   gov_reg_number?: string | null;
   slogan?: string | null;
   phone?: string | null;
@@ -80,7 +81,7 @@ const L: Record<CardLang, Record<string, string>> = {
     president: "అధ్యక్షుడు", active: "● యాక్టివ్ సభ్యుడు", inactive: "● ఇనాక్టివ్",
     objectives: "ముఖ్య ఉద్దేశాలు", oath: "సభ్యుని ప్రమాణం",
     jaihind: "జై హింద్",
-    mbrApp: "MBR APP డౌన్‌లోడ్",
+    mbrApp: "కొత్త సభ్యుల నమోదు",
     obj1: "చిట్వేల్ మండల ప్రజలకు మౌలిక సదుపాయాల (విద్య, వైద్య, పర్యావరణ) ఏర్పాటు కై ప్రయత్నం.",
     obj2: "కుల, మత, ప్రాంత, వర్గ, రాజకీయాలకు అతీతంగా యువకులలో దేశభక్తిని పెంచడం. మానవత్వంతో నిస్వార్థ సేవ చేపట్టడం.",
     obj3: "అత్యవసర పరిస్థితుల్లో ప్రభుత్వ అధికారులకు సహాయ సహకారాలు అందించడం. వారి నిజాయితీని గ్రహించి సన్మానించడం.",
@@ -92,7 +93,7 @@ const L: Record<CardLang, Record<string, string>> = {
     president: "President", active: "● ACTIVE MEMBER", inactive: "● INACTIVE",
     objectives: "Key Objectives", oath: "Member's Oath",
     jaihind: "Jai Hind",
-    mbrApp: "Download MBR APP",
+    mbrApp: "New Member Registration",
     obj1: "Strive to provide basic facilities (education, healthcare, environment) for the people of Chitvel Mandal.",
     obj2: "Foster patriotism among youth beyond caste, religion, region, class and politics. Undertake selfless service with humanity.",
     obj3: "Assist government officials in emergencies. Recognize and honour their integrity.",
@@ -104,7 +105,7 @@ const L: Record<CardLang, Record<string, string>> = {
     president: "अध्यक्ष", active: "● सक्रिय सदस्य", inactive: "● निष्क्रिय",
     objectives: "मुख्य उद्देश्य", oath: "सदस्य की शपथ",
     jaihind: "जय हिन्द",
-    mbrApp: "MBR APP डाउनलोड",
+    mbrApp: "नए सदस्य पंजीकरण",
     obj1: "चित्वेल मंडल के लोगों के लिए मौलिक सुविधाओं (शिक्षा, चिकित्सा, पर्यावरण) की व्यवस्था का प्रयास।",
     obj2: "जाति, धर्म, क्षेत्र, वर्ग और राजनीति से ऊपर उठकर युवाओं में देशभक्ति बढ़ाना। मानवता के साथ निःस्वार्थ सेवा करना।",
     obj3: "आपातकालीन परिस्थितियों में सरकारी अधिकारियों को सहायता देना। उनकी ईमानदारी को पहचानकर सम्मानित करना।",
@@ -117,7 +118,6 @@ const SOCIETY_EMAIL = "chitvelhelplinesociety@gmail.com";
 const SOCIETY_PHONE = "+91 90595 94989";
 
 const SLOGAN = "॥ మానవసేవే మాధవసేవ ॥";
-const MBR_APP_URL = "https://mbrapp.lovable.app";
 
 // Intrinsic card size at 96dpi: 85.6mm × 54mm ≈ 323.6px × 204.1px
 const CARD_PX_W = 323.6;
@@ -200,7 +200,9 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
         phone: member.phone,
       });
       const qr = await QRCode.toDataURL(payload, { margin: 0, width: 240 });
-      const appQr = await QRCode.toDataURL(MBR_APP_URL, { margin: 0, width: 240 });
+      const origin = typeof window !== "undefined" ? window.location.origin : "";
+      const regUrl = `${origin}/member/register${org?.org_code ? `?code=${encodeURIComponent(org.org_code)}` : ""}`;
+      const appQr = await QRCode.toDataURL(regUrl, { margin: 0, width: 240 });
       if (!cancel) {
         setQrDataUrl(qr);
         setAppQrUrl(appQr);
