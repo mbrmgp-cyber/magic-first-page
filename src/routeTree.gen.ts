@@ -26,6 +26,7 @@ import { Route as AuthenticatedOrgCommitteeRouteImport } from './routes/_authent
 import { Route as AuthenticatedOrgChatRouteImport } from './routes/_authenticated/org.chat'
 import { Route as AuthenticatedOrgAccountsRouteImport } from './routes/_authenticated/org.accounts'
 import { Route as AuthenticatedMemberPendingRouteImport } from './routes/_authenticated/member.pending'
+import { Route as AuthenticatedMemberLedgerRouteImport } from './routes/_authenticated/member.ledger'
 import { Route as AuthenticatedMemberDashboardRouteImport } from './routes/_authenticated/member.dashboard'
 
 const AuthRoute = AuthRouteImport.update({
@@ -117,6 +118,12 @@ const AuthenticatedMemberPendingRoute =
     path: '/member/pending',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedMemberLedgerRoute =
+  AuthenticatedMemberLedgerRouteImport.update({
+    id: '/member/ledger',
+    path: '/member/ledger',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMemberDashboardRoute =
   AuthenticatedMemberDashboardRouteImport.update({
     id: '/member/dashboard',
@@ -131,6 +138,7 @@ export interface FileRoutesByFullPath {
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
   '/member/dashboard': typeof AuthenticatedMemberDashboardRoute
+  '/member/ledger': typeof AuthenticatedMemberLedgerRoute
   '/member/pending': typeof AuthenticatedMemberPendingRoute
   '/org/accounts': typeof AuthenticatedOrgAccountsRoute
   '/org/chat': typeof AuthenticatedOrgChatRoute
@@ -150,6 +158,7 @@ export interface FileRoutesByTo {
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
   '/member/dashboard': typeof AuthenticatedMemberDashboardRoute
+  '/member/ledger': typeof AuthenticatedMemberLedgerRoute
   '/member/pending': typeof AuthenticatedMemberPendingRoute
   '/org/accounts': typeof AuthenticatedOrgAccountsRoute
   '/org/chat': typeof AuthenticatedOrgChatRoute
@@ -171,6 +180,7 @@ export interface FileRoutesById {
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
   '/_authenticated/member/dashboard': typeof AuthenticatedMemberDashboardRoute
+  '/_authenticated/member/ledger': typeof AuthenticatedMemberLedgerRoute
   '/_authenticated/member/pending': typeof AuthenticatedMemberPendingRoute
   '/_authenticated/org/accounts': typeof AuthenticatedOrgAccountsRoute
   '/_authenticated/org/chat': typeof AuthenticatedOrgChatRoute
@@ -192,6 +202,7 @@ export interface FileRouteTypes {
     | '/member/register'
     | '/org/register'
     | '/member/dashboard'
+    | '/member/ledger'
     | '/member/pending'
     | '/org/accounts'
     | '/org/chat'
@@ -211,6 +222,7 @@ export interface FileRouteTypes {
     | '/member/register'
     | '/org/register'
     | '/member/dashboard'
+    | '/member/ledger'
     | '/member/pending'
     | '/org/accounts'
     | '/org/chat'
@@ -231,6 +243,7 @@ export interface FileRouteTypes {
     | '/member/register'
     | '/org/register'
     | '/_authenticated/member/dashboard'
+    | '/_authenticated/member/ledger'
     | '/_authenticated/member/pending'
     | '/_authenticated/org/accounts'
     | '/_authenticated/org/chat'
@@ -373,6 +386,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMemberPendingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/member/ledger': {
+      id: '/_authenticated/member/ledger'
+      path: '/member/ledger'
+      fullPath: '/member/ledger'
+      preLoaderRoute: typeof AuthenticatedMemberLedgerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/member/dashboard': {
       id: '/_authenticated/member/dashboard'
       path: '/member/dashboard'
@@ -386,6 +406,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedMemberDashboardRoute: typeof AuthenticatedMemberDashboardRoute
+  AuthenticatedMemberLedgerRoute: typeof AuthenticatedMemberLedgerRoute
   AuthenticatedMemberPendingRoute: typeof AuthenticatedMemberPendingRoute
   AuthenticatedOrgAccountsRoute: typeof AuthenticatedOrgAccountsRoute
   AuthenticatedOrgChatRoute: typeof AuthenticatedOrgChatRoute
@@ -402,6 +423,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedMemberDashboardRoute: AuthenticatedMemberDashboardRoute,
+  AuthenticatedMemberLedgerRoute: AuthenticatedMemberLedgerRoute,
   AuthenticatedMemberPendingRoute: AuthenticatedMemberPendingRoute,
   AuthenticatedOrgAccountsRoute: AuthenticatedOrgAccountsRoute,
   AuthenticatedOrgChatRoute: AuthenticatedOrgChatRoute,
