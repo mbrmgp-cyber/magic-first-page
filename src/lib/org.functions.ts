@@ -1,9 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getRequest } from "@tanstack/react-start/server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import QRCode from "qrcode";
 
-function getAppOrigin() {
+async function getAppOrigin() {
+  const { getRequest } = await import("@tanstack/react-start/server");
   const request = getRequest();
   const origin = request?.headers.get("origin");
   if (origin) return origin;
@@ -306,7 +306,7 @@ export const reviewMember = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { member_id: string; action: "approve" | "reject" }) => d)
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
+    const { supabase } = context;
     const status = data.action === "approve" ? "approved" : "rejected";
     const { data: memberRow, error } = await supabase
       .from("members")
@@ -324,6 +324,7 @@ export const reviewMember = createServerFn({ method: "POST" })
       if (!memberUserId) {
         const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({
           email: memberRow.email,
+          password: `MBR-${crypto.randomUUID()}`,
           email_confirm: true,
           user_metadata: { role: "member" },
         });
@@ -331,7 +332,7 @@ export const reviewMember = createServerFn({ method: "POST" })
         memberUserId = created.user?.id;
       }
       if (memberUserId) {
-        const redirectTo = `${getAppOrigin()}/auth?lang=${encodeURIComponent(lang)}`;
+        const redirectTo = `${await getAppOrigin()}/auth?lang=${encodeURIComponent(lang)}`;
         const { error: linkError } = await supabaseAdmin.auth.signInWithOtp({
           email: memberRow.email,
           options: { shouldCreateUser: false, emailRedirectTo: redirectTo },
