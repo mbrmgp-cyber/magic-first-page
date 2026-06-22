@@ -255,13 +255,45 @@ export const reviewMember = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { member_id: string; action: "approve" | "reject" }) => d)
   .handler(async ({ data, context }) => {
-    const { supabase } = context;
+    const { supabase, userId } = context;
     const status = data.action === "approve" ? "approved" : "rejected";
-    const { error } = await supabase
+    const { data: memberRow, error } = await supabase
       .from("members")
       .update({ status, reviewed_at: new Date().toISOString() })
-      .eq("id", data.member_id);
+      .eq("id", data.member_id)
+      .select("id, email, preferred_lang")
+      .single();
     if (error) throw new Error(error.message);
+    if (data.action === "approve" && memberRow?.email) {
+      const lang = (memberRow as any).preferred_lang || "te";
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: users } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+      const existingUser = users.users.find((u) => u.email?.toLowerCase() === memberRow.email.toLowerCase());
+      let memberUserId = existingUser?.id;
+      if (!memberUserId) {
+        const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({
+          email: memberRow.email,
+          email_confirm: true,
+          user_metadata: { role: "member" },
+        });
+        if (createError) throw new Error(createError.message);
+        memberUserId = created.user?.id;
+      }
+      if (memberUserId) {
+        const { error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+          type: "magiclink",
+          email: memberRow.email,
+          options: { redirectTo: `/auth?lang=${encodeURIComponent(lang)}` },
+        });
+        if (linkError) throw new Error(linkError.message);
+        const { error: claimError } = await supabaseAdmin
+          .from("members")
+          .update({ user_id: memberUserId })
+          .eq("id", memberRow.id)
+          .is("user_id", null);
+        if (claimError) throw new Error(claimError.message);
+      }
+    }
     return { ok: true };
   });
 
