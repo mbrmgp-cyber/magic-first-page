@@ -29,7 +29,7 @@ function fileToDataUrl(file: File) {
   });
 }
 
-function FilePicker({ label, value, onChange, accept = "image/*" }: {
+function FilePicker({ label, value, onChange, accept = "image/png,image/jpeg,image/jpg,image/webp,image/*" }: {
   label: string; value?: string; onChange: (url: string) => void; accept?: string;
 }) {
   const { t } = useI18n();
@@ -158,6 +158,7 @@ function OrgRegister() {
           address: f.address.trim() || undefined,
           aadhaar_url: f.aadhaar_url || undefined,
         })),
+        client_uploads: true,
       }});
 
       setResult(res);
