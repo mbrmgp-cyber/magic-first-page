@@ -505,7 +505,7 @@ function CardBack({
       <div style={{ padding: "1.5mm 2.5mm", height: "52mm", display: "flex", flexDirection: "column", gap: "1mm" }}>
         {/* Objectives */}
         <div>
-          <div style={{ fontSize: "2.5mm", fontWeight: 800, color: "#000080", borderBottom: "0.2mm solid #FF9933", paddingBottom: "0.2mm", marginBottom: "0.5mm" }}>
+          <div style={{ fontSize: "2.5mm", fontWeight: 800, color: "#000080", borderBottom: `0.2mm solid ${accent}`, paddingBottom: "0.2mm", marginBottom: "0.5mm" }}>
             {t.objectives}
           </div>
           <ol style={{ margin: 0, paddingLeft: "3.5mm", fontSize: "2mm", lineHeight: 1.3, color: "#222" }}>
