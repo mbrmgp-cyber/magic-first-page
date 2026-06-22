@@ -62,7 +62,7 @@ function DesignsPage() {
   const org: any = orgQ.data?.org;
   const theme = useMemo(() => resolveTheme(org), [org]);
 
-  const [idPick, setIdPick] = useState<IdLayout>("portrait-classic");
+  const [idPick, setIdPick] = useState<IdLayout>("official-saffron");
   const [letterPick, setLetterPick] = useState<LetterLayout>("standard-header");
   const [generating, setGenerating] = useState(false);
 
