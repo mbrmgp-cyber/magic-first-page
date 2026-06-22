@@ -238,7 +238,7 @@ function Dashboard() {
             )}
           </button>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={() => setSettingsOpen(true)} className="text-zinc-200 hover:bg-zinc-900 hover:text-white" aria-label="Settings">
+            <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/org/theme" })} className="text-zinc-200 hover:bg-zinc-900 hover:text-white" aria-label="Theme & Design">
               <Settings className="h-4 w-4" />
             </Button>
             <Button variant="ghost" size="sm" onClick={logout} className="text-zinc-200 hover:bg-zinc-900 hover:text-white">
