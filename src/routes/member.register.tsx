@@ -35,11 +35,11 @@ function MemberRegister() {
   const lt = (en: string, te: string) => localizeText({ en, te }, lang);
   const search = Route.useSearch();
 
-  const [stage, setStage] = useState<"code" | "scan" | "form" | "done">("code");
-  const [code, setCode] = useState("");
+  const [stage, setStage] = useState<"code" | "scan" | "form" | "done">(search.code ? "form" : "code");
+  const [code, setCode] = useState(search.code?.toUpperCase() ?? "");
   const [orgId, setOrgId] = useState<string | null>(null);
   const [orgName, setOrgName] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(!!search.code);
   const qrFileRef = useRef<HTMLInputElement>(null);
   const qrHostId = useRef(`qr-file-${Math.random().toString(36).slice(2)}`);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
