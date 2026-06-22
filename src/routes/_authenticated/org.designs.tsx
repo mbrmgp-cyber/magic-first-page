@@ -19,7 +19,7 @@ export const Route = createFileRoute("/_authenticated/org/designs")({
 });
 
 type IdLayout =
-  | "portrait-classic"
+  | "official-saffron"
   | "landscape-corporate"
   | "portrait-qr"
   | "split-design"
@@ -32,10 +32,11 @@ type Tpl<T extends string> = {
   en: string;
   te: string;
   comingSoon?: boolean;
+  featured?: boolean;
 };
 
 const ID_TEMPLATES: Tpl<IdLayout>[] = [
-  { id: "portrait-classic",     en: "Portrait Classic",     te: "పోర్ట్రెయిట్ క్లాసిక్" },
+  { id: "official-saffron",     en: "Official Saffron (Active)", te: "అధికారిక సాఫ్రాన్", featured: true },
   { id: "landscape-corporate",  en: "Landscape Corporate",  te: "ల్యాండ్‌స్కేప్ కార్పొరేట్" },
   { id: "portrait-qr",          en: "Portrait with QR",     te: "QR తో పోర్ట్రెయిట్" },
   { id: "split-design",         en: "Split Design",         te: "స్ప్లిట్ డిజైన్" },
