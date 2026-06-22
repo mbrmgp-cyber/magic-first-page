@@ -10,9 +10,10 @@ import { toast } from "sonner";
 import {
   ArrowLeft, Save, Palette, Square, Frame, Sparkles, MousePointerClick,
   Type, AlignLeft, BookOpen, Users, Briefcase, IdCard,
+  AlignCenter, AlignRight, Quote,
 } from "lucide-react";
 import {
-  DEFAULT_THEME, HEAD_FONTS, type ThemeSettings, resolveTheme,
+  DEFAULT_THEME, HEAD_FONTS, TEXT_ALIGNS, type TextAlign, type ThemeSettings, resolveTheme,
 } from "@/lib/theme";
 
 export const Route = createFileRoute("/_authenticated/org/theme")({
@@ -30,6 +31,8 @@ const COLOR_FIELDS: Field[] = [
   { key: "buttonBg", en: "Button Fill", te: "బటన్ కలర్", icon: MousePointerClick },
   { key: "buttonText", en: "Button Text", te: "బటన్ టెక్స్ట్", icon: Type },
 ];
+
+const ALIGN_ICON: Record<TextAlign, any> = { left: AlignLeft, center: AlignCenter, right: AlignRight };
 
 function ColorRow({ f, value, onChange }: { f: Field; value: string; onChange: (v: string) => void }) {
   const Icon = f.icon;
@@ -83,6 +86,7 @@ function OrgThemePage() {
     ["--tbtn" as any]: t.buttonBg,
     ["--tbtnText" as any]: t.buttonText,
     ["--thead" as any]: t.headColor,
+    ["--tsub" as any]: t.subColor,
     ["--tsmall" as any]: t.smallColor,
   }), [t]);
 
@@ -104,6 +108,10 @@ function OrgThemePage() {
     }
   }
 
+  const orgName = org?.name || "Chitvel Help Line Society";
+  const orgSlogan = org?.slogan || "॥ మానవసేవే మాధవసేవ ॥";
+  const orgReg = org?.gov_reg_number || "356/16";
+
   return (
     <div className="min-h-screen bg-black text-white pb-12" style={{ fontFamily: `${t.headFont}, system-ui, sans-serif` }}>
       <div className="max-w-3xl mx-auto p-4 space-y-5">
@@ -118,26 +126,44 @@ function OrgThemePage() {
           <div className="w-12" />
         </div>
 
-        {/* Live preview */}
-        <Card className="p-4 space-y-4 border" style={{ background: t.box, borderColor: t.border, boxShadow: `0 0 32px ${t.icon}22` }}>
-          <p className="text-[11px] uppercase tracking-wide" style={{ color: t.smallColor, fontSize: t.smallSize }}>
+        {/* Live preview — mirrors dashboard layout */}
+        <Card className="p-4 space-y-3 border bg-zinc-950 border-zinc-800">
+          <p className="text-[11px] uppercase tracking-wide text-white/80">
             Live Preview / ప్రివ్యూ
           </p>
-          <div className="rounded-xl p-4 space-y-3" style={{ background: t.bg, border: `1px solid ${t.border}` }}>
-            <h2 style={{ color: t.headColor, fontFamily: `${t.headFont}, system-ui, sans-serif` }} className="text-xl font-bold">
-              {org?.name || "Your Society"}
-            </h2>
-            <p style={{ color: t.smallColor, fontSize: t.smallSize }}>
-              Reg No: <span style={{ color: t.icon }}>{org?.gov_reg_number || "356/16"}</span>
-            </p>
+          <div className="rounded-xl p-3 space-y-3" style={{ background: t.bg, border: `1px solid ${t.border}` }}>
+            {/* Headline card (mirrors org.dashboard) */}
+            <div className="rounded-lg p-3 border" style={{ background: t.box, borderColor: t.border, boxShadow: `0 0 24px ${t.icon}22` }}>
+              <div className={`flex items-start gap-3 ${t.headAlign === "right" ? "flex-row-reverse" : ""}`}>
+                <div className="w-12 h-12 shrink-0 rounded-full border flex items-center justify-center"
+                  style={{ background: t.bg, borderColor: t.border, color: t.smallColor }}>
+                  <Sparkles className="w-5 h-5" style={{ color: t.icon }} />
+                </div>
+                <div className="flex-1 min-w-0" style={{ textAlign: t.headAlign }}>
+                  <h2 className="font-extrabold leading-tight tracking-tight text-base"
+                    style={{ color: t.headColor, fontFamily: `${t.headFont}, system-ui, sans-serif` }}>
+                    {orgName}
+                  </h2>
+                  <p className="italic mt-0.5 text-[12px]"
+                    style={{ color: t.subColor, fontFamily: `${t.subFont}, system-ui, sans-serif` }}>
+                    {orgSlogan}
+                  </p>
+                  <p className="mt-0.5" style={{ color: t.smallColor, fontSize: t.smallSize }}>
+                    Reg No: <span style={{ color: t.icon }}>{orgReg}</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Menu tiles */}
             <div className="grid grid-cols-3 gap-2">
               {[
                 { i: BookOpen, l: "Rules" },
                 { i: Users, l: "Members" },
                 { i: Briefcase, l: "Committee" },
               ].map((x) => (
-                <div key={x.l} className="rounded-lg p-3 flex flex-col items-center gap-2"
-                  style={{ background: t.box, border: `1px solid ${t.border}` }}>
+                <div key={x.l} className="rounded-lg p-3 flex flex-col items-center gap-2 border"
+                  style={{ background: t.box, borderColor: t.border }}>
                   <div className="h-9 w-9 rounded-md flex items-center justify-center" style={{ background: `${t.icon}22` }}>
                     <x.i className="h-5 w-5" style={{ color: t.icon }} />
                   </div>
@@ -145,7 +171,9 @@ function OrgThemePage() {
                 </div>
               ))}
             </div>
-            <div className="rounded-lg p-3 flex items-center gap-3" style={{ background: t.box, border: `1px solid ${t.border}` }}>
+
+            {/* ID card row */}
+            <div className="rounded-lg p-3 flex items-center gap-3 border" style={{ background: t.box, borderColor: t.border }}>
               <IdCard className="h-5 w-5" style={{ color: t.icon }} />
               <div className="flex-1">
                 <p style={{ color: t.headColor }} className="text-sm font-semibold">Member ID Card</p>
@@ -156,6 +184,32 @@ function OrgThemePage() {
                 Action
               </button>
             </div>
+          </div>
+        </Card>
+
+        {/* Text alignment */}
+        <Card className="bg-zinc-950 border-zinc-800 p-4 space-y-3">
+          <div className="flex items-center gap-2 text-sm font-semibold text-white">
+            <AlignCenter className="h-4 w-4" style={{ color: t.icon }} />
+            Header Text Alignment / టెక్స్ట్ అలైన్‌మెంట్
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {TEXT_ALIGNS.map((a) => {
+              const Icon = ALIGN_ICON[a.value];
+              const active = t.headAlign === a.value;
+              return (
+                <button key={a.value} onClick={() => set("headAlign", a.value)}
+                  className="rounded-lg border p-3 flex flex-col items-center gap-1 transition"
+                  style={{
+                    borderColor: active ? t.icon : "#27272a",
+                    background: active ? `${t.icon}1a` : "transparent",
+                  }}>
+                  <Icon className="h-5 w-5" style={{ color: active ? t.icon : "#a1a1aa" }} />
+                  <span className="text-xs font-semibold text-white">{a.en}</span>
+                  <span className="text-[10px] text-zinc-400">{a.te}</span>
+                </button>
+              );
+            })}
           </div>
         </Card>
 
@@ -200,6 +254,35 @@ function OrgThemePage() {
           </div>
         </Card>
 
+        {/* Sub-title style */}
+        <Card className="bg-zinc-950 border-zinc-800 p-4 space-y-3">
+          <div className="flex items-center gap-2 text-sm font-semibold text-white">
+            <Quote className="h-4 w-4" style={{ color: t.icon }} />
+            Sub-Title Style &amp; Color / సబ్‌టైటిల్ స్టైల్ &amp; కలర్
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-zinc-400 w-16">Color</span>
+            <input type="color" value={t.subColor} onChange={(e) => set("subColor", e.target.value)}
+              className="h-9 w-12 rounded cursor-pointer bg-transparent border border-zinc-700" />
+            <Input value={t.subColor} onChange={(e) => set("subColor", e.target.value)}
+              className="bg-zinc-900 border-zinc-700 text-white font-mono w-24 h-9" maxLength={7} />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {HEAD_FONTS.map((f) => (
+              <button key={f.value} onClick={() => set("subFont", f.value)}
+                className="rounded-lg border p-3 text-left transition"
+                style={{
+                  borderColor: t.subFont === f.value ? t.icon : "#27272a",
+                  background: t.subFont === f.value ? `${t.icon}1a` : "transparent",
+                  fontFamily: `${f.value}, system-ui, sans-serif`,
+                }}>
+                <div className="text-sm font-semibold text-white italic">{f.label}</div>
+                <div className="text-[11px] italic" style={{ color: t.subColor }}>॥ మానవసేవే మాధవసేవ ॥</div>
+              </button>
+            ))}
+          </div>
+        </Card>
+
         {/* Small text */}
         <Card className="bg-zinc-950 border-zinc-800 p-4 space-y-3">
           <div className="flex items-center gap-2 text-sm font-semibold text-white">
@@ -217,7 +300,7 @@ function OrgThemePage() {
             <span className="text-xs text-zinc-400 w-16">Size</span>
             <input type="range" min={10} max={16} step={1} value={t.smallSize}
               onChange={(e) => set("smallSize", parseInt(e.target.value))}
-              className="flex-1 accent-[var(--ticon)]" style={{ accentColor: t.icon }} />
+              className="flex-1" style={{ accentColor: t.icon }} />
             <span className="font-mono text-xs text-zinc-300 w-10 text-right">{t.smallSize}px</span>
           </div>
           <p style={{ color: t.smallColor, fontSize: t.smallSize }} className="pt-1">
