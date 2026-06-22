@@ -355,6 +355,96 @@ function IdThumb({ layout, theme }: { layout: IdLayout; theme: Required<ThemeSet
       </div>
     );
   }
+  if (layout === "modern-dark") {
+    return (
+      <div style={{ ...common, flexDirection: "column", background: "#0f172a", borderColor: c }}>
+        <div style={{ height: "28%", borderBottom: `2px solid ${c}`, padding: 3 }}>
+          <div style={{ height: 3, background: c, width: "70%" }} />
+          <div style={{ height: 2, background: "#94a3b8", width: "50%", marginTop: 2 }} />
+        </div>
+        <div style={{ flex: 1, display: "flex", padding: 3, gap: 3 }}>
+          <div style={{ width: "30%", background: "#1e293b", borderRadius: 2, border: `1px solid ${c}` }} />
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
+            <div style={{ height: 3, background: "#e2e8f0", width: "80%" }} />
+            <div style={{ height: 2, background: "#94a3b8", width: "60%" }} />
+            <div style={{ height: 2, background: "#94a3b8", width: "70%" }} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (layout === "elegant-gold") {
+    const gold = "#c9a227";
+    return (
+      <div style={{ ...common, padding: 2, background: gold }}>
+        <div style={{ flex: 1, background: "#fffdf6", borderRadius: 3, border: `1px solid ${gold}`, padding: 3, display: "flex", flexDirection: "column", gap: 2 }}>
+          <div style={{ height: 3, background: "#7a5b00", width: "70%", margin: "0 auto" }} />
+          <div style={{ display: "flex", gap: 3, flex: 1 }}>
+            <div style={{ width: "30%", background: "#f4ead0", borderRadius: 2, border: `1px solid ${gold}` }} />
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
+              <div style={{ height: 2, background: "#7a5b00", width: "75%" }} />
+              <div style={{ height: 2, background: "#b89544", width: "60%" }} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (layout === "photo-strip") {
+    return (
+      <div style={{ ...common, flexDirection: "row" }}>
+        <div style={{ width: "32%", background: "#e5e5e5", borderRight: `3px solid ${c}`,
+          display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#999" }} />
+        </div>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+          <div style={{ height: "32%", background: c, padding: 2 }}>
+            <div style={{ height: 3, background: "#fff", width: "75%" }} />
+            <div style={{ height: 2, background: "#fff", opacity: 0.8, width: "55%", marginTop: 1 }} />
+          </div>
+          <div style={{ flex: 1, padding: 3, display: "flex", flexDirection: "column", gap: 2 }}>
+            <div style={{ height: 2, background: "#333", width: "80%" }} />
+            <div style={{ height: 2, background: "#888", width: "60%" }} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (layout === "minimal-mono") {
+    return (
+      <div style={{ ...common, flexDirection: "column", border: "2px solid #111" }}>
+        <div style={{ borderBottom: "2px solid #111", padding: 3 }}>
+          <div style={{ height: 3, background: "#111", width: "80%" }} />
+          <div style={{ height: 2, background: "#444", width: "55%", marginTop: 2 }} />
+        </div>
+        <div style={{ flex: 1, display: "flex", padding: 3, gap: 3 }}>
+          <div style={{ width: "30%", border: "1px solid #111", background: "#fafafa" }} />
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
+            <div style={{ height: 2, background: "#111", width: "75%" }} />
+            <div style={{ height: 2, background: "#555", width: "55%" }} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (layout === "vertical-band") {
+    return (
+      <div style={{ ...common, flexDirection: "row" }}>
+        <div style={{ width: 8, background: c }} />
+        <div style={{ flex: 1, padding: 3, display: "flex", flexDirection: "column", gap: 2 }}>
+          <div style={{ height: 3, background: c, width: "70%" }} />
+          <div style={{ height: 2, background: "#888", width: "55%" }} />
+          <div style={{ display: "flex", gap: 3, flex: 1, marginTop: 2 }}>
+            <div style={{ width: "30%", background: "#e5e5e5", borderRadius: 2 }} />
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
+              <div style={{ height: 2, background: "#333" }} />
+              <div style={{ height: 2, background: "#888", width: "70%" }} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   // official-saffron — miniature of the real ID card
   return (
     <div style={{ ...common, flexDirection: "column", border: `1px solid #000080` }}>
