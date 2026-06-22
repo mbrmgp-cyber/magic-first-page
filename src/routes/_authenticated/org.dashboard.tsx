@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 import { localizeText, transliterateText, useI18n } from "@/lib/i18n";
+import { resolveTheme } from "@/lib/theme";
 
 export const Route = createFileRoute("/_authenticated/org/dashboard")({
   head: () => ({ meta: [{ title: "Society Dashboard — MBR App" }] }),
