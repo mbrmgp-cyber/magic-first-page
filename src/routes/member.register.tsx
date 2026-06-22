@@ -185,7 +185,7 @@ function MemberRegister() {
                       ? <img src={photoPreview} className="h-full w-full object-cover" />
                       : <Camera className="w-7 h-7 text-[#ff8c28]" />}
                   </div>
-                  <input type="file" accept="image/*" capture="user" onChange={onPhoto}
+                  <input type="file" accept="image/*" onChange={onPhoto}
                     className="absolute inset-0 opacity-0 cursor-pointer" />
                 </div>
                 <span className="text-xs text-zinc-400">{lt("Upload Member Photo", "సభ్యుడి ఫోటో")}</span>
