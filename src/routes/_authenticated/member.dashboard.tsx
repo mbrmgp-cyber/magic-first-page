@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  LogOut, IdCard, BookOpen, Wallet, Briefcase, MessageSquare, QrCode as QrIcon,
+  LogOut, IdCard, BookOpen, Wallet, Briefcase, MessageSquare, ShieldCheck, User, ScanLine,
 } from "lucide-react";
 import QRCode from "qrcode";
 
