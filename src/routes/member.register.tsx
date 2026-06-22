@@ -70,6 +70,15 @@ function MemberRegister() {
     } finally { setLoading(false); }
   }
 
+  // Auto-verify when ?code=ABC is supplied (e.g. from ID card back QR)
+  useEffect(() => {
+    if (search.code && stage === "code") {
+      setCode(search.code.toUpperCase());
+      void verifyCode(search.code);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search.code]);
+
   function onPhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
     if (!f) return;
