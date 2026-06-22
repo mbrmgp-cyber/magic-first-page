@@ -430,12 +430,31 @@ function CardFront({
           {/* Signature pinned bottom-right */}
           <div style={{ marginTop: "auto", textAlign: "right" }}>
             {sigUrl ? (
-              <img src={sigUrl} alt="sig" style={{ height: "4.5mm", maxWidth: "28mm", objectFit: "contain", marginLeft: "auto", display: "block" }} />
+              <img src={sigUrl} alt="sig" style={{ height: "4.8mm", maxWidth: "28mm", objectFit: "contain", marginLeft: "auto", display: "block" }} />
             ) : (
-              <div style={{ height: "4.5mm" }} />
+              <div
+                style={{
+                  height: "4.8mm",
+                  fontFamily: '"Dancing Script","Brush Script MT","Lucida Handwriting","Segoe Script",cursive',
+                  fontStyle: "italic",
+                  fontWeight: 700,
+                  fontSize: "4.2mm",
+                  color: "#000080",
+                  textAlign: "right",
+                  lineHeight: 1,
+                  transform: "rotate(-4deg)",
+                  transformOrigin: "right bottom",
+                  paddingRight: "1mm",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {tr(org?.president_name ?? "M. Bhaskar Reddy", lang)}
+              </div>
             )}
             <div style={{ borderTop: "0.2mm solid #000080", marginTop: "0.2mm", paddingTop: "0.2mm", fontSize: "1.8mm", color: "#000080", fontWeight: 700, lineHeight: 1.1 }}>
-              {tr(org?.president_name ?? "—", lang)}
+              {tr(org?.president_name ?? "M. Bhaskar Reddy", lang)}
               <div style={{ fontSize: "1.5mm", color: "#666", fontWeight: 500 }}>{t.president}</div>
             </div>
           </div>
