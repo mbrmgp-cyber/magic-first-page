@@ -257,18 +257,19 @@ function Dashboard() {
         </div>
 
         {/* Society headline card */}
-        <Card className="p-4 bg-zinc-950 border-zinc-800 shadow-[0_0_40px_rgba(255,140,40,0.1)]">
+        <Card className="p-4 border" style={{ background: theme.box, borderColor: theme.border, boxShadow: `0 0 40px ${theme.icon}1a` }}>
           <div className="flex items-start gap-4">
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
-              className="relative w-20 h-20 shrink-0 rounded-full bg-zinc-900 flex items-center justify-center overflow-hidden group border border-zinc-700"
+              className="relative w-20 h-20 shrink-0 rounded-full flex items-center justify-center overflow-hidden group border"
+              style={{ background: theme.bg, borderColor: theme.border }}
             >
               {org.logo_url ? (
                 <img src={org.logo_url} alt={`${org.name} logo`} className="w-full h-full object-cover" />
               ) : (
-                <span className="text-2xl font-bold text-zinc-400">
+                <span className="text-2xl font-bold" style={{ color: theme.smallColor }}>
                   {org.name.split(" ").map(w => w[0]).join("").slice(0, 3).toUpperCase()}
                 </span>
               )}
@@ -277,13 +278,13 @@ function Dashboard() {
               </span>
             </button>
             <div className="min-w-0 flex-1">
-              <h1 className="font-extrabold leading-tight tracking-tight text-white" style={{ fontSize: "clamp(0.95rem, 4.6vw, 1.6rem)" }}>
+              <h1 className="font-extrabold leading-tight tracking-tight" style={{ fontSize: "clamp(0.95rem, 4.6vw, 1.6rem)", color: theme.headColor }}>
                 {transliterateText(org.name, lang)}
               </h1>
-              {org.slogan && <p className="mt-1 text-sm text-zinc-400 italic">{transliterateText(org.slogan, lang)}</p>}
+              {org.slogan && <p className="mt-1 italic" style={{ color: theme.smallColor, fontSize: theme.smallSize }}>{transliterateText(org.slogan, lang)}</p>}
               {org.gov_reg_number && (
-                <p className="mt-1 text-xs text-zinc-500">
-                  {lt("Reg No", "నమోదు సంఖ్య")}: <span className="font-mono text-[#ff8c28]">{org.gov_reg_number}</span>
+                <p className="mt-1" style={{ color: theme.smallColor, fontSize: theme.smallSize }}>
+                  {lt("Reg No", "నమోదు సంఖ్య")}: <span className="font-mono" style={{ color: theme.icon }}>{org.gov_reg_number}</span>
                 </p>
               )}
             </div>
@@ -291,11 +292,11 @@ function Dashboard() {
         </Card>
 
         {/* Accounts Summary — unified card */}
-        <Card className="p-4 bg-zinc-950 border-zinc-800 shadow-[0_0_30px_rgba(255,140,40,0.1)]">
+        <Card className="p-4 border" style={{ background: theme.box, borderColor: theme.border, boxShadow: `0 0 30px ${theme.icon}1a` }}>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-white">{lt("Accounts Summary", "అకౌంట్స్ వివరాలు")}</h2>
+            <h2 className="text-sm font-semibold" style={{ color: theme.headColor }}>{lt("Accounts Summary", "అకౌంట్స్ వివరాలు")}</h2>
           </div>
-          <div className="flex items-stretch divide-x divide-zinc-800">
+          <div className="flex items-stretch divide-x" style={{ borderColor: theme.border }}>
             <MetricItem label={lt("Total Funds", "మొత్తం నిధులు")} sub="" value="₹ 0" />
             <MetricItem label={lt("Loans Disbursed", "మార్కెట్ అప్పులు")} sub="" value="₹ 0" />
             <MetricItem label={lt("Interest Collected", "వచ్చిన వడ్డీ")} sub="" value="₹ 0" />
@@ -306,19 +307,23 @@ function Dashboard() {
         <div className="grid grid-cols-2 gap-3">
           {MENU.map((m) => (
             <Link key={m.to} to={m.to}>
-              <Card className="p-4 bg-zinc-950 border-zinc-800 hover:border-[#ff8c28]/60 hover:shadow-[0_0_24px_rgba(255,140,40,0.25)] transition-all cursor-pointer h-full">
+              <Card className="p-4 border transition-all cursor-pointer h-full"
+                style={{ background: theme.box, borderColor: theme.border }}
+                onMouseEnter={(e) => { e.currentTarget.style.boxShadow = `0 0 24px ${theme.icon}40`; e.currentTarget.style.borderColor = theme.icon; }}
+                onMouseLeave={(e) => { e.currentTarget.style.boxShadow = ``; e.currentTarget.style.borderColor = theme.border; }}>
                 <div className="flex flex-col items-center text-center gap-2">
-                  <div className="w-11 h-11 rounded-lg flex items-center justify-center bg-[#ff8c28]/15 border border-[#ff8c28]/40">
-                    <m.icon className="w-5 h-5 text-[#ff8c28]" />
+                  <div className="w-11 h-11 rounded-lg flex items-center justify-center border"
+                    style={{ background: `${theme.icon}26`, borderColor: `${theme.icon}66` }}>
+                    <m.icon className="w-5 h-5" style={{ color: theme.icon }} />
                   </div>
-                  <span className="font-medium text-xs leading-tight text-zinc-100">{lt(m.en, m.te)}</span>
+                  <span className="font-medium text-xs leading-tight" style={{ color: theme.headColor }}>{lt(m.en, m.te)}</span>
                 </div>
               </Card>
             </Link>
           ))}
         </div>
 
-        <p className="text-center text-xs text-zinc-500 pt-2">Org Code: <span className="font-mono text-[#ff8c28]">{org.org_code}</span></p>
+        <p className="text-center pt-2" style={{ color: theme.smallColor, fontSize: theme.smallSize }}>Org Code: <span className="font-mono" style={{ color: theme.icon }}>{org.org_code}</span></p>
       </div>
 
       {/* QR Dialog */}
