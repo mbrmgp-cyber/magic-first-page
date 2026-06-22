@@ -13,6 +13,7 @@ import { localizeText, useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/member/register")({
   head: () => ({ meta: [{ title: "Member Registration — MBR App" }] }),
+  ssr: false,
   component: MemberRegister,
 });
 
@@ -120,6 +121,7 @@ function MemberRegister() {
           bank_name: showBank ? form.bank_name || undefined : undefined,
           bank_account_number: showBank ? form.bank_account_number || undefined : undefined,
           bank_ifsc: showBank ? form.bank_ifsc || undefined : undefined,
+          preferred_lang: lang,
         },
       });
       setStage("done");
@@ -299,7 +301,7 @@ function MemberRegister() {
           <ScanLine className="h-4 w-4 mr-2" /> {lt("Scan QR with Camera", "కెమెరాతో QR స్కాన్")}
         </Button>
         <div id={qrHostId.current} className="hidden" />
-        <input ref={qrFileRef} type="file" accept="image/*" className="hidden" onChange={onQrImage} />
+        <input ref={qrFileRef} type="file" accept="image/png,image/jpeg,image/jpg,image/webp,image/*" className="hidden" onChange={onQrImage} />
         <Button type="button" onClick={() => qrFileRef.current?.click()} disabled={loading}
           className="w-full bg-zinc-900 hover:bg-zinc-800 border border-[#ff8c28]/60 text-[#ff8c28] font-semibold">
           {loading ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <ImageIcon className="h-4 w-4 mr-2" />}
