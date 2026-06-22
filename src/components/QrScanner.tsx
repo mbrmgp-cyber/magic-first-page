@@ -15,10 +15,45 @@ export async function decodeQrFromFile(file: File, elementId: string, showImage 
   // eslint-disable-next-line new-cap
   const scanner = new mod.Html5Qrcode(elementId);
   try {
-    return await scanner.scanFile(file, showImage);
+    try {
+      return await scanner.scanFile(file, showImage);
+    } catch (firstError) {
+      const prepared = await prepareQrImageForScan(file);
+      if (prepared === file) throw firstError;
+      return await scanner.scanFile(prepared, showImage);
+    }
   } finally {
     try { scanner.clear(); } catch {}
   }
+}
+
+async function prepareQrImageForScan(file: File): Promise<File> {
+  if (typeof window === "undefined" || !file.type.startsWith("image/")) return file;
+  const bitmap = await createImageBitmap(file).catch(() => null);
+  if (!bitmap) return file;
+  const side = Math.max(bitmap.width, bitmap.height, 900);
+  const canvas = document.createElement("canvas");
+  canvas.width = side;
+  canvas.height = side;
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx) return file;
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, side, side);
+  const scale = Math.min((side * 0.86) / bitmap.width, (side * 0.86) / bitmap.height);
+  const w = Math.round(bitmap.width * scale);
+  const h = Math.round(bitmap.height * scale);
+  ctx.drawImage(bitmap, Math.round((side - w) / 2), Math.round((side - h) / 2), w, h);
+  const image = ctx.getImageData(0, 0, side, side);
+  for (let i = 0; i < image.data.length; i += 4) {
+    const gray = image.data[i] * 0.299 + image.data[i + 1] * 0.587 + image.data[i + 2] * 0.114;
+    const v = gray > 145 ? 255 : 0;
+    image.data[i] = v;
+    image.data[i + 1] = v;
+    image.data[i + 2] = v;
+  }
+  ctx.putImageData(image, 0, 0);
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
+  return blob ? new File([blob], "qr-upload.png", { type: "image/png" }) : file;
 }
 
 export function QrScanner({ onScan, onError }: Props) {
@@ -83,7 +118,7 @@ export function QrScanner({ onScan, onError }: Props) {
         <input
           ref={fileRef}
           type="file"
-          accept="image/*"
+          accept="image/png,image/jpeg,image/jpg,image/webp,image/*"
           className="hidden"
           onChange={handleFile}
         />

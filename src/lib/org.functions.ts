@@ -2,6 +2,16 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import QRCode from "qrcode";
 
+async function getAppOrigin() {
+  const { getRequest } = await import("@tanstack/react-start/server");
+  const request = getRequest();
+  const origin = request?.headers.get("origin");
+  if (origin) return origin;
+  const host = request?.headers.get("x-forwarded-host") ?? request?.headers.get("host");
+  const proto = request?.headers.get("x-forwarded-proto") ?? "https";
+  return host ? `${proto}://${host}` : "";
+}
+
 function genOrgCode() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let s = "";
@@ -9,6 +19,35 @@ function genOrgCode() {
   crypto.getRandomValues(bytes);
   for (let i = 0; i < 12; i++) s += chars[bytes[i] % chars.length];
   return s;
+}
+
+async function findAuthUserIdByEmail(supabaseAdmin: any, email: string) {
+  const target = email.trim().toLowerCase();
+  for (let page = 1; page <= 20; page += 1) {
+    const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 1000 });
+    if (error) throw new Error(error.message);
+    const user = data.users.find((u: any) => u.email?.toLowerCase() === target);
+    if (user) return user.id as string;
+    if (data.users.length < 1000) break;
+  }
+  return null;
+}
+
+async function uploadImageDataUrl(supabaseAdmin: any, dataUrl: string | undefined | null, folder: string) {
+  if (!dataUrl?.startsWith("data:image/")) return dataUrl ?? null;
+  const match = dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
+  if (!match) throw new Error("Invalid image file");
+  const contentType = match[1];
+  const bytes = Uint8Array.from(atob(match[2]), (char) => char.charCodeAt(0));
+  if (bytes.byteLength > 3 * 1024 * 1024) throw new Error("Image must be under 3MB");
+  const ext = contentType.split("/")[1]?.replace("jpeg", "jpg") || "jpg";
+  const path = `public-requests/${folder}/${crypto.randomUUID()}.${ext}`;
+  const { error } = await supabaseAdmin.storage
+    .from("org-documents")
+    .upload(path, bytes, { contentType, upsert: false });
+  if (error) throw new Error(error.message);
+  const { data } = await supabaseAdmin.storage.from("org-documents").createSignedUrl(path, 60 * 60 * 24 * 365);
+  return data?.signedUrl ?? path;
 }
 
 export const registerOrganization = createServerFn({ method: "POST" })
@@ -29,10 +68,22 @@ export const registerOrganization = createServerFn({ method: "POST" })
     admin_designation?: string;
     admin_aadhaar_url?: string;
     founders?: { name: string; address?: string; aadhaar_url?: string }[];
+    client_uploads?: boolean;
   }) => d)
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const org_code = genOrgCode();
+    const supabaseAdmin = data.client_uploads ? (await import("@/integrations/supabase/client.server")).supabaseAdmin : null;
+    const uploadFolder = userId ?? org_code;
+    const logoUrl = supabaseAdmin ? await uploadImageDataUrl(supabaseAdmin, data.logo_url, `${uploadFolder}/logo`) : data.logo_url;
+    const certificateUrl = supabaseAdmin ? await uploadImageDataUrl(supabaseAdmin, data.registration_certificate_url, `${uploadFolder}/certificate`) : data.registration_certificate_url;
+    const panUrl = supabaseAdmin ? await uploadImageDataUrl(supabaseAdmin, data.pan_card_url, `${uploadFolder}/pan`) : data.pan_card_url;
+    const adminAadhaarUrl = supabaseAdmin ? await uploadImageDataUrl(supabaseAdmin, data.admin_aadhaar_url, `${uploadFolder}/admin-aadhaar`) : data.admin_aadhaar_url;
+    const founders = await Promise.all((data.founders ?? []).filter((f) => f.name?.trim()).map(async (f, i) => ({
+      name: f.name.trim(),
+      address: f.address?.trim() || undefined,
+      aadhaar_url: supabaseAdmin ? await uploadImageDataUrl(supabaseAdmin, f.aadhaar_url, `${uploadFolder}/founder-${i + 1}`) : f.aadhaar_url,
+    })));
     const { data: org, error } = await supabase
       .from("organizations")
       .insert({
@@ -41,17 +92,17 @@ export const registerOrganization = createServerFn({ method: "POST" })
         email: data.email,
         phone: data.phone ?? null,
         slogan: data.slogan ?? null,
-        logo_url: data.logo_url ?? null,
+        logo_url: logoUrl ?? null,
         gov_reg_number: data.gov_reg_number ?? null,
         is_gov_registered: data.is_gov_registered ?? true,
-        registration_certificate_url: data.registration_certificate_url ?? null,
-        pan_card_url: data.pan_card_url ?? null,
+        registration_certificate_url: certificateUrl ?? null,
+        pan_card_url: panUrl ?? null,
         bank_account_number: data.bank_account_number ?? null,
         bank_ifsc: data.bank_ifsc ?? null,
         admin_name: data.admin_name ?? null,
         admin_designation: data.admin_designation ?? null,
-        admin_aadhaar_url: data.admin_aadhaar_url ?? null,
-        founders: (data.founders ?? []).filter((f) => f.name?.trim()),
+        admin_aadhaar_url: adminAadhaarUrl ?? null,
+        founders,
         org_code,
       } as any)
       .select()
@@ -161,6 +212,7 @@ export const submitMemberRequest = createServerFn({ method: "POST" })
     bank_name?: string;
     bank_account_number?: string;
     bank_ifsc?: string;
+    preferred_lang?: string;
   }) => d)
   .handler(async ({ data }) => {
     const code = data.code.trim().toUpperCase();
@@ -209,6 +261,7 @@ export const submitMemberRequest = createServerFn({ method: "POST" })
         bank_name: data.bank_name ?? null,
         bank_account_number: data.bank_account_number ?? null,
         bank_ifsc: data.bank_ifsc ?? null,
+        preferred_lang: data.preferred_lang ?? "te",
         status: "pending",
       } as any)
       .select()
@@ -229,6 +282,46 @@ export const getMyMembership = createServerFn({ method: "GET" })
       .limit(1)
       .maybeSingle();
     return { membership: data };
+  });
+
+export const sendApprovedMemberLoginLink = createServerFn({ method: "POST" })
+  .inputValidator((d: { email: string; lang?: string }) => d)
+  .handler(async ({ data }) => {
+    const email = data.email.trim();
+    if (!email) return { sent: false as const };
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: member } = await supabaseAdmin
+      .from("members")
+      .select("id, email, user_id, preferred_lang")
+      .ilike("email", email)
+      .eq("status", "approved")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (!member) return { sent: false as const };
+    let memberUserId = (member as any).user_id ?? await findAuthUserIdByEmail(supabaseAdmin, member.email);
+    if (!memberUserId) {
+      const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({
+        email: member.email,
+        password: `MBR-${crypto.randomUUID()}`,
+        email_confirm: true,
+        user_metadata: { role: "member" },
+      });
+      if (createError) throw new Error(createError.message);
+      memberUserId = created.user?.id;
+    }
+    if (memberUserId && !(member as any).user_id) {
+      const { error: claimError } = await supabaseAdmin.from("members").update({ user_id: memberUserId }).eq("id", member.id);
+      if (claimError) throw new Error(claimError.message);
+    }
+    const lang = data.lang || (member as any).preferred_lang || "te";
+    const redirectTo = `${await getAppOrigin()}/auth?lang=${encodeURIComponent(lang)}`;
+    const { error } = await supabaseAdmin.auth.signInWithOtp({
+      email: member.email,
+      options: { shouldCreateUser: false, emailRedirectTo: redirectTo },
+    });
+    if (error) throw new Error(error.message);
+    return { sent: true as const };
   });
 
 export const listOrgMembers = createServerFn({ method: "GET" })
@@ -255,11 +348,42 @@ export const reviewMember = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase } = context;
     const status = data.action === "approve" ? "approved" : "rejected";
-    const { error } = await supabase
+    const { data: memberRow, error } = await supabase
       .from("members")
       .update({ status, reviewed_at: new Date().toISOString() })
-      .eq("id", data.member_id);
+      .eq("id", data.member_id)
+      .select("id, email, preferred_lang")
+      .single();
     if (error) throw new Error(error.message);
+    if (data.action === "approve" && memberRow?.email) {
+      const lang = (memberRow as any).preferred_lang || "te";
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      let memberUserId = await findAuthUserIdByEmail(supabaseAdmin, memberRow.email);
+      if (!memberUserId) {
+        const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({
+          email: memberRow.email,
+          password: `MBR-${crypto.randomUUID()}`,
+          email_confirm: true,
+          user_metadata: { role: "member" },
+        });
+        if (createError) throw new Error(createError.message);
+        memberUserId = created.user?.id;
+      }
+      if (memberUserId) {
+        const redirectTo = `${await getAppOrigin()}/auth?lang=${encodeURIComponent(lang)}`;
+        const { error: linkError } = await supabaseAdmin.auth.signInWithOtp({
+          email: memberRow.email,
+          options: { shouldCreateUser: false, emailRedirectTo: redirectTo },
+        });
+        if (linkError) throw new Error(linkError.message);
+        const { error: claimError } = await supabaseAdmin
+          .from("members")
+          .update({ user_id: memberUserId })
+          .eq("id", memberRow.id)
+          .is("user_id", null);
+        if (claimError) throw new Error(claimError.message);
+      }
+    }
     return { ok: true };
   });
 

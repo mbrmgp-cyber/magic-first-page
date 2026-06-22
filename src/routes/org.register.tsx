@@ -20,18 +20,16 @@ export const Route = createFileRoute("/org/register")({
   component: OrgRegister,
 });
 
-async function uploadFile(file: File, folder: string): Promise<string> {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Login required");
-  const ext = file.name.split(".").pop() || "bin";
-  const path = `${user.id}/${folder}/${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage.from("org-documents").upload(path, file, { upsert: false });
-  if (error) throw error;
-  const { data } = await supabase.storage.from("org-documents").createSignedUrl(path, 60 * 60 * 24 * 365);
-  return data?.signedUrl ?? path;
+function fileToDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error("Could not read image"));
+    reader.readAsDataURL(file);
+  });
 }
 
-function FilePicker({ label, value, onChange, accept = "image/*" }: {
+function FilePicker({ label, value, onChange, accept = "image/png,image/jpeg,image/jpg,image/webp,image/*" }: {
   label: string; value?: string; onChange: (url: string) => void; accept?: string;
 }) {
   const { t } = useI18n();
@@ -48,35 +46,32 @@ function FilePicker({ label, value, onChange, accept = "image/*" }: {
             <Plus className="h-6 w-6 text-[#ff8c28]" />
           </div>
         )}
-        <input
-          ref={inputRef}
-          type="file"
-          accept={accept}
-          className="hidden"
-          onChange={async (e) => {
-            const f = e.target.files?.[0];
-            if (!f) return;
-            setBusy(true);
-            try {
-              const url = await uploadFile(f, label.replace(/\s+/g, "_").toLowerCase());
-              onChange(url);
-              toast.success("Uploaded");
-            } catch (err: any) {
-              toast.error(err.message ?? "Upload failed");
-            } finally {
-              setBusy(false);
-              if (inputRef.current) inputRef.current.value = "";
-            }
-          }}
-        />
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 px-2 rounded-md border border-[#ff8c28]/60 bg-zinc-900 hover:bg-zinc-800 text-[11px] font-semibold text-[#ff8c28] leading-tight"
-        >
+        <label className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 px-2 rounded-md border border-[#ff8c28]/60 bg-zinc-900 hover:bg-zinc-800 text-[11px] font-semibold text-[#ff8c28] leading-tight cursor-pointer">
           {busy ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
           <span className="truncate">{value ? t("changeFile") : t("uploadFromGallery")}</span>
-        </button>
+          <input
+            ref={inputRef}
+            type="file"
+            accept={accept}
+            multiple={false}
+            className="sr-only"
+            onChange={async (e) => {
+              const f = e.target.files?.[0];
+              if (!f) return;
+              if (f.size > 3 * 1024 * 1024) { toast.error("Image must be under 3MB"); return; }
+              setBusy(true);
+              try {
+                onChange(await fileToDataUrl(f));
+                toast.success("Uploaded");
+              } catch (err: any) {
+                toast.error(err.message ?? "Upload failed");
+              } finally {
+                setBusy(false);
+                if (inputRef.current) inputRef.current.value = "";
+              }
+            }}
+          />
+        </label>
       </div>
     </div>
   );
@@ -159,6 +154,7 @@ function OrgRegister() {
           address: f.address.trim() || undefined,
           aadhaar_url: f.aadhaar_url || undefined,
         })),
+        client_uploads: true,
       }});
 
       setResult(res);
