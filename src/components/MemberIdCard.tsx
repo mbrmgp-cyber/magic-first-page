@@ -47,6 +47,12 @@ type Org = {
   president_name?: string | null;
   president_signature_url?: string | null;
   theme_color?: string | null;
+  theme_settings?: {
+    headAlign?: "left" | "center" | "right";
+    headFont?: string;
+    subColor?: string;
+    subFont?: string;
+  } | null;
 };
 
 type Member = {
@@ -342,11 +348,11 @@ function CardFront({
         ) : (
           <div style={{ height: "11mm", width: "11mm", borderRadius: "50%", background: "#fff" }} />
         )}
-        <div style={{ flex: 1, minWidth: 0, lineHeight: 1.35 }}>
-          <div style={{ fontFamily: TELUGU_FONT, fontSize: "3.6mm", fontWeight: 900, color: "#000080", letterSpacing: "0.05mm", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+        <div style={{ flex: 1, minWidth: 0, lineHeight: 1.35, textAlign: (org?.theme_settings?.headAlign ?? "left") as any }}>
+          <div style={{ fontFamily: org?.theme_settings?.headFont ? `${org.theme_settings.headFont}, ${TELUGU_FONT}` : TELUGU_FONT, fontSize: "3.6mm", fontWeight: 900, color: "#000080", letterSpacing: "0.05mm", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
             {tr(org?.name ?? "Organization", lang)}
           </div>
-          <div style={{ fontFamily: TELUGU_FONT, fontSize: "2.1mm", color: "#000080", fontWeight: 700, marginTop: "0.3mm", fontStyle: "italic", lineHeight: 1.3 }}>
+          <div style={{ fontFamily: org?.theme_settings?.subFont ? `${org.theme_settings.subFont}, ${TELUGU_FONT}` : TELUGU_FONT, fontSize: "2.1mm", color: org?.theme_settings?.subColor || "#000080", fontWeight: 700, marginTop: "0.3mm", fontStyle: "italic", lineHeight: 1.3 }}>
             {lang === "te" ? SLOGAN : lang === "hi" ? "॥ मानवसेवा ही माधव सेवा ॥" : "॥ Service to Humanity is Service to God ॥"}
           </div>
           {org?.gov_reg_number && (

@@ -1,5 +1,7 @@
 // Org-level theme settings shared across dashboards, ID cards, letter pads.
 
+export type TextAlign = "left" | "center" | "right";
+
 export type ThemeSettings = {
   bg?: string;          // page background
   box?: string;         // card / box fill
@@ -9,8 +11,11 @@ export type ThemeSettings = {
   buttonText?: string;  // primary button text
   headColor?: string;   // big header text color
   headFont?: string;    // header font family
+  subColor?: string;    // sub-title (slogan) color
+  subFont?: string;     // sub-title font family
   smallColor?: string;  // small text color
   smallSize?: number;   // small text size px (10..16)
+  headAlign?: TextAlign; // text alignment for headline block
 };
 
 export const DEFAULT_THEME: Required<ThemeSettings> = {
@@ -22,8 +27,11 @@ export const DEFAULT_THEME: Required<ThemeSettings> = {
   buttonText: "#ffffff",
   headColor: "#ffffff",
   headFont: "Inter",
+  subColor: "#a1a1aa",
+  subFont: "Inter",
   smallColor: "#a1a1aa",
   smallSize: 12,
+  headAlign: "left",
 };
 
 export const HEAD_FONTS = [
@@ -33,6 +41,12 @@ export const HEAD_FONTS = [
   { label: "Editorial (Merriweather)", value: "Merriweather" },
   { label: "Classic (Roboto Slab)", value: "Roboto Slab" },
   { label: "Clean (Noto Sans)", value: "Noto Sans" },
+];
+
+export const TEXT_ALIGNS: { value: TextAlign; en: string; te: string }[] = [
+  { value: "left", en: "Left", te: "ఎడమ" },
+  { value: "center", en: "Center", te: "మధ్యలో" },
+  { value: "right", en: "Right", te: "కుడి" },
 ];
 
 export function resolveTheme(org: any): Required<ThemeSettings> {
@@ -58,6 +72,7 @@ export function themeStyle(t: Required<ThemeSettings>): React.CSSProperties {
     ["--tbtn" as any]: t.buttonBg,
     ["--tbtnText" as any]: t.buttonText,
     ["--thead" as any]: t.headColor,
+    ["--tsub" as any]: t.subColor,
     ["--tsmall" as any]: t.smallColor,
     ["--tsmallSize" as any]: `${t.smallSize}px`,
     fontFamily: `${t.headFont}, system-ui, sans-serif`,
