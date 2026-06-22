@@ -68,10 +68,22 @@ export const registerOrganization = createServerFn({ method: "POST" })
     admin_designation?: string;
     admin_aadhaar_url?: string;
     founders?: { name: string; address?: string; aadhaar_url?: string }[];
+    client_uploads?: boolean;
   }) => d)
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const org_code = genOrgCode();
+    const supabaseAdmin = data.client_uploads ? (await import("@/integrations/supabase/client.server")).supabaseAdmin : null;
+    const uploadFolder = userId ?? org_code;
+    const logoUrl = supabaseAdmin ? await uploadImageDataUrl(supabaseAdmin, data.logo_url, `${uploadFolder}/logo`) : data.logo_url;
+    const certificateUrl = supabaseAdmin ? await uploadImageDataUrl(supabaseAdmin, data.registration_certificate_url, `${uploadFolder}/certificate`) : data.registration_certificate_url;
+    const panUrl = supabaseAdmin ? await uploadImageDataUrl(supabaseAdmin, data.pan_card_url, `${uploadFolder}/pan`) : data.pan_card_url;
+    const adminAadhaarUrl = supabaseAdmin ? await uploadImageDataUrl(supabaseAdmin, data.admin_aadhaar_url, `${uploadFolder}/admin-aadhaar`) : data.admin_aadhaar_url;
+    const founders = await Promise.all((data.founders ?? []).filter((f) => f.name?.trim()).map(async (f, i) => ({
+      name: f.name.trim(),
+      address: f.address?.trim() || undefined,
+      aadhaar_url: supabaseAdmin ? await uploadImageDataUrl(supabaseAdmin, f.aadhaar_url, `${uploadFolder}/founder-${i + 1}`) : f.aadhaar_url,
+    })));
     const { data: org, error } = await supabase
       .from("organizations")
       .insert({
@@ -80,17 +92,17 @@ export const registerOrganization = createServerFn({ method: "POST" })
         email: data.email,
         phone: data.phone ?? null,
         slogan: data.slogan ?? null,
-        logo_url: data.logo_url ?? null,
+        logo_url: logoUrl ?? null,
         gov_reg_number: data.gov_reg_number ?? null,
         is_gov_registered: data.is_gov_registered ?? true,
-        registration_certificate_url: data.registration_certificate_url ?? null,
-        pan_card_url: data.pan_card_url ?? null,
+        registration_certificate_url: certificateUrl ?? null,
+        pan_card_url: panUrl ?? null,
         bank_account_number: data.bank_account_number ?? null,
         bank_ifsc: data.bank_ifsc ?? null,
         admin_name: data.admin_name ?? null,
         admin_designation: data.admin_designation ?? null,
-        admin_aadhaar_url: data.admin_aadhaar_url ?? null,
-        founders: (data.founders ?? []).filter((f) => f.name?.trim()),
+        admin_aadhaar_url: adminAadhaarUrl ?? null,
+        founders,
         org_code,
       } as any)
       .select()
