@@ -23,7 +23,12 @@ type IdLayout =
   | "landscape-corporate"
   | "portrait-qr"
   | "split-design"
-  | "traditional-border";
+  | "traditional-border"
+  | "modern-dark"
+  | "elegant-gold"
+  | "photo-strip"
+  | "minimal-mono"
+  | "vertical-band";
 
 type LetterLayout = "standard-header" | "watermark-centered" | "left-sidebar";
 
@@ -41,11 +46,11 @@ const ID_TEMPLATES: Tpl<IdLayout>[] = [
   { id: "portrait-qr",          en: "Portrait with QR",     te: "QR తో పోర్ట్రెయిట్" },
   { id: "split-design",         en: "Split Design",         te: "స్ప్లిట్ డిజైన్" },
   { id: "traditional-border",   en: "Traditional Border",   te: "సాంప్రదాయ బార్డర్" },
-  { id: "coming-6",  en: "Premium Layout 6",  te: "త్వరలో", comingSoon: true },
-  { id: "coming-7",  en: "Premium Layout 7",  te: "త్వరలో", comingSoon: true },
-  { id: "coming-8",  en: "Premium Layout 8",  te: "త్వరలో", comingSoon: true },
-  { id: "coming-9",  en: "Premium Layout 9",  te: "త్వరలో", comingSoon: true },
-  { id: "coming-10", en: "Premium Layout 10", te: "త్వరలో", comingSoon: true },
+  { id: "modern-dark",          en: "Modern Dark",          te: "మోడర్న్ డార్క్" },
+  { id: "elegant-gold",         en: "Elegant Gold Trim",    te: "ఎలెగంట్ గోల్డ్" },
+  { id: "photo-strip",          en: "Photo Strip",          te: "ఫోటో స్ట్రిప్" },
+  { id: "minimal-mono",         en: "Minimal Mono",         te: "మినిమల్ మోనో" },
+  { id: "vertical-band",        en: "Vertical Band",        te: "వర్టికల్ బ్యాండ్" },
 ];
 
 const LETTER_TEMPLATES: Tpl<LetterLayout>[] = [
@@ -350,6 +355,96 @@ function IdThumb({ layout, theme }: { layout: IdLayout; theme: Required<ThemeSet
       </div>
     );
   }
+  if (layout === "modern-dark") {
+    return (
+      <div style={{ ...common, flexDirection: "column", background: "#0f172a", borderColor: c }}>
+        <div style={{ height: "28%", borderBottom: `2px solid ${c}`, padding: 3 }}>
+          <div style={{ height: 3, background: c, width: "70%" }} />
+          <div style={{ height: 2, background: "#94a3b8", width: "50%", marginTop: 2 }} />
+        </div>
+        <div style={{ flex: 1, display: "flex", padding: 3, gap: 3 }}>
+          <div style={{ width: "30%", background: "#1e293b", borderRadius: 2, border: `1px solid ${c}` }} />
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
+            <div style={{ height: 3, background: "#e2e8f0", width: "80%" }} />
+            <div style={{ height: 2, background: "#94a3b8", width: "60%" }} />
+            <div style={{ height: 2, background: "#94a3b8", width: "70%" }} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (layout === "elegant-gold") {
+    const gold = "#c9a227";
+    return (
+      <div style={{ ...common, padding: 2, background: gold }}>
+        <div style={{ flex: 1, background: "#fffdf6", borderRadius: 3, border: `1px solid ${gold}`, padding: 3, display: "flex", flexDirection: "column", gap: 2 }}>
+          <div style={{ height: 3, background: "#7a5b00", width: "70%", margin: "0 auto" }} />
+          <div style={{ display: "flex", gap: 3, flex: 1 }}>
+            <div style={{ width: "30%", background: "#f4ead0", borderRadius: 2, border: `1px solid ${gold}` }} />
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
+              <div style={{ height: 2, background: "#7a5b00", width: "75%" }} />
+              <div style={{ height: 2, background: "#b89544", width: "60%" }} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (layout === "photo-strip") {
+    return (
+      <div style={{ ...common, flexDirection: "row" }}>
+        <div style={{ width: "32%", background: "#e5e5e5", borderRight: `3px solid ${c}`,
+          display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#999" }} />
+        </div>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+          <div style={{ height: "32%", background: c, padding: 2 }}>
+            <div style={{ height: 3, background: "#fff", width: "75%" }} />
+            <div style={{ height: 2, background: "#fff", opacity: 0.8, width: "55%", marginTop: 1 }} />
+          </div>
+          <div style={{ flex: 1, padding: 3, display: "flex", flexDirection: "column", gap: 2 }}>
+            <div style={{ height: 2, background: "#333", width: "80%" }} />
+            <div style={{ height: 2, background: "#888", width: "60%" }} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (layout === "minimal-mono") {
+    return (
+      <div style={{ ...common, flexDirection: "column", border: "2px solid #111" }}>
+        <div style={{ borderBottom: "2px solid #111", padding: 3 }}>
+          <div style={{ height: 3, background: "#111", width: "80%" }} />
+          <div style={{ height: 2, background: "#444", width: "55%", marginTop: 2 }} />
+        </div>
+        <div style={{ flex: 1, display: "flex", padding: 3, gap: 3 }}>
+          <div style={{ width: "30%", border: "1px solid #111", background: "#fafafa" }} />
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
+            <div style={{ height: 2, background: "#111", width: "75%" }} />
+            <div style={{ height: 2, background: "#555", width: "55%" }} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (layout === "vertical-band") {
+    return (
+      <div style={{ ...common, flexDirection: "row" }}>
+        <div style={{ width: 8, background: c }} />
+        <div style={{ flex: 1, padding: 3, display: "flex", flexDirection: "column", gap: 2 }}>
+          <div style={{ height: 3, background: c, width: "70%" }} />
+          <div style={{ height: 2, background: "#888", width: "55%" }} />
+          <div style={{ display: "flex", gap: 3, flex: 1, marginTop: 2 }}>
+            <div style={{ width: "30%", background: "#e5e5e5", borderRadius: 2 }} />
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
+              <div style={{ height: 2, background: "#333" }} />
+              <div style={{ height: 2, background: "#888", width: "70%" }} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   // official-saffron — miniature of the real ID card
   return (
     <div style={{ ...common, flexDirection: "column", border: `1px solid #000080` }}>
@@ -448,10 +543,43 @@ function IdCardPreview({
   layout: IdLayout; theme: Required<ThemeSettings>;
   orgName: string; slogan: string; reg: string;
 }) {
+  // Official Saffron already renders Front+Back internally
+  if (layout === "official-saffron") {
+    return <OfficialSaffronPreview theme={theme} orgName={orgName} slogan={slogan} reg={reg} />;
+  }
+
+  const front = (
+    <IdCardFront layout={layout} theme={theme} orgName={orgName} slogan={slogan} reg={reg} />
+  );
+
+  return (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 14, justifyContent: "center" }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: theme.smallColor, letterSpacing: 1 }}>
+          FRONT / ముందు
+        </div>
+        {front}
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: theme.smallColor, letterSpacing: 1 }}>
+          BACK / వెనుక
+        </div>
+        <StandardBackPreview theme={theme} memberName="Sample Member" />
+      </div>
+    </div>
+  );
+}
+
+function IdCardFront({
+  layout, theme, orgName, slogan, reg,
+}: {
+  layout: IdLayout; theme: Required<ThemeSettings>;
+  orgName: string; slogan: string; reg: string;
+}) {
   const align = theme.headAlign;
   const headFF = `${theme.headFont}, "Noto Sans Telugu", system-ui, sans-serif`;
   const subFF = `${theme.subFont}, "Noto Sans Telugu", system-ui, sans-serif`;
-  const cardW = 340, cardH = 214; // landscape default
+  const cardW = 340, cardH = 214;
 
   const header = (
     <div style={{
@@ -493,10 +621,6 @@ function IdCardPreview({
     </div>
   );
 
-  if (layout === "official-saffron") {
-    return <OfficialSaffronPreview theme={theme} orgName={orgName} slogan={slogan} reg={reg} />;
-  }
-
   if (layout === "portrait-qr") {
     return (
       <div style={{
@@ -512,11 +636,9 @@ function IdCardPreview({
           </div>
           <div style={{ fontFamily: headFF, fontWeight: 800, color: "#111", fontSize: 13 }}>Sample Member</div>
           <div style={{ color: "#555", fontSize: theme.smallSize }}>ID: A/0001</div>
-          {layout === "portrait-qr" && (
-            <div style={{ marginTop: "auto", alignSelf: "center", padding: 4, background: "#fff", border: `1px solid ${theme.border}`, borderRadius: 4 }}>
-              <QrCode className="h-10 w-10" style={{ color: "#111" }} />
-            </div>
-          )}
+          <div style={{ marginTop: "auto", alignSelf: "center", padding: 4, background: "#fff", border: `1px solid ${theme.border}`, borderRadius: 4 }}>
+            <QrCode className="h-10 w-10" style={{ color: "#111" }} />
+          </div>
         </div>
       </div>
     );
@@ -588,6 +710,147 @@ function IdCardPreview({
     );
   }
 
+  if (layout === "modern-dark") {
+    return (
+      <div style={{
+        width: cardW, height: cardH, borderRadius: 12, overflow: "hidden",
+        background: "#0f172a", color: "#fff", display: "flex", flexDirection: "column",
+        boxShadow: `0 10px 32px ${theme.icon}55`, border: `1px solid ${theme.icon}`,
+      }}>
+        <div style={{ padding: "10px 12px", borderBottom: `2px solid ${theme.icon}`, textAlign: align }}>
+          <div style={{ fontFamily: headFF, fontWeight: 900, fontSize: 13, color: theme.icon }}>{orgName}</div>
+          <div style={{ fontFamily: subFF, fontSize: 9, fontStyle: "italic", opacity: 0.85 }}>{slogan}</div>
+        </div>
+        <div style={{ flex: 1, display: "flex", padding: 10, gap: 10 }}>
+          <div style={{ width: 70, height: 86, borderRadius: 8, background: "#1e293b",
+            border: `1px solid ${theme.icon}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <User style={{ width: 28, height: 28, color: theme.icon }} />
+          </div>
+          <div style={{ flex: 1, fontSize: 10 }}>
+            <div style={{ fontWeight: 800, fontSize: 13 }}>Sample Member</div>
+            <div style={{ opacity: 0.8 }}>ID: A/0001</div>
+            <div style={{ opacity: 0.8 }}>Phone: +91 90000 00000</div>
+            <div style={{ opacity: 0.8 }}>Reg: {reg}</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (layout === "elegant-gold") {
+    const gold = "#c9a227";
+    return (
+      <div style={{
+        width: cardW, height: cardH, borderRadius: 10, padding: 4,
+        background: `linear-gradient(135deg, ${gold}, #f6e27a, ${gold})`,
+        boxShadow: `0 8px 28px ${gold}55`,
+      }}>
+        <div style={{ width: "100%", height: "100%", background: "#fffdf6", borderRadius: 8,
+          border: `1px solid ${gold}`, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+          <div style={{ padding: "8px 12px", textAlign: "center", borderBottom: `1px solid ${gold}` }}>
+            <div style={{ fontFamily: headFF, fontWeight: 900, color: "#3b2f00", fontSize: 13 }}>{orgName}</div>
+            <div style={{ fontFamily: subFF, fontSize: 9, fontStyle: "italic", color: "#7a5b00" }}>{slogan}</div>
+          </div>
+          <div style={{ flex: 1, display: "flex", padding: 10, gap: 10 }}>
+            <div style={{ width: 64, height: 80, borderRadius: 6, background: "#f4ead0",
+              border: `1px solid ${gold}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <User style={{ width: 26, height: 26, color: gold }} />
+            </div>
+            <div style={{ flex: 1, fontSize: 10, color: "#3b2f00" }}>
+              <div style={{ fontWeight: 800, fontSize: 13 }}>Sample Member</div>
+              <div>ID: A/0001</div>
+              <div>Reg: {reg}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (layout === "photo-strip") {
+    return (
+      <div style={{
+        width: cardW, height: cardH, borderRadius: 10, overflow: "hidden",
+        background: "#fff", border: `1px solid ${theme.border}`,
+        boxShadow: `0 8px 28px ${theme.icon}33`, display: "flex",
+      }}>
+        <div style={{ width: 100, background: "#e5e5e5", display: "flex",
+          alignItems: "center", justifyContent: "center", borderRight: `4px solid ${theme.icon}` }}>
+          <User style={{ width: 44, height: 44, color: "#999" }} />
+        </div>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+          <div style={{ background: theme.icon, color: theme.buttonText,
+            padding: "6px 10px", textAlign: align }}>
+            <div style={{ fontFamily: headFF, fontWeight: 900, fontSize: 12 }}>{orgName}</div>
+            <div style={{ fontFamily: subFF, fontSize: 8, fontStyle: "italic", opacity: 0.9 }}>{slogan}</div>
+          </div>
+          <div style={{ flex: 1, padding: 10, fontSize: 10 }}>
+            <div style={{ fontWeight: 800, fontSize: 13, color: "#111" }}>Sample Member</div>
+            <div style={{ color: "#555" }}>ID: A/0001</div>
+            <div style={{ color: "#555" }}>Phone: +91 90000 00000</div>
+            <div style={{ color: "#555" }}>Reg: {reg}</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (layout === "minimal-mono") {
+    return (
+      <div style={{
+        width: cardW, height: cardH, borderRadius: 10, overflow: "hidden",
+        background: "#fff", border: `2px solid #111`, display: "flex", flexDirection: "column",
+        boxShadow: "0 8px 28px rgba(0,0,0,0.2)",
+      }}>
+        <div style={{ padding: "10px 12px", borderBottom: "2px solid #111", textAlign: align }}>
+          <div style={{ fontFamily: headFF, fontWeight: 900, color: "#111", fontSize: 14, letterSpacing: 0.5 }}>{orgName}</div>
+          <div style={{ fontFamily: subFF, fontSize: 9, fontStyle: "italic", color: "#444" }}>{slogan}</div>
+        </div>
+        <div style={{ flex: 1, display: "flex", padding: 10, gap: 10 }}>
+          <div style={{ width: 64, height: 80, border: "1px solid #111", background: "#fafafa",
+            display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <User style={{ width: 26, height: 26, color: "#111" }} />
+          </div>
+          <div style={{ flex: 1, fontSize: 10, color: "#111" }}>
+            <div style={{ fontWeight: 800, fontSize: 13 }}>Sample Member</div>
+            <div>ID: A/0001</div>
+            <div>Reg: {reg}</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (layout === "vertical-band") {
+    return (
+      <div style={{
+        width: cardW, height: cardH, borderRadius: 10, overflow: "hidden",
+        background: "#fff", border: `1px solid ${theme.border}`, display: "flex",
+        boxShadow: `0 8px 28px ${theme.icon}33`,
+      }}>
+        <div style={{ width: 18, background: theme.icon }} />
+        <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+          <div style={{ padding: "8px 12px", textAlign: align }}>
+            <div style={{ fontFamily: headFF, fontWeight: 900, fontSize: 13, color: theme.icon }}>{orgName}</div>
+            <div style={{ fontFamily: subFF, fontSize: 9, fontStyle: "italic", color: theme.subColor }}>{slogan}</div>
+            <div style={{ fontSize: theme.smallSize - 1, color: "#666" }}>Reg: {reg}</div>
+          </div>
+          <div style={{ flex: 1, display: "flex", gap: 10, padding: "0 12px 10px" }}>
+            <div style={{ width: 64, height: 80, borderRadius: 6, background: "#e5e5e5",
+              border: `1px solid ${theme.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <User style={{ width: 26, height: 26, color: "#999" }} />
+            </div>
+            <div style={{ flex: 1, fontSize: 10, color: "#222" }}>
+              <div style={{ fontWeight: 800, fontSize: 13 }}>Sample Member</div>
+              <div>ID: A/0001</div>
+              <div>Phone: +91 90000 00000</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // landscape-corporate (default)
   return (
     <div style={{
@@ -600,6 +863,64 @@ function IdCardPreview({
     </div>
   );
 }
+
+/* Universal back layout shared by ALL ID card templates */
+function StandardBackPreview({
+  theme, memberName,
+}: { theme: Required<ThemeSettings>; memberName: string }) {
+  const accent = theme.icon || "#FF9933";
+  const green = "#138808";
+  const navy = "#000080";
+  const headFF = `${theme.headFont}, "Noto Sans Telugu", system-ui, sans-serif`;
+  const W = 340, H = 214;
+  return (
+    <div style={{
+      width: W, height: H, background: "#fff", color: "#111",
+      borderRadius: 8, overflow: "hidden", border: `1px solid ${navy}`,
+      boxShadow: `0 8px 28px ${accent}33`,
+      fontFamily: headFF, display: "flex", flexDirection: "column",
+    }}>
+      <div style={{ display: "flex", height: 6 }}>
+        <div style={{ flex: 1, background: accent }} />
+        <div style={{ flex: 1, background: "#fff" }} />
+        <div style={{ flex: 1, background: green }} />
+      </div>
+      <div style={{ flex: 1, padding: "6px 10px", display: "flex", flexDirection: "column", gap: 4 }}>
+        <div>
+          <div style={{ fontSize: 9, fontWeight: 800, color: navy, borderBottom: `1px solid ${accent}`, paddingBottom: 1, marginBottom: 2 }}>
+            ముఖ్య ఉద్దేశాలు
+          </div>
+          <ol style={{ margin: 0, paddingLeft: 12, fontSize: 7.5, lineHeight: 1.3, color: "#111" }}>
+            <li>చిట్వేల్ మండల ప్రజలకు మౌలిక సదుపాయాల ఏర్పాటు కై ప్రయత్నం.</li>
+            <li>కుల, మత, ప్రాంత, వర్గ, రాజకీయాలకు అతీతంగా దేశభక్తిని పెంచడం.</li>
+            <li>అత్యవసర పరిస్థితుల్లో ప్రభుత్వ అధికారులకు సహాయం అందించడం.</li>
+          </ol>
+        </div>
+        <div style={{ display: "flex", gap: 6, alignItems: "flex-start", marginTop: 2 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 9, fontWeight: 800, color: green, borderBottom: `1px solid ${green}`, paddingBottom: 1, marginBottom: 2 }}>
+              సభ్యుని ప్రమాణం
+            </div>
+            <div style={{ fontSize: 7.5, lineHeight: 1.3, color: "#111", fontStyle: "italic" }}>
+              "నేను నమ్మిన దైవం సాక్షిగా ఈ సంఘంలోని నిబంధనలకు అనుగుణంగా నడుచుకుంటానని ప్రమాణం చేస్తున్నాను." — <span style={{ fontWeight: 700, fontStyle: "normal", color: navy }}>{memberName}</span>
+            </div>
+            <div style={{ fontSize: 8, fontWeight: 800, color: "#C8102E", marginTop: 2 }}>జై హింద్ 🇮🇳</div>
+          </div>
+          <div style={{ flexShrink: 0, textAlign: "center" }}>
+            <div style={{ height: 42, width: 42, border: `1px solid ${navy}`, padding: 2, background: "#fff",
+              display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <QrCode style={{ width: "100%", height: "100%", color: "#111" }} />
+            </div>
+            <div style={{ fontSize: 6.5, fontWeight: 700, color: navy, marginTop: 2, lineHeight: 1.05, maxWidth: 48 }}>
+              MBR APP డౌన్‌లోడ్
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 function LetterPreview({
   layout, theme, orgName, slogan, reg,
