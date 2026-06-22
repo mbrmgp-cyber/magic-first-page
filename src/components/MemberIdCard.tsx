@@ -47,6 +47,12 @@ type Org = {
   president_name?: string | null;
   president_signature_url?: string | null;
   theme_color?: string | null;
+  theme_settings?: {
+    headAlign?: "left" | "center" | "right";
+    headFont?: string;
+    subColor?: string;
+    subFont?: string;
+  } | null;
 };
 
 type Member = {
