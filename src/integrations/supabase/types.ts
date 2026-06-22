@@ -119,6 +119,95 @@ export type Database = {
           },
         ]
       }
+      member_loan_requests: {
+        Row: {
+          approved_loan_id: string | null
+          created_at: string
+          id: string
+          interest_rate_monthly: number
+          member_id: string
+          org_id: string
+          payment_date: string | null
+          reason: string
+          reject_reason: string | null
+          requested_amount: number
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          surety_member_code: string | null
+          surety_member_id: string | null
+          updated_at: string
+          utr_number: string | null
+        }
+        Insert: {
+          approved_loan_id?: string | null
+          created_at?: string
+          id?: string
+          interest_rate_monthly?: number
+          member_id: string
+          org_id: string
+          payment_date?: string | null
+          reason: string
+          reject_reason?: string | null
+          requested_amount: number
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          surety_member_code?: string | null
+          surety_member_id?: string | null
+          updated_at?: string
+          utr_number?: string | null
+        }
+        Update: {
+          approved_loan_id?: string | null
+          created_at?: string
+          id?: string
+          interest_rate_monthly?: number
+          member_id?: string
+          org_id?: string
+          payment_date?: string | null
+          reason?: string
+          reject_reason?: string | null
+          requested_amount?: number
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          surety_member_code?: string | null
+          surety_member_id?: string | null
+          updated_at?: string
+          utr_number?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_loan_requests_approved_loan_id_fkey"
+            columns: ["approved_loan_id"]
+            isOneToOne: false
+            referencedRelation: "member_loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_loan_requests_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_loan_requests_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_loan_requests_surety_member_id_fkey"
+            columns: ["surety_member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       member_loans: {
         Row: {
           closed_at: string | null
