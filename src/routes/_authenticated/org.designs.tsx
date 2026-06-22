@@ -129,6 +129,12 @@ function DesignsPage() {
                     cursor: locked ? "not-allowed" : "pointer",
                   }}
                 >
+                  {tpl.featured && (
+                    <div className="absolute top-1 left-1 z-10 text-[8px] font-bold px-1.5 py-0.5 rounded"
+                      style={{ background: "#138808", color: "#fff", letterSpacing: 0.5 }}>
+                      ACTIVE
+                    </div>
+                  )}
                   <div className="aspect-[1.586/1] w-full p-1.5" style={{ background: theme.bg }}>
                     <IdThumb layout={(locked ? "official-saffron" : tpl.id) as IdLayout} theme={theme} />
                   </div>
