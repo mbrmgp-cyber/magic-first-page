@@ -122,8 +122,16 @@ function MemberCard({ member, orgId, org, onReview, onChange }:
     <Card className="p-4 bg-white/95">
       <div className="flex gap-3 items-start">
         <div className="h-14 w-14 rounded-full overflow-hidden bg-muted flex items-center justify-center shrink-0">
-          {photoUrl ? <img src={photoUrl} className="h-full w-full object-cover" />
-            : <User className="w-7 h-7 text-muted-foreground" />}
+          {photoUrl ? (
+            <img
+              src={photoUrl}
+              alt={member.name}
+              className="h-full w-full object-cover"
+              onError={() => setPhotoUrl(null)}
+            />
+          ) : (
+            <User className="w-7 h-7 text-muted-foreground" />
+          )}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2">
