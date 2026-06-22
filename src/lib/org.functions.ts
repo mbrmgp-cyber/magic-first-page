@@ -182,6 +182,35 @@ export const updateOrgPresident = createServerFn({ method: "POST" })
     return { org };
   });
 
+export const updateOrgTheme = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { theme_color?: string; theme_font?: string }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const patch: Record<string, any> = {};
+    if (data.theme_color !== undefined) {
+      if (!/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(data.theme_color)) {
+        throw new Error("Invalid color");
+      }
+      patch.theme_color = data.theme_color;
+    }
+    if (data.theme_font !== undefined) {
+      const allowed = ["Inter", "Poppins", "Playfair Display", "Merriweather", "Roboto Slab", "Noto Sans"];
+      if (!allowed.includes(data.theme_font)) throw new Error("Invalid font");
+      patch.theme_font = data.theme_font;
+    }
+    const { data: org, error } = await supabase
+      .from("organizations")
+      .update(patch as any)
+      .eq("admin_user_id", userId)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return { org };
+  });
+
+
+
 
 export const validateOrgCode = createServerFn({ method: "POST" })
   .inputValidator((d: { code: string }) => d)
