@@ -19,6 +19,7 @@ const MENU = [
   { label: "ID Card", te: "సభ్యుడి ఐడి కార్డ్", icon: IdCard, to: "/member/pending" },
   { label: "Society Rules", te: "సంస్థ నియమాలు", icon: BookOpen, to: "/member/pending" },
   { label: "Financial Ledger", te: "ఆర్థిక వివరాలు", icon: Wallet, to: "/member/ledger" },
+  { label: "Request Loan", te: "అప్పు కొరకు అభ్యర్థన", icon: Wallet, to: "/member/loan-request" },
   { label: "Committee Details", te: "కార్య వర్గ వివరాలు", icon: Briefcase, to: "/member/pending" },
   { label: "Chat & Elections", te: "చాటింగ్ మరియు ఎలక్షన్", icon: MessageSquare, to: "/member/pending" },
 ] as const;

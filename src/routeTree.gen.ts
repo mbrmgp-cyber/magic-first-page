@@ -18,6 +18,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedOrgThemeRouteImport } from './routes/_authenticated/org.theme'
 import { Route as AuthenticatedOrgRulesRouteImport } from './routes/_authenticated/org.rules'
 import { Route as AuthenticatedOrgMembersRouteImport } from './routes/_authenticated/org.members'
+import { Route as AuthenticatedOrgLoanRequestsRouteImport } from './routes/_authenticated/org.loan-requests'
 import { Route as AuthenticatedOrgEventsRouteImport } from './routes/_authenticated/org.events'
 import { Route as AuthenticatedOrgElectionsRouteImport } from './routes/_authenticated/org.elections'
 import { Route as AuthenticatedOrgDesignsRouteImport } from './routes/_authenticated/org.designs'
@@ -26,6 +27,7 @@ import { Route as AuthenticatedOrgCommitteeRouteImport } from './routes/_authent
 import { Route as AuthenticatedOrgChatRouteImport } from './routes/_authenticated/org.chat'
 import { Route as AuthenticatedOrgAccountsRouteImport } from './routes/_authenticated/org.accounts'
 import { Route as AuthenticatedMemberPendingRouteImport } from './routes/_authenticated/member.pending'
+import { Route as AuthenticatedMemberLoanRequestRouteImport } from './routes/_authenticated/member.loan-request'
 import { Route as AuthenticatedMemberLedgerRouteImport } from './routes/_authenticated/member.ledger'
 import { Route as AuthenticatedMemberDashboardRouteImport } from './routes/_authenticated/member.dashboard'
 
@@ -73,6 +75,12 @@ const AuthenticatedOrgMembersRoute = AuthenticatedOrgMembersRouteImport.update({
   path: '/org/members',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedOrgLoanRequestsRoute =
+  AuthenticatedOrgLoanRequestsRouteImport.update({
+    id: '/org/loan-requests',
+    path: '/org/loan-requests',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedOrgEventsRoute = AuthenticatedOrgEventsRouteImport.update({
   id: '/org/events',
   path: '/org/events',
@@ -118,6 +126,12 @@ const AuthenticatedMemberPendingRoute =
     path: '/member/pending',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedMemberLoanRequestRoute =
+  AuthenticatedMemberLoanRequestRouteImport.update({
+    id: '/member/loan-request',
+    path: '/member/loan-request',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMemberLedgerRoute =
   AuthenticatedMemberLedgerRouteImport.update({
     id: '/member/ledger',
@@ -139,6 +153,7 @@ export interface FileRoutesByFullPath {
   '/org/register': typeof OrgRegisterRoute
   '/member/dashboard': typeof AuthenticatedMemberDashboardRoute
   '/member/ledger': typeof AuthenticatedMemberLedgerRoute
+  '/member/loan-request': typeof AuthenticatedMemberLoanRequestRoute
   '/member/pending': typeof AuthenticatedMemberPendingRoute
   '/org/accounts': typeof AuthenticatedOrgAccountsRoute
   '/org/chat': typeof AuthenticatedOrgChatRoute
@@ -147,6 +162,7 @@ export interface FileRoutesByFullPath {
   '/org/designs': typeof AuthenticatedOrgDesignsRoute
   '/org/elections': typeof AuthenticatedOrgElectionsRoute
   '/org/events': typeof AuthenticatedOrgEventsRoute
+  '/org/loan-requests': typeof AuthenticatedOrgLoanRequestsRoute
   '/org/members': typeof AuthenticatedOrgMembersRoute
   '/org/rules': typeof AuthenticatedOrgRulesRoute
   '/org/theme': typeof AuthenticatedOrgThemeRoute
@@ -159,6 +175,7 @@ export interface FileRoutesByTo {
   '/org/register': typeof OrgRegisterRoute
   '/member/dashboard': typeof AuthenticatedMemberDashboardRoute
   '/member/ledger': typeof AuthenticatedMemberLedgerRoute
+  '/member/loan-request': typeof AuthenticatedMemberLoanRequestRoute
   '/member/pending': typeof AuthenticatedMemberPendingRoute
   '/org/accounts': typeof AuthenticatedOrgAccountsRoute
   '/org/chat': typeof AuthenticatedOrgChatRoute
@@ -167,6 +184,7 @@ export interface FileRoutesByTo {
   '/org/designs': typeof AuthenticatedOrgDesignsRoute
   '/org/elections': typeof AuthenticatedOrgElectionsRoute
   '/org/events': typeof AuthenticatedOrgEventsRoute
+  '/org/loan-requests': typeof AuthenticatedOrgLoanRequestsRoute
   '/org/members': typeof AuthenticatedOrgMembersRoute
   '/org/rules': typeof AuthenticatedOrgRulesRoute
   '/org/theme': typeof AuthenticatedOrgThemeRoute
@@ -181,6 +199,7 @@ export interface FileRoutesById {
   '/org/register': typeof OrgRegisterRoute
   '/_authenticated/member/dashboard': typeof AuthenticatedMemberDashboardRoute
   '/_authenticated/member/ledger': typeof AuthenticatedMemberLedgerRoute
+  '/_authenticated/member/loan-request': typeof AuthenticatedMemberLoanRequestRoute
   '/_authenticated/member/pending': typeof AuthenticatedMemberPendingRoute
   '/_authenticated/org/accounts': typeof AuthenticatedOrgAccountsRoute
   '/_authenticated/org/chat': typeof AuthenticatedOrgChatRoute
@@ -189,6 +208,7 @@ export interface FileRoutesById {
   '/_authenticated/org/designs': typeof AuthenticatedOrgDesignsRoute
   '/_authenticated/org/elections': typeof AuthenticatedOrgElectionsRoute
   '/_authenticated/org/events': typeof AuthenticatedOrgEventsRoute
+  '/_authenticated/org/loan-requests': typeof AuthenticatedOrgLoanRequestsRoute
   '/_authenticated/org/members': typeof AuthenticatedOrgMembersRoute
   '/_authenticated/org/rules': typeof AuthenticatedOrgRulesRoute
   '/_authenticated/org/theme': typeof AuthenticatedOrgThemeRoute
@@ -203,6 +223,7 @@ export interface FileRouteTypes {
     | '/org/register'
     | '/member/dashboard'
     | '/member/ledger'
+    | '/member/loan-request'
     | '/member/pending'
     | '/org/accounts'
     | '/org/chat'
@@ -211,6 +232,7 @@ export interface FileRouteTypes {
     | '/org/designs'
     | '/org/elections'
     | '/org/events'
+    | '/org/loan-requests'
     | '/org/members'
     | '/org/rules'
     | '/org/theme'
@@ -223,6 +245,7 @@ export interface FileRouteTypes {
     | '/org/register'
     | '/member/dashboard'
     | '/member/ledger'
+    | '/member/loan-request'
     | '/member/pending'
     | '/org/accounts'
     | '/org/chat'
@@ -231,6 +254,7 @@ export interface FileRouteTypes {
     | '/org/designs'
     | '/org/elections'
     | '/org/events'
+    | '/org/loan-requests'
     | '/org/members'
     | '/org/rules'
     | '/org/theme'
@@ -244,6 +268,7 @@ export interface FileRouteTypes {
     | '/org/register'
     | '/_authenticated/member/dashboard'
     | '/_authenticated/member/ledger'
+    | '/_authenticated/member/loan-request'
     | '/_authenticated/member/pending'
     | '/_authenticated/org/accounts'
     | '/_authenticated/org/chat'
@@ -252,6 +277,7 @@ export interface FileRouteTypes {
     | '/_authenticated/org/designs'
     | '/_authenticated/org/elections'
     | '/_authenticated/org/events'
+    | '/_authenticated/org/loan-requests'
     | '/_authenticated/org/members'
     | '/_authenticated/org/rules'
     | '/_authenticated/org/theme'
@@ -330,6 +356,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOrgMembersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/org/loan-requests': {
+      id: '/_authenticated/org/loan-requests'
+      path: '/org/loan-requests'
+      fullPath: '/org/loan-requests'
+      preLoaderRoute: typeof AuthenticatedOrgLoanRequestsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/org/events': {
       id: '/_authenticated/org/events'
       path: '/org/events'
@@ -386,6 +419,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMemberPendingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/member/loan-request': {
+      id: '/_authenticated/member/loan-request'
+      path: '/member/loan-request'
+      fullPath: '/member/loan-request'
+      preLoaderRoute: typeof AuthenticatedMemberLoanRequestRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/member/ledger': {
       id: '/_authenticated/member/ledger'
       path: '/member/ledger'
@@ -407,6 +447,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedMemberDashboardRoute: typeof AuthenticatedMemberDashboardRoute
   AuthenticatedMemberLedgerRoute: typeof AuthenticatedMemberLedgerRoute
+  AuthenticatedMemberLoanRequestRoute: typeof AuthenticatedMemberLoanRequestRoute
   AuthenticatedMemberPendingRoute: typeof AuthenticatedMemberPendingRoute
   AuthenticatedOrgAccountsRoute: typeof AuthenticatedOrgAccountsRoute
   AuthenticatedOrgChatRoute: typeof AuthenticatedOrgChatRoute
@@ -415,6 +456,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedOrgDesignsRoute: typeof AuthenticatedOrgDesignsRoute
   AuthenticatedOrgElectionsRoute: typeof AuthenticatedOrgElectionsRoute
   AuthenticatedOrgEventsRoute: typeof AuthenticatedOrgEventsRoute
+  AuthenticatedOrgLoanRequestsRoute: typeof AuthenticatedOrgLoanRequestsRoute
   AuthenticatedOrgMembersRoute: typeof AuthenticatedOrgMembersRoute
   AuthenticatedOrgRulesRoute: typeof AuthenticatedOrgRulesRoute
   AuthenticatedOrgThemeRoute: typeof AuthenticatedOrgThemeRoute
@@ -424,6 +466,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedMemberDashboardRoute: AuthenticatedMemberDashboardRoute,
   AuthenticatedMemberLedgerRoute: AuthenticatedMemberLedgerRoute,
+  AuthenticatedMemberLoanRequestRoute: AuthenticatedMemberLoanRequestRoute,
   AuthenticatedMemberPendingRoute: AuthenticatedMemberPendingRoute,
   AuthenticatedOrgAccountsRoute: AuthenticatedOrgAccountsRoute,
   AuthenticatedOrgChatRoute: AuthenticatedOrgChatRoute,
@@ -432,6 +475,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedOrgDesignsRoute: AuthenticatedOrgDesignsRoute,
   AuthenticatedOrgElectionsRoute: AuthenticatedOrgElectionsRoute,
   AuthenticatedOrgEventsRoute: AuthenticatedOrgEventsRoute,
+  AuthenticatedOrgLoanRequestsRoute: AuthenticatedOrgLoanRequestsRoute,
   AuthenticatedOrgMembersRoute: AuthenticatedOrgMembersRoute,
   AuthenticatedOrgRulesRoute: AuthenticatedOrgRulesRoute,
   AuthenticatedOrgThemeRoute: AuthenticatedOrgThemeRoute,
