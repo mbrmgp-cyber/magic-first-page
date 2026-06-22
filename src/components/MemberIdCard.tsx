@@ -118,7 +118,6 @@ const SOCIETY_EMAIL = "chitvelhelplinesociety@gmail.com";
 const SOCIETY_PHONE = "+91 90595 94989";
 
 const SLOGAN = "॥ మానవసేవే మాధవసేవ ॥";
-const MBR_APP_URL = "https://mbrapp.lovable.app";
 
 // Intrinsic card size at 96dpi: 85.6mm × 54mm ≈ 323.6px × 204.1px
 const CARD_PX_W = 323.6;
