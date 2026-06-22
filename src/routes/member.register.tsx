@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { validateOrgCode, submitMemberRequest } from "@/lib/org.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ import { localizeText, useI18n } from "@/lib/i18n";
 export const Route = createFileRoute("/member/register")({
   head: () => ({ meta: [{ title: "Member Registration — MBR App" }] }),
   ssr: false,
+  validateSearch: (s: Record<string, unknown>) => ({ code: typeof s.code === "string" ? s.code : undefined }),
   component: MemberRegister,
 });
 
@@ -32,12 +33,13 @@ function MemberRegister() {
   const submit = useServerFn(submitMemberRequest);
   const { lang } = useI18n();
   const lt = (en: string, te: string) => localizeText({ en, te }, lang);
+  const search = Route.useSearch();
 
-  const [stage, setStage] = useState<"code" | "scan" | "form" | "done">("code");
-  const [code, setCode] = useState("");
+  const [stage, setStage] = useState<"code" | "scan" | "form" | "done">(search.code ? "form" : "code");
+  const [code, setCode] = useState(search.code?.toUpperCase() ?? "");
   const [orgId, setOrgId] = useState<string | null>(null);
   const [orgName, setOrgName] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(!!search.code);
   const qrFileRef = useRef<HTMLInputElement>(null);
   const qrHostId = useRef(`qr-file-${Math.random().toString(36).slice(2)}`);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -60,13 +62,25 @@ function MemberRegister() {
     setLoading(true);
     try {
       const res = await validate({ data: { code: c } });
-      if (!res.valid) { toast.error(lt("Invalid QR / Code", "చెల్లని QR / కోడ్")); return; }
+      if (!res.valid) {
+        toast.error(lt("Invalid QR / Code", "చెల్లని QR / కోడ్"));
+        setStage("code");
+        return;
+      }
       setCode(c.trim().toUpperCase());
       setOrgName(res.org.name);
       setOrgId(res.org.id);
       setStage("form");
     } finally { setLoading(false); }
   }
+
+  // Auto-verify when ?code=ABC is supplied (e.g. from ID card back QR)
+  useEffect(() => {
+    if (search.code && !orgId) {
+      void verifyCode(search.code);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search.code]);
 
   function onPhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
