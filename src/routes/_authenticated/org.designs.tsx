@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
   ArrowLeft, IdCard, FileText, Sparkles, Check, Wand2, Lock, QrCode,
-  LayoutTemplate, Layers, Square, FileSignature, Download,
+  LayoutTemplate, Layers, Square, FileSignature, Download, User, Shield, BadgeCheck,
 } from "lucide-react";
+import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 import { resolveTheme, type ThemeSettings } from "@/lib/theme";
 
 export const Route = createFileRoute("/_authenticated/org/designs")({
@@ -18,7 +19,7 @@ export const Route = createFileRoute("/_authenticated/org/designs")({
 });
 
 type IdLayout =
-  | "portrait-classic"
+  | "official-saffron"
   | "landscape-corporate"
   | "portrait-qr"
   | "split-design"
@@ -31,10 +32,11 @@ type Tpl<T extends string> = {
   en: string;
   te: string;
   comingSoon?: boolean;
+  featured?: boolean;
 };
 
 const ID_TEMPLATES: Tpl<IdLayout>[] = [
-  { id: "portrait-classic",     en: "Portrait Classic",     te: "పోర్ట్రెయిట్ క్లాసిక్" },
+  { id: "official-saffron",     en: "Official Saffron (Active)", te: "అధికారిక సాఫ్రాన్", featured: true },
   { id: "landscape-corporate",  en: "Landscape Corporate",  te: "ల్యాండ్‌స్కేప్ కార్పొరేట్" },
   { id: "portrait-qr",          en: "Portrait with QR",     te: "QR తో పోర్ట్రెయిట్" },
   { id: "split-design",         en: "Split Design",         te: "స్ప్లిట్ డిజైన్" },
@@ -60,7 +62,7 @@ function DesignsPage() {
   const org: any = orgQ.data?.org;
   const theme = useMemo(() => resolveTheme(org), [org]);
 
-  const [idPick, setIdPick] = useState<IdLayout>("portrait-classic");
+  const [idPick, setIdPick] = useState<IdLayout>("official-saffron");
   const [letterPick, setLetterPick] = useState<LetterLayout>("standard-header");
   const [generating, setGenerating] = useState(false);
 
@@ -127,8 +129,14 @@ function DesignsPage() {
                     cursor: locked ? "not-allowed" : "pointer",
                   }}
                 >
+                  {tpl.featured && (
+                    <div className="absolute top-1 left-1 z-10 text-[8px] font-bold px-1.5 py-0.5 rounded"
+                      style={{ background: "#138808", color: "#fff", letterSpacing: 0.5 }}>
+                      ACTIVE
+                    </div>
+                  )}
                   <div className="aspect-[1.586/1] w-full p-1.5" style={{ background: theme.bg }}>
-                    <IdThumb layout={(locked ? "portrait-classic" : tpl.id) as IdLayout} theme={theme} />
+                    <IdThumb layout={(locked ? "official-saffron" : tpl.id) as IdLayout} theme={theme} />
                   </div>
                   <div className="px-2 py-1.5 flex items-center justify-between gap-1">
                     <div className="min-w-0">
@@ -342,21 +350,34 @@ function IdThumb({ layout, theme }: { layout: IdLayout; theme: Required<ThemeSet
       </div>
     );
   }
-  // portrait-classic
+  // official-saffron — miniature of the real ID card
   return (
-    <div style={{ ...common, flexDirection: "column" }}>
-      <div style={{ background: c, height: 16, display: "flex", alignItems: "center", padding: "0 4px", gap: 3 }}>
-        <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#fff" }} />
-        <div style={{ height: 3, background: "#fff", flex: 1, opacity: 0.8 }} />
-      </div>
-      <div style={{ flex: 1, padding: 4, display: "flex", gap: 4 }}>
-        <div style={{ width: "35%", background: "#e5e5e5", borderRadius: 3 }} />
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 3 }}>
-          <div style={{ height: 3, background: "#333" }} />
-          <div style={{ height: 2, background: "#888", width: "80%" }} />
-          <div style={{ height: 2, background: "#aaa", width: "60%" }} />
-          <div style={{ height: 2, background: "#aaa", width: "70%" }} />
+    <div style={{ ...common, flexDirection: "column", border: `1px solid #000080` }}>
+      <div style={{ background: "#FF9933", height: 18, display: "flex", alignItems: "center", padding: "0 4px", gap: 3 }}>
+        <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#fff" }} />
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 1 }}>
+          <div style={{ height: 3, background: "#000080", width: "85%" }} />
+          <div style={{ height: 2, background: "#000080", width: "55%", opacity: 0.7 }} />
         </div>
+        <div style={{ width: 12, height: 5, background: "#000080", borderRadius: 1 }} />
+      </div>
+      <div style={{ flex: 1, padding: 3, display: "flex", gap: 3 }}>
+        <div style={{ width: "30%", display: "flex", flexDirection: "column", gap: 2 }}>
+          <div style={{ flex: 1, background: "#e5e5e5", borderRadius: 2, border: `1px solid #138808` }} />
+          <div style={{ height: 4, background: "#138808", borderRadius: 1 }} />
+        </div>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
+          <div style={{ height: 3, background: "#000080", width: "70%" }} />
+          <div style={{ height: 2, background: "#888", width: "85%" }} />
+          <div style={{ height: 2, background: "#888", width: "70%" }} />
+          <div style={{ height: 2, background: "#888", width: "60%" }} />
+          <div style={{ marginTop: "auto", height: 2, background: "#000080", width: "55%", alignSelf: "flex-end" }} />
+        </div>
+      </div>
+      <div style={{ background: "#138808", height: 10, display: "flex", alignItems: "center", padding: "0 3px", gap: 3 }}>
+        <div style={{ width: 6, height: 6, background: "#fff", borderRadius: 1 }} />
+        <div style={{ flex: 1, height: 2, background: "#fff", opacity: 0.85 }} />
+        <div style={{ width: 6, height: 6, background: "#000", borderRadius: "50%" }} />
       </div>
     </div>
   );
@@ -472,7 +493,11 @@ function IdCardPreview({
     </div>
   );
 
-  if (layout === "portrait-classic" || layout === "portrait-qr") {
+  if (layout === "official-saffron") {
+    return <OfficialSaffronPreview theme={theme} orgName={orgName} slogan={slogan} reg={reg} />;
+  }
+
+  if (layout === "portrait-qr") {
     return (
       <div style={{
         width: cardH, height: cardW, borderRadius: 10, overflow: "hidden",
@@ -667,6 +692,190 @@ function LetterPreview({
         </div>
       </div>
       {lines}
+    </div>
+  );
+}
+
+/* ---------------- Official Saffron (mirrors real MemberIdCard) ---------------- */
+
+function OfficialSaffronPreview({
+  theme, orgName, slogan, reg,
+}: {
+  theme: Required<ThemeSettings>;
+  orgName: string; slogan: string; reg: string;
+}) {
+  const accent = theme.icon || "#FF9933";
+  const green = "#138808";
+  const navy = "#000080";
+  const headFF = `${theme.headFont}, "Noto Sans Telugu", system-ui, sans-serif`;
+  const subFF = `${theme.subFont}, "Noto Sans Telugu", system-ui, sans-serif`;
+  const align = theme.headAlign;
+
+  // Card dimensions (landscape, 1.586:1)
+  const W = 340, H = 214;
+
+  const Front = (
+    <div style={{
+      width: W, height: H, background: "#fff", color: "#111",
+      borderRadius: 8, overflow: "hidden", border: `1px solid ${navy}`,
+      boxShadow: `0 8px 28px ${accent}33`,
+      fontFamily: headFF, display: "flex", flexDirection: "column",
+    }}>
+      {/* Saffron header */}
+      <div style={{
+        background: accent, padding: "6px 10px", display: "flex", alignItems: "center",
+        gap: 8, height: 52, flexDirection: align === "right" ? "row-reverse" : "row",
+      }}>
+        <div style={{
+          width: 40, height: 40, borderRadius: "50%", background: "#fff",
+          border: "1px solid #fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+        }}>
+          <Shield className="h-5 w-5" style={{ color: accent }} />
+        </div>
+        <div style={{ flex: 1, minWidth: 0, lineHeight: 1.25, textAlign: align }}>
+          <div style={{ fontWeight: 900, fontSize: 12, color: navy, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            {orgName}
+          </div>
+          <div style={{ fontFamily: subFF, fontSize: 8, fontStyle: "italic", color: navy, fontWeight: 700 }}>
+            {slogan}
+          </div>
+          <div style={{ fontSize: 7, color: navy, opacity: 0.85 }}>Reg: {reg}</div>
+        </div>
+        <div style={{
+          fontSize: 8, background: navy, color: "#fff",
+          padding: "2px 6px", borderRadius: 3, fontWeight: 800, flexShrink: 0,
+        }}>
+          సభ్యుడు
+        </div>
+      </div>
+
+      {/* Body */}
+      <div style={{ flex: 1, display: "flex", gap: 8, padding: "6px 10px 4px", position: "relative" }}>
+        <div style={{ width: 68, flexShrink: 0, display: "flex", flexDirection: "column" }}>
+          <div style={{
+            width: 68, height: 84, border: `1px solid ${green}`, background: "#f5f5f5",
+            display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden",
+          }}>
+            <User style={{ width: 28, height: 28, color: "#999" }} />
+          </div>
+          <div style={{
+            marginTop: 4, fontSize: 7, fontWeight: 800, color: "#fff",
+            background: green, textAlign: "center", padding: "2px 3px", borderRadius: 2, lineHeight: 1.1,
+          }}>
+            ● యాక్టివ్ సభ్యుడు
+          </div>
+        </div>
+
+        <div style={{ flex: 1, minWidth: 0, fontSize: 9, lineHeight: 1.3, color: "#222", display: "flex", flexDirection: "column" }}>
+          <div style={{
+            fontSize: 8, color: "#fff", background: navy, fontWeight: 700,
+            padding: "1px 5px", borderRadius: 2, display: "inline-block", alignSelf: "flex-start",
+          }}>
+            ID: A/0001
+          </div>
+          <div style={{ fontSize: 12, fontWeight: 800, marginTop: 2, color: navy, lineHeight: 1.2 }}>Sample Member</div>
+          <div><span style={{ color: "#666" }}>తండ్రి:</span> <span style={{ fontWeight: 600 }}>Father Name</span></div>
+          <div><span style={{ color: "#666" }}>గ్రామం:</span> <span style={{ fontWeight: 600 }}>Chitvel</span></div>
+          <div><span style={{ color: "#666" }}>మండలం:</span> <span style={{ fontWeight: 600 }}>Chitvel</span></div>
+          <div><span style={{ color: "#666" }}>ఫోన్:</span> <span style={{ fontWeight: 600 }}>+91 90000 00000</span></div>
+          <div style={{ display: "flex", gap: 5, marginTop: 2, alignItems: "center" }}>
+            <div style={{ fontSize: 8 }}><span style={{ color: "#666" }}>చేరిన: </span><span style={{ fontWeight: 600 }}>01/01/2024</span></div>
+            <div style={{ fontSize: 8, background: "#C8102E", color: "#fff", padding: "1px 5px", borderRadius: 2, fontWeight: 800 }}>🩸 O+</div>
+          </div>
+          <div style={{ marginTop: "auto", textAlign: "right" }}>
+            <div style={{ height: 14, fontFamily: '"Brush Script MT", cursive', fontSize: 13, color: navy, lineHeight: 1 }}>
+              M. Bhaskar Reddy
+            </div>
+            <div style={{ borderTop: `1px solid ${navy}`, marginTop: 1, paddingTop: 1, fontSize: 7, color: navy, fontWeight: 700, lineHeight: 1 }}>
+              అధ్యక్షుడు
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Green footer */}
+      <div style={{
+        background: green, height: 34, padding: "2px 8px",
+        display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6,
+      }}>
+        <div style={{ width: 28, height: 28, background: "#fff", borderRadius: 2, padding: 2, flexShrink: 0,
+          display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <QrCode style={{ width: 22, height: 22, color: "#111" }} />
+        </div>
+        <div style={{ flex: 1, minWidth: 0, color: "#fff", textAlign: "center", lineHeight: 1.2 }}>
+          <div style={{ fontSize: 7.5, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            ✉ chitvelhelplinesociety@gmail.com
+          </div>
+          <div style={{ fontSize: 7.5, fontWeight: 700 }}>☎ +91 90595 94989</div>
+        </div>
+        <div style={{
+          height: 28, width: 28, background: "#000", borderRadius: "50%",
+          display: "flex", alignItems: "center", justifyContent: "center", padding: 3, flexShrink: 0,
+        }}>
+          <img src={mbrLogo.url} alt="MBR" style={{ height: "100%", width: "100%", objectFit: "contain" }} />
+        </div>
+      </div>
+    </div>
+  );
+
+  const Back = (
+    <div style={{
+      width: W, height: H, background: "#fff", color: "#111",
+      borderRadius: 8, overflow: "hidden", border: `1px solid ${navy}`,
+      boxShadow: `0 8px 28px ${accent}33`,
+      fontFamily: headFF, display: "flex", flexDirection: "column",
+    }}>
+      {/* Tricolor stripe */}
+      <div style={{ display: "flex", height: 6 }}>
+        <div style={{ flex: 1, background: accent }} />
+        <div style={{ flex: 1, background: "#fff" }} />
+        <div style={{ flex: 1, background: green }} />
+      </div>
+      <div style={{ flex: 1, padding: "6px 10px", display: "flex", flexDirection: "column", gap: 4 }}>
+        <div>
+          <div style={{ fontSize: 9, fontWeight: 800, color: navy, borderBottom: `1px solid ${accent}`, paddingBottom: 1, marginBottom: 2 }}>
+            ముఖ్య ఉద్దేశాలు
+          </div>
+          <ol style={{ margin: 0, paddingLeft: 12, fontSize: 7.5, lineHeight: 1.25, color: "#222" }}>
+            <li>చిట్వేల్ మండల ప్రజలకు మౌలిక సదుపాయాల ఏర్పాటు కై ప్రయత్నం.</li>
+            <li>కుల, మత, ప్రాంత, వర్గ, రాజకీయాలకు అతీతంగా దేశభక్తిని పెంచడం.</li>
+            <li>అత్యవసర పరిస్థితుల్లో ప్రభుత్వ అధికారులకు సహాయం అందించడం.</li>
+          </ol>
+        </div>
+        <div style={{ display: "flex", gap: 6, alignItems: "flex-start", marginTop: 2 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 9, fontWeight: 800, color: green, borderBottom: `1px solid ${green}`, paddingBottom: 1, marginBottom: 2 }}>
+              సభ్యుని ప్రమాణం
+            </div>
+            <div style={{ fontSize: 7.5, lineHeight: 1.25, color: "#222", fontStyle: "italic" }}>
+              "నేను నమ్మిన దైవం సాక్షిగా ఈ సంఘంలోని నిబంధనలకు అనుగుణంగా నడుచుకుంటానని ప్రమాణం చేస్తున్నాను." — <span style={{ fontWeight: 700, fontStyle: "normal", color: navy }}>Sample Member</span>
+            </div>
+            <div style={{ fontSize: 8, fontWeight: 800, color: "#C8102E", marginTop: 2 }}>జై హింద్ 🇮🇳</div>
+          </div>
+          <div style={{ flexShrink: 0, textAlign: "center" }}>
+            <div style={{ height: 42, width: 42, border: `1px solid ${navy}`, padding: 2, background: "#fff",
+              display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <QrCode style={{ width: "100%", height: "100%", color: "#111" }} />
+            </div>
+            <div style={{ fontSize: 6.5, fontWeight: 700, color: navy, marginTop: 2, lineHeight: 1.05, maxWidth: 48 }}>
+              MBR APP డౌన్‌లోడ్
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 14, justifyContent: "center" }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: theme.smallColor, letterSpacing: 1 }}>FRONT / ముందు</div>
+        {Front}
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: theme.smallColor, letterSpacing: 1 }}>BACK / వెనుక</div>
+        {Back}
+      </div>
     </div>
   );
 }
