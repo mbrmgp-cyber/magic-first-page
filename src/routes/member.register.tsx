@@ -62,7 +62,11 @@ function MemberRegister() {
     setLoading(true);
     try {
       const res = await validate({ data: { code: c } });
-      if (!res.valid) { toast.error(lt("Invalid QR / Code", "చెల్లని QR / కోడ్")); return; }
+      if (!res.valid) {
+        toast.error(lt("Invalid QR / Code", "చెల్లని QR / కోడ్"));
+        setStage("code");
+        return;
+      }
       setCode(c.trim().toUpperCase());
       setOrgName(res.org.name);
       setOrgId(res.org.id);
