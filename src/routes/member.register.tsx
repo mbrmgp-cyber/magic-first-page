@@ -72,8 +72,7 @@ function MemberRegister() {
 
   // Auto-verify when ?code=ABC is supplied (e.g. from ID card back QR)
   useEffect(() => {
-    if (search.code && stage === "code") {
-      setCode(search.code.toUpperCase());
+    if (search.code && !orgId) {
       void verifyCode(search.code);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
