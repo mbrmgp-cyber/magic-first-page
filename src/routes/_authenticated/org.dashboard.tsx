@@ -31,6 +31,7 @@ const MENU = [
   { to: "/org/theme", en: "Design & Theme", te: "రంగులు మరియు డిజైన్", icon: Settings },
 
   { to: "/org/accounts", en: "Accounts", te: "అకౌంట్స్", icon: Wallet },
+  { to: "/org/loan-requests", en: "Loan Requests", te: "అప్పు అభ్యర్థనలు", icon: Wallet },
   { to: "/org/chat", en: "Member Chat", te: "సభ్యులతో చాటింగ్", icon: MessageSquare },
   { to: "/org/elections", en: "Board Elections", te: "బోర్డు ఎన్నికలు", icon: Vote },
 ] as const;
