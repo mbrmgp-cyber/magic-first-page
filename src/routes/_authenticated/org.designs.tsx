@@ -689,3 +689,187 @@ function LetterPreview({
     </div>
   );
 }
+
+/* ---------------- Official Saffron (mirrors real MemberIdCard) ---------------- */
+
+function OfficialSaffronPreview({
+  theme, orgName, slogan, reg,
+}: {
+  theme: Required<ThemeSettings>;
+  orgName: string; slogan: string; reg: string;
+}) {
+  const accent = theme.icon || "#FF9933";
+  const green = "#138808";
+  const navy = "#000080";
+  const headFF = `${theme.headFont}, "Noto Sans Telugu", system-ui, sans-serif`;
+  const subFF = `${theme.subFont}, "Noto Sans Telugu", system-ui, sans-serif`;
+  const align = theme.headAlign;
+
+  // Card dimensions (landscape, 1.586:1)
+  const W = 340, H = 214;
+
+  const Front = (
+    <div style={{
+      width: W, height: H, background: "#fff", color: "#111",
+      borderRadius: 8, overflow: "hidden", border: `1px solid ${navy}`,
+      boxShadow: `0 8px 28px ${accent}33`,
+      fontFamily: headFF, display: "flex", flexDirection: "column",
+    }}>
+      {/* Saffron header */}
+      <div style={{
+        background: accent, padding: "6px 10px", display: "flex", alignItems: "center",
+        gap: 8, height: 52, flexDirection: align === "right" ? "row-reverse" : "row",
+      }}>
+        <div style={{
+          width: 40, height: 40, borderRadius: "50%", background: "#fff",
+          border: "1px solid #fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+        }}>
+          <Shield className="h-5 w-5" style={{ color: accent }} />
+        </div>
+        <div style={{ flex: 1, minWidth: 0, lineHeight: 1.25, textAlign: align }}>
+          <div style={{ fontWeight: 900, fontSize: 12, color: navy, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            {orgName}
+          </div>
+          <div style={{ fontFamily: subFF, fontSize: 8, fontStyle: "italic", color: navy, fontWeight: 700 }}>
+            {slogan}
+          </div>
+          <div style={{ fontSize: 7, color: navy, opacity: 0.85 }}>Reg: {reg}</div>
+        </div>
+        <div style={{
+          fontSize: 8, background: navy, color: "#fff",
+          padding: "2px 6px", borderRadius: 3, fontWeight: 800, flexShrink: 0,
+        }}>
+          సభ్యుడు
+        </div>
+      </div>
+
+      {/* Body */}
+      <div style={{ flex: 1, display: "flex", gap: 8, padding: "6px 10px 4px", position: "relative" }}>
+        <div style={{ width: 68, flexShrink: 0, display: "flex", flexDirection: "column" }}>
+          <div style={{
+            width: 68, height: 84, border: `1px solid ${green}`, background: "#f5f5f5",
+            display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden",
+          }}>
+            <User style={{ width: 28, height: 28, color: "#999" }} />
+          </div>
+          <div style={{
+            marginTop: 4, fontSize: 7, fontWeight: 800, color: "#fff",
+            background: green, textAlign: "center", padding: "2px 3px", borderRadius: 2, lineHeight: 1.1,
+          }}>
+            ● యాక్టివ్ సభ్యుడు
+          </div>
+        </div>
+
+        <div style={{ flex: 1, minWidth: 0, fontSize: 9, lineHeight: 1.3, color: "#222", display: "flex", flexDirection: "column" }}>
+          <div style={{
+            fontSize: 8, color: "#fff", background: navy, fontWeight: 700,
+            padding: "1px 5px", borderRadius: 2, display: "inline-block", alignSelf: "flex-start",
+          }}>
+            ID: A/0001
+          </div>
+          <div style={{ fontSize: 12, fontWeight: 800, marginTop: 2, color: navy, lineHeight: 1.2 }}>Sample Member</div>
+          <div><span style={{ color: "#666" }}>తండ్రి:</span> <span style={{ fontWeight: 600 }}>Father Name</span></div>
+          <div><span style={{ color: "#666" }}>గ్రామం:</span> <span style={{ fontWeight: 600 }}>Chitvel</span></div>
+          <div><span style={{ color: "#666" }}>మండలం:</span> <span style={{ fontWeight: 600 }}>Chitvel</span></div>
+          <div><span style={{ color: "#666" }}>ఫోన్:</span> <span style={{ fontWeight: 600 }}>+91 90000 00000</span></div>
+          <div style={{ display: "flex", gap: 5, marginTop: 2, alignItems: "center" }}>
+            <div style={{ fontSize: 8 }}><span style={{ color: "#666" }}>చేరిన: </span><span style={{ fontWeight: 600 }}>01/01/2024</span></div>
+            <div style={{ fontSize: 8, background: "#C8102E", color: "#fff", padding: "1px 5px", borderRadius: 2, fontWeight: 800 }}>🩸 O+</div>
+          </div>
+          <div style={{ marginTop: "auto", textAlign: "right" }}>
+            <div style={{ height: 14, fontFamily: '"Brush Script MT", cursive', fontSize: 13, color: navy, lineHeight: 1 }}>
+              M. Bhaskar Reddy
+            </div>
+            <div style={{ borderTop: `1px solid ${navy}`, marginTop: 1, paddingTop: 1, fontSize: 7, color: navy, fontWeight: 700, lineHeight: 1 }}>
+              అధ్యక్షుడు
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Green footer */}
+      <div style={{
+        background: green, height: 34, padding: "2px 8px",
+        display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6,
+      }}>
+        <div style={{ width: 28, height: 28, background: "#fff", borderRadius: 2, padding: 2, flexShrink: 0,
+          display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <QrCode style={{ width: 22, height: 22, color: "#111" }} />
+        </div>
+        <div style={{ flex: 1, minWidth: 0, color: "#fff", textAlign: "center", lineHeight: 1.2 }}>
+          <div style={{ fontSize: 7.5, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            ✉ chitvelhelplinesociety@gmail.com
+          </div>
+          <div style={{ fontSize: 7.5, fontWeight: 700 }}>☎ +91 90595 94989</div>
+        </div>
+        <div style={{
+          height: 28, width: 28, background: "#000", borderRadius: "50%",
+          display: "flex", alignItems: "center", justifyContent: "center", padding: 3, flexShrink: 0,
+        }}>
+          <img src={mbrLogo.url} alt="MBR" style={{ height: "100%", width: "100%", objectFit: "contain" }} />
+        </div>
+      </div>
+    </div>
+  );
+
+  const Back = (
+    <div style={{
+      width: W, height: H, background: "#fff", color: "#111",
+      borderRadius: 8, overflow: "hidden", border: `1px solid ${navy}`,
+      boxShadow: `0 8px 28px ${accent}33`,
+      fontFamily: headFF, display: "flex", flexDirection: "column",
+    }}>
+      {/* Tricolor stripe */}
+      <div style={{ display: "flex", height: 6 }}>
+        <div style={{ flex: 1, background: accent }} />
+        <div style={{ flex: 1, background: "#fff" }} />
+        <div style={{ flex: 1, background: green }} />
+      </div>
+      <div style={{ flex: 1, padding: "6px 10px", display: "flex", flexDirection: "column", gap: 4 }}>
+        <div>
+          <div style={{ fontSize: 9, fontWeight: 800, color: navy, borderBottom: `1px solid ${accent}`, paddingBottom: 1, marginBottom: 2 }}>
+            ముఖ్య ఉద్దేశాలు
+          </div>
+          <ol style={{ margin: 0, paddingLeft: 12, fontSize: 7.5, lineHeight: 1.25, color: "#222" }}>
+            <li>చిట్వేల్ మండల ప్రజలకు మౌలిక సదుపాయాల ఏర్పాటు కై ప్రయత్నం.</li>
+            <li>కుల, మత, ప్రాంత, వర్గ, రాజకీయాలకు అతీతంగా దేశభక్తిని పెంచడం.</li>
+            <li>అత్యవసర పరిస్థితుల్లో ప్రభుత్వ అధికారులకు సహాయం అందించడం.</li>
+          </ol>
+        </div>
+        <div style={{ display: "flex", gap: 6, alignItems: "flex-start", marginTop: 2 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 9, fontWeight: 800, color: green, borderBottom: `1px solid ${green}`, paddingBottom: 1, marginBottom: 2 }}>
+              సభ్యుని ప్రమాణం
+            </div>
+            <div style={{ fontSize: 7.5, lineHeight: 1.25, color: "#222", fontStyle: "italic" }}>
+              "నేను నమ్మిన దైవం సాక్షిగా ఈ సంఘంలోని నిబంధనలకు అనుగుణంగా నడుచుకుంటానని ప్రమాణం చేస్తున్నాను." — <span style={{ fontWeight: 700, fontStyle: "normal", color: navy }}>Sample Member</span>
+            </div>
+            <div style={{ fontSize: 8, fontWeight: 800, color: "#C8102E", marginTop: 2 }}>జై హింద్ 🇮🇳</div>
+          </div>
+          <div style={{ flexShrink: 0, textAlign: "center" }}>
+            <div style={{ height: 42, width: 42, border: `1px solid ${navy}`, padding: 2, background: "#fff",
+              display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <QrCode style={{ width: "100%", height: "100%", color: "#111" }} />
+            </div>
+            <div style={{ fontSize: 6.5, fontWeight: 700, color: navy, marginTop: 2, lineHeight: 1.05, maxWidth: 48 }}>
+              MBR APP డౌన్‌లోడ్
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 14, justifyContent: "center" }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: theme.smallColor, letterSpacing: 1 }}>FRONT / ముందు</div>
+        {Front}
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: theme.smallColor, letterSpacing: 1 }}>BACK / వెనుక</div>
+        {Back}
+      </div>
+    </div>
+  );
+}
