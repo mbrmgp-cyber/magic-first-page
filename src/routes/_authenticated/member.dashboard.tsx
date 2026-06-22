@@ -65,38 +65,38 @@ function MemberDashboard() {
       <div className="max-w-md mx-auto p-4 space-y-5">
         {/* Top header: society logo + welcome + society QR */}
         <header className="flex items-start justify-between gap-3">
-          <div className="h-14 w-14 rounded-lg bg-zinc-950 border border-zinc-800 overflow-hidden flex items-center justify-center">
+          <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-950 border border-[#ff8c28]/30 overflow-hidden flex items-center justify-center shrink-0">
             {org?.logo_url
               ? <img src={org.logo_url} alt="" className="h-full w-full object-cover" />
-              : <span className="text-[10px] text-zinc-500">LOGO</span>}
+              : <ShieldCheck className="h-7 w-7 text-[#ff8c28]" />}
           </div>
-          <div className="flex-1 text-center">
+          <div className="flex-1 min-w-0 text-center">
             <p className="text-[11px] text-zinc-400">Welcome / నమస్కారం</p>
             <p className="text-sm font-semibold text-white truncate">{fullName}</p>
           </div>
-          <div className="h-14 w-14 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center overflow-hidden">
+          <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-950 border border-[#ff8c28]/30 flex items-center justify-center overflow-hidden shrink-0">
             {qrUrl
               ? <img src={qrUrl} alt="Society QR" className="h-full w-full object-contain p-1" />
-              : <QrIcon className="h-6 w-6 text-zinc-500" />}
+              : <ScanLine className="h-7 w-7 text-[#ff8c28]" />}
           </div>
         </header>
 
         {/* Sub-header */}
         <Card className="bg-zinc-950 border-zinc-800 p-4 text-center shadow-[0_0_24px_rgba(255,140,40,0.12)]">
           <p className="text-sm text-white leading-snug">
-            {org?.name ? `${org.name} ` : ""}యొక్క విలువైన సభ్యుడి వివరాలు
+            {(org?.name ?? "సొసైటీ")} యొక్క విలువైన సభ్యుడి వివరాలు
           </p>
           <p className="text-[11px] text-zinc-400 mt-0.5">
-            Valued member details of {org?.name ?? "the Society"}
+            Valued Member Details of {org?.name ?? "the Society"}
           </p>
         </Card>
 
         {/* Profile layout: photo + names */}
         <Card className="bg-zinc-950 border-zinc-800 p-4 flex items-center gap-4">
-          <div className="h-24 w-24 rounded-lg overflow-hidden border border-[#ff8c28]/40 bg-zinc-900 flex items-center justify-center shrink-0">
+          <div className="h-24 w-24 rounded-2xl overflow-hidden border border-[#ff8c28]/40 bg-gradient-to-br from-zinc-900 to-zinc-950 flex items-center justify-center shrink-0">
             {m.photo_url
               ? <img src={m.photo_url} alt={fullName} className="h-full w-full object-cover" />
-              : <span className="text-zinc-600 text-xs">No Photo</span>}
+              : <User className="h-12 w-12 text-zinc-600" strokeWidth={1.5} />}
           </div>
           <div className="min-w-0">
             <p className="text-[11px] text-zinc-400">First Name / పేరు</p>
