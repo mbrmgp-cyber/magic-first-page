@@ -248,16 +248,13 @@ const Ctx = createContext<{
 });
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(() => initialLang());
+  const [lang, setLangState] = useState<Lang>("te");
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const valid = readUrlLang();
-    if (valid) {
-      localStorage.setItem("mbr_lang", valid);
-      setLangState(valid);
-      return;
-    }
+    const resolved = initialLang();
+    localStorage.setItem("mbr_lang", resolved);
+    setLangState(resolved);
   }, []);
 
   useEffect(() => {
