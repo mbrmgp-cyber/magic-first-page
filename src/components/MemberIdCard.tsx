@@ -317,6 +317,8 @@ function CardFront({
   }
   const societyEmail = org?.email || SOCIETY_EMAIL;
   const societyPhone = org?.phone || SOCIETY_PHONE;
+  const accent = org?.theme_color || "#FF9933";
+
 
   return (
     <div
