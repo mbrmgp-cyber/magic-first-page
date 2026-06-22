@@ -200,6 +200,7 @@ export type Database = {
           phone: string | null
           photo_url: string | null
           pin_code: string | null
+          preferred_lang: string | null
           reviewed_at: string | null
           status: Database["public"]["Enums"]["member_status"]
           updated_at: string
@@ -229,6 +230,7 @@ export type Database = {
           phone?: string | null
           photo_url?: string | null
           pin_code?: string | null
+          preferred_lang?: string | null
           reviewed_at?: string | null
           status?: Database["public"]["Enums"]["member_status"]
           updated_at?: string
@@ -258,6 +260,7 @@ export type Database = {
           phone?: string | null
           photo_url?: string | null
           pin_code?: string | null
+          preferred_lang?: string | null
           reviewed_at?: string | null
           status?: Database["public"]["Enums"]["member_status"]
           updated_at?: string
