@@ -38,8 +38,8 @@ const MENU = [
 function MetricItem({ label, sub, value }: { label: string; sub: string; value: string }) {
   return (
     <div className="flex-1 min-w-0 px-1.5">
-      <p className="text-[9px] uppercase tracking-wide text-[#ff8c28] font-semibold leading-tight truncate">{label}</p>
-      <p className="text-[9px] text-zinc-400 leading-tight truncate">{sub}</p>
+      <p className="text-[9px] uppercase tracking-wide text-[#ff8c28] font-semibold leading-tight break-words">{label}</p>
+      {sub && <p className="text-[9px] text-zinc-400 leading-tight break-words">{sub}</p>}
       <p className="mt-1 text-sm md:text-base font-bold text-white truncate">{value}</p>
     </div>
   );
@@ -258,7 +258,7 @@ function Dashboard() {
 
         {/* Society headline card */}
         <Card className="p-4 border" style={{ background: theme.box, borderColor: theme.border, boxShadow: `0 0 40px ${theme.icon}1a` }}>
-          <div className="flex items-start gap-4">
+          <div className={`flex items-start gap-4 ${theme.headAlign === "right" ? "flex-row-reverse" : ""}`}>
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
@@ -277,11 +277,11 @@ function Dashboard() {
                 {uploading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <><Camera className="w-5 h-5 mb-0.5" />మార్చండి</>}
               </span>
             </button>
-            <div className="min-w-0 flex-1">
-              <h1 className="font-extrabold leading-tight tracking-tight" style={{ fontSize: "clamp(0.95rem, 4.6vw, 1.6rem)", color: theme.headColor }}>
+            <div className="min-w-0 flex-1" style={{ textAlign: theme.headAlign }}>
+              <h1 className="font-extrabold leading-tight tracking-tight" style={{ fontSize: "clamp(0.95rem, 4.6vw, 1.6rem)", color: theme.headColor, fontFamily: `${theme.headFont}, system-ui, sans-serif` }}>
                 {transliterateText(org.name, lang)}
               </h1>
-              {org.slogan && <p className="mt-1 italic" style={{ color: theme.smallColor, fontSize: theme.smallSize }}>{transliterateText(org.slogan, lang)}</p>}
+              {org.slogan && <p className="mt-1 italic" style={{ color: theme.subColor, fontFamily: `${theme.subFont}, system-ui, sans-serif` }}>{transliterateText(org.slogan, lang)}</p>}
               {org.gov_reg_number && (
                 <p className="mt-1" style={{ color: theme.smallColor, fontSize: theme.smallSize }}>
                   {lt("Reg No", "నమోదు సంఖ్య")}: <span className="font-mono" style={{ color: theme.icon }}>{org.gov_reg_number}</span>
