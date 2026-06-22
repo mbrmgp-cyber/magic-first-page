@@ -33,6 +33,7 @@ function MemberRegister() {
   const submit = useServerFn(submitMemberRequest);
   const { lang } = useI18n();
   const lt = (en: string, te: string) => localizeText({ en, te }, lang);
+  const search = Route.useSearch();
 
   const [stage, setStage] = useState<"code" | "scan" | "form" | "done">("code");
   const [code, setCode] = useState("");
