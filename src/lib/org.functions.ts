@@ -284,6 +284,46 @@ export const getMyMembership = createServerFn({ method: "GET" })
     return { membership: data };
   });
 
+export const sendApprovedMemberLoginLink = createServerFn({ method: "POST" })
+  .inputValidator((d: { email: string; lang?: string }) => d)
+  .handler(async ({ data }) => {
+    const email = data.email.trim();
+    if (!email) return { sent: false as const };
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: member } = await supabaseAdmin
+      .from("members")
+      .select("id, email, user_id, preferred_lang")
+      .ilike("email", email)
+      .eq("status", "approved")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (!member) return { sent: false as const };
+    let memberUserId = (member as any).user_id ?? await findAuthUserIdByEmail(supabaseAdmin, member.email);
+    if (!memberUserId) {
+      const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({
+        email: member.email,
+        password: `MBR-${crypto.randomUUID()}`,
+        email_confirm: true,
+        user_metadata: { role: "member" },
+      });
+      if (createError) throw new Error(createError.message);
+      memberUserId = created.user?.id;
+    }
+    if (memberUserId && !(member as any).user_id) {
+      const { error: claimError } = await supabaseAdmin.from("members").update({ user_id: memberUserId }).eq("id", member.id);
+      if (claimError) throw new Error(claimError.message);
+    }
+    const lang = data.lang || (member as any).preferred_lang || "te";
+    const redirectTo = `${await getAppOrigin()}/auth?lang=${encodeURIComponent(lang)}`;
+    const { error } = await supabaseAdmin.auth.signInWithOtp({
+      email: member.email,
+      options: { shouldCreateUser: false, emailRedirectTo: redirectTo },
+    });
+    if (error) throw new Error(error.message);
+    return { sent: true as const };
+  });
+
 export const listOrgMembers = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
