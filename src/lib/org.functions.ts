@@ -318,9 +318,7 @@ export const reviewMember = createServerFn({ method: "POST" })
     if (data.action === "approve" && memberRow?.email) {
       const lang = (memberRow as any).preferred_lang || "te";
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { data: users } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
-      const existingUser = users.users.find((u) => u.email?.toLowerCase() === memberRow.email.toLowerCase());
-      let memberUserId = existingUser?.id;
+      let memberUserId = await findAuthUserIdByEmail(supabaseAdmin, memberRow.email);
       if (!memberUserId) {
         const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({
           email: memberRow.email,
