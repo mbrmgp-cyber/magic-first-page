@@ -200,11 +200,20 @@ export const updateOrgTheme = createServerFn({ method: "POST" })
     }
     if (data.theme_settings !== undefined) {
       const s = data.theme_settings || {};
-      const colorKeys = ["bg", "box", "border", "icon", "buttonBg", "buttonText", "headColor", "smallColor"];
+      const colorKeys = ["bg", "box", "border", "icon", "buttonBg", "buttonText", "headColor", "subColor", "smallColor"];
       for (const k of colorKeys) {
         if (s[k] !== undefined && s[k] !== null && s[k] !== "" && !isHex(String(s[k]))) {
           throw new Error(`Invalid ${k}`);
         }
+      }
+      const allowedFonts = ["Inter", "Poppins", "Playfair Display", "Merriweather", "Roboto Slab", "Noto Sans"];
+      for (const k of ["headFont", "subFont"]) {
+        if (s[k] !== undefined && s[k] !== null && s[k] !== "" && !allowedFonts.includes(String(s[k]))) {
+          throw new Error(`Invalid ${k}`);
+        }
+      }
+      if (s.headAlign !== undefined && !["left", "center", "right"].includes(String(s.headAlign))) {
+        throw new Error("Invalid headAlign");
       }
       patch.theme_settings = s;
     }
