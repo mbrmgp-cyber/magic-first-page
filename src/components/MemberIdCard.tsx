@@ -275,7 +275,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
               />
             </div>
             <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
-              <CardBack bref={backRef} t={t} lang={lang} memberName={member.name} appQrUrl={appQrUrl} />
+              <CardBack bref={backRef} t={t} lang={lang} memberName={member.name} appQrUrl={appQrUrl} accent={org?.theme_color || "#FF9933"} />
             </div>
           </div>
         </div>
