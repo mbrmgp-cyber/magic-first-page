@@ -40,6 +40,7 @@ type Org = {
   name: string;
   logo_url?: string | null;
   letter_code?: string | null;
+  org_code?: string | null;
   gov_reg_number?: string | null;
   slogan?: string | null;
   phone?: string | null;
