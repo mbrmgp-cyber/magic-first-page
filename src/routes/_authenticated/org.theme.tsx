@@ -161,7 +161,7 @@ function OrgThemePage() {
 
         {/* Colors */}
         <Card className="bg-zinc-950 border-zinc-800 p-4" style={previewVars}>
-          <div className="flex items-center gap-2 text-sm font-semibold mb-2">
+          <div className="flex items-center gap-2 text-sm font-semibold mb-2 text-white">
             <Palette className="h-4 w-4" style={{ color: t.icon }} /> Colors / రంగులు
           </div>
           <div className="divide-y divide-zinc-800">
