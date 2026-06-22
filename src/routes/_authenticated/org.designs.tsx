@@ -130,7 +130,7 @@ function DesignsPage() {
                   }}
                 >
                   <div className="aspect-[1.586/1] w-full p-1.5" style={{ background: theme.bg }}>
-                    <IdThumb layout={(locked ? "portrait-classic" : tpl.id) as IdLayout} theme={theme} />
+                    <IdThumb layout={(locked ? "official-saffron" : tpl.id) as IdLayout} theme={theme} />
                   </div>
                   <div className="px-2 py-1.5 flex items-center justify-between gap-1">
                     <div className="min-w-0">
