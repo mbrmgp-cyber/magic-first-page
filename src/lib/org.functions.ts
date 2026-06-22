@@ -305,7 +305,7 @@ export const getMyMembership = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
     const { data } = await supabase
       .from("members")
-      .select("*, organizations(name, logo_url, slogan, letter_code, gov_reg_number, phone, email, president_name, president_signature_url)")
+      .select("*, organizations(name, logo_url, slogan, letter_code, gov_reg_number, phone, email, president_name, president_signature_url, theme_color, theme_font)")
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(1)
