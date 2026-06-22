@@ -333,7 +333,7 @@ function CardFront({
     >
       {/* Saffron header — title in dark blue with Telugu font so vattulu render clearly */}
       <div style={{
-        background: "#FF9933",
+        background: accent,
         padding: "1.4mm 2.5mm", display: "flex", alignItems: "center",
         gap: "2.2mm", height: "13mm",
       }}>
