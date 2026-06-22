@@ -46,7 +46,9 @@ type Org = {
   email?: string | null;
   president_name?: string | null;
   president_signature_url?: string | null;
+  theme_color?: string | null;
 };
+
 type Member = {
   id: string;
   name: string;
@@ -273,7 +275,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
               />
             </div>
             <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
-              <CardBack bref={backRef} t={t} lang={lang} memberName={member.name} appQrUrl={appQrUrl} />
+              <CardBack bref={backRef} t={t} lang={lang} memberName={member.name} appQrUrl={appQrUrl} accent={org?.theme_color || "#FF9933"} />
             </div>
           </div>
         </div>
@@ -315,6 +317,8 @@ function CardFront({
   }
   const societyEmail = org?.email || SOCIETY_EMAIL;
   const societyPhone = org?.phone || SOCIETY_PHONE;
+  const accent = org?.theme_color || "#FF9933";
+
 
   return (
     <div
@@ -329,7 +333,7 @@ function CardFront({
     >
       {/* Saffron header — title in dark blue with Telugu font so vattulu render clearly */}
       <div style={{
-        background: "#FF9933",
+        background: accent,
         padding: "1.4mm 2.5mm", display: "flex", alignItems: "center",
         gap: "2.2mm", height: "13mm",
       }}>
@@ -470,13 +474,14 @@ function CardFront({
 }
 
 function CardBack({
-  bref, t, memberName, appQrUrl, lang,
+  bref, t, memberName, appQrUrl, lang, accent,
 }: {
   bref: React.RefObject<HTMLDivElement | null>;
   t: Record<string, string>;
   memberName: string;
   appQrUrl: string;
   lang: CardLang;
+  accent: string;
 }) {
   return (
     <div
@@ -491,15 +496,16 @@ function CardBack({
     >
       {/* tricolor stripe */}
       <div style={{ display: "flex", height: "2mm" }}>
-        <div style={{ flex: 1, background: "#FF9933" }} />
+        <div style={{ flex: 1, background: accent }} />
         <div style={{ flex: 1, background: "#fff" }} />
         <div style={{ flex: 1, background: "#138808" }} />
       </div>
 
+
       <div style={{ padding: "1.5mm 2.5mm", height: "52mm", display: "flex", flexDirection: "column", gap: "1mm" }}>
         {/* Objectives */}
         <div>
-          <div style={{ fontSize: "2.5mm", fontWeight: 800, color: "#000080", borderBottom: "0.2mm solid #FF9933", paddingBottom: "0.2mm", marginBottom: "0.5mm" }}>
+          <div style={{ fontSize: "2.5mm", fontWeight: 800, color: "#000080", borderBottom: `0.2mm solid ${accent}`, paddingBottom: "0.2mm", marginBottom: "0.5mm" }}>
             {t.objectives}
           </div>
           <ol style={{ margin: 0, paddingLeft: "3.5mm", fontSize: "2mm", lineHeight: 1.3, color: "#222" }}>
