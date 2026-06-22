@@ -398,6 +398,8 @@ export type Database = {
           president_signature_url: string | null
           registration_certificate_url: string | null
           slogan: string | null
+          theme_color: string
+          theme_font: string
           updated_at: string
         }
         Insert: {
@@ -428,6 +430,8 @@ export type Database = {
           president_signature_url?: string | null
           registration_certificate_url?: string | null
           slogan?: string | null
+          theme_color?: string
+          theme_font?: string
           updated_at?: string
         }
         Update: {
@@ -458,6 +462,8 @@ export type Database = {
           president_signature_url?: string | null
           registration_certificate_url?: string | null
           slogan?: string | null
+          theme_color?: string
+          theme_font?: string
           updated_at?: string
         }
         Relationships: []
