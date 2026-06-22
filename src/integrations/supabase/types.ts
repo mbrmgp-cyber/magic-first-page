@@ -400,6 +400,7 @@ export type Database = {
           slogan: string | null
           theme_color: string
           theme_font: string
+          theme_settings: Json
           updated_at: string
         }
         Insert: {
@@ -432,6 +433,7 @@ export type Database = {
           slogan?: string | null
           theme_color?: string
           theme_font?: string
+          theme_settings?: Json
           updated_at?: string
         }
         Update: {
@@ -464,6 +466,7 @@ export type Database = {
           slogan?: string | null
           theme_color?: string
           theme_font?: string
+          theme_settings?: Json
           updated_at?: string
         }
         Relationships: []
