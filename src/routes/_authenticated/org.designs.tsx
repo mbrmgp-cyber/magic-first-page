@@ -487,7 +487,11 @@ function IdCardPreview({
     </div>
   );
 
-  if (layout === "portrait-classic" || layout === "portrait-qr") {
+  if (layout === "official-saffron") {
+    return <OfficialSaffronPreview theme={theme} orgName={orgName} slogan={slogan} reg={reg} />;
+  }
+
+  if (layout === "portrait-qr") {
     return (
       <div style={{
         width: cardH, height: cardW, borderRadius: 10, overflow: "hidden",
