@@ -46,28 +46,6 @@ function FilePicker({ label, value, onChange, accept = "image/png,image/jpeg,ima
             <Plus className="h-6 w-6 text-[#ff8c28]" />
           </div>
         )}
-        <input
-          ref={inputRef}
-          type="file"
-          accept={accept}
-          multiple={false}
-          className="hidden"
-          onChange={async (e) => {
-            const f = e.target.files?.[0];
-            if (!f) return;
-            if (f.size > 3 * 1024 * 1024) { toast.error("Image must be under 3MB"); return; }
-            setBusy(true);
-            try {
-              onChange(await fileToDataUrl(f));
-              toast.success("Uploaded");
-            } catch (err: any) {
-              toast.error(err.message ?? "Upload failed");
-            } finally {
-              setBusy(false);
-              if (inputRef.current) inputRef.current.value = "";
-            }
-          }}
-        />
         <label className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 px-2 rounded-md border border-[#ff8c28]/60 bg-zinc-900 hover:bg-zinc-800 text-[11px] font-semibold text-[#ff8c28] leading-tight cursor-pointer">
           {busy ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
           <span className="truncate">{value ? t("changeFile") : t("uploadFromGallery")}</span>
