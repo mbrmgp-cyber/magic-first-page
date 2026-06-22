@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
   ArrowLeft, IdCard, FileText, Sparkles, Check, Wand2, Lock, QrCode,
-  LayoutTemplate, Layers, Square, FileSignature, Download,
+  LayoutTemplate, Layers, Square, FileSignature, Download, User, Shield, BadgeCheck,
 } from "lucide-react";
+import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 import { resolveTheme, type ThemeSettings } from "@/lib/theme";
 
 export const Route = createFileRoute("/_authenticated/org/designs")({
