@@ -46,7 +46,9 @@ type Org = {
   email?: string | null;
   president_name?: string | null;
   president_signature_url?: string | null;
+  theme_color?: string | null;
 };
+
 type Member = {
   id: string;
   name: string;
