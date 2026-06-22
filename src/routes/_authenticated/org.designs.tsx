@@ -344,21 +344,34 @@ function IdThumb({ layout, theme }: { layout: IdLayout; theme: Required<ThemeSet
       </div>
     );
   }
-  // portrait-classic
+  // official-saffron — miniature of the real ID card
   return (
-    <div style={{ ...common, flexDirection: "column" }}>
-      <div style={{ background: c, height: 16, display: "flex", alignItems: "center", padding: "0 4px", gap: 3 }}>
-        <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#fff" }} />
-        <div style={{ height: 3, background: "#fff", flex: 1, opacity: 0.8 }} />
-      </div>
-      <div style={{ flex: 1, padding: 4, display: "flex", gap: 4 }}>
-        <div style={{ width: "35%", background: "#e5e5e5", borderRadius: 3 }} />
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 3 }}>
-          <div style={{ height: 3, background: "#333" }} />
-          <div style={{ height: 2, background: "#888", width: "80%" }} />
-          <div style={{ height: 2, background: "#aaa", width: "60%" }} />
-          <div style={{ height: 2, background: "#aaa", width: "70%" }} />
+    <div style={{ ...common, flexDirection: "column", border: `1px solid #000080` }}>
+      <div style={{ background: "#FF9933", height: 18, display: "flex", alignItems: "center", padding: "0 4px", gap: 3 }}>
+        <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#fff" }} />
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 1 }}>
+          <div style={{ height: 3, background: "#000080", width: "85%" }} />
+          <div style={{ height: 2, background: "#000080", width: "55%", opacity: 0.7 }} />
         </div>
+        <div style={{ width: 12, height: 5, background: "#000080", borderRadius: 1 }} />
+      </div>
+      <div style={{ flex: 1, padding: 3, display: "flex", gap: 3 }}>
+        <div style={{ width: "30%", display: "flex", flexDirection: "column", gap: 2 }}>
+          <div style={{ flex: 1, background: "#e5e5e5", borderRadius: 2, border: `1px solid #138808` }} />
+          <div style={{ height: 4, background: "#138808", borderRadius: 1 }} />
+        </div>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
+          <div style={{ height: 3, background: "#000080", width: "70%" }} />
+          <div style={{ height: 2, background: "#888", width: "85%" }} />
+          <div style={{ height: 2, background: "#888", width: "70%" }} />
+          <div style={{ height: 2, background: "#888", width: "60%" }} />
+          <div style={{ marginTop: "auto", height: 2, background: "#000080", width: "55%", alignSelf: "flex-end" }} />
+        </div>
+      </div>
+      <div style={{ background: "#138808", height: 10, display: "flex", alignItems: "center", padding: "0 3px", gap: 3 }}>
+        <div style={{ width: 6, height: 6, background: "#fff", borderRadius: 1 }} />
+        <div style={{ flex: 1, height: 2, background: "#fff", opacity: 0.85 }} />
+        <div style={{ width: 6, height: 6, background: "#000", borderRadius: "50%" }} />
       </div>
     </div>
   );
