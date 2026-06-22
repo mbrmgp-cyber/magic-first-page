@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 import { localizeText, transliterateText, useI18n } from "@/lib/i18n";
+import { resolveTheme } from "@/lib/theme";
 
 export const Route = createFileRoute("/_authenticated/org/dashboard")({
   head: () => ({ meta: [{ title: "Society Dashboard — MBR App" }] }),
@@ -219,8 +220,15 @@ function Dashboard() {
     );
   }
 
+  const theme = resolveTheme(org);
   return (
-    <div className="min-h-screen bg-black p-3 md:p-6 text-white">
+    <div className="min-h-screen p-3 md:p-6"
+      style={{
+        backgroundColor: theme.bg,
+        color: theme.headColor,
+        fontFamily: `${theme.headFont}, system-ui, sans-serif`,
+      }}>
+
       <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onLogoPicked} />
       <div className="max-w-3xl mx-auto space-y-4">
         {/* Top bar */}
@@ -238,7 +246,7 @@ function Dashboard() {
             )}
           </button>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={() => setSettingsOpen(true)} className="text-zinc-200 hover:bg-zinc-900 hover:text-white" aria-label="Settings">
+            <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/org/theme" })} className="text-zinc-200 hover:bg-zinc-900 hover:text-white" aria-label="Theme & Design">
               <Settings className="h-4 w-4" />
             </Button>
             <Button variant="ghost" size="sm" onClick={logout} className="text-zinc-200 hover:bg-zinc-900 hover:text-white">
