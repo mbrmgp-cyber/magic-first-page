@@ -173,7 +173,7 @@ function OrgThemePage() {
 
         {/* Header style */}
         <Card className="bg-zinc-950 border-zinc-800 p-4 space-y-3">
-          <div className="flex items-center gap-2 text-sm font-semibold">
+          <div className="flex items-center gap-2 text-sm font-semibold text-white">
             <Type className="h-4 w-4" style={{ color: t.icon }} />
             Head Title Style &amp; Color / హెడ్ టైటిల్ స్టైల్
           </div>
