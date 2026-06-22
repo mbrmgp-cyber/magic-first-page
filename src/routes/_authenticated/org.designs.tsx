@@ -23,7 +23,12 @@ type IdLayout =
   | "landscape-corporate"
   | "portrait-qr"
   | "split-design"
-  | "traditional-border";
+  | "traditional-border"
+  | "modern-dark"
+  | "elegant-gold"
+  | "photo-strip"
+  | "minimal-mono"
+  | "vertical-band";
 
 type LetterLayout = "standard-header" | "watermark-centered" | "left-sidebar";
 
@@ -41,11 +46,11 @@ const ID_TEMPLATES: Tpl<IdLayout>[] = [
   { id: "portrait-qr",          en: "Portrait with QR",     te: "QR తో పోర్ట్రెయిట్" },
   { id: "split-design",         en: "Split Design",         te: "స్ప్లిట్ డిజైన్" },
   { id: "traditional-border",   en: "Traditional Border",   te: "సాంప్రదాయ బార్డర్" },
-  { id: "coming-6",  en: "Premium Layout 6",  te: "త్వరలో", comingSoon: true },
-  { id: "coming-7",  en: "Premium Layout 7",  te: "త్వరలో", comingSoon: true },
-  { id: "coming-8",  en: "Premium Layout 8",  te: "త్వరలో", comingSoon: true },
-  { id: "coming-9",  en: "Premium Layout 9",  te: "త్వరలో", comingSoon: true },
-  { id: "coming-10", en: "Premium Layout 10", te: "త్వరలో", comingSoon: true },
+  { id: "modern-dark",          en: "Modern Dark",          te: "మోడర్న్ డార్క్" },
+  { id: "elegant-gold",         en: "Elegant Gold Trim",    te: "ఎలెగంట్ గోల్డ్" },
+  { id: "photo-strip",          en: "Photo Strip",          te: "ఫోటో స్ట్రిప్" },
+  { id: "minimal-mono",         en: "Minimal Mono",         te: "మినిమల్ మోనో" },
+  { id: "vertical-band",        en: "Vertical Band",        te: "వర్టికల్ బ్యాండ్" },
 ];
 
 const LETTER_TEMPLATES: Tpl<LetterLayout>[] = [
