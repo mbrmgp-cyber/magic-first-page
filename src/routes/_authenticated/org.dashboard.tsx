@@ -27,6 +27,8 @@ const MENU = [
   { to: "/org/committee", en: "Executive Committee", te: "కార్యవర్గ కమిటీ వివరాలు", icon: Briefcase },
   { to: "/org/events", en: "Events, Meetings, Decisions", te: "కార్యక్రమాలు, సమావేశాలు, నిర్ణయాలు", icon: Calendar },
   { to: "/org/designs", en: "ID Cards, Mementos, Letterhead, Stamp Design", te: "ID కార్డులు, మెమెంటోలు, లెటర్‌ప్యాడ్, స్టాంప్ డిజైన్", icon: IdCard },
+  { to: "/org/theme", en: "Design & Theme", te: "రంగులు మరియు డిజైన్", icon: Settings },
+
   { to: "/org/accounts", en: "Accounts", te: "అకౌంట్స్", icon: Wallet },
   { to: "/org/chat", en: "Member Chat", te: "సభ్యులతో చాటింగ్", icon: MessageSquare },
   { to: "/org/elections", en: "Board Elections", te: "బోర్డు ఎన్నికలు", icon: Vote },

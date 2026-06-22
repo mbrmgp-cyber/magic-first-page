@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as OrgRegisterRouteImport } from './routes/org.register'
 import { Route as MemberRegisterRouteImport } from './routes/member.register'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedOrgThemeRouteImport } from './routes/_authenticated/org.theme'
 import { Route as AuthenticatedOrgRulesRouteImport } from './routes/_authenticated/org.rules'
 import { Route as AuthenticatedOrgMembersRouteImport } from './routes/_authenticated/org.members'
 import { Route as AuthenticatedOrgEventsRouteImport } from './routes/_authenticated/org.events'
@@ -54,6 +55,11 @@ const MemberRegisterRoute = MemberRegisterRouteImport.update({
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOrgThemeRoute = AuthenticatedOrgThemeRouteImport.update({
+  id: '/org/theme',
+  path: '/org/theme',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedOrgRulesRoute = AuthenticatedOrgRulesRouteImport.update({
@@ -135,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/org/events': typeof AuthenticatedOrgEventsRoute
   '/org/members': typeof AuthenticatedOrgMembersRoute
   '/org/rules': typeof AuthenticatedOrgRulesRoute
+  '/org/theme': typeof AuthenticatedOrgThemeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -153,6 +160,7 @@ export interface FileRoutesByTo {
   '/org/events': typeof AuthenticatedOrgEventsRoute
   '/org/members': typeof AuthenticatedOrgMembersRoute
   '/org/rules': typeof AuthenticatedOrgRulesRoute
+  '/org/theme': typeof AuthenticatedOrgThemeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -173,6 +181,7 @@ export interface FileRoutesById {
   '/_authenticated/org/events': typeof AuthenticatedOrgEventsRoute
   '/_authenticated/org/members': typeof AuthenticatedOrgMembersRoute
   '/_authenticated/org/rules': typeof AuthenticatedOrgRulesRoute
+  '/_authenticated/org/theme': typeof AuthenticatedOrgThemeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -193,6 +202,7 @@ export interface FileRouteTypes {
     | '/org/events'
     | '/org/members'
     | '/org/rules'
+    | '/org/theme'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -211,6 +221,7 @@ export interface FileRouteTypes {
     | '/org/events'
     | '/org/members'
     | '/org/rules'
+    | '/org/theme'
   id:
     | '__root__'
     | '/'
@@ -230,6 +241,7 @@ export interface FileRouteTypes {
     | '/_authenticated/org/events'
     | '/_authenticated/org/members'
     | '/_authenticated/org/rules'
+    | '/_authenticated/org/theme'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -282,6 +294,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/theme': {
+      id: '/_authenticated/org/theme'
+      path: '/org/theme'
+      fullPath: '/org/theme'
+      preLoaderRoute: typeof AuthenticatedOrgThemeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/org/rules': {
@@ -377,6 +396,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedOrgEventsRoute: typeof AuthenticatedOrgEventsRoute
   AuthenticatedOrgMembersRoute: typeof AuthenticatedOrgMembersRoute
   AuthenticatedOrgRulesRoute: typeof AuthenticatedOrgRulesRoute
+  AuthenticatedOrgThemeRoute: typeof AuthenticatedOrgThemeRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -392,6 +412,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedOrgEventsRoute: AuthenticatedOrgEventsRoute,
   AuthenticatedOrgMembersRoute: AuthenticatedOrgMembersRoute,
   AuthenticatedOrgRulesRoute: AuthenticatedOrgRulesRoute,
+  AuthenticatedOrgThemeRoute: AuthenticatedOrgThemeRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
