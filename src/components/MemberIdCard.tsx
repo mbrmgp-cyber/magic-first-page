@@ -201,7 +201,9 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
         phone: member.phone,
       });
       const qr = await QRCode.toDataURL(payload, { margin: 0, width: 240 });
-      const appQr = await QRCode.toDataURL(MBR_APP_URL, { margin: 0, width: 240 });
+      const origin = typeof window !== "undefined" ? window.location.origin : "";
+      const regUrl = `${origin}/member/register${org?.org_code ? `?code=${encodeURIComponent(org.org_code)}` : ""}`;
+      const appQr = await QRCode.toDataURL(regUrl, { margin: 0, width: 240 });
       if (!cancel) {
         setQrDataUrl(qr);
         setAppQrUrl(appQr);
