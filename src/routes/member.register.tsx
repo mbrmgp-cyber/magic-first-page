@@ -14,6 +14,7 @@ import { localizeText, useI18n } from "@/lib/i18n";
 export const Route = createFileRoute("/member/register")({
   head: () => ({ meta: [{ title: "Member Registration — MBR App" }] }),
   ssr: false,
+  validateSearch: (s: Record<string, unknown>) => ({ code: typeof s.code === "string" ? s.code : undefined }),
   component: MemberRegister,
 });
 
