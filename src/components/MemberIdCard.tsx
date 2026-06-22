@@ -474,13 +474,14 @@ function CardFront({
 }
 
 function CardBack({
-  bref, t, memberName, appQrUrl, lang,
+  bref, t, memberName, appQrUrl, lang, accent,
 }: {
   bref: React.RefObject<HTMLDivElement | null>;
   t: Record<string, string>;
   memberName: string;
   appQrUrl: string;
   lang: CardLang;
+  accent: string;
 }) {
   return (
     <div
@@ -495,10 +496,11 @@ function CardBack({
     >
       {/* tricolor stripe */}
       <div style={{ display: "flex", height: "2mm" }}>
-        <div style={{ flex: 1, background: "#FF9933" }} />
+        <div style={{ flex: 1, background: accent }} />
         <div style={{ flex: 1, background: "#fff" }} />
         <div style={{ flex: 1, background: "#138808" }} />
       </div>
+
 
       <div style={{ padding: "1.5mm 2.5mm", height: "52mm", display: "flex", flexDirection: "column", gap: "1mm" }}>
         {/* Objectives */}
