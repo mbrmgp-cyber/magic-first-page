@@ -1,6 +1,16 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import QRCode from "qrcode";
+
+function getAppOrigin() {
+  const request = getRequest();
+  const origin = request?.headers.get("origin");
+  if (origin) return origin;
+  const host = request?.headers.get("x-forwarded-host") ?? request?.headers.get("host");
+  const proto = request?.headers.get("x-forwarded-proto") ?? "https";
+  return host ? `${proto}://${host}` : "";
+}
 
 function genOrgCode() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -280,10 +290,10 @@ export const reviewMember = createServerFn({ method: "POST" })
         memberUserId = created.user?.id;
       }
       if (memberUserId) {
-        const { error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-          type: "magiclink",
+        const redirectTo = `${getAppOrigin()}/auth?lang=${encodeURIComponent(lang)}`;
+        const { error: linkError } = await supabaseAdmin.auth.signInWithOtp({
           email: memberRow.email,
-          options: { redirectTo: `/auth?lang=${encodeURIComponent(lang)}` },
+          options: { shouldCreateUser: false, emailRedirectTo: redirectTo },
         });
         if (linkError) throw new Error(linkError.message);
         const { error: claimError } = await supabaseAdmin
