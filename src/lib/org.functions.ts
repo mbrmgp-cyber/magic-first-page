@@ -184,20 +184,29 @@ export const updateOrgPresident = createServerFn({ method: "POST" })
 
 export const updateOrgTheme = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { theme_color?: string; theme_font?: string }) => d)
+  .inputValidator((d: { theme_color?: string; theme_font?: string; theme_settings?: Record<string, any> }) => d)
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const patch: Record<string, any> = {};
+    const isHex = (v: string) => /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v);
     if (data.theme_color !== undefined) {
-      if (!/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(data.theme_color)) {
-        throw new Error("Invalid color");
-      }
+      if (!isHex(data.theme_color)) throw new Error("Invalid color");
       patch.theme_color = data.theme_color;
     }
     if (data.theme_font !== undefined) {
       const allowed = ["Inter", "Poppins", "Playfair Display", "Merriweather", "Roboto Slab", "Noto Sans"];
       if (!allowed.includes(data.theme_font)) throw new Error("Invalid font");
       patch.theme_font = data.theme_font;
+    }
+    if (data.theme_settings !== undefined) {
+      const s = data.theme_settings || {};
+      const colorKeys = ["bg", "box", "border", "icon", "buttonBg", "buttonText", "headColor", "smallColor"];
+      for (const k of colorKeys) {
+        if (s[k] !== undefined && s[k] !== null && s[k] !== "" && !isHex(String(s[k]))) {
+          throw new Error(`Invalid ${k}`);
+        }
+      }
+      patch.theme_settings = s;
     }
     const { data: org, error } = await supabase
       .from("organizations")
