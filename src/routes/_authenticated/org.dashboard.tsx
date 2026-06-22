@@ -219,8 +219,15 @@ function Dashboard() {
     );
   }
 
+  const theme = resolveTheme(org);
   return (
-    <div className="min-h-screen bg-black p-3 md:p-6 text-white">
+    <div className="min-h-screen p-3 md:p-6"
+      style={{
+        backgroundColor: theme.bg,
+        color: theme.headColor,
+        fontFamily: `${theme.headFont}, system-ui, sans-serif`,
+      }}>
+
       <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onLogoPicked} />
       <div className="max-w-3xl mx-auto space-y-4">
         {/* Top bar */}
