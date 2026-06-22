@@ -20,15 +20,13 @@ export const Route = createFileRoute("/org/register")({
   component: OrgRegister,
 });
 
-async function uploadFile(file: File, folder: string): Promise<string> {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Login required");
-  const ext = file.name.split(".").pop() || "bin";
-  const path = `${user.id}/${folder}/${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage.from("org-documents").upload(path, file, { upsert: false });
-  if (error) throw error;
-  const { data } = await supabase.storage.from("org-documents").createSignedUrl(path, 60 * 60 * 24 * 365);
-  return data?.signedUrl ?? path;
+function fileToDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error("Could not read image"));
+    reader.readAsDataURL(file);
+  });
 }
 
 function FilePicker({ label, value, onChange, accept = "image/*" }: {
@@ -52,14 +50,15 @@ function FilePicker({ label, value, onChange, accept = "image/*" }: {
           ref={inputRef}
           type="file"
           accept={accept}
+          multiple={false}
           className="hidden"
           onChange={async (e) => {
             const f = e.target.files?.[0];
             if (!f) return;
+            if (f.size > 3 * 1024 * 1024) { toast.error("Image must be under 3MB"); return; }
             setBusy(true);
             try {
-              const url = await uploadFile(f, label.replace(/\s+/g, "_").toLowerCase());
-              onChange(url);
+              onChange(await fileToDataUrl(f));
               toast.success("Uploaded");
             } catch (err: any) {
               toast.error(err.message ?? "Upload failed");
