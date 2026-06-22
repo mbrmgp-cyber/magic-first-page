@@ -21,6 +21,35 @@ function genOrgCode() {
   return s;
 }
 
+async function findAuthUserIdByEmail(supabaseAdmin: any, email: string) {
+  const target = email.trim().toLowerCase();
+  for (let page = 1; page <= 20; page += 1) {
+    const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 1000 });
+    if (error) throw new Error(error.message);
+    const user = data.users.find((u: any) => u.email?.toLowerCase() === target);
+    if (user) return user.id as string;
+    if (data.users.length < 1000) break;
+  }
+  return null;
+}
+
+async function uploadImageDataUrl(supabaseAdmin: any, dataUrl: string | undefined | null, folder: string) {
+  if (!dataUrl?.startsWith("data:image/")) return dataUrl ?? null;
+  const match = dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
+  if (!match) throw new Error("Invalid image file");
+  const contentType = match[1];
+  const bytes = Uint8Array.from(atob(match[2]), (char) => char.charCodeAt(0));
+  if (bytes.byteLength > 3 * 1024 * 1024) throw new Error("Image must be under 3MB");
+  const ext = contentType.split("/")[1]?.replace("jpeg", "jpg") || "jpg";
+  const path = `public-requests/${folder}/${crypto.randomUUID()}.${ext}`;
+  const { error } = await supabaseAdmin.storage
+    .from("org-documents")
+    .upload(path, bytes, { contentType, upsert: false });
+  if (error) throw new Error(error.message);
+  const { data } = await supabaseAdmin.storage.from("org-documents").createSignedUrl(path, 60 * 60 * 24 * 365);
+  return data?.signedUrl ?? path;
+}
+
 export const registerOrganization = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: {
