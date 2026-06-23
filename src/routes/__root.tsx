@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { LanguageProvider } from "@/lib/i18n";
+import { CurrencyProvider } from "@/lib/currency-context";
 import { SplashScreen } from "@/components/SplashScreen";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -140,10 +141,12 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
-        {showSplash && <SplashScreen onDone={handleSplashDone} />}
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet />
-        <Toaster position="top-center" richColors closeButton />
+        <CurrencyProvider>
+          {showSplash && <SplashScreen onDone={handleSplashDone} />}
+          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+          <Outlet />
+          <Toaster position="top-center" richColors closeButton />
+        </CurrencyProvider>
       </LanguageProvider>
     </QueryClientProvider>
   );

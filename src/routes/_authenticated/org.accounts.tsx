@@ -17,10 +17,7 @@ export const Route = createFileRoute("/_authenticated/org/accounts")({
   component: AccountsPage,
 });
 
-const CURRENCIES = [
-  { code: "INR", symbol: "₹" }, { code: "USD", symbol: "$" },
-  { code: "AED", symbol: "د.إ" }, { code: "KWD", symbol: "د.ك" }, { code: "MYR", symbol: "RM" },
-];
+import { useCurrency, CurrencySelector } from "@/lib/currency-context";
 
 type Lookup = Awaited<ReturnType<typeof lookupMemberByCode>>;
 
@@ -41,13 +38,12 @@ function AccountsPage() {
   const [interest, setInterest] = useState("");
   const [newLoan, setNewLoan] = useState("");
   const [newLoanRate, setNewLoanRate] = useState("2");
-  const [currency, setCurrency] = useState("INR");
+  const { symbol: sym } = useCurrency();
   const [info, setInfo] = useState<Extract<Lookup, { found: true }> | null>(null);
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState<{ balance: number; emailed_to: string | null; collected: number; disbursed: number } | null>(null);
   const [locked, setLocked] = useState(false);
 
-  const sym = CURRENCIES.find(c => c.code === currency)?.symbol ?? "₹";
   const fmtCur = (n: number) => `${sym} ${Number(n || 0).toLocaleString("en-IN")}`;
 
   async function onLogoPicked(e: React.ChangeEvent<HTMLInputElement>) {
@@ -192,10 +188,7 @@ function AccountsPage() {
             </div>
             <div className="flex flex-col gap-1">
               <Label className="text-[10px] uppercase tracking-wide">Select Currency</Label>
-              <select value={currency} onChange={(e) => setCurrency(e.target.value)}
-                className="border-2 border-orange-200 rounded px-2 py-1.5 text-sm bg-white font-semibold">
-                {CURRENCIES.map(c => <option key={c.code} value={c.code}>{c.symbol} {c.code}</option>)}
-              </select>
+              <CurrencySelector variant="light" />
             </div>
           </div>
           <h1 className="mt-3 text-lg md:text-2xl font-bold" style={{

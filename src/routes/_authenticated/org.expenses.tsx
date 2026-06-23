@@ -12,7 +12,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { recordExpense, listExpenses, type ExpenseType, type WalletType } from "@/lib/cashflow.functions";
+import { recordExpense, listExpenses, listWalletAccounts, type ExpenseType, type WalletType } from "@/lib/cashflow.functions";
+import { CurrencySelector, CURRENCIES, BASE_CURRENCY, type CurrencyCode } from "@/lib/currency-context";
 
 export const Route = createFileRoute("/_authenticated/org/expenses")({
   head: () => ({ meta: [{ title: "ఖర్చులు / Expenses" }] }),
@@ -37,10 +38,15 @@ function ExpensesPage() {
   const save = useServerFn(recordExpense);
   const listFn = useServerFn(listExpenses);
   const listQ = useQuery({ queryKey: ["org-expenses"], queryFn: () => listFn() });
+  const walletsFn = useServerFn(listWalletAccounts);
+  const walletsQ = useQuery({ queryKey: ["wallet-accounts"], queryFn: () => walletsFn() });
 
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
+  const [txCurrency, setTxCurrency] = useState<CurrencyCode>(BASE_CURRENCY);
+  const [exchangeRate, setExchangeRate] = useState("1");
+  const [walletAccountId, setWalletAccountId] = useState<string>("");
   const [expType, setExpType] = useState<ExpenseType>("charity");
   const [wallet, setWallet] = useState<WalletType>("bank");
   const [remarks, setRemarks] = useState("");
@@ -49,16 +55,24 @@ function ExpensesPage() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     const a = Number(amount);
+    const rate = Number(exchangeRate);
     if (!recipient.trim()) { toast.error("Recipient required"); return; }
     if (!(a > 0)) { toast.error("Valid amount required"); return; }
+    if (txCurrency !== BASE_CURRENCY && !(rate > 0)) { toast.error("Exchange rate required for foreign currency"); return; }
     setBusy(true);
     try {
       await save({ data: {
         entry_date: date, recipient_name: recipient, amount: a,
-        expense_type: expType, wallet, remarks: remarks || undefined,
+        expense_type: expType, wallet,
+        wallet_account_id: walletAccountId || undefined,
+        currency: txCurrency,
+        exchange_rate: txCurrency === BASE_CURRENCY ? 1 : rate,
+        remarks: remarks || undefined,
       }});
-      toast.success(`₹${a.toLocaleString("en-IN")} expense recorded`);
+      const baseAmt = a * (txCurrency === BASE_CURRENCY ? 1 : rate);
+      toast.success(`₹${baseAmt.toLocaleString("en-IN")} expense recorded`);
       setRecipient(""); setAmount(""); setRemarks("");
+      setTxCurrency(BASE_CURRENCY); setExchangeRate("1"); setWalletAccountId("");
       qc.invalidateQueries({ queryKey: ["org-expenses"] });
       qc.invalidateQueries({ queryKey: ["cashflow"] });
     } catch (err: any) {
@@ -71,14 +85,17 @@ function ExpensesPage() {
   return (
     <div className="min-h-screen bg-black text-white pb-16">
       <div className="max-w-2xl mx-auto p-4 space-y-5">
-        <header className="flex items-center gap-3">
-          <Link to="/org/dashboard" className="p-2 rounded-lg hover:bg-white/10">
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-          <div>
-            <h1 className="text-lg font-bold">ఖర్చులు మరియు ఆర్థిక సహాయం నమోదు</h1>
-            <p className="text-xs text-white/60">Expense & Charity Payment</p>
+        <header className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <Link to="/org/dashboard" className="p-2 rounded-lg hover:bg-white/10">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+            <div>
+              <h1 className="text-lg font-bold">ఖర్చులు మరియు ఆర్థిక సహాయం నమోదు</h1>
+              <p className="text-xs text-white/60">Expense & Charity Payment</p>
+            </div>
           </div>
+          <CurrencySelector />
         </header>
 
         <Card className="bg-zinc-950 border-white/10 p-4">
@@ -89,7 +106,7 @@ function ExpensesPage() {
                 className="bg-zinc-900 border-white/10 text-white" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-white/80">Amount (₹) *</Label>
+              <Label className="text-white/80">Amount * ({CURRENCIES.find(c => c.code === txCurrency)?.symbol})</Label>
               <Input type="number" min="1" step="0.01" required value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 className="bg-zinc-900 border-white/10 text-white" />
@@ -109,11 +126,42 @@ function ExpensesPage() {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-white/80">Wallet (Paid From)</Label>
+              <Label className="text-white/80">Transaction Currency</Label>
+              <Select value={txCurrency} onValueChange={(v) => { setTxCurrency(v as CurrencyCode); if (v === BASE_CURRENCY) setExchangeRate("1"); }}>
+                <SelectTrigger className="bg-zinc-900 border-white/10 text-white"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {CURRENCIES.map((c) => <SelectItem key={c.code} value={c.code}>{c.symbol} {c.code}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            {txCurrency !== BASE_CURRENCY && (
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label className="text-white/80">Exchange Rate (1 {txCurrency} = ? INR) *</Label>
+                <Input type="number" min="0" step="0.0001" required value={exchangeRate}
+                  onChange={(e) => setExchangeRate(e.target.value)}
+                  className="bg-zinc-900 border-white/10 text-white" />
+                {Number(amount) > 0 && Number(exchangeRate) > 0 && (
+                  <p className="text-[11px] text-amber-400">
+                    ≈ ₹ {(Number(amount) * Number(exchangeRate)).toLocaleString("en-IN", { minimumFractionDigits: 2 })} (base)
+                  </p>
+                )}
+              </div>
+            )}
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label className="text-white/80">Wallet Account (Paid From)</Label>
+              <Select value={walletAccountId || "__legacy__"} onValueChange={(v) => setWalletAccountId(v === "__legacy__" ? "" : v)}>
+                <SelectTrigger className="bg-zinc-900 border-white/10 text-white"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__legacy__">— Use general wallet —</SelectItem>
+                  {(walletsQ.data?.rows ?? []).map((a: any) => (
+                    <SelectItem key={a.id} value={a.id}>{a.name} ({a.currency})</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Select value={wallet} onValueChange={(v) => setWallet(v as WalletType)}>
                 <SelectTrigger className="bg-zinc-900 border-white/10 text-white"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {WALLETS.map((w) => <SelectItem key={w.v} value={w.v}>{w.label}</SelectItem>)}
+                  {WALLETS.map((w) => <SelectItem key={w.v} value={w.v}>{w.label} (category)</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
