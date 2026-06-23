@@ -48,22 +48,70 @@ function AccountsPage() {
   async function onSave() {
     if (!info) { toast.error("Look up a member first"); return; }
     const p = Number(principal || 0), i = Number(interest || 0);
-    if (p + i <= 0) { toast.error("అసలు లేదా వడ్డీ నమోదు చేయండి"); return; }
+    const nl = Number(newLoan || 0), nr = Number(newLoanRate || 0);
+    if (p + i + nl <= 0) { toast.error("ఏదైనా మొత్తం నమోదు చేయండి"); return; }
     setBusy(true);
     try {
       const res = await record({
         data: {
           member_code: idNo, payment_date: date,
           principal_amount: p, interest_amount: i,
+          new_loan_amount: nl > 0 ? nl : undefined,
+          new_loan_interest_rate: nl > 0 ? nr : undefined,
           remarks: remarks || undefined,
         },
       });
-      setSaved({ balance: res.balance, emailed_to: res.emailed_to });
+      setSaved({
+        balance: res.balance, emailed_to: res.emailed_to,
+        collected: res.collected, disbursed: res.disbursed,
+      });
+      generateReceipt({
+        member: info.member.name, code: idNo, date,
+        collectedPrincipal: p, collectedInterest: i,
+        newLoan: nl, newLoanRate: nr, balance: res.balance,
+        remarks,
+      });
       setLocked(true);
       toast.success(`Saved. రసీదు ${res.emailed_to ?? "—"}కు పంపబడింది`);
     } catch (e: any) {
       toast.error(e?.message ?? "Save failed");
     } finally { setBusy(false); }
+  }
+
+  function generateReceipt(r: {
+    member: string; code: string; date: string;
+    collectedPrincipal: number; collectedInterest: number;
+    newLoan: number; newLoanRate: number; balance: number; remarks: string;
+  }) {
+    const w = window.open("", "_blank", "width=720,height=900");
+    if (!w) return;
+    const fmt = (n: number) => `Rs. ${Number(n || 0).toLocaleString("en-IN")}`;
+    w.document.write(`<!doctype html><html><head><title>Receipt</title>
+    <style>body{font-family:system-ui,sans-serif;padding:24px;color:#111}
+    h1{margin:0 0 4px;font-size:20px;color:#c2410c}
+    h2{font-size:14px;margin:16px 0 6px;color:#15803d;border-bottom:1px solid #ddd;padding-bottom:4px}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    td{padding:6px 4px;border-bottom:1px dashed #eee}
+    td:last-child{text-align:right;font-weight:600}
+    .foot{margin-top:24px;font-size:11px;color:#666;text-align:center}</style></head><body>
+    <h1>Chitvel Help Line Society</h1>
+    <div style="font-size:12px;color:#555">Committee Accounts &mdash; Receipt</div>
+    <table style="margin-top:12px"><tr><td>Member</td><td>${r.member} (${r.code})</td></tr>
+    <tr><td>Date</td><td>${r.date}</td></tr>
+    ${r.remarks ? `<tr><td>Remarks</td><td>${r.remarks}</td></tr>` : ""}</table>
+    <h2>Today's Collection</h2>
+    <table><tr><td>Principal Paid</td><td>${fmt(r.collectedPrincipal)}</td></tr>
+    <tr><td>Interest Paid</td><td>${fmt(r.collectedInterest)}</td></tr>
+    <tr><td><b>Total Collected</b></td><td>${fmt(r.collectedPrincipal + r.collectedInterest)}</td></tr></table>
+    <h2>New Loan Disbursed</h2>
+    <table><tr><td>Loan Amount</td><td>${fmt(r.newLoan)}</td></tr>
+    <tr><td>Monthly Interest Rate</td><td>${r.newLoanRate}%</td></tr></table>
+    <h2>Updated Outstanding Balance</h2>
+    <table><tr><td>Total Due</td><td>${fmt(r.balance)}</td></tr></table>
+    <div class="foot">Auto-generated receipt</div>
+    <script>setTimeout(()=>window.print(),300)</script>
+    </body></html>`);
+    w.document.close();
   }
 
   function onEdit() { setLocked(false); }
