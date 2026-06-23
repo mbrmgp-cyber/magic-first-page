@@ -38,10 +38,12 @@ const SIZES: Record<CardSize, { w: number; h: number; pdf: [number, number]; ori
   keychain:  { w: 380, h: 240, pdf: [60, 38],   orient: "landscape", label: "Keychain",  icon: <KeyRound className="h-3.5 w-3.5" /> },
 };
 
-const PANEL = "#111113";
-const BORDER = "#2a2a30";
-const HEAD = "#ededf0";
-const SUB = "#8a8a91";
+const PANEL = "#1b1b22";        // section card surface (lifted off page bg for clarity)
+const PANEL_HEAD_BG = "#242430"; // header strip inside a section
+const FIELD_BG = "#0f0f14";      // inputs / file buttons
+const BORDER = "#3a3a46";        // brighter, easier to see
+const HEAD = "#f4f4f6";
+const SUB = "#b8b8c2";           // lifted from #8a8a91 for readability
 const ACCENT = "#f97316";
 
 function defaultBuiltins(w: number, h: number): Record<BuiltinKey, ElState> {
