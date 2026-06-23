@@ -143,20 +143,10 @@ function DesignsPage() {
   const orgQ = useQuery({ queryKey: ["my-org"], queryFn: () => fetchOrg() });
   const org: any = orgQ.data?.org;
 
-  // Resolve org theme then overlay our premium-dark page chrome so background is never neon.
-  const baseTheme = useMemo(() => resolveTheme(org), [org]);
-  const theme = useMemo(() => ({
-    ...baseTheme,
-    bg: PAGE_BG,
-    box: PAGE_PANEL,
-    border: PAGE_BORDER,
-    headColor: PAGE_HEAD,
-    smallColor: PAGE_SUB,
-    // keep accent (icon/buttonBg) from org theme; fall back to default orange.
-    icon: baseTheme.icon || DEFAULT_THEME.icon,
-    buttonBg: baseTheme.buttonBg || DEFAULT_THEME.buttonBg,
-    buttonText: baseTheme.buttonText || DEFAULT_THEME.buttonText,
-  }), [baseTheme]);
+  // Pass org theme straight through to inner templates so Settings → Theme changes
+  // (colors, fonts, accent) immediately apply to ID Cards, Letter Pads, Receipts.
+  // Page chrome (background/panel) stays dark via the PAGE_* constants.
+  const theme = useMemo(() => resolveTheme(org), [org]);
 
   // Module tab
   const [tab, setTab] = useState<"id" | "letter" | "receipt">("id");
