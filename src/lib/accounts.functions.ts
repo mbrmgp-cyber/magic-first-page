@@ -152,6 +152,9 @@ export const recordMonthlyPayment = createServerFn({ method: "POST" })
       balance: Math.round(balance * 100) / 100,
       emailed_to: member.email ?? null,
       member_name: member.name,
+      new_loan_id: newLoanId,
+      collected: paidTotal,
+      disbursed: newLoanAmt,
     };
   });
 
