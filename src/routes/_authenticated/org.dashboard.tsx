@@ -31,6 +31,9 @@ const MENU = [
   { to: "/org/theme", en: "Design & Theme", te: "రంగులు మరియు డిజైన్", icon: Settings },
 
   { to: "/org/accounts", en: "Accounts", te: "అకౌంట్స్", icon: Wallet },
+  { to: "/org/income", en: "Income & Donations", te: "ఆదాయం & విరాళాలు", icon: TrendingUp },
+  { to: "/org/expenses", en: "Expenses & Charity", te: "ఖర్చులు & సహాయం", icon: TrendingDown },
+  { to: "/org/cashflow", en: "Cash Flow Statement", te: "నగదు ప్రవాహం", icon: PieChart },
   { to: "/org/master-ledger", en: "Master Ledger", te: "మాస్టర్ లెడ్జర్", icon: FileDown },
   { to: "/org/loan-requests", en: "Loan Requests", te: "అప్పు అభ్యర్థనలు", icon: Wallet },
   { to: "/org/chat", en: "Member Chat", te: "సభ్యులతో చాటింగ్", icon: MessageSquare },
