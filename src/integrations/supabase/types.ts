@@ -373,6 +373,112 @@ export type Database = {
           },
         ]
       }
+      org_expenses: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          entry_date: string
+          expense_type: Database["public"]["Enums"]["expense_type"]
+          id: string
+          org_id: string
+          recipient_name: string
+          remarks: string | null
+          updated_at: string
+          wallet: Database["public"]["Enums"]["wallet_type"]
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          entry_date?: string
+          expense_type: Database["public"]["Enums"]["expense_type"]
+          id?: string
+          org_id: string
+          recipient_name: string
+          remarks?: string | null
+          updated_at?: string
+          wallet?: Database["public"]["Enums"]["wallet_type"]
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          entry_date?: string
+          expense_type?: Database["public"]["Enums"]["expense_type"]
+          id?: string
+          org_id?: string
+          recipient_name?: string
+          remarks?: string | null
+          updated_at?: string
+          wallet?: Database["public"]["Enums"]["wallet_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_expenses_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_income: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          entry_date: string
+          id: string
+          income_type: Database["public"]["Enums"]["income_type"]
+          org_id: string
+          payer_name: string
+          payer_phone: string | null
+          receipt_no: string | null
+          remarks: string | null
+          updated_at: string
+          wallet: Database["public"]["Enums"]["wallet_type"]
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          entry_date?: string
+          id?: string
+          income_type: Database["public"]["Enums"]["income_type"]
+          org_id: string
+          payer_name: string
+          payer_phone?: string | null
+          receipt_no?: string | null
+          remarks?: string | null
+          updated_at?: string
+          wallet?: Database["public"]["Enums"]["wallet_type"]
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          entry_date?: string
+          id?: string
+          income_type?: Database["public"]["Enums"]["income_type"]
+          org_id?: string
+          payer_name?: string
+          payer_phone?: string | null
+          receipt_no?: string | null
+          remarks?: string | null
+          updated_at?: string
+          wallet?: Database["public"]["Enums"]["wallet_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_income_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_milestones: {
         Row: {
           created_at: string
@@ -630,8 +736,11 @@ export type Database = {
         | "treasurer"
         | "executive"
         | "worker"
+      expense_type: "charity" | "office" | "meeting" | "misc"
+      income_type: "registration_fee" | "donation" | "other"
       member_status: "pending" | "approved" | "rejected"
       org_approval_status: "pending" | "approved" | "rejected"
+      wallet_type: "bank" | "accountant" | "president"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -768,8 +877,11 @@ export const Constants = {
         "executive",
         "worker",
       ],
+      expense_type: ["charity", "office", "meeting", "misc"],
+      income_type: ["registration_fee", "donation", "other"],
       member_status: ["pending", "approved", "rejected"],
       org_approval_status: ["pending", "approved", "rejected"],
+      wallet_type: ["bank", "accountant", "president"],
     },
   },
 } as const
