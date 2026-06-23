@@ -16,6 +16,8 @@ type ElState = {
   y: number;
   w: number;
   h: number;
+  color?: string;
+  fontSize?: number;
 };
 
 const CANVAS_W = 540; // editor canvas width
@@ -23,8 +25,8 @@ const CANVAS_H = 340; // CR80 landscape-ish ratio (1.586:1)
 
 const DEFAULTS: Record<ElementKey, ElState> = {
   photo:       { enabled: true,  x: 24,  y: 80,  w: 110, h: 130 },
-  name:        { enabled: true,  x: 160, y: 100, w: 340, h: 36 },
-  designation: { enabled: true,  x: 160, y: 150, w: 340, h: 26 },
+  name:        { enabled: true,  x: 160, y: 100, w: 340, h: 36, color: "#111111", fontSize: 22 },
+  designation: { enabled: true,  x: 160, y: 150, w: 340, h: 26, color: "#374151", fontSize: 16 },
   qr:          { enabled: true,  x: 420, y: 210, w: 90,  h: 90 },
 };
 
@@ -176,7 +178,7 @@ export function CustomIdBuilder({ defaultName = "Member Name", defaultDesignatio
                 onPointerDown={(e) => startDrag("name", e)}
               >
                 <div className="w-full h-full grid place-items-center px-2" style={{
-                  fontWeight: 800, color: "#111", fontSize: Math.max(12, els.name.h * 0.55),
+                  fontWeight: 800, color: els.name.color || "#111", fontSize: els.name.fontSize || Math.max(12, els.name.h * 0.55),
                   whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                 }}>{name}</div>
               </DraggableBox>
@@ -190,7 +192,7 @@ export function CustomIdBuilder({ defaultName = "Member Name", defaultDesignatio
                 onPointerDown={(e) => startDrag("designation", e)}
               >
                 <div className="w-full h-full grid place-items-center px-2" style={{
-                  fontWeight: 500, color: "#374151", fontSize: Math.max(10, els.designation.h * 0.6),
+                  fontWeight: 500, color: els.designation.color || "#374151", fontSize: els.designation.fontSize || Math.max(10, els.designation.h * 0.6),
                   whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                 }}>{designation}</div>
               </DraggableBox>
@@ -260,6 +262,8 @@ export function CustomIdBuilder({ defaultName = "Member Name", defaultDesignatio
         {els.name.enabled && (
           <Panel title="4 · Name Text">
             <LabeledInput label="Name" value={name} onChange={setName} />
+            <FontSizeSlider value={els.name.fontSize || 22} onChange={(v) => patch("name", { fontSize: v })} />
+            <ColorPickerRow label="Text Color / టెక్స్ట్ కలర్" value={els.name.color || "#111111"} onChange={(c) => patch("name", { color: c })} />
             <SizeSliders state={els.name} onChange={(p) => patch("name", p)} />
           </Panel>
         )}
@@ -267,6 +271,8 @@ export function CustomIdBuilder({ defaultName = "Member Name", defaultDesignatio
         {els.designation.enabled && (
           <Panel title="5 · Designation">
             <LabeledInput label="Designation" value={designation} onChange={setDesignation} />
+            <FontSizeSlider value={els.designation.fontSize || 16} onChange={(v) => patch("designation", { fontSize: v })} />
+            <ColorPickerRow label="Text Color / టెక్స్ట్ కలర్" value={els.designation.color || "#374151"} onChange={(c) => patch("designation", { color: c })} />
             <SizeSliders state={els.designation} onChange={(p) => patch("designation", p)} />
           </Panel>
         )}
@@ -370,6 +376,40 @@ function LabeledInput({ label, value, onChange }: { label: string; value: string
     <div className="space-y-1">
       <Label className="text-[10px]" style={{ color: SUB }}>{label}</Label>
       <Input value={value} onChange={(e) => onChange(e.target.value)} className="h-8 text-xs" style={{ background: "#0a0a0a", borderColor: BORDER, color: HEAD }} />
+    </div>
+  );
+}
+
+function FontSizeSlider({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  return (
+    <div className="space-y-1">
+      <p className="text-[10px]" style={{ color: SUB }}>Font Size: {Math.round(value)}px</p>
+      <Slider value={[value]} min={8} max={64} step={1} onValueChange={(v) => onChange(v[0])} />
+    </div>
+  );
+}
+
+const SWATCHES = ["#ffffff", "#000000", "#111111", "#374151", "#f97316", "#facc15", "#ef4444", "#22c55e", "#3b82f6"];
+
+function ColorPickerRow({ label, value, onChange }: { label: string; value: string; onChange: (c: string) => void }) {
+  return (
+    <div className="space-y-1.5">
+      <p className="text-[10px]" style={{ color: SUB }}>{label}</p>
+      <div className="flex items-center gap-1.5 flex-wrap">
+        {SWATCHES.map((c) => (
+          <button
+            key={c}
+            type="button"
+            onClick={() => onChange(c)}
+            className="h-6 w-6 rounded-full border transition-transform hover:scale-110"
+            style={{ background: c, borderColor: value.toLowerCase() === c.toLowerCase() ? ACCENT : "rgba(255,255,255,0.2)", boxShadow: value.toLowerCase() === c.toLowerCase() ? `0 0 0 2px ${ACCENT}` : "none" }}
+            aria-label={c}
+          />
+        ))}
+        <label className="h-6 w-6 rounded-full border cursor-pointer overflow-hidden relative" style={{ borderColor: "rgba(255,255,255,0.2)", background: value }}>
+          <input type="color" value={value} onChange={(e) => onChange(e.target.value)} className="absolute inset-0 opacity-0 cursor-pointer" />
+        </label>
+      </div>
     </div>
   );
 }
