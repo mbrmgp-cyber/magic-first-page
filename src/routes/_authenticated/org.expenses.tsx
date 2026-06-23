@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { recordExpense, listExpenses, listWalletAccounts, type ExpenseType, type WalletType } from "@/lib/cashflow.functions";
-import { CurrencySelector, CURRENCIES, BASE_CURRENCY, type CurrencyCode } from "@/lib/currency-context";
+import { CURRENCIES, BASE_CURRENCY, type CurrencyCode } from "@/lib/currency-context";
 
 export const Route = createFileRoute("/_authenticated/org/expenses")({
   head: () => ({ meta: [{ title: "ఖర్చులు / Expenses" }] }),
@@ -85,17 +85,14 @@ function ExpensesPage() {
   return (
     <div className="min-h-screen bg-black text-white pb-16">
       <div className="max-w-2xl mx-auto p-4 space-y-5">
-        <header className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <Link to="/org/dashboard" className="p-2 rounded-lg hover:bg-white/10">
-              <ArrowLeft className="h-5 w-5" />
-            </Link>
-            <div>
-              <h1 className="text-lg font-bold">ఖర్చులు మరియు ఆర్థిక సహాయం నమోదు</h1>
-              <p className="text-xs text-white/60">Expense & Charity Payment</p>
-            </div>
+        <header className="flex items-center gap-3">
+          <Link to="/org/accounts-hub" className="p-2 rounded-lg hover:bg-white/10">
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+          <div>
+            <h1 className="text-lg font-bold">ఖర్చులు మరియు ఆర్థిక సహాయం నమోదు</h1>
+            <p className="text-xs text-white/60">Expense & Charity Payment</p>
           </div>
-          <CurrencySelector />
         </header>
 
         <Card className="bg-zinc-950 border-white/10 p-4">

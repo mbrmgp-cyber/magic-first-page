@@ -5,7 +5,7 @@ import { ArrowLeft, FileSpreadsheet, FileText, RefreshCw } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getMasterLedger } from "@/lib/accounts.functions";
-import { useCurrency, CurrencySelector } from "@/lib/currency-context";
+import { useCurrency } from "@/lib/currency-context";
 
 export const Route = createFileRoute("/_authenticated/org/master-ledger")({
   head: () => ({ meta: [{ title: "Admin Master Ledger" }] }),
@@ -66,8 +66,8 @@ function MasterLedgerPage() {
   return (
     <div className="min-h-screen bg-tricolor p-3 md:p-6">
       <div className="max-w-6xl mx-auto space-y-4">
-        <Link to="/org/dashboard" className="inline-flex items-center gap-1 text-sm text-foreground/80 hover:text-foreground">
-          <ArrowLeft className="w-4 h-4" /> Dashboard
+        <Link to="/org/accounts-hub" className="inline-flex items-center gap-1 text-sm text-foreground/80 hover:text-foreground">
+          <ArrowLeft className="w-4 h-4" /> Accounts Hub
         </Link>
 
         <Card className="p-4 bg-white/95 shadow-xl">
@@ -80,7 +80,6 @@ function MasterLedgerPage() {
               <p className="text-xs text-muted-foreground">Live aggregated entries from Committee Accounts</p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <CurrencySelector variant="light" />
               <Button variant="outline" size="sm" onClick={() => q.refetch()}>
                 <RefreshCw className={`h-4 w-4 ${q.isFetching ? "animate-spin" : ""}`} />
               </Button>
