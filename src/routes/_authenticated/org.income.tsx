@@ -44,11 +44,13 @@ function IncomePage() {
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [payer, setPayer] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [amount, setAmount] = useState("");
   const [incType, setIncType] = useState<IncomeType>("donation");
   const [wallet, setWallet] = useState<WalletType>("bank");
   const [remarks, setRemarks] = useState("");
   const [busy, setBusy] = useState(false);
+
 
   function generateReceiptHTML(entry: any) {
     const org = orgQ.data?.org;
@@ -127,30 +129,37 @@ function IncomePage() {
   function emailReceipt(entry: any) {
     const org = orgQ.data?.org?.name ?? "Society";
     const subject = `${org} — Receipt ${entry.receipt_no}`;
-    const body = `Dear ${entry.payer_name},%0D%0A%0D%0AThank you for your contribution of ₹${entry.amount}.%0D%0AReceipt No: ${entry.receipt_no}%0D%0ADate: ${entry.entry_date}%0D%0A%0D%0ARegards,%0D%0A${org}`;
-    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${body}`;
+    const body = `Dear ${entry.payer_name},%0D%0A%0D%0AThank you for your contribution of ₹${entry.amount}.%0D%0AReceipt No: ${entry.receipt_no}%0D%0ADate: ${entry.entry_date}%0D%0A%0D%0APlease find your official receipt attached (printed from the receipt window).%0D%0A%0D%0ARegards,%0D%0A${org}`;
+    const to = entry.payer_email ? encodeURIComponent(entry.payer_email) : "";
+    window.location.href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${body}`;
   }
+
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     const a = Number(amount);
     if (!payer.trim()) { toast.error("Payer name required"); return; }
+    if (!email.trim() || !/^\S+@\S+\.\S+$/.test(email)) { toast.error("Valid email address required"); return; }
     if (!(a > 0)) { toast.error("Valid amount required"); return; }
     setBusy(true);
     try {
       const res = await save({ data: {
         entry_date: date, payer_name: payer, payer_phone: phone || undefined,
+        payer_email: email,
         amount: a, income_type: incType, wallet, remarks: remarks || undefined,
       }});
-      toast.success(`Receipt ${res.entry.receipt_no} saved`);
+      toast.success(`Receipt ${res.entry.receipt_no} saved — opening email…`);
       openReceipt(res.entry);
-      setPayer(""); setPhone(""); setAmount(""); setRemarks("");
+      // Auto-trigger email to the recipient with the receipt details
+      setTimeout(() => emailReceipt(res.entry), 400);
+      setPayer(""); setPhone(""); setEmail(""); setAmount(""); setRemarks("");
       qc.invalidateQueries({ queryKey: ["org-income"] });
       qc.invalidateQueries({ queryKey: ["cashflow"] });
     } catch (err: any) {
       toast.error(err?.message ?? "Failed");
     } finally { setBusy(false); }
   }
+
 
   const rows = (listQ.data?.rows ?? []) as any[];
 
@@ -190,6 +199,12 @@ function IncomePage() {
               <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)}
                 placeholder="+91…" className="bg-zinc-900 border-white/10 text-white" />
             </div>
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label className="text-white/80">Email Address * <span className="text-[10px] text-white/50">(receipt will be emailed)</span></Label>
+              <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+                placeholder="name@example.com" className="bg-zinc-900 border-white/10 text-white" />
+            </div>
+
             <div className="space-y-1.5">
               <Label className="text-white/80">Income Type</Label>
               <Select value={incType} onValueChange={(v) => setIncType(v as IncomeType)}>

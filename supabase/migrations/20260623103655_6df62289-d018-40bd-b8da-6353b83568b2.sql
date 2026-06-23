@@ -1,0 +1,1 @@
+ALTER TABLE public.org_income ADD COLUMN IF NOT EXISTS payer_email text;

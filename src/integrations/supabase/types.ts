@@ -432,6 +432,7 @@ export type Database = {
           id: string
           income_type: Database["public"]["Enums"]["income_type"]
           org_id: string
+          payer_email: string | null
           payer_name: string
           payer_phone: string | null
           receipt_no: string | null
@@ -447,6 +448,7 @@ export type Database = {
           id?: string
           income_type: Database["public"]["Enums"]["income_type"]
           org_id: string
+          payer_email?: string | null
           payer_name: string
           payer_phone?: string | null
           receipt_no?: string | null
@@ -462,6 +464,7 @@ export type Database = {
           id?: string
           income_type?: Database["public"]["Enums"]["income_type"]
           org_id?: string
+          payer_email?: string | null
           payer_name?: string
           payer_phone?: string | null
           receipt_no?: string | null

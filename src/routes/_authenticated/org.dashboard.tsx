@@ -29,16 +29,11 @@ const MENU = [
   { to: "/org/events", en: "Events, Meetings, Decisions", te: "కార్యక్రమాలు, సమావేశాలు, నిర్ణయాలు", icon: Calendar },
   { to: "/org/designs", en: "ID Cards, Mementos, Letterhead, Stamp Design", te: "ID కార్డులు, మెమెంటోలు, లెటర్‌ప్యాడ్, స్టాంప్ డిజైన్", icon: IdCard },
   { to: "/org/theme", en: "Design & Theme", te: "రంగులు మరియు డిజైన్", icon: Settings },
-
-  { to: "/org/accounts", en: "Accounts", te: "అకౌంట్స్", icon: Wallet },
-  { to: "/org/income", en: "Income & Donations", te: "ఆదాయం & విరాళాలు", icon: TrendingUp },
-  { to: "/org/expenses", en: "Expenses & Charity", te: "ఖర్చులు & సహాయం", icon: TrendingDown },
-  { to: "/org/cashflow", en: "Cash Flow Statement", te: "నగదు ప్రవాహం", icon: PieChart },
-  { to: "/org/master-ledger", en: "Master Ledger", te: "మాస్టర్ లెడ్జర్", icon: FileDown },
-  { to: "/org/loan-requests", en: "Loan Requests", te: "అప్పు అభ్యర్థనలు", icon: Wallet },
+  { to: "/org/accounts-hub", en: "Accounts Hub", te: "అకౌంట్స్ బాక్స్", icon: Wallet },
   { to: "/org/chat", en: "Member Chat", te: "సభ్యులతో చాటింగ్", icon: MessageSquare },
   { to: "/org/elections", en: "Board Elections", te: "బోర్డు ఎన్నికలు", icon: Vote },
 ] as const;
+
 
 function MetricItem({ label, sub, value }: { label: string; sub: string; value: string }) {
   return (

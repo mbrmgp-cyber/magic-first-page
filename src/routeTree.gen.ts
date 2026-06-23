@@ -29,6 +29,7 @@ import { Route as AuthenticatedOrgDashboardRouteImport } from './routes/_authent
 import { Route as AuthenticatedOrgCommitteeRouteImport } from './routes/_authenticated/org.committee'
 import { Route as AuthenticatedOrgChatRouteImport } from './routes/_authenticated/org.chat'
 import { Route as AuthenticatedOrgCashflowRouteImport } from './routes/_authenticated/org.cashflow'
+import { Route as AuthenticatedOrgAccountsHubRouteImport } from './routes/_authenticated/org.accounts-hub'
 import { Route as AuthenticatedOrgAccountsRouteImport } from './routes/_authenticated/org.accounts'
 import { Route as AuthenticatedMemberPendingRouteImport } from './routes/_authenticated/member.pending'
 import { Route as AuthenticatedMemberLoanRequestRouteImport } from './routes/_authenticated/member.loan-request'
@@ -141,6 +142,12 @@ const AuthenticatedOrgCashflowRoute =
     path: '/org/cashflow',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedOrgAccountsHubRoute =
+  AuthenticatedOrgAccountsHubRouteImport.update({
+    id: '/org/accounts-hub',
+    path: '/org/accounts-hub',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedOrgAccountsRoute =
   AuthenticatedOrgAccountsRouteImport.update({
     id: '/org/accounts',
@@ -183,6 +190,7 @@ export interface FileRoutesByFullPath {
   '/member/loan-request': typeof AuthenticatedMemberLoanRequestRoute
   '/member/pending': typeof AuthenticatedMemberPendingRoute
   '/org/accounts': typeof AuthenticatedOrgAccountsRoute
+  '/org/accounts-hub': typeof AuthenticatedOrgAccountsHubRoute
   '/org/cashflow': typeof AuthenticatedOrgCashflowRoute
   '/org/chat': typeof AuthenticatedOrgChatRoute
   '/org/committee': typeof AuthenticatedOrgCommitteeRoute
@@ -209,6 +217,7 @@ export interface FileRoutesByTo {
   '/member/loan-request': typeof AuthenticatedMemberLoanRequestRoute
   '/member/pending': typeof AuthenticatedMemberPendingRoute
   '/org/accounts': typeof AuthenticatedOrgAccountsRoute
+  '/org/accounts-hub': typeof AuthenticatedOrgAccountsHubRoute
   '/org/cashflow': typeof AuthenticatedOrgCashflowRoute
   '/org/chat': typeof AuthenticatedOrgChatRoute
   '/org/committee': typeof AuthenticatedOrgCommitteeRoute
@@ -237,6 +246,7 @@ export interface FileRoutesById {
   '/_authenticated/member/loan-request': typeof AuthenticatedMemberLoanRequestRoute
   '/_authenticated/member/pending': typeof AuthenticatedMemberPendingRoute
   '/_authenticated/org/accounts': typeof AuthenticatedOrgAccountsRoute
+  '/_authenticated/org/accounts-hub': typeof AuthenticatedOrgAccountsHubRoute
   '/_authenticated/org/cashflow': typeof AuthenticatedOrgCashflowRoute
   '/_authenticated/org/chat': typeof AuthenticatedOrgChatRoute
   '/_authenticated/org/committee': typeof AuthenticatedOrgCommitteeRoute
@@ -265,6 +275,7 @@ export interface FileRouteTypes {
     | '/member/loan-request'
     | '/member/pending'
     | '/org/accounts'
+    | '/org/accounts-hub'
     | '/org/cashflow'
     | '/org/chat'
     | '/org/committee'
@@ -291,6 +302,7 @@ export interface FileRouteTypes {
     | '/member/loan-request'
     | '/member/pending'
     | '/org/accounts'
+    | '/org/accounts-hub'
     | '/org/cashflow'
     | '/org/chat'
     | '/org/committee'
@@ -318,6 +330,7 @@ export interface FileRouteTypes {
     | '/_authenticated/member/loan-request'
     | '/_authenticated/member/pending'
     | '/_authenticated/org/accounts'
+    | '/_authenticated/org/accounts-hub'
     | '/_authenticated/org/cashflow'
     | '/_authenticated/org/chat'
     | '/_authenticated/org/committee'
@@ -484,6 +497,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOrgCashflowRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/org/accounts-hub': {
+      id: '/_authenticated/org/accounts-hub'
+      path: '/org/accounts-hub'
+      fullPath: '/org/accounts-hub'
+      preLoaderRoute: typeof AuthenticatedOrgAccountsHubRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/org/accounts': {
       id: '/_authenticated/org/accounts'
       path: '/org/accounts'
@@ -529,6 +549,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMemberLoanRequestRoute: typeof AuthenticatedMemberLoanRequestRoute
   AuthenticatedMemberPendingRoute: typeof AuthenticatedMemberPendingRoute
   AuthenticatedOrgAccountsRoute: typeof AuthenticatedOrgAccountsRoute
+  AuthenticatedOrgAccountsHubRoute: typeof AuthenticatedOrgAccountsHubRoute
   AuthenticatedOrgCashflowRoute: typeof AuthenticatedOrgCashflowRoute
   AuthenticatedOrgChatRoute: typeof AuthenticatedOrgChatRoute
   AuthenticatedOrgCommitteeRoute: typeof AuthenticatedOrgCommitteeRoute
@@ -552,6 +573,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMemberLoanRequestRoute: AuthenticatedMemberLoanRequestRoute,
   AuthenticatedMemberPendingRoute: AuthenticatedMemberPendingRoute,
   AuthenticatedOrgAccountsRoute: AuthenticatedOrgAccountsRoute,
+  AuthenticatedOrgAccountsHubRoute: AuthenticatedOrgAccountsHubRoute,
   AuthenticatedOrgCashflowRoute: AuthenticatedOrgCashflowRoute,
   AuthenticatedOrgChatRoute: AuthenticatedOrgChatRoute,
   AuthenticatedOrgCommitteeRoute: AuthenticatedOrgCommitteeRoute,
