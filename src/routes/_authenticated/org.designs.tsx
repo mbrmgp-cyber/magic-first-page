@@ -312,9 +312,54 @@ function DesignsPage() {
             })}
           </div>
 
+          {/* Dual mode: Rich Text editor vs Blank Template */}
+          <Tabs value={letterMode} onValueChange={(v) => setLetterMode(v as "rich" | "blank")} className="w-full">
+            <TabsList className="grid grid-cols-2 w-full" style={{ background: theme.bg }}>
+              <TabsTrigger value="rich" className="gap-2"><Pencil className="h-3.5 w-3.5" /> Rich Text Letter / టైప్ చేయండి</TabsTrigger>
+              <TabsTrigger value="blank" className="gap-2"><FileX className="h-3.5 w-3.5" /> Blank Template / ఖాళీ</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="rich" className="space-y-3 mt-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-[11px]" style={{ color: theme.smallColor }}>To / గ్రహీత</Label>
+                  <Textarea rows={2} value={letterTo} onChange={(e) => setLetterTo(e.target.value)}
+                    placeholder="Recipient name & address" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[11px]" style={{ color: theme.smallColor }}>Date / తేదీ</Label>
+                  <Input type="date" value={letterDate} onChange={(e) => setLetterDate(e.target.value)} />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-[11px]" style={{ color: theme.smallColor }}>Subject / విషయం</Label>
+                <Input value={letterSubject} onChange={(e) => setLetterSubject(e.target.value)}
+                  placeholder="Regarding..." />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-[11px]" style={{ color: theme.smallColor }}>Body / లేఖ విషయం</Label>
+                <Textarea rows={8} value={letterBody} onChange={(e) => setLetterBody(e.target.value)}
+                  placeholder="Type your letter body here..." />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="blank" className="mt-3">
+              <div className="rounded-lg border p-3 text-[12px]"
+                style={{ background: theme.bg, borderColor: theme.border, color: theme.smallColor }}>
+                Blank template — header &amp; footer only. Download as PDF, print, and write content by hand.
+              </div>
+            </TabsContent>
+          </Tabs>
+
           <LivePreview title="Letter Pad Live Preview" theme={theme}>
             <LetterPreview layout={letterPick} theme={theme} orgName={orgName} slogan={orgSlogan} reg={orgReg} />
           </LivePreview>
+
+          <Button onClick={printLetterhead} className="w-full font-semibold h-11"
+            style={{ background: theme.buttonBg, color: theme.buttonText }}>
+            <Printer className="h-4 w-4 mr-2" />
+            {letterMode === "rich" ? "Preview & Download Letter PDF" : "Download Blank Letterhead PDF"}
+          </Button>
         </Section>
 
         {/* Generate */}
