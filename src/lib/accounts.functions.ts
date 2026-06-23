@@ -221,3 +221,72 @@ export const getMyLedger = createServerFn({ method: "GET" })
       },
     };
   });
+
+// Admin Master Ledger — aggregated view across all members
+export const getMasterLedger = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const orgId = await resolveOrgId(supabase, userId);
+    if (!orgId) return { rows: [], totals: { outstanding: 0, principal: 0, interest: 0, newLoan: 0, net: 0 } };
+
+    const { data: members } = await supabase
+      .from("members")
+      .select("id, name, member_code")
+      .eq("org_id", orgId)
+      .eq("status", "approved")
+      .order("member_code", { ascending: true });
+
+    const today = new Date().toISOString().slice(0, 10);
+    const rows = await Promise.all((members ?? []).map(async (m: any) => {
+      const { data: loans } = await supabase
+        .from("member_loans").select("id, principal, start_date")
+        .eq("member_id", m.id).eq("status", "active");
+      let outstanding = 0;
+      let newLoanToday = 0;
+      const loanIds: string[] = [];
+      for (const l of (loans ?? [])) {
+        loanIds.push(l.id);
+        const { data: s } = await supabase.rpc("get_loan_summary", { _loan_id: l.id });
+        const summary = Array.isArray(s) ? s[0] : s;
+        outstanding += Number(summary?.balance ?? 0);
+        if (String(l.start_date).slice(0, 10) === today) newLoanToday += Number(l.principal ?? 0);
+      }
+      let principalToday = 0, interestToday = 0;
+      if (loanIds.length) {
+        const { data: pays } = await supabase
+          .from("member_loan_payments")
+          .select("amount, notes, payment_date")
+          .in("loan_id", loanIds)
+          .eq("payment_date", today);
+        for (const p of (pays ?? [])) {
+          try {
+            const n = JSON.parse(p.notes ?? "{}");
+            principalToday += Number(n.principal ?? 0);
+            interestToday += Number(n.interest ?? 0);
+          } catch {
+            principalToday += Number(p.amount ?? 0);
+          }
+        }
+      }
+      const oldBalance = outstanding + principalToday - newLoanToday; // approximate pre-today balance
+      return {
+        member_id: m.member_code,
+        member_name: m.name,
+        old_balance: Math.round(oldBalance * 100) / 100,
+        principal_collected: Math.round(principalToday * 100) / 100,
+        interest_collected: Math.round(interestToday * 100) / 100,
+        new_loan: Math.round(newLoanToday * 100) / 100,
+        net_balance: Math.round(outstanding * 100) / 100,
+      };
+    }));
+
+    const totals = rows.reduce((acc, r) => ({
+      outstanding: acc.outstanding + r.old_balance,
+      principal: acc.principal + r.principal_collected,
+      interest: acc.interest + r.interest_collected,
+      newLoan: acc.newLoan + r.new_loan,
+      net: acc.net + r.net_balance,
+    }), { outstanding: 0, principal: 0, interest: 0, newLoan: 0, net: 0 });
+    return { rows, totals };
+  });

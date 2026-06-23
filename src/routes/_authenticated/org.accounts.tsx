@@ -1,24 +1,38 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
-import { ArrowLeft, Save, Send, Pencil, FileText, FileSpreadsheet, Search, ShieldCheck, RefreshCw } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRef, useState } from "react";
+import { ArrowLeft, Save, Send, Pencil, FileText, FileSpreadsheet, Search, RefreshCw, Upload, BookOpen } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { lookupMemberByCode, recordMonthlyPayment } from "@/lib/accounts.functions";
+import { getMyOrg, updateOrgLogo } from "@/lib/org.functions";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/org/accounts")({
   head: () => ({ meta: [{ title: "Committee Accounts — Monthly Loan Entry" }] }),
   component: AccountsPage,
 });
 
+const CURRENCIES = [
+  { code: "INR", symbol: "₹" }, { code: "USD", symbol: "$" },
+  { code: "AED", symbol: "د.إ" }, { code: "KWD", symbol: "د.ك" }, { code: "MYR", symbol: "RM" },
+];
+
 type Lookup = Awaited<ReturnType<typeof lookupMemberByCode>>;
 
 function AccountsPage() {
   const lookup = useServerFn(lookupMemberByCode);
   const record = useServerFn(recordMonthlyPayment);
+  const fetchOrg = useServerFn(getMyOrg);
+  const saveLogo = useServerFn(updateOrgLogo);
+  const qc = useQueryClient();
+  const orgQ = useQuery({ queryKey: ["my-org"], queryFn: () => fetchOrg() });
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
 
   const [idNo, setIdNo] = useState("");
   const [date, setDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
@@ -27,10 +41,39 @@ function AccountsPage() {
   const [interest, setInterest] = useState("");
   const [newLoan, setNewLoan] = useState("");
   const [newLoanRate, setNewLoanRate] = useState("2");
+  const [currency, setCurrency] = useState("INR");
   const [info, setInfo] = useState<Extract<Lookup, { found: true }> | null>(null);
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState<{ balance: number; emailed_to: string | null; collected: number; disbursed: number } | null>(null);
   const [locked, setLocked] = useState(false);
+
+  const sym = CURRENCIES.find(c => c.code === currency)?.symbol ?? "₹";
+  const fmtCur = (n: number) => `${sym} ${Number(n || 0).toLocaleString("en-IN")}`;
+
+  async function onLogoPicked(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    if (!f) return;
+    setUploading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Login required");
+      const ext = f.name.split(".").pop() || "png";
+      const path = `${user.id}/logo/${crypto.randomUUID()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("org-documents").upload(path, f, { upsert: false });
+      if (upErr) throw upErr;
+      const { data: signed } = await supabase.storage.from("org-documents").createSignedUrl(path, 60 * 60 * 24 * 365);
+      const url = signed?.signedUrl;
+      if (!url) throw new Error("URL generation failed");
+      await saveLogo({ data: { logo_url: url } });
+      await qc.invalidateQueries({ queryKey: ["my-org"] });
+      toast.success("లోగో అప్‌డేట్ అయింది");
+    } catch (err: any) {
+      toast.error(err.message ?? "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function doLookup(code: string) {
     if (!code.trim()) return;
@@ -72,6 +115,7 @@ function AccountsPage() {
         remarks,
       });
       setLocked(true);
+      await qc.invalidateQueries({ queryKey: ["master-ledger"] });
       toast.success(`Saved. రసీదు ${res.emailed_to ?? "—"}కు పంపబడింది`);
     } catch (e: any) {
       toast.error(e?.message ?? "Save failed");
@@ -85,7 +129,7 @@ function AccountsPage() {
   }) {
     const w = window.open("", "_blank", "width=720,height=900");
     if (!w) return;
-    const fmt = (n: number) => `Rs. ${Number(n || 0).toLocaleString("en-IN")}`;
+    const fmt = (n: number) => `${sym} ${Number(n || 0).toLocaleString("en-IN")}`;
     w.document.write(`<!doctype html><html><head><title>Receipt</title>
     <style>body{font-family:system-ui,sans-serif;padding:24px;color:#111}
     h1{margin:0 0 4px;font-size:20px;color:#c2410c}
@@ -124,15 +168,34 @@ function AccountsPage() {
           <ArrowLeft className="w-4 h-4" /> Dashboard
         </Link>
 
-        {/* Header */}
+        {/* Header with logo + currency */}
         <Card className="p-4 bg-white/95 border-white shadow-xl">
-          <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-orange-100 to-green-100 flex items-center justify-center">
-              <ShieldCheck className="h-7 w-7 text-orange-600" />
+          <div className="flex items-start justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-3">
+              <button type="button" onClick={() => fileRef.current?.click()}
+                className="relative h-14 w-14 rounded-xl bg-gradient-to-br from-orange-100 to-green-100 flex items-center justify-center overflow-hidden border-2 border-orange-200 hover:border-orange-400 transition group"
+                title="Upload logo">
+                {orgQ.data?.org?.logo_url ? (
+                  <img src={orgQ.data.org.logo_url} alt="Society logo" className="h-full w-full object-cover" />
+                ) : (
+                  <Upload className="h-6 w-6 text-orange-600" />
+                )}
+                {uploading && <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                  <RefreshCw className="h-4 w-4 animate-spin" /></div>}
+                <div className="absolute inset-x-0 bottom-0 bg-black/60 text-white text-[8px] py-0.5 opacity-0 group-hover:opacity-100">EDIT</div>
+              </button>
+              <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onLogoPicked} />
+              <div className="leading-tight">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Society</p>
+                <p className="font-bold text-foreground">{orgQ.data?.org?.name ?? "చిట్వేల్ హెల్ప్ లైన్ సొసైటీ"}</p>
+              </div>
             </div>
-            <div className="leading-tight">
-              <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Society</p>
-              <p className="font-bold text-foreground">చిట్వేల్ హెల్ప్ లైన్ సొసైటీ</p>
+            <div className="flex flex-col gap-1">
+              <Label className="text-[10px] uppercase tracking-wide">Select Currency</Label>
+              <select value={currency} onChange={(e) => setCurrency(e.target.value)}
+                className="border-2 border-orange-200 rounded px-2 py-1.5 text-sm bg-white font-semibold">
+                {CURRENCIES.map(c => <option key={c.code} value={c.code}>{c.symbol} {c.code}</option>)}
+              </select>
             </div>
           </div>
           <h1 className="mt-3 text-lg md:text-2xl font-bold" style={{
@@ -141,7 +204,12 @@ function AccountsPage() {
           }}>
             కమిటీ అకౌంట్స్ – నెలవారీ అప్పు వివరాల నమోదు
           </h1>
-          <p className="text-xs text-muted-foreground">Committee Accounts – Monthly Loan Entry</p>
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <p className="text-xs text-muted-foreground">Committee Accounts – Monthly Loan Entry</p>
+            <Link to="/org/master-ledger" className="inline-flex items-center gap-1 text-xs text-green-700 hover:text-green-900 font-semibold">
+              <BookOpen className="h-3 w-3" /> View Master Ledger →
+            </Link>
+          </div>
         </Card>
 
         {/* Lookup row */}
@@ -180,11 +248,11 @@ function AccountsPage() {
               <p className="text-xs font-bold text-red-600 tracking-wide">OLD LOAN</p>
               <div>
                 <p className="text-[11px] text-muted-foreground">అప్పు మొత్తం (OUTSTANDING)</p>
-                <p className="font-bold text-lg">₹ {info ? info.totalOutstanding.toLocaleString("en-IN") : "0"}</p>
+                <p className="font-bold text-lg">{sym} {info ? info.totalOutstanding.toLocaleString("en-IN") : "0"}</p>
               </div>
               <div>
                 <p className="text-[11px] text-muted-foreground">వడ్డీ మొత్తం (MONTHLY)</p>
-                <p className="font-bold text-lg">₹ {info ? info.monthlyInterest.toLocaleString("en-IN") : "0"}</p>
+                <p className="font-bold text-lg">{sym} {info ? info.monthlyInterest.toLocaleString("en-IN") : "0"}</p>
               </div>
               <div className="space-y-1.5 pt-2 border-t border-orange-200">
                 <Label className="text-xs">అసలు జమ (Principal Paid)</Label>
@@ -213,7 +281,7 @@ function AccountsPage() {
               </div>
               {newLoan && Number(newLoan) > 0 && (
                 <div className="text-[11px] text-muted-foreground pt-2 border-t border-red-200">
-                  ఈ రోజు ఇవ్వబడుతుంది: <b className="text-red-700">₹ {Number(newLoan).toLocaleString("en-IN")}</b>
+                  ఈ రోజు ఇవ్వబడుతుంది: <b className="text-red-700">{sym} {Number(newLoan).toLocaleString("en-IN")}</b>
                 </div>
               )}
             </div>
@@ -229,9 +297,9 @@ function AccountsPage() {
 
           {saved && (
             <div className="rounded-md border border-green-300 bg-green-50 p-3 text-sm text-green-900 space-y-1">
-              <div>✅ Saved. Updated balance: <b>₹ {saved.balance.toLocaleString("en-IN")}</b></div>
-              {saved.collected > 0 && <div>Collected today: <b>₹ {saved.collected.toLocaleString("en-IN")}</b></div>}
-              {saved.disbursed > 0 && <div>New loan disbursed: <b>₹ {saved.disbursed.toLocaleString("en-IN")}</b></div>}
+              <div>✅ Saved. Updated balance: <b>{sym} {saved.balance.toLocaleString("en-IN")}</b></div>
+              {saved.collected > 0 && <div>Collected today: <b>{sym} {saved.collected.toLocaleString("en-IN")}</b></div>}
+              {saved.disbursed > 0 && <div>New loan disbursed: <b>{sym} {saved.disbursed.toLocaleString("en-IN")}</b></div>}
               {saved.emailed_to && <div>Receipt emailed to <b>{saved.emailed_to}</b></div>}
             </div>
           )}
