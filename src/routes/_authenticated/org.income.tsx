@@ -12,8 +12,9 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { recordIncome, listIncome, type IncomeType, type WalletType } from "@/lib/cashflow.functions";
+import { recordIncome, listIncome, listWalletAccounts, type IncomeType, type WalletType } from "@/lib/cashflow.functions";
 import { getMyOrg } from "@/lib/org.functions";
+import { CurrencySelector, CURRENCIES, BASE_CURRENCY, type CurrencyCode } from "@/lib/currency-context";
 
 export const Route = createFileRoute("/_authenticated/org/income")({
   head: () => ({ meta: [{ title: "ఆదాయం / Income Receipts" }] }),
@@ -40,12 +41,17 @@ function IncomePage() {
 
   const orgQ = useQuery({ queryKey: ["my-org"], queryFn: () => orgFn() });
   const listQ = useQuery({ queryKey: ["org-income"], queryFn: () => listFn() });
+  const walletsFn = useServerFn(listWalletAccounts);
+  const walletsQ = useQuery({ queryKey: ["wallet-accounts"], queryFn: () => walletsFn() });
 
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [payer, setPayer] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [amount, setAmount] = useState("");
+  const [txCurrency, setTxCurrency] = useState<CurrencyCode>(BASE_CURRENCY);
+  const [exchangeRate, setExchangeRate] = useState("1");
+  const [walletAccountId, setWalletAccountId] = useState<string>("");
   const [incType, setIncType] = useState<IncomeType>("donation");
   const [wallet, setWallet] = useState<WalletType>("bank");
   const [remarks, setRemarks] = useState("");
