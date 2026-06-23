@@ -80,7 +80,6 @@ function MasterLedgerPage() {
               <p className="text-xs text-muted-foreground">Live aggregated entries from Committee Accounts</p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <CurrencySelector variant="light" />
               <Button variant="outline" size="sm" onClick={() => q.refetch()}>
                 <RefreshCw className={`h-4 w-4 ${q.isFetching ? "animate-spin" : ""}`} />
               </Button>
