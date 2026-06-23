@@ -119,12 +119,12 @@ const DEFAULT_RECEIPT: ReceiptData = {
   mode: "Cash",
 };
 
-// Premium dark fallbacks — actual chrome is sourced from org theme inside DesignsPage.
-const DEFAULT_PAGE_BG = "#0a0a0a";
-const DEFAULT_PAGE_PANEL = "#111113";
-const DEFAULT_PAGE_BORDER = "#27272a";
-const DEFAULT_PAGE_HEAD = "#fafafa";
-const DEFAULT_PAGE_SUB = "#a1a1aa";
+// Premium dark page chrome (constant — accent/font/colors flow from org theme to inner templates).
+const PAGE_BG = "#0a0a0a";
+const PAGE_PANEL = "#111113";
+const PAGE_BORDER = "#27272a";
+const PAGE_HEAD = "#fafafa";
+const PAGE_SUB = "#a1a1aa";
 
 const FONT_OPTIONS = [
   { v: "Inter", label: "Inter (Modern)" },
