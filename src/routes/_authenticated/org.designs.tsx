@@ -9,7 +9,12 @@ import { toast } from "sonner";
 import {
   ArrowLeft, IdCard, FileText, Sparkles, Check, Wand2, Lock, QrCode,
   LayoutTemplate, Layers, Square, FileSignature, Download, User, Shield, BadgeCheck,
+  Printer, Pencil, FileX,
 } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 import { resolveTheme, type ThemeSettings } from "@/lib/theme";
 
@@ -71,9 +76,17 @@ function DesignsPage() {
   const [letterPick, setLetterPick] = useState<LetterLayout>("standard-header");
   const [generating, setGenerating] = useState(false);
 
+  // Letterhead dual-mode state
+  const [letterMode, setLetterMode] = useState<"rich" | "blank">("rich");
+  const [letterTo, setLetterTo] = useState("");
+  const [letterSubject, setLetterSubject] = useState("");
+  const [letterBody, setLetterBody] = useState("");
+  const [letterDate, setLetterDate] = useState(new Date().toISOString().slice(0, 10));
+
   const orgName = org?.name || "Chitvel Help Line Society";
   const orgSlogan = org?.slogan || "॥ మానవసేవే మాధవసేవ ॥";
   const orgReg = org?.gov_reg_number || "356/16";
+  const orgAddress = org?.address || "";
 
   async function applyAndGenerate() {
     setGenerating(true);
@@ -86,6 +99,93 @@ function DesignsPage() {
     } finally {
       setGenerating(false);
     }
+  }
+
+  function escapeHtml(s: string): string {
+    return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
+  }
+
+  function printLetterhead() {
+    const isRich = letterMode === "rich";
+    const subject = letterSubject.trim();
+    const to = letterTo.trim();
+    const body = letterBody.trim();
+    const accent = theme.icon;
+    const headFF = `${theme.headFont}, "Noto Sans Telugu", system-ui, sans-serif`;
+    const subFF = `${theme.subFont}, "Noto Sans Telugu", system-ui, sans-serif`;
+    const dateStr = letterDate ? new Date(letterDate).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" }) : "";
+
+    let header = "";
+    let sidebar = "";
+    let bodyWrap = "padding:48px 56px;";
+    if (letterPick === "left-sidebar") {
+      bodyWrap = "padding:48px 48px 48px 240px; position:relative;";
+      sidebar = `
+        <div style="position:absolute;left:0;top:0;bottom:0;width:200px;background:${accent};color:#fff;padding:32px 18px;text-align:center;font-family:${headFF};">
+          <div style="width:88px;height:88px;border-radius:50%;background:#fff;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;color:${accent};font-size:36px;font-weight:900;">★</div>
+          <div style="font-weight:800;font-size:14px;line-height:1.3;">${escapeHtml(orgName)}</div>
+          <div style="font-family:${subFF};font-style:italic;font-size:10px;opacity:.9;margin-top:6px;">${escapeHtml(orgSlogan)}</div>
+          <div style="font-size:10px;opacity:.85;margin-top:10px;">Reg: ${escapeHtml(orgReg)}</div>
+          ${orgAddress ? `<div style="font-size:9px;opacity:.85;margin-top:10px;line-height:1.4;">${escapeHtml(orgAddress)}</div>` : ""}
+        </div>`;
+    } else if (letterPick === "watermark-centered") {
+      header = `
+        <div style="text-align:center;padding:36px 56px 16px;font-family:${headFF};">
+          <div style="font-weight:900;font-size:28px;color:${accent};">${escapeHtml(orgName)}</div>
+          <div style="font-family:${subFF};font-style:italic;color:#555;font-size:14px;margin-top:4px;">${escapeHtml(orgSlogan)}</div>
+          <div style="font-size:11px;color:#777;margin-top:2px;">Reg No: ${escapeHtml(orgReg)}${orgAddress ? " • " + escapeHtml(orgAddress) : ""}</div>
+        </div>`;
+      bodyWrap = "padding:8px 64px 48px; position:relative;";
+    } else {
+      // standard-header
+      header = `
+        <div style="display:flex;align-items:center;gap:16px;padding:32px 56px 16px;border-bottom:4px solid ${accent};font-family:${headFF};">
+          <div style="width:64px;height:64px;border-radius:50%;background:${accent};color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;">★</div>
+          <div style="flex:1;">
+            <div style="font-weight:900;font-size:24px;color:${accent};">${escapeHtml(orgName)}</div>
+            <div style="font-family:${subFF};font-style:italic;font-size:13px;color:#555;">${escapeHtml(orgSlogan)}</div>
+            <div style="font-size:11px;color:#777;">Reg No: ${escapeHtml(orgReg)}${orgAddress ? " • " + escapeHtml(orgAddress) : ""}</div>
+          </div>
+        </div>`;
+    }
+
+    const watermark = letterPick === "watermark-centered"
+      ? `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:220px;color:${accent};opacity:.06;pointer-events:none;font-weight:900;">★</div>`
+      : "";
+
+    const richBody = isRich ? `
+      <div style="font-family:${subFF};color:#111;font-size:13px;line-height:1.65;">
+        <div style="display:flex;justify-content:space-between;margin-top:8px;">
+          <div><strong>To,</strong><br/>${escapeHtml(to).replace(/\n/g, "<br/>") || "&nbsp;"}</div>
+          <div style="text-align:right;color:#555;">${escapeHtml(dateStr)}</div>
+        </div>
+        ${subject ? `<div style="margin-top:18px;"><strong>Subject:</strong> ${escapeHtml(subject)}</div>` : ""}
+        <div style="margin-top:18px;white-space:pre-wrap;">${escapeHtml(body) || "&nbsp;"}</div>
+        <div style="margin-top:48px;">Yours sincerely,<br/><br/><br/><strong>${escapeHtml(orgName)}</strong></div>
+      </div>` : `
+      <div style="font-family:${subFF};color:#bbb;font-size:11px;text-align:center;margin-top:36px;">
+        — Blank letterhead • write or print content here —
+      </div>`;
+
+    const html = `<!doctype html><html><head><meta charset="utf-8"/>
+      <title>Letterhead — ${escapeHtml(orgName)}</title>
+      <style>
+        @page { size: A4; margin: 0; }
+        html,body{margin:0;padding:0;background:#fff;}
+        .page{width:210mm;min-height:297mm;background:#fff;position:relative;}
+        @media print { .noprint{display:none!important;} }
+      </style></head><body>
+      <div class="noprint" style="padding:12px;background:#111;color:#fff;font-family:system-ui;display:flex;gap:12px;align-items:center;">
+        <button onclick="window.print()" style="padding:8px 16px;background:${accent};color:#fff;border:0;border-radius:6px;font-weight:700;cursor:pointer;">Print / Save as PDF</button>
+        <span style="font-size:12px;opacity:.8;">Use your browser's Save as PDF in the print dialog.</span>
+      </div>
+      <div class="page">${sidebar}${header}<div style="${bodyWrap}">${watermark}${richBody}</div></div>
+      </body></html>`;
+
+    const w = window.open("", "_blank", "width=900,height=1100");
+    if (!w) { toast.error("Popup blocked — allow popups to download PDF"); return; }
+    w.document.write(html);
+    w.document.close();
   }
 
   return (
@@ -212,9 +312,54 @@ function DesignsPage() {
             })}
           </div>
 
+          {/* Dual mode: Rich Text editor vs Blank Template */}
+          <Tabs value={letterMode} onValueChange={(v) => setLetterMode(v as "rich" | "blank")} className="w-full">
+            <TabsList className="grid grid-cols-2 w-full" style={{ background: theme.bg }}>
+              <TabsTrigger value="rich" className="gap-2"><Pencil className="h-3.5 w-3.5" /> Rich Text Letter / టైప్ చేయండి</TabsTrigger>
+              <TabsTrigger value="blank" className="gap-2"><FileX className="h-3.5 w-3.5" /> Blank Template / ఖాళీ</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="rich" className="space-y-3 mt-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-[11px]" style={{ color: theme.smallColor }}>To / గ్రహీత</Label>
+                  <Textarea rows={2} value={letterTo} onChange={(e) => setLetterTo(e.target.value)}
+                    placeholder="Recipient name & address" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[11px]" style={{ color: theme.smallColor }}>Date / తేదీ</Label>
+                  <Input type="date" value={letterDate} onChange={(e) => setLetterDate(e.target.value)} />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-[11px]" style={{ color: theme.smallColor }}>Subject / విషయం</Label>
+                <Input value={letterSubject} onChange={(e) => setLetterSubject(e.target.value)}
+                  placeholder="Regarding..." />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-[11px]" style={{ color: theme.smallColor }}>Body / లేఖ విషయం</Label>
+                <Textarea rows={8} value={letterBody} onChange={(e) => setLetterBody(e.target.value)}
+                  placeholder="Type your letter body here..." />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="blank" className="mt-3">
+              <div className="rounded-lg border p-3 text-[12px]"
+                style={{ background: theme.bg, borderColor: theme.border, color: theme.smallColor }}>
+                Blank template — header &amp; footer only. Download as PDF, print, and write content by hand.
+              </div>
+            </TabsContent>
+          </Tabs>
+
           <LivePreview title="Letter Pad Live Preview" theme={theme}>
             <LetterPreview layout={letterPick} theme={theme} orgName={orgName} slogan={orgSlogan} reg={orgReg} />
           </LivePreview>
+
+          <Button onClick={printLetterhead} className="w-full font-semibold h-11"
+            style={{ background: theme.buttonBg, color: theme.buttonText }}>
+            <Printer className="h-4 w-4 mr-2" />
+            {letterMode === "rich" ? "Preview & Download Letter PDF" : "Download Blank Letterhead PDF"}
+          </Button>
         </Section>
 
         {/* Generate */}
