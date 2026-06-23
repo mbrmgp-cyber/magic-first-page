@@ -1408,7 +1408,7 @@ function StandardBackPreview({
   const W = 340, H = 214;
   return (
     <div style={{
-      width: W, height: H, background: "#fff", color: "#111",
+      width: W, height: H, background: cardBg, color: "#111",
       borderRadius: 8, overflow: "hidden", border: `1px solid ${navy}`,
       boxShadow: `0 8px 28px ${accent}33`, fontFamily: headFF, display: "flex", flexDirection: "column",
     }}>
