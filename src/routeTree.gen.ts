@@ -147,24 +147,6 @@ const AuthenticatedOrgAccountsRoute =
     path: '/org/accounts',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedOrgIncomeRoute =
-  AuthenticatedOrgIncomeRouteImport.update({
-    id: '/org/income',
-    path: '/org/income',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOrgExpensesRoute =
-  AuthenticatedOrgExpensesRouteImport.update({
-    id: '/org/expenses',
-    path: '/org/expenses',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOrgCashflowRoute =
-  AuthenticatedOrgCashflowRouteImport.update({
-    id: '/org/cashflow',
-    path: '/org/cashflow',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedMemberPendingRoute =
   AuthenticatedMemberPendingRouteImport.update({
     id: '/member/pending',
