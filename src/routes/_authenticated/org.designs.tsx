@@ -169,10 +169,10 @@ function DesignsPage() {
   const [receipt, setReceipt] = useState<ReceiptData>(DEFAULT_RECEIPT);
   const [receiptLogo, setReceiptLogo] = useState<string>(mbrLogo.url);
 
-  // Design Customization (per-edit-session overrides)
+  // Design Customization (per-edit-session overrides — nullable so live theme wins until user picks).
   const [cardBg, setCardBg] = useState<string>("#ffffff");
-  const [accentColor, setAccentColor] = useState<string>(theme.icon);
-  const [fontFamily, setFontFamily] = useState<string>(theme.headFont);
+  const [accentColor, setAccentColor] = useState<string | null>(null);
+  const [fontFamily, setFontFamily] = useState<string | null>(null);
 
   // customTheme applies the user's live styling on top of base theme
   const customTheme = useMemo(() => ({
