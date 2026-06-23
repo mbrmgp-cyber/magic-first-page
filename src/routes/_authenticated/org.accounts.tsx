@@ -167,15 +167,34 @@ function AccountsPage() {
           <ArrowLeft className="w-4 h-4" /> Dashboard
         </Link>
 
-        {/* Header */}
+        {/* Header with logo + currency */}
         <Card className="p-4 bg-white/95 border-white shadow-xl">
-          <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-orange-100 to-green-100 flex items-center justify-center">
-              <ShieldCheck className="h-7 w-7 text-orange-600" />
+          <div className="flex items-start justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-3">
+              <button type="button" onClick={() => fileRef.current?.click()}
+                className="relative h-14 w-14 rounded-xl bg-gradient-to-br from-orange-100 to-green-100 flex items-center justify-center overflow-hidden border-2 border-orange-200 hover:border-orange-400 transition group"
+                title="Upload logo">
+                {orgQ.data?.org?.logo_url ? (
+                  <img src={orgQ.data.org.logo_url} alt="Society logo" className="h-full w-full object-cover" />
+                ) : (
+                  <Upload className="h-6 w-6 text-orange-600" />
+                )}
+                {uploading && <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                  <RefreshCw className="h-4 w-4 animate-spin" /></div>}
+                <div className="absolute inset-x-0 bottom-0 bg-black/60 text-white text-[8px] py-0.5 opacity-0 group-hover:opacity-100">EDIT</div>
+              </button>
+              <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onLogoPicked} />
+              <div className="leading-tight">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Society</p>
+                <p className="font-bold text-foreground">{orgQ.data?.org?.name ?? "చిట్వేల్ హెల్ప్ లైన్ సొసైటీ"}</p>
+              </div>
             </div>
-            <div className="leading-tight">
-              <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Society</p>
-              <p className="font-bold text-foreground">చిట్వేల్ హెల్ప్ లైన్ సొసైటీ</p>
+            <div className="flex flex-col gap-1">
+              <Label className="text-[10px] uppercase tracking-wide">Select Currency</Label>
+              <select value={currency} onChange={(e) => setCurrency(e.target.value)}
+                className="border-2 border-orange-200 rounded px-2 py-1.5 text-sm bg-white font-semibold">
+                {CURRENCIES.map(c => <option key={c.code} value={c.code}>{c.symbol} {c.code}</option>)}
+              </select>
             </div>
           </div>
           <h1 className="mt-3 text-lg md:text-2xl font-bold" style={{
@@ -184,7 +203,12 @@ function AccountsPage() {
           }}>
             కమిటీ అకౌంట్స్ – నెలవారీ అప్పు వివరాల నమోదు
           </h1>
-          <p className="text-xs text-muted-foreground">Committee Accounts – Monthly Loan Entry</p>
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <p className="text-xs text-muted-foreground">Committee Accounts – Monthly Loan Entry</p>
+            <Link to="/org/master-ledger" className="inline-flex items-center gap-1 text-xs text-green-700 hover:text-green-900 font-semibold">
+              <BookOpen className="h-3 w-3" /> View Master Ledger →
+            </Link>
+          </div>
         </Card>
 
         {/* Lookup row */}
