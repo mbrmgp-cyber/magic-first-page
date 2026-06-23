@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getCashFlowSummary, type TimeRange } from "@/lib/cashflow.functions";
-import { useCurrency, CurrencySelector, BASE_CURRENCY } from "@/lib/currency-context";
+import { useCurrency, BASE_CURRENCY } from "@/lib/currency-context";
 
 export const Route = createFileRoute("/_authenticated/org/cashflow")({
   head: () => ({ meta: [{ title: "Society Cash Flow Statement" }] }),
