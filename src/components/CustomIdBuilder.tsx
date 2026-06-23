@@ -262,6 +262,8 @@ export function CustomIdBuilder({ defaultName = "Member Name", defaultDesignatio
         {els.name.enabled && (
           <Panel title="4 · Name Text">
             <LabeledInput label="Name" value={name} onChange={setName} />
+            <FontSizeSlider value={els.name.fontSize || 22} onChange={(v) => patch("name", { fontSize: v })} />
+            <ColorPickerRow label="Text Color / టెక్స్ట్ కలర్" value={els.name.color || "#111111"} onChange={(c) => patch("name", { color: c })} />
             <SizeSliders state={els.name} onChange={(p) => patch("name", p)} />
           </Panel>
         )}
@@ -269,6 +271,8 @@ export function CustomIdBuilder({ defaultName = "Member Name", defaultDesignatio
         {els.designation.enabled && (
           <Panel title="5 · Designation">
             <LabeledInput label="Designation" value={designation} onChange={setDesignation} />
+            <FontSizeSlider value={els.designation.fontSize || 16} onChange={(v) => patch("designation", { fontSize: v })} />
+            <ColorPickerRow label="Text Color / టెక్స్ట్ కలర్" value={els.designation.color || "#374151"} onChange={(c) => patch("designation", { color: c })} />
             <SizeSliders state={els.designation} onChange={(p) => patch("designation", p)} />
           </Panel>
         )}
