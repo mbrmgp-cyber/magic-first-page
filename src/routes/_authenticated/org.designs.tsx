@@ -864,6 +864,45 @@ function IdThumb({ layout, theme }: { layout: IdLayout; theme: Required<ThemeSet
       </div>
     );
   }
+  if (layout === "portrait-vertical") {
+    // Show as a portrait card inside the landscape thumb slot
+    return (
+      <div style={{ ...common, alignItems: "center", justifyContent: "center", background: "#f5f5f5" }}>
+        <div style={{
+          height: "92%", aspectRatio: "0.65 / 1", background: "#fff",
+          border: `1px solid ${br}`, borderRadius: 3, display: "flex", flexDirection: "column", overflow: "hidden",
+        }}>
+          <div style={{ background: c, height: "22%", padding: 2 }}>
+            <div style={{ height: 2, background: "#fff", width: "85%", margin: "1px auto" }} />
+            <div style={{ height: 1.5, background: "#fff", opacity: 0.7, width: "55%", margin: "1px auto" }} />
+          </div>
+          <div style={{ flex: 1, padding: 3, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+            <div style={{ width: "55%", height: "40%", background: "#e5e5e5", border: `1px solid ${c}`, borderRadius: 2 }} />
+            <div style={{ height: 2, background: "#333", width: "75%" }} />
+            <div style={{ height: 1.5, background: "#888", width: "55%" }} />
+          </div>
+          <div style={{ background: "#138808", height: 4 }} />
+        </div>
+      </div>
+    );
+  }
+  if (layout === "keychain-mini") {
+    return (
+      <div style={{ ...common, alignItems: "center", justifyContent: "center", flexDirection: "column", background: "#f5f5f5", gap: 1 }}>
+        <div style={{ width: 5, height: 5, borderRadius: "50%", border: `1.5px solid ${c}`, background: "transparent" }} />
+        <div style={{ width: "75%", height: "62%", background: "#fff", border: `2px solid ${c}`, borderRadius: 4, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+          <div style={{ background: c, height: 5 }} />
+          <div style={{ flex: 1, display: "flex", padding: 2, gap: 2 }}>
+            <div style={{ width: "32%", background: "#e5e5e5", borderRadius: 1 }} />
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 1 }}>
+              <div style={{ height: 1.5, background: "#333" }} />
+              <div style={{ height: 1.5, background: "#888", width: "70%" }} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   if (layout === "vertical-band") {
     return (
       <div style={{ ...common, flexDirection: "row" }}>
