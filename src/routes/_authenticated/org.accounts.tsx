@@ -186,9 +186,8 @@ function AccountsPage() {
                 <p className="font-bold text-foreground">{orgQ.data?.org?.name ?? "చిట్వేల్ హెల్ప్ లైన్ సొసైటీ"}</p>
               </div>
             </div>
-            <div className="flex flex-col gap-1">
-              <Label className="text-[10px] uppercase tracking-wide">Select Currency</Label>
-              <CurrencySelector variant="light" />
+            <div className="flex flex-col gap-1 text-right">
+              <span className="text-[10px] uppercase tracking-wide text-muted-foreground">Base currency set in Accounts Hub</span>
             </div>
           </div>
           <h1 className="mt-3 text-lg md:text-2xl font-bold" style={{
