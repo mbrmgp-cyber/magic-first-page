@@ -115,6 +115,7 @@ function AccountsPage() {
         remarks,
       });
       setLocked(true);
+      await qc.invalidateQueries({ queryKey: ["master-ledger"] });
       toast.success(`Saved. రసీదు ${res.emailed_to ?? "—"}కు పంపబడింది`);
     } catch (e: any) {
       toast.error(e?.message ?? "Save failed");
