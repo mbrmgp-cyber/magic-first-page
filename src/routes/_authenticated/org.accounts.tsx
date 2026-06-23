@@ -27,6 +27,12 @@ type Lookup = Awaited<ReturnType<typeof lookupMemberByCode>>;
 function AccountsPage() {
   const lookup = useServerFn(lookupMemberByCode);
   const record = useServerFn(recordMonthlyPayment);
+  const fetchOrg = useServerFn(getMyOrg);
+  const saveLogo = useServerFn(updateOrgLogo);
+  const qc = useQueryClient();
+  const orgQ = useQuery({ queryKey: ["my-org"], queryFn: () => fetchOrg() });
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
 
   const [idNo, setIdNo] = useState("");
   const [date, setDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
@@ -35,10 +41,39 @@ function AccountsPage() {
   const [interest, setInterest] = useState("");
   const [newLoan, setNewLoan] = useState("");
   const [newLoanRate, setNewLoanRate] = useState("2");
+  const [currency, setCurrency] = useState("INR");
   const [info, setInfo] = useState<Extract<Lookup, { found: true }> | null>(null);
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState<{ balance: number; emailed_to: string | null; collected: number; disbursed: number } | null>(null);
   const [locked, setLocked] = useState(false);
+
+  const sym = CURRENCIES.find(c => c.code === currency)?.symbol ?? "₹";
+  const fmtCur = (n: number) => `${sym} ${Number(n || 0).toLocaleString("en-IN")}`;
+
+  async function onLogoPicked(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    if (!f) return;
+    setUploading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Login required");
+      const ext = f.name.split(".").pop() || "png";
+      const path = `${user.id}/logo/${crypto.randomUUID()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("org-documents").upload(path, f, { upsert: false });
+      if (upErr) throw upErr;
+      const { data: signed } = await supabase.storage.from("org-documents").createSignedUrl(path, 60 * 60 * 24 * 365);
+      const url = signed?.signedUrl;
+      if (!url) throw new Error("URL generation failed");
+      await saveLogo({ data: { logo_url: url } });
+      await qc.invalidateQueries({ queryKey: ["my-org"] });
+      toast.success("లోగో అప్‌డేట్ అయింది");
+    } catch (err: any) {
+      toast.error(err.message ?? "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function doLookup(code: string) {
     if (!code.trim()) return;
