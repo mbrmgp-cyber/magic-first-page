@@ -10,11 +10,13 @@ import {
   ArrowLeft, IdCard, FileText, Sparkles, Check, Lock, QrCode,
   Square, Download, User, Shield,
   Printer, Pencil, FileX, Receipt, Pencil as EditIcon, ChevronLeft,
+  Palette, Type as TypeIcon, Upload,
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 import { resolveTheme, type ThemeSettings, DEFAULT_THEME } from "@/lib/theme";
 
@@ -33,7 +35,9 @@ type IdLayout =
   | "elegant-gold"
   | "photo-strip"
   | "minimal-mono"
-  | "vertical-band";
+  | "vertical-band"
+  | "portrait-vertical"
+  | "keychain-mini";
 
 type LetterLayout = "standard-header" | "watermark-centered" | "left-sidebar";
 type ReceiptLayout = "classic" | "saffron-strip" | "minimal-line";
@@ -49,6 +53,8 @@ type Tpl<T extends string> = {
 const ID_TEMPLATES: Tpl<IdLayout>[] = [
   { id: "official-saffron",     en: "Official Saffron", te: "అధికారిక సాఫ్రాన్", featured: true },
   { id: "landscape-corporate",  en: "Landscape Corporate",  te: "ల్యాండ్‌స్కేప్ కార్పొరేట్" },
+  { id: "portrait-vertical",    en: "Vertical Portrait",    te: "నిలువు ఐడి కార్డ్", featured: true },
+  { id: "keychain-mini",        en: "Keychain Mini",        te: "కీ చైన్ టైప్" },
   { id: "portrait-qr",          en: "Portrait with QR",     te: "QR తో పోర్ట్రెయిట్" },
   { id: "split-design",         en: "Split Design",         te: "స్ప్లిట్ డిజైన్" },
   { id: "traditional-border",   en: "Traditional Border",   te: "సాంప్రదాయ బార్డర్" },
@@ -118,6 +124,17 @@ const PAGE_BORDER = "#27272a";
 const PAGE_HEAD = "#fafafa";
 const PAGE_SUB = "#a1a1aa";
 
+const FONT_OPTIONS = [
+  { v: "Inter", label: "Inter (Modern)" },
+  { v: "Poppins", label: "Poppins (Bold)" },
+  { v: "Playfair Display", label: "Playfair (Serif)" },
+  { v: "Merriweather", label: "Merriweather (Editorial)" },
+  { v: "Roboto Slab", label: "Roboto Slab (Classic)" },
+  { v: "Noto Sans", label: "Noto Sans (Clean)" },
+  { v: "Georgia", label: "Georgia (Traditional)" },
+  { v: "Courier New", label: "Courier (Mono)" },
+];
+
 function DesignsPage() {
   const navigate = useNavigate();
   const fetchOrg = useServerFn(getMyOrg);
@@ -157,6 +174,21 @@ function DesignsPage() {
   // Receipt state
   const [receiptPick, setReceiptPick] = useState<ReceiptLayout | null>(null);
   const [receipt, setReceipt] = useState<ReceiptData>(DEFAULT_RECEIPT);
+  const [receiptLogo, setReceiptLogo] = useState<string>(mbrLogo.url);
+
+  // Design Customization (per-edit-session overrides)
+  const [cardBg, setCardBg] = useState<string>("#ffffff");
+  const [accentColor, setAccentColor] = useState<string>(theme.icon);
+  const [fontFamily, setFontFamily] = useState<string>(theme.headFont);
+
+  // customTheme applies the user's live styling on top of base theme
+  const customTheme = useMemo(() => ({
+    ...theme,
+    icon: accentColor,
+    buttonBg: accentColor,
+    headFont: fontFamily,
+    subFont: fontFamily,
+  }), [theme, accentColor, fontFamily]);
 
   const orgName = org?.name || "Chitvel Help Line Society";
   const orgSlogan = org?.slogan || "॥ మానవసేవే మాధవసేవ ॥";
@@ -359,10 +391,17 @@ function DesignsPage() {
                       <Field label="Mandal / మండలం" value={member.mandal} onChange={(v) => setMember({ ...member, mandal: v })} />
                       <Field label="Join Date" value={member.joinDate} onChange={(v) => setMember({ ...member, joinDate: v })} />
                     </div>
+
+                    <StyleControls
+                      cardBg={cardBg} setCardBg={setCardBg}
+                      accent={accentColor} setAccent={setAccentColor}
+                      font={fontFamily} setFont={setFontFamily}
+                    />
+
                     <Button
                       onClick={() => toast.success("ID Card ready — printable PDF available shortly")}
                       className="w-full font-semibold h-10"
-                      style={{ background: theme.buttonBg, color: theme.buttonText }}
+                      style={{ background: customTheme.buttonBg, color: customTheme.buttonText }}
                     >
                       <Download className="h-4 w-4 mr-2" /> Save & Download PDF
                     </Button>
@@ -370,7 +409,7 @@ function DesignsPage() {
 
                   {/* Live Preview */}
                   <div className="rounded-lg p-3 border flex items-center justify-center" style={{ background: PAGE_BG, borderColor: PAGE_BORDER, minHeight: 260 }}>
-                    <IdCardPreview layout={idPick} theme={theme} orgName={orgName} slogan={orgSlogan} reg={orgReg} member={member} />
+                    <IdCardPreview layout={idPick} theme={customTheme} orgName={orgName} slogan={orgSlogan} reg={orgReg} member={member} cardBg={cardBg} />
                   </div>
                 </div>
               </Section>
@@ -517,16 +556,25 @@ function DesignsPage() {
                       <Field label="Purpose" value={receipt.purpose} onChange={(v) => setReceipt({ ...receipt, purpose: v })} />
                       <Field label="Mode" value={receipt.mode} onChange={(v) => setReceipt({ ...receipt, mode: v })} />
                     </div>
+
+                    <LogoUploader logoUrl={receiptLogo} onChange={setReceiptLogo} />
+
+                    <StyleControls
+                      cardBg={cardBg} setCardBg={setCardBg}
+                      accent={accentColor} setAccent={setAccentColor}
+                      font={fontFamily} setFont={setFontFamily}
+                    />
+
                     <Button
                       onClick={() => toast.success("Receipt ready — printable PDF available shortly")}
                       className="w-full font-semibold h-10"
-                      style={{ background: theme.buttonBg, color: theme.buttonText }}
+                      style={{ background: customTheme.buttonBg, color: customTheme.buttonText }}
                     >
                       <Download className="h-4 w-4 mr-2" /> Save & Download Receipt
                     </Button>
                   </div>
                   <div className="rounded-lg p-3 border flex items-center justify-center" style={{ background: PAGE_BG, borderColor: PAGE_BORDER, minHeight: 260 }}>
-                    <ReceiptPreview layout={receiptPick} theme={theme} orgName={orgName} slogan={orgSlogan} reg={orgReg} data={receipt} />
+                    <ReceiptPreview layout={receiptPick} theme={customTheme} orgName={orgName} slogan={orgSlogan} reg={orgReg} data={receipt} cardBg={cardBg} logoUrl={receiptLogo} />
                   </div>
                 </div>
               </Section>
@@ -592,7 +640,86 @@ function Field({ label, value, onChange, type = "text" }: {
   );
 }
 
-/* ---------------- Thumbnails ---------------- */
+/* ---------------- Design Customization Panel ---------------- */
+
+function StyleControls({
+  cardBg, setCardBg, accent, setAccent, font, setFont,
+}: {
+  cardBg: string; setCardBg: (v: string) => void;
+  accent: string; setAccent: (v: string) => void;
+  font: string; setFont: (v: string) => void;
+}) {
+  return (
+    <div className="rounded-lg p-3 border space-y-3" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
+      <div className="flex items-center gap-2">
+        <Palette className="h-3.5 w-3.5" style={{ color: accent }} />
+        <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: PAGE_HEAD }}>
+          Design Customization / డిజైన్
+        </p>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <div className="space-y-1">
+          <Label className="text-[10px]" style={{ color: PAGE_SUB }}>Card Background</Label>
+          <div className="flex items-center gap-2">
+            <input type="color" value={cardBg} onChange={(e) => setCardBg(e.target.value)}
+              className="h-9 w-12 rounded border cursor-pointer" style={{ borderColor: PAGE_BORDER, background: "transparent" }} />
+            <Input value={cardBg} onChange={(e) => setCardBg(e.target.value)}
+              className="h-9 text-[11px] flex-1"
+              style={{ background: PAGE_BG, borderColor: PAGE_BORDER, color: PAGE_HEAD }} />
+          </div>
+        </div>
+        <div className="space-y-1">
+          <Label className="text-[10px]" style={{ color: PAGE_SUB }}>Accent / Strip Color</Label>
+          <div className="flex items-center gap-2">
+            <input type="color" value={accent} onChange={(e) => setAccent(e.target.value)}
+              className="h-9 w-12 rounded border cursor-pointer" style={{ borderColor: PAGE_BORDER, background: "transparent" }} />
+            <Input value={accent} onChange={(e) => setAccent(e.target.value)}
+              className="h-9 text-[11px] flex-1"
+              style={{ background: PAGE_BG, borderColor: PAGE_BORDER, color: PAGE_HEAD }} />
+          </div>
+        </div>
+      </div>
+      <div className="space-y-1">
+        <Label className="text-[10px] flex items-center gap-1" style={{ color: PAGE_SUB }}>
+          <TypeIcon className="h-3 w-3" /> Font Style / ఫాంట్
+        </Label>
+        <Select value={font} onValueChange={setFont}>
+          <SelectTrigger className="h-9 text-[12px]" style={{ background: PAGE_BG, borderColor: PAGE_BORDER, color: PAGE_HEAD }}>
+            <SelectValue placeholder="Choose font" />
+          </SelectTrigger>
+          <SelectContent>
+            {FONT_OPTIONS.map((f) => (
+              <SelectItem key={f.v} value={f.v} style={{ fontFamily: f.v }}>{f.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  );
+}
+
+function LogoUploader({ logoUrl, onChange }: { logoUrl: string; onChange: (url: string) => void }) {
+  return (
+    <div className="rounded-lg p-3 border flex items-center gap-3" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
+      <div style={{ width: 44, height: 44, borderRadius: 6, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", padding: 4, border: `1px solid ${PAGE_BORDER}` }}>
+        {logoUrl ? <img src={logoUrl} alt="Logo" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} /> : null}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-[11px] font-semibold" style={{ color: PAGE_HEAD }}>Society Logo / లోగో</p>
+        <p className="text-[10px]" style={{ color: PAGE_SUB }}>Shown in the receipt header</p>
+      </div>
+      <label className="inline-flex items-center gap-1 px-3 h-8 rounded-md text-[11px] cursor-pointer border"
+        style={{ background: PAGE_BG, borderColor: PAGE_BORDER, color: PAGE_HEAD }}>
+        <Upload className="h-3 w-3" /> Upload
+        <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+          const f = e.target.files?.[0]; if (!f) return;
+          const url = URL.createObjectURL(f); onChange(url);
+        }} />
+      </label>
+    </div>
+  );
+}
+
 
 function IdThumb({ layout, theme }: { layout: IdLayout; theme: Required<ThemeSettings> }) {
   const c = theme.icon, br = theme.border, bg = "#ffffff";
@@ -732,6 +859,45 @@ function IdThumb({ layout, theme }: { layout: IdLayout; theme: Required<ThemeSet
           <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
             <div style={{ height: 2, background: "#111", width: "75%" }} />
             <div style={{ height: 2, background: "#555", width: "55%" }} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (layout === "portrait-vertical") {
+    // Show as a portrait card inside the landscape thumb slot
+    return (
+      <div style={{ ...common, alignItems: "center", justifyContent: "center", background: "#f5f5f5" }}>
+        <div style={{
+          height: "92%", aspectRatio: "0.65 / 1", background: "#fff",
+          border: `1px solid ${br}`, borderRadius: 3, display: "flex", flexDirection: "column", overflow: "hidden",
+        }}>
+          <div style={{ background: c, height: "22%", padding: 2 }}>
+            <div style={{ height: 2, background: "#fff", width: "85%", margin: "1px auto" }} />
+            <div style={{ height: 1.5, background: "#fff", opacity: 0.7, width: "55%", margin: "1px auto" }} />
+          </div>
+          <div style={{ flex: 1, padding: 3, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+            <div style={{ width: "55%", height: "40%", background: "#e5e5e5", border: `1px solid ${c}`, borderRadius: 2 }} />
+            <div style={{ height: 2, background: "#333", width: "75%" }} />
+            <div style={{ height: 1.5, background: "#888", width: "55%" }} />
+          </div>
+          <div style={{ background: "#138808", height: 4 }} />
+        </div>
+      </div>
+    );
+  }
+  if (layout === "keychain-mini") {
+    return (
+      <div style={{ ...common, alignItems: "center", justifyContent: "center", flexDirection: "column", background: "#f5f5f5", gap: 1 }}>
+        <div style={{ width: 5, height: 5, borderRadius: "50%", border: `1.5px solid ${c}`, background: "transparent" }} />
+        <div style={{ width: "75%", height: "62%", background: "#fff", border: `2px solid ${c}`, borderRadius: 4, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+          <div style={{ background: c, height: 5 }} />
+          <div style={{ flex: 1, display: "flex", padding: 2, gap: 2 }}>
+            <div style={{ width: "32%", background: "#e5e5e5", borderRadius: 1 }} />
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 1 }}>
+              <div style={{ height: 1.5, background: "#333" }} />
+              <div style={{ height: 1.5, background: "#888", width: "70%" }} />
+            </div>
           </div>
         </div>
       </div>
@@ -884,15 +1050,20 @@ function ReceiptThumb({ layout, accent }: { layout: ReceiptLayout; accent: strin
 /* ---------------- Live Previews ---------------- */
 
 function IdCardPreview({
-  layout, theme, orgName, slogan, reg, member,
+  layout, theme, orgName, slogan, reg, member, cardBg = "#ffffff",
 }: {
   layout: IdLayout; theme: Required<ThemeSettings>;
   orgName: string; slogan: string; reg: string; member: MemberData;
+  cardBg?: string;
 }) {
   if (layout === "official-saffron") {
-    return <OfficialSaffronPreview theme={theme} orgName={orgName} slogan={slogan} reg={reg} member={member} />;
+    return <OfficialSaffronPreview theme={theme} orgName={orgName} slogan={slogan} reg={reg} member={member} cardBg={cardBg} />;
   }
-  const front = <IdCardFront layout={layout} theme={theme} orgName={orgName} slogan={slogan} reg={reg} member={member} />;
+  if (layout === "keychain-mini") {
+    // Keychain badge — compact, no back side
+    return <KeychainPreview theme={theme} orgName={orgName} member={member} cardBg={cardBg} />;
+  }
+  const front = <IdCardFront layout={layout} theme={theme} orgName={orgName} slogan={slogan} reg={reg} member={member} cardBg={cardBg} />;
   return (
     <div style={{ display: "flex", flexWrap: "wrap", gap: 14, justifyContent: "center" }}>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
@@ -901,17 +1072,55 @@ function IdCardPreview({
       </div>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
         <div style={{ fontSize: 10, fontWeight: 700, color: PAGE_SUB, letterSpacing: 1 }}>BACK / వెనుక</div>
-        <StandardBackPreview theme={theme} memberName={member.name} />
+        <StandardBackPreview theme={theme} memberName={member.name} cardBg={cardBg} />
       </div>
     </div>
   );
 }
 
+function KeychainPreview({
+  theme, orgName, member, cardBg,
+}: {
+  theme: Required<ThemeSettings>; orgName: string; member: MemberData; cardBg: string;
+}) {
+  const headFF = `${theme.headFont}, "Noto Sans Telugu", system-ui, sans-serif`;
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+      <div style={{ width: 18, height: 18, borderRadius: "50%", border: `3px solid ${theme.icon}`, background: "transparent" }} />
+      <div style={{ width: 2, height: 14, background: theme.icon }} />
+      <div style={{
+        width: 220, height: 130, background: cardBg, borderRadius: 12, overflow: "hidden",
+        border: `2px solid ${theme.icon}`, boxShadow: `0 8px 28px ${theme.icon}55`,
+        display: "flex", flexDirection: "column", fontFamily: headFF,
+      }}>
+        <div style={{ background: theme.icon, padding: "4px 8px", color: theme.buttonText, fontSize: 10, fontWeight: 900, textAlign: "center", letterSpacing: 0.5 }}>
+          {orgName}
+        </div>
+        <div style={{ flex: 1, display: "flex", padding: 8, gap: 8 }}>
+          <div style={{ width: 56, height: 70, borderRadius: 6, background: "#e5e5e5",
+            border: `1px solid ${theme.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <User style={{ width: 26, height: 26, color: "#999" }} />
+          </div>
+          <div style={{ flex: 1, fontSize: 10, color: "#111" }}>
+            <div style={{ fontWeight: 800, fontSize: 12 }}>{member.name}</div>
+            <div style={{ color: "#555", marginTop: 2 }}>ID: {member.memberId}</div>
+            <div style={{ color: "#555" }}>📞 {member.phone}</div>
+            <div style={{ display: "inline-block", marginTop: 4, background: "#C8102E", color: "#fff",
+              fontSize: 9, fontWeight: 800, padding: "1px 5px", borderRadius: 3 }}>🩸 {member.bloodGroup}</div>
+          </div>
+        </div>
+      </div>
+      <div style={{ fontSize: 9, color: PAGE_SUB, letterSpacing: 1 }}>KEYCHAIN / కీ చైన్</div>
+    </div>
+  );
+}
+
 function IdCardFront({
-  layout, theme, orgName, slogan, reg, member,
+  layout, theme, orgName, slogan, reg, member, cardBg = "#ffffff",
 }: {
   layout: IdLayout; theme: Required<ThemeSettings>;
   orgName: string; slogan: string; reg: string; member: MemberData;
+  cardBg?: string;
 }) {
   const align = theme.headAlign;
   const headFF = `${theme.headFont}, "Noto Sans Telugu", system-ui, sans-serif`;
@@ -1172,11 +1381,54 @@ function IdCardFront({
     );
   }
 
+  if (layout === "portrait-vertical") {
+    // Vertical (portrait) ID card — taller than wide
+    const W = 220, H = 340;
+    return (
+      <div style={{
+        width: W, height: H, borderRadius: 12, overflow: "hidden",
+        background: cardBg, border: `1px solid ${theme.border}`,
+        boxShadow: `0 10px 32px ${theme.icon}44`, display: "flex", flexDirection: "column",
+        fontFamily: headFF,
+      }}>
+        <div style={{ background: theme.icon, color: theme.buttonText, padding: "10px 12px", textAlign: "center" }}>
+          <div style={{ fontWeight: 900, fontSize: 13, lineHeight: 1.2 }}>{orgName}</div>
+          <div style={{ fontFamily: subFF, fontSize: 9, fontStyle: "italic", opacity: 0.95, marginTop: 2 }}>{slogan}</div>
+          <div style={{ fontSize: 9, opacity: 0.9, marginTop: 2 }}>Reg: {reg}</div>
+        </div>
+        <div style={{ flex: 1, padding: 12, display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+          <div style={{
+            width: 110, height: 130, borderRadius: 8, background: "#e5e5e5",
+            border: `2px solid ${theme.icon}`, display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <User style={{ width: 44, height: 44, color: "#999" }} />
+          </div>
+          <div style={{ textAlign: "center", color: "#111" }}>
+            <div style={{ fontWeight: 800, fontSize: 14 }}>{member.name}</div>
+            <div style={{ fontSize: 11, color: "#555" }}>ID: {member.memberId}</div>
+          </div>
+          <div style={{ width: "100%", fontSize: 10, color: "#333", lineHeight: 1.5 }}>
+            <div><b>Father:</b> {member.fatherName}</div>
+            <div><b>Phone:</b> {member.phone}</div>
+            <div><b>Village:</b> {member.village}</div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
+              <span><b>Joined:</b> {member.joinDate}</span>
+              <span style={{ background: "#C8102E", color: "#fff", padding: "1px 6px", borderRadius: 3, fontWeight: 800 }}>🩸 {member.bloodGroup}</span>
+            </div>
+          </div>
+        </div>
+        <div style={{ background: "#138808", height: 18, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 9, fontWeight: 700 }}>
+          ● యాక్టివ్ సభ్యుడు ●
+        </div>
+      </div>
+    );
+  }
+
   // landscape-corporate (default)
   return (
     <div style={{
       width: cardW, height: cardH, borderRadius: 10, overflow: "hidden",
-      border: `1px solid ${theme.border}`, background: "#fff",
+      border: `1px solid ${theme.border}`, background: cardBg,
       boxShadow: `0 8px 28px ${theme.icon}33`, display: "flex", flexDirection: "column",
     }}>
       {header}
@@ -1186,8 +1438,8 @@ function IdCardFront({
 }
 
 function StandardBackPreview({
-  theme, memberName,
-}: { theme: Required<ThemeSettings>; memberName: string }) {
+  theme, memberName, cardBg = "#ffffff",
+}: { theme: Required<ThemeSettings>; memberName: string; cardBg?: string }) {
   const accent = theme.icon || "#FF9933";
   const green = "#138808";
   const navy = "#000080";
@@ -1195,7 +1447,7 @@ function StandardBackPreview({
   const W = 340, H = 214;
   return (
     <div style={{
-      width: W, height: H, background: "#fff", color: "#111",
+      width: W, height: H, background: cardBg, color: "#111",
       borderRadius: 8, overflow: "hidden", border: `1px solid ${navy}`,
       boxShadow: `0 8px 28px ${accent}33`, fontFamily: headFF, display: "flex", flexDirection: "column",
     }}>
@@ -1328,14 +1580,25 @@ function LetterPreview({
 /* ---------------- Receipt Preview ---------------- */
 
 function ReceiptPreview({
-  layout, theme, orgName, slogan, reg, data,
+  layout, theme, orgName, slogan, reg, data, cardBg = "#ffffff", logoUrl,
 }: {
   layout: ReceiptLayout; theme: Required<ThemeSettings>;
   orgName: string; slogan: string; reg: string; data: ReceiptData;
+  cardBg?: string; logoUrl?: string;
 }) {
   const headFF = `${theme.headFont}, "Noto Sans Telugu", system-ui, sans-serif`;
   const accent = theme.icon;
   const W = 360, H = 220;
+
+  const Logo = logoUrl ? (
+    <div style={{
+      width: 44, height: 44, borderRadius: 6, background: "#fff",
+      border: `1px solid ${accent}`, padding: 3, flexShrink: 0,
+      display: "flex", alignItems: "center", justifyContent: "center",
+    }}>
+      <img src={logoUrl} alt="Logo" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
+    </div>
+  ) : null;
 
   const rows = (
     <div style={{ fontSize: 11, color: "#222", lineHeight: 1.7 }}>
@@ -1350,12 +1613,15 @@ function ReceiptPreview({
   if (layout === "minimal-line") {
     return (
       <div style={{
-        width: W, minHeight: H, background: "#fff", borderRadius: 8, padding: 16,
+        width: W, minHeight: H, background: cardBg, borderRadius: 8, padding: 16,
         border: `1px solid ${theme.border}`, fontFamily: headFF,
         boxShadow: `0 8px 28px ${accent}22`,
       }}>
-        <div style={{ fontWeight: 900, color: "#111", fontSize: 16 }}>{orgName}</div>
-        <div style={{ borderTop: "1px solid #111", marginTop: 6, paddingTop: 8 }}>{rows}</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {Logo}
+          <div style={{ fontWeight: 900, color: "#111", fontSize: 16 }}>{orgName}</div>
+        </div>
+        <div style={{ borderTop: "1px solid #111", marginTop: 8, paddingTop: 8 }}>{rows}</div>
         <div style={{ marginTop: 14, textAlign: "right", fontSize: 10, color: "#555" }}>Authorized Signature</div>
       </div>
     );
@@ -1364,13 +1630,16 @@ function ReceiptPreview({
   if (layout === "saffron-strip") {
     return (
       <div style={{
-        width: W, minHeight: H, background: "#fff", borderRadius: 8, overflow: "hidden",
+        width: W, minHeight: H, background: cardBg, borderRadius: 8, overflow: "hidden",
         border: `1px solid ${theme.border}`, fontFamily: headFF,
         boxShadow: `0 8px 28px ${accent}22`,
       }}>
-        <div style={{ background: accent, color: "#fff", padding: "8px 14px" }}>
-          <div style={{ fontWeight: 900, fontSize: 15 }}>{orgName}</div>
-          <div style={{ fontSize: 10, opacity: 0.9 }}>{slogan} · Reg: {reg}</div>
+        <div style={{ background: accent, color: "#fff", padding: "8px 14px", display: "flex", alignItems: "center", gap: 10 }}>
+          {Logo}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 900, fontSize: 15 }}>{orgName}</div>
+            <div style={{ fontSize: 10, opacity: 0.9 }}>{slogan} · Reg: {reg}</div>
+          </div>
         </div>
         <div style={{ padding: 14 }}>
           <div style={{ fontWeight: 800, color: accent, marginBottom: 6 }}>OFFICIAL RECEIPT</div>
@@ -1383,13 +1652,16 @@ function ReceiptPreview({
   // classic
   return (
     <div style={{
-      width: W, minHeight: H, background: "#fff", borderRadius: 8, padding: 14,
+      width: W, minHeight: H, background: cardBg, borderRadius: 8, padding: 14,
       border: `2px solid ${accent}`, fontFamily: headFF, boxShadow: `0 8px 28px ${accent}22`,
     }}>
-      <div style={{ textAlign: "center", borderBottom: `1px solid ${accent}`, paddingBottom: 6, marginBottom: 8 }}>
-        <div style={{ fontWeight: 900, color: accent, fontSize: 16 }}>{orgName}</div>
-        <div style={{ fontSize: 10, color: "#666" }}>{slogan} · Reg: {reg}</div>
-        <div style={{ fontWeight: 800, color: "#111", marginTop: 4 }}>RECEIPT / రసీదు</div>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, borderBottom: `1px solid ${accent}`, paddingBottom: 6, marginBottom: 8 }}>
+        {Logo}
+        <div style={{ flex: 1, textAlign: Logo ? "left" : "center" }}>
+          <div style={{ fontWeight: 900, color: accent, fontSize: 16 }}>{orgName}</div>
+          <div style={{ fontSize: 10, color: "#666" }}>{slogan} · Reg: {reg}</div>
+          <div style={{ fontWeight: 800, color: "#111", marginTop: 4 }}>RECEIPT / రసీదు</div>
+        </div>
       </div>
       {rows}
       <div style={{ marginTop: 14, display: "flex", justifyContent: "space-between", fontSize: 10, color: "#555" }}>
@@ -1403,10 +1675,11 @@ function ReceiptPreview({
 /* ---------------- Official Saffron live preview ---------------- */
 
 function OfficialSaffronPreview({
-  theme, orgName, slogan, reg, member,
+  theme, orgName, slogan, reg, member, cardBg = "#ffffff",
 }: {
   theme: Required<ThemeSettings>;
   orgName: string; slogan: string; reg: string; member: MemberData;
+  cardBg?: string;
 }) {
   const accent = theme.icon || "#FF9933";
   const green = "#138808";
@@ -1418,7 +1691,7 @@ function OfficialSaffronPreview({
 
   const Front = (
     <div style={{
-      width: W, height: H, background: "#fff", color: "#111",
+      width: W, height: H, background: cardBg, color: "#111",
       borderRadius: 8, overflow: "hidden", border: `1px solid ${navy}`,
       boxShadow: `0 8px 28px ${accent}33`, fontFamily: headFF, display: "flex", flexDirection: "column",
     }}>
@@ -1500,7 +1773,7 @@ function OfficialSaffronPreview({
       </div>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
         <div style={{ fontSize: 10, fontWeight: 700, color: PAGE_SUB, letterSpacing: 1 }}>BACK / వెనుక</div>
-        <StandardBackPreview theme={theme} memberName={member.name} />
+        <StandardBackPreview theme={theme} memberName={member.name} cardBg={cardBg} />
       </div>
     </div>
   );
