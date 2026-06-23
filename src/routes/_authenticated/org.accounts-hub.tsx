@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Wallet, TrendingUp, TrendingDown, PieChart, FileDown, Coins } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { CurrencySelector } from "@/lib/currency-context";
 
 export const Route = createFileRoute("/_authenticated/org/accounts-hub")({
   head: () => ({ meta: [{ title: "Accounts Hub / అకౌంట్స్ బాక్స్" }] }),
