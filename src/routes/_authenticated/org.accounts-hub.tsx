@@ -1,0 +1,65 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowLeft, Wallet, TrendingUp, TrendingDown, PieChart, FileDown, Coins } from "lucide-react";
+import { Card } from "@/components/ui/card";
+
+export const Route = createFileRoute("/_authenticated/org/accounts-hub")({
+  head: () => ({ meta: [{ title: "Accounts Hub / అకౌంట్స్ బాక్స్" }] }),
+  component: AccountsHub,
+});
+
+const TILES = [
+  { to: "/org/loan-requests", en: "Member Loan Requests", te: "సభ్యుల అప్పు అభ్యర్థనలు", icon: Wallet, color: "#ff8c28" },
+  { to: "/org/income", en: "Income & Donations", te: "ఆదాయం & విరాళాలు", icon: TrendingUp, color: "#22c55e" },
+  { to: "/org/expenses", en: "Expenses & Charity", te: "ఖర్చులు & సహాయం", icon: TrendingDown, color: "#ef4444" },
+  { to: "/org/cashflow", en: "Society Cash Flow Statement", te: "నగదు ప్రవాహ నివేదిక", icon: PieChart, color: "#3b82f6" },
+  { to: "/org/master-ledger", en: "Admin Master Ledger", te: "మాస్టర్ లెడ్జర్", icon: FileDown, color: "#a855f7" },
+  { to: "/org/accounts", en: "Currency & Loan Entry", te: "కరెన్సీ & అప్పు నమోదు", icon: Coins, color: "#eab308" },
+] as const;
+
+function AccountsHub() {
+  return (
+    <div className="min-h-screen bg-black text-white pb-16">
+      <div className="max-w-2xl mx-auto p-4 space-y-5">
+        <header className="flex items-center gap-3">
+          <Link to="/org/dashboard" className="p-2 rounded-lg hover:bg-white/10">
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+          <div>
+            <h1 className="text-lg font-bold">అకౌంట్స్ బాక్స్</h1>
+            <p className="text-xs text-white/60">Accounts Hub — central navigation for all financial tasks</p>
+          </div>
+        </header>
+
+        <div className="grid grid-cols-2 gap-3">
+          {TILES.map((t) => (
+            <Link key={t.to} to={t.to}>
+              <Card
+                className="p-4 bg-zinc-950 border-white/10 hover:border-[#ff8c28] transition-all cursor-pointer h-full"
+                style={{ boxShadow: `0 0 0 transparent` }}
+                onMouseEnter={(e) => { e.currentTarget.style.boxShadow = `0 0 24px ${t.color}40`; }}
+                onMouseLeave={(e) => { e.currentTarget.style.boxShadow = ``; }}
+              >
+                <div className="flex flex-col items-center text-center gap-2 py-2">
+                  <div
+                    className="w-12 h-12 rounded-xl flex items-center justify-center border"
+                    style={{ background: `${t.color}1f`, borderColor: `${t.color}66` }}
+                  >
+                    <t.icon className="w-6 h-6" style={{ color: t.color }} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold leading-tight">{t.te}</p>
+                    <p className="text-[11px] text-white/50 leading-tight mt-0.5">{t.en}</p>
+                  </div>
+                </div>
+              </Card>
+            </Link>
+          ))}
+        </div>
+
+        <p className="text-center text-[11px] text-white/40 pt-2">
+          Tap any tile to open the detailed module.
+        </p>
+      </div>
+    </div>
+  );
+}
