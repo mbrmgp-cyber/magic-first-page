@@ -14,7 +14,7 @@ import {
 import { toast } from "sonner";
 import { recordIncome, listIncome, listWalletAccounts, type IncomeType, type WalletType } from "@/lib/cashflow.functions";
 import { getMyOrg } from "@/lib/org.functions";
-import { CurrencySelector, CURRENCIES, BASE_CURRENCY, type CurrencyCode } from "@/lib/currency-context";
+import { CURRENCIES, BASE_CURRENCY, type CurrencyCode } from "@/lib/currency-context";
 
 export const Route = createFileRoute("/_authenticated/org/income")({
   head: () => ({ meta: [{ title: "ఆదాయం / Income Receipts" }] }),
