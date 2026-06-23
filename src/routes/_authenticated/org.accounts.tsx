@@ -128,7 +128,7 @@ function AccountsPage() {
   }) {
     const w = window.open("", "_blank", "width=720,height=900");
     if (!w) return;
-    const fmt = (n: number) => `Rs. ${Number(n || 0).toLocaleString("en-IN")}`;
+    const fmt = (n: number) => `${sym} ${Number(n || 0).toLocaleString("en-IN")}`;
     w.document.write(`<!doctype html><html><head><title>Receipt</title>
     <style>body{font-family:system-ui,sans-serif;padding:24px;color:#111}
     h1{margin:0 0 4px;font-size:20px;color:#c2410c}
@@ -247,11 +247,11 @@ function AccountsPage() {
               <p className="text-xs font-bold text-red-600 tracking-wide">OLD LOAN</p>
               <div>
                 <p className="text-[11px] text-muted-foreground">అప్పు మొత్తం (OUTSTANDING)</p>
-                <p className="font-bold text-lg">₹ {info ? info.totalOutstanding.toLocaleString("en-IN") : "0"}</p>
+                <p className="font-bold text-lg">{sym} {info ? info.totalOutstanding.toLocaleString("en-IN") : "0"}</p>
               </div>
               <div>
                 <p className="text-[11px] text-muted-foreground">వడ్డీ మొత్తం (MONTHLY)</p>
-                <p className="font-bold text-lg">₹ {info ? info.monthlyInterest.toLocaleString("en-IN") : "0"}</p>
+                <p className="font-bold text-lg">{sym} {info ? info.monthlyInterest.toLocaleString("en-IN") : "0"}</p>
               </div>
               <div className="space-y-1.5 pt-2 border-t border-orange-200">
                 <Label className="text-xs">అసలు జమ (Principal Paid)</Label>
@@ -280,7 +280,7 @@ function AccountsPage() {
               </div>
               {newLoan && Number(newLoan) > 0 && (
                 <div className="text-[11px] text-muted-foreground pt-2 border-t border-red-200">
-                  ఈ రోజు ఇవ్వబడుతుంది: <b className="text-red-700">₹ {Number(newLoan).toLocaleString("en-IN")}</b>
+                  ఈ రోజు ఇవ్వబడుతుంది: <b className="text-red-700">{sym} {Number(newLoan).toLocaleString("en-IN")}</b>
                 </div>
               )}
             </div>
@@ -296,9 +296,9 @@ function AccountsPage() {
 
           {saved && (
             <div className="rounded-md border border-green-300 bg-green-50 p-3 text-sm text-green-900 space-y-1">
-              <div>✅ Saved. Updated balance: <b>₹ {saved.balance.toLocaleString("en-IN")}</b></div>
-              {saved.collected > 0 && <div>Collected today: <b>₹ {saved.collected.toLocaleString("en-IN")}</b></div>}
-              {saved.disbursed > 0 && <div>New loan disbursed: <b>₹ {saved.disbursed.toLocaleString("en-IN")}</b></div>}
+              <div>✅ Saved. Updated balance: <b>{sym} {saved.balance.toLocaleString("en-IN")}</b></div>
+              {saved.collected > 0 && <div>Collected today: <b>{sym} {saved.collected.toLocaleString("en-IN")}</b></div>}
+              {saved.disbursed > 0 && <div>New loan disbursed: <b>{sym} {saved.disbursed.toLocaleString("en-IN")}</b></div>}
               {saved.emailed_to && <div>Receipt emailed to <b>{saved.emailed_to}</b></div>}
             </div>
           )}
