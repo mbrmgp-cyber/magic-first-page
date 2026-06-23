@@ -1636,10 +1636,11 @@ function ReceiptPreview({
 /* ---------------- Official Saffron live preview ---------------- */
 
 function OfficialSaffronPreview({
-  theme, orgName, slogan, reg, member,
+  theme, orgName, slogan, reg, member, cardBg = "#ffffff",
 }: {
   theme: Required<ThemeSettings>;
   orgName: string; slogan: string; reg: string; member: MemberData;
+  cardBg?: string;
 }) {
   const accent = theme.icon || "#FF9933";
   const green = "#138808";
@@ -1651,7 +1652,7 @@ function OfficialSaffronPreview({
 
   const Front = (
     <div style={{
-      width: W, height: H, background: "#fff", color: "#111",
+      width: W, height: H, background: cardBg, color: "#111",
       borderRadius: 8, overflow: "hidden", border: `1px solid ${navy}`,
       boxShadow: `0 8px 28px ${accent}33`, fontFamily: headFF, display: "flex", flexDirection: "column",
     }}>
