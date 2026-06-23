@@ -556,16 +556,25 @@ function DesignsPage() {
                       <Field label="Purpose" value={receipt.purpose} onChange={(v) => setReceipt({ ...receipt, purpose: v })} />
                       <Field label="Mode" value={receipt.mode} onChange={(v) => setReceipt({ ...receipt, mode: v })} />
                     </div>
+
+                    <LogoUploader logoUrl={receiptLogo} onChange={setReceiptLogo} />
+
+                    <StyleControls
+                      cardBg={cardBg} setCardBg={setCardBg}
+                      accent={accentColor} setAccent={setAccentColor}
+                      font={fontFamily} setFont={setFontFamily}
+                    />
+
                     <Button
                       onClick={() => toast.success("Receipt ready — printable PDF available shortly")}
                       className="w-full font-semibold h-10"
-                      style={{ background: theme.buttonBg, color: theme.buttonText }}
+                      style={{ background: customTheme.buttonBg, color: customTheme.buttonText }}
                     >
                       <Download className="h-4 w-4 mr-2" /> Save & Download Receipt
                     </Button>
                   </div>
                   <div className="rounded-lg p-3 border flex items-center justify-center" style={{ background: PAGE_BG, borderColor: PAGE_BORDER, minHeight: 260 }}>
-                    <ReceiptPreview layout={receiptPick} theme={theme} orgName={orgName} slogan={orgSlogan} reg={orgReg} data={receipt} />
+                    <ReceiptPreview layout={receiptPick} theme={customTheme} orgName={orgName} slogan={orgSlogan} reg={orgReg} data={receipt} cardBg={cardBg} logoUrl={receiptLogo} />
                   </div>
                 </div>
               </Section>
