@@ -21,6 +21,7 @@ import { Route as AuthenticatedOrgMembersRouteImport } from './routes/_authentic
 import { Route as AuthenticatedOrgMasterLedgerRouteImport } from './routes/_authenticated/org.master-ledger'
 import { Route as AuthenticatedOrgLoanRequestsRouteImport } from './routes/_authenticated/org.loan-requests'
 import { Route as AuthenticatedOrgIncomeRouteImport } from './routes/_authenticated/org.income'
+import { Route as AuthenticatedOrgExpensesRouteImport } from './routes/_authenticated/org.expenses'
 import { Route as AuthenticatedOrgEventsRouteImport } from './routes/_authenticated/org.events'
 import { Route as AuthenticatedOrgElectionsRouteImport } from './routes/_authenticated/org.elections'
 import { Route as AuthenticatedOrgDesignsRouteImport } from './routes/_authenticated/org.designs'
@@ -94,6 +95,12 @@ const AuthenticatedOrgIncomeRoute = AuthenticatedOrgIncomeRouteImport.update({
   path: '/org/income',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedOrgExpensesRoute =
+  AuthenticatedOrgExpensesRouteImport.update({
+    id: '/org/expenses',
+    path: '/org/expenses',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedOrgEventsRoute = AuthenticatedOrgEventsRouteImport.update({
   id: '/org/events',
   path: '/org/events',
@@ -175,6 +182,7 @@ export interface FileRoutesByFullPath {
   '/org/designs': typeof AuthenticatedOrgDesignsRoute
   '/org/elections': typeof AuthenticatedOrgElectionsRoute
   '/org/events': typeof AuthenticatedOrgEventsRoute
+  '/org/expenses': typeof AuthenticatedOrgExpensesRoute
   '/org/income': typeof AuthenticatedOrgIncomeRoute
   '/org/loan-requests': typeof AuthenticatedOrgLoanRequestsRoute
   '/org/master-ledger': typeof AuthenticatedOrgMasterLedgerRoute
@@ -199,6 +207,7 @@ export interface FileRoutesByTo {
   '/org/designs': typeof AuthenticatedOrgDesignsRoute
   '/org/elections': typeof AuthenticatedOrgElectionsRoute
   '/org/events': typeof AuthenticatedOrgEventsRoute
+  '/org/expenses': typeof AuthenticatedOrgExpensesRoute
   '/org/income': typeof AuthenticatedOrgIncomeRoute
   '/org/loan-requests': typeof AuthenticatedOrgLoanRequestsRoute
   '/org/master-ledger': typeof AuthenticatedOrgMasterLedgerRoute
@@ -225,6 +234,7 @@ export interface FileRoutesById {
   '/_authenticated/org/designs': typeof AuthenticatedOrgDesignsRoute
   '/_authenticated/org/elections': typeof AuthenticatedOrgElectionsRoute
   '/_authenticated/org/events': typeof AuthenticatedOrgEventsRoute
+  '/_authenticated/org/expenses': typeof AuthenticatedOrgExpensesRoute
   '/_authenticated/org/income': typeof AuthenticatedOrgIncomeRoute
   '/_authenticated/org/loan-requests': typeof AuthenticatedOrgLoanRequestsRoute
   '/_authenticated/org/master-ledger': typeof AuthenticatedOrgMasterLedgerRoute
@@ -251,6 +261,7 @@ export interface FileRouteTypes {
     | '/org/designs'
     | '/org/elections'
     | '/org/events'
+    | '/org/expenses'
     | '/org/income'
     | '/org/loan-requests'
     | '/org/master-ledger'
@@ -275,6 +286,7 @@ export interface FileRouteTypes {
     | '/org/designs'
     | '/org/elections'
     | '/org/events'
+    | '/org/expenses'
     | '/org/income'
     | '/org/loan-requests'
     | '/org/master-ledger'
@@ -300,6 +312,7 @@ export interface FileRouteTypes {
     | '/_authenticated/org/designs'
     | '/_authenticated/org/elections'
     | '/_authenticated/org/events'
+    | '/_authenticated/org/expenses'
     | '/_authenticated/org/income'
     | '/_authenticated/org/loan-requests'
     | '/_authenticated/org/master-ledger'
@@ -402,6 +415,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOrgIncomeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/org/expenses': {
+      id: '/_authenticated/org/expenses'
+      path: '/org/expenses'
+      fullPath: '/org/expenses'
+      preLoaderRoute: typeof AuthenticatedOrgExpensesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/org/events': {
       id: '/_authenticated/org/events'
       path: '/org/events'
@@ -495,6 +515,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedOrgDesignsRoute: typeof AuthenticatedOrgDesignsRoute
   AuthenticatedOrgElectionsRoute: typeof AuthenticatedOrgElectionsRoute
   AuthenticatedOrgEventsRoute: typeof AuthenticatedOrgEventsRoute
+  AuthenticatedOrgExpensesRoute: typeof AuthenticatedOrgExpensesRoute
   AuthenticatedOrgIncomeRoute: typeof AuthenticatedOrgIncomeRoute
   AuthenticatedOrgLoanRequestsRoute: typeof AuthenticatedOrgLoanRequestsRoute
   AuthenticatedOrgMasterLedgerRoute: typeof AuthenticatedOrgMasterLedgerRoute
@@ -516,6 +537,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedOrgDesignsRoute: AuthenticatedOrgDesignsRoute,
   AuthenticatedOrgElectionsRoute: AuthenticatedOrgElectionsRoute,
   AuthenticatedOrgEventsRoute: AuthenticatedOrgEventsRoute,
+  AuthenticatedOrgExpensesRoute: AuthenticatedOrgExpensesRoute,
   AuthenticatedOrgIncomeRoute: AuthenticatedOrgIncomeRoute,
   AuthenticatedOrgLoanRequestsRoute: AuthenticatedOrgLoanRequestsRoute,
   AuthenticatedOrgMasterLedgerRoute: AuthenticatedOrgMasterLedgerRoute,
