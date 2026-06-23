@@ -1541,14 +1541,25 @@ function LetterPreview({
 /* ---------------- Receipt Preview ---------------- */
 
 function ReceiptPreview({
-  layout, theme, orgName, slogan, reg, data,
+  layout, theme, orgName, slogan, reg, data, cardBg = "#ffffff", logoUrl,
 }: {
   layout: ReceiptLayout; theme: Required<ThemeSettings>;
   orgName: string; slogan: string; reg: string; data: ReceiptData;
+  cardBg?: string; logoUrl?: string;
 }) {
   const headFF = `${theme.headFont}, "Noto Sans Telugu", system-ui, sans-serif`;
   const accent = theme.icon;
   const W = 360, H = 220;
+
+  const Logo = logoUrl ? (
+    <div style={{
+      width: 44, height: 44, borderRadius: 6, background: "#fff",
+      border: `1px solid ${accent}`, padding: 3, flexShrink: 0,
+      display: "flex", alignItems: "center", justifyContent: "center",
+    }}>
+      <img src={logoUrl} alt="Logo" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
+    </div>
+  ) : null;
 
   const rows = (
     <div style={{ fontSize: 11, color: "#222", lineHeight: 1.7 }}>
@@ -1563,12 +1574,15 @@ function ReceiptPreview({
   if (layout === "minimal-line") {
     return (
       <div style={{
-        width: W, minHeight: H, background: "#fff", borderRadius: 8, padding: 16,
+        width: W, minHeight: H, background: cardBg, borderRadius: 8, padding: 16,
         border: `1px solid ${theme.border}`, fontFamily: headFF,
         boxShadow: `0 8px 28px ${accent}22`,
       }}>
-        <div style={{ fontWeight: 900, color: "#111", fontSize: 16 }}>{orgName}</div>
-        <div style={{ borderTop: "1px solid #111", marginTop: 6, paddingTop: 8 }}>{rows}</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {Logo}
+          <div style={{ fontWeight: 900, color: "#111", fontSize: 16 }}>{orgName}</div>
+        </div>
+        <div style={{ borderTop: "1px solid #111", marginTop: 8, paddingTop: 8 }}>{rows}</div>
         <div style={{ marginTop: 14, textAlign: "right", fontSize: 10, color: "#555" }}>Authorized Signature</div>
       </div>
     );
@@ -1577,13 +1591,16 @@ function ReceiptPreview({
   if (layout === "saffron-strip") {
     return (
       <div style={{
-        width: W, minHeight: H, background: "#fff", borderRadius: 8, overflow: "hidden",
+        width: W, minHeight: H, background: cardBg, borderRadius: 8, overflow: "hidden",
         border: `1px solid ${theme.border}`, fontFamily: headFF,
         boxShadow: `0 8px 28px ${accent}22`,
       }}>
-        <div style={{ background: accent, color: "#fff", padding: "8px 14px" }}>
-          <div style={{ fontWeight: 900, fontSize: 15 }}>{orgName}</div>
-          <div style={{ fontSize: 10, opacity: 0.9 }}>{slogan} · Reg: {reg}</div>
+        <div style={{ background: accent, color: "#fff", padding: "8px 14px", display: "flex", alignItems: "center", gap: 10 }}>
+          {Logo}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 900, fontSize: 15 }}>{orgName}</div>
+            <div style={{ fontSize: 10, opacity: 0.9 }}>{slogan} · Reg: {reg}</div>
+          </div>
         </div>
         <div style={{ padding: 14 }}>
           <div style={{ fontWeight: 800, color: accent, marginBottom: 6 }}>OFFICIAL RECEIPT</div>
@@ -1596,13 +1613,16 @@ function ReceiptPreview({
   // classic
   return (
     <div style={{
-      width: W, minHeight: H, background: "#fff", borderRadius: 8, padding: 14,
+      width: W, minHeight: H, background: cardBg, borderRadius: 8, padding: 14,
       border: `2px solid ${accent}`, fontFamily: headFF, boxShadow: `0 8px 28px ${accent}22`,
     }}>
-      <div style={{ textAlign: "center", borderBottom: `1px solid ${accent}`, paddingBottom: 6, marginBottom: 8 }}>
-        <div style={{ fontWeight: 900, color: accent, fontSize: 16 }}>{orgName}</div>
-        <div style={{ fontSize: 10, color: "#666" }}>{slogan} · Reg: {reg}</div>
-        <div style={{ fontWeight: 800, color: "#111", marginTop: 4 }}>RECEIPT / రసీదు</div>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, borderBottom: `1px solid ${accent}`, paddingBottom: 6, marginBottom: 8 }}>
+        {Logo}
+        <div style={{ flex: 1, textAlign: Logo ? "left" : "center" }}>
+          <div style={{ fontWeight: 900, color: accent, fontSize: 16 }}>{orgName}</div>
+          <div style={{ fontSize: 10, color: "#666" }}>{slogan} · Reg: {reg}</div>
+          <div style={{ fontWeight: 800, color: "#111", marginTop: 4 }}>RECEIPT / రసీదు</div>
+        </div>
       </div>
       {rows}
       <div style={{ marginTop: 14, display: "flex", justifyContent: "space-between", fontSize: 10, color: "#555" }}>
