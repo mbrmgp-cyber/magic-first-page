@@ -25,9 +25,11 @@ function AccountsPage() {
   const [remarks, setRemarks] = useState("");
   const [principal, setPrincipal] = useState("");
   const [interest, setInterest] = useState("");
+  const [newLoan, setNewLoan] = useState("");
+  const [newLoanRate, setNewLoanRate] = useState("2");
   const [info, setInfo] = useState<Extract<Lookup, { found: true }> | null>(null);
   const [busy, setBusy] = useState(false);
-  const [saved, setSaved] = useState<{ balance: number; emailed_to: string | null } | null>(null);
+  const [saved, setSaved] = useState<{ balance: number; emailed_to: string | null; collected: number; disbursed: number } | null>(null);
   const [locked, setLocked] = useState(false);
 
   async function doLookup(code: string) {
@@ -46,22 +48,70 @@ function AccountsPage() {
   async function onSave() {
     if (!info) { toast.error("Look up a member first"); return; }
     const p = Number(principal || 0), i = Number(interest || 0);
-    if (p + i <= 0) { toast.error("అసలు లేదా వడ్డీ నమోదు చేయండి"); return; }
+    const nl = Number(newLoan || 0), nr = Number(newLoanRate || 0);
+    if (p + i + nl <= 0) { toast.error("ఏదైనా మొత్తం నమోదు చేయండి"); return; }
     setBusy(true);
     try {
       const res = await record({
         data: {
           member_code: idNo, payment_date: date,
           principal_amount: p, interest_amount: i,
+          new_loan_amount: nl > 0 ? nl : undefined,
+          new_loan_interest_rate: nl > 0 ? nr : undefined,
           remarks: remarks || undefined,
         },
       });
-      setSaved({ balance: res.balance, emailed_to: res.emailed_to });
+      setSaved({
+        balance: res.balance, emailed_to: res.emailed_to,
+        collected: res.collected, disbursed: res.disbursed,
+      });
+      generateReceipt({
+        member: info.member.name, code: idNo, date,
+        collectedPrincipal: p, collectedInterest: i,
+        newLoan: nl, newLoanRate: nr, balance: res.balance,
+        remarks,
+      });
       setLocked(true);
       toast.success(`Saved. రసీదు ${res.emailed_to ?? "—"}కు పంపబడింది`);
     } catch (e: any) {
       toast.error(e?.message ?? "Save failed");
     } finally { setBusy(false); }
+  }
+
+  function generateReceipt(r: {
+    member: string; code: string; date: string;
+    collectedPrincipal: number; collectedInterest: number;
+    newLoan: number; newLoanRate: number; balance: number; remarks: string;
+  }) {
+    const w = window.open("", "_blank", "width=720,height=900");
+    if (!w) return;
+    const fmt = (n: number) => `Rs. ${Number(n || 0).toLocaleString("en-IN")}`;
+    w.document.write(`<!doctype html><html><head><title>Receipt</title>
+    <style>body{font-family:system-ui,sans-serif;padding:24px;color:#111}
+    h1{margin:0 0 4px;font-size:20px;color:#c2410c}
+    h2{font-size:14px;margin:16px 0 6px;color:#15803d;border-bottom:1px solid #ddd;padding-bottom:4px}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    td{padding:6px 4px;border-bottom:1px dashed #eee}
+    td:last-child{text-align:right;font-weight:600}
+    .foot{margin-top:24px;font-size:11px;color:#666;text-align:center}</style></head><body>
+    <h1>Chitvel Help Line Society</h1>
+    <div style="font-size:12px;color:#555">Committee Accounts &mdash; Receipt</div>
+    <table style="margin-top:12px"><tr><td>Member</td><td>${r.member} (${r.code})</td></tr>
+    <tr><td>Date</td><td>${r.date}</td></tr>
+    ${r.remarks ? `<tr><td>Remarks</td><td>${r.remarks}</td></tr>` : ""}</table>
+    <h2>Today's Collection</h2>
+    <table><tr><td>Principal Paid</td><td>${fmt(r.collectedPrincipal)}</td></tr>
+    <tr><td>Interest Paid</td><td>${fmt(r.collectedInterest)}</td></tr>
+    <tr><td><b>Total Collected</b></td><td>${fmt(r.collectedPrincipal + r.collectedInterest)}</td></tr></table>
+    <h2>New Loan Disbursed</h2>
+    <table><tr><td>Loan Amount</td><td>${fmt(r.newLoan)}</td></tr>
+    <tr><td>Monthly Interest Rate</td><td>${r.newLoanRate}%</td></tr></table>
+    <h2>Updated Outstanding Balance</h2>
+    <table><tr><td>Total Due</td><td>${fmt(r.balance)}</td></tr></table>
+    <div class="foot">Auto-generated receipt</div>
+    <script>setTimeout(()=>window.print(),300)</script>
+    </body></html>`);
+    w.document.close();
   }
 
   function onEdit() { setLocked(false); }
@@ -117,26 +167,55 @@ function AccountsPage() {
             </div>
           </div>
 
-          {/* Dynamic auto-populated */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 rounded-lg border bg-orange-50/60 p-3">
-            <Field label="అప్పు తీసుకున్న వారి పేరు" value={info?.member.name ?? "—"} />
-            <Field label="అప్పు మొత్తం (Outstanding)"
-              value={info ? `₹ ${info.totalOutstanding.toLocaleString("en-IN")}` : "—"} />
-            <Field label="వడ్డీ మొత్తం (Monthly)"
-              value={info ? `₹ ${info.monthlyInterest.toLocaleString("en-IN")}` : "—"} />
+          {/* Member name banner */}
+          <div className="rounded-lg border bg-orange-50/60 p-3">
+            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">అప్పు తీసుకున్న వారి పేరు</p>
+            <p className="text-lg font-bold text-foreground">{info?.member.name ?? "—"}</p>
           </div>
 
-          {/* Editable entries */}
+          {/* Dual-pane: OLD LOAN | TODAY NEW LOAN */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label>అసలు జమ (Principal Paid)</Label>
-              <Input inputMode="decimal" value={principal} disabled={locked}
-                onChange={(e) => setPrincipal(e.target.value.replace(/[^\d.]/g, ""))} placeholder="0" />
+            {/* OLD LOAN */}
+            <div className="rounded-lg border-2 border-orange-200 bg-orange-50/40 p-3 space-y-3">
+              <p className="text-xs font-bold text-red-600 tracking-wide">OLD LOAN</p>
+              <div>
+                <p className="text-[11px] text-muted-foreground">అప్పు మొత్తం (OUTSTANDING)</p>
+                <p className="font-bold text-lg">₹ {info ? info.totalOutstanding.toLocaleString("en-IN") : "0"}</p>
+              </div>
+              <div>
+                <p className="text-[11px] text-muted-foreground">వడ్డీ మొత్తం (MONTHLY)</p>
+                <p className="font-bold text-lg">₹ {info ? info.monthlyInterest.toLocaleString("en-IN") : "0"}</p>
+              </div>
+              <div className="space-y-1.5 pt-2 border-t border-orange-200">
+                <Label className="text-xs">అసలు జమ (Principal Paid)</Label>
+                <Input inputMode="decimal" value={principal} disabled={locked}
+                  onChange={(e) => setPrincipal(e.target.value.replace(/[^\d.]/g, ""))} placeholder="0" />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">వడ్డీ జమ (Interest Paid)</Label>
+                <Input inputMode="decimal" value={interest} disabled={locked}
+                  onChange={(e) => setInterest(e.target.value.replace(/[^\d.]/g, ""))} placeholder="0" />
+              </div>
             </div>
-            <div className="space-y-1.5">
-              <Label>వడ్డీ జమ (Interest Paid)</Label>
-              <Input inputMode="decimal" value={interest} disabled={locked}
-                onChange={(e) => setInterest(e.target.value.replace(/[^\d.]/g, ""))} placeholder="0" />
+
+            {/* TODAY NEW LOAN */}
+            <div className="rounded-lg border-2 border-red-300 bg-red-50/40 p-3 space-y-3">
+              <p className="text-xs font-bold text-red-600 tracking-wide">TODAY NEW LOAN</p>
+              <div className="space-y-1.5">
+                <Label className="text-xs text-green-700 font-semibold">LOAN (కొత్త అప్పు)</Label>
+                <Input inputMode="decimal" value={newLoan} disabled={locked}
+                  onChange={(e) => setNewLoan(e.target.value.replace(/[^\d.]/g, ""))} placeholder="0" />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs text-green-700 font-semibold">Interest Rate (% monthly)</Label>
+                <Input inputMode="decimal" value={newLoanRate} disabled={locked}
+                  onChange={(e) => setNewLoanRate(e.target.value.replace(/[^\d.]/g, ""))} placeholder="2.0" />
+              </div>
+              {newLoan && Number(newLoan) > 0 && (
+                <div className="text-[11px] text-muted-foreground pt-2 border-t border-red-200">
+                  ఈ రోజు ఇవ్వబడుతుంది: <b className="text-red-700">₹ {Number(newLoan).toLocaleString("en-IN")}</b>
+                </div>
+              )}
             </div>
           </div>
 
@@ -149,9 +228,11 @@ function AccountsPage() {
           </div>
 
           {saved && (
-            <div className="rounded-md border border-green-300 bg-green-50 p-3 text-sm text-green-900">
-              ✅ Saved. Updated balance: <b>₹ {saved.balance.toLocaleString("en-IN")}</b>.{" "}
-              {saved.emailed_to && <>Receipt emailed to <b>{saved.emailed_to}</b>.</>}
+            <div className="rounded-md border border-green-300 bg-green-50 p-3 text-sm text-green-900 space-y-1">
+              <div>✅ Saved. Updated balance: <b>₹ {saved.balance.toLocaleString("en-IN")}</b></div>
+              {saved.collected > 0 && <div>Collected today: <b>₹ {saved.collected.toLocaleString("en-IN")}</b></div>}
+              {saved.disbursed > 0 && <div>New loan disbursed: <b>₹ {saved.disbursed.toLocaleString("en-IN")}</b></div>}
+              {saved.emailed_to && <div>Receipt emailed to <b>{saved.emailed_to}</b></div>}
             </div>
           )}
 
