@@ -178,14 +178,17 @@ function IncomePage() {
   return (
     <div className="min-h-screen bg-black text-white pb-16">
       <div className="max-w-2xl mx-auto p-4 space-y-5">
-        <header className="flex items-center gap-3">
-          <Link to="/org/dashboard" className="p-2 rounded-lg hover:bg-white/10">
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-          <div>
-            <h1 className="text-lg font-bold">ఆదాయం మరియు విరాళాల నమోదు</h1>
-            <p className="text-xs text-white/60">Income & Donation Receipt</p>
+        <header className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <Link to="/org/dashboard" className="p-2 rounded-lg hover:bg-white/10">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+            <div>
+              <h1 className="text-lg font-bold">ఆదాయం మరియు విరాళాల నమోదు</h1>
+              <p className="text-xs text-white/60">Income & Donation Receipt</p>
+            </div>
           </div>
+          <CurrencySelector />
         </header>
 
         <Card className="bg-zinc-950 border-white/10 p-4">
@@ -196,7 +199,7 @@ function IncomePage() {
                 className="bg-zinc-900 border-white/10 text-white" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-white/80">Amount (₹) *</Label>
+              <Label className="text-white/80">Amount * ({CURRENCIES.find(c => c.code === txCurrency)?.symbol})</Label>
               <Input type="number" min="1" step="0.01" required value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 className="bg-zinc-900 border-white/10 text-white" />
@@ -226,12 +229,43 @@ function IncomePage() {
                 </SelectContent>
               </Select>
             </div>
+            <div className="space-y-1.5">
+              <Label className="text-white/80">Transaction Currency</Label>
+              <Select value={txCurrency} onValueChange={(v) => { setTxCurrency(v as CurrencyCode); if (v === BASE_CURRENCY) setExchangeRate("1"); }}>
+                <SelectTrigger className="bg-zinc-900 border-white/10 text-white"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {CURRENCIES.map((c) => <SelectItem key={c.code} value={c.code}>{c.symbol} {c.code}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            {txCurrency !== BASE_CURRENCY && (
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label className="text-white/80">Exchange Rate (1 {txCurrency} = ? INR) *</Label>
+                <Input type="number" min="0" step="0.0001" required value={exchangeRate}
+                  onChange={(e) => setExchangeRate(e.target.value)}
+                  className="bg-zinc-900 border-white/10 text-white" />
+                {Number(amount) > 0 && Number(exchangeRate) > 0 && (
+                  <p className="text-[11px] text-amber-400">
+                    ≈ ₹ {(Number(amount) * Number(exchangeRate)).toLocaleString("en-IN", { minimumFractionDigits: 2 })} (base)
+                  </p>
+                )}
+              </div>
+            )}
             <div className="space-y-1.5 sm:col-span-2">
-              <Label className="text-white/80">Wallet (Deposit To)</Label>
+              <Label className="text-white/80">Wallet Account (Deposit To)</Label>
+              <Select value={walletAccountId || "__legacy__"} onValueChange={(v) => setWalletAccountId(v === "__legacy__" ? "" : v)}>
+                <SelectTrigger className="bg-zinc-900 border-white/10 text-white"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__legacy__">— Use general wallet —</SelectItem>
+                  {(walletsQ.data?.rows ?? []).map((a: any) => (
+                    <SelectItem key={a.id} value={a.id}>{a.name} ({a.currency})</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Select value={wallet} onValueChange={(v) => setWallet(v as WalletType)}>
                 <SelectTrigger className="bg-zinc-900 border-white/10 text-white"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {WALLETS.map((w) => <SelectItem key={w.v} value={w.v}>{w.label}</SelectItem>)}
+                  {WALLETS.map((w) => <SelectItem key={w.v} value={w.v}>{w.label} (category)</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
