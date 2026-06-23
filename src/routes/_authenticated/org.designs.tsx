@@ -1734,7 +1734,7 @@ function OfficialSaffronPreview({
       </div>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
         <div style={{ fontSize: 10, fontWeight: 700, color: PAGE_SUB, letterSpacing: 1 }}>BACK / వెనుక</div>
-        <StandardBackPreview theme={theme} memberName={member.name} />
+        <StandardBackPreview theme={theme} memberName={member.name} cardBg={cardBg} />
       </div>
     </div>
   );
