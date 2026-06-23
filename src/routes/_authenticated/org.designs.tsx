@@ -10,11 +10,13 @@ import {
   ArrowLeft, IdCard, FileText, Sparkles, Check, Lock, QrCode,
   Square, Download, User, Shield,
   Printer, Pencil, FileX, Receipt, Pencil as EditIcon, ChevronLeft,
+  Palette, Type as TypeIcon, Upload,
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 import { resolveTheme, type ThemeSettings, DEFAULT_THEME } from "@/lib/theme";
 
