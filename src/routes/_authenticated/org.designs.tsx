@@ -1011,15 +1011,20 @@ function ReceiptThumb({ layout, accent }: { layout: ReceiptLayout; accent: strin
 /* ---------------- Live Previews ---------------- */
 
 function IdCardPreview({
-  layout, theme, orgName, slogan, reg, member,
+  layout, theme, orgName, slogan, reg, member, cardBg = "#ffffff",
 }: {
   layout: IdLayout; theme: Required<ThemeSettings>;
   orgName: string; slogan: string; reg: string; member: MemberData;
+  cardBg?: string;
 }) {
   if (layout === "official-saffron") {
-    return <OfficialSaffronPreview theme={theme} orgName={orgName} slogan={slogan} reg={reg} member={member} />;
+    return <OfficialSaffronPreview theme={theme} orgName={orgName} slogan={slogan} reg={reg} member={member} cardBg={cardBg} />;
   }
-  const front = <IdCardFront layout={layout} theme={theme} orgName={orgName} slogan={slogan} reg={reg} member={member} />;
+  if (layout === "keychain-mini") {
+    // Keychain badge — compact, no back side
+    return <KeychainPreview theme={theme} orgName={orgName} member={member} cardBg={cardBg} />;
+  }
+  const front = <IdCardFront layout={layout} theme={theme} orgName={orgName} slogan={slogan} reg={reg} member={member} cardBg={cardBg} />;
   return (
     <div style={{ display: "flex", flexWrap: "wrap", gap: 14, justifyContent: "center" }}>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
@@ -1028,8 +1033,45 @@ function IdCardPreview({
       </div>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
         <div style={{ fontSize: 10, fontWeight: 700, color: PAGE_SUB, letterSpacing: 1 }}>BACK / వెనుక</div>
-        <StandardBackPreview theme={theme} memberName={member.name} />
+        <StandardBackPreview theme={theme} memberName={member.name} cardBg={cardBg} />
       </div>
+    </div>
+  );
+}
+
+function KeychainPreview({
+  theme, orgName, member, cardBg,
+}: {
+  theme: Required<ThemeSettings>; orgName: string; member: MemberData; cardBg: string;
+}) {
+  const headFF = `${theme.headFont}, "Noto Sans Telugu", system-ui, sans-serif`;
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+      <div style={{ width: 18, height: 18, borderRadius: "50%", border: `3px solid ${theme.icon}`, background: "transparent" }} />
+      <div style={{ width: 2, height: 14, background: theme.icon }} />
+      <div style={{
+        width: 220, height: 130, background: cardBg, borderRadius: 12, overflow: "hidden",
+        border: `2px solid ${theme.icon}`, boxShadow: `0 8px 28px ${theme.icon}55`,
+        display: "flex", flexDirection: "column", fontFamily: headFF,
+      }}>
+        <div style={{ background: theme.icon, padding: "4px 8px", color: theme.buttonText, fontSize: 10, fontWeight: 900, textAlign: "center", letterSpacing: 0.5 }}>
+          {orgName}
+        </div>
+        <div style={{ flex: 1, display: "flex", padding: 8, gap: 8 }}>
+          <div style={{ width: 56, height: 70, borderRadius: 6, background: "#e5e5e5",
+            border: `1px solid ${theme.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <User style={{ width: 26, height: 26, color: "#999" }} />
+          </div>
+          <div style={{ flex: 1, fontSize: 10, color: "#111" }}>
+            <div style={{ fontWeight: 800, fontSize: 12 }}>{member.name}</div>
+            <div style={{ color: "#555", marginTop: 2 }}>ID: {member.memberId}</div>
+            <div style={{ color: "#555" }}>📞 {member.phone}</div>
+            <div style={{ display: "inline-block", marginTop: 4, background: "#C8102E", color: "#fff",
+              fontSize: 9, fontWeight: 800, padding: "1px 5px", borderRadius: 3 }}>🩸 {member.bloodGroup}</div>
+          </div>
+        </div>
+      </div>
+      <div style={{ fontSize: 9, color: PAGE_SUB, letterSpacing: 1 }}>KEYCHAIN / కీ చైన్</div>
     </div>
   );
 }
