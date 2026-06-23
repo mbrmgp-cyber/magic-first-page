@@ -119,7 +119,7 @@ const DEFAULT_RECEIPT: ReceiptData = {
   mode: "Cash",
 };
 
-// Forced premium dark theme for this page (no neon blue, matches accounting modules)
+// Premium dark page chrome (constant — accent/font/colors flow from org theme to inner templates).
 const PAGE_BG = "#0a0a0a";
 const PAGE_PANEL = "#111113";
 const PAGE_BORDER = "#27272a";
@@ -143,20 +143,10 @@ function DesignsPage() {
   const orgQ = useQuery({ queryKey: ["my-org"], queryFn: () => fetchOrg() });
   const org: any = orgQ.data?.org;
 
-  // Resolve org theme then overlay our premium-dark page chrome so background is never neon.
-  const baseTheme = useMemo(() => resolveTheme(org), [org]);
-  const theme = useMemo(() => ({
-    ...baseTheme,
-    bg: PAGE_BG,
-    box: PAGE_PANEL,
-    border: PAGE_BORDER,
-    headColor: PAGE_HEAD,
-    smallColor: PAGE_SUB,
-    // keep accent (icon/buttonBg) from org theme; fall back to default orange.
-    icon: baseTheme.icon || DEFAULT_THEME.icon,
-    buttonBg: baseTheme.buttonBg || DEFAULT_THEME.buttonBg,
-    buttonText: baseTheme.buttonText || DEFAULT_THEME.buttonText,
-  }), [baseTheme]);
+  // Pass org theme straight through to inner templates so Settings → Theme changes
+  // (colors, fonts, accent) immediately apply to ID Cards, Letter Pads, Receipts.
+  // Page chrome (background/panel) stays dark via the PAGE_* constants.
+  const theme = useMemo(() => resolveTheme(org), [org]);
 
   // Module tab
   const [tab, setTab] = useState<"id" | "letter" | "receipt">("id");
@@ -179,19 +169,22 @@ function DesignsPage() {
   const [receipt, setReceipt] = useState<ReceiptData>(DEFAULT_RECEIPT);
   const [receiptLogo, setReceiptLogo] = useState<string>(mbrLogo.url);
 
-  // Design Customization (per-edit-session overrides)
+  // Design Customization (per-edit-session overrides — nullable so live theme wins until user picks).
   const [cardBg, setCardBg] = useState<string>("#ffffff");
-  const [accentColor, setAccentColor] = useState<string>(theme.icon);
-  const [fontFamily, setFontFamily] = useState<string>(theme.headFont);
+  const [accentColor, setAccentColor] = useState<string | null>(null);
+  const [fontFamily, setFontFamily] = useState<string | null>(null);
 
-  // customTheme applies the user's live styling on top of base theme
+  // customTheme applies the user's live styling on top of base theme; until the user
+  // changes anything, it follows the org theme (so Settings → Theme edits take effect).
+  const effectiveAccent = accentColor ?? theme.icon;
+  const effectiveFont = fontFamily ?? theme.headFont;
   const customTheme = useMemo(() => ({
     ...theme,
-    icon: accentColor,
-    buttonBg: accentColor,
-    headFont: fontFamily,
-    subFont: fontFamily,
-  }), [theme, accentColor, fontFamily]);
+    icon: effectiveAccent,
+    buttonBg: effectiveAccent,
+    headFont: effectiveFont,
+    subFont: effectiveFont,
+  }), [theme, effectiveAccent, effectiveFont]);
 
   const orgName = org?.name || "Chitvel Help Line Society";
   const orgSlogan = org?.slogan || "॥ మానవసేవే మాధవసేవ ॥";
@@ -430,8 +423,8 @@ function DesignsPage() {
 
                     <StyleControls
                       cardBg={cardBg} setCardBg={setCardBg}
-                      accent={accentColor} setAccent={setAccentColor}
-                      font={fontFamily} setFont={setFontFamily}
+                      accent={effectiveAccent} setAccent={setAccentColor}
+                      font={effectiveFont} setFont={setFontFamily}
                     />
 
                     <Button
@@ -597,8 +590,8 @@ function DesignsPage() {
 
                     <StyleControls
                       cardBg={cardBg} setCardBg={setCardBg}
-                      accent={accentColor} setAccent={setAccentColor}
-                      font={fontFamily} setFont={setFontFamily}
+                      accent={effectiveAccent} setAccent={setAccentColor}
+                      font={effectiveFont} setFont={setFontFamily}
                     />
 
                     <Button
