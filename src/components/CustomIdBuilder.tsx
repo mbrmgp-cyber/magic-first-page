@@ -16,6 +16,8 @@ type ElState = {
   y: number;
   w: number;
   h: number;
+  color?: string;
+  fontSize?: number;
 };
 
 const CANVAS_W = 540; // editor canvas width
@@ -23,7 +25,7 @@ const CANVAS_H = 340; // CR80 landscape-ish ratio (1.586:1)
 
 const DEFAULTS: Record<ElementKey, ElState> = {
   photo:       { enabled: true,  x: 24,  y: 80,  w: 110, h: 130 },
-  name:        { enabled: true,  x: 160, y: 100, w: 340, h: 36 },
+  name:        { enabled: true,  x: 160, y: 100, w: 340, h: 36, color: "#111111", fontSize: 22 },
   designation: { enabled: true,  x: 160, y: 150, w: 340, h: 26 },
   qr:          { enabled: true,  x: 420, y: 210, w: 90,  h: 90 },
 };
