@@ -391,10 +391,17 @@ function DesignsPage() {
                       <Field label="Mandal / మండలం" value={member.mandal} onChange={(v) => setMember({ ...member, mandal: v })} />
                       <Field label="Join Date" value={member.joinDate} onChange={(v) => setMember({ ...member, joinDate: v })} />
                     </div>
+
+                    <StyleControls
+                      cardBg={cardBg} setCardBg={setCardBg}
+                      accent={accentColor} setAccent={setAccentColor}
+                      font={fontFamily} setFont={setFontFamily}
+                    />
+
                     <Button
                       onClick={() => toast.success("ID Card ready — printable PDF available shortly")}
                       className="w-full font-semibold h-10"
-                      style={{ background: theme.buttonBg, color: theme.buttonText }}
+                      style={{ background: customTheme.buttonBg, color: customTheme.buttonText }}
                     >
                       <Download className="h-4 w-4 mr-2" /> Save & Download PDF
                     </Button>
@@ -402,7 +409,7 @@ function DesignsPage() {
 
                   {/* Live Preview */}
                   <div className="rounded-lg p-3 border flex items-center justify-center" style={{ background: PAGE_BG, borderColor: PAGE_BORDER, minHeight: 260 }}>
-                    <IdCardPreview layout={idPick} theme={theme} orgName={orgName} slogan={orgSlogan} reg={orgReg} member={member} />
+                    <IdCardPreview layout={idPick} theme={customTheme} orgName={orgName} slogan={orgSlogan} reg={orgReg} member={member} cardBg={cardBg} />
                   </div>
                 </div>
               </Section>
