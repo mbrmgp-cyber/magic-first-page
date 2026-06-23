@@ -20,12 +20,15 @@ import { Route as AuthenticatedOrgRulesRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedOrgMembersRouteImport } from './routes/_authenticated/org.members'
 import { Route as AuthenticatedOrgMasterLedgerRouteImport } from './routes/_authenticated/org.master-ledger'
 import { Route as AuthenticatedOrgLoanRequestsRouteImport } from './routes/_authenticated/org.loan-requests'
+import { Route as AuthenticatedOrgIncomeRouteImport } from './routes/_authenticated/org.income'
+import { Route as AuthenticatedOrgExpensesRouteImport } from './routes/_authenticated/org.expenses'
 import { Route as AuthenticatedOrgEventsRouteImport } from './routes/_authenticated/org.events'
 import { Route as AuthenticatedOrgElectionsRouteImport } from './routes/_authenticated/org.elections'
 import { Route as AuthenticatedOrgDesignsRouteImport } from './routes/_authenticated/org.designs'
 import { Route as AuthenticatedOrgDashboardRouteImport } from './routes/_authenticated/org.dashboard'
 import { Route as AuthenticatedOrgCommitteeRouteImport } from './routes/_authenticated/org.committee'
 import { Route as AuthenticatedOrgChatRouteImport } from './routes/_authenticated/org.chat'
+import { Route as AuthenticatedOrgCashflowRouteImport } from './routes/_authenticated/org.cashflow'
 import { Route as AuthenticatedOrgAccountsRouteImport } from './routes/_authenticated/org.accounts'
 import { Route as AuthenticatedMemberPendingRouteImport } from './routes/_authenticated/member.pending'
 import { Route as AuthenticatedMemberLoanRequestRouteImport } from './routes/_authenticated/member.loan-request'
@@ -88,6 +91,17 @@ const AuthenticatedOrgLoanRequestsRoute =
     path: '/org/loan-requests',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedOrgIncomeRoute = AuthenticatedOrgIncomeRouteImport.update({
+  id: '/org/income',
+  path: '/org/income',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOrgExpensesRoute =
+  AuthenticatedOrgExpensesRouteImport.update({
+    id: '/org/expenses',
+    path: '/org/expenses',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedOrgEventsRoute = AuthenticatedOrgEventsRouteImport.update({
   id: '/org/events',
   path: '/org/events',
@@ -121,6 +135,12 @@ const AuthenticatedOrgChatRoute = AuthenticatedOrgChatRouteImport.update({
   path: '/org/chat',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedOrgCashflowRoute =
+  AuthenticatedOrgCashflowRouteImport.update({
+    id: '/org/cashflow',
+    path: '/org/cashflow',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedOrgAccountsRoute =
   AuthenticatedOrgAccountsRouteImport.update({
     id: '/org/accounts',
@@ -163,12 +183,15 @@ export interface FileRoutesByFullPath {
   '/member/loan-request': typeof AuthenticatedMemberLoanRequestRoute
   '/member/pending': typeof AuthenticatedMemberPendingRoute
   '/org/accounts': typeof AuthenticatedOrgAccountsRoute
+  '/org/cashflow': typeof AuthenticatedOrgCashflowRoute
   '/org/chat': typeof AuthenticatedOrgChatRoute
   '/org/committee': typeof AuthenticatedOrgCommitteeRoute
   '/org/dashboard': typeof AuthenticatedOrgDashboardRoute
   '/org/designs': typeof AuthenticatedOrgDesignsRoute
   '/org/elections': typeof AuthenticatedOrgElectionsRoute
   '/org/events': typeof AuthenticatedOrgEventsRoute
+  '/org/expenses': typeof AuthenticatedOrgExpensesRoute
+  '/org/income': typeof AuthenticatedOrgIncomeRoute
   '/org/loan-requests': typeof AuthenticatedOrgLoanRequestsRoute
   '/org/master-ledger': typeof AuthenticatedOrgMasterLedgerRoute
   '/org/members': typeof AuthenticatedOrgMembersRoute
@@ -186,12 +209,15 @@ export interface FileRoutesByTo {
   '/member/loan-request': typeof AuthenticatedMemberLoanRequestRoute
   '/member/pending': typeof AuthenticatedMemberPendingRoute
   '/org/accounts': typeof AuthenticatedOrgAccountsRoute
+  '/org/cashflow': typeof AuthenticatedOrgCashflowRoute
   '/org/chat': typeof AuthenticatedOrgChatRoute
   '/org/committee': typeof AuthenticatedOrgCommitteeRoute
   '/org/dashboard': typeof AuthenticatedOrgDashboardRoute
   '/org/designs': typeof AuthenticatedOrgDesignsRoute
   '/org/elections': typeof AuthenticatedOrgElectionsRoute
   '/org/events': typeof AuthenticatedOrgEventsRoute
+  '/org/expenses': typeof AuthenticatedOrgExpensesRoute
+  '/org/income': typeof AuthenticatedOrgIncomeRoute
   '/org/loan-requests': typeof AuthenticatedOrgLoanRequestsRoute
   '/org/master-ledger': typeof AuthenticatedOrgMasterLedgerRoute
   '/org/members': typeof AuthenticatedOrgMembersRoute
@@ -211,12 +237,15 @@ export interface FileRoutesById {
   '/_authenticated/member/loan-request': typeof AuthenticatedMemberLoanRequestRoute
   '/_authenticated/member/pending': typeof AuthenticatedMemberPendingRoute
   '/_authenticated/org/accounts': typeof AuthenticatedOrgAccountsRoute
+  '/_authenticated/org/cashflow': typeof AuthenticatedOrgCashflowRoute
   '/_authenticated/org/chat': typeof AuthenticatedOrgChatRoute
   '/_authenticated/org/committee': typeof AuthenticatedOrgCommitteeRoute
   '/_authenticated/org/dashboard': typeof AuthenticatedOrgDashboardRoute
   '/_authenticated/org/designs': typeof AuthenticatedOrgDesignsRoute
   '/_authenticated/org/elections': typeof AuthenticatedOrgElectionsRoute
   '/_authenticated/org/events': typeof AuthenticatedOrgEventsRoute
+  '/_authenticated/org/expenses': typeof AuthenticatedOrgExpensesRoute
+  '/_authenticated/org/income': typeof AuthenticatedOrgIncomeRoute
   '/_authenticated/org/loan-requests': typeof AuthenticatedOrgLoanRequestsRoute
   '/_authenticated/org/master-ledger': typeof AuthenticatedOrgMasterLedgerRoute
   '/_authenticated/org/members': typeof AuthenticatedOrgMembersRoute
@@ -236,12 +265,15 @@ export interface FileRouteTypes {
     | '/member/loan-request'
     | '/member/pending'
     | '/org/accounts'
+    | '/org/cashflow'
     | '/org/chat'
     | '/org/committee'
     | '/org/dashboard'
     | '/org/designs'
     | '/org/elections'
     | '/org/events'
+    | '/org/expenses'
+    | '/org/income'
     | '/org/loan-requests'
     | '/org/master-ledger'
     | '/org/members'
@@ -259,12 +291,15 @@ export interface FileRouteTypes {
     | '/member/loan-request'
     | '/member/pending'
     | '/org/accounts'
+    | '/org/cashflow'
     | '/org/chat'
     | '/org/committee'
     | '/org/dashboard'
     | '/org/designs'
     | '/org/elections'
     | '/org/events'
+    | '/org/expenses'
+    | '/org/income'
     | '/org/loan-requests'
     | '/org/master-ledger'
     | '/org/members'
@@ -283,12 +318,15 @@ export interface FileRouteTypes {
     | '/_authenticated/member/loan-request'
     | '/_authenticated/member/pending'
     | '/_authenticated/org/accounts'
+    | '/_authenticated/org/cashflow'
     | '/_authenticated/org/chat'
     | '/_authenticated/org/committee'
     | '/_authenticated/org/dashboard'
     | '/_authenticated/org/designs'
     | '/_authenticated/org/elections'
     | '/_authenticated/org/events'
+    | '/_authenticated/org/expenses'
+    | '/_authenticated/org/income'
     | '/_authenticated/org/loan-requests'
     | '/_authenticated/org/master-ledger'
     | '/_authenticated/org/members'
@@ -383,6 +421,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOrgLoanRequestsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/org/income': {
+      id: '/_authenticated/org/income'
+      path: '/org/income'
+      fullPath: '/org/income'
+      preLoaderRoute: typeof AuthenticatedOrgIncomeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/expenses': {
+      id: '/_authenticated/org/expenses'
+      path: '/org/expenses'
+      fullPath: '/org/expenses'
+      preLoaderRoute: typeof AuthenticatedOrgExpensesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/org/events': {
       id: '/_authenticated/org/events'
       path: '/org/events'
@@ -423,6 +475,13 @@ declare module '@tanstack/react-router' {
       path: '/org/chat'
       fullPath: '/org/chat'
       preLoaderRoute: typeof AuthenticatedOrgChatRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/cashflow': {
+      id: '/_authenticated/org/cashflow'
+      path: '/org/cashflow'
+      fullPath: '/org/cashflow'
+      preLoaderRoute: typeof AuthenticatedOrgCashflowRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/org/accounts': {
@@ -470,12 +529,15 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMemberLoanRequestRoute: typeof AuthenticatedMemberLoanRequestRoute
   AuthenticatedMemberPendingRoute: typeof AuthenticatedMemberPendingRoute
   AuthenticatedOrgAccountsRoute: typeof AuthenticatedOrgAccountsRoute
+  AuthenticatedOrgCashflowRoute: typeof AuthenticatedOrgCashflowRoute
   AuthenticatedOrgChatRoute: typeof AuthenticatedOrgChatRoute
   AuthenticatedOrgCommitteeRoute: typeof AuthenticatedOrgCommitteeRoute
   AuthenticatedOrgDashboardRoute: typeof AuthenticatedOrgDashboardRoute
   AuthenticatedOrgDesignsRoute: typeof AuthenticatedOrgDesignsRoute
   AuthenticatedOrgElectionsRoute: typeof AuthenticatedOrgElectionsRoute
   AuthenticatedOrgEventsRoute: typeof AuthenticatedOrgEventsRoute
+  AuthenticatedOrgExpensesRoute: typeof AuthenticatedOrgExpensesRoute
+  AuthenticatedOrgIncomeRoute: typeof AuthenticatedOrgIncomeRoute
   AuthenticatedOrgLoanRequestsRoute: typeof AuthenticatedOrgLoanRequestsRoute
   AuthenticatedOrgMasterLedgerRoute: typeof AuthenticatedOrgMasterLedgerRoute
   AuthenticatedOrgMembersRoute: typeof AuthenticatedOrgMembersRoute
@@ -490,12 +552,15 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMemberLoanRequestRoute: AuthenticatedMemberLoanRequestRoute,
   AuthenticatedMemberPendingRoute: AuthenticatedMemberPendingRoute,
   AuthenticatedOrgAccountsRoute: AuthenticatedOrgAccountsRoute,
+  AuthenticatedOrgCashflowRoute: AuthenticatedOrgCashflowRoute,
   AuthenticatedOrgChatRoute: AuthenticatedOrgChatRoute,
   AuthenticatedOrgCommitteeRoute: AuthenticatedOrgCommitteeRoute,
   AuthenticatedOrgDashboardRoute: AuthenticatedOrgDashboardRoute,
   AuthenticatedOrgDesignsRoute: AuthenticatedOrgDesignsRoute,
   AuthenticatedOrgElectionsRoute: AuthenticatedOrgElectionsRoute,
   AuthenticatedOrgEventsRoute: AuthenticatedOrgEventsRoute,
+  AuthenticatedOrgExpensesRoute: AuthenticatedOrgExpensesRoute,
+  AuthenticatedOrgIncomeRoute: AuthenticatedOrgIncomeRoute,
   AuthenticatedOrgLoanRequestsRoute: AuthenticatedOrgLoanRequestsRoute,
   AuthenticatedOrgMasterLedgerRoute: AuthenticatedOrgMasterLedgerRoute,
   AuthenticatedOrgMembersRoute: AuthenticatedOrgMembersRoute,
