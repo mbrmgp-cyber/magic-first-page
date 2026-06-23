@@ -44,11 +44,13 @@ function IncomePage() {
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [payer, setPayer] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [amount, setAmount] = useState("");
   const [incType, setIncType] = useState<IncomeType>("donation");
   const [wallet, setWallet] = useState<WalletType>("bank");
   const [remarks, setRemarks] = useState("");
   const [busy, setBusy] = useState(false);
+
 
   function generateReceiptHTML(entry: any) {
     const org = orgQ.data?.org;

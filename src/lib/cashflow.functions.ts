@@ -22,6 +22,7 @@ export const recordIncome = createServerFn({ method: "POST" })
     entry_date: string;
     payer_name: string;
     payer_phone?: string;
+    payer_email: string;
     amount: number;
     income_type: IncomeType;
     wallet: WalletType;
@@ -32,9 +33,10 @@ export const recordIncome = createServerFn({ method: "POST" })
     const orgId = await resolveOrgId(supabase, userId);
     if (!orgId) throw new Error("Org not found");
     if (!data.payer_name?.trim()) throw new Error("Payer name required");
+    if (!data.payer_email?.trim() || !/^\S+@\S+\.\S+$/.test(data.payer_email))
+      throw new Error("Valid email address required");
     if (!(data.amount > 0)) throw new Error("Amount must be greater than 0");
 
-    // Generate sequential receipt number per org
     const { count } = await supabase
       .from("org_income").select("id", { count: "exact", head: true })
       .eq("org_id", orgId);
@@ -45,6 +47,7 @@ export const recordIncome = createServerFn({ method: "POST" })
       entry_date: data.entry_date,
       payer_name: data.payer_name.trim(),
       payer_phone: data.payer_phone?.trim() || null,
+      payer_email: data.payer_email.trim().toLowerCase(),
       amount: data.amount,
       income_type: data.income_type,
       wallet: data.wallet,
@@ -55,6 +58,7 @@ export const recordIncome = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true as const, entry: row };
   });
+
 
 export const listIncome = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
