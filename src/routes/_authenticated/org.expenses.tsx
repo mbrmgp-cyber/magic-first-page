@@ -38,10 +38,15 @@ function ExpensesPage() {
   const save = useServerFn(recordExpense);
   const listFn = useServerFn(listExpenses);
   const listQ = useQuery({ queryKey: ["org-expenses"], queryFn: () => listFn() });
+  const walletsFn = useServerFn(listWalletAccounts);
+  const walletsQ = useQuery({ queryKey: ["wallet-accounts"], queryFn: () => walletsFn() });
 
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
+  const [txCurrency, setTxCurrency] = useState<CurrencyCode>(BASE_CURRENCY);
+  const [exchangeRate, setExchangeRate] = useState("1");
+  const [walletAccountId, setWalletAccountId] = useState<string>("");
   const [expType, setExpType] = useState<ExpenseType>("charity");
   const [wallet, setWallet] = useState<WalletType>("bank");
   const [remarks, setRemarks] = useState("");
@@ -50,16 +55,24 @@ function ExpensesPage() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     const a = Number(amount);
+    const rate = Number(exchangeRate);
     if (!recipient.trim()) { toast.error("Recipient required"); return; }
     if (!(a > 0)) { toast.error("Valid amount required"); return; }
+    if (txCurrency !== BASE_CURRENCY && !(rate > 0)) { toast.error("Exchange rate required for foreign currency"); return; }
     setBusy(true);
     try {
       await save({ data: {
         entry_date: date, recipient_name: recipient, amount: a,
-        expense_type: expType, wallet, remarks: remarks || undefined,
+        expense_type: expType, wallet,
+        wallet_account_id: walletAccountId || undefined,
+        currency: txCurrency,
+        exchange_rate: txCurrency === BASE_CURRENCY ? 1 : rate,
+        remarks: remarks || undefined,
       }});
-      toast.success(`₹${a.toLocaleString("en-IN")} expense recorded`);
+      const baseAmt = a * (txCurrency === BASE_CURRENCY ? 1 : rate);
+      toast.success(`₹${baseAmt.toLocaleString("en-IN")} expense recorded`);
       setRecipient(""); setAmount(""); setRemarks("");
+      setTxCurrency(BASE_CURRENCY); setExchangeRate("1"); setWalletAccountId("");
       qc.invalidateQueries({ queryKey: ["org-expenses"] });
       qc.invalidateQueries({ queryKey: ["cashflow"] });
     } catch (err: any) {
