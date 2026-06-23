@@ -160,6 +160,7 @@ function DesignsPage() {
 
   // Module tab
   const [tab, setTab] = useState<"id" | "letter" | "receipt">("id");
+  const [idMode, setIdMode] = useState<"templates" | "custom">("templates");
 
   // ID Card state — gallery vs edit mode
   const [idPick, setIdPick] = useState<IdLayout | null>(null);
