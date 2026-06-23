@@ -1342,11 +1342,54 @@ function IdCardFront({
     );
   }
 
+  if (layout === "portrait-vertical") {
+    // Vertical (portrait) ID card — taller than wide
+    const W = 220, H = 340;
+    return (
+      <div style={{
+        width: W, height: H, borderRadius: 12, overflow: "hidden",
+        background: cardBg, border: `1px solid ${theme.border}`,
+        boxShadow: `0 10px 32px ${theme.icon}44`, display: "flex", flexDirection: "column",
+        fontFamily: headFF,
+      }}>
+        <div style={{ background: theme.icon, color: theme.buttonText, padding: "10px 12px", textAlign: "center" }}>
+          <div style={{ fontWeight: 900, fontSize: 13, lineHeight: 1.2 }}>{orgName}</div>
+          <div style={{ fontFamily: subFF, fontSize: 9, fontStyle: "italic", opacity: 0.95, marginTop: 2 }}>{slogan}</div>
+          <div style={{ fontSize: 9, opacity: 0.9, marginTop: 2 }}>Reg: {reg}</div>
+        </div>
+        <div style={{ flex: 1, padding: 12, display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+          <div style={{
+            width: 110, height: 130, borderRadius: 8, background: "#e5e5e5",
+            border: `2px solid ${theme.icon}`, display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <User style={{ width: 44, height: 44, color: "#999" }} />
+          </div>
+          <div style={{ textAlign: "center", color: "#111" }}>
+            <div style={{ fontWeight: 800, fontSize: 14 }}>{member.name}</div>
+            <div style={{ fontSize: 11, color: "#555" }}>ID: {member.memberId}</div>
+          </div>
+          <div style={{ width: "100%", fontSize: 10, color: "#333", lineHeight: 1.5 }}>
+            <div><b>Father:</b> {member.fatherName}</div>
+            <div><b>Phone:</b> {member.phone}</div>
+            <div><b>Village:</b> {member.village}</div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
+              <span><b>Joined:</b> {member.joinDate}</span>
+              <span style={{ background: "#C8102E", color: "#fff", padding: "1px 6px", borderRadius: 3, fontWeight: 800 }}>🩸 {member.bloodGroup}</span>
+            </div>
+          </div>
+        </div>
+        <div style={{ background: "#138808", height: 18, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 9, fontWeight: 700 }}>
+          ● యాక్టివ్ సభ్యుడు ●
+        </div>
+      </div>
+    );
+  }
+
   // landscape-corporate (default)
   return (
     <div style={{
       width: cardW, height: cardH, borderRadius: 10, overflow: "hidden",
-      border: `1px solid ${theme.border}`, background: "#fff",
+      border: `1px solid ${theme.border}`, background: cardBg,
       boxShadow: `0 8px 28px ${theme.icon}33`, display: "flex", flexDirection: "column",
     }}>
       {header}
@@ -1356,8 +1399,8 @@ function IdCardFront({
 }
 
 function StandardBackPreview({
-  theme, memberName,
-}: { theme: Required<ThemeSettings>; memberName: string }) {
+  theme, memberName, cardBg = "#ffffff",
+}: { theme: Required<ThemeSettings>; memberName: string; cardBg?: string }) {
   const accent = theme.icon || "#FF9933";
   const green = "#138808";
   const navy = "#000080";
