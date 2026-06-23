@@ -474,7 +474,7 @@ function UploadButton({ label, sub, onFile }: { label: string; sub?: string; onF
     <>
       <input id={id} type="file" accept="image/*" className="hidden"
         onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f); e.currentTarget.value = ""; }} />
-      <Button asChild variant="outline" size="sm" className="w-full h-9 cursor-pointer" style={{ borderColor: BORDER, background: "#0a0a0a", color: HEAD }}>
+      <Button asChild variant="outline" size="sm" className="w-full h-9 cursor-pointer" style={{ borderColor: BORDER, background: FIELD_BG, color: HEAD }}>
         <label htmlFor={id}>
           <Upload className="h-3.5 w-3.5 mr-2" />
           <span className="text-xs">{label}</span>
@@ -522,7 +522,7 @@ function LabeledInput({ label, value, onChange }: { label: string; value: string
   return (
     <div className="space-y-1">
       <Label className="text-[10px]" style={{ color: SUB }}>{label}</Label>
-      <Input value={value} onChange={(e) => onChange(e.target.value)} className="h-8 text-xs" style={{ background: "#0a0a0a", borderColor: BORDER, color: HEAD }} />
+      <Input value={value} onChange={(e) => onChange(e.target.value)} className="h-8 text-xs" style={{ background: FIELD_BG, borderColor: BORDER, color: HEAD }} />
     </div>
   );
 }
