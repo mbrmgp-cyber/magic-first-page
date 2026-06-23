@@ -17,10 +17,7 @@ export const Route = createFileRoute("/_authenticated/org/accounts")({
   component: AccountsPage,
 });
 
-const CURRENCIES = [
-  { code: "INR", symbol: "₹" }, { code: "USD", symbol: "$" },
-  { code: "AED", symbol: "د.إ" }, { code: "KWD", symbol: "د.ك" }, { code: "MYR", symbol: "RM" },
-];
+import { useCurrency, CurrencySelector } from "@/lib/currency-context";
 
 type Lookup = Awaited<ReturnType<typeof lookupMemberByCode>>;
 
@@ -41,13 +38,12 @@ function AccountsPage() {
   const [interest, setInterest] = useState("");
   const [newLoan, setNewLoan] = useState("");
   const [newLoanRate, setNewLoanRate] = useState("2");
-  const [currency, setCurrency] = useState("INR");
+  const { symbol: sym } = useCurrency();
   const [info, setInfo] = useState<Extract<Lookup, { found: true }> | null>(null);
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState<{ balance: number; emailed_to: string | null; collected: number; disbursed: number } | null>(null);
   const [locked, setLocked] = useState(false);
 
-  const sym = CURRENCIES.find(c => c.code === currency)?.symbol ?? "₹";
   const fmtCur = (n: number) => `${sym} ${Number(n || 0).toLocaleString("en-IN")}`;
 
   async function onLogoPicked(e: React.ChangeEvent<HTMLInputElement>) {
