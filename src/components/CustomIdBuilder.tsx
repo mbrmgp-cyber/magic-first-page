@@ -178,7 +178,7 @@ export function CustomIdBuilder({ defaultName = "Member Name", defaultDesignatio
                 onPointerDown={(e) => startDrag("name", e)}
               >
                 <div className="w-full h-full grid place-items-center px-2" style={{
-                  fontWeight: 800, color: "#111", fontSize: Math.max(12, els.name.h * 0.55),
+                  fontWeight: 800, color: els.name.color || "#111", fontSize: els.name.fontSize || Math.max(12, els.name.h * 0.55),
                   whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                 }}>{name}</div>
               </DraggableBox>
@@ -192,7 +192,7 @@ export function CustomIdBuilder({ defaultName = "Member Name", defaultDesignatio
                 onPointerDown={(e) => startDrag("designation", e)}
               >
                 <div className="w-full h-full grid place-items-center px-2" style={{
-                  fontWeight: 500, color: "#374151", fontSize: Math.max(10, els.designation.h * 0.6),
+                  fontWeight: 500, color: els.designation.color || "#374151", fontSize: els.designation.fontSize || Math.max(10, els.designation.h * 0.6),
                   whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                 }}>{designation}</div>
               </DraggableBox>
