@@ -21,13 +21,19 @@ function AccountsHub() {
   return (
     <div className="min-h-screen bg-black text-white pb-16">
       <div className="max-w-2xl mx-auto p-4 space-y-5">
-        <header className="flex items-center gap-3">
-          <Link to="/org/dashboard" className="p-2 rounded-lg hover:bg-white/10">
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-          <div>
-            <h1 className="text-lg font-bold">అకౌంట్స్ బాక్స్</h1>
-            <p className="text-xs text-white/60">Accounts Hub — central navigation for all financial tasks</p>
+        <header className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <Link to="/org/dashboard" className="p-2 rounded-lg hover:bg-white/10">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+            <div>
+              <h1 className="text-lg font-bold">అకౌంట్స్ బాక్స్</h1>
+              <p className="text-xs text-white/60">Accounts Hub — central navigation for all financial tasks</p>
+            </div>
+          </div>
+          <div className="flex flex-col items-end gap-1">
+            <span className="text-[10px] uppercase tracking-wide text-white/50">Base Currency</span>
+            <CurrencySelector />
           </div>
         </header>
 
