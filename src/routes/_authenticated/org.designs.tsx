@@ -19,6 +19,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 import { resolveTheme, type ThemeSettings, DEFAULT_THEME } from "@/lib/theme";
+import { CustomIdBuilder } from "@/components/CustomIdBuilder";
+import { Wand2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/org/designs")({
   head: () => ({ meta: [{ title: "Designs Studio — MBR App" }] }),
