@@ -7,19 +7,19 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
-  ArrowLeft, IdCard, FileText, Sparkles, Check, Wand2, Lock, QrCode,
-  LayoutTemplate, Layers, Square, FileSignature, Download, User, Shield, BadgeCheck,
-  Printer, Pencil, FileX,
+  ArrowLeft, IdCard, FileText, Sparkles, Check, Lock, QrCode,
+  Square, Download, User, Shield,
+  Printer, Pencil, FileX, Receipt, Pencil as EditIcon, ChevronLeft,
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
-import { resolveTheme, type ThemeSettings } from "@/lib/theme";
+import { resolveTheme, type ThemeSettings, DEFAULT_THEME } from "@/lib/theme";
 
 export const Route = createFileRoute("/_authenticated/org/designs")({
-  head: () => ({ meta: [{ title: "ID Card & Letter Pad Templates — MBR App" }] }),
+  head: () => ({ meta: [{ title: "Designs Studio — MBR App" }] }),
   component: DesignsPage,
 });
 
@@ -36,6 +36,7 @@ type IdLayout =
   | "vertical-band";
 
 type LetterLayout = "standard-header" | "watermark-centered" | "left-sidebar";
+type ReceiptLayout = "classic" | "saffron-strip" | "minimal-line";
 
 type Tpl<T extends string> = {
   id: T | `coming-${number}`;
@@ -46,7 +47,7 @@ type Tpl<T extends string> = {
 };
 
 const ID_TEMPLATES: Tpl<IdLayout>[] = [
-  { id: "official-saffron",     en: "Official Saffron (Active)", te: "అధికారిక సాఫ్రాన్", featured: true },
+  { id: "official-saffron",     en: "Official Saffron", te: "అధికారిక సాఫ్రాన్", featured: true },
   { id: "landscape-corporate",  en: "Landscape Corporate",  te: "ల్యాండ్‌స్కేప్ కార్పొరేట్" },
   { id: "portrait-qr",          en: "Portrait with QR",     te: "QR తో పోర్ట్రెయిట్" },
   { id: "split-design",         en: "Split Design",         te: "స్ప్లిట్ డిజైన్" },
@@ -62,44 +63,105 @@ const LETTER_TEMPLATES: Tpl<LetterLayout>[] = [
   { id: "standard-header",     en: "Standard Header",     te: "స్టాండర్డ్ హెడర్" },
   { id: "watermark-centered",  en: "Watermark Centered",  te: "వాటర్‌మార్క్ సెంటర్" },
   { id: "left-sidebar",        en: "Left Sidebar Modern", te: "లెఫ్ట్ సైడ్‌బార్ మోడర్న్" },
-  { id: "coming-4", en: "Premium Letterhead", te: "త్వరలో", comingSoon: true },
 ];
+
+const RECEIPT_TEMPLATES: Tpl<ReceiptLayout>[] = [
+  { id: "classic",        en: "Classic Receipt",   te: "క్లాసిక్" },
+  { id: "saffron-strip",  en: "Saffron Strip",     te: "సాఫ్రాన్ స్ట్రిప్" },
+  { id: "minimal-line",   en: "Minimal Line",      te: "మినిమల్" },
+];
+
+export type MemberData = {
+  name: string;
+  memberId: string;
+  fatherName: string;
+  phone: string;
+  bloodGroup: string;
+  village: string;
+  mandal: string;
+  joinDate: string;
+};
+
+const DEFAULT_MEMBER: MemberData = {
+  name: "Sample Member",
+  memberId: "A/0001",
+  fatherName: "Father Name",
+  phone: "+91 90000 00000",
+  bloodGroup: "O+",
+  village: "Chitvel",
+  mandal: "Chitvel",
+  joinDate: "01/01/2024",
+};
+
+export type ReceiptData = {
+  receiptNo: string;
+  date: string;
+  payerName: string;
+  amount: string;
+  purpose: string;
+  mode: string;
+};
+
+const DEFAULT_RECEIPT: ReceiptData = {
+  receiptNo: "R-0001",
+  date: new Date().toISOString().slice(0, 10),
+  payerName: "",
+  amount: "",
+  purpose: "Donation",
+  mode: "Cash",
+};
+
+// Forced premium dark theme for this page (no neon blue, matches accounting modules)
+const PAGE_BG = "#0a0a0a";
+const PAGE_PANEL = "#111113";
+const PAGE_BORDER = "#27272a";
+const PAGE_HEAD = "#fafafa";
+const PAGE_SUB = "#a1a1aa";
 
 function DesignsPage() {
   const navigate = useNavigate();
   const fetchOrg = useServerFn(getMyOrg);
   const orgQ = useQuery({ queryKey: ["my-org"], queryFn: () => fetchOrg() });
   const org: any = orgQ.data?.org;
-  const theme = useMemo(() => resolveTheme(org), [org]);
 
-  const [idPick, setIdPick] = useState<IdLayout>("official-saffron");
+  // Resolve org theme then overlay our premium-dark page chrome so background is never neon.
+  const baseTheme = useMemo(() => resolveTheme(org), [org]);
+  const theme = useMemo(() => ({
+    ...baseTheme,
+    bg: PAGE_BG,
+    box: PAGE_PANEL,
+    border: PAGE_BORDER,
+    headColor: PAGE_HEAD,
+    smallColor: PAGE_SUB,
+    // keep accent (icon/buttonBg) from org theme; fall back to default orange.
+    icon: baseTheme.icon || DEFAULT_THEME.icon,
+    buttonBg: baseTheme.buttonBg || DEFAULT_THEME.buttonBg,
+    buttonText: baseTheme.buttonText || DEFAULT_THEME.buttonText,
+  }), [baseTheme]);
+
+  // Module tab
+  const [tab, setTab] = useState<"id" | "letter" | "receipt">("id");
+
+  // ID Card state — gallery vs edit mode
+  const [idPick, setIdPick] = useState<IdLayout | null>(null);
+  const [member, setMember] = useState<MemberData>(DEFAULT_MEMBER);
+
+  // Letter state
   const [letterPick, setLetterPick] = useState<LetterLayout>("standard-header");
-  const [generating, setGenerating] = useState(false);
-
-  // Letterhead dual-mode state
   const [letterMode, setLetterMode] = useState<"rich" | "blank">("rich");
   const [letterTo, setLetterTo] = useState("");
   const [letterSubject, setLetterSubject] = useState("");
   const [letterBody, setLetterBody] = useState("");
   const [letterDate, setLetterDate] = useState(new Date().toISOString().slice(0, 10));
 
+  // Receipt state
+  const [receiptPick, setReceiptPick] = useState<ReceiptLayout | null>(null);
+  const [receipt, setReceipt] = useState<ReceiptData>(DEFAULT_RECEIPT);
+
   const orgName = org?.name || "Chitvel Help Line Society";
   const orgSlogan = org?.slogan || "॥ మానవసేవే మాధవసేవ ॥";
   const orgReg = org?.gov_reg_number || "356/16";
   const orgAddress = org?.address || "";
-
-  async function applyAndGenerate() {
-    setGenerating(true);
-    try {
-      await new Promise((r) => setTimeout(r, 1400));
-      toast.success(
-        "ID Cards generated for all members / అన్ని సభ్యుల ID కార్డులు సిద్ధం",
-        { description: "Ready for PDF download using the selected layout." },
-      );
-    } finally {
-      setGenerating(false);
-    }
-  }
 
   function escapeHtml(s: string): string {
     return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
@@ -137,7 +199,6 @@ function DesignsPage() {
         </div>`;
       bodyWrap = "padding:8px 64px 48px; position:relative;";
     } else {
-      // standard-header
       header = `
         <div style="display:flex;align-items:center;gap:16px;padding:32px 56px 16px;border-bottom:4px solid ${accent};font-family:${headFF};">
           <div style="width:64px;height:64px;border-radius:50%;background:${accent};color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;">★</div>
@@ -189,201 +250,289 @@ function DesignsPage() {
   }
 
   return (
-    <div className="min-h-screen pb-16" style={{ background: theme.bg, color: theme.headColor }}>
-      <div className="max-w-5xl mx-auto p-4 space-y-6">
+    <div className="min-h-screen pb-16" style={{ background: PAGE_BG, color: PAGE_HEAD }}>
+      <div className="max-w-5xl mx-auto p-4 space-y-5">
         {/* Header */}
         <div className="flex items-center justify-between">
           <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/org/dashboard" })}
-            style={{ color: theme.smallColor }}>
-            <ArrowLeft className="h-4 w-4 mr-1" /> Back
+            style={{ color: PAGE_SUB }}>
+            <ArrowLeft className="h-4 w-4 mr-1" /> Dashboard
           </Button>
           <div className="text-center">
             <h1 className="text-base md:text-lg font-extrabold leading-tight"
-              style={{ color: theme.headColor, fontFamily: `${theme.headFont}, system-ui` }}>
-              ID Card &amp; Letter Pad Templates
+              style={{ color: PAGE_HEAD, fontFamily: `${theme.headFont}, system-ui` }}>
+              Designs Studio
             </h1>
-            <p className="text-[11px]" style={{ color: theme.smallColor }}>
-              టెంప్లేట్ సెలెక్టర్ — Live preview inherits your theme
+            <p className="text-[11px]" style={{ color: PAGE_SUB }}>
+              ID Card • Letter Pad • Receipt — Modular Templates
             </p>
           </div>
-          <div className="w-12" />
+          <div className="w-20" />
         </div>
 
-        {/* ID Card Gallery */}
-        <Section
-          icon={<IdCard className="h-5 w-5" style={{ color: theme.icon }} />}
-          title="ID Card Templates"
-          subtitle="ID కార్డ్ లేఅవుట్ గ్యాలరీ — 10 options"
-          theme={theme}
-        >
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-            {ID_TEMPLATES.map((tpl) => {
-              const active = tpl.id === idPick;
-              const locked = !!tpl.comingSoon;
-              return (
-                <button
-                  key={tpl.id}
-                  disabled={locked}
-                  onClick={() => !locked && setIdPick(tpl.id as IdLayout)}
-                  className="group relative rounded-xl overflow-hidden border transition text-left"
-                  style={{
-                    borderColor: active ? theme.icon : theme.border,
-                    background: theme.box,
-                    boxShadow: active ? `0 0 0 2px ${theme.icon}` : undefined,
-                    opacity: locked ? 0.55 : 1,
-                    cursor: locked ? "not-allowed" : "pointer",
-                  }}
-                >
-                  {tpl.featured && (
-                    <div className="absolute top-1 left-1 z-10 text-[8px] font-bold px-1.5 py-0.5 rounded"
-                      style={{ background: "#138808", color: "#fff", letterSpacing: 0.5 }}>
-                      ACTIVE
-                    </div>
-                  )}
-                  <div className="aspect-[1.586/1] w-full p-1.5" style={{ background: theme.bg }}>
-                    <IdThumb layout={(locked ? "official-saffron" : tpl.id) as IdLayout} theme={theme} />
-                  </div>
-                  <div className="px-2 py-1.5 flex items-center justify-between gap-1">
-                    <div className="min-w-0">
-                      <p className="text-[11px] font-semibold truncate" style={{ color: theme.headColor }}>{tpl.en}</p>
-                      <p className="text-[10px] truncate" style={{ color: theme.smallColor }}>{tpl.te}</p>
-                    </div>
-                    {locked ? (
-                      <Lock className="h-3 w-3 shrink-0" style={{ color: theme.smallColor }} />
-                    ) : active ? (
-                      <div className="rounded-full p-0.5" style={{ background: theme.icon }}>
-                        <Check className="h-3 w-3" style={{ color: theme.buttonText }} />
-                      </div>
-                    ) : null}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+        {/* Module tabs */}
+        <Tabs value={tab} onValueChange={(v) => setTab(v as any)} className="w-full">
+          <TabsList className="grid grid-cols-3 w-full h-11" style={{ background: PAGE_PANEL, border: `1px solid ${PAGE_BORDER}` }}>
+            <TabsTrigger value="id" className="gap-2 text-xs sm:text-sm">
+              <IdCard className="h-4 w-4" /> ID Card
+            </TabsTrigger>
+            <TabsTrigger value="letter" className="gap-2 text-xs sm:text-sm">
+              <FileText className="h-4 w-4" /> Letter Pad
+            </TabsTrigger>
+            <TabsTrigger value="receipt" className="gap-2 text-xs sm:text-sm">
+              <Receipt className="h-4 w-4" /> Receipt Card
+            </TabsTrigger>
+          </TabsList>
 
-          <LivePreview title="ID Card Live Preview" theme={theme}>
-            <IdCardPreview layout={idPick} theme={theme} orgName={orgName} slogan={orgSlogan} reg={orgReg} />
-          </LivePreview>
-        </Section>
-
-        {/* Letter Pad Gallery */}
-        <Section
-          icon={<FileText className="h-5 w-5" style={{ color: theme.icon }} />}
-          title="Letter Pad Templates"
-          subtitle="లెటర్ ప్యాడ్ టెంప్లేట్స్"
-          theme={theme}
-        >
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {LETTER_TEMPLATES.map((tpl) => {
-              const active = tpl.id === letterPick;
-              const locked = !!tpl.comingSoon;
-              return (
-                <button
-                  key={tpl.id}
-                  disabled={locked}
-                  onClick={() => !locked && setLetterPick(tpl.id as LetterLayout)}
-                  className="group relative rounded-xl overflow-hidden border transition text-left"
-                  style={{
-                    borderColor: active ? theme.icon : theme.border,
-                    background: theme.box,
-                    boxShadow: active ? `0 0 0 2px ${theme.icon}` : undefined,
-                    opacity: locked ? 0.55 : 1,
-                    cursor: locked ? "not-allowed" : "pointer",
-                  }}
-                >
-                  <div className="aspect-[0.77/1] w-full p-1.5" style={{ background: theme.bg }}>
-                    <LetterThumb layout={(locked ? "standard-header" : tpl.id) as LetterLayout} theme={theme} />
-                  </div>
-                  <div className="px-2 py-1.5 flex items-center justify-between gap-1">
-                    <div className="min-w-0">
-                      <p className="text-[11px] font-semibold truncate" style={{ color: theme.headColor }}>{tpl.en}</p>
-                      <p className="text-[10px] truncate" style={{ color: theme.smallColor }}>{tpl.te}</p>
-                    </div>
-                    {locked ? (
-                      <Lock className="h-3 w-3 shrink-0" style={{ color: theme.smallColor }} />
-                    ) : active ? (
-                      <div className="rounded-full p-0.5" style={{ background: theme.icon }}>
-                        <Check className="h-3 w-3" style={{ color: theme.buttonText }} />
-                      </div>
-                    ) : null}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Dual mode: Rich Text editor vs Blank Template */}
-          <Tabs value={letterMode} onValueChange={(v) => setLetterMode(v as "rich" | "blank")} className="w-full">
-            <TabsList className="grid grid-cols-2 w-full" style={{ background: theme.bg }}>
-              <TabsTrigger value="rich" className="gap-2"><Pencil className="h-3.5 w-3.5" /> Rich Text Letter / టైప్ చేయండి</TabsTrigger>
-              <TabsTrigger value="blank" className="gap-2"><FileX className="h-3.5 w-3.5" /> Blank Template / ఖాళీ</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="rich" className="space-y-3 mt-3">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label className="text-[11px]" style={{ color: theme.smallColor }}>To / గ్రహీత</Label>
-                  <Textarea rows={2} value={letterTo} onChange={(e) => setLetterTo(e.target.value)}
-                    placeholder="Recipient name & address" />
+          {/* ============= MODULE 1: ID CARD ============= */}
+          <TabsContent value="id" className="mt-4 space-y-4">
+            {idPick === null ? (
+              <Section
+                icon={<IdCard className="h-5 w-5" style={{ color: theme.icon }} />}
+                title="Choose an ID Card Template"
+                subtitle="ID కార్డ్ టెంప్లేట్‌ను ఎంచుకోండి — క్లిక్ చేస్తే ఎడిట్ మోడ్ తెరుచుకుంటుంది"
+                theme={theme}
+              >
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                  {ID_TEMPLATES.map((tpl) => {
+                    const locked = !!tpl.comingSoon;
+                    return (
+                      <button
+                        key={tpl.id}
+                        disabled={locked}
+                        onClick={() => !locked && setIdPick(tpl.id as IdLayout)}
+                        className="group relative rounded-xl overflow-hidden border transition text-left hover:scale-[1.02]"
+                        style={{
+                          borderColor: PAGE_BORDER,
+                          background: PAGE_PANEL,
+                          opacity: locked ? 0.55 : 1,
+                          cursor: locked ? "not-allowed" : "pointer",
+                        }}
+                      >
+                        {tpl.featured && (
+                          <div className="absolute top-1 left-1 z-10 text-[8px] font-bold px-1.5 py-0.5 rounded"
+                            style={{ background: "#138808", color: "#fff", letterSpacing: 0.5 }}>
+                            POPULAR
+                          </div>
+                        )}
+                        <div className="aspect-[1.586/1] w-full p-1.5" style={{ background: PAGE_BG }}>
+                          <IdThumb layout={(locked ? "official-saffron" : tpl.id) as IdLayout} theme={theme} />
+                        </div>
+                        <div className="px-2 py-1.5 flex items-center justify-between gap-1">
+                          <div className="min-w-0">
+                            <p className="text-[11px] font-semibold truncate" style={{ color: PAGE_HEAD }}>{tpl.en}</p>
+                            <p className="text-[10px] truncate" style={{ color: PAGE_SUB }}>{tpl.te}</p>
+                          </div>
+                          {locked ? (
+                            <Lock className="h-3 w-3 shrink-0" style={{ color: PAGE_SUB }} />
+                          ) : (
+                            <EditIcon className="h-3 w-3 shrink-0" style={{ color: theme.icon }} />
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
-                <div className="space-y-1">
-                  <Label className="text-[11px]" style={{ color: theme.smallColor }}>Date / తేదీ</Label>
-                  <Input type="date" value={letterDate} onChange={(e) => setLetterDate(e.target.value)} />
+              </Section>
+            ) : (
+              <Section
+                icon={<EditIcon className="h-5 w-5" style={{ color: theme.icon }} />}
+                title="Edit Mode — Live Preview"
+                subtitle="ఎడిట్ చేసుకునే అవకాశం — వివరాలు మార్చండి, ప్రివ్యూ లైవ్‌గా అప్‌డేట్ అవుతుంది"
+                theme={theme}
+                right={
+                  <Button size="sm" variant="ghost" onClick={() => setIdPick(null)} style={{ color: PAGE_SUB }}>
+                    <ChevronLeft className="h-4 w-4 mr-1" /> Back to gallery
+                  </Button>
+                }
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Form */}
+                  <div className="space-y-3 rounded-lg p-3 border" style={{ background: PAGE_BG, borderColor: PAGE_BORDER }}>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Field label="Member Name / పేరు" value={member.name} onChange={(v) => setMember({ ...member, name: v })} />
+                      <Field label="ID Number" value={member.memberId} onChange={(v) => setMember({ ...member, memberId: v })} />
+                      <Field label="Father's Name / తండ్రి" value={member.fatherName} onChange={(v) => setMember({ ...member, fatherName: v })} />
+                      <Field label="Phone / ఫోన్" value={member.phone} onChange={(v) => setMember({ ...member, phone: v })} />
+                      <Field label="Blood Group" value={member.bloodGroup} onChange={(v) => setMember({ ...member, bloodGroup: v })} />
+                      <Field label="Village / గ్రామం" value={member.village} onChange={(v) => setMember({ ...member, village: v })} />
+                      <Field label="Mandal / మండలం" value={member.mandal} onChange={(v) => setMember({ ...member, mandal: v })} />
+                      <Field label="Join Date" value={member.joinDate} onChange={(v) => setMember({ ...member, joinDate: v })} />
+                    </div>
+                    <Button
+                      onClick={() => toast.success("ID Card ready — printable PDF available shortly")}
+                      className="w-full font-semibold h-10"
+                      style={{ background: theme.buttonBg, color: theme.buttonText }}
+                    >
+                      <Download className="h-4 w-4 mr-2" /> Save & Download PDF
+                    </Button>
+                  </div>
+
+                  {/* Live Preview */}
+                  <div className="rounded-lg p-3 border flex items-center justify-center" style={{ background: PAGE_BG, borderColor: PAGE_BORDER, minHeight: 260 }}>
+                    <IdCardPreview layout={idPick} theme={theme} orgName={orgName} slogan={orgSlogan} reg={orgReg} member={member} />
+                  </div>
                 </div>
-              </div>
-              <div className="space-y-1">
-                <Label className="text-[11px]" style={{ color: theme.smallColor }}>Subject / విషయం</Label>
-                <Input value={letterSubject} onChange={(e) => setLetterSubject(e.target.value)}
-                  placeholder="Regarding..." />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-[11px]" style={{ color: theme.smallColor }}>Body / లేఖ విషయం</Label>
-                <Textarea rows={8} value={letterBody} onChange={(e) => setLetterBody(e.target.value)}
-                  placeholder="Type your letter body here..." />
-              </div>
-            </TabsContent>
+              </Section>
+            )}
+          </TabsContent>
 
-            <TabsContent value="blank" className="mt-3">
-              <div className="rounded-lg border p-3 text-[12px]"
-                style={{ background: theme.bg, borderColor: theme.border, color: theme.smallColor }}>
-                Blank template — header &amp; footer only. Download as PDF, print, and write content by hand.
+          {/* ============= MODULE 2: LETTER PAD ============= */}
+          <TabsContent value="letter" className="mt-4 space-y-4">
+            <Section
+              icon={<FileText className="h-5 w-5" style={{ color: theme.icon }} />}
+              title="Letter Pad Templates"
+              subtitle="లెటర్ ప్యాడ్ టెంప్లేట్స్ — Rich Text మోడ్ లేదా Blank మోడ్"
+              theme={theme}
+            >
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {LETTER_TEMPLATES.map((tpl) => {
+                  const active = tpl.id === letterPick;
+                  return (
+                    <button
+                      key={tpl.id}
+                      onClick={() => setLetterPick(tpl.id as LetterLayout)}
+                      className="group relative rounded-xl overflow-hidden border transition text-left hover:scale-[1.02]"
+                      style={{
+                        borderColor: active ? theme.icon : PAGE_BORDER,
+                        background: PAGE_PANEL,
+                        boxShadow: active ? `0 0 0 2px ${theme.icon}` : undefined,
+                      }}
+                    >
+                      <div className="aspect-[0.77/1] w-full p-1.5" style={{ background: PAGE_BG }}>
+                        <LetterThumb layout={tpl.id as LetterLayout} theme={theme} />
+                      </div>
+                      <div className="px-2 py-1.5 flex items-center justify-between gap-1">
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-semibold truncate" style={{ color: PAGE_HEAD }}>{tpl.en}</p>
+                          <p className="text-[10px] truncate" style={{ color: PAGE_SUB }}>{tpl.te}</p>
+                        </div>
+                        {active && (
+                          <div className="rounded-full p-0.5" style={{ background: theme.icon }}>
+                            <Check className="h-3 w-3" style={{ color: theme.buttonText }} />
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
-            </TabsContent>
-          </Tabs>
 
-          <LivePreview title="Letter Pad Live Preview" theme={theme}>
-            <LetterPreview layout={letterPick} theme={theme} orgName={orgName} slogan={orgSlogan} reg={orgReg} />
-          </LivePreview>
+              <Tabs value={letterMode} onValueChange={(v) => setLetterMode(v as "rich" | "blank")} className="w-full">
+                <TabsList className="grid grid-cols-2 w-full" style={{ background: PAGE_BG, border: `1px solid ${PAGE_BORDER}` }}>
+                  <TabsTrigger value="rich" className="gap-2"><Pencil className="h-3.5 w-3.5" /> Rich Text / టైప్</TabsTrigger>
+                  <TabsTrigger value="blank" className="gap-2"><FileX className="h-3.5 w-3.5" /> Blank / ఖాళీ</TabsTrigger>
+                </TabsList>
 
-          <Button onClick={printLetterhead} className="w-full font-semibold h-11"
-            style={{ background: theme.buttonBg, color: theme.buttonText }}>
-            <Printer className="h-4 w-4 mr-2" />
-            {letterMode === "rich" ? "Preview & Download Letter PDF" : "Download Blank Letterhead PDF"}
-          </Button>
-        </Section>
+                <TabsContent value="rich" className="space-y-3 mt-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-[11px]" style={{ color: PAGE_SUB }}>To / గ్రహీత</Label>
+                      <Textarea rows={2} value={letterTo} onChange={(e) => setLetterTo(e.target.value)} placeholder="Recipient name & address" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[11px]" style={{ color: PAGE_SUB }}>Date / తేదీ</Label>
+                      <Input type="date" value={letterDate} onChange={(e) => setLetterDate(e.target.value)} />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-[11px]" style={{ color: PAGE_SUB }}>Subject / విషయం</Label>
+                    <Input value={letterSubject} onChange={(e) => setLetterSubject(e.target.value)} placeholder="Regarding..." />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-[11px]" style={{ color: PAGE_SUB }}>Body / లేఖ విషయం</Label>
+                    <Textarea rows={8} value={letterBody} onChange={(e) => setLetterBody(e.target.value)} placeholder="Type your letter body here..." />
+                  </div>
+                </TabsContent>
 
-        {/* Generate */}
-        <Button
-          disabled={generating}
-          onClick={applyAndGenerate}
-          className="w-full font-semibold h-12"
-          style={{
-            background: theme.buttonBg,
-            color: theme.buttonText,
-            boxShadow: `0 0 28px ${theme.buttonBg}66`,
-          }}
-        >
-          {generating ? (
-            <>
-              <Wand2 className="h-4 w-4 mr-2 animate-pulse" /> Generating for all members…
-            </>
-          ) : (
-            <>
-              <Download className="h-4 w-4 mr-2" />
-              Apply &amp; Generate for All Members / అన్ని సభ్యులకు తయారు చేయండి
-            </>
-          )}
-        </Button>
+                <TabsContent value="blank" className="mt-3">
+                  <div className="rounded-lg border p-3 text-[12px]" style={{ background: PAGE_BG, borderColor: PAGE_BORDER, color: PAGE_SUB }}>
+                    Blank template — header &amp; footer only. Download as PDF, print, and write content by hand.
+                  </div>
+                </TabsContent>
+              </Tabs>
+
+              <LivePreview title="Letter Pad Live Preview" theme={theme}>
+                <LetterPreview layout={letterPick} theme={theme} orgName={orgName} slogan={orgSlogan} reg={orgReg} />
+              </LivePreview>
+
+              <Button onClick={printLetterhead} className="w-full font-semibold h-11"
+                style={{ background: theme.buttonBg, color: theme.buttonText }}>
+                <Printer className="h-4 w-4 mr-2" />
+                {letterMode === "rich" ? "Preview & Download Letter PDF" : "Download Blank Letterhead PDF"}
+              </Button>
+            </Section>
+          </TabsContent>
+
+          {/* ============= MODULE 3: RECEIPT CARD ============= */}
+          <TabsContent value="receipt" className="mt-4 space-y-4">
+            {receiptPick === null ? (
+              <Section
+                icon={<Receipt className="h-5 w-5" style={{ color: theme.icon }} />}
+                title="Choose a Receipt Template"
+                subtitle="రసీదు టెంప్లేట్‌ను ఎంచుకోండి"
+                theme={theme}
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {RECEIPT_TEMPLATES.map((tpl) => (
+                    <button
+                      key={tpl.id}
+                      onClick={() => setReceiptPick(tpl.id as ReceiptLayout)}
+                      className="group relative rounded-xl overflow-hidden border transition text-left hover:scale-[1.02]"
+                      style={{ borderColor: PAGE_BORDER, background: PAGE_PANEL, cursor: "pointer" }}
+                    >
+                      <div className="aspect-[1.6/1] w-full p-2" style={{ background: PAGE_BG }}>
+                        <ReceiptThumb layout={tpl.id as ReceiptLayout} accent={theme.icon} />
+                      </div>
+                      <div className="px-2 py-1.5 flex items-center justify-between">
+                        <div>
+                          <p className="text-[11px] font-semibold" style={{ color: PAGE_HEAD }}>{tpl.en}</p>
+                          <p className="text-[10px]" style={{ color: PAGE_SUB }}>{tpl.te}</p>
+                        </div>
+                        <EditIcon className="h-3 w-3" style={{ color: theme.icon }} />
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </Section>
+            ) : (
+              <Section
+                icon={<EditIcon className="h-5 w-5" style={{ color: theme.icon }} />}
+                title="Edit Mode — Receipt"
+                subtitle="వివరాలు నింపండి — ప్రివ్యూ లైవ్"
+                theme={theme}
+                right={
+                  <Button size="sm" variant="ghost" onClick={() => setReceiptPick(null)} style={{ color: PAGE_SUB }}>
+                    <ChevronLeft className="h-4 w-4 mr-1" /> Back to gallery
+                  </Button>
+                }
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-3 rounded-lg p-3 border" style={{ background: PAGE_BG, borderColor: PAGE_BORDER }}>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Field label="Receipt No" value={receipt.receiptNo} onChange={(v) => setReceipt({ ...receipt, receiptNo: v })} />
+                      <Field label="Date" value={receipt.date} onChange={(v) => setReceipt({ ...receipt, date: v })} type="date" />
+                      <Field label="Payer Name / పేరు" value={receipt.payerName} onChange={(v) => setReceipt({ ...receipt, payerName: v })} />
+                      <Field label="Amount (₹)" value={receipt.amount} onChange={(v) => setReceipt({ ...receipt, amount: v })} />
+                      <Field label="Purpose" value={receipt.purpose} onChange={(v) => setReceipt({ ...receipt, purpose: v })} />
+                      <Field label="Mode" value={receipt.mode} onChange={(v) => setReceipt({ ...receipt, mode: v })} />
+                    </div>
+                    <Button
+                      onClick={() => toast.success("Receipt ready — printable PDF available shortly")}
+                      className="w-full font-semibold h-10"
+                      style={{ background: theme.buttonBg, color: theme.buttonText }}
+                    >
+                      <Download className="h-4 w-4 mr-2" /> Save & Download Receipt
+                    </Button>
+                  </div>
+                  <div className="rounded-lg p-3 border flex items-center justify-center" style={{ background: PAGE_BG, borderColor: PAGE_BORDER, minHeight: 260 }}>
+                    <ReceiptPreview layout={receiptPick} theme={theme} orgName={orgName} slogan={orgSlogan} reg={orgReg} data={receipt} />
+                  </div>
+                </div>
+              </Section>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
@@ -392,19 +541,22 @@ function DesignsPage() {
 /* ---------------- Layout helpers ---------------- */
 
 function Section({
-  icon, title, subtitle, theme, children,
+  icon, title, subtitle, theme, children, right,
 }: {
   icon: React.ReactNode; title: string; subtitle: string;
-  theme: Required<ThemeSettings>; children: React.ReactNode;
+  theme: Required<ThemeSettings>; children: React.ReactNode; right?: React.ReactNode;
 }) {
   return (
-    <Card className="p-4 space-y-4 border" style={{ background: theme.box, borderColor: theme.border }}>
-      <div className="flex items-center gap-2">
-        {icon}
-        <div>
-          <h2 className="text-sm md:text-base font-bold" style={{ color: theme.headColor }}>{title}</h2>
-          <p className="text-[11px]" style={{ color: theme.smallColor }}>{subtitle}</p>
+    <Card className="p-4 space-y-4 border" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
+      <div className="flex items-center gap-2 justify-between">
+        <div className="flex items-center gap-2">
+          {icon}
+          <div>
+            <h2 className="text-sm md:text-base font-bold" style={{ color: PAGE_HEAD }}>{title}</h2>
+            <p className="text-[11px]" style={{ color: PAGE_SUB }}>{subtitle}</p>
+          </div>
         </div>
+        {right}
       </div>
       {children}
     </Card>
@@ -415,10 +567,10 @@ function LivePreview({
   title, theme, children,
 }: { title: string; theme: Required<ThemeSettings>; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl p-3 border" style={{ background: theme.bg, borderColor: theme.border }}>
+    <div className="rounded-xl p-3 border" style={{ background: PAGE_BG, borderColor: PAGE_BORDER }}>
       <div className="flex items-center gap-2 mb-2">
         <Sparkles className="h-3.5 w-3.5" style={{ color: theme.icon }} />
-        <p className="text-[11px] uppercase tracking-wide font-semibold" style={{ color: theme.headColor }}>
+        <p className="text-[11px] uppercase tracking-wide font-semibold" style={{ color: PAGE_HEAD }}>
           {title} / లైవ్ ప్రివ్యూ
         </p>
       </div>
@@ -427,10 +579,23 @@ function LivePreview({
   );
 }
 
+function Field({ label, value, onChange, type = "text" }: {
+  label: string; value: string; onChange: (v: string) => void; type?: string;
+}) {
+  return (
+    <div className="space-y-1">
+      <Label className="text-[10px]" style={{ color: PAGE_SUB }}>{label}</Label>
+      <Input type={type} value={value} onChange={(e) => onChange(e.target.value)}
+        className="h-9 text-[12px]"
+        style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER, color: PAGE_HEAD }} />
+    </div>
+  );
+}
+
 /* ---------------- Thumbnails ---------------- */
 
 function IdThumb({ layout, theme }: { layout: IdLayout; theme: Required<ThemeSettings> }) {
-  const c = theme.icon, b = theme.box, br = theme.border, bg = "#ffffff";
+  const c = theme.icon, br = theme.border, bg = "#ffffff";
   const common: React.CSSProperties = {
     width: "100%", height: "100%", borderRadius: 6,
     background: bg, border: `1px solid ${br}`, overflow: "hidden",
@@ -590,7 +755,7 @@ function IdThumb({ layout, theme }: { layout: IdLayout; theme: Required<ThemeSet
       </div>
     );
   }
-  // official-saffron — miniature of the real ID card
+  // official-saffron
   return (
     <div style={{ ...common, flexDirection: "column", border: `1px solid #000080` }}>
       <div style={{ background: "#FF9933", height: 18, display: "flex", alignItems: "center", padding: "0 4px", gap: 3 }}>
@@ -611,14 +776,9 @@ function IdThumb({ layout, theme }: { layout: IdLayout; theme: Required<ThemeSet
           <div style={{ height: 2, background: "#888", width: "85%" }} />
           <div style={{ height: 2, background: "#888", width: "70%" }} />
           <div style={{ height: 2, background: "#888", width: "60%" }} />
-          <div style={{ marginTop: "auto", height: 2, background: "#000080", width: "55%", alignSelf: "flex-end" }} />
         </div>
       </div>
-      <div style={{ background: "#138808", height: 10, display: "flex", alignItems: "center", padding: "0 3px", gap: 3 }}>
-        <div style={{ width: 6, height: 6, background: "#fff", borderRadius: 1 }} />
-        <div style={{ flex: 1, height: 2, background: "#fff", opacity: 0.85 }} />
-        <div style={{ width: 6, height: 6, background: "#000", borderRadius: "50%" }} />
-      </div>
+      <div style={{ background: "#138808", height: 10 }} />
     </div>
   );
 }
@@ -661,7 +821,6 @@ function LetterThumb({ layout, theme }: { layout: LetterLayout; theme: Required<
       </div>
     );
   }
-  // standard-header
   return (
     <div style={common}>
       <div style={{ display: "flex", alignItems: "center", gap: 4, borderBottom: `2px solid ${c}`, paddingBottom: 4 }}>
@@ -680,46 +839,79 @@ function LetterThumb({ layout, theme }: { layout: LetterLayout; theme: Required<
   );
 }
 
+function ReceiptThumb({ layout, accent }: { layout: ReceiptLayout; accent: string }) {
+  const common: React.CSSProperties = {
+    width: "100%", height: "100%", borderRadius: 4, background: "#fff",
+    overflow: "hidden", padding: 5, display: "flex", flexDirection: "column", gap: 3,
+  };
+  if (layout === "saffron-strip") {
+    return (
+      <div style={{ ...common, padding: 0 }}>
+        <div style={{ background: accent, height: 14, padding: "2px 6px" }}>
+          <div style={{ height: 3, width: "60%", background: "#fff" }} />
+        </div>
+        <div style={{ padding: 6, display: "flex", flexDirection: "column", gap: 3 }}>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} style={{ height: 2, background: "#ddd", width: `${85 - i * 10}%` }} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+  if (layout === "minimal-line") {
+    return (
+      <div style={common}>
+        <div style={{ height: 3, background: "#111", width: "60%" }} />
+        <div style={{ height: 1, background: "#111" }} />
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} style={{ height: 2, background: "#ddd", width: `${80 - i * 8}%` }} />
+        ))}
+      </div>
+    );
+  }
+  // classic
+  return (
+    <div style={{ ...common, border: `2px solid ${accent}` }}>
+      <div style={{ textAlign: "center", height: 3, background: accent, width: "70%", margin: "0 auto" }} />
+      <div style={{ height: 2, background: "#888", width: "40%", margin: "2px auto" }} />
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} style={{ height: 2, background: "#ddd", width: `${85 - i * 10}%` }} />
+      ))}
+    </div>
+  );
+}
+
 /* ---------------- Live Previews ---------------- */
 
 function IdCardPreview({
-  layout, theme, orgName, slogan, reg,
+  layout, theme, orgName, slogan, reg, member,
 }: {
   layout: IdLayout; theme: Required<ThemeSettings>;
-  orgName: string; slogan: string; reg: string;
+  orgName: string; slogan: string; reg: string; member: MemberData;
 }) {
-  // Official Saffron already renders Front+Back internally
   if (layout === "official-saffron") {
-    return <OfficialSaffronPreview theme={theme} orgName={orgName} slogan={slogan} reg={reg} />;
+    return <OfficialSaffronPreview theme={theme} orgName={orgName} slogan={slogan} reg={reg} member={member} />;
   }
-
-  const front = (
-    <IdCardFront layout={layout} theme={theme} orgName={orgName} slogan={slogan} reg={reg} />
-  );
-
+  const front = <IdCardFront layout={layout} theme={theme} orgName={orgName} slogan={slogan} reg={reg} member={member} />;
   return (
     <div style={{ display: "flex", flexWrap: "wrap", gap: 14, justifyContent: "center" }}>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: theme.smallColor, letterSpacing: 1 }}>
-          FRONT / ముందు
-        </div>
+        <div style={{ fontSize: 10, fontWeight: 700, color: PAGE_SUB, letterSpacing: 1 }}>FRONT / ముందు</div>
         {front}
       </div>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: theme.smallColor, letterSpacing: 1 }}>
-          BACK / వెనుక
-        </div>
-        <StandardBackPreview theme={theme} memberName="Sample Member" />
+        <div style={{ fontSize: 10, fontWeight: 700, color: PAGE_SUB, letterSpacing: 1 }}>BACK / వెనుక</div>
+        <StandardBackPreview theme={theme} memberName={member.name} />
       </div>
     </div>
   );
 }
 
 function IdCardFront({
-  layout, theme, orgName, slogan, reg,
+  layout, theme, orgName, slogan, reg, member,
 }: {
   layout: IdLayout; theme: Required<ThemeSettings>;
-  orgName: string; slogan: string; reg: string;
+  orgName: string; slogan: string; reg: string; member: MemberData;
 }) {
   const align = theme.headAlign;
   const headFF = `${theme.headFont}, "Noto Sans Telugu", system-ui, sans-serif`;
@@ -738,15 +930,9 @@ function IdCardFront({
       </div>
       <div style={{ flex: 1, minWidth: 0, textAlign: align }}>
         <div style={{ fontFamily: headFF, fontWeight: 900, fontSize: 13, color: theme.buttonText,
-          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-          {orgName}
-        </div>
-        <div style={{ fontFamily: subFF, fontSize: 9, fontStyle: "italic", color: theme.subColor }}>
-          {slogan}
-        </div>
-        <div style={{ fontSize: theme.smallSize - 2, color: theme.buttonText, opacity: 0.85 }}>
-          Reg: {reg}
-        </div>
+          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{orgName}</div>
+        <div style={{ fontFamily: subFF, fontSize: 9, fontStyle: "italic", color: theme.subColor }}>{slogan}</div>
+        <div style={{ fontSize: theme.smallSize - 2, color: theme.buttonText, opacity: 0.85 }}>Reg: {reg}</div>
       </div>
     </div>
   );
@@ -758,10 +944,10 @@ function IdCardFront({
         <Square className="h-6 w-6" style={{ color: "#999" }} />
       </div>
       <div style={{ flex: 1, fontFamily: headFF }}>
-        <div style={{ fontWeight: 800, color: "#111", fontSize: 13 }}>Sample Member</div>
-        <div style={{ color: "#555", fontSize: theme.smallSize }}>ID: A/0001</div>
-        <div style={{ color: "#555", fontSize: theme.smallSize }}>Phone: +91 90000 00000</div>
-        <div style={{ color: "#555", fontSize: theme.smallSize }}>Village: Chitvel</div>
+        <div style={{ fontWeight: 800, color: "#111", fontSize: 13 }}>{member.name}</div>
+        <div style={{ color: "#555", fontSize: theme.smallSize }}>ID: {member.memberId}</div>
+        <div style={{ color: "#555", fontSize: theme.smallSize }}>Phone: {member.phone}</div>
+        <div style={{ color: "#555", fontSize: theme.smallSize }}>Village: {member.village}</div>
       </div>
     </div>
   );
@@ -779,8 +965,8 @@ function IdCardFront({
             display: "flex", alignItems: "center", justifyContent: "center", border: `1px solid ${theme.border}` }}>
             <Square className="h-7 w-7" style={{ color: "#999" }} />
           </div>
-          <div style={{ fontFamily: headFF, fontWeight: 800, color: "#111", fontSize: 13 }}>Sample Member</div>
-          <div style={{ color: "#555", fontSize: theme.smallSize }}>ID: A/0001</div>
+          <div style={{ fontFamily: headFF, fontWeight: 800, color: "#111", fontSize: 13 }}>{member.name}</div>
+          <div style={{ color: "#555", fontSize: theme.smallSize }}>ID: {member.memberId}</div>
           <div style={{ marginTop: "auto", alignSelf: "center", padding: 4, background: "#fff", border: `1px solid ${theme.border}`, borderRadius: 4 }}>
             <QrCode className="h-10 w-10" style={{ color: "#111" }} />
           </div>
@@ -802,20 +988,16 @@ function IdCardFront({
             display: "flex", alignItems: "center", justifyContent: "center" }}>
             <Sparkles className="h-5 w-5" style={{ color: theme.icon }} />
           </div>
-          <div style={{ fontFamily: headFF, color: theme.buttonText, fontSize: 10, fontWeight: 800, textAlign: "center" }}>
-            {orgName}
-          </div>
-          <div style={{ fontFamily: subFF, color: theme.subColor, fontSize: 8, fontStyle: "italic", textAlign: "center" }}>
-            {slogan}
-          </div>
+          <div style={{ fontFamily: headFF, color: theme.buttonText, fontSize: 10, fontWeight: 800, textAlign: "center" }}>{orgName}</div>
+          <div style={{ fontFamily: subFF, color: theme.subColor, fontSize: 8, fontStyle: "italic", textAlign: "center" }}>{slogan}</div>
         </div>
         <div style={{ flex: 1, padding: 12, display: "flex", flexDirection: "column", gap: 6 }}>
           <div style={{ width: 60, height: 72, borderRadius: 6, background: "#e5e5e5",
             border: `1px solid ${theme.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <Square className="h-6 w-6" style={{ color: "#999" }} />
           </div>
-          <div style={{ fontFamily: headFF, fontWeight: 800, color: "#111", fontSize: 12 }}>Sample Member</div>
-          <div style={{ color: "#555", fontSize: theme.smallSize }}>ID: A/0001</div>
+          <div style={{ fontFamily: headFF, fontWeight: 800, color: "#111", fontSize: 12 }}>{member.name}</div>
+          <div style={{ color: "#555", fontSize: theme.smallSize }}>ID: {member.memberId}</div>
           <div style={{ color: "#555", fontSize: theme.smallSize }}>Reg: {reg}</div>
         </div>
       </div>
@@ -830,23 +1012,18 @@ function IdCardFront({
       }}>
         <div style={{
           width: "100%", height: "100%", border: `2px double ${theme.icon}`,
-          background: "#fff", borderRadius: 6, padding: 8,
-          display: "flex", flexDirection: "column",
+          background: "#fff", borderRadius: 6, padding: 8, display: "flex", flexDirection: "column",
         }}>
-          <div style={{ textAlign: "center", fontFamily: headFF, fontWeight: 900, color: theme.icon, fontSize: 14 }}>
-            {orgName}
-          </div>
-          <div style={{ textAlign: "center", fontFamily: subFF, fontSize: 9, fontStyle: "italic", color: theme.subColor }}>
-            {slogan}
-          </div>
+          <div style={{ textAlign: "center", fontFamily: headFF, fontWeight: 900, color: theme.icon, fontSize: 14 }}>{orgName}</div>
+          <div style={{ textAlign: "center", fontFamily: subFF, fontSize: 9, fontStyle: "italic", color: theme.subColor }}>{slogan}</div>
           <div style={{ flex: 1, display: "flex", gap: 10, padding: 8 }}>
             <div style={{ width: 62, height: 78, borderRadius: 4, background: "#e5e5e5",
               border: `1px solid ${theme.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Square className="h-6 w-6" style={{ color: "#999" }} />
             </div>
             <div style={{ flex: 1, fontFamily: headFF }}>
-              <div style={{ fontWeight: 800, color: "#111", fontSize: 12 }}>Sample Member</div>
-              <div style={{ color: "#555", fontSize: theme.smallSize }}>ID: A/0001</div>
+              <div style={{ fontWeight: 800, color: "#111", fontSize: 12 }}>{member.name}</div>
+              <div style={{ color: "#555", fontSize: theme.smallSize }}>ID: {member.memberId}</div>
               <div style={{ color: "#555", fontSize: theme.smallSize }}>Reg: {reg}</div>
             </div>
           </div>
@@ -872,9 +1049,9 @@ function IdCardFront({
             <User style={{ width: 28, height: 28, color: theme.icon }} />
           </div>
           <div style={{ flex: 1, fontSize: 10 }}>
-            <div style={{ fontWeight: 800, fontSize: 13 }}>Sample Member</div>
-            <div style={{ opacity: 0.8 }}>ID: A/0001</div>
-            <div style={{ opacity: 0.8 }}>Phone: +91 90000 00000</div>
+            <div style={{ fontWeight: 800, fontSize: 13 }}>{member.name}</div>
+            <div style={{ opacity: 0.8 }}>ID: {member.memberId}</div>
+            <div style={{ opacity: 0.8 }}>Phone: {member.phone}</div>
             <div style={{ opacity: 0.8 }}>Reg: {reg}</div>
           </div>
         </div>
@@ -902,8 +1079,8 @@ function IdCardFront({
               <User style={{ width: 26, height: 26, color: gold }} />
             </div>
             <div style={{ flex: 1, fontSize: 10, color: "#3b2f00" }}>
-              <div style={{ fontWeight: 800, fontSize: 13 }}>Sample Member</div>
-              <div>ID: A/0001</div>
+              <div style={{ fontWeight: 800, fontSize: 13 }}>{member.name}</div>
+              <div>ID: {member.memberId}</div>
               <div>Reg: {reg}</div>
             </div>
           </div>
@@ -924,15 +1101,14 @@ function IdCardFront({
           <User style={{ width: 44, height: 44, color: "#999" }} />
         </div>
         <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-          <div style={{ background: theme.icon, color: theme.buttonText,
-            padding: "6px 10px", textAlign: align }}>
+          <div style={{ background: theme.icon, color: theme.buttonText, padding: "6px 10px", textAlign: align }}>
             <div style={{ fontFamily: headFF, fontWeight: 900, fontSize: 12 }}>{orgName}</div>
             <div style={{ fontFamily: subFF, fontSize: 8, fontStyle: "italic", opacity: 0.9 }}>{slogan}</div>
           </div>
           <div style={{ flex: 1, padding: 10, fontSize: 10 }}>
-            <div style={{ fontWeight: 800, fontSize: 13, color: "#111" }}>Sample Member</div>
-            <div style={{ color: "#555" }}>ID: A/0001</div>
-            <div style={{ color: "#555" }}>Phone: +91 90000 00000</div>
+            <div style={{ fontWeight: 800, fontSize: 13, color: "#111" }}>{member.name}</div>
+            <div style={{ color: "#555" }}>ID: {member.memberId}</div>
+            <div style={{ color: "#555" }}>Phone: {member.phone}</div>
             <div style={{ color: "#555" }}>Reg: {reg}</div>
           </div>
         </div>
@@ -957,8 +1133,8 @@ function IdCardFront({
             <User style={{ width: 26, height: 26, color: "#111" }} />
           </div>
           <div style={{ flex: 1, fontSize: 10, color: "#111" }}>
-            <div style={{ fontWeight: 800, fontSize: 13 }}>Sample Member</div>
-            <div>ID: A/0001</div>
+            <div style={{ fontWeight: 800, fontSize: 13 }}>{member.name}</div>
+            <div>ID: {member.memberId}</div>
             <div>Reg: {reg}</div>
           </div>
         </div>
@@ -986,9 +1162,9 @@ function IdCardFront({
               <User style={{ width: 26, height: 26, color: "#999" }} />
             </div>
             <div style={{ flex: 1, fontSize: 10, color: "#222" }}>
-              <div style={{ fontWeight: 800, fontSize: 13 }}>Sample Member</div>
-              <div>ID: A/0001</div>
-              <div>Phone: +91 90000 00000</div>
+              <div style={{ fontWeight: 800, fontSize: 13 }}>{member.name}</div>
+              <div>ID: {member.memberId}</div>
+              <div>Phone: {member.phone}</div>
             </div>
           </div>
         </div>
@@ -1009,7 +1185,6 @@ function IdCardFront({
   );
 }
 
-/* Universal back layout shared by ALL ID card templates */
 function StandardBackPreview({
   theme, memberName,
 }: { theme: Required<ThemeSettings>; memberName: string }) {
@@ -1022,8 +1197,7 @@ function StandardBackPreview({
     <div style={{
       width: W, height: H, background: "#fff", color: "#111",
       borderRadius: 8, overflow: "hidden", border: `1px solid ${navy}`,
-      boxShadow: `0 8px 28px ${accent}33`,
-      fontFamily: headFF, display: "flex", flexDirection: "column",
+      boxShadow: `0 8px 28px ${accent}33`, fontFamily: headFF, display: "flex", flexDirection: "column",
     }}>
       <div style={{ display: "flex", height: 6 }}>
         <div style={{ flex: 1, background: accent }} />
@@ -1056,16 +1230,12 @@ function StandardBackPreview({
               display: "flex", alignItems: "center", justifyContent: "center" }}>
               <QrCode style={{ width: "100%", height: "100%", color: "#111" }} />
             </div>
-            <div style={{ fontSize: 6.5, fontWeight: 700, color: navy, marginTop: 2, lineHeight: 1.05, maxWidth: 48 }}>
-              కొత్త సభ్యుల నమోదు
-            </div>
           </div>
         </div>
       </div>
     </div>
   );
 }
-
 
 function LetterPreview({
   layout, theme, orgName, slogan, reg,
@@ -1118,15 +1288,9 @@ function LetterPreview({
             display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto" }}>
             <Sparkles className="h-6 w-6" style={{ color: theme.icon }} />
           </div>
-          <div style={{ fontFamily: headFF, fontSize: 9, color: theme.buttonText, fontWeight: 700, textAlign: "center" }}>
-            {orgName}
-          </div>
-          <div style={{ fontFamily: subFF, fontSize: 8, color: theme.buttonText, opacity: 0.85, fontStyle: "italic", textAlign: "center" }}>
-            {slogan}
-          </div>
-          <div style={{ fontSize: theme.smallSize - 2, color: theme.buttonText, opacity: 0.85, textAlign: "center" }}>
-            Reg: {reg}
-          </div>
+          <div style={{ fontFamily: headFF, fontSize: 9, color: theme.buttonText, fontWeight: 700, textAlign: "center" }}>{orgName}</div>
+          <div style={{ fontFamily: subFF, fontSize: 8, color: theme.buttonText, opacity: 0.85, fontStyle: "italic", textAlign: "center" }}>{slogan}</div>
+          <div style={{ fontSize: theme.smallSize - 2, color: theme.buttonText, opacity: 0.85, textAlign: "center" }}>Reg: {reg}</div>
         </div>
         <div style={{ flex: 1, padding: 14, background: "#fff" }}>
           <div style={{ fontFamily: headFF, fontWeight: 800, color: "#111", fontSize: 13 }}>Letter Heading</div>
@@ -1136,7 +1300,6 @@ function LetterPreview({
     );
   }
 
-  // standard-header
   return (
     <div style={{
       width: W, height: H, background: "#fff", borderRadius: 10, padding: 18,
@@ -1162,13 +1325,88 @@ function LetterPreview({
   );
 }
 
-/* ---------------- Official Saffron (mirrors real MemberIdCard) ---------------- */
+/* ---------------- Receipt Preview ---------------- */
+
+function ReceiptPreview({
+  layout, theme, orgName, slogan, reg, data,
+}: {
+  layout: ReceiptLayout; theme: Required<ThemeSettings>;
+  orgName: string; slogan: string; reg: string; data: ReceiptData;
+}) {
+  const headFF = `${theme.headFont}, "Noto Sans Telugu", system-ui, sans-serif`;
+  const accent = theme.icon;
+  const W = 360, H = 220;
+
+  const rows = (
+    <div style={{ fontSize: 11, color: "#222", lineHeight: 1.7 }}>
+      <div><b>Receipt No:</b> {data.receiptNo} &nbsp;&nbsp; <b>Date:</b> {data.date}</div>
+      <div><b>Received From:</b> {data.payerName || "—"}</div>
+      <div><b>Amount:</b> ₹ {data.amount || "0.00"}</div>
+      <div><b>Purpose:</b> {data.purpose}</div>
+      <div><b>Mode:</b> {data.mode}</div>
+    </div>
+  );
+
+  if (layout === "minimal-line") {
+    return (
+      <div style={{
+        width: W, minHeight: H, background: "#fff", borderRadius: 8, padding: 16,
+        border: `1px solid ${theme.border}`, fontFamily: headFF,
+        boxShadow: `0 8px 28px ${accent}22`,
+      }}>
+        <div style={{ fontWeight: 900, color: "#111", fontSize: 16 }}>{orgName}</div>
+        <div style={{ borderTop: "1px solid #111", marginTop: 6, paddingTop: 8 }}>{rows}</div>
+        <div style={{ marginTop: 14, textAlign: "right", fontSize: 10, color: "#555" }}>Authorized Signature</div>
+      </div>
+    );
+  }
+
+  if (layout === "saffron-strip") {
+    return (
+      <div style={{
+        width: W, minHeight: H, background: "#fff", borderRadius: 8, overflow: "hidden",
+        border: `1px solid ${theme.border}`, fontFamily: headFF,
+        boxShadow: `0 8px 28px ${accent}22`,
+      }}>
+        <div style={{ background: accent, color: "#fff", padding: "8px 14px" }}>
+          <div style={{ fontWeight: 900, fontSize: 15 }}>{orgName}</div>
+          <div style={{ fontSize: 10, opacity: 0.9 }}>{slogan} · Reg: {reg}</div>
+        </div>
+        <div style={{ padding: 14 }}>
+          <div style={{ fontWeight: 800, color: accent, marginBottom: 6 }}>OFFICIAL RECEIPT</div>
+          {rows}
+        </div>
+      </div>
+    );
+  }
+
+  // classic
+  return (
+    <div style={{
+      width: W, minHeight: H, background: "#fff", borderRadius: 8, padding: 14,
+      border: `2px solid ${accent}`, fontFamily: headFF, boxShadow: `0 8px 28px ${accent}22`,
+    }}>
+      <div style={{ textAlign: "center", borderBottom: `1px solid ${accent}`, paddingBottom: 6, marginBottom: 8 }}>
+        <div style={{ fontWeight: 900, color: accent, fontSize: 16 }}>{orgName}</div>
+        <div style={{ fontSize: 10, color: "#666" }}>{slogan} · Reg: {reg}</div>
+        <div style={{ fontWeight: 800, color: "#111", marginTop: 4 }}>RECEIPT / రసీదు</div>
+      </div>
+      {rows}
+      <div style={{ marginTop: 14, display: "flex", justifyContent: "space-between", fontSize: 10, color: "#555" }}>
+        <span>Payer Signature</span>
+        <span>Authorized Signature</span>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- Official Saffron live preview ---------------- */
 
 function OfficialSaffronPreview({
-  theme, orgName, slogan, reg,
+  theme, orgName, slogan, reg, member,
 }: {
   theme: Required<ThemeSettings>;
-  orgName: string; slogan: string; reg: string;
+  orgName: string; slogan: string; reg: string; member: MemberData;
 }) {
   const accent = theme.icon || "#FF9933";
   const green = "#138808";
@@ -1176,18 +1414,14 @@ function OfficialSaffronPreview({
   const headFF = `${theme.headFont}, "Noto Sans Telugu", system-ui, sans-serif`;
   const subFF = `${theme.subFont}, "Noto Sans Telugu", system-ui, sans-serif`;
   const align = theme.headAlign;
-
-  // Card dimensions (landscape, 1.586:1)
   const W = 340, H = 214;
 
   const Front = (
     <div style={{
       width: W, height: H, background: "#fff", color: "#111",
       borderRadius: 8, overflow: "hidden", border: `1px solid ${navy}`,
-      boxShadow: `0 8px 28px ${accent}33`,
-      fontFamily: headFF, display: "flex", flexDirection: "column",
+      boxShadow: `0 8px 28px ${accent}33`, fontFamily: headFF, display: "flex", flexDirection: "column",
     }}>
-      {/* Saffron header */}
       <div style={{
         background: accent, padding: "6px 10px", display: "flex", alignItems: "center",
         gap: 8, height: 52, flexDirection: align === "right" ? "row-reverse" : "row",
@@ -1199,23 +1433,13 @@ function OfficialSaffronPreview({
           <Shield className="h-5 w-5" style={{ color: accent }} />
         </div>
         <div style={{ flex: 1, minWidth: 0, lineHeight: 1.25, textAlign: align }}>
-          <div style={{ fontWeight: 900, fontSize: 12, color: navy, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-            {orgName}
-          </div>
-          <div style={{ fontFamily: subFF, fontSize: 8, fontStyle: "italic", color: navy, fontWeight: 700 }}>
-            {slogan}
-          </div>
+          <div style={{ fontWeight: 900, fontSize: 12, color: navy, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{orgName}</div>
+          <div style={{ fontFamily: subFF, fontSize: 8, fontStyle: "italic", color: navy, fontWeight: 700 }}>{slogan}</div>
           <div style={{ fontSize: 7, color: navy, opacity: 0.85 }}>Reg: {reg}</div>
         </div>
-        <div style={{
-          fontSize: 8, background: navy, color: "#fff",
-          padding: "2px 6px", borderRadius: 3, fontWeight: 800, flexShrink: 0,
-        }}>
-          సభ్యుడు
-        </div>
+        <div style={{ fontSize: 8, background: navy, color: "#fff", padding: "2px 6px", borderRadius: 3, fontWeight: 800, flexShrink: 0 }}>సభ్యుడు</div>
       </div>
 
-      {/* Body */}
       <div style={{ flex: 1, display: "flex", gap: 8, padding: "6px 10px 4px", position: "relative" }}>
         <div style={{ width: 68, flexShrink: 0, display: "flex", flexDirection: "column" }}>
           <div style={{
@@ -1227,39 +1451,25 @@ function OfficialSaffronPreview({
           <div style={{
             marginTop: 4, fontSize: 7, fontWeight: 800, color: "#fff",
             background: green, textAlign: "center", padding: "2px 3px", borderRadius: 2, lineHeight: 1.1,
-          }}>
-            ● యాక్టివ్ సభ్యుడు
-          </div>
+          }}>● యాక్టివ్ సభ్యుడు</div>
         </div>
 
         <div style={{ flex: 1, minWidth: 0, fontSize: 9, lineHeight: 1.3, color: "#222", display: "flex", flexDirection: "column" }}>
-          <div style={{
-            fontSize: 8, color: "#fff", background: navy, fontWeight: 700,
-            padding: "1px 5px", borderRadius: 2, display: "inline-block", alignSelf: "flex-start",
-          }}>
-            ID: A/0001
+          <div style={{ fontSize: 8, color: "#fff", background: navy, fontWeight: 700, padding: "1px 5px", borderRadius: 2, display: "inline-block", alignSelf: "flex-start" }}>
+            ID: {member.memberId}
           </div>
-          <div style={{ fontSize: 12, fontWeight: 800, marginTop: 2, color: navy, lineHeight: 1.2 }}>Sample Member</div>
-          <div><span style={{ color: "#666" }}>తండ్రి:</span> <span style={{ fontWeight: 600 }}>Father Name</span></div>
-          <div><span style={{ color: "#666" }}>గ్రామం:</span> <span style={{ fontWeight: 600 }}>Chitvel</span></div>
-          <div><span style={{ color: "#666" }}>మండలం:</span> <span style={{ fontWeight: 600 }}>Chitvel</span></div>
-          <div><span style={{ color: "#666" }}>ఫోన్:</span> <span style={{ fontWeight: 600 }}>+91 90000 00000</span></div>
+          <div style={{ fontSize: 12, fontWeight: 800, marginTop: 2, color: navy, lineHeight: 1.2 }}>{member.name}</div>
+          <div><span style={{ color: "#666" }}>తండ్రి:</span> <span style={{ fontWeight: 600 }}>{member.fatherName}</span></div>
+          <div><span style={{ color: "#666" }}>గ్రామం:</span> <span style={{ fontWeight: 600 }}>{member.village}</span></div>
+          <div><span style={{ color: "#666" }}>మండలం:</span> <span style={{ fontWeight: 600 }}>{member.mandal}</span></div>
+          <div><span style={{ color: "#666" }}>ఫోన్:</span> <span style={{ fontWeight: 600 }}>{member.phone}</span></div>
           <div style={{ display: "flex", gap: 5, marginTop: 2, alignItems: "center" }}>
-            <div style={{ fontSize: 8 }}><span style={{ color: "#666" }}>చేరిన: </span><span style={{ fontWeight: 600 }}>01/01/2024</span></div>
-            <div style={{ fontSize: 8, background: "#C8102E", color: "#fff", padding: "1px 5px", borderRadius: 2, fontWeight: 800 }}>🩸 O+</div>
-          </div>
-          <div style={{ marginTop: "auto", textAlign: "right" }}>
-            <div style={{ height: 14, fontFamily: '"Brush Script MT", cursive', fontSize: 13, color: navy, lineHeight: 1 }}>
-              M. Bhaskar Reddy
-            </div>
-            <div style={{ borderTop: `1px solid ${navy}`, marginTop: 1, paddingTop: 1, fontSize: 7, color: navy, fontWeight: 700, lineHeight: 1 }}>
-              అధ్యక్షుడు
-            </div>
+            <div style={{ fontSize: 8 }}><span style={{ color: "#666" }}>చేరిన: </span><span style={{ fontWeight: 600 }}>{member.joinDate}</span></div>
+            <div style={{ fontSize: 8, background: "#C8102E", color: "#fff", padding: "1px 5px", borderRadius: 2, fontWeight: 800 }}>🩸 {member.bloodGroup}</div>
           </div>
         </div>
       </div>
 
-      {/* Green footer */}
       <div style={{
         background: green, height: 34, padding: "2px 8px",
         display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6,
@@ -1269,9 +1479,7 @@ function OfficialSaffronPreview({
           <QrCode style={{ width: 22, height: 22, color: "#111" }} />
         </div>
         <div style={{ flex: 1, minWidth: 0, color: "#fff", textAlign: "center", lineHeight: 1.2 }}>
-          <div style={{ fontSize: 7.5, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-            ✉ chitvelhelplinesociety@gmail.com
-          </div>
+          <div style={{ fontSize: 7.5, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>✉ chitvelhelplinesociety@gmail.com</div>
           <div style={{ fontSize: 7.5, fontWeight: 700 }}>☎ +91 90595 94989</div>
         </div>
         <div style={{
@@ -1284,63 +1492,15 @@ function OfficialSaffronPreview({
     </div>
   );
 
-  const Back = (
-    <div style={{
-      width: W, height: H, background: "#fff", color: "#111",
-      borderRadius: 8, overflow: "hidden", border: `1px solid ${navy}`,
-      boxShadow: `0 8px 28px ${accent}33`,
-      fontFamily: headFF, display: "flex", flexDirection: "column",
-    }}>
-      {/* Tricolor stripe */}
-      <div style={{ display: "flex", height: 6 }}>
-        <div style={{ flex: 1, background: accent }} />
-        <div style={{ flex: 1, background: "#fff" }} />
-        <div style={{ flex: 1, background: green }} />
-      </div>
-      <div style={{ flex: 1, padding: "6px 10px", display: "flex", flexDirection: "column", gap: 4 }}>
-        <div>
-          <div style={{ fontSize: 9, fontWeight: 800, color: navy, borderBottom: `1px solid ${accent}`, paddingBottom: 1, marginBottom: 2 }}>
-            ముఖ్య ఉద్దేశాలు
-          </div>
-          <ol style={{ margin: 0, paddingLeft: 12, fontSize: 7.5, lineHeight: 1.25, color: "#222" }}>
-            <li>చిట్వేల్ మండల ప్రజలకు మౌలిక సదుపాయాల ఏర్పాటు కై ప్రయత్నం.</li>
-            <li>కుల, మత, ప్రాంత, వర్గ, రాజకీయాలకు అతీతంగా దేశభక్తిని పెంచడం.</li>
-            <li>అత్యవసర పరిస్థితుల్లో ప్రభుత్వ అధికారులకు సహాయం అందించడం.</li>
-          </ol>
-        </div>
-        <div style={{ display: "flex", gap: 6, alignItems: "flex-start", marginTop: 2 }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 9, fontWeight: 800, color: green, borderBottom: `1px solid ${green}`, paddingBottom: 1, marginBottom: 2 }}>
-              సభ్యుని ప్రమాణం
-            </div>
-            <div style={{ fontSize: 7.5, lineHeight: 1.25, color: "#222", fontStyle: "italic" }}>
-              "నేను నమ్మిన దైవం సాక్షిగా ఈ సంఘంలోని నిబంధనలకు అనుగుణంగా నడుచుకుంటానని ప్రమాణం చేస్తున్నాను." — <span style={{ fontWeight: 700, fontStyle: "normal", color: navy }}>Sample Member</span>
-            </div>
-            <div style={{ fontSize: 8, fontWeight: 800, color: "#C8102E", marginTop: 2 }}>జై హింద్ 🇮🇳</div>
-          </div>
-          <div style={{ flexShrink: 0, textAlign: "center" }}>
-            <div style={{ height: 42, width: 42, border: `1px solid ${navy}`, padding: 2, background: "#fff",
-              display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <QrCode style={{ width: "100%", height: "100%", color: "#111" }} />
-            </div>
-            <div style={{ fontSize: 6.5, fontWeight: 700, color: navy, marginTop: 2, lineHeight: 1.05, maxWidth: 48 }}>
-              కొత్త సభ్యుల నమోదు
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
     <div style={{ display: "flex", flexWrap: "wrap", gap: 14, justifyContent: "center" }}>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: theme.smallColor, letterSpacing: 1 }}>FRONT / ముందు</div>
+        <div style={{ fontSize: 10, fontWeight: 700, color: PAGE_SUB, letterSpacing: 1 }}>FRONT / ముందు</div>
         {Front}
       </div>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: theme.smallColor, letterSpacing: 1 }}>BACK / వెనుక</div>
-        {Back}
+        <div style={{ fontSize: 10, fontWeight: 700, color: PAGE_SUB, letterSpacing: 1 }}>BACK / వెనుక</div>
+        <StandardBackPreview theme={theme} memberName={member.name} />
       </div>
     </div>
   );
