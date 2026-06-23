@@ -376,9 +376,12 @@ export type Database = {
       org_expenses: {
         Row: {
           amount: number
+          base_amount: number | null
           created_at: string
           created_by: string | null
+          currency: string
           entry_date: string
+          exchange_rate: number
           expense_type: Database["public"]["Enums"]["expense_type"]
           id: string
           org_id: string
@@ -386,12 +389,16 @@ export type Database = {
           remarks: string | null
           updated_at: string
           wallet: Database["public"]["Enums"]["wallet_type"]
+          wallet_account_id: string | null
         }
         Insert: {
           amount: number
+          base_amount?: number | null
           created_at?: string
           created_by?: string | null
+          currency?: string
           entry_date?: string
+          exchange_rate?: number
           expense_type: Database["public"]["Enums"]["expense_type"]
           id?: string
           org_id: string
@@ -399,12 +406,16 @@ export type Database = {
           remarks?: string | null
           updated_at?: string
           wallet?: Database["public"]["Enums"]["wallet_type"]
+          wallet_account_id?: string | null
         }
         Update: {
           amount?: number
+          base_amount?: number | null
           created_at?: string
           created_by?: string | null
+          currency?: string
           entry_date?: string
+          exchange_rate?: number
           expense_type?: Database["public"]["Enums"]["expense_type"]
           id?: string
           org_id?: string
@@ -412,6 +423,7 @@ export type Database = {
           remarks?: string | null
           updated_at?: string
           wallet?: Database["public"]["Enums"]["wallet_type"]
+          wallet_account_id?: string | null
         }
         Relationships: [
           {
@@ -421,14 +433,24 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "org_expenses_wallet_account_id_fkey"
+            columns: ["wallet_account_id"]
+            isOneToOne: false
+            referencedRelation: "wallet_accounts"
+            referencedColumns: ["id"]
+          },
         ]
       }
       org_income: {
         Row: {
           amount: number
+          base_amount: number | null
           created_at: string
           created_by: string | null
+          currency: string
           entry_date: string
+          exchange_rate: number
           id: string
           income_type: Database["public"]["Enums"]["income_type"]
           org_id: string
@@ -439,12 +461,16 @@ export type Database = {
           remarks: string | null
           updated_at: string
           wallet: Database["public"]["Enums"]["wallet_type"]
+          wallet_account_id: string | null
         }
         Insert: {
           amount: number
+          base_amount?: number | null
           created_at?: string
           created_by?: string | null
+          currency?: string
           entry_date?: string
+          exchange_rate?: number
           id?: string
           income_type: Database["public"]["Enums"]["income_type"]
           org_id: string
@@ -455,12 +481,16 @@ export type Database = {
           remarks?: string | null
           updated_at?: string
           wallet?: Database["public"]["Enums"]["wallet_type"]
+          wallet_account_id?: string | null
         }
         Update: {
           amount?: number
+          base_amount?: number | null
           created_at?: string
           created_by?: string | null
+          currency?: string
           entry_date?: string
+          exchange_rate?: number
           id?: string
           income_type?: Database["public"]["Enums"]["income_type"]
           org_id?: string
@@ -471,6 +501,7 @@ export type Database = {
           remarks?: string | null
           updated_at?: string
           wallet?: Database["public"]["Enums"]["wallet_type"]
+          wallet_account_id?: string | null
         }
         Relationships: [
           {
@@ -478,6 +509,13 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_income_wallet_account_id_fkey"
+            columns: ["wallet_account_id"]
+            isOneToOne: false
+            referencedRelation: "wallet_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -689,6 +727,47 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      wallet_accounts: {
+        Row: {
+          created_at: string
+          currency: string
+          id: string
+          is_active: boolean
+          name: string
+          org_id: string
+          updated_at: string
+          wallet_type: Database["public"]["Enums"]["wallet_type"]
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          org_id: string
+          updated_at?: string
+          wallet_type?: Database["public"]["Enums"]["wallet_type"]
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          org_id?: string
+          updated_at?: string
+          wallet_type?: Database["public"]["Enums"]["wallet_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_accounts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
