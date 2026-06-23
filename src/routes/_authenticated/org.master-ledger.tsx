@@ -80,10 +80,7 @@ function MasterLedgerPage() {
               <p className="text-xs text-muted-foreground">Live aggregated entries from Committee Accounts</p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <select value={currency} onChange={(e) => setCurrency(e.target.value)}
-                className="border rounded px-2 py-1.5 text-sm bg-white">
-                {CURRENCIES.map(c => <option key={c.code} value={c.code}>{c.symbol} {c.code}</option>)}
-              </select>
+              <CurrencySelector variant="light" />
               <Button variant="outline" size="sm" onClick={() => q.refetch()}>
                 <RefreshCw className={`h-4 w-4 ${q.isFetching ? "animate-spin" : ""}`} />
               </Button>
