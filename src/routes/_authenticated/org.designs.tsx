@@ -19,6 +19,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 import { resolveTheme, type ThemeSettings, DEFAULT_THEME } from "@/lib/theme";
+import { CustomIdBuilder } from "@/components/CustomIdBuilder";
+import { Wand2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/org/designs")({
   head: () => ({ meta: [{ title: "Designs Studio — MBR App" }] }),
@@ -158,6 +160,7 @@ function DesignsPage() {
 
   // Module tab
   const [tab, setTab] = useState<"id" | "letter" | "receipt">("id");
+  const [idMode, setIdMode] = useState<"templates" | "custom">("templates");
 
   // ID Card state — gallery vs edit mode
   const [idPick, setIdPick] = useState<IdLayout | null>(null);
@@ -318,7 +321,40 @@ function DesignsPage() {
 
           {/* ============= MODULE 1: ID CARD ============= */}
           <TabsContent value="id" className="mt-4 space-y-4">
-            {idPick === null ? (
+            {/* ID Mode toggle: Ready-made templates vs Custom builder */}
+            <div className="grid grid-cols-2 gap-2 rounded-lg p-1" style={{ background: PAGE_PANEL, border: `1px solid ${PAGE_BORDER}` }}>
+              <button
+                onClick={() => setIdMode("templates")}
+                className="h-9 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition"
+                style={{
+                  background: idMode === "templates" ? theme.icon : "transparent",
+                  color: idMode === "templates" ? "#fff" : PAGE_SUB,
+                }}
+              >
+                <IdCard className="h-3.5 w-3.5" /> Ready-Made Templates
+              </button>
+              <button
+                onClick={() => setIdMode("custom")}
+                className="h-9 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition"
+                style={{
+                  background: idMode === "custom" ? theme.icon : "transparent",
+                  color: idMode === "custom" ? "#fff" : PAGE_SUB,
+                }}
+              >
+                <Wand2 className="h-3.5 w-3.5" /> Custom Builder
+              </button>
+            </div>
+
+            {idMode === "custom" ? (
+              <Section
+                icon={<Wand2 className="h-5 w-5" style={{ color: theme.icon }} />}
+                title="Custom ID Card Builder"
+                subtitle="మీ సొంత డిజైన్ అప్‌లోడ్ చేసి, ఫోటో / పేరు / QR drag-and-drop చేయండి"
+                theme={theme}
+              >
+                <CustomIdBuilder defaultName={member.name} defaultDesignation="Member" />
+              </Section>
+            ) : idPick === null ? (
               <Section
                 icon={<IdCard className="h-5 w-5" style={{ color: theme.icon }} />}
                 title="Choose an ID Card Template"
