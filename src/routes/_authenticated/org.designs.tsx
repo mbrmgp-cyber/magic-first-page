@@ -640,7 +640,86 @@ function Field({ label, value, onChange, type = "text" }: {
   );
 }
 
-/* ---------------- Thumbnails ---------------- */
+/* ---------------- Design Customization Panel ---------------- */
+
+function StyleControls({
+  cardBg, setCardBg, accent, setAccent, font, setFont,
+}: {
+  cardBg: string; setCardBg: (v: string) => void;
+  accent: string; setAccent: (v: string) => void;
+  font: string; setFont: (v: string) => void;
+}) {
+  return (
+    <div className="rounded-lg p-3 border space-y-3" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
+      <div className="flex items-center gap-2">
+        <Palette className="h-3.5 w-3.5" style={{ color: accent }} />
+        <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: PAGE_HEAD }}>
+          Design Customization / డిజైన్
+        </p>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <div className="space-y-1">
+          <Label className="text-[10px]" style={{ color: PAGE_SUB }}>Card Background</Label>
+          <div className="flex items-center gap-2">
+            <input type="color" value={cardBg} onChange={(e) => setCardBg(e.target.value)}
+              className="h-9 w-12 rounded border cursor-pointer" style={{ borderColor: PAGE_BORDER, background: "transparent" }} />
+            <Input value={cardBg} onChange={(e) => setCardBg(e.target.value)}
+              className="h-9 text-[11px] flex-1"
+              style={{ background: PAGE_BG, borderColor: PAGE_BORDER, color: PAGE_HEAD }} />
+          </div>
+        </div>
+        <div className="space-y-1">
+          <Label className="text-[10px]" style={{ color: PAGE_SUB }}>Accent / Strip Color</Label>
+          <div className="flex items-center gap-2">
+            <input type="color" value={accent} onChange={(e) => setAccent(e.target.value)}
+              className="h-9 w-12 rounded border cursor-pointer" style={{ borderColor: PAGE_BORDER, background: "transparent" }} />
+            <Input value={accent} onChange={(e) => setAccent(e.target.value)}
+              className="h-9 text-[11px] flex-1"
+              style={{ background: PAGE_BG, borderColor: PAGE_BORDER, color: PAGE_HEAD }} />
+          </div>
+        </div>
+      </div>
+      <div className="space-y-1">
+        <Label className="text-[10px] flex items-center gap-1" style={{ color: PAGE_SUB }}>
+          <TypeIcon className="h-3 w-3" /> Font Style / ఫాంట్
+        </Label>
+        <Select value={font} onValueChange={setFont}>
+          <SelectTrigger className="h-9 text-[12px]" style={{ background: PAGE_BG, borderColor: PAGE_BORDER, color: PAGE_HEAD }}>
+            <SelectValue placeholder="Choose font" />
+          </SelectTrigger>
+          <SelectContent>
+            {FONT_OPTIONS.map((f) => (
+              <SelectItem key={f.v} value={f.v} style={{ fontFamily: f.v }}>{f.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  );
+}
+
+function LogoUploader({ logoUrl, onChange }: { logoUrl: string; onChange: (url: string) => void }) {
+  return (
+    <div className="rounded-lg p-3 border flex items-center gap-3" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
+      <div style={{ width: 44, height: 44, borderRadius: 6, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", padding: 4, border: `1px solid ${PAGE_BORDER}` }}>
+        {logoUrl ? <img src={logoUrl} alt="Logo" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} /> : null}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-[11px] font-semibold" style={{ color: PAGE_HEAD }}>Society Logo / లోగో</p>
+        <p className="text-[10px]" style={{ color: PAGE_SUB }}>Shown in the receipt header</p>
+      </div>
+      <label className="inline-flex items-center gap-1 px-3 h-8 rounded-md text-[11px] cursor-pointer border"
+        style={{ background: PAGE_BG, borderColor: PAGE_BORDER, color: PAGE_HEAD }}>
+        <Upload className="h-3 w-3" /> Upload
+        <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+          const f = e.target.files?.[0]; if (!f) return;
+          const url = URL.createObjectURL(f); onChange(url);
+        }} />
+      </label>
+    </div>
+  );
+}
+
 
 function IdThumb({ layout, theme }: { layout: IdLayout; theme: Required<ThemeSettings> }) {
   const c = theme.icon, br = theme.border, bg = "#ffffff";
