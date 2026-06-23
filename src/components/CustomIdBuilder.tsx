@@ -437,9 +437,24 @@ function DraggableBox({
 
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-lg border p-3 space-y-2" style={{ background: PANEL, borderColor: BORDER }}>
-      <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: HEAD }}>{title}</p>
-      {children}
+    <div
+      className="rounded-xl border overflow-hidden"
+      style={{
+        background: PANEL,
+        borderColor: BORDER,
+        boxShadow: "0 1px 0 rgba(255,255,255,0.04) inset, 0 6px 18px rgba(0,0,0,0.35)",
+      }}
+    >
+      <div
+        className="flex items-center gap-2 px-3 py-2 border-b"
+        style={{ background: PANEL_HEAD_BG, borderColor: BORDER }}
+      >
+        <span className="h-3 w-1 rounded-sm" style={{ background: ACCENT }} />
+        <p className="text-[11px] font-bold uppercase tracking-[0.12em]" style={{ color: HEAD }}>
+          {title}
+        </p>
+      </div>
+      <div className="p-3 space-y-2">{children}</div>
     </div>
   );
 }
