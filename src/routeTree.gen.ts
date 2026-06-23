@@ -30,9 +30,6 @@ import { Route as AuthenticatedOrgCommitteeRouteImport } from './routes/_authent
 import { Route as AuthenticatedOrgChatRouteImport } from './routes/_authenticated/org.chat'
 import { Route as AuthenticatedOrgCashflowRouteImport } from './routes/_authenticated/org.cashflow'
 import { Route as AuthenticatedOrgAccountsRouteImport } from './routes/_authenticated/org.accounts'
-import { Route as AuthenticatedOrgIncomeRouteImport } from './routes/_authenticated/org.income'
-import { Route as AuthenticatedOrgExpensesRouteImport } from './routes/_authenticated/org.expenses'
-import { Route as AuthenticatedOrgCashflowRouteImport } from './routes/_authenticated/org.cashflow'
 import { Route as AuthenticatedMemberPendingRouteImport } from './routes/_authenticated/member.pending'
 import { Route as AuthenticatedMemberLoanRequestRouteImport } from './routes/_authenticated/member.loan-request'
 import { Route as AuthenticatedMemberLedgerRouteImport } from './routes/_authenticated/member.ledger'
@@ -148,6 +145,24 @@ const AuthenticatedOrgAccountsRoute =
   AuthenticatedOrgAccountsRouteImport.update({
     id: '/org/accounts',
     path: '/org/accounts',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOrgIncomeRoute =
+  AuthenticatedOrgIncomeRouteImport.update({
+    id: '/org/income',
+    path: '/org/income',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOrgExpensesRoute =
+  AuthenticatedOrgExpensesRouteImport.update({
+    id: '/org/expenses',
+    path: '/org/expenses',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOrgCashflowRoute =
+  AuthenticatedOrgCashflowRouteImport.update({
+    id: '/org/cashflow',
+    path: '/org/cashflow',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedMemberPendingRoute =
