@@ -144,21 +144,27 @@ function IncomePage() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     const a = Number(amount);
+    const rate = Number(exchangeRate);
     if (!payer.trim()) { toast.error("Payer name required"); return; }
     if (!email.trim() || !/^\S+@\S+\.\S+$/.test(email)) { toast.error("Valid email address required"); return; }
     if (!(a > 0)) { toast.error("Valid amount required"); return; }
+    if (txCurrency !== BASE_CURRENCY && !(rate > 0)) { toast.error("Exchange rate required for foreign currency"); return; }
     setBusy(true);
     try {
       const res = await save({ data: {
         entry_date: date, payer_name: payer, payer_phone: phone || undefined,
         payer_email: email,
-        amount: a, income_type: incType, wallet, remarks: remarks || undefined,
+        amount: a, income_type: incType, wallet,
+        wallet_account_id: walletAccountId || undefined,
+        currency: txCurrency,
+        exchange_rate: txCurrency === BASE_CURRENCY ? 1 : rate,
+        remarks: remarks || undefined,
       }});
       toast.success(`Receipt ${res.entry.receipt_no} saved — opening email…`);
       openReceipt(res.entry);
-      // Auto-trigger email to the recipient with the receipt details
       setTimeout(() => emailReceipt(res.entry), 400);
       setPayer(""); setPhone(""); setEmail(""); setAmount(""); setRemarks("");
+      setTxCurrency(BASE_CURRENCY); setExchangeRate("1"); setWalletAccountId("");
       qc.invalidateQueries({ queryKey: ["org-income"] });
       qc.invalidateQueries({ queryKey: ["cashflow"] });
     } catch (err: any) {
