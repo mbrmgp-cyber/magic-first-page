@@ -25,9 +25,11 @@ function AccountsPage() {
   const [remarks, setRemarks] = useState("");
   const [principal, setPrincipal] = useState("");
   const [interest, setInterest] = useState("");
+  const [newLoan, setNewLoan] = useState("");
+  const [newLoanRate, setNewLoanRate] = useState("2");
   const [info, setInfo] = useState<Extract<Lookup, { found: true }> | null>(null);
   const [busy, setBusy] = useState(false);
-  const [saved, setSaved] = useState<{ balance: number; emailed_to: string | null } | null>(null);
+  const [saved, setSaved] = useState<{ balance: number; emailed_to: string | null; collected: number; disbursed: number } | null>(null);
   const [locked, setLocked] = useState(false);
 
   async function doLookup(code: string) {
