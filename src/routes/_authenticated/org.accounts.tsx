@@ -1,18 +1,26 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
-import { ArrowLeft, Save, Send, Pencil, FileText, FileSpreadsheet, Search, ShieldCheck, RefreshCw } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRef, useState } from "react";
+import { ArrowLeft, Save, Send, Pencil, FileText, FileSpreadsheet, Search, RefreshCw, Upload, BookOpen } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { lookupMemberByCode, recordMonthlyPayment } from "@/lib/accounts.functions";
+import { getMyOrg, updateOrgLogo } from "@/lib/org.functions";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/org/accounts")({
   head: () => ({ meta: [{ title: "Committee Accounts — Monthly Loan Entry" }] }),
   component: AccountsPage,
 });
+
+const CURRENCIES = [
+  { code: "INR", symbol: "₹" }, { code: "USD", symbol: "$" },
+  { code: "AED", symbol: "د.إ" }, { code: "KWD", symbol: "د.ك" }, { code: "MYR", symbol: "RM" },
+];
 
 type Lookup = Awaited<ReturnType<typeof lookupMemberByCode>>;
 
