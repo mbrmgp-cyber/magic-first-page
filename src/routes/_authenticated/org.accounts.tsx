@@ -188,10 +188,7 @@ function AccountsPage() {
             </div>
             <div className="flex flex-col gap-1">
               <Label className="text-[10px] uppercase tracking-wide">Select Currency</Label>
-              <select value={currency} onChange={(e) => setCurrency(e.target.value)}
-                className="border-2 border-orange-200 rounded px-2 py-1.5 text-sm bg-white font-semibold">
-                {CURRENCIES.map(c => <option key={c.code} value={c.code}>{c.symbol} {c.code}</option>)}
-              </select>
+              <CurrencySelector variant="light" />
             </div>
           </div>
           <h1 className="mt-3 text-lg md:text-2xl font-bold" style={{
