@@ -35,7 +35,9 @@ type IdLayout =
   | "elegant-gold"
   | "photo-strip"
   | "minimal-mono"
-  | "vertical-band";
+  | "vertical-band"
+  | "portrait-vertical"
+  | "keychain-mini";
 
 type LetterLayout = "standard-header" | "watermark-centered" | "left-sidebar";
 type ReceiptLayout = "classic" | "saffron-strip" | "minimal-line";
@@ -51,6 +53,8 @@ type Tpl<T extends string> = {
 const ID_TEMPLATES: Tpl<IdLayout>[] = [
   { id: "official-saffron",     en: "Official Saffron", te: "అధికారిక సాఫ్రాన్", featured: true },
   { id: "landscape-corporate",  en: "Landscape Corporate",  te: "ల్యాండ్‌స్కేప్ కార్పొరేట్" },
+  { id: "portrait-vertical",    en: "Vertical Portrait",    te: "నిలువు ఐడి కార్డ్", featured: true },
+  { id: "keychain-mini",        en: "Keychain Mini",        te: "కీ చైన్ టైప్" },
   { id: "portrait-qr",          en: "Portrait with QR",     te: "QR తో పోర్ట్రెయిట్" },
   { id: "split-design",         en: "Split Design",         te: "స్ప్లిట్ డిజైన్" },
   { id: "traditional-border",   en: "Traditional Border",   te: "సాంప్రదాయ బార్డర్" },
