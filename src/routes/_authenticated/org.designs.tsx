@@ -9,7 +9,12 @@ import { toast } from "sonner";
 import {
   ArrowLeft, IdCard, FileText, Sparkles, Check, Wand2, Lock, QrCode,
   LayoutTemplate, Layers, Square, FileSignature, Download, User, Shield, BadgeCheck,
+  Printer, Pencil, FileX,
 } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 import { resolveTheme, type ThemeSettings } from "@/lib/theme";
 
