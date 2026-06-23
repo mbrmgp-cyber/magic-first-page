@@ -71,6 +71,8 @@ export const recordMonthlyPayment = createServerFn({ method: "POST" })
     payment_date: string;
     principal_amount: number;
     interest_amount: number;
+    new_loan_amount?: number;
+    new_loan_interest_rate?: number;
     remarks?: string;
   }) => d)
   .handler(async ({ data, context }) => {
@@ -82,31 +84,57 @@ export const recordMonthlyPayment = createServerFn({ method: "POST" })
       .from("members").select("id, name, email")
       .eq("org_id", orgId).eq("member_code", code).maybeSingle();
     if (!member) throw new Error("Member not found");
-    const { data: loans } = await supabase
+
+    const paidTotal = Number(data.principal_amount || 0) + Number(data.interest_amount || 0);
+    const newLoanAmt = Number(data.new_loan_amount || 0);
+    if (paidTotal <= 0 && newLoanAmt <= 0) throw new Error("ఏదైనా మొత్తం నమోదు చేయండి");
+
+    // 1. Record collection against oldest active loan (if any)
+    if (paidTotal > 0) {
+      const { data: loans } = await supabase
+        .from("member_loans").select("id")
+        .eq("member_id", member.id).eq("status", "active")
+        .order("start_date", { ascending: true }).limit(1);
+      const loan = loans?.[0];
+      if (!loan) throw new Error("No active loan to collect against");
+      const notes = JSON.stringify({
+        principal: data.principal_amount,
+        interest: data.interest_amount,
+        remarks: data.remarks ?? "",
+      });
+      const { error } = await supabase.from("member_loan_payments").insert({
+        loan_id: loan.id, org_id: orgId, amount: paidTotal,
+        payment_date: data.payment_date, notes,
+      });
+      if (error) throw new Error(error.message);
+    }
+
+    // 2. Disburse new loan (if any)
+    let newLoanId: string | null = null;
+    if (newLoanAmt > 0) {
+      const rate = Number(data.new_loan_interest_rate || 0);
+      const { data: created, error: lerr } = await supabase.from("member_loans").insert({
+        org_id: orgId,
+        member_id: member.id,
+        principal: newLoanAmt,
+        interest_rate_monthly: rate,
+        start_date: data.payment_date,
+        purpose: data.remarks ?? "Committee disbursement",
+      }).select("id").single();
+      if (lerr) throw new Error(lerr.message);
+      newLoanId = created!.id;
+    }
+
+    // Recompute total outstanding across all active loans
+    const { data: activeLoans } = await supabase
       .from("member_loans").select("id")
-      .eq("member_id", member.id).eq("status", "active")
-      .order("start_date", { ascending: true }).limit(1);
-    const loan = loans?.[0];
-    if (!loan) throw new Error("No active loan for this member");
-
-    const total = Number(data.principal_amount || 0) + Number(data.interest_amount || 0);
-    if (total <= 0) throw new Error("Amount must be greater than zero");
-
-    const notes = JSON.stringify({
-      principal: data.principal_amount,
-      interest: data.interest_amount,
-      remarks: data.remarks ?? "",
-    });
-    const { error } = await supabase.from("member_loan_payments").insert({
-      loan_id: loan.id, org_id: orgId, amount: total,
-      payment_date: data.payment_date, notes,
-    });
-    if (error) throw new Error(error.message);
-
-    // Recompute balance
-    const { data: s } = await supabase.rpc("get_loan_summary", { _loan_id: loan.id });
-    const summary = Array.isArray(s) ? s[0] : s;
-    const balance = Number(summary?.balance ?? 0);
+      .eq("member_id", member.id).eq("status", "active");
+    let balance = 0;
+    for (const al of (activeLoans ?? [])) {
+      const { data: s } = await supabase.rpc("get_loan_summary", { _loan_id: al.id });
+      const summary = Array.isArray(s) ? s[0] : s;
+      balance += Number(summary?.balance ?? 0);
+    }
 
     // Email receipt (best-effort log; full email infra can be wired later)
     if (member.email) {
