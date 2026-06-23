@@ -423,8 +423,8 @@ function DesignsPage() {
 
                     <StyleControls
                       cardBg={cardBg} setCardBg={setCardBg}
-                      accent={accentColor} setAccent={setAccentColor}
-                      font={fontFamily} setFont={setFontFamily}
+                      accent={effectiveAccent} setAccent={setAccentColor}
+                      font={effectiveFont} setFont={setFontFamily}
                     />
 
                     <Button
