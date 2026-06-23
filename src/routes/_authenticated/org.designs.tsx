@@ -174,14 +174,17 @@ function DesignsPage() {
   const [accentColor, setAccentColor] = useState<string | null>(null);
   const [fontFamily, setFontFamily] = useState<string | null>(null);
 
-  // customTheme applies the user's live styling on top of base theme
+  // customTheme applies the user's live styling on top of base theme; until the user
+  // changes anything, it follows the org theme (so Settings → Theme edits take effect).
+  const effectiveAccent = accentColor ?? theme.icon;
+  const effectiveFont = fontFamily ?? theme.headFont;
   const customTheme = useMemo(() => ({
     ...theme,
-    icon: accentColor,
-    buttonBg: accentColor,
-    headFont: fontFamily,
-    subFont: fontFamily,
-  }), [theme, accentColor, fontFamily]);
+    icon: effectiveAccent,
+    buttonBg: effectiveAccent,
+    headFont: effectiveFont,
+    subFont: effectiveFont,
+  }), [theme, effectiveAccent, effectiveFont]);
 
   const orgName = org?.name || "Chitvel Help Line Society";
   const orgSlogan = org?.slogan || "॥ మానవసేవే మాధవసేవ ॥";
