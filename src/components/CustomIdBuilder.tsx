@@ -38,10 +38,12 @@ const SIZES: Record<CardSize, { w: number; h: number; pdf: [number, number]; ori
   keychain:  { w: 380, h: 240, pdf: [60, 38],   orient: "landscape", label: "Keychain",  icon: <KeyRound className="h-3.5 w-3.5" /> },
 };
 
-const PANEL = "#111113";
-const BORDER = "#2a2a30";
-const HEAD = "#ededf0";
-const SUB = "#8a8a91";
+const PANEL = "#1b1b22";        // section card surface (lifted off page bg for clarity)
+const PANEL_HEAD_BG = "#242430"; // header strip inside a section
+const FIELD_BG = "#0f0f14";      // inputs / file buttons
+const BORDER = "#3a3a46";        // brighter, easier to see
+const HEAD = "#f4f4f6";
+const SUB = "#b8b8c2";           // lifted from #8a8a91 for readability
 const ACCENT = "#f97316";
 
 function defaultBuiltins(w: number, h: number): Record<BuiltinKey, ElState> {
@@ -435,9 +437,24 @@ function DraggableBox({
 
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-lg border p-3 space-y-2" style={{ background: PANEL, borderColor: BORDER }}>
-      <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: HEAD }}>{title}</p>
-      {children}
+    <div
+      className="rounded-xl border overflow-hidden"
+      style={{
+        background: PANEL,
+        borderColor: BORDER,
+        boxShadow: "0 1px 0 rgba(255,255,255,0.04) inset, 0 6px 18px rgba(0,0,0,0.35)",
+      }}
+    >
+      <div
+        className="flex items-center gap-2 px-3 py-2 border-b"
+        style={{ background: PANEL_HEAD_BG, borderColor: BORDER }}
+      >
+        <span className="h-3 w-1 rounded-sm" style={{ background: ACCENT }} />
+        <p className="text-[11px] font-bold uppercase tracking-[0.12em]" style={{ color: HEAD }}>
+          {title}
+        </p>
+      </div>
+      <div className="p-3 space-y-2">{children}</div>
     </div>
   );
 }
@@ -457,7 +474,7 @@ function UploadButton({ label, sub, onFile }: { label: string; sub?: string; onF
     <>
       <input id={id} type="file" accept="image/*" className="hidden"
         onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f); e.currentTarget.value = ""; }} />
-      <Button asChild variant="outline" size="sm" className="w-full h-9 cursor-pointer" style={{ borderColor: BORDER, background: "#0a0a0a", color: HEAD }}>
+      <Button asChild variant="outline" size="sm" className="w-full h-9 cursor-pointer" style={{ borderColor: BORDER, background: FIELD_BG, color: HEAD }}>
         <label htmlFor={id}>
           <Upload className="h-3.5 w-3.5 mr-2" />
           <span className="text-xs">{label}</span>
@@ -505,7 +522,7 @@ function LabeledInput({ label, value, onChange }: { label: string; value: string
   return (
     <div className="space-y-1">
       <Label className="text-[10px]" style={{ color: SUB }}>{label}</Label>
-      <Input value={value} onChange={(e) => onChange(e.target.value)} className="h-8 text-xs" style={{ background: "#0a0a0a", borderColor: BORDER, color: HEAD }} />
+      <Input value={value} onChange={(e) => onChange(e.target.value)} className="h-8 text-xs" style={{ background: FIELD_BG, borderColor: BORDER, color: HEAD }} />
     </div>
   );
 }
