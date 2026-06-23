@@ -379,3 +379,37 @@ function LabeledInput({ label, value, onChange }: { label: string; value: string
     </div>
   );
 }
+
+function FontSizeSlider({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  return (
+    <div className="space-y-1">
+      <p className="text-[10px]" style={{ color: SUB }}>Font Size: {Math.round(value)}px</p>
+      <Slider value={[value]} min={8} max={64} step={1} onValueChange={(v) => onChange(v[0])} />
+    </div>
+  );
+}
+
+const SWATCHES = ["#ffffff", "#000000", "#111111", "#374151", "#f97316", "#facc15", "#ef4444", "#22c55e", "#3b82f6"];
+
+function ColorPickerRow({ label, value, onChange }: { label: string; value: string; onChange: (c: string) => void }) {
+  return (
+    <div className="space-y-1.5">
+      <p className="text-[10px]" style={{ color: SUB }}>{label}</p>
+      <div className="flex items-center gap-1.5 flex-wrap">
+        {SWATCHES.map((c) => (
+          <button
+            key={c}
+            type="button"
+            onClick={() => onChange(c)}
+            className="h-6 w-6 rounded-full border transition-transform hover:scale-110"
+            style={{ background: c, borderColor: value.toLowerCase() === c.toLowerCase() ? ACCENT : "rgba(255,255,255,0.2)", boxShadow: value.toLowerCase() === c.toLowerCase() ? `0 0 0 2px ${ACCENT}` : "none" }}
+            aria-label={c}
+          />
+        ))}
+        <label className="h-6 w-6 rounded-full border cursor-pointer overflow-hidden relative" style={{ borderColor: "rgba(255,255,255,0.2)", background: value }}>
+          <input type="color" value={value} onChange={(e) => onChange(e.target.value)} className="absolute inset-0 opacity-0 cursor-pointer" />
+        </label>
+      </div>
+    </div>
+  );
+}
