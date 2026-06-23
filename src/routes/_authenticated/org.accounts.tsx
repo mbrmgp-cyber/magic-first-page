@@ -17,7 +17,7 @@ export const Route = createFileRoute("/_authenticated/org/accounts")({
   component: AccountsPage,
 });
 
-import { useCurrency, CurrencySelector } from "@/lib/currency-context";
+import { useCurrency } from "@/lib/currency-context";
 
 type Lookup = Awaited<ReturnType<typeof lookupMemberByCode>>;
 
