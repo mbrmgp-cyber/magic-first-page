@@ -124,6 +124,17 @@ const PAGE_BORDER = "#27272a";
 const PAGE_HEAD = "#fafafa";
 const PAGE_SUB = "#a1a1aa";
 
+const FONT_OPTIONS = [
+  { v: "Inter", label: "Inter (Modern)" },
+  { v: "Poppins", label: "Poppins (Bold)" },
+  { v: "Playfair Display", label: "Playfair (Serif)" },
+  { v: "Merriweather", label: "Merriweather (Editorial)" },
+  { v: "Roboto Slab", label: "Roboto Slab (Classic)" },
+  { v: "Noto Sans", label: "Noto Sans (Clean)" },
+  { v: "Georgia", label: "Georgia (Traditional)" },
+  { v: "Courier New", label: "Courier (Mono)" },
+];
+
 function DesignsPage() {
   const navigate = useNavigate();
   const fetchOrg = useServerFn(getMyOrg);
