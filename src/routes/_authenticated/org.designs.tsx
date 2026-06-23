@@ -101,6 +101,89 @@ function DesignsPage() {
     }
   }
 
+  function printLetterhead() {
+    const isRich = letterMode === "rich";
+    const subject = letterSubject.trim();
+    const to = letterTo.trim();
+    const body = letterBody.trim();
+    const accent = theme.icon;
+    const headFF = `${theme.headFont}, "Noto Sans Telugu", system-ui, sans-serif`;
+    const subFF = `${theme.subFont}, "Noto Sans Telugu", system-ui, sans-serif`;
+    const dateStr = letterDate ? new Date(letterDate).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" }) : "";
+
+    let header = "";
+    let sidebar = "";
+    let bodyWrap = "padding:48px 56px;";
+    if (letterPick === "left-sidebar") {
+      bodyWrap = "padding:48px 48px 48px 240px; position:relative;";
+      sidebar = `
+        <div style="position:absolute;left:0;top:0;bottom:0;width:200px;background:${accent};color:#fff;padding:32px 18px;text-align:center;font-family:${headFF};">
+          <div style="width:88px;height:88px;border-radius:50%;background:#fff;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;color:${accent};font-size:36px;font-weight:900;">★</div>
+          <div style="font-weight:800;font-size:14px;line-height:1.3;">${escapeHtml(orgName)}</div>
+          <div style="font-family:${subFF};font-style:italic;font-size:10px;opacity:.9;margin-top:6px;">${escapeHtml(orgSlogan)}</div>
+          <div style="font-size:10px;opacity:.85;margin-top:10px;">Reg: ${escapeHtml(orgReg)}</div>
+          ${orgAddress ? `<div style="font-size:9px;opacity:.85;margin-top:10px;line-height:1.4;">${escapeHtml(orgAddress)}</div>` : ""}
+        </div>`;
+    } else if (letterPick === "watermark-centered") {
+      header = `
+        <div style="text-align:center;padding:36px 56px 16px;font-family:${headFF};">
+          <div style="font-weight:900;font-size:28px;color:${accent};">${escapeHtml(orgName)}</div>
+          <div style="font-family:${subFF};font-style:italic;color:#555;font-size:14px;margin-top:4px;">${escapeHtml(orgSlogan)}</div>
+          <div style="font-size:11px;color:#777;margin-top:2px;">Reg No: ${escapeHtml(orgReg)}${orgAddress ? " • " + escapeHtml(orgAddress) : ""}</div>
+        </div>`;
+      bodyWrap = "padding:8px 64px 48px; position:relative;";
+    } else {
+      // standard-header
+      header = `
+        <div style="display:flex;align-items:center;gap:16px;padding:32px 56px 16px;border-bottom:4px solid ${accent};font-family:${headFF};">
+          <div style="width:64px;height:64px;border-radius:50%;background:${accent};color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;">★</div>
+          <div style="flex:1;">
+            <div style="font-weight:900;font-size:24px;color:${accent};">${escapeHtml(orgName)}</div>
+            <div style="font-family:${subFF};font-style:italic;font-size:13px;color:#555;">${escapeHtml(orgSlogan)}</div>
+            <div style="font-size:11px;color:#777;">Reg No: ${escapeHtml(orgReg)}${orgAddress ? " • " + escapeHtml(orgAddress) : ""}</div>
+          </div>
+        </div>`;
+    }
+
+    const watermark = letterPick === "watermark-centered"
+      ? `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:220px;color:${accent};opacity:.06;pointer-events:none;font-weight:900;">★</div>`
+      : "";
+
+    const richBody = isRich ? `
+      <div style="font-family:${subFF};color:#111;font-size:13px;line-height:1.65;">
+        <div style="display:flex;justify-content:space-between;margin-top:8px;">
+          <div><strong>To,</strong><br/>${escapeHtml(to).replace(/\n/g, "<br/>") || "&nbsp;"}</div>
+          <div style="text-align:right;color:#555;">${escapeHtml(dateStr)}</div>
+        </div>
+        ${subject ? `<div style="margin-top:18px;"><strong>Subject:</strong> ${escapeHtml(subject)}</div>` : ""}
+        <div style="margin-top:18px;white-space:pre-wrap;">${escapeHtml(body) || "&nbsp;"}</div>
+        <div style="margin-top:48px;">Yours sincerely,<br/><br/><br/><strong>${escapeHtml(orgName)}</strong></div>
+      </div>` : `
+      <div style="font-family:${subFF};color:#bbb;font-size:11px;text-align:center;margin-top:36px;">
+        — Blank letterhead • write or print content here —
+      </div>`;
+
+    const html = `<!doctype html><html><head><meta charset="utf-8"/>
+      <title>Letterhead — ${escapeHtml(orgName)}</title>
+      <style>
+        @page { size: A4; margin: 0; }
+        html,body{margin:0;padding:0;background:#fff;}
+        .page{width:210mm;min-height:297mm;background:#fff;position:relative;}
+        @media print { .noprint{display:none!important;} }
+      </style></head><body>
+      <div class="noprint" style="padding:12px;background:#111;color:#fff;font-family:system-ui;display:flex;gap:12px;align-items:center;">
+        <button onclick="window.print()" style="padding:8px 16px;background:${accent};color:#fff;border:0;border-radius:6px;font-weight:700;cursor:pointer;">Print / Save as PDF</button>
+        <span style="font-size:12px;opacity:.8;">Use your browser's Save as PDF in the print dialog.</span>
+      </div>
+      <div class="page">${sidebar}${header}<div style="${bodyWrap}">${watermark}${richBody}</div></div>
+      </body></html>`;
+
+    const w = window.open("", "_blank", "width=900,height=1100");
+    if (!w) { toast.error("Popup blocked — allow popups to download PDF"); return; }
+    w.document.write(html);
+    w.document.close();
+  }
+
   return (
     <div className="min-h-screen pb-16" style={{ background: theme.bg, color: theme.headColor }}>
       <div className="max-w-5xl mx-auto p-4 space-y-6">
