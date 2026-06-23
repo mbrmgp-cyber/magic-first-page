@@ -5,24 +5,18 @@ import { ArrowLeft, FileSpreadsheet, FileText, RefreshCw } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getMasterLedger } from "@/lib/accounts.functions";
-import { useState } from "react";
+import { useCurrency, CurrencySelector } from "@/lib/currency-context";
 
 export const Route = createFileRoute("/_authenticated/org/master-ledger")({
   head: () => ({ meta: [{ title: "Admin Master Ledger" }] }),
   component: MasterLedgerPage,
 });
 
-const CURRENCIES = [
-  { code: "INR", symbol: "₹" }, { code: "USD", symbol: "$" },
-  { code: "AED", symbol: "د.إ" }, { code: "KWD", symbol: "د.ك" }, { code: "MYR", symbol: "RM" },
-];
-
 function MasterLedgerPage() {
   const fetchLedger = useServerFn(getMasterLedger);
   const q = useQuery({ queryKey: ["master-ledger"], queryFn: () => fetchLedger() });
-  const [currency, setCurrency] = useState("INR");
-  const sym = CURRENCIES.find(c => c.code === currency)?.symbol ?? "₹";
-  const fmt = (n: number) => `${sym} ${Number(n || 0).toLocaleString("en-IN")}`;
+  const { symbol } = useCurrency();
+  const fmt = (n: number) => `${symbol} ${Number(n || 0).toLocaleString("en-IN")}`;
 
   const rows = q.data?.rows ?? [];
   const totals = q.data?.totals ?? { outstanding: 0, principal: 0, interest: 0, newLoan: 0, net: 0 };
