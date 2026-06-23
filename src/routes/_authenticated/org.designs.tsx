@@ -321,7 +321,40 @@ function DesignsPage() {
 
           {/* ============= MODULE 1: ID CARD ============= */}
           <TabsContent value="id" className="mt-4 space-y-4">
-            {idPick === null ? (
+            {/* ID Mode toggle: Ready-made templates vs Custom builder */}
+            <div className="grid grid-cols-2 gap-2 rounded-lg p-1" style={{ background: PAGE_PANEL, border: `1px solid ${PAGE_BORDER}` }}>
+              <button
+                onClick={() => setIdMode("templates")}
+                className="h-9 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition"
+                style={{
+                  background: idMode === "templates" ? theme.icon : "transparent",
+                  color: idMode === "templates" ? "#fff" : PAGE_SUB,
+                }}
+              >
+                <IdCard className="h-3.5 w-3.5" /> Ready-Made Templates
+              </button>
+              <button
+                onClick={() => setIdMode("custom")}
+                className="h-9 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition"
+                style={{
+                  background: idMode === "custom" ? theme.icon : "transparent",
+                  color: idMode === "custom" ? "#fff" : PAGE_SUB,
+                }}
+              >
+                <Wand2 className="h-3.5 w-3.5" /> Custom Builder
+              </button>
+            </div>
+
+            {idMode === "custom" ? (
+              <Section
+                icon={<Wand2 className="h-5 w-5" style={{ color: theme.icon }} />}
+                title="Custom ID Card Builder"
+                subtitle="మీ సొంత డిజైన్ అప్‌లోడ్ చేసి, ఫోటో / పేరు / QR drag-and-drop చేయండి"
+                theme={theme}
+              >
+                <CustomIdBuilder defaultName={member.name} defaultDesignation="Member" />
+              </Section>
+            ) : idPick === null ? (
               <Section
                 icon={<IdCard className="h-5 w-5" style={{ color: theme.icon }} />}
                 title="Choose an ID Card Template"
