@@ -14,6 +14,55 @@ async function resolveOrgId(supabase: any, userId: string): Promise<string | nul
 export type WalletType = "bank" | "accountant" | "president";
 export type IncomeType = "registration_fee" | "donation" | "other";
 export type ExpenseType = "charity" | "office" | "meeting" | "misc";
+export type TimeRange = "this_month" | "3m" | "6m" | "yearly" | "all";
+
+function rangeStart(range: TimeRange): string | null {
+  const now = new Date();
+  let d: Date;
+  switch (range) {
+    case "this_month":
+      d = new Date(now.getFullYear(), now.getMonth(), 1); break;
+    case "3m":
+      d = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate()); break;
+    case "6m":
+      d = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate()); break;
+    case "yearly":
+      d = new Date(now.getFullYear(), 0, 1); break;
+    default:
+      return null;
+  }
+  return d.toISOString().slice(0, 10);
+}
+
+// ===== WALLET ACCOUNTS =====
+export const listWalletAccounts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const orgId = await resolveOrgId(supabase, userId);
+    if (!orgId) return { rows: [] };
+    const { data } = await supabase.from("wallet_accounts").select("*")
+      .eq("org_id", orgId).eq("is_active", true).order("name");
+    return { rows: data ?? [] };
+  });
+
+export const createWalletAccount = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { name: string; currency: string; wallet_type: WalletType }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const orgId = await resolveOrgId(supabase, userId);
+    if (!orgId) throw new Error("Org not found");
+    if (!data.name?.trim()) throw new Error("Account name required");
+    const { data: row, error } = await supabase.from("wallet_accounts").insert({
+      org_id: orgId,
+      name: data.name.trim(),
+      currency: (data.currency || "INR").toUpperCase(),
+      wallet_type: data.wallet_type,
+    }).select("*").single();
+    if (error) throw new Error(error.message);
+    return { ok: true as const, account: row };
+  });
 
 // ===== INCOME =====
 export const recordIncome = createServerFn({ method: "POST" })
@@ -26,6 +75,9 @@ export const recordIncome = createServerFn({ method: "POST" })
     amount: number;
     income_type: IncomeType;
     wallet: WalletType;
+    wallet_account_id?: string | null;
+    currency?: string;
+    exchange_rate?: number;
     remarks?: string;
   }) => d)
   .handler(async ({ data, context }) => {
@@ -36,6 +88,12 @@ export const recordIncome = createServerFn({ method: "POST" })
     if (!data.payer_email?.trim() || !/^\S+@\S+\.\S+$/.test(data.payer_email))
       throw new Error("Valid email address required");
     if (!(data.amount > 0)) throw new Error("Amount must be greater than 0");
+
+    const currency = (data.currency || "INR").toUpperCase();
+    const rate = currency === "INR" ? 1 : Number(data.exchange_rate || 0);
+    if (currency !== "INR" && !(rate > 0))
+      throw new Error("Exchange rate required for non-INR currency");
+    const base_amount = Math.round(data.amount * rate * 100) / 100;
 
     const { count } = await supabase
       .from("org_income").select("id", { count: "exact", head: true })
@@ -49,8 +107,12 @@ export const recordIncome = createServerFn({ method: "POST" })
       payer_phone: data.payer_phone?.trim() || null,
       payer_email: data.payer_email.trim().toLowerCase(),
       amount: data.amount,
+      currency,
+      exchange_rate: rate,
+      base_amount,
       income_type: data.income_type,
       wallet: data.wallet,
+      wallet_account_id: data.wallet_account_id || null,
       receipt_no,
       remarks: data.remarks?.trim() || null,
       created_by: userId,
@@ -80,6 +142,9 @@ export const recordExpense = createServerFn({ method: "POST" })
     amount: number;
     expense_type: ExpenseType;
     wallet: WalletType;
+    wallet_account_id?: string | null;
+    currency?: string;
+    exchange_rate?: number;
     remarks?: string;
   }) => d)
   .handler(async ({ data, context }) => {
@@ -89,13 +154,23 @@ export const recordExpense = createServerFn({ method: "POST" })
     if (!data.recipient_name?.trim()) throw new Error("Recipient name required");
     if (!(data.amount > 0)) throw new Error("Amount must be greater than 0");
 
+    const currency = (data.currency || "INR").toUpperCase();
+    const rate = currency === "INR" ? 1 : Number(data.exchange_rate || 0);
+    if (currency !== "INR" && !(rate > 0))
+      throw new Error("Exchange rate required for non-INR currency");
+    const base_amount = Math.round(data.amount * rate * 100) / 100;
+
     const { data: row, error } = await supabase.from("org_expenses").insert({
       org_id: orgId,
       entry_date: data.entry_date,
       recipient_name: data.recipient_name.trim(),
       amount: data.amount,
+      currency,
+      exchange_rate: rate,
+      base_amount,
       expense_type: data.expense_type,
       wallet: data.wallet,
+      wallet_account_id: data.wallet_account_id || null,
       remarks: data.remarks?.trim() || null,
       created_by: userId,
     }).select("*").single();
@@ -117,31 +192,40 @@ export const listExpenses = createServerFn({ method: "GET" })
 // ===== CASH FLOW SUMMARY =====
 export const getCashFlowSummary = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((d: { range?: TimeRange } | undefined) => d ?? { range: "all" as TimeRange })
+  .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const orgId = await resolveOrgId(supabase, userId);
     if (!orgId) return null;
-    const [{ data: inc }, { data: exp }] = await Promise.all([
-      supabase.from("org_income").select("amount, wallet, income_type, entry_date").eq("org_id", orgId),
-      supabase.from("org_expenses").select("amount, wallet, expense_type, entry_date").eq("org_id", orgId),
-    ]);
+    const range: TimeRange = data?.range ?? "all";
+    const since = rangeStart(range);
+
+    let incQ = supabase.from("org_income")
+      .select("amount, base_amount, currency, wallet, income_type, entry_date").eq("org_id", orgId);
+    let expQ = supabase.from("org_expenses")
+      .select("amount, base_amount, currency, wallet, expense_type, entry_date").eq("org_id", orgId);
+    if (since) { incQ = incQ.gte("entry_date", since); expQ = expQ.gte("entry_date", since); }
+
+    const [{ data: inc }, { data: exp }] = await Promise.all([incQ, expQ]);
     const wallets: Record<WalletType, number> = { bank: 0, accountant: 0, president: 0 };
     const incomeByType: Record<string, number> = {};
     const expenseByType: Record<string, number> = {};
     let totalIncome = 0, totalExpense = 0;
     for (const r of (inc ?? [])) {
-      const a = Number(r.amount || 0);
+      const a = Number(r.base_amount ?? r.amount ?? 0);
       wallets[r.wallet as WalletType] = (wallets[r.wallet as WalletType] || 0) + a;
       incomeByType[r.income_type] = (incomeByType[r.income_type] || 0) + a;
       totalIncome += a;
     }
     for (const r of (exp ?? [])) {
-      const a = Number(r.amount || 0);
+      const a = Number(r.base_amount ?? r.amount ?? 0);
       wallets[r.wallet as WalletType] = (wallets[r.wallet as WalletType] || 0) - a;
       expenseByType[r.expense_type] = (expenseByType[r.expense_type] || 0) + a;
       totalExpense += a;
     }
     return {
+      range,
+      since,
       wallets,
       incomeByType,
       expenseByType,
