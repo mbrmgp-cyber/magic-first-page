@@ -174,6 +174,21 @@ function DesignsPage() {
   // Receipt state
   const [receiptPick, setReceiptPick] = useState<ReceiptLayout | null>(null);
   const [receipt, setReceipt] = useState<ReceiptData>(DEFAULT_RECEIPT);
+  const [receiptLogo, setReceiptLogo] = useState<string>(mbrLogo.url);
+
+  // Design Customization (per-edit-session overrides)
+  const [cardBg, setCardBg] = useState<string>("#ffffff");
+  const [accentColor, setAccentColor] = useState<string>(theme.icon);
+  const [fontFamily, setFontFamily] = useState<string>(theme.headFont);
+
+  // customTheme applies the user's live styling on top of base theme
+  const customTheme = useMemo(() => ({
+    ...theme,
+    icon: accentColor,
+    buttonBg: accentColor,
+    headFont: fontFamily,
+    subFont: fontFamily,
+  }), [theme, accentColor, fontFamily]);
 
   const orgName = org?.name || "Chitvel Help Line Society";
   const orgSlogan = org?.slogan || "॥ మానవసేవే మాధవసేవ ॥";
