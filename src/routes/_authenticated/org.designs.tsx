@@ -1077,10 +1077,11 @@ function KeychainPreview({
 }
 
 function IdCardFront({
-  layout, theme, orgName, slogan, reg, member,
+  layout, theme, orgName, slogan, reg, member, cardBg = "#ffffff",
 }: {
   layout: IdLayout; theme: Required<ThemeSettings>;
   orgName: string; slogan: string; reg: string; member: MemberData;
+  cardBg?: string;
 }) {
   const align = theme.headAlign;
   const headFF = `${theme.headFont}, "Noto Sans Telugu", system-ui, sans-serif`;
