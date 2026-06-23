@@ -1,18 +1,22 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
-import { Upload, Download, Image as ImageIcon, User, QrCode, Type as TypeIcon, Briefcase, Trash2 } from "lucide-react";
+import {
+  Upload, Download, Image as ImageIcon, User, QrCode, Type as TypeIcon,
+  Briefcase, Trash2, Plus, RectangleHorizontal, RectangleVertical, KeyRound,
+} from "lucide-react";
 import { toast } from "sonner";
 import QRCode from "qrcode";
 
-type ElementKey = "photo" | "name" | "designation" | "qr";
+type BuiltinKey = "photo" | "name" | "designation" | "qr";
+type ElementKey = BuiltinKey | string; // custom fields use cf-<id>
 
 type ElState = {
   enabled: boolean;
-  x: number; // px relative to canvas
+  x: number;
   y: number;
   w: number;
   h: number;
@@ -20,38 +24,74 @@ type ElState = {
   fontSize?: number;
 };
 
-const CANVAS_W = 540; // editor canvas width
-const CANVAS_H = 340; // CR80 landscape-ish ratio (1.586:1)
+type CustomField = {
+  id: string;       // cf-xxxx
+  label: string;    // panel label
+  value: string;    // displayed text
+};
 
-const DEFAULTS: Record<ElementKey, ElState> = {
-  photo:       { enabled: true,  x: 24,  y: 80,  w: 110, h: 130 },
-  name:        { enabled: true,  x: 160, y: 100, w: 340, h: 36, color: "#111111", fontSize: 22 },
-  designation: { enabled: true,  x: 160, y: 150, w: 340, h: 26, color: "#374151", fontSize: 16 },
-  qr:          { enabled: true,  x: 420, y: 210, w: 90,  h: 90 },
+type CardSize = "landscape" | "portrait" | "keychain";
+
+const SIZES: Record<CardSize, { w: number; h: number; pdf: [number, number]; orient: "landscape" | "portrait"; label: string; icon: React.ReactNode }> = {
+  landscape: { w: 540, h: 340, pdf: [85.6, 54], orient: "landscape", label: "Landscape", icon: <RectangleHorizontal className="h-3.5 w-3.5" /> },
+  portrait:  { w: 340, h: 540, pdf: [54, 85.6], orient: "portrait",  label: "Portrait",  icon: <RectangleVertical className="h-3.5 w-3.5" /> },
+  keychain:  { w: 380, h: 240, pdf: [60, 38],   orient: "landscape", label: "Keychain",  icon: <KeyRound className="h-3.5 w-3.5" /> },
 };
 
 const PANEL = "#111113";
-const BORDER = "#1f1f23";
+const BORDER = "#2a2a30";
 const HEAD = "#ededf0";
 const SUB = "#8a8a91";
 const ACCENT = "#f97316";
+
+function defaultBuiltins(w: number, h: number): Record<BuiltinKey, ElState> {
+  return {
+    photo:       { enabled: true, x: Math.round(w * 0.05), y: Math.round(h * 0.22), w: Math.round(w * 0.22), h: Math.round(h * 0.40) },
+    name:        { enabled: true, x: Math.round(w * 0.30), y: Math.round(h * 0.28), w: Math.round(w * 0.65), h: 36, color: "#111111", fontSize: 22 },
+    designation: { enabled: true, x: Math.round(w * 0.30), y: Math.round(h * 0.43), w: Math.round(w * 0.65), h: 26, color: "#374151", fontSize: 16 },
+    qr:          { enabled: true, x: Math.round(w * 0.78), y: Math.round(h * 0.62), w: Math.round(w * 0.17), h: Math.round(w * 0.17) },
+  };
+}
 
 export function CustomIdBuilder({ defaultName = "Member Name", defaultDesignation = "Member" }: {
   defaultName?: string;
   defaultDesignation?: string;
 }) {
+  const [size, setSize] = useState<CardSize>("landscape");
+  const { w: CANVAS_W, h: CANVAS_H } = SIZES[size];
+
   const [bg, setBg] = useState<string | null>(null);
   const [photo, setPhoto] = useState<string | null>(null);
   const [name, setName] = useState(defaultName);
   const [designation, setDesignation] = useState(defaultDesignation);
   const [qrValue, setQrValue] = useState("https://example.org/member/0001");
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
-  const [els, setEls] = useState<Record<ElementKey, ElState>>(DEFAULTS);
+
+  const [els, setEls] = useState<Record<ElementKey, ElState>>(() => defaultBuiltins(540, 340));
+  const [customFields, setCustomFields] = useState<CustomField[]>([]);
   const [selected, setSelected] = useState<ElementKey | null>(null);
   const [exporting, setExporting] = useState(false);
   const canvasRef = useRef<HTMLDivElement | null>(null);
 
-  // generate QR
+  // re-layout when size changes: clamp existing positions, scale builtins if not yet moved is hard — just clamp.
+  useEffect(() => {
+    setEls((prev) => {
+      const next: Record<ElementKey, ElState> = { ...prev };
+      for (const k of Object.keys(next)) {
+        const e = next[k];
+        const w = Math.min(e.w, CANVAS_W);
+        const h = Math.min(e.h, CANVAS_H);
+        next[k] = {
+          ...e,
+          w, h,
+          x: Math.max(0, Math.min(CANVAS_W - w, e.x)),
+          y: Math.max(0, Math.min(CANVAS_H - h, e.y)),
+        };
+      }
+      return next;
+    });
+  }, [CANVAS_W, CANVAS_H]);
+
   useEffect(() => {
     QRCode.toDataURL(qrValue || " ", { margin: 0, width: 256 }).then(setQrDataUrl).catch(() => setQrDataUrl(""));
   }, [qrValue]);
@@ -67,7 +107,6 @@ export function CustomIdBuilder({ defaultName = "Member Name", defaultDesignatio
     setEls((prev) => ({ ...prev, [key]: { ...prev[key], ...p } }));
   }
 
-  // dragging
   function startDrag(key: ElementKey, e: React.PointerEvent) {
     e.preventDefault();
     setSelected(key);
@@ -92,6 +131,36 @@ export function CustomIdBuilder({ defaultName = "Member Name", defaultDesignatio
     window.addEventListener("pointerup", up);
   }
 
+  function addCustomField() {
+    const id = `cf-${Date.now().toString(36)}`;
+    const idx = customFields.length + 1;
+    setCustomFields((prev) => [...prev, { id, label: `Custom Field ${idx}`, value: `Detail ${idx}` }]);
+    setEls((prev) => ({
+      ...prev,
+      [id]: {
+        enabled: true,
+        x: Math.round(CANVAS_W * 0.30),
+        y: Math.round(CANVAS_H * 0.60) + idx * 8,
+        w: Math.round(CANVAS_W * 0.65),
+        h: 24,
+        color: "#111111",
+        fontSize: 14,
+      },
+    }));
+  }
+
+  function removeCustomField(id: string) {
+    setCustomFields((prev) => prev.filter((f) => f.id !== id));
+    setEls((prev) => {
+      const { [id]: _drop, ...rest } = prev;
+      return rest;
+    });
+  }
+
+  function updateCustomField(id: string, p: Partial<CustomField>) {
+    setCustomFields((prev) => prev.map((f) => (f.id === id ? { ...f, ...p } : f)));
+  }
+
   async function exportPDF() {
     if (!canvasRef.current) return;
     setExporting(true);
@@ -100,7 +169,6 @@ export function CustomIdBuilder({ defaultName = "Member Name", defaultDesignatio
         import("html2canvas"),
         import("jspdf"),
       ]);
-      // deselect to hide outline
       const prevSelected = selected;
       setSelected(null);
       await new Promise((r) => setTimeout(r, 50));
@@ -111,9 +179,9 @@ export function CustomIdBuilder({ defaultName = "Member Name", defaultDesignatio
       });
       setSelected(prevSelected);
       const img = canvas.toDataURL("image/png");
-      // CR80 card: 85.6 x 54 mm landscape
-      const pdf = new jsPdf.jsPDF({ orientation: "landscape", unit: "mm", format: [85.6, 54] });
-      pdf.addImage(img, "PNG", 0, 0, 85.6, 54);
+      const { pdf: pdfSize, orient } = SIZES[size];
+      const pdf = new jsPdf.jsPDF({ orientation: orient, unit: "mm", format: pdfSize });
+      pdf.addImage(img, "PNG", 0, 0, pdfSize[0], pdfSize[1]);
       pdf.save(`id-card-${Date.now()}.pdf`);
       toast.success("PDF downloaded");
     } catch (err) {
@@ -124,11 +192,44 @@ export function CustomIdBuilder({ defaultName = "Member Name", defaultDesignatio
     }
   }
 
+  const cfMap = useMemo(() => Object.fromEntries(customFields.map((f) => [f.id, f])), [customFields]);
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-4">
       {/* Canvas */}
       <div className="space-y-3">
-        <div className="rounded-lg border p-3" style={{ background: "#0a0a0a", borderColor: BORDER }}>
+        {/* Card size selector */}
+        <div className="rounded-lg border p-2 flex items-center gap-2" style={{ background: PANEL, borderColor: BORDER }}>
+          <span className="text-[10px] font-bold uppercase tracking-wider px-1 shrink-0" style={{ color: SUB }}>Size</span>
+          <div className="flex flex-1 gap-1.5 flex-wrap">
+            {(Object.keys(SIZES) as CardSize[]).map((k) => {
+              const active = size === k;
+              return (
+                <button
+                  key={k}
+                  onClick={() => setSize(k)}
+                  className="flex-1 min-w-[90px] flex items-center justify-center gap-1.5 h-8 rounded text-[11px] font-semibold transition-colors"
+                  style={{
+                    background: active ? ACCENT : "#0a0a0a",
+                    color: active ? "#fff" : HEAD,
+                    border: `1px solid ${active ? ACCENT : BORDER}`,
+                  }}
+                >
+                  {SIZES[k].icon} {SIZES[k].label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div
+          className="rounded-xl border-2 p-4"
+          style={{
+            background: "linear-gradient(135deg, #0a0a0a 0%, #15151a 100%)",
+            borderColor: BORDER,
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
+          }}
+        >
           <div
             ref={canvasRef}
             onPointerDown={(e) => { if (e.target === e.currentTarget) setSelected(null); }}
@@ -138,10 +239,10 @@ export function CustomIdBuilder({ defaultName = "Member Name", defaultDesignatio
               maxWidth: CANVAS_W,
               aspectRatio: `${CANVAS_W} / ${CANVAS_H}`,
               background: bg ? `url(${bg}) center/cover no-repeat` : "#ffffff",
-              border: "1px solid #ddd",
-              borderRadius: 8,
+              border: "2px solid #000",
+              borderRadius: 10,
               overflow: "hidden",
-              boxShadow: "0 6px 20px rgba(0,0,0,0.35)",
+              boxShadow: "0 12px 40px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.08)",
             }}
           >
             {!bg && (
@@ -153,13 +254,8 @@ export function CustomIdBuilder({ defaultName = "Member Name", defaultDesignatio
               </div>
             )}
 
-            {/* Photo block */}
-            {els.photo.enabled && (
-              <DraggableBox
-                state={els.photo}
-                selected={selected === "photo"}
-                onPointerDown={(e) => startDrag("photo", e)}
-              >
+            {els.photo?.enabled && (
+              <DraggableBox state={els.photo} cw={CANVAS_W} ch={CANVAS_H} selected={selected === "photo"} onPointerDown={(e) => startDrag("photo", e)}>
                 {photo ? (
                   <img src={photo} alt="" className="w-full h-full object-cover pointer-events-none" />
                 ) : (
@@ -170,41 +266,26 @@ export function CustomIdBuilder({ defaultName = "Member Name", defaultDesignatio
               </DraggableBox>
             )}
 
-            {/* Name */}
-            {els.name.enabled && (
-              <DraggableBox
-                state={els.name}
-                selected={selected === "name"}
-                onPointerDown={(e) => startDrag("name", e)}
-              >
+            {els.name?.enabled && (
+              <DraggableBox state={els.name} cw={CANVAS_W} ch={CANVAS_H} selected={selected === "name"} onPointerDown={(e) => startDrag("name", e)}>
                 <div className="w-full h-full grid place-items-center px-2" style={{
-                  fontWeight: 800, color: els.name.color || "#111", fontSize: els.name.fontSize || Math.max(12, els.name.h * 0.55),
+                  fontWeight: 800, color: els.name.color || "#111", fontSize: els.name.fontSize || 22,
                   whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                 }}>{name}</div>
               </DraggableBox>
             )}
 
-            {/* Designation */}
-            {els.designation.enabled && (
-              <DraggableBox
-                state={els.designation}
-                selected={selected === "designation"}
-                onPointerDown={(e) => startDrag("designation", e)}
-              >
+            {els.designation?.enabled && (
+              <DraggableBox state={els.designation} cw={CANVAS_W} ch={CANVAS_H} selected={selected === "designation"} onPointerDown={(e) => startDrag("designation", e)}>
                 <div className="w-full h-full grid place-items-center px-2" style={{
-                  fontWeight: 500, color: els.designation.color || "#374151", fontSize: els.designation.fontSize || Math.max(10, els.designation.h * 0.6),
+                  fontWeight: 500, color: els.designation.color || "#374151", fontSize: els.designation.fontSize || 16,
                   whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                 }}>{designation}</div>
               </DraggableBox>
             )}
 
-            {/* QR */}
-            {els.qr.enabled && (
-              <DraggableBox
-                state={els.qr}
-                selected={selected === "qr"}
-                onPointerDown={(e) => startDrag("qr", e)}
-              >
+            {els.qr?.enabled && (
+              <DraggableBox state={els.qr} cw={CANVAS_W} ch={CANVAS_H} selected={selected === "qr"} onPointerDown={(e) => startDrag("qr", e)}>
                 {qrDataUrl ? (
                   <img src={qrDataUrl} alt="QR" className="w-full h-full pointer-events-none" style={{ background: "#fff" }} />
                 ) : (
@@ -214,18 +295,26 @@ export function CustomIdBuilder({ defaultName = "Member Name", defaultDesignatio
                 )}
               </DraggableBox>
             )}
+
+            {customFields.map((f) => {
+              const e = els[f.id];
+              if (!e?.enabled) return null;
+              return (
+                <DraggableBox key={f.id} state={e} cw={CANVAS_W} ch={CANVAS_H} selected={selected === f.id} onPointerDown={(ev) => startDrag(f.id, ev)}>
+                  <div className="w-full h-full grid place-items-center px-2" style={{
+                    fontWeight: 600, color: e.color || "#111", fontSize: e.fontSize || 14,
+                    whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                  }}>{f.value}</div>
+                </DraggableBox>
+              );
+            })}
           </div>
           <p className="text-[10px] mt-2 text-center" style={{ color: SUB }}>
-            Tap an element to select • drag to move • resize from the side panel
+            Tap an element to select • drag to move or use position sliders below
           </p>
         </div>
 
-        <Button
-          onClick={exportPDF}
-          disabled={exporting}
-          className="w-full h-10 font-semibold"
-          style={{ background: ACCENT, color: "#fff" }}
-        >
+        <Button onClick={exportPDF} disabled={exporting} className="w-full h-10 font-semibold" style={{ background: ACCENT, color: "#fff" }}>
           <Download className="h-4 w-4 mr-2" /> {exporting ? "Preparing PDF..." : "Download High-Quality PDF"}
         </Button>
       </div>
@@ -246,52 +335,82 @@ export function CustomIdBuilder({ defaultName = "Member Name", defaultDesignatio
         </Panel>
 
         <Panel title="2 · Elements / ఎలిమెంట్స్">
-          <ToggleRow icon={<User className="h-3.5 w-3.5" />} label="Photo / ఫోటో" on={els.photo.enabled} onChange={(v) => patch("photo", { enabled: v })} />
-          <ToggleRow icon={<TypeIcon className="h-3.5 w-3.5" />} label="Name / పేరు" on={els.name.enabled} onChange={(v) => patch("name", { enabled: v })} />
-          <ToggleRow icon={<Briefcase className="h-3.5 w-3.5" />} label="Designation / పదవి" on={els.designation.enabled} onChange={(v) => patch("designation", { enabled: v })} />
-          <ToggleRow icon={<QrCode className="h-3.5 w-3.5" />} label="QR Code / క్యూఆర్" on={els.qr.enabled} onChange={(v) => patch("qr", { enabled: v })} />
+          <ToggleRow icon={<User className="h-3.5 w-3.5" />} label="Photo / ఫోటో" on={els.photo?.enabled} onChange={(v) => patch("photo", { enabled: v })} />
+          <ToggleRow icon={<TypeIcon className="h-3.5 w-3.5" />} label="Name / పేరు" on={els.name?.enabled} onChange={(v) => patch("name", { enabled: v })} />
+          <ToggleRow icon={<Briefcase className="h-3.5 w-3.5" />} label="Designation / పదవి" on={els.designation?.enabled} onChange={(v) => patch("designation", { enabled: v })} />
+          <ToggleRow icon={<QrCode className="h-3.5 w-3.5" />} label="QR Code / క్యూఆర్" on={els.qr?.enabled} onChange={(v) => patch("qr", { enabled: v })} />
         </Panel>
 
-        {els.photo.enabled && (
+        {els.photo?.enabled && (
           <Panel title="3 · Photo">
             <UploadButton label={photo ? "Replace Photo" : "Upload Photo"} sub="మెంబర్ ఫోటో" onFile={(f) => uploadFile(f, setPhoto)} />
-            <SizeSliders state={els.photo} onChange={(p) => patch("photo", p)} />
+            <PositionSliders state={els.photo} cw={CANVAS_W} ch={CANVAS_H} onChange={(p) => patch("photo", p)} />
+            <SizeSliders state={els.photo} cw={CANVAS_W} ch={CANVAS_H} onChange={(p) => patch("photo", p)} />
           </Panel>
         )}
 
-        {els.name.enabled && (
+        {els.name?.enabled && (
           <Panel title="4 · Name Text">
             <LabeledInput label="Name" value={name} onChange={setName} />
             <FontSizeSlider value={els.name.fontSize || 22} onChange={(v) => patch("name", { fontSize: v })} />
             <ColorPickerRow label="Text Color / టెక్స్ట్ కలర్" value={els.name.color || "#111111"} onChange={(c) => patch("name", { color: c })} />
-            <SizeSliders state={els.name} onChange={(p) => patch("name", p)} />
+            <PositionSliders state={els.name} cw={CANVAS_W} ch={CANVAS_H} onChange={(p) => patch("name", p)} />
+            <SizeSliders state={els.name} cw={CANVAS_W} ch={CANVAS_H} onChange={(p) => patch("name", p)} />
           </Panel>
         )}
 
-        {els.designation.enabled && (
+        {els.designation?.enabled && (
           <Panel title="5 · Designation">
             <LabeledInput label="Designation" value={designation} onChange={setDesignation} />
             <FontSizeSlider value={els.designation.fontSize || 16} onChange={(v) => patch("designation", { fontSize: v })} />
             <ColorPickerRow label="Text Color / టెక్స్ట్ కలర్" value={els.designation.color || "#374151"} onChange={(c) => patch("designation", { color: c })} />
-            <SizeSliders state={els.designation} onChange={(p) => patch("designation", p)} />
+            <PositionSliders state={els.designation} cw={CANVAS_W} ch={CANVAS_H} onChange={(p) => patch("designation", p)} />
+            <SizeSliders state={els.designation} cw={CANVAS_W} ch={CANVAS_H} onChange={(p) => patch("designation", p)} />
           </Panel>
         )}
 
-        {els.qr.enabled && (
+        {els.qr?.enabled && (
           <Panel title="6 · QR Code">
             <LabeledInput label="QR Value (URL / ID)" value={qrValue} onChange={setQrValue} />
-            <SizeSliders state={els.qr} onChange={(p) => patch("qr", p)} square />
+            <PositionSliders state={els.qr} cw={CANVAS_W} ch={CANVAS_H} onChange={(p) => patch("qr", p)} />
+            <SizeSliders state={els.qr} cw={CANVAS_W} ch={CANVAS_H} onChange={(p) => patch("qr", p)} square />
           </Panel>
         )}
+
+        {/* Custom fields */}
+        {customFields.map((f, i) => {
+          const e = els[f.id];
+          if (!e) return null;
+          return (
+            <Panel key={f.id} title={`7.${i + 1} · ${f.label}`}>
+              <div className="flex items-center justify-between">
+                <ToggleRow icon={<TypeIcon className="h-3.5 w-3.5" />} label="Visible" on={e.enabled} onChange={(v) => patch(f.id, { enabled: v })} />
+                <Button variant="ghost" size="sm" onClick={() => removeCustomField(f.id)} className="h-7 px-2" style={{ color: "#ef4444" }}>
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </div>
+              <LabeledInput label="Label" value={f.label} onChange={(v) => updateCustomField(f.id, { label: v })} />
+              <LabeledInput label="Text" value={f.value} onChange={(v) => updateCustomField(f.id, { value: v })} />
+              <FontSizeSlider value={e.fontSize || 14} onChange={(v) => patch(f.id, { fontSize: v })} />
+              <ColorPickerRow label="Text Color" value={e.color || "#111111"} onChange={(c) => patch(f.id, { color: c })} />
+              <PositionSliders state={e} cw={CANVAS_W} ch={CANVAS_H} onChange={(p) => patch(f.id, p)} />
+              <SizeSliders state={e} cw={CANVAS_W} ch={CANVAS_H} onChange={(p) => patch(f.id, p)} />
+            </Panel>
+          );
+        })}
+
+        <Button onClick={addCustomField} variant="outline" className="w-full h-9 text-xs" style={{ borderColor: ACCENT, color: ACCENT, background: "transparent" }}>
+          <Plus className="h-4 w-4 mr-1" /> Add Custom Field
+        </Button>
       </div>
     </div>
   );
 }
 
 function DraggableBox({
-  state, selected, onPointerDown, children,
+  state, cw, ch, selected, onPointerDown, children,
 }: {
-  state: ElState; selected: boolean;
+  state: ElState; cw: number; ch: number; selected: boolean;
   onPointerDown: (e: React.PointerEvent) => void;
   children: React.ReactNode;
 }) {
@@ -300,10 +419,10 @@ function DraggableBox({
       onPointerDown={onPointerDown}
       className="absolute cursor-move"
       style={{
-        left: `${(state.x / CANVAS_W) * 100}%`,
-        top: `${(state.y / CANVAS_H) * 100}%`,
-        width: `${(state.w / CANVAS_W) * 100}%`,
-        height: `${(state.h / CANVAS_H) * 100}%`,
+        left: `${(state.x / cw) * 100}%`,
+        top: `${(state.y / ch) * 100}%`,
+        width: `${(state.w / cw) * 100}%`,
+        height: `${(state.h / ch) * 100}%`,
         outline: selected ? `2px dashed ${ACCENT}` : "1px dashed rgba(0,0,0,0.18)",
         outlineOffset: 1,
         background: "transparent",
@@ -323,11 +442,11 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
   );
 }
 
-function ToggleRow({ icon, label, on, onChange }: { icon: React.ReactNode; label: string; on: boolean; onChange: (v: boolean) => void }) {
+function ToggleRow({ icon, label, on, onChange }: { icon: React.ReactNode; label: string; on?: boolean; onChange: (v: boolean) => void }) {
   return (
     <div className="flex items-center justify-between gap-2 py-1">
       <div className="flex items-center gap-2 text-xs" style={{ color: HEAD }}>{icon} {label}</div>
-      <Switch checked={on} onCheckedChange={onChange} />
+      <Switch checked={!!on} onCheckedChange={onChange} />
     </div>
   );
 }
@@ -349,14 +468,25 @@ function UploadButton({ label, sub, onFile }: { label: string; sub?: string; onF
   );
 }
 
-function SizeSliders({ state, onChange, square = false }: {
-  state: ElState; onChange: (p: Partial<ElState>) => void; square?: boolean;
+function PositionSliders({ state, cw, ch, onChange }: { state: ElState; cw: number; ch: number; onChange: (p: Partial<ElState>) => void }) {
+  const maxX = Math.max(0, cw - state.w);
+  const maxY = Math.max(0, ch - state.h);
+  return (
+    <div className="space-y-2 pt-1 border-t" style={{ borderColor: BORDER }}>
+      <SliderRow label={`X: ${Math.round(state.x)}px`} value={Math.min(state.x, maxX)} min={0} max={maxX || 1} onChange={(x) => onChange({ x })} />
+      <SliderRow label={`Y: ${Math.round(state.y)}px`} value={Math.min(state.y, maxY)} min={0} max={maxY || 1} onChange={(y) => onChange({ y })} />
+    </div>
+  );
+}
+
+function SizeSliders({ state, cw, ch, onChange, square = false }: {
+  state: ElState; cw: number; ch: number; onChange: (p: Partial<ElState>) => void; square?: boolean;
 }) {
   return (
     <div className="space-y-2">
-      <SliderRow label={`Width: ${Math.round(state.w)}px`} value={state.w} min={20} max={CANVAS_W} onChange={(w) => onChange(square ? { w, h: w } : { w })} />
+      <SliderRow label={`Width: ${Math.round(state.w)}px`} value={state.w} min={20} max={cw} onChange={(w) => onChange(square ? { w, h: w } : { w })} />
       {!square && (
-        <SliderRow label={`Height: ${Math.round(state.h)}px`} value={state.h} min={16} max={CANVAS_H} onChange={(h) => onChange({ h })} />
+        <SliderRow label={`Height: ${Math.round(state.h)}px`} value={state.h} min={16} max={ch} onChange={(h) => onChange({ h })} />
       )}
     </div>
   );
