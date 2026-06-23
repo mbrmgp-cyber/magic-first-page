@@ -5,7 +5,7 @@ import { ArrowLeft, FileSpreadsheet, FileText, RefreshCw } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getMasterLedger } from "@/lib/accounts.functions";
-import { useCurrency, CurrencySelector } from "@/lib/currency-context";
+import { useCurrency } from "@/lib/currency-context";
 
 export const Route = createFileRoute("/_authenticated/org/master-ledger")({
   head: () => ({ meta: [{ title: "Admin Master Ledger" }] }),
