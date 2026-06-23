@@ -76,9 +76,17 @@ function DesignsPage() {
   const [letterPick, setLetterPick] = useState<LetterLayout>("standard-header");
   const [generating, setGenerating] = useState(false);
 
+  // Letterhead dual-mode state
+  const [letterMode, setLetterMode] = useState<"rich" | "blank">("rich");
+  const [letterTo, setLetterTo] = useState("");
+  const [letterSubject, setLetterSubject] = useState("");
+  const [letterBody, setLetterBody] = useState("");
+  const [letterDate, setLetterDate] = useState(new Date().toISOString().slice(0, 10));
+
   const orgName = org?.name || "Chitvel Help Line Society";
   const orgSlogan = org?.slogan || "॥ మానవసేవే మాధవసేవ ॥";
   const orgReg = org?.gov_reg_number || "356/16";
+  const orgAddress = org?.address || "";
 
   async function applyAndGenerate() {
     setGenerating(true);
