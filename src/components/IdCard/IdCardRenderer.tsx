@@ -245,7 +245,7 @@ function renderFront(design: IdCardDesign, org: OrgContext, member: SampleMember
   return vertical ? <FrontVertical design={design} org={org} member={member} /> : <FrontHorizontal design={design} org={org} member={member} />;
 }
 
-function renderBack(design: IdCardDesign, org: OrgContext, _member: SampleMember) {
+function renderBack(design: IdCardDesign, org: OrgContext, member: SampleMember) {
   const e = design.elements;
   const g = design.global;
   const mbrLogoUrl = org.mbrLogoUrl || mbrLogoAsset.url;
@@ -257,17 +257,35 @@ function renderBack(design: IdCardDesign, org: OrgContext, _member: SampleMember
   const userSize = e.backMatter?.size;
   const fitSize = userSize && userSize > 0 ? Math.min(userSize, autoFitSize(backText, userSize)) : autoFitSize(backText);
   const backTextStyle = { ...txt(e.backMatter), fontSize: fitSize + "px" };
+
+  // Pick president label per active language (te = Telugu only, else English)
+  const lang = (typeof window !== "undefined" && window.localStorage?.getItem("mbr_lang")) || "te";
+  const presLabel = lang === "te" ? "అధ్యక్షుడు" : "President";
+
+  // Oath text — replace {name} / (సభ్యుడి పేరు) placeholder with member name
+  const oathRaw = design.oathText || "";
+  const oathText = oathRaw
+    .replace(/\{name\}/gi, member.name || "")
+    .replace(/\(\s*సభ్యుడి పేరు\s*\)/g, member.name || "");
+
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", padding: 10, gap: 6, position: "relative" }}>
       <div style={{ borderBottom: `2px solid ${g.accentColor}`, paddingBottom: 4, paddingRight: mbrLogoSize + 8 }}>
         <div style={{ ...txt(e.orgName, g.accentColor), color: g.accentColor }}>{org.name}</div>
       </div>
       <div style={{ flex: 1, display: "flex", gap: 8, minHeight: 0 }}>
-        {show(e.backMatter) && (
-          <div style={{ flex: 1, minWidth: 0, ...backTextStyle, whiteSpace: "pre-wrap", overflow: "hidden", wordBreak: "break-word" }}>
-            {backText}
-          </div>
-        )}
+        <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 4 }}>
+          {show(e.backMatter) && (
+            <div style={{ ...backTextStyle, whiteSpace: "pre-wrap", overflow: "hidden", wordBreak: "break-word" }}>
+              {backText}
+            </div>
+          )}
+          {show(e.oath) && oathText && (
+            <div style={{ ...txt(e.oath), whiteSpace: "pre-wrap", wordBreak: "break-word", padding: "4px 6px", border: `1px dashed ${g.accentColor}`, borderRadius: 4, background: "rgba(0,0,0,0.02)" }}>
+              {oathText}
+            </div>
+          )}
+        </div>
         {show(e.mbrQrCode) && (
           <div style={{ flexShrink: 0, width: qrSize + 4, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
             {org.mbrQrUrl ? (
@@ -285,12 +303,13 @@ function renderBack(design: IdCardDesign, org: OrgContext, _member: SampleMember
             <img src={org.presidentSignatureUrl} alt="" style={{ width: e.presidentSignature.imgSize, height: 32, objectFit: "contain", display: "block" }} />
           )}
           {showPresName && <div style={{ fontWeight: 700 }}>{presName}</div>}
-          <div style={{ opacity: 0.75 }}>President / అధ్యక్షుడు</div>
+          <div style={{ opacity: 0.75 }}>{presLabel}</div>
         </div>
       </div>
-      {/* MBR logo is a permanent forced branding element — always visible */}
-      <img src={mbrLogoUrl} alt="MBR" style={{ ...cornerStyle(e.mbrLogo?.corner, 4), width: mbrLogoSize, height: mbrLogoSize, objectFit: "contain", borderRadius: "50%", background: "#000", padding: 1 }} />
+      {/* MBR logo — permanent branding, nudged inward to clear border */}
+      <img src={mbrLogoUrl} alt="MBR" style={{ ...cornerStyle(e.mbrLogo?.corner, 10), width: mbrLogoSize, height: mbrLogoSize, objectFit: "contain", borderRadius: "50%", background: "#000", padding: 1 }} />
     </div>
   );
 }
+
 

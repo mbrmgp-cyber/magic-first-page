@@ -30,10 +30,12 @@ export type ElementKey =
   | "address"
   // back-only
   | "backMatter"
+  | "oath"
   | "mbrQrCode"
   | "mbrLogo"
   | "presidentSignature"
   | "presidentName";
+
 
 export type CornerPosition = "tl" | "tr" | "bl" | "br";
 
@@ -65,7 +67,9 @@ export type IdCardDesign = {
   global: GlobalStyle;
   elements: Record<ElementKey, ElementStyle>;
   backMatter?: string; // editable back-side paragraph text
+  oathText?: string;   // editable oath / pledge text (use {name} for member name)
 };
+
 
 export const FONT_OPTIONS = [
   "Inter",
@@ -100,6 +104,7 @@ function makeElements(accent: string, textColor: string): Record<ElementKey, Ele
     bloodGroup:  TEXT({ size: 11, weight: 800, color: "#c1121f" }),
     address:     TEXT({ size: 9, visible: false }),
     backMatter:  TEXT({ size: 10, weight: 500, lineHeight: 1.4 }),
+    oath:        TEXT({ size: 9, weight: 500, lineHeight: 1.4, visible: false }),
     mbrQrCode:   { visible: true, imgSize: 56 },
     mbrLogo:     { visible: true, imgSize: 24, corner: "br" },
 
@@ -119,6 +124,10 @@ export const TEMPLATE_META: Record<TemplateId, { en: string; te: string; descrip
 
 const DEFAULT_BACK_MATTER =
   "ముఖ్య ఉద్దేశాలు:\nమండల ప్రజలకు మౌలిక సదుపాయాల (విద్య, వైద్య, పర్యావరణ) ఏర్పాట్లకై ప్రయత్నం.\nకుల, మత, ప్రాంత, వర్గ రాజకీయాలకు అతీతంగా యువకులలో దేశభక్తిని పెంచడం.\nఆపదలో ఉన్నవారికి నిస్వార్థ సహాయం అందించడం.";
+
+const DEFAULT_OATH =
+  "ప్రమాణం: ఈ సంస్థ ఆశయం కోసం, అందులోని విధివిధానాలకు అనుకూలంగా నిస్వార్థంగా సేవ చేస్తానని ప్రమాణం చేస్తున్నాను. — {name}";
+
 
 export const TEMPLATES: Record<TemplateId, Omit<IdCardDesign, "cardType">> = {
   classic: {
@@ -179,6 +188,7 @@ export function defaultDesign(templateId: TemplateId = "classic", cardType: Card
     global: { ...base.global },
     elements: JSON.parse(JSON.stringify(base.elements)),
     backMatter: base.backMatter || DEFAULT_BACK_MATTER,
+    oathText: DEFAULT_OATH,
   };
 }
 
@@ -200,6 +210,7 @@ export const ELEMENT_LABELS: Record<ElementKey, { en: string; te: string; side: 
   bloodGroup:  { en: "Blood Group",       te: "బ్లడ్ గ్రూప్",     side: "front" },
   address:     { en: "Address",           te: "అడ్రస్",          side: "back" },
   backMatter:  { en: "Back Side Text",    te: "వెనుక మేటర్",     side: "back" },
+  oath:        { en: "Oath / ప్రమాణం",    te: "ప్రమాణం",          side: "back" },
   mbrQrCode:   { en: "MBR App QR",        te: "MBR యాప్ క్యూఆర్", side: "back" },
   mbrLogo:     { en: "MBR Small Logo",    te: "MBR చిన్న లోగో",  side: "back" },
   presidentSignature: { en: "President Signature", te: "ప్రెసిడెంట్ సంతకం", side: "back" },
