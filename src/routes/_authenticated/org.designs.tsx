@@ -1511,13 +1511,16 @@ function LetterPreview({
   layout, theme, orgName, slogan, reg, logoUrl, cardBg = "#ffffff",
   to = "", date = "", subject = "", body = "", showContent = true,
   logoSize = 48, titleSize = 16,
+  titleColor, sloganColor = "#555555", regColor = "#666666",
 }: {
   layout: LetterLayout; theme: Required<ThemeSettings>;
   orgName: string; slogan: string; reg: string;
   logoUrl?: string; cardBg?: string;
   to?: string; date?: string; subject?: string; body?: string; showContent?: boolean;
   logoSize?: number; titleSize?: number;
+  titleColor?: string; sloganColor?: string; regColor?: string;
 }) {
+  const titleC = titleColor ?? theme.icon;
   const headFF = `${theme.headFont}, "Noto Sans Telugu", system-ui, sans-serif`;
   const subFF = `${theme.subFont}, "Noto Sans Telugu", system-ui, sans-serif`;
   const W = 320, H = 460;
