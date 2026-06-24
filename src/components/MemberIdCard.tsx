@@ -339,7 +339,7 @@ function LegacyLayout(props: any) {
       </ScaledCard>
 
       <div className="flex justify-between items-center gap-2 pt-2">
-        <Button size="sm" variant="outline" onClick={() => setShowBack(v => !v)}>
+        <Button size="sm" variant="outline" onClick={() => setShowBack((v: boolean) => !v)}>
           <RotateCw className="w-4 h-4 mr-1" />
           {showBack ? (lang === "en" ? "Front" : lang === "hi" ? "सामने" : "ముందు")
                     : (lang === "en" ? "Back" : lang === "hi" ? "पीछे" : "వెనుక")}
