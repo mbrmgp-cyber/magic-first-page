@@ -167,6 +167,8 @@ function DesignsPage() {
   const [letterBody, setLetterBody] = useState("");
   const [letterDate, setLetterDate] = useState(new Date().toISOString().slice(0, 10));
   const [letterLogo, setLetterLogo] = useState<string | null>(null);
+  const [letterLogoSize, setLetterLogoSize] = useState<number>(48);
+  const [letterTitleSize, setLetterTitleSize] = useState<number>(16);
 
   // Receipt state
   const [receiptPick, setReceiptPick] = useState<ReceiptLayout | null>(null);
