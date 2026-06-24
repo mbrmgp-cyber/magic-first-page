@@ -65,6 +65,17 @@ export function TemplateCustomizer({ design, onChange }: Props) {
           placeholder="వెనుక సైడ్ కు రాయాల్సిన మేటర్..."
           className="text-xs"
         />
+        <div className="space-y-1">
+          <Label className="text-[11px]" style={{ color: TEXT_SUB }}>
+            Line Height / లైన్ గ్యాప్ — {(design.elements.backMatter.lineHeight ?? 1.4).toFixed(2)}
+          </Label>
+          <input
+            type="range" min={1} max={2.2} step={0.05}
+            value={design.elements.backMatter.lineHeight ?? 1.4}
+            onChange={(e) => setElement("backMatter", { lineHeight: Number(e.target.value) })}
+            className="w-full"
+          />
+        </div>
       </Section>
 
       {/* BACK ELEMENTS */}
@@ -74,6 +85,7 @@ export function TemplateCustomizer({ design, onChange }: Props) {
     </div>
   );
 }
+
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
