@@ -349,9 +349,10 @@ function LegacyLayout(props: any) {
           {lang === "en" ? "Print / PDF" : lang === "hi" ? "प्रिंट / PDF" : "ప్రింట్ / PDF"}
         </Button>
       </div>
-    </div>
+    </>
   );
 }
+
 
 function CardFront({
   fref, member, org, photoUrl, logoUrl, sigUrl, qrDataUrl, joined, t, lang,
