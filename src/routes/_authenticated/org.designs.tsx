@@ -166,12 +166,12 @@ function DesignsPage() {
   const [letterSubject, setLetterSubject] = useState("");
   const [letterBody, setLetterBody] = useState("");
   const [letterDate, setLetterDate] = useState(new Date().toISOString().slice(0, 10));
-  const [letterLogo, setLetterLogo] = useState<string>(mbrLogo.url);
+  const [letterLogo, setLetterLogo] = useState<string | null>(null);
 
   // Receipt state
   const [receiptPick, setReceiptPick] = useState<ReceiptLayout | null>(null);
   const [receipt, setReceipt] = useState<ReceiptData>(DEFAULT_RECEIPT);
-  const [receiptLogo, setReceiptLogo] = useState<string>(mbrLogo.url);
+  const [receiptLogo, setReceiptLogo] = useState<string | null>(null);
 
 
   // Design Customization (per-edit-session overrides — nullable so live theme wins until user picks).
