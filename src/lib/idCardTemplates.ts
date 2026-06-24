@@ -188,6 +188,7 @@ export function defaultDesign(templateId: TemplateId = "classic", cardType: Card
     global: { ...base.global },
     elements: JSON.parse(JSON.stringify(base.elements)),
     backMatter: base.backMatter || DEFAULT_BACK_MATTER,
+    oathText: DEFAULT_OATH,
   };
 }
 
