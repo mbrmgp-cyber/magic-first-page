@@ -1429,15 +1429,24 @@ function StandardBackPreview({
 }
 
 function LetterPreview({
-  layout, theme, orgName, slogan, reg,
+  layout, theme, orgName, slogan, reg, logoUrl, cardBg = "#ffffff",
+  to = "", date = "", subject = "", body = "", showContent = true,
 }: {
   layout: LetterLayout; theme: Required<ThemeSettings>;
   orgName: string; slogan: string; reg: string;
+  logoUrl?: string; cardBg?: string;
+  to?: string; date?: string; subject?: string; body?: string; showContent?: boolean;
 }) {
   const headFF = `${theme.headFont}, "Noto Sans Telugu", system-ui, sans-serif`;
   const subFF = `${theme.subFont}, "Noto Sans Telugu", system-ui, sans-serif`;
-  const W = 320, H = 420;
-  const lines = (
+  const W = 320, H = 460;
+  const dateStr = date ? new Date(date).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" }) : "";
+
+  const LogoImg = logoUrl ? (
+    <img src={logoUrl} alt="Logo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+  ) : <Sparkles style={{ width: "60%", height: "60%", color: theme.icon }} />;
+
+  const placeholderLines = (
     <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 6 }}>
       {Array.from({ length: 10 }).map((_, i) => (
         <div key={i} style={{ height: 4, background: "#e5e5e5", borderRadius: 2, width: `${95 - (i % 4) * 8}%` }} />
@@ -1445,25 +1454,33 @@ function LetterPreview({
     </div>
   );
 
+  const content = showContent && (to || subject || body || dateStr) ? (
+    <div style={{ marginTop: 12, fontFamily: subFF, fontSize: 10, color: "#111", lineHeight: 1.5 }}>
+      {dateStr ? <div style={{ textAlign: "right", color: "#444", marginBottom: 6 }}>{dateStr}</div> : null}
+      {to ? <div style={{ whiteSpace: "pre-wrap", marginBottom: 6 }}>{to}</div> : null}
+      {subject ? <div style={{ fontWeight: 800, marginBottom: 6 }}>విషయం: {subject}</div> : null}
+      {body ? <div style={{ whiteSpace: "pre-wrap" }}>{body}</div> : null}
+    </div>
+  ) : placeholderLines;
+
   if (layout === "watermark-centered") {
     return (
       <div style={{
-        width: W, height: H, background: "#fff", borderRadius: 10, padding: 18,
+        width: W, height: H, background: cardBg, borderRadius: 10, padding: 18,
         border: `1px solid ${theme.border}`, boxShadow: `0 8px 28px ${theme.icon}33`,
         position: "relative", overflow: "hidden",
       }}>
-        <div style={{
-          position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
-          opacity: 0.08, pointerEvents: "none",
-        }}>
-          <Sparkles style={{ height: 180, width: 180, color: theme.icon }} />
-        </div>
+        {logoUrl ? (
+          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.08, pointerEvents: "none" }}>
+            <img src={logoUrl} alt="" style={{ width: 200, height: 200, objectFit: "contain" }} />
+          </div>
+        ) : null}
         <div style={{ position: "relative", textAlign: theme.headAlign }}>
           <div style={{ fontFamily: headFF, fontWeight: 900, color: theme.icon, fontSize: 18 }}>{orgName}</div>
           <div style={{ fontFamily: subFF, fontStyle: "italic", color: theme.subColor, fontSize: 11 }}>{slogan}</div>
           <div style={{ fontSize: theme.smallSize, color: "#666" }}>Reg No: {reg}</div>
         </div>
-        {lines}
+        <div style={{ position: "relative" }}>{content}</div>
       </div>
     );
   }
@@ -1472,20 +1489,22 @@ function LetterPreview({
     return (
       <div style={{
         width: W, height: H, borderRadius: 10, overflow: "hidden", display: "flex",
-        border: `1px solid ${theme.border}`, boxShadow: `0 8px 28px ${theme.icon}33`,
+        border: `1px solid ${theme.border}`, boxShadow: `0 8px 28px ${theme.icon}33`, background: cardBg,
       }}>
-        <div style={{ width: 88, background: theme.icon, padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
-          <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#fff",
-            display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto" }}>
-            <Sparkles className="h-6 w-6" style={{ color: theme.icon }} />
+        <div style={{ width: 92, background: theme.icon, padding: 10, display: "flex", flexDirection: "column", gap: 6 }}>
+          <div style={{ width: 60, height: 60, borderRadius: "50%", background: "#fff",
+            display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto", padding: 4 }}>
+            {LogoImg}
           </div>
-          <div style={{ fontFamily: headFF, fontSize: 9, color: theme.buttonText, fontWeight: 700, textAlign: "center" }}>{orgName}</div>
-          <div style={{ fontFamily: subFF, fontSize: 8, color: theme.buttonText, opacity: 0.85, fontStyle: "italic", textAlign: "center" }}>{slogan}</div>
-          <div style={{ fontSize: theme.smallSize - 2, color: theme.buttonText, opacity: 0.85, textAlign: "center" }}>Reg: {reg}</div>
+          <div style={{ fontFamily: headFF, fontSize: 10, color: theme.buttonText, fontWeight: 800, textAlign: "center", lineHeight: 1.2 }}>{orgName}</div>
+          <div style={{ fontFamily: subFF, fontSize: 8, color: theme.buttonText, opacity: 0.9, fontStyle: "italic", textAlign: "center" }}>{slogan}</div>
+          <div style={{ fontSize: 8, color: theme.buttonText, opacity: 0.85, textAlign: "center" }}>Reg: {reg}</div>
         </div>
-        <div style={{ flex: 1, padding: 14, background: "#fff" }}>
-          <div style={{ fontFamily: headFF, fontWeight: 800, color: "#111", fontSize: 13 }}>Letter Heading</div>
-          {lines}
+        <div style={{ flex: 1, padding: 14, background: cardBg }}>
+          <div style={{ fontFamily: headFF, fontWeight: 800, color: "#111", fontSize: 13 }}>
+            {subject || "Letter Heading"}
+          </div>
+          {content}
         </div>
       </div>
     );
@@ -1493,7 +1512,7 @@ function LetterPreview({
 
   return (
     <div style={{
-      width: W, height: H, background: "#fff", borderRadius: 10, padding: 18,
+      width: W, height: H, background: cardBg, borderRadius: 10, padding: 18,
       border: `1px solid ${theme.border}`, boxShadow: `0 8px 28px ${theme.icon}33`,
     }}>
       <div style={{
@@ -1501,9 +1520,9 @@ function LetterPreview({
         paddingBottom: 10, borderBottom: `3px solid ${theme.icon}`,
         flexDirection: theme.headAlign === "right" ? "row-reverse" : "row",
       }}>
-        <div style={{ width: 44, height: 44, borderRadius: "50%", background: theme.icon,
-          display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <Sparkles className="h-5 w-5" style={{ color: theme.buttonText }} />
+        <div style={{ width: 48, height: 48, borderRadius: "50%", background: "#fff", border: `2px solid ${theme.icon}`,
+          display: "flex", alignItems: "center", justifyContent: "center", padding: 3, flexShrink: 0 }}>
+          {LogoImg}
         </div>
         <div style={{ flex: 1, textAlign: theme.headAlign }}>
           <div style={{ fontFamily: headFF, fontWeight: 900, color: theme.icon, fontSize: 16 }}>{orgName}</div>
@@ -1511,7 +1530,7 @@ function LetterPreview({
           <div style={{ fontSize: theme.smallSize, color: "#666" }}>Reg No: {reg}</div>
         </div>
       </div>
-      {lines}
+      {content}
     </div>
   );
 }
