@@ -246,6 +246,54 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
 
   return (
     <div className="space-y-3">
+      {org?.id_card_design ? (
+        <SavedDesignCard
+          design={org.id_card_design}
+          org={org}
+          member={member}
+          photoUrl={photoUrl}
+          logoUrl={logoUrl}
+          sigUrl={sigUrl}
+          qrDataUrl={qrDataUrl}
+          showBack={showBack}
+          setShowBack={setShowBack}
+          frontRef={frontRef}
+          backRef={backRef}
+          onPrint={handlePrint}
+          lang={lang}
+        />
+      ) : (
+        <LegacyLayout
+          langs={langs}
+          lang={lang}
+          setLang={setLang}
+          langLabel={langLabel}
+          showBack={showBack}
+          setShowBack={setShowBack}
+          handlePrint={handlePrint}
+          frontRef={frontRef}
+          backRef={backRef}
+          member={member}
+          org={org}
+          t={t}
+          photoUrl={photoUrl}
+          logoUrl={logoUrl}
+          sigUrl={sigUrl}
+          qrDataUrl={qrDataUrl}
+          appQrUrl={appQrUrl}
+          joined={joined}
+        />
+      )}
+    </div>
+  );
+}
+
+function LegacyLayout(props: any) {
+  const { langs, lang, setLang, langLabel, showBack, setShowBack, handlePrint,
+          frontRef, backRef, member, org, t, photoUrl, logoUrl, sigUrl, qrDataUrl, appQrUrl, joined } = props;
+  return (
+    <>
+
       <div className="flex items-center gap-1 justify-center">
         <Languages className="w-4 h-4 text-muted-foreground" />
         {langs.map(l => (
