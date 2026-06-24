@@ -227,6 +227,24 @@ export const updateOrgTheme = createServerFn({ method: "POST" })
     return { org };
   });
 
+export const updateOrgIdDesign = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id_card_design: Record<string, any> }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: org, error } = await supabase
+      .from("organizations")
+      .update({ id_card_design: data.id_card_design } as any)
+      .eq("admin_user_id", userId)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return { org };
+  });
+
+
+
+
 
 
 
