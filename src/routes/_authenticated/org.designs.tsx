@@ -890,35 +890,58 @@ function IdThumb({ layout, theme }: { layout: IdLayout; theme: Required<ThemeSet
   );
 }
 
-function LetterThumb({ layout, theme }: { layout: LetterLayout; theme: Required<ThemeSettings> }) {
+function LetterThumb({
+  layout, theme, orgName, slogan, reg, logoUrl,
+}: {
+  layout: LetterLayout; theme: Required<ThemeSettings>;
+  orgName?: string; slogan?: string; reg?: string; logoUrl?: string;
+}) {
   const c = theme.icon, br = theme.border;
   const common: React.CSSProperties = {
     width: "100%", height: "100%", borderRadius: 4,
-    background: "#fff", border: `1px solid ${br}`, overflow: "hidden", padding: 5,
+    background: "#fff", border: `1px solid ${br}`, overflow: "hidden", padding: 6,
+    fontFamily: `${theme.headFont}, "Noto Sans Telugu", system-ui, sans-serif`,
   };
+  const Logo = ({ size = 22 }: { size?: number }) => (
+    <div style={{ width: size, height: size, borderRadius: "50%", background: "#fff", border: `1px solid ${c}`, padding: 2,
+      display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+      {logoUrl ? <img src={logoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+        : <div style={{ width: "60%", height: "60%", borderRadius: "50%", background: c }} />}
+    </div>
+  );
+  const placeholderLines = (
+    <div style={{ marginTop: 5, display: "flex", flexDirection: "column", gap: 2 }}>
+      {Array.from({ length: 7 }).map((_, i) => (
+        <div key={i} style={{ height: 2, background: "#ddd", width: `${90 - (i % 4) * 8}%` }} />
+      ))}
+    </div>
+  );
+
   if (layout === "watermark-centered") {
     return (
       <div style={{ ...common, position: "relative" }}>
-        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.12 }}>
-          <div style={{ width: 50, height: 50, borderRadius: "50%", background: c }} />
+        {logoUrl ? (
+          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.1 }}>
+            <img src={logoUrl} alt="" style={{ width: "60%", height: "60%", objectFit: "contain" }} />
+          </div>
+        ) : null}
+        <div style={{ position: "relative", textAlign: "center" }}>
+          <div style={{ fontSize: 8, fontWeight: 900, color: c, lineHeight: 1.1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{orgName}</div>
+          <div style={{ fontSize: 6, color: "#666", fontStyle: "italic", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{slogan}</div>
+          <div style={{ fontSize: 6, color: "#888" }}>Reg: {reg}</div>
         </div>
-        <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: 2 }}>
-          <div style={{ height: 4, background: c, width: "60%", margin: "0 auto" }} />
-          <div style={{ height: 2, background: "#888", width: "40%", margin: "2px auto 4px" }} />
-          {Array.from({ length: 7 }).map((_, i) => (
-            <div key={i} style={{ height: 2, background: "#ddd", width: `${85 - (i % 3) * 10}%` }} />
-          ))}
-        </div>
+        <div style={{ position: "relative" }}>{placeholderLines}</div>
       </div>
     );
   }
   if (layout === "left-sidebar") {
     return (
       <div style={{ ...common, padding: 0, display: "flex" }}>
-        <div style={{ width: "28%", background: c, padding: 4, display: "flex", flexDirection: "column", gap: 3 }}>
-          <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#fff", margin: "0 auto" }} />
-          <div style={{ height: 2, background: "#fff", opacity: 0.7 }} />
-          <div style={{ height: 2, background: "#fff", opacity: 0.5, width: "70%" }} />
+        <div style={{ width: "32%", background: c, padding: 4, display: "flex", flexDirection: "column", gap: 3, alignItems: "center" }}>
+          <Logo size={20} />
+          <div style={{ fontSize: 6, color: "#fff", fontWeight: 800, textAlign: "center", lineHeight: 1.1, overflow: "hidden" }}>{orgName}</div>
+          <div style={{ fontSize: 5, color: "#fff", opacity: 0.85, textAlign: "center", fontStyle: "italic" }}>{slogan}</div>
+          <div style={{ fontSize: 5, color: "#fff", opacity: 0.85 }}>Reg: {reg}</div>
         </div>
         <div style={{ flex: 1, padding: 5, display: "flex", flexDirection: "column", gap: 2 }}>
           {Array.from({ length: 8 }).map((_, i) => (
@@ -931,62 +954,84 @@ function LetterThumb({ layout, theme }: { layout: LetterLayout; theme: Required<
   return (
     <div style={common}>
       <div style={{ display: "flex", alignItems: "center", gap: 4, borderBottom: `2px solid ${c}`, paddingBottom: 4 }}>
-        <div style={{ width: 12, height: 12, borderRadius: "50%", background: c }} />
-        <div style={{ flex: 1 }}>
-          <div style={{ height: 3, background: "#333", width: "80%" }} />
-          <div style={{ height: 2, background: "#888", width: "50%", marginTop: 2 }} />
+        <Logo size={22} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 8, fontWeight: 900, color: c, lineHeight: 1.1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{orgName}</div>
+          <div style={{ fontSize: 6, color: "#666", fontStyle: "italic", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{slogan}</div>
+          <div style={{ fontSize: 6, color: "#888" }}>Reg: {reg}</div>
         </div>
       </div>
-      <div style={{ marginTop: 5, display: "flex", flexDirection: "column", gap: 2 }}>
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} style={{ height: 2, background: "#ddd", width: `${90 - (i % 4) * 8}%` }} />
-        ))}
-      </div>
+      {placeholderLines}
     </div>
   );
 }
 
-function ReceiptThumb({ layout, accent }: { layout: ReceiptLayout; accent: string }) {
+function ReceiptThumb({
+  layout, accent, orgName, slogan, reg, logoUrl,
+}: {
+  layout: ReceiptLayout; accent: string;
+  orgName?: string; slogan?: string; reg?: string; logoUrl?: string;
+}) {
   const common: React.CSSProperties = {
     width: "100%", height: "100%", borderRadius: 4, background: "#fff",
     overflow: "hidden", padding: 5, display: "flex", flexDirection: "column", gap: 3,
   };
+  const Logo = ({ size = 18 }: { size?: number }) => (
+    <div style={{ width: size, height: size, borderRadius: 3, background: "#fff", border: `1px solid ${accent}`, padding: 1,
+      display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+      {logoUrl ? <img src={logoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+        : <div style={{ width: "60%", height: "60%", borderRadius: "50%", background: accent }} />}
+    </div>
+  );
+  const rows = (
+    <div style={{ display: "flex", flexDirection: "column", gap: 2, marginTop: 2 }}>
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} style={{ height: 2, background: "#ddd", width: `${85 - i * 10}%` }} />
+      ))}
+    </div>
+  );
+
   if (layout === "saffron-strip") {
     return (
       <div style={{ ...common, padding: 0 }}>
-        <div style={{ background: accent, height: 14, padding: "2px 6px" }}>
-          <div style={{ height: 3, width: "60%", background: "#fff" }} />
+        <div style={{ background: accent, padding: "3px 6px", display: "flex", alignItems: "center", gap: 4 }}>
+          <Logo size={16} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 7, fontWeight: 900, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{orgName}</div>
+            <div style={{ fontSize: 5, color: "#fff", opacity: 0.9 }}>Reg: {reg}</div>
+          </div>
         </div>
-        <div style={{ padding: 6, display: "flex", flexDirection: "column", gap: 3 }}>
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} style={{ height: 2, background: "#ddd", width: `${85 - i * 10}%` }} />
-          ))}
-        </div>
+        <div style={{ padding: 6 }}>{rows}</div>
       </div>
     );
   }
   if (layout === "minimal-line") {
     return (
       <div style={common}>
-        <div style={{ height: 3, background: "#111", width: "60%" }} />
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <Logo size={16} />
+          <div style={{ fontSize: 7, fontWeight: 900, color: "#111", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{orgName}</div>
+        </div>
         <div style={{ height: 1, background: "#111" }} />
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} style={{ height: 2, background: "#ddd", width: `${80 - i * 8}%` }} />
-        ))}
+        {rows}
       </div>
     );
   }
-  // classic
   return (
     <div style={{ ...common, border: `2px solid ${accent}` }}>
-      <div style={{ textAlign: "center", height: 3, background: accent, width: "70%", margin: "0 auto" }} />
-      <div style={{ height: 2, background: "#888", width: "40%", margin: "2px auto" }} />
-      {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} style={{ height: 2, background: "#ddd", width: `${85 - i * 10}%` }} />
-      ))}
+      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+        <Logo size={18} />
+        <div style={{ flex: 1, minWidth: 0, textAlign: "center" }}>
+          <div style={{ fontSize: 7, fontWeight: 900, color: accent, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{orgName}</div>
+          <div style={{ fontSize: 5, color: "#666", fontStyle: "italic" }}>{slogan}</div>
+          <div style={{ fontSize: 5, color: "#888" }}>Reg: {reg}</div>
+        </div>
+      </div>
+      {rows}
     </div>
   );
 }
+
 
 /* ---------------- Live Previews ---------------- */
 
