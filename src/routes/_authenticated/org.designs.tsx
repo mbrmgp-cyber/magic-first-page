@@ -442,6 +442,11 @@ function DesignsPage() {
                     <input type="range" min={12} max={28} step={1} value={letterTitleSize}
                       onChange={(e) => setLetterTitleSize(Number(e.target.value))} className="w-full" />
                   </div>
+                  <div className="space-y-1">
+                    <Label className="text-[10px]" style={{ color: PAGE_SUB }}>Reg No Size — {letterRegSize}px</Label>
+                    <input type="range" min={7} max={18} step={1} value={letterRegSize}
+                      onChange={(e) => setLetterRegSize(Number(e.target.value))} className="w-full" />
+                  </div>
                   <div className="grid grid-cols-3 gap-2 pt-1">
                     <LineColor label="Title / టైటిల్" value={letterTitleColor ?? effectiveAccent} onChange={setLetterTitleColor} />
                     <LineColor label="Slogan / స్లోగన్" value={letterSloganColor ?? "#555555"} onChange={setLetterSloganColor} />
