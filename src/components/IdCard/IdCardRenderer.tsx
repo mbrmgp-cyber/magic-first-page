@@ -129,6 +129,8 @@ export function IdCardRenderer({ design, org, member, side, scale = 1 }: Props) 
 function Header({ design, org }: { design: IdCardDesign; org: OrgContext }) {
   const e = design.elements;
   const g = design.global;
+  const align = g.headerAlign || "left";
+  const justify = align === "center" ? "center" : align === "right" ? "flex-end" : "flex-start";
   return (
     <div style={{ background: g.accentColor, padding: "6px 10px", display: "flex", alignItems: "center", gap: 8 }}>
       {show(e.logo) && (
@@ -138,8 +140,8 @@ function Header({ design, org }: { design: IdCardDesign; org: OrgContext }) {
           <div style={{ width: e.logo.imgSize, height: e.logo.imgSize, borderRadius: "50%", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", color: g.accentColor, fontWeight: 900, flexShrink: 0 }}>★</div>
         )
       )}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        {show(e.orgName) && <div style={{ ...txt(e.orgName, "#fff"), whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{org.name}</div>}
+      <div style={{ flex: 1, minWidth: 0, textAlign: align, display: "flex", flexDirection: "column", alignItems: justify }}>
+        {show(e.orgName) && <div style={{ ...txt(e.orgName, "#fff"), maxWidth: "100%", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{org.name}</div>}
         {show(e.slogan) && org.slogan && <div style={{ ...txt(e.slogan, "#fff"), opacity: 0.95, fontStyle: "italic" }}>{org.slogan}</div>}
         {show(e.regNumber) && org.regNumber && <div style={txt(e.regNumber, "#fff")}>Reg: {org.regNumber}</div>}
       </div>
