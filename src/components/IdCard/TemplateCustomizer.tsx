@@ -65,6 +65,17 @@ export function TemplateCustomizer({ design, onChange }: Props) {
           placeholder="వెనుక సైడ్ కు రాయాల్సిన మేటర్..."
           className="text-xs"
         />
+        <div className="space-y-1">
+          <Label className="text-[11px]" style={{ color: TEXT_SUB }}>
+            Line Height / లైన్ గ్యాప్ — {(design.elements.backMatter.lineHeight ?? 1.4).toFixed(2)}
+          </Label>
+          <input
+            type="range" min={1} max={2.2} step={0.05}
+            value={design.elements.backMatter.lineHeight ?? 1.4}
+            onChange={(e) => setElement("backMatter", { lineHeight: Number(e.target.value) })}
+            className="w-full"
+          />
+        </div>
       </Section>
 
       {/* BACK ELEMENTS */}
@@ -74,6 +85,7 @@ export function TemplateCustomizer({ design, onChange }: Props) {
     </div>
   );
 }
+
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -129,10 +141,25 @@ function ElementRow({ k, design, setElement }: { k: ElementKey; design: IdCardDe
 
       {el.visible && (
         isImage ? (
-          <div className="grid grid-cols-1 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             <NumberField label="Size (px)" value={el.imgSize ?? 60} min={20} max={140} onChange={(v) => setElement(k, { imgSize: v })} />
+            {(k === "qrCode" || k === "mbrLogo") && (
+              <div className="space-y-1">
+                <Label className="text-[10px]" style={{ color: TEXT_SUB }}>Corner / మూల</Label>
+                <Select value={el.corner || "br"} onValueChange={(v) => setElement(k, { corner: v })}>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="tl">↖ Top Left</SelectItem>
+                    <SelectItem value="tr">↗ Top Right</SelectItem>
+                    <SelectItem value="bl">↙ Bottom Left</SelectItem>
+                    <SelectItem value="br">↘ Bottom Right</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
         ) : (
+
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
               <Label className="text-[10px]" style={{ color: TEXT_SUB }}>Font</Label>
