@@ -1756,9 +1756,9 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
 
   return (
     <div className="space-y-4">
-      {/* Step 1: Card Type */}
-      <div className="rounded-xl p-3 border" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
-        <div className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: PAGE_SUB }}>
+      {/* Step 1: Card Type + Print Dimensions */}
+      <div className="rounded-xl p-3 border space-y-3" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
+        <div className="text-[11px] font-bold uppercase tracking-wider" style={{ color: PAGE_SUB }}>
           Step 1 • కార్డ్ టైప్ ఎంచుకోండి
         </div>
         <div className="grid grid-cols-2 gap-2">
@@ -1774,7 +1774,21 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
             </button>
           ))}
         </div>
+        <div className="space-y-1">
+          <Label className="text-[10px]" style={{ color: PAGE_SUB }}>Print Dimensions / ప్రింట్ సైజ్</Label>
+          <Select
+            value={design.cardType === "keychain" ? "cr80-v" : "cr80-h"}
+            onValueChange={(v) => setCardType(v === "cr80-v" ? "keychain" : "normal")}
+          >
+            <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="cr80-h">CR-80 Horizontal — 85.6 × 54 mm (Normal)</SelectItem>
+              <SelectItem value="cr80-v">CR-80 Vertical — 54 × 85.6 mm (Keychain / Lanyard)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
+
 
       {/* Step 2: Template Picker */}
       {step === "pick" && (
