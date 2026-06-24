@@ -255,6 +255,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
           logoUrl={logoUrl}
           sigUrl={sigUrl}
           qrDataUrl={qrDataUrl}
+          appQrUrl={appQrUrl}
           showBack={showBack}
           setShowBack={setShowBack}
           frontRef={frontRef}
