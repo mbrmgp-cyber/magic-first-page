@@ -1560,9 +1560,9 @@ function LetterPreview({
           </div>
         ) : null}
         <div style={{ position: "relative", textAlign: theme.headAlign }}>
-          <div style={{ fontFamily: headFF, fontWeight: 900, color: theme.icon, fontSize: titleSize + 2 }}>{orgName}</div>
-          <div style={{ fontFamily: subFF, fontStyle: "italic", color: theme.subColor, fontSize: 11 }}>{slogan}</div>
-          <div style={{ fontSize: theme.smallSize, color: "#666" }}>Reg No: {reg}</div>
+          <div style={{ fontFamily: headFF, fontWeight: 900, color: titleC, fontSize: titleSize + 2 }}>{orgName}</div>
+          <div style={{ fontFamily: subFF, fontStyle: "italic", color: sloganColor, fontSize: 11 }}>{slogan}</div>
+          <div style={{ fontSize: theme.smallSize, color: regColor }}>Reg No: {reg}</div>
         </div>
         <div style={{ position: "relative" }}>{content}</div>
       </div>
