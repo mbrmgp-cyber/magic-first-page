@@ -191,7 +191,7 @@ function FrontHorizontal({ design, org, member }: { design: IdCardDesign; org: O
       </div>
       {/* Front corner QR (member URL) — kept clean, no logo overlap */}
       {show(e.qrCode) && member.qrUrl && (
-        <img src={member.qrUrl} alt="" style={{ ...cornerStyle(e.qrCode.corner, 6), width: e.qrCode.imgSize, height: e.qrCode.imgSize, background: "#fff", padding: 2, borderRadius: 3, border: `1px solid ${design.global.accentColor}` }} />
+        <img src={member.qrUrl} alt="" style={{ ...cornerStyle(e.qrCode.corner, 12), width: e.qrCode.imgSize, height: e.qrCode.imgSize, background: "#fff", padding: 2, borderRadius: 3, border: `1px solid ${design.global.accentColor}` }} />
       )}
       {/* Legacy footer band */}
       {design.templateId === "legacy" && design.global.footerColor && (
