@@ -623,6 +623,7 @@ export type Database = {
           founders: Json
           gov_reg_number: string | null
           id: string
+          id_card_design: Json | null
           is_gov_registered: boolean
           letter_code: string | null
           logo_url: string | null
@@ -656,6 +657,7 @@ export type Database = {
           founders?: Json
           gov_reg_number?: string | null
           id?: string
+          id_card_design?: Json | null
           is_gov_registered?: boolean
           letter_code?: string | null
           logo_url?: string | null
@@ -689,6 +691,7 @@ export type Database = {
           founders?: Json
           gov_reg_number?: string | null
           id?: string
+          id_card_design?: Json | null
           is_gov_registered?: boolean
           letter_code?: string | null
           logo_url?: string | null
