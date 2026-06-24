@@ -48,10 +48,22 @@ function txt(style: ElementStyle | undefined, fallback = ""): React.CSSPropertie
     fontSize: (style?.size ?? 12) + "px",
     fontWeight: style?.weight ?? 500,
     color: style?.color || fallback || "#111",
-    lineHeight: 1.25,
+    lineHeight: style?.lineHeight ?? 1.25,
   };
 }
 const show = (s: ElementStyle | undefined) => s?.visible !== false;
+
+function cornerStyle(corner: string | undefined, offset = 6): React.CSSProperties {
+  const c = corner || "br";
+  return {
+    position: "absolute",
+    top: c.startsWith("t") ? offset : undefined,
+    bottom: c.startsWith("b") ? offset : undefined,
+    left: c.endsWith("l") ? offset : undefined,
+    right: c.endsWith("r") ? offset : undefined,
+  };
+}
+
 
 export function IdCardRenderer({ design, org, member, side, scale = 1 }: Props) {
   const isVertical = design.templateId === "vertical" || design.cardType === "keychain";
