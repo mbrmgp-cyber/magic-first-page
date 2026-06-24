@@ -1610,9 +1610,9 @@ function LetterPreview({
           {LogoImg}
         </div>
         <div style={{ flex: 1, textAlign: theme.headAlign }}>
-          <div style={{ fontFamily: headFF, fontWeight: 900, color: theme.icon, fontSize: titleSize, lineHeight: 1.15 }}>{orgName}</div>
-          <div style={{ fontFamily: subFF, fontSize: 10, fontStyle: "italic", color: theme.subColor }}>{slogan}</div>
-          <div style={{ fontSize: theme.smallSize, color: "#666" }}>Reg No: {reg}</div>
+          <div style={{ fontFamily: headFF, fontWeight: 900, color: titleC, fontSize: titleSize, lineHeight: 1.15 }}>{orgName}</div>
+          <div style={{ fontFamily: subFF, fontSize: 10, fontStyle: "italic", color: sloganColor }}>{slogan}</div>
+          <div style={{ fontSize: theme.smallSize, color: regColor }}>Reg No: {reg}</div>
         </div>
       </div>
       {content}
