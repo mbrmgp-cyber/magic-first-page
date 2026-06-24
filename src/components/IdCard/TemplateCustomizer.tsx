@@ -56,6 +56,17 @@ export function TemplateCustomizer({ design, onChange }: Props) {
         {frontKeys.map((k) => <ElementRow key={k} k={k} design={design} setElement={setElement} />)}
       </Section>
 
+      {/* BACK MATTER TEXT */}
+      <Section title="Back Side Text  •  వెనుక మేటర్ (ఎడిట్ చేయండి)">
+        <Textarea
+          value={design.backMatter || ""}
+          onChange={(e) => onChange({ ...design, backMatter: e.target.value })}
+          rows={5}
+          placeholder="వెనుక సైడ్ కు రాయాల్సిన మేటర్..."
+          className="text-xs"
+        />
+      </Section>
+
       {/* BACK ELEMENTS */}
       <Section title="Back Side — Lines & Elements  •  బ్యాక్ లైన్స్">
         {backKeys.map((k) => <ElementRow key={k} k={k} design={design} setElement={setElement} />)}
