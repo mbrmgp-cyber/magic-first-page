@@ -92,10 +92,14 @@ export function IdCardRenderer({ design, org, member, side, scale = 1 }: Props) 
   const baseH = design.cardType === "keychain" ? KEYCHAIN_H : isVertical ? NORMAL_W : NORMAL_H;
 
   const g = design.global;
+  const bgImg = side === "front" ? g.frontBgImage : g.backBgImage;
   const containerStyle: React.CSSProperties = {
     width: baseW * scale,
     height: baseH * scale,
     background: g.backgroundColor,
+    backgroundImage: bgImg ? `url(${bgImg})` : undefined,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
     border: g.borderStyle === "none" ? "none" : `${g.borderWidth}px ${g.borderStyle} ${g.borderColor}`,
     borderRadius: g.cornerRadius,
     overflow: "hidden",
