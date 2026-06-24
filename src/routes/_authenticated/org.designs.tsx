@@ -2,7 +2,10 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { getMyOrg } from "@/lib/org.functions";
+import { getMyOrg, updateOrgIdDesign } from "@/lib/org.functions";
+import { defaultDesign, TEMPLATE_META, type IdCardDesign, type TemplateId, type CardType } from "@/lib/idCardTemplates";
+import { IdCardRenderer, type OrgContext, type SampleMember } from "@/components/IdCard/IdCardRenderer";
+import { TemplateCustomizer } from "@/components/IdCard/TemplateCustomizer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -312,138 +315,15 @@ function DesignsPage() {
             </TabsTrigger>
           </TabsList>
 
-          {/* ============= MODULE 1: ID CARD ============= */}
+          {/* ============= MODULE 1: ID CARD (Template-First) ============= */}
           <TabsContent value="id" className="mt-4 space-y-4">
-            {/* ID Mode toggle: Ready-made templates vs Custom builder */}
-            <div className="grid grid-cols-2 gap-2 rounded-lg p-1" style={{ background: PAGE_PANEL, border: `1px solid ${PAGE_BORDER}` }}>
-              <button
-                onClick={() => setIdMode("templates")}
-                className="h-9 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition"
-                style={{
-                  background: idMode === "templates" ? theme.icon : "transparent",
-                  color: idMode === "templates" ? "#fff" : PAGE_SUB,
-                }}
-              >
-                <IdCard className="h-3.5 w-3.5" /> Ready-Made Templates
-              </button>
-              <button
-                onClick={() => setIdMode("custom")}
-                className="h-9 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition"
-                style={{
-                  background: idMode === "custom" ? theme.icon : "transparent",
-                  color: idMode === "custom" ? "#fff" : PAGE_SUB,
-                }}
-              >
-                <Wand2 className="h-3.5 w-3.5" /> Custom Builder
-              </button>
-            </div>
-
-            {idMode === "custom" ? (
-              <Section
-                icon={<Wand2 className="h-5 w-5" style={{ color: theme.icon }} />}
-                title="Custom ID Card Builder"
-                subtitle="మీ సొంత డిజైన్ అప్‌లోడ్ చేసి, ఫోటో / పేరు / QR drag-and-drop చేయండి"
-                theme={theme}
-              >
-                <CustomIdBuilder defaultName={member.name} defaultDesignation="Member" />
-              </Section>
-            ) : idPick === null ? (
-              <Section
-                icon={<IdCard className="h-5 w-5" style={{ color: theme.icon }} />}
-                title="Choose an ID Card Template"
-                subtitle="ID కార్డ్ టెంప్లేట్‌ను ఎంచుకోండి — క్లిక్ చేస్తే ఎడిట్ మోడ్ తెరుచుకుంటుంది"
-                theme={theme}
-              >
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-                  {ID_TEMPLATES.map((tpl) => {
-                    const locked = !!tpl.comingSoon;
-                    return (
-                      <button
-                        key={tpl.id}
-                        disabled={locked}
-                        onClick={() => !locked && setIdPick(tpl.id as IdLayout)}
-                        className="group relative rounded-xl overflow-hidden border transition text-left hover:scale-[1.02]"
-                        style={{
-                          borderColor: PAGE_BORDER,
-                          background: PAGE_PANEL,
-                          opacity: locked ? 0.55 : 1,
-                          cursor: locked ? "not-allowed" : "pointer",
-                        }}
-                      >
-                        {tpl.featured && (
-                          <div className="absolute top-1 left-1 z-10 text-[8px] font-bold px-1.5 py-0.5 rounded"
-                            style={{ background: "#138808", color: "#fff", letterSpacing: 0.5 }}>
-                            POPULAR
-                          </div>
-                        )}
-                        <div className="aspect-[1.586/1] w-full p-1.5" style={{ background: PAGE_BG }}>
-                          <IdThumb layout={(locked ? "official-saffron" : tpl.id) as IdLayout} theme={theme} />
-                        </div>
-                        <div className="px-2 py-1.5 flex items-center justify-between gap-1">
-                          <div className="min-w-0">
-                            <p className="text-[11px] font-semibold truncate" style={{ color: PAGE_HEAD }}>{tpl.en}</p>
-                            <p className="text-[10px] truncate" style={{ color: PAGE_SUB }}>{tpl.te}</p>
-                          </div>
-                          {locked ? (
-                            <Lock className="h-3 w-3 shrink-0" style={{ color: PAGE_SUB }} />
-                          ) : (
-                            <EditIcon className="h-3 w-3 shrink-0" style={{ color: theme.icon }} />
-                          )}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </Section>
-            ) : (
-              <Section
-                icon={<EditIcon className="h-5 w-5" style={{ color: theme.icon }} />}
-                title="Edit Mode — Live Preview"
-                subtitle="ఎడిట్ చేసుకునే అవకాశం — వివరాలు మార్చండి, ప్రివ్యూ లైవ్‌గా అప్‌డేట్ అవుతుంది"
-                theme={theme}
-                right={
-                  <Button size="sm" variant="ghost" onClick={() => setIdPick(null)} style={{ color: PAGE_SUB }}>
-                    <ChevronLeft className="h-4 w-4 mr-1" /> Back to gallery
-                  </Button>
-                }
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Form */}
-                  <div className="space-y-3 rounded-lg p-3 border" style={{ background: PAGE_BG, borderColor: PAGE_BORDER }}>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Field label="Member Name / పేరు" value={member.name} onChange={(v) => setMember({ ...member, name: v })} />
-                      <Field label="ID Number" value={member.memberId} onChange={(v) => setMember({ ...member, memberId: v })} />
-                      <Field label="Father's Name / తండ్రి" value={member.fatherName} onChange={(v) => setMember({ ...member, fatherName: v })} />
-                      <Field label="Phone / ఫోన్" value={member.phone} onChange={(v) => setMember({ ...member, phone: v })} />
-                      <Field label="Blood Group" value={member.bloodGroup} onChange={(v) => setMember({ ...member, bloodGroup: v })} />
-                      <Field label="Village / గ్రామం" value={member.village} onChange={(v) => setMember({ ...member, village: v })} />
-                      <Field label="Mandal / మండలం" value={member.mandal} onChange={(v) => setMember({ ...member, mandal: v })} />
-                      <Field label="Join Date" value={member.joinDate} onChange={(v) => setMember({ ...member, joinDate: v })} />
-                    </div>
-
-                    <StyleControls
-                      cardBg={cardBg} setCardBg={setCardBg}
-                      accent={effectiveAccent} setAccent={setAccentColor}
-                      font={effectiveFont} setFont={setFontFamily}
-                    />
-
-                    <Button
-                      onClick={() => toast.success("ID Card ready — printable PDF available shortly")}
-                      className="w-full font-semibold h-10"
-                      style={{ background: customTheme.buttonBg, color: customTheme.buttonText }}
-                    >
-                      <Download className="h-4 w-4 mr-2" /> Save & Download PDF
-                    </Button>
-                  </div>
-
-                  {/* Live Preview */}
-                  <div className="rounded-lg p-3 border flex items-center justify-center" style={{ background: PAGE_BG, borderColor: PAGE_BORDER, minHeight: 260 }}>
-                    <IdCardPreview layout={idPick} theme={customTheme} orgName={orgName} slogan={orgSlogan} reg={orgReg} member={member} cardBg={cardBg} />
-                  </div>
-                </div>
-              </Section>
-            )}
+            <TemplateFirstIdCard
+              org={org}
+              orgQ={orgQ}
+              theme={theme}
+            />
           </TabsContent>
+
 
           {/* ============= MODULE 2: LETTER PAD ============= */}
           <TabsContent value="letter" className="mt-4 space-y-4">
@@ -1807,3 +1687,162 @@ function OfficialSaffronPreview({
     </div>
   );
 }
+
+/* ===================================================================
+ * Template-First ID Card Studio (simplified, single source of truth)
+ * =================================================================== */
+
+function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme: Required<ThemeSettings> }) {
+  const saveDesign = useServerFn(updateOrgIdDesign);
+  const initial: IdCardDesign = (org?.id_card_design as IdCardDesign) || defaultDesign("classic", "normal");
+  const [design, setDesign] = useState<IdCardDesign>(initial);
+  const [side, setSide] = useState<"front" | "back">("front");
+  const [step, setStep] = useState<"pick" | "edit">(org?.id_card_design ? "edit" : "pick");
+  const [saving, setSaving] = useState(false);
+
+  const orgCtx: OrgContext = {
+    name: org?.name || "Chitvel Help Line Society",
+    slogan: org?.slogan || "॥ మానవసేవే మాధవసేవ ॥",
+    regNumber: org?.gov_reg_number || "356/16",
+    logoUrl: org?.logo_url,
+    presidentName: org?.president_name || "President",
+    presidentSignatureUrl: org?.president_signature_url,
+  };
+  const sampleMember: SampleMember = {
+    name: "Sample Member / ఉదాహరణ సభ్యుడు",
+    fatherName: "Father Name",
+    memberCode: org?.letter_code ? `${org.letter_code}/0001` : "A/0001",
+    designation: "Member",
+    village: "Chitvel",
+    pincode: "516101",
+    phone: "+91 90000 00000",
+    email: "member@example.com",
+    bloodGroup: "O+",
+    address: "Chitvel, Kadapa, AP",
+    photoUrl: null,
+    qrUrl: null,
+  };
+
+  function pickTemplate(id: TemplateId) {
+    setDesign(defaultDesign(id, design.cardType));
+    setStep("edit");
+  }
+  function setCardType(t: CardType) { setDesign({ ...design, cardType: t }); }
+
+  async function onSave() {
+    setSaving(true);
+    try {
+      await saveDesign({ data: { id_card_design: design as any } });
+      toast.success("ID Card design saved — applies to all members automatically", { description: "డిజైన్ సేవ్ అయింది. సభ్యులందరికీ ఆటోమేటిక్ గా అప్లై అవుతుంది." });
+      orgQ.refetch();
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to save");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Step 1: Card Type */}
+      <div className="rounded-xl p-3 border" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
+        <div className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: PAGE_SUB }}>
+          Step 1 • కార్డ్ టైప్ ఎంచుకోండి
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          {(["normal", "keychain"] as CardType[]).map((t) => (
+            <button key={t} onClick={() => setCardType(t)}
+              className="h-12 rounded-lg text-xs font-semibold transition"
+              style={{
+                background: design.cardType === t ? theme.icon : "transparent",
+                color: design.cardType === t ? "#fff" : PAGE_SUB,
+                border: `1px solid ${design.cardType === t ? theme.icon : PAGE_BORDER}`,
+              }}>
+              {t === "normal" ? "🪪 Normal ID Card / నార్మల్" : "🔑 Keychain Type / కీ చైన్"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Step 2: Template Picker */}
+      {step === "pick" && (
+        <div className="rounded-xl p-3 border" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
+          <div className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: PAGE_SUB }}>
+            Step 2 • టెంప్లేట్ ఎంచుకోండి (5 రెడీమేడ్ డిజైన్స్)
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {(Object.keys(TEMPLATE_META) as TemplateId[]).map((id) => {
+              const meta = TEMPLATE_META[id];
+              const tplDesign: IdCardDesign = defaultDesign(id, design.cardType);
+              return (
+                <button key={id} onClick={() => pickTemplate(id)}
+                  className="rounded-xl border p-3 text-left hover:scale-[1.02] transition space-y-2"
+                  style={{ borderColor: PAGE_BORDER, background: PAGE_BG }}>
+                  <div className="flex justify-center bg-zinc-900/40 rounded-lg p-2" style={{ height: 130, overflow: "hidden" }}>
+                    <IdCardRenderer design={tplDesign} org={orgCtx} member={sampleMember} side="front" scale={0.55} />
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold" style={{ color: PAGE_HEAD }}>{meta.en}</div>
+                    <div className="text-[11px]" style={{ color: PAGE_SUB }}>{meta.te}</div>
+                    <div className="text-[10px] mt-1" style={{ color: PAGE_SUB }}>{meta.description}</div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Step 3: Edit & Preview */}
+      {step === "edit" && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Button size="sm" variant="ghost" onClick={() => setStep("pick")} style={{ color: PAGE_SUB }}>
+              <ChevronLeft className="h-4 w-4 mr-1" /> Change template / టెంప్లేట్ మార్చండి
+            </Button>
+            <div className="text-[11px]" style={{ color: PAGE_SUB }}>
+              Selected: <span className="font-bold" style={{ color: PAGE_HEAD }}>{TEMPLATE_META[design.templateId].en}</span>
+            </div>
+          </div>
+
+          {/* Live Preview */}
+          <div className="rounded-xl p-4 border" style={{ background: PAGE_BG, borderColor: PAGE_BORDER }}>
+            <div className="flex items-center justify-center gap-2 mb-3">
+              {(["front", "back"] as const).map((s) => (
+                <button key={s} onClick={() => setSide(s)}
+                  className="h-8 px-4 rounded text-xs font-semibold transition"
+                  style={{
+                    background: side === s ? theme.icon : "transparent",
+                    color: side === s ? "#fff" : PAGE_SUB,
+                    border: `1px solid ${side === s ? theme.icon : PAGE_BORDER}`,
+                  }}>
+                  {s === "front" ? "ముందు / Front" : "వెనుక / Back"}
+                </button>
+              ))}
+            </div>
+            <div className="flex justify-center">
+              <IdCardRenderer design={design} org={orgCtx} member={sampleMember} side={side} scale={1} />
+            </div>
+          </div>
+
+          {/* Customizer */}
+          <TemplateCustomizer design={design} onChange={setDesign} />
+
+          {/* Save */}
+          <div className="sticky bottom-0 -mx-4 px-4 py-3 border-t" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
+            <Button onClick={onSave} disabled={saving}
+              className="w-full h-12 text-sm font-bold"
+              style={{ background: theme.buttonBg, color: theme.buttonText }}>
+              <Check className="h-4 w-4 mr-2" />
+              {saving ? "Saving..." : "Save Design — Apply to All Members / అందరికీ అప్లై"}
+            </Button>
+            <p className="text-[10px] text-center mt-2" style={{ color: PAGE_SUB }}>
+              ఈ డిజైన్ సేవ్ చేస్తే ఆర్గనైజేషన్ లోని సభ్యులందరికీ ఇదే ఐడి కార్డ్ ఆటోమేటిక్ గా తయారు అవుతుంది.
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
