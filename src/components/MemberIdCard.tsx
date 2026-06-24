@@ -54,6 +54,7 @@ type Org = {
     subColor?: string;
     subFont?: string;
   } | null;
+  id_card_design?: any;
 };
 
 type Member = {
