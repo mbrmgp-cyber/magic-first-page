@@ -169,6 +169,9 @@ function DesignsPage() {
   const [letterLogo, setLetterLogo] = useState<string | null>(null);
   const [letterLogoSize, setLetterLogoSize] = useState<number>(48);
   const [letterTitleSize, setLetterTitleSize] = useState<number>(16);
+  const [letterTitleColor, setLetterTitleColor] = useState<string | null>(null);
+  const [letterSloganColor, setLetterSloganColor] = useState<string | null>(null);
+  const [letterRegColor, setLetterRegColor] = useState<string | null>(null);
 
   // Receipt state
   const [receiptPick, setReceiptPick] = useState<ReceiptLayout | null>(null);
