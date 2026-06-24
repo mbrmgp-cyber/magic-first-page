@@ -195,6 +195,9 @@ function DesignsPage() {
   const orgSlogan = org?.slogan || "॥ మానవసేవే మాధవసేవ ॥";
   const orgReg = org?.gov_reg_number || "356/16";
   const orgAddress = org?.address || "";
+  const orgLogo: string = org?.logo_url || mbrLogo.url;
+  const effectiveLetterLogo: string = letterLogo || orgLogo;
+  const effectiveReceiptLogo: string = receiptLogo || orgLogo;
 
   function escapeHtml(s: string): string {
     return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
