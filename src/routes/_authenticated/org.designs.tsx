@@ -399,6 +399,10 @@ function DesignsPage() {
                       </div>
                     </div>
                     <div className="space-y-1">
+                      <Label className="text-[11px]" style={{ color: PAGE_SUB }}>Letter Heading / లేఖ శీర్షిక</Label>
+                      <Input value={letterHeading} onChange={(e) => setLetterHeading(e.target.value)} placeholder="Letter Heading" />
+                    </div>
+                    <div className="space-y-1">
                       <Label className="text-[11px]" style={{ color: PAGE_SUB }}>Subject / విషయం</Label>
                       <Input value={letterSubject} onChange={(e) => setLetterSubject(e.target.value)} placeholder="Regarding..." />
                     </div>
