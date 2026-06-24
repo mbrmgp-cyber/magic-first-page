@@ -627,3 +627,73 @@ function Row({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+/* ===================================================================
+ * SavedDesignCard — renders member ID using the org-saved design.
+ * =================================================================== */
+import { IdCardRenderer, type OrgContext, type SampleMember } from "@/components/IdCard/IdCardRenderer";
+import type { IdCardDesign } from "@/lib/idCardTemplates";
+
+function SavedDesignCard({
+  design, org, member, photoUrl, logoUrl, sigUrl, qrDataUrl,
+  showBack, setShowBack, frontRef, backRef, onPrint, lang,
+}: {
+  design: IdCardDesign;
+  org: Org | null;
+  member: Member;
+  photoUrl: string | null;
+  logoUrl: string | null;
+  sigUrl: string | null;
+  qrDataUrl: string;
+  showBack: boolean;
+  setShowBack: (fn: (v: boolean) => boolean) => void;
+  frontRef: React.RefObject<HTMLDivElement | null>;
+  backRef: React.RefObject<HTMLDivElement | null>;
+  onPrint: () => void;
+  lang: CardLang;
+}) {
+  const orgCtx: OrgContext = {
+    name: org?.name || "",
+    slogan: org?.slogan || undefined,
+    regNumber: org?.gov_reg_number || undefined,
+    logoUrl: logoUrl,
+    presidentName: org?.president_name || undefined,
+    presidentSignatureUrl: sigUrl,
+  };
+  const sample: SampleMember = {
+    name: member.name,
+    fatherName: member.father_name || undefined,
+    memberCode: member.member_code || undefined,
+    designation: "Member",
+    village: member.village || undefined,
+    pincode: undefined,
+    phone: member.phone || undefined,
+    email: member.email || undefined,
+    bloodGroup: member.blood_group || undefined,
+    address: member.address || undefined,
+    photoUrl: photoUrl,
+    qrUrl: qrDataUrl || null,
+  };
+  const side = showBack ? "back" : "front";
+  return (
+    <>
+      <div className="flex justify-center">
+        <div ref={side === "front" ? frontRef : backRef}>
+          <IdCardRenderer design={design} org={orgCtx} member={sample} side={side} scale={1} />
+        </div>
+      </div>
+      <div className="flex justify-between items-center gap-2 pt-2">
+        <Button size="sm" variant="outline" onClick={() => setShowBack((v: boolean) => !v)}>
+          <RotateCw className="w-4 h-4 mr-1" />
+          {showBack
+            ? (lang === "en" ? "Front" : lang === "hi" ? "सामने" : "ముందు")
+            : (lang === "en" ? "Back" : lang === "hi" ? "पीछे" : "వెనుక")}
+        </Button>
+        <Button size="sm" onClick={onPrint}>
+          <Printer className="w-4 h-4 mr-1" />
+          {lang === "en" ? "Print / PDF" : lang === "hi" ? "प्रिंट / PDF" : "ప్రింట్ / PDF"}
+        </Button>
+      </div>
+    </>
+  );
+}
