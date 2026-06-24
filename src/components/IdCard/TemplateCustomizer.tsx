@@ -25,7 +25,8 @@ export function TemplateCustomizer({ design, onChange }: Props) {
 
   const keys = Object.keys(design.elements) as ElementKey[];
   const frontKeys = keys.filter((k) => ELEMENT_LABELS[k].side === "front");
-  const backKeys = keys.filter((k) => ELEMENT_LABELS[k].side === "back");
+  // MBR Small Logo is a permanent forced branding element — not user-toggleable
+  const backKeys = keys.filter((k) => ELEMENT_LABELS[k].side === "back" && k !== "mbrLogo");
 
   return (
     <div className="space-y-4">
