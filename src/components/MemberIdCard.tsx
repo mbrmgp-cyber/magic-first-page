@@ -636,7 +636,7 @@ import { IdCardRenderer, type OrgContext, type SampleMember } from "@/components
 import type { IdCardDesign } from "@/lib/idCardTemplates";
 
 function SavedDesignCard({
-  design, org, member, photoUrl, logoUrl, sigUrl, qrDataUrl,
+  design, org, member, photoUrl, logoUrl, sigUrl, qrDataUrl, appQrUrl,
   showBack, setShowBack, frontRef, backRef, onPrint, lang,
 }: {
   design: IdCardDesign;
@@ -646,6 +646,7 @@ function SavedDesignCard({
   logoUrl: string | null;
   sigUrl: string | null;
   qrDataUrl: string;
+  appQrUrl: string;
   showBack: boolean;
   setShowBack: (fn: (v: boolean) => boolean) => void;
   frontRef: React.RefObject<HTMLDivElement | null>;
@@ -660,12 +661,14 @@ function SavedDesignCard({
     logoUrl: logoUrl,
     presidentName: org?.president_name || undefined,
     presidentSignatureUrl: sigUrl,
+    mbrQrUrl: appQrUrl || null,
+    mbrLogoUrl: mbrLogo.url,
   };
   const sample: SampleMember = {
     name: member.name,
     fatherName: member.father_name || undefined,
     memberCode: member.member_code || undefined,
-    designation: "Member",
+    designation: "సభ్యుడు",
     village: member.village || undefined,
     pincode: undefined,
     phone: member.phone || undefined,
