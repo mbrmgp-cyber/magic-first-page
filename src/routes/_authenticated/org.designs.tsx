@@ -160,17 +160,19 @@ function DesignsPage() {
   const [member, setMember] = useState<MemberData>(DEFAULT_MEMBER);
 
   // Letter state
-  const [letterPick, setLetterPick] = useState<LetterLayout>("standard-header");
+  const [letterPick, setLetterPick] = useState<LetterLayout | null>(null);
   const [letterMode, setLetterMode] = useState<"rich" | "blank">("rich");
   const [letterTo, setLetterTo] = useState("");
   const [letterSubject, setLetterSubject] = useState("");
   const [letterBody, setLetterBody] = useState("");
   const [letterDate, setLetterDate] = useState(new Date().toISOString().slice(0, 10));
+  const [letterLogo, setLetterLogo] = useState<string>(mbrLogo.url);
 
   // Receipt state
   const [receiptPick, setReceiptPick] = useState<ReceiptLayout | null>(null);
   const [receipt, setReceipt] = useState<ReceiptData>(DEFAULT_RECEIPT);
   const [receiptLogo, setReceiptLogo] = useState<string>(mbrLogo.url);
+
 
   // Design Customization (per-edit-session overrides — nullable so live theme wins until user picks).
   const [cardBg, setCardBg] = useState<string>("#ffffff");
