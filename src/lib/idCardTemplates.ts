@@ -30,10 +30,12 @@ export type ElementKey =
   | "address"
   // back-only
   | "backMatter"
+  | "oath"
   | "mbrQrCode"
   | "mbrLogo"
   | "presidentSignature"
   | "presidentName";
+
 
 export type CornerPosition = "tl" | "tr" | "bl" | "br";
 
