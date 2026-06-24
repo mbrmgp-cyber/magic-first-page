@@ -67,7 +67,9 @@ export type IdCardDesign = {
   global: GlobalStyle;
   elements: Record<ElementKey, ElementStyle>;
   backMatter?: string; // editable back-side paragraph text
+  oathText?: string;   // editable oath / pledge text (use {name} for member name)
 };
+
 
 export const FONT_OPTIONS = [
   "Inter",
