@@ -166,12 +166,12 @@ function DesignsPage() {
   const [letterSubject, setLetterSubject] = useState("");
   const [letterBody, setLetterBody] = useState("");
   const [letterDate, setLetterDate] = useState(new Date().toISOString().slice(0, 10));
-  const [letterLogo, setLetterLogo] = useState<string>(mbrLogo.url);
+  const [letterLogo, setLetterLogo] = useState<string | null>(null);
 
   // Receipt state
   const [receiptPick, setReceiptPick] = useState<ReceiptLayout | null>(null);
   const [receipt, setReceipt] = useState<ReceiptData>(DEFAULT_RECEIPT);
-  const [receiptLogo, setReceiptLogo] = useState<string>(mbrLogo.url);
+  const [receiptLogo, setReceiptLogo] = useState<string | null>(null);
 
 
   // Design Customization (per-edit-session overrides — nullable so live theme wins until user picks).
@@ -195,6 +195,9 @@ function DesignsPage() {
   const orgSlogan = org?.slogan || "॥ మానవసేవే మాధవసేవ ॥";
   const orgReg = org?.gov_reg_number || "356/16";
   const orgAddress = org?.address || "";
+  const orgLogo: string = org?.logo_url || mbrLogo.url;
+  const effectiveLetterLogo: string = letterLogo || orgLogo;
+  const effectiveReceiptLogo: string = receiptLogo || orgLogo;
 
   function escapeHtml(s: string): string {
     return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
@@ -345,7 +348,8 @@ function DesignsPage() {
                       style={{ borderColor: PAGE_BORDER, background: PAGE_PANEL, cursor: "pointer" }}
                     >
                       <div className="aspect-[0.77/1] w-full p-1.5" style={{ background: PAGE_BG }}>
-                        <LetterThumb layout={tpl.id as LetterLayout} theme={theme} />
+                        <LetterThumb layout={tpl.id as LetterLayout} theme={theme}
+                          orgName={orgName} slogan={orgSlogan} reg={orgReg} logoUrl={orgLogo} />
                       </div>
                       <div className="px-2 py-1.5 flex items-center justify-between gap-1">
                         <div className="min-w-0">
@@ -404,7 +408,7 @@ function DesignsPage() {
                   </TabsContent>
                 </Tabs>
 
-                <LogoUploader logoUrl={letterLogo} onChange={setLetterLogo} />
+                <LogoUploader logoUrl={effectiveLetterLogo} onChange={setLetterLogo} />
 
                 <StyleControls
                   cardBg={cardBg} setCardBg={setCardBg}
@@ -413,7 +417,20 @@ function DesignsPage() {
                 />
 
                 <LivePreview title="Letter Pad Live Preview" theme={customTheme}>
-                  <LetterPreview layout={letterPick} theme={customTheme} orgName={orgName} slogan={orgSlogan} reg={orgReg} />
+                  <LetterPreview
+                    layout={letterPick}
+                    theme={customTheme}
+                    orgName={orgName}
+                    slogan={orgSlogan}
+                    reg={orgReg}
+                    logoUrl={effectiveLetterLogo}
+                    cardBg={cardBg}
+                    to={letterTo}
+                    date={letterDate}
+                    subject={letterSubject}
+                    body={letterBody}
+                    showContent={letterMode === "rich"}
+                  />
                 </LivePreview>
 
                 <Button onClick={printLetterhead} className="w-full font-semibold h-11"
@@ -444,7 +461,8 @@ function DesignsPage() {
                       style={{ borderColor: PAGE_BORDER, background: PAGE_PANEL, cursor: "pointer" }}
                     >
                       <div className="aspect-[1.6/1] w-full p-2" style={{ background: PAGE_BG }}>
-                        <ReceiptThumb layout={tpl.id as ReceiptLayout} accent={theme.icon} />
+                        <ReceiptThumb layout={tpl.id as ReceiptLayout} accent={theme.icon}
+                          orgName={orgName} slogan={orgSlogan} reg={orgReg} logoUrl={orgLogo} />
                       </div>
                       <div className="px-2 py-1.5 flex items-center justify-between">
                         <div>
@@ -480,7 +498,7 @@ function DesignsPage() {
                       <Field label="Mode" value={receipt.mode} onChange={(v) => setReceipt({ ...receipt, mode: v })} />
                     </div>
 
-                    <LogoUploader logoUrl={receiptLogo} onChange={setReceiptLogo} />
+                    <LogoUploader logoUrl={effectiveReceiptLogo} onChange={setReceiptLogo} />
 
                     <StyleControls
                       cardBg={cardBg} setCardBg={setCardBg}
@@ -497,7 +515,7 @@ function DesignsPage() {
                     </Button>
                   </div>
                   <div className="rounded-lg p-3 border flex items-center justify-center" style={{ background: PAGE_BG, borderColor: PAGE_BORDER, minHeight: 260 }}>
-                    <ReceiptPreview layout={receiptPick} theme={customTheme} orgName={orgName} slogan={orgSlogan} reg={orgReg} data={receipt} cardBg={cardBg} logoUrl={receiptLogo} />
+                    <ReceiptPreview layout={receiptPick} theme={customTheme} orgName={orgName} slogan={orgSlogan} reg={orgReg} data={receipt} cardBg={cardBg} logoUrl={effectiveReceiptLogo} />
                   </div>
                 </div>
               </Section>
@@ -872,35 +890,58 @@ function IdThumb({ layout, theme }: { layout: IdLayout; theme: Required<ThemeSet
   );
 }
 
-function LetterThumb({ layout, theme }: { layout: LetterLayout; theme: Required<ThemeSettings> }) {
+function LetterThumb({
+  layout, theme, orgName, slogan, reg, logoUrl,
+}: {
+  layout: LetterLayout; theme: Required<ThemeSettings>;
+  orgName?: string; slogan?: string; reg?: string; logoUrl?: string;
+}) {
   const c = theme.icon, br = theme.border;
   const common: React.CSSProperties = {
     width: "100%", height: "100%", borderRadius: 4,
-    background: "#fff", border: `1px solid ${br}`, overflow: "hidden", padding: 5,
+    background: "#fff", border: `1px solid ${br}`, overflow: "hidden", padding: 6,
+    fontFamily: `${theme.headFont}, "Noto Sans Telugu", system-ui, sans-serif`,
   };
+  const Logo = ({ size = 22 }: { size?: number }) => (
+    <div style={{ width: size, height: size, borderRadius: "50%", background: "#fff", border: `1px solid ${c}`, padding: 2,
+      display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+      {logoUrl ? <img src={logoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+        : <div style={{ width: "60%", height: "60%", borderRadius: "50%", background: c }} />}
+    </div>
+  );
+  const placeholderLines = (
+    <div style={{ marginTop: 5, display: "flex", flexDirection: "column", gap: 2 }}>
+      {Array.from({ length: 7 }).map((_, i) => (
+        <div key={i} style={{ height: 2, background: "#ddd", width: `${90 - (i % 4) * 8}%` }} />
+      ))}
+    </div>
+  );
+
   if (layout === "watermark-centered") {
     return (
       <div style={{ ...common, position: "relative" }}>
-        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.12 }}>
-          <div style={{ width: 50, height: 50, borderRadius: "50%", background: c }} />
+        {logoUrl ? (
+          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.1 }}>
+            <img src={logoUrl} alt="" style={{ width: "60%", height: "60%", objectFit: "contain" }} />
+          </div>
+        ) : null}
+        <div style={{ position: "relative", textAlign: "center" }}>
+          <div style={{ fontSize: 8, fontWeight: 900, color: c, lineHeight: 1.1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{orgName}</div>
+          <div style={{ fontSize: 6, color: "#666", fontStyle: "italic", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{slogan}</div>
+          <div style={{ fontSize: 6, color: "#888" }}>Reg: {reg}</div>
         </div>
-        <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: 2 }}>
-          <div style={{ height: 4, background: c, width: "60%", margin: "0 auto" }} />
-          <div style={{ height: 2, background: "#888", width: "40%", margin: "2px auto 4px" }} />
-          {Array.from({ length: 7 }).map((_, i) => (
-            <div key={i} style={{ height: 2, background: "#ddd", width: `${85 - (i % 3) * 10}%` }} />
-          ))}
-        </div>
+        <div style={{ position: "relative" }}>{placeholderLines}</div>
       </div>
     );
   }
   if (layout === "left-sidebar") {
     return (
       <div style={{ ...common, padding: 0, display: "flex" }}>
-        <div style={{ width: "28%", background: c, padding: 4, display: "flex", flexDirection: "column", gap: 3 }}>
-          <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#fff", margin: "0 auto" }} />
-          <div style={{ height: 2, background: "#fff", opacity: 0.7 }} />
-          <div style={{ height: 2, background: "#fff", opacity: 0.5, width: "70%" }} />
+        <div style={{ width: "32%", background: c, padding: 4, display: "flex", flexDirection: "column", gap: 3, alignItems: "center" }}>
+          <Logo size={20} />
+          <div style={{ fontSize: 6, color: "#fff", fontWeight: 800, textAlign: "center", lineHeight: 1.1, overflow: "hidden" }}>{orgName}</div>
+          <div style={{ fontSize: 5, color: "#fff", opacity: 0.85, textAlign: "center", fontStyle: "italic" }}>{slogan}</div>
+          <div style={{ fontSize: 5, color: "#fff", opacity: 0.85 }}>Reg: {reg}</div>
         </div>
         <div style={{ flex: 1, padding: 5, display: "flex", flexDirection: "column", gap: 2 }}>
           {Array.from({ length: 8 }).map((_, i) => (
@@ -913,62 +954,84 @@ function LetterThumb({ layout, theme }: { layout: LetterLayout; theme: Required<
   return (
     <div style={common}>
       <div style={{ display: "flex", alignItems: "center", gap: 4, borderBottom: `2px solid ${c}`, paddingBottom: 4 }}>
-        <div style={{ width: 12, height: 12, borderRadius: "50%", background: c }} />
-        <div style={{ flex: 1 }}>
-          <div style={{ height: 3, background: "#333", width: "80%" }} />
-          <div style={{ height: 2, background: "#888", width: "50%", marginTop: 2 }} />
+        <Logo size={22} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 8, fontWeight: 900, color: c, lineHeight: 1.1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{orgName}</div>
+          <div style={{ fontSize: 6, color: "#666", fontStyle: "italic", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{slogan}</div>
+          <div style={{ fontSize: 6, color: "#888" }}>Reg: {reg}</div>
         </div>
       </div>
-      <div style={{ marginTop: 5, display: "flex", flexDirection: "column", gap: 2 }}>
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} style={{ height: 2, background: "#ddd", width: `${90 - (i % 4) * 8}%` }} />
-        ))}
-      </div>
+      {placeholderLines}
     </div>
   );
 }
 
-function ReceiptThumb({ layout, accent }: { layout: ReceiptLayout; accent: string }) {
+function ReceiptThumb({
+  layout, accent, orgName, slogan, reg, logoUrl,
+}: {
+  layout: ReceiptLayout; accent: string;
+  orgName?: string; slogan?: string; reg?: string; logoUrl?: string;
+}) {
   const common: React.CSSProperties = {
     width: "100%", height: "100%", borderRadius: 4, background: "#fff",
     overflow: "hidden", padding: 5, display: "flex", flexDirection: "column", gap: 3,
   };
+  const Logo = ({ size = 18 }: { size?: number }) => (
+    <div style={{ width: size, height: size, borderRadius: 3, background: "#fff", border: `1px solid ${accent}`, padding: 1,
+      display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+      {logoUrl ? <img src={logoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+        : <div style={{ width: "60%", height: "60%", borderRadius: "50%", background: accent }} />}
+    </div>
+  );
+  const rows = (
+    <div style={{ display: "flex", flexDirection: "column", gap: 2, marginTop: 2 }}>
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} style={{ height: 2, background: "#ddd", width: `${85 - i * 10}%` }} />
+      ))}
+    </div>
+  );
+
   if (layout === "saffron-strip") {
     return (
       <div style={{ ...common, padding: 0 }}>
-        <div style={{ background: accent, height: 14, padding: "2px 6px" }}>
-          <div style={{ height: 3, width: "60%", background: "#fff" }} />
+        <div style={{ background: accent, padding: "3px 6px", display: "flex", alignItems: "center", gap: 4 }}>
+          <Logo size={16} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 7, fontWeight: 900, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{orgName}</div>
+            <div style={{ fontSize: 5, color: "#fff", opacity: 0.9 }}>Reg: {reg}</div>
+          </div>
         </div>
-        <div style={{ padding: 6, display: "flex", flexDirection: "column", gap: 3 }}>
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} style={{ height: 2, background: "#ddd", width: `${85 - i * 10}%` }} />
-          ))}
-        </div>
+        <div style={{ padding: 6 }}>{rows}</div>
       </div>
     );
   }
   if (layout === "minimal-line") {
     return (
       <div style={common}>
-        <div style={{ height: 3, background: "#111", width: "60%" }} />
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <Logo size={16} />
+          <div style={{ fontSize: 7, fontWeight: 900, color: "#111", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{orgName}</div>
+        </div>
         <div style={{ height: 1, background: "#111" }} />
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} style={{ height: 2, background: "#ddd", width: `${80 - i * 8}%` }} />
-        ))}
+        {rows}
       </div>
     );
   }
-  // classic
   return (
     <div style={{ ...common, border: `2px solid ${accent}` }}>
-      <div style={{ textAlign: "center", height: 3, background: accent, width: "70%", margin: "0 auto" }} />
-      <div style={{ height: 2, background: "#888", width: "40%", margin: "2px auto" }} />
-      {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} style={{ height: 2, background: "#ddd", width: `${85 - i * 10}%` }} />
-      ))}
+      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+        <Logo size={18} />
+        <div style={{ flex: 1, minWidth: 0, textAlign: "center" }}>
+          <div style={{ fontSize: 7, fontWeight: 900, color: accent, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{orgName}</div>
+          <div style={{ fontSize: 5, color: "#666", fontStyle: "italic" }}>{slogan}</div>
+          <div style={{ fontSize: 5, color: "#888" }}>Reg: {reg}</div>
+        </div>
+      </div>
+      {rows}
     </div>
   );
 }
+
 
 /* ---------------- Live Previews ---------------- */
 
@@ -1413,15 +1476,24 @@ function StandardBackPreview({
 }
 
 function LetterPreview({
-  layout, theme, orgName, slogan, reg,
+  layout, theme, orgName, slogan, reg, logoUrl, cardBg = "#ffffff",
+  to = "", date = "", subject = "", body = "", showContent = true,
 }: {
   layout: LetterLayout; theme: Required<ThemeSettings>;
   orgName: string; slogan: string; reg: string;
+  logoUrl?: string; cardBg?: string;
+  to?: string; date?: string; subject?: string; body?: string; showContent?: boolean;
 }) {
   const headFF = `${theme.headFont}, "Noto Sans Telugu", system-ui, sans-serif`;
   const subFF = `${theme.subFont}, "Noto Sans Telugu", system-ui, sans-serif`;
-  const W = 320, H = 420;
-  const lines = (
+  const W = 320, H = 460;
+  const dateStr = date ? new Date(date).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" }) : "";
+
+  const LogoImg = logoUrl ? (
+    <img src={logoUrl} alt="Logo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+  ) : <Sparkles style={{ width: "60%", height: "60%", color: theme.icon }} />;
+
+  const placeholderLines = (
     <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 6 }}>
       {Array.from({ length: 10 }).map((_, i) => (
         <div key={i} style={{ height: 4, background: "#e5e5e5", borderRadius: 2, width: `${95 - (i % 4) * 8}%` }} />
@@ -1429,25 +1501,33 @@ function LetterPreview({
     </div>
   );
 
+  const content = showContent && (to || subject || body || dateStr) ? (
+    <div style={{ marginTop: 12, fontFamily: subFF, fontSize: 10, color: "#111", lineHeight: 1.5 }}>
+      {dateStr ? <div style={{ textAlign: "right", color: "#444", marginBottom: 6 }}>{dateStr}</div> : null}
+      {to ? <div style={{ whiteSpace: "pre-wrap", marginBottom: 6 }}>{to}</div> : null}
+      {subject ? <div style={{ fontWeight: 800, marginBottom: 6 }}>విషయం: {subject}</div> : null}
+      {body ? <div style={{ whiteSpace: "pre-wrap" }}>{body}</div> : null}
+    </div>
+  ) : placeholderLines;
+
   if (layout === "watermark-centered") {
     return (
       <div style={{
-        width: W, height: H, background: "#fff", borderRadius: 10, padding: 18,
+        width: W, height: H, background: cardBg, borderRadius: 10, padding: 18,
         border: `1px solid ${theme.border}`, boxShadow: `0 8px 28px ${theme.icon}33`,
         position: "relative", overflow: "hidden",
       }}>
-        <div style={{
-          position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
-          opacity: 0.08, pointerEvents: "none",
-        }}>
-          <Sparkles style={{ height: 180, width: 180, color: theme.icon }} />
-        </div>
+        {logoUrl ? (
+          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.08, pointerEvents: "none" }}>
+            <img src={logoUrl} alt="" style={{ width: 200, height: 200, objectFit: "contain" }} />
+          </div>
+        ) : null}
         <div style={{ position: "relative", textAlign: theme.headAlign }}>
           <div style={{ fontFamily: headFF, fontWeight: 900, color: theme.icon, fontSize: 18 }}>{orgName}</div>
           <div style={{ fontFamily: subFF, fontStyle: "italic", color: theme.subColor, fontSize: 11 }}>{slogan}</div>
           <div style={{ fontSize: theme.smallSize, color: "#666" }}>Reg No: {reg}</div>
         </div>
-        {lines}
+        <div style={{ position: "relative" }}>{content}</div>
       </div>
     );
   }
@@ -1456,20 +1536,22 @@ function LetterPreview({
     return (
       <div style={{
         width: W, height: H, borderRadius: 10, overflow: "hidden", display: "flex",
-        border: `1px solid ${theme.border}`, boxShadow: `0 8px 28px ${theme.icon}33`,
+        border: `1px solid ${theme.border}`, boxShadow: `0 8px 28px ${theme.icon}33`, background: cardBg,
       }}>
-        <div style={{ width: 88, background: theme.icon, padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
-          <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#fff",
-            display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto" }}>
-            <Sparkles className="h-6 w-6" style={{ color: theme.icon }} />
+        <div style={{ width: 92, background: theme.icon, padding: 10, display: "flex", flexDirection: "column", gap: 6 }}>
+          <div style={{ width: 60, height: 60, borderRadius: "50%", background: "#fff",
+            display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto", padding: 4 }}>
+            {LogoImg}
           </div>
-          <div style={{ fontFamily: headFF, fontSize: 9, color: theme.buttonText, fontWeight: 700, textAlign: "center" }}>{orgName}</div>
-          <div style={{ fontFamily: subFF, fontSize: 8, color: theme.buttonText, opacity: 0.85, fontStyle: "italic", textAlign: "center" }}>{slogan}</div>
-          <div style={{ fontSize: theme.smallSize - 2, color: theme.buttonText, opacity: 0.85, textAlign: "center" }}>Reg: {reg}</div>
+          <div style={{ fontFamily: headFF, fontSize: 10, color: theme.buttonText, fontWeight: 800, textAlign: "center", lineHeight: 1.2 }}>{orgName}</div>
+          <div style={{ fontFamily: subFF, fontSize: 8, color: theme.buttonText, opacity: 0.9, fontStyle: "italic", textAlign: "center" }}>{slogan}</div>
+          <div style={{ fontSize: 8, color: theme.buttonText, opacity: 0.85, textAlign: "center" }}>Reg: {reg}</div>
         </div>
-        <div style={{ flex: 1, padding: 14, background: "#fff" }}>
-          <div style={{ fontFamily: headFF, fontWeight: 800, color: "#111", fontSize: 13 }}>Letter Heading</div>
-          {lines}
+        <div style={{ flex: 1, padding: 14, background: cardBg }}>
+          <div style={{ fontFamily: headFF, fontWeight: 800, color: "#111", fontSize: 13 }}>
+            {subject || "Letter Heading"}
+          </div>
+          {content}
         </div>
       </div>
     );
@@ -1477,7 +1559,7 @@ function LetterPreview({
 
   return (
     <div style={{
-      width: W, height: H, background: "#fff", borderRadius: 10, padding: 18,
+      width: W, height: H, background: cardBg, borderRadius: 10, padding: 18,
       border: `1px solid ${theme.border}`, boxShadow: `0 8px 28px ${theme.icon}33`,
     }}>
       <div style={{
@@ -1485,9 +1567,9 @@ function LetterPreview({
         paddingBottom: 10, borderBottom: `3px solid ${theme.icon}`,
         flexDirection: theme.headAlign === "right" ? "row-reverse" : "row",
       }}>
-        <div style={{ width: 44, height: 44, borderRadius: "50%", background: theme.icon,
-          display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <Sparkles className="h-5 w-5" style={{ color: theme.buttonText }} />
+        <div style={{ width: 48, height: 48, borderRadius: "50%", background: "#fff", border: `2px solid ${theme.icon}`,
+          display: "flex", alignItems: "center", justifyContent: "center", padding: 3, flexShrink: 0 }}>
+          {LogoImg}
         </div>
         <div style={{ flex: 1, textAlign: theme.headAlign }}>
           <div style={{ fontFamily: headFF, fontWeight: 900, color: theme.icon, fontSize: 16 }}>{orgName}</div>
@@ -1495,7 +1577,7 @@ function LetterPreview({
           <div style={{ fontSize: theme.smallSize, color: "#666" }}>Reg No: {reg}</div>
         </div>
       </div>
-      {lines}
+      {content}
     </div>
   );
 }
