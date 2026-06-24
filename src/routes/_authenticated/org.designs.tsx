@@ -1730,7 +1730,7 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
     bloodGroup: "B+",
     address: "Chitvel, Kadapa, AP",
     photoUrl: null,
-    qrUrl: qrApi(memberRegUrl + "&m=A_0001", 160),
+    qrUrl: qrApi(memberRegUrl + (memberRegUrl.includes("?") ? "&" : "?") + "m=A_0001", 160),
     status: "active",
   };
 
