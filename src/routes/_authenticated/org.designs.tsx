@@ -436,6 +436,11 @@ function DesignsPage() {
                     <input type="range" min={12} max={28} step={1} value={letterTitleSize}
                       onChange={(e) => setLetterTitleSize(Number(e.target.value))} className="w-full" />
                   </div>
+                  <div className="grid grid-cols-3 gap-2 pt-1">
+                    <LineColor label="Title / టైటిల్" value={letterTitleColor ?? effectiveAccent} onChange={setLetterTitleColor} />
+                    <LineColor label="Slogan / స్లోగన్" value={letterSloganColor ?? "#555555"} onChange={setLetterSloganColor} />
+                    <LineColor label="Reg No / రిజి" value={letterRegColor ?? "#666666"} onChange={setLetterRegColor} />
+                  </div>
                 </div>
 
                 <LivePreview title="Letter Pad Live Preview" theme={customTheme}>
