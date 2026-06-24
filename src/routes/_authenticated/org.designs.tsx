@@ -169,6 +169,9 @@ function DesignsPage() {
   const [letterLogo, setLetterLogo] = useState<string | null>(null);
   const [letterLogoSize, setLetterLogoSize] = useState<number>(48);
   const [letterTitleSize, setLetterTitleSize] = useState<number>(16);
+  const [letterTitleColor, setLetterTitleColor] = useState<string | null>(null);
+  const [letterSloganColor, setLetterSloganColor] = useState<string | null>(null);
+  const [letterRegColor, setLetterRegColor] = useState<string | null>(null);
 
   // Receipt state
   const [receiptPick, setReceiptPick] = useState<ReceiptLayout | null>(null);
@@ -433,6 +436,11 @@ function DesignsPage() {
                     <input type="range" min={12} max={28} step={1} value={letterTitleSize}
                       onChange={(e) => setLetterTitleSize(Number(e.target.value))} className="w-full" />
                   </div>
+                  <div className="grid grid-cols-3 gap-2 pt-1">
+                    <LineColor label="Title / టైటిల్" value={letterTitleColor ?? effectiveAccent} onChange={setLetterTitleColor} />
+                    <LineColor label="Slogan / స్లోగన్" value={letterSloganColor ?? "#555555"} onChange={setLetterSloganColor} />
+                    <LineColor label="Reg No / రిజి" value={letterRegColor ?? "#666666"} onChange={setLetterRegColor} />
+                  </div>
                 </div>
 
                 <LivePreview title="Letter Pad Live Preview" theme={customTheme}>
@@ -451,6 +459,9 @@ function DesignsPage() {
                     showContent={letterMode === "rich"}
                     logoSize={letterLogoSize}
                     titleSize={letterTitleSize}
+                    titleColor={letterTitleColor ?? effectiveAccent}
+                    sloganColor={letterSloganColor ?? "#555555"}
+                    regColor={letterRegColor ?? "#666666"}
                   />
                 </LivePreview>
 
@@ -1500,13 +1511,16 @@ function LetterPreview({
   layout, theme, orgName, slogan, reg, logoUrl, cardBg = "#ffffff",
   to = "", date = "", subject = "", body = "", showContent = true,
   logoSize = 48, titleSize = 16,
+  titleColor, sloganColor = "#555555", regColor = "#666666",
 }: {
   layout: LetterLayout; theme: Required<ThemeSettings>;
   orgName: string; slogan: string; reg: string;
   logoUrl?: string; cardBg?: string;
   to?: string; date?: string; subject?: string; body?: string; showContent?: boolean;
   logoSize?: number; titleSize?: number;
+  titleColor?: string; sloganColor?: string; regColor?: string;
 }) {
+  const titleC = titleColor ?? theme.icon;
   const headFF = `${theme.headFont}, "Noto Sans Telugu", system-ui, sans-serif`;
   const subFF = `${theme.subFont}, "Noto Sans Telugu", system-ui, sans-serif`;
   const W = 320, H = 460;
@@ -1546,9 +1560,9 @@ function LetterPreview({
           </div>
         ) : null}
         <div style={{ position: "relative", textAlign: theme.headAlign }}>
-          <div style={{ fontFamily: headFF, fontWeight: 900, color: theme.icon, fontSize: titleSize + 2 }}>{orgName}</div>
-          <div style={{ fontFamily: subFF, fontStyle: "italic", color: theme.subColor, fontSize: 11 }}>{slogan}</div>
-          <div style={{ fontSize: theme.smallSize, color: "#666" }}>Reg No: {reg}</div>
+          <div style={{ fontFamily: headFF, fontWeight: 900, color: titleC, fontSize: titleSize + 2 }}>{orgName}</div>
+          <div style={{ fontFamily: subFF, fontStyle: "italic", color: sloganColor, fontSize: 11 }}>{slogan}</div>
+          <div style={{ fontSize: theme.smallSize, color: regColor }}>Reg No: {reg}</div>
         </div>
         <div style={{ position: "relative" }}>{content}</div>
       </div>
@@ -1596,9 +1610,9 @@ function LetterPreview({
           {LogoImg}
         </div>
         <div style={{ flex: 1, textAlign: theme.headAlign }}>
-          <div style={{ fontFamily: headFF, fontWeight: 900, color: theme.icon, fontSize: titleSize, lineHeight: 1.15 }}>{orgName}</div>
-          <div style={{ fontFamily: subFF, fontSize: 10, fontStyle: "italic", color: theme.subColor }}>{slogan}</div>
-          <div style={{ fontSize: theme.smallSize, color: "#666" }}>Reg No: {reg}</div>
+          <div style={{ fontFamily: headFF, fontWeight: 900, color: titleC, fontSize: titleSize, lineHeight: 1.15 }}>{orgName}</div>
+          <div style={{ fontFamily: subFF, fontSize: 10, fontStyle: "italic", color: sloganColor }}>{slogan}</div>
+          <div style={{ fontSize: theme.smallSize, color: regColor }}>Reg No: {reg}</div>
         </div>
       </div>
       {content}
@@ -1992,3 +2006,15 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
   );
 }
 
+
+function LineColor({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="space-y-1">
+      <Label className="text-[10px]" style={{ color: "#a1a1aa" }}>{label}</Label>
+      <div className="flex items-center gap-1">
+        <input type="color" value={value} onChange={(e) => onChange(e.target.value)} className="h-8 w-8 rounded border" />
+        <Input value={value} onChange={(e) => onChange(e.target.value)} className="h-8 text-[10px] font-mono" />
+      </div>
+    </div>
+  );
+}
