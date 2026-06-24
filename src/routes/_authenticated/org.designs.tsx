@@ -2006,3 +2006,15 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
   );
 }
 
+
+function LineColor({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="space-y-1">
+      <Label className="text-[10px]" style={{ color: "#a1a1aa" }}>{label}</Label>
+      <div className="flex items-center gap-1">
+        <input type="color" value={value} onChange={(e) => onChange(e.target.value)} className="h-8 w-8 rounded border" />
+        <Input value={value} onChange={(e) => onChange(e.target.value)} className="h-8 text-[10px] font-mono" />
+      </div>
+    </div>
+  );
+}
