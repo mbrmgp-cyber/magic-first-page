@@ -59,6 +59,9 @@ export type GlobalStyle = {
   cornerRadius: number;
   accentColor: string;
   footerColor?: string; // optional second accent (e.g. legacy green footer)
+  headerAlign?: "left" | "center" | "right"; // align org name/slogan/reg next to logo
+  frontBgImage?: string; // optional uploaded background image (front side)
+  backBgImage?: string;  // optional uploaded background image (back side)
 };
 
 export type IdCardDesign = {
