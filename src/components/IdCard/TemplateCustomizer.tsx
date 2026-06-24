@@ -158,6 +158,31 @@ function NumberField({ label, value, onChange, min, max }: { label: string; valu
   );
 }
 
+function BgImageField({ label, value, onChange }: { label: string; value: string | undefined; onChange: (v: string | undefined) => void }) {
+  return (
+    <div className="space-y-1">
+      <Label className="text-[11px]" style={{ color: TEXT_SUB }}>{label}</Label>
+      <div className="flex items-center gap-2">
+        <div style={{ width: 36, height: 36, borderRadius: 4, background: value ? `url(${value}) center/cover` : "#0a0a0a", border: `1px solid ${PANEL_BORDER}` }} />
+        <label className="inline-flex items-center justify-center px-2 h-8 rounded-md text-[10px] cursor-pointer border flex-1"
+          style={{ background: "#0a0a0a", borderColor: PANEL_BORDER, color: "#fff" }}>
+          {value ? "Change" : "Upload"}
+          <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+            const f = e.target.files?.[0]; if (!f) return;
+            const reader = new FileReader();
+            reader.onload = () => onChange(String(reader.result));
+            reader.readAsDataURL(f);
+          }} />
+        </label>
+        {value && (
+          <button type="button" onClick={() => onChange(undefined)} className="text-[10px] px-2 h-8 rounded border"
+            style={{ borderColor: PANEL_BORDER, color: TEXT_SUB, background: "#0a0a0a" }}>Clear</button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function ElementRow({ k, design, setElement }: { k: ElementKey; design: IdCardDesign; setElement: (k: ElementKey, p: any) => void }) {
   const meta = ELEMENT_LABELS[k];
   const el = design.elements[k];
