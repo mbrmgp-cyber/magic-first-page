@@ -496,7 +496,7 @@ function DesignsPage() {
                       <Field label="Mode" value={receipt.mode} onChange={(v) => setReceipt({ ...receipt, mode: v })} />
                     </div>
 
-                    <LogoUploader logoUrl={receiptLogo} onChange={setReceiptLogo} />
+                    <LogoUploader logoUrl={effectiveReceiptLogo} onChange={setReceiptLogo} />
 
                     <StyleControls
                       cardBg={cardBg} setCardBg={setCardBg}
