@@ -293,7 +293,7 @@ function DesignsPage() {
   }
 
   return (
-    <div className="min-h-screen pb-16" style={{ background: PAGE_BG, color: PAGE_HEAD }}>
+    <div className="min-h-screen pb-16 [&_input]:!text-white [&_input]:!bg-white/5 [&_input]:!border-white/25 [&_input::placeholder]:!text-white/40 [&_textarea]:!text-white [&_textarea]:!bg-white/5 [&_textarea]:!border-white/25 [&_textarea::placeholder]:!text-white/40 [&_input[type=date]]:[color-scheme:dark]" style={{ background: PAGE_BG, color: PAGE_HEAD }}>
       <div className="max-w-5xl mx-auto p-4 space-y-5">
         {/* Header */}
         <div className="flex items-center justify-between">
