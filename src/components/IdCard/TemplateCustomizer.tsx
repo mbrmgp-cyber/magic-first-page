@@ -141,10 +141,25 @@ function ElementRow({ k, design, setElement }: { k: ElementKey; design: IdCardDe
 
       {el.visible && (
         isImage ? (
-          <div className="grid grid-cols-1 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             <NumberField label="Size (px)" value={el.imgSize ?? 60} min={20} max={140} onChange={(v) => setElement(k, { imgSize: v })} />
+            {(k === "qrCode" || k === "mbrLogo") && (
+              <div className="space-y-1">
+                <Label className="text-[10px]" style={{ color: TEXT_SUB }}>Corner / మూల</Label>
+                <Select value={el.corner || "br"} onValueChange={(v) => setElement(k, { corner: v })}>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="tl">↖ Top Left</SelectItem>
+                    <SelectItem value="tr">↗ Top Right</SelectItem>
+                    <SelectItem value="bl">↙ Bottom Left</SelectItem>
+                    <SelectItem value="br">↘ Bottom Right</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
         ) : (
+
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
               <Label className="text-[10px]" style={{ color: TEXT_SUB }}>Font</Label>
