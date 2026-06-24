@@ -232,7 +232,7 @@ function FrontVertical({ design, org, member }: { design: IdCardDesign; org: Org
         )}
       </div>
       {show(e.qrCode) && member.qrUrl && (
-        <img src={member.qrUrl} alt="" style={{ ...cornerStyle(e.qrCode.corner, 6), width: e.qrCode.imgSize, height: e.qrCode.imgSize, background: "#fff", padding: 2, borderRadius: 3, border: `1px solid ${accent}` }} />
+        <img src={member.qrUrl} alt="" style={{ ...cornerStyle(e.qrCode.corner, 12), width: e.qrCode.imgSize, height: e.qrCode.imgSize, background: "#fff", padding: 2, borderRadius: 3, border: `1px solid ${accent}` }} />
       )}
     </div>
   );
