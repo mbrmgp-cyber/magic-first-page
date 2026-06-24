@@ -224,7 +224,7 @@ function renderBack(design: IdCardDesign, org: OrgContext, _member: SampleMember
   const qrSize = Math.min(e.mbrQrCode?.imgSize ?? 56, 70);
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", padding: 10, gap: 6, position: "relative" }}>
-      <div style={{ borderBottom: `2px solid ${g.accentColor}`, paddingBottom: 4, paddingRight: show(e.mbrLogo) ? (e.mbrLogo.imgSize + 8) : 0 }}>
+      <div style={{ borderBottom: `2px solid ${g.accentColor}`, paddingBottom: 4, paddingRight: show(e.mbrLogo) ? ((e.mbrLogo.imgSize ?? 24) + 8) : 0 }}>
         <div style={{ ...txt(e.orgName, g.accentColor), color: g.accentColor }}>{org.name}</div>
       </div>
       <div style={{ flex: 1, display: "flex", gap: 8, minHeight: 0 }}>
@@ -244,7 +244,7 @@ function renderBack(design: IdCardDesign, org: OrgContext, _member: SampleMember
           </div>
         )}
       </div>
-      <div style={{ display: "flex", alignItems: "flex-end", gap: 8, paddingRight: show(e.mbrLogo) ? (e.mbrLogo.imgSize + 8) : 0 }}>
+      <div style={{ display: "flex", alignItems: "flex-end", gap: 8, paddingRight: show(e.mbrLogo) ? ((e.mbrLogo.imgSize ?? 24) + 8) : 0 }}>
         <div style={{ ...txt(e.presidentName), fontSize: 9, opacity: 0.9 }}>
           {show(e.presidentSignature) && org.presidentSignatureUrl && (
             <img src={org.presidentSignatureUrl} alt="" style={{ width: e.presidentSignature.imgSize, height: 32, objectFit: "contain", display: "block" }} />
