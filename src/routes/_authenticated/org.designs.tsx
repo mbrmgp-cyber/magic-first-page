@@ -407,7 +407,7 @@ function DesignsPage() {
                   </TabsContent>
                 </Tabs>
 
-                <LogoUploader logoUrl={letterLogo} onChange={setLetterLogo} />
+                <LogoUploader logoUrl={effectiveLetterLogo} onChange={setLetterLogo} />
 
                 <StyleControls
                   cardBg={cardBg} setCardBg={setCardBg}
@@ -416,7 +416,20 @@ function DesignsPage() {
                 />
 
                 <LivePreview title="Letter Pad Live Preview" theme={customTheme}>
-                  <LetterPreview layout={letterPick} theme={customTheme} orgName={orgName} slogan={orgSlogan} reg={orgReg} />
+                  <LetterPreview
+                    layout={letterPick}
+                    theme={customTheme}
+                    orgName={orgName}
+                    slogan={orgSlogan}
+                    reg={orgReg}
+                    logoUrl={effectiveLetterLogo}
+                    cardBg={cardBg}
+                    to={letterTo}
+                    date={letterDate}
+                    subject={letterSubject}
+                    body={letterBody}
+                    showContent={letterMode === "rich"}
+                  />
                 </LivePreview>
 
                 <Button onClick={printLetterhead} className="w-full font-semibold h-11"
