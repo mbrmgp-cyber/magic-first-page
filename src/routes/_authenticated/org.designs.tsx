@@ -459,6 +459,9 @@ function DesignsPage() {
                     showContent={letterMode === "rich"}
                     logoSize={letterLogoSize}
                     titleSize={letterTitleSize}
+                    titleColor={letterTitleColor ?? effectiveAccent}
+                    sloganColor={letterSloganColor ?? "#555555"}
+                    regColor={letterRegColor ?? "#666666"}
                   />
                 </LivePreview>
 
