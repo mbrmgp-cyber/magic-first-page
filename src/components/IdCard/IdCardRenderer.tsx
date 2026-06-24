@@ -14,7 +14,20 @@ export type SampleMember = {
   address?: string;
   photoUrl?: string | null;
   qrUrl?: string | null;
+  status?: "active" | "inactive";
 };
+
+function StatusBadge({ status }: { status?: "active" | "inactive" }) {
+  const inactive = status === "inactive";
+  const bg = inactive ? "#dc2626" : "#16a34a";
+  const en = inactive ? "Inactive" : "Active";
+  const te = inactive ? "నిష్క్రియ సభ్యుడు" : "యాక్టివ్ సభ్యుడు";
+  return (
+    <div style={{ display: "inline-flex", alignSelf: "center", background: bg, color: "#fff", fontSize: 8, fontWeight: 700, padding: "2px 6px", borderRadius: 999, lineHeight: 1.1, marginTop: 4, whiteSpace: "nowrap" }}>
+      {en} / {te}
+    </div>
+  );
+}
 
 export type OrgContext = {
   name: string;
