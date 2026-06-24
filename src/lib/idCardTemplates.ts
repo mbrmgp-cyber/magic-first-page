@@ -203,6 +203,7 @@ export const ELEMENT_LABELS: Record<ElementKey, { en: string; te: string; side: 
   bloodGroup:  { en: "Blood Group",       te: "బ్లడ్ గ్రూప్",     side: "front" },
   address:     { en: "Address",           te: "అడ్రస్",          side: "back" },
   backMatter:  { en: "Back Side Text",    te: "వెనుక మేటర్",     side: "back" },
+  oath:        { en: "Oath / ప్రమాణం",    te: "ప్రమాణం",          side: "back" },
   mbrQrCode:   { en: "MBR App QR",        te: "MBR యాప్ క్యూఆర్", side: "back" },
   mbrLogo:     { en: "MBR Small Logo",    te: "MBR చిన్న లోగో",  side: "back" },
   presidentSignature: { en: "President Signature", te: "ప్రెసిడెంట్ సంతకం", side: "back" },
