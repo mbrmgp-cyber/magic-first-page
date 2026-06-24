@@ -312,138 +312,15 @@ function DesignsPage() {
             </TabsTrigger>
           </TabsList>
 
-          {/* ============= MODULE 1: ID CARD ============= */}
+          {/* ============= MODULE 1: ID CARD (Template-First) ============= */}
           <TabsContent value="id" className="mt-4 space-y-4">
-            {/* ID Mode toggle: Ready-made templates vs Custom builder */}
-            <div className="grid grid-cols-2 gap-2 rounded-lg p-1" style={{ background: PAGE_PANEL, border: `1px solid ${PAGE_BORDER}` }}>
-              <button
-                onClick={() => setIdMode("templates")}
-                className="h-9 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition"
-                style={{
-                  background: idMode === "templates" ? theme.icon : "transparent",
-                  color: idMode === "templates" ? "#fff" : PAGE_SUB,
-                }}
-              >
-                <IdCard className="h-3.5 w-3.5" /> Ready-Made Templates
-              </button>
-              <button
-                onClick={() => setIdMode("custom")}
-                className="h-9 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition"
-                style={{
-                  background: idMode === "custom" ? theme.icon : "transparent",
-                  color: idMode === "custom" ? "#fff" : PAGE_SUB,
-                }}
-              >
-                <Wand2 className="h-3.5 w-3.5" /> Custom Builder
-              </button>
-            </div>
-
-            {idMode === "custom" ? (
-              <Section
-                icon={<Wand2 className="h-5 w-5" style={{ color: theme.icon }} />}
-                title="Custom ID Card Builder"
-                subtitle="మీ సొంత డిజైన్ అప్‌లోడ్ చేసి, ఫోటో / పేరు / QR drag-and-drop చేయండి"
-                theme={theme}
-              >
-                <CustomIdBuilder defaultName={member.name} defaultDesignation="Member" />
-              </Section>
-            ) : idPick === null ? (
-              <Section
-                icon={<IdCard className="h-5 w-5" style={{ color: theme.icon }} />}
-                title="Choose an ID Card Template"
-                subtitle="ID కార్డ్ టెంప్లేట్‌ను ఎంచుకోండి — క్లిక్ చేస్తే ఎడిట్ మోడ్ తెరుచుకుంటుంది"
-                theme={theme}
-              >
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-                  {ID_TEMPLATES.map((tpl) => {
-                    const locked = !!tpl.comingSoon;
-                    return (
-                      <button
-                        key={tpl.id}
-                        disabled={locked}
-                        onClick={() => !locked && setIdPick(tpl.id as IdLayout)}
-                        className="group relative rounded-xl overflow-hidden border transition text-left hover:scale-[1.02]"
-                        style={{
-                          borderColor: PAGE_BORDER,
-                          background: PAGE_PANEL,
-                          opacity: locked ? 0.55 : 1,
-                          cursor: locked ? "not-allowed" : "pointer",
-                        }}
-                      >
-                        {tpl.featured && (
-                          <div className="absolute top-1 left-1 z-10 text-[8px] font-bold px-1.5 py-0.5 rounded"
-                            style={{ background: "#138808", color: "#fff", letterSpacing: 0.5 }}>
-                            POPULAR
-                          </div>
-                        )}
-                        <div className="aspect-[1.586/1] w-full p-1.5" style={{ background: PAGE_BG }}>
-                          <IdThumb layout={(locked ? "official-saffron" : tpl.id) as IdLayout} theme={theme} />
-                        </div>
-                        <div className="px-2 py-1.5 flex items-center justify-between gap-1">
-                          <div className="min-w-0">
-                            <p className="text-[11px] font-semibold truncate" style={{ color: PAGE_HEAD }}>{tpl.en}</p>
-                            <p className="text-[10px] truncate" style={{ color: PAGE_SUB }}>{tpl.te}</p>
-                          </div>
-                          {locked ? (
-                            <Lock className="h-3 w-3 shrink-0" style={{ color: PAGE_SUB }} />
-                          ) : (
-                            <EditIcon className="h-3 w-3 shrink-0" style={{ color: theme.icon }} />
-                          )}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </Section>
-            ) : (
-              <Section
-                icon={<EditIcon className="h-5 w-5" style={{ color: theme.icon }} />}
-                title="Edit Mode — Live Preview"
-                subtitle="ఎడిట్ చేసుకునే అవకాశం — వివరాలు మార్చండి, ప్రివ్యూ లైవ్‌గా అప్‌డేట్ అవుతుంది"
-                theme={theme}
-                right={
-                  <Button size="sm" variant="ghost" onClick={() => setIdPick(null)} style={{ color: PAGE_SUB }}>
-                    <ChevronLeft className="h-4 w-4 mr-1" /> Back to gallery
-                  </Button>
-                }
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Form */}
-                  <div className="space-y-3 rounded-lg p-3 border" style={{ background: PAGE_BG, borderColor: PAGE_BORDER }}>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Field label="Member Name / పేరు" value={member.name} onChange={(v) => setMember({ ...member, name: v })} />
-                      <Field label="ID Number" value={member.memberId} onChange={(v) => setMember({ ...member, memberId: v })} />
-                      <Field label="Father's Name / తండ్రి" value={member.fatherName} onChange={(v) => setMember({ ...member, fatherName: v })} />
-                      <Field label="Phone / ఫోన్" value={member.phone} onChange={(v) => setMember({ ...member, phone: v })} />
-                      <Field label="Blood Group" value={member.bloodGroup} onChange={(v) => setMember({ ...member, bloodGroup: v })} />
-                      <Field label="Village / గ్రామం" value={member.village} onChange={(v) => setMember({ ...member, village: v })} />
-                      <Field label="Mandal / మండలం" value={member.mandal} onChange={(v) => setMember({ ...member, mandal: v })} />
-                      <Field label="Join Date" value={member.joinDate} onChange={(v) => setMember({ ...member, joinDate: v })} />
-                    </div>
-
-                    <StyleControls
-                      cardBg={cardBg} setCardBg={setCardBg}
-                      accent={effectiveAccent} setAccent={setAccentColor}
-                      font={effectiveFont} setFont={setFontFamily}
-                    />
-
-                    <Button
-                      onClick={() => toast.success("ID Card ready — printable PDF available shortly")}
-                      className="w-full font-semibold h-10"
-                      style={{ background: customTheme.buttonBg, color: customTheme.buttonText }}
-                    >
-                      <Download className="h-4 w-4 mr-2" /> Save & Download PDF
-                    </Button>
-                  </div>
-
-                  {/* Live Preview */}
-                  <div className="rounded-lg p-3 border flex items-center justify-center" style={{ background: PAGE_BG, borderColor: PAGE_BORDER, minHeight: 260 }}>
-                    <IdCardPreview layout={idPick} theme={customTheme} orgName={orgName} slogan={orgSlogan} reg={orgReg} member={member} cardBg={cardBg} />
-                  </div>
-                </div>
-              </Section>
-            )}
+            <TemplateFirstIdCard
+              org={org}
+              orgQ={orgQ}
+              theme={theme}
+            />
           </TabsContent>
+
 
           {/* ============= MODULE 2: LETTER PAD ============= */}
           <TabsContent value="letter" className="mt-4 space-y-4">
