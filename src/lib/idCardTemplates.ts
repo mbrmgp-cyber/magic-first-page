@@ -102,6 +102,7 @@ function makeElements(accent: string, textColor: string): Record<ElementKey, Ele
     bloodGroup:  TEXT({ size: 11, weight: 800, color: "#c1121f" }),
     address:     TEXT({ size: 9, visible: false }),
     backMatter:  TEXT({ size: 10, weight: 500, lineHeight: 1.4 }),
+    oath:        TEXT({ size: 9, weight: 500, lineHeight: 1.4, visible: false }),
     mbrQrCode:   { visible: true, imgSize: 56 },
     mbrLogo:     { visible: true, imgSize: 24, corner: "br" },
 
