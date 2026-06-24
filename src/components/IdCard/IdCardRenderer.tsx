@@ -20,13 +20,21 @@ export type SampleMember = {
 function StatusBadge({ status }: { status?: "active" | "inactive" }) {
   const inactive = status === "inactive";
   const bg = inactive ? "#dc2626" : "#16a34a";
-  const en = inactive ? "Inactive" : "Active";
-  const te = inactive ? "నిష్క్రియ సభ్యుడు" : "యాక్టివ్ సభ్యుడు";
   return (
-    <div style={{ display: "inline-flex", alignSelf: "center", background: bg, color: "#fff", fontSize: 8, fontWeight: 700, padding: "2px 6px", borderRadius: 999, lineHeight: 1.1, marginTop: 4, whiteSpace: "nowrap" }}>
-      {en} / {te}
+    <div style={{ display: "inline-flex", alignSelf: "center", background: bg, color: "#fff", fontSize: 9, fontWeight: 700, padding: "2px 10px", borderRadius: 999, lineHeight: 1.1, marginTop: 4, whiteSpace: "nowrap", letterSpacing: 0.3 }}>
+      {inactive ? "Inactive" : "Active"}
     </div>
   );
+}
+
+// Auto-shrink font size based on text length so back matter fits the box
+function autoFitSize(text: string, base = 11, min = 7): number {
+  const len = (text || "").length;
+  if (len < 120) return base;
+  if (len < 220) return base - 1;
+  if (len < 340) return base - 2;
+  if (len < 480) return base - 3;
+  return min;
 }
 
 export type OrgContext = {
@@ -183,7 +191,7 @@ function FrontHorizontal({ design, org, member }: { design: IdCardDesign; org: O
       </div>
       {/* Front corner QR (member URL) — kept clean, no logo overlap */}
       {show(e.qrCode) && member.qrUrl && (
-        <img src={member.qrUrl} alt="" style={{ ...cornerStyle(e.qrCode.corner, 6), width: e.qrCode.imgSize, height: e.qrCode.imgSize, background: "#fff", padding: 2, borderRadius: 3, border: `1px solid ${design.global.accentColor}` }} />
+        <img src={member.qrUrl} alt="" style={{ ...cornerStyle(e.qrCode.corner, 12), width: e.qrCode.imgSize, height: e.qrCode.imgSize, background: "#fff", padding: 2, borderRadius: 3, border: `1px solid ${design.global.accentColor}` }} />
       )}
       {/* Legacy footer band */}
       {design.templateId === "legacy" && design.global.footerColor && (
@@ -224,7 +232,7 @@ function FrontVertical({ design, org, member }: { design: IdCardDesign; org: Org
         )}
       </div>
       {show(e.qrCode) && member.qrUrl && (
-        <img src={member.qrUrl} alt="" style={{ ...cornerStyle(e.qrCode.corner, 6), width: e.qrCode.imgSize, height: e.qrCode.imgSize, background: "#fff", padding: 2, borderRadius: 3, border: `1px solid ${accent}` }} />
+        <img src={member.qrUrl} alt="" style={{ ...cornerStyle(e.qrCode.corner, 12), width: e.qrCode.imgSize, height: e.qrCode.imgSize, background: "#fff", padding: 2, borderRadius: 3, border: `1px solid ${accent}` }} />
       )}
     </div>
   );
@@ -244,15 +252,20 @@ function renderBack(design: IdCardDesign, org: OrgContext, _member: SampleMember
   const presName = (org.presidentName || "").trim();
   const showPresName = show(e.presidentName) && presName && presName.toLowerCase() !== "president";
   const qrSize = Math.min(e.mbrQrCode?.imgSize ?? 56, 70);
+  const mbrLogoSize = e.mbrLogo?.imgSize ?? 24;
+  const backText = design.backMatter || "";
+  const userSize = e.backMatter?.size;
+  const fitSize = userSize && userSize > 0 ? Math.min(userSize, autoFitSize(backText, userSize)) : autoFitSize(backText);
+  const backTextStyle = { ...txt(e.backMatter), fontSize: fitSize + "px" };
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", padding: 10, gap: 6, position: "relative" }}>
-      <div style={{ borderBottom: `2px solid ${g.accentColor}`, paddingBottom: 4, paddingRight: show(e.mbrLogo) ? ((e.mbrLogo.imgSize ?? 24) + 8) : 0 }}>
+      <div style={{ borderBottom: `2px solid ${g.accentColor}`, paddingBottom: 4, paddingRight: mbrLogoSize + 8 }}>
         <div style={{ ...txt(e.orgName, g.accentColor), color: g.accentColor }}>{org.name}</div>
       </div>
       <div style={{ flex: 1, display: "flex", gap: 8, minHeight: 0 }}>
         {show(e.backMatter) && (
-          <div style={{ flex: 1, minWidth: 0, ...txt(e.backMatter), whiteSpace: "pre-wrap", overflow: "hidden", wordBreak: "break-word" }}>
-            {design.backMatter || ""}
+          <div style={{ flex: 1, minWidth: 0, ...backTextStyle, whiteSpace: "pre-wrap", overflow: "hidden", wordBreak: "break-word" }}>
+            {backText}
           </div>
         )}
         {show(e.mbrQrCode) && (
@@ -266,7 +279,7 @@ function renderBack(design: IdCardDesign, org: OrgContext, _member: SampleMember
           </div>
         )}
       </div>
-      <div style={{ display: "flex", alignItems: "flex-end", gap: 8, paddingRight: show(e.mbrLogo) ? ((e.mbrLogo.imgSize ?? 24) + 8) : 0 }}>
+      <div style={{ display: "flex", alignItems: "flex-end", gap: 8, paddingRight: mbrLogoSize + 8 }}>
         <div style={{ ...txt(e.presidentName), fontSize: 9, opacity: 0.9 }}>
           {show(e.presidentSignature) && org.presidentSignatureUrl && (
             <img src={org.presidentSignatureUrl} alt="" style={{ width: e.presidentSignature.imgSize, height: 32, objectFit: "contain", display: "block" }} />
@@ -275,9 +288,8 @@ function renderBack(design: IdCardDesign, org: OrgContext, _member: SampleMember
           <div style={{ opacity: 0.75 }}>President / అధ్యక్షుడు</div>
         </div>
       </div>
-      {show(e.mbrLogo) && (
-        <img src={mbrLogoUrl} alt="MBR" style={{ ...cornerStyle(e.mbrLogo.corner, 4), width: e.mbrLogo.imgSize, height: e.mbrLogo.imgSize, objectFit: "contain", borderRadius: "50%", background: "#000", padding: 1 }} />
-      )}
+      {/* MBR logo is a permanent forced branding element — always visible */}
+      <img src={mbrLogoUrl} alt="MBR" style={{ ...cornerStyle(e.mbrLogo?.corner, 4), width: mbrLogoSize, height: mbrLogoSize, objectFit: "contain", borderRadius: "50%", background: "#000", padding: 1 }} />
     </div>
   );
 }
