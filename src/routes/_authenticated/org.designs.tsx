@@ -348,7 +348,8 @@ function DesignsPage() {
                       style={{ borderColor: PAGE_BORDER, background: PAGE_PANEL, cursor: "pointer" }}
                     >
                       <div className="aspect-[0.77/1] w-full p-1.5" style={{ background: PAGE_BG }}>
-                        <LetterThumb layout={tpl.id as LetterLayout} theme={theme} />
+                        <LetterThumb layout={tpl.id as LetterLayout} theme={theme}
+                          orgName={orgName} slogan={orgSlogan} reg={orgReg} logoUrl={orgLogo} />
                       </div>
                       <div className="px-2 py-1.5 flex items-center justify-between gap-1">
                         <div className="min-w-0">
