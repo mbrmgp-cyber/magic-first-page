@@ -1478,11 +1478,13 @@ function StandardBackPreview({
 function LetterPreview({
   layout, theme, orgName, slogan, reg, logoUrl, cardBg = "#ffffff",
   to = "", date = "", subject = "", body = "", showContent = true,
+  logoSize = 48, titleSize = 16,
 }: {
   layout: LetterLayout; theme: Required<ThemeSettings>;
   orgName: string; slogan: string; reg: string;
   logoUrl?: string; cardBg?: string;
   to?: string; date?: string; subject?: string; body?: string; showContent?: boolean;
+  logoSize?: number; titleSize?: number;
 }) {
   const headFF = `${theme.headFont}, "Noto Sans Telugu", system-ui, sans-serif`;
   const subFF = `${theme.subFont}, "Noto Sans Telugu", system-ui, sans-serif`;
@@ -1490,7 +1492,7 @@ function LetterPreview({
   const dateStr = date ? new Date(date).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" }) : "";
 
   const LogoImg = logoUrl ? (
-    <img src={logoUrl} alt="Logo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+    <img src={logoUrl} alt="Logo" style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: "50%" }} />
   ) : <Sparkles style={{ width: "60%", height: "60%", color: theme.icon }} />;
 
   const placeholderLines = (
@@ -1523,7 +1525,7 @@ function LetterPreview({
           </div>
         ) : null}
         <div style={{ position: "relative", textAlign: theme.headAlign }}>
-          <div style={{ fontFamily: headFF, fontWeight: 900, color: theme.icon, fontSize: 18 }}>{orgName}</div>
+          <div style={{ fontFamily: headFF, fontWeight: 900, color: theme.icon, fontSize: titleSize + 2 }}>{orgName}</div>
           <div style={{ fontFamily: subFF, fontStyle: "italic", color: theme.subColor, fontSize: 11 }}>{slogan}</div>
           <div style={{ fontSize: theme.smallSize, color: "#666" }}>Reg No: {reg}</div>
         </div>
@@ -1533,17 +1535,18 @@ function LetterPreview({
   }
 
   if (layout === "left-sidebar") {
+    const sideLogo = Math.min(logoSize + 12, 80);
     return (
       <div style={{
         width: W, height: H, borderRadius: 10, overflow: "hidden", display: "flex",
         border: `1px solid ${theme.border}`, boxShadow: `0 8px 28px ${theme.icon}33`, background: cardBg,
       }}>
         <div style={{ width: 92, background: theme.icon, padding: 10, display: "flex", flexDirection: "column", gap: 6 }}>
-          <div style={{ width: 60, height: 60, borderRadius: "50%", background: "#fff",
-            display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto", padding: 4 }}>
+          <div style={{ width: sideLogo, height: sideLogo, borderRadius: "50%", background: "#fff",
+            display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto", padding: 4, overflow: "hidden" }}>
             {LogoImg}
           </div>
-          <div style={{ fontFamily: headFF, fontSize: 10, color: theme.buttonText, fontWeight: 800, textAlign: "center", lineHeight: 1.2 }}>{orgName}</div>
+          <div style={{ fontFamily: headFF, fontSize: Math.max(9, titleSize - 6), color: theme.buttonText, fontWeight: 800, textAlign: "center", lineHeight: 1.2 }}>{orgName}</div>
           <div style={{ fontFamily: subFF, fontSize: 8, color: theme.buttonText, opacity: 0.9, fontStyle: "italic", textAlign: "center" }}>{slogan}</div>
           <div style={{ fontSize: 8, color: theme.buttonText, opacity: 0.85, textAlign: "center" }}>Reg: {reg}</div>
         </div>
@@ -1567,12 +1570,12 @@ function LetterPreview({
         paddingBottom: 10, borderBottom: `3px solid ${theme.icon}`,
         flexDirection: theme.headAlign === "right" ? "row-reverse" : "row",
       }}>
-        <div style={{ width: 48, height: 48, borderRadius: "50%", background: "#fff", border: `2px solid ${theme.icon}`,
-          display: "flex", alignItems: "center", justifyContent: "center", padding: 3, flexShrink: 0 }}>
+        <div style={{ width: logoSize, height: logoSize, borderRadius: "50%", background: "#fff", border: `2px solid ${theme.icon}`,
+          display: "flex", alignItems: "center", justifyContent: "center", padding: 3, flexShrink: 0, overflow: "hidden" }}>
           {LogoImg}
         </div>
         <div style={{ flex: 1, textAlign: theme.headAlign }}>
-          <div style={{ fontFamily: headFF, fontWeight: 900, color: theme.icon, fontSize: 16 }}>{orgName}</div>
+          <div style={{ fontFamily: headFF, fontWeight: 900, color: theme.icon, fontSize: titleSize, lineHeight: 1.15 }}>{orgName}</div>
           <div style={{ fontFamily: subFF, fontSize: 10, fontStyle: "italic", color: theme.subColor }}>{slogan}</div>
           <div style={{ fontSize: theme.smallSize, color: "#666" }}>Reg No: {reg}</div>
         </div>
