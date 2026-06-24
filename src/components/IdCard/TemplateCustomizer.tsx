@@ -1,7 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Eye, EyeOff } from "lucide-react";
 import type { IdCardDesign, ElementKey } from "@/lib/idCardTemplates";
@@ -57,6 +56,17 @@ export function TemplateCustomizer({ design, onChange }: Props) {
         {frontKeys.map((k) => <ElementRow key={k} k={k} design={design} setElement={setElement} />)}
       </Section>
 
+      {/* BACK MATTER TEXT */}
+      <Section title="Back Side Text  •  వెనుక మేటర్ (ఎడిట్ చేయండి)">
+        <Textarea
+          value={design.backMatter || ""}
+          onChange={(e) => onChange({ ...design, backMatter: e.target.value })}
+          rows={5}
+          placeholder="వెనుక సైడ్ కు రాయాల్సిన మేటర్..."
+          className="text-xs"
+        />
+      </Section>
+
       {/* BACK ELEMENTS */}
       <Section title="Back Side — Lines & Elements  •  బ్యాక్ లైన్స్">
         {backKeys.map((k) => <ElementRow key={k} k={k} design={design} setElement={setElement} />)}
@@ -98,7 +108,7 @@ function NumberField({ label, value, onChange, min, max }: { label: string; valu
 function ElementRow({ k, design, setElement }: { k: ElementKey; design: IdCardDesign; setElement: (k: ElementKey, p: any) => void }) {
   const meta = ELEMENT_LABELS[k];
   const el = design.elements[k];
-  const isImage = k === "logo" || k === "photo" || k === "qrCode" || k === "presidentSignature";
+  const isImage = k === "logo" || k === "photo" || k === "qrCode" || k === "presidentSignature" || k === "mbrQrCode" || k === "mbrLogo";
 
   return (
     <div className="rounded-md p-2 border space-y-2" style={{ borderColor: PANEL_BORDER, background: "#0a0a0a" }}>
