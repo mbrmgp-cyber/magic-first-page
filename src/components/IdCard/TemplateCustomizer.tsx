@@ -79,6 +79,21 @@ export function TemplateCustomizer({ design, onChange }: Props) {
         </div>
       </Section>
 
+      {/* OATH / ప్రమాణం */}
+      <Section title="Oath / ప్రమాణం (Hidden by default — Show/Hide using toggle below)">
+        <Textarea
+          value={design.oathText || ""}
+          onChange={(e) => onChange({ ...design, oathText: e.target.value })}
+          rows={4}
+          placeholder="ఈ సంస్థ ఆశయం కోసం ... ప్రమాణం చేస్తున్నాను — {name}"
+          className="text-xs"
+        />
+        <p className="text-[10px]" style={{ color: TEXT_SUB }}>
+          Tip: <code>{"{name}"}</code> లేదా <code>(సభ్యుడి పేరు)</code> — auto-replaces with member's name.
+        </p>
+      </Section>
+
+
       {/* BACK ELEMENTS */}
       <Section title="Back Side — Lines & Elements  •  బ్యాక్ లైన్స్">
         {backKeys.map((k) => <ElementRow key={k} k={k} design={design} setElement={setElement} />)}
