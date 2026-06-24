@@ -677,6 +677,7 @@ function SavedDesignCard({
     address: member.address || undefined,
     photoUrl: photoUrl,
     qrUrl: qrDataUrl || null,
+    status: (member as any)?.status === "approved" || (member as any)?.status === "active" ? "active" : "inactive",
   };
   const side = showBack ? "back" : "front";
   return (
