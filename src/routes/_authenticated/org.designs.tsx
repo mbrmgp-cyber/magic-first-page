@@ -466,10 +466,12 @@ function DesignsPage() {
                     to={letterTo}
                     date={letterDate}
                     subject={letterSubject}
+                    heading={letterHeading}
                     body={letterBody}
                     showContent={letterMode === "rich"}
                     logoSize={letterLogoSize}
                     titleSize={letterTitleSize}
+                    regSize={letterRegSize}
                     titleColor={letterTitleColor ?? effectiveAccent}
                     sloganColor={letterSloganColor ?? "#555555"}
                     regColor={letterRegColor ?? "#666666"}
