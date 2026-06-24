@@ -314,45 +314,27 @@ function DesignsPage() {
 
           {/* ============= MODULE 1: ID CARD ============= */}
           <TabsContent value="id" className="mt-4 space-y-4">
-            {/* Simple flow guidance banner */}
-            {idMode === "templates" && idPick === null && (
-              <div className="rounded-lg p-3 border flex items-start gap-2.5"
-                style={{ background: "rgba(19,136,8,0.08)", borderColor: "rgba(19,136,8,0.35)" }}>
-                <div className="h-6 w-6 rounded-full flex items-center justify-center shrink-0"
-                  style={{ background: "#138808", color: "#fff", fontSize: 12, fontWeight: 700 }}>i</div>
-                <div className="text-[12px] leading-relaxed" style={{ color: PAGE_HEAD }}>
-                  <strong>సింపుల్ 3 స్టెప్స్:</strong> 1) కింద ఉన్న టెంప్లేట్ ఎంచుకోండి →
-                  2) వివరాలు మార్చండి → 3) PDF Download చేయండి.
-                  <span className="block mt-0.5" style={{ color: PAGE_SUB }}>
-                    Pick a template, edit details, download. That's it!
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {/* ID Mode toggle: Ready-made templates (default) vs Advanced builder */}
+            {/* ID Mode toggle: Ready-made templates vs Custom builder */}
             <div className="grid grid-cols-2 gap-2 rounded-lg p-1" style={{ background: PAGE_PANEL, border: `1px solid ${PAGE_BORDER}` }}>
               <button
                 onClick={() => setIdMode("templates")}
-                className="h-10 rounded-md text-xs font-semibold flex flex-col items-center justify-center gap-0.5 transition"
+                className="h-9 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition"
                 style={{
                   background: idMode === "templates" ? theme.icon : "transparent",
                   color: idMode === "templates" ? "#fff" : PAGE_SUB,
                 }}
               >
-                <span className="flex items-center gap-1.5"><IdCard className="h-3.5 w-3.5" /> Ready Templates</span>
-                <span className="text-[9px] opacity-80 font-normal">Recommended • సులభం</span>
+                <IdCard className="h-3.5 w-3.5" /> Ready-Made Templates
               </button>
               <button
                 onClick={() => setIdMode("custom")}
-                className="h-10 rounded-md text-xs font-semibold flex flex-col items-center justify-center gap-0.5 transition"
+                className="h-9 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition"
                 style={{
                   background: idMode === "custom" ? theme.icon : "transparent",
                   color: idMode === "custom" ? "#fff" : PAGE_SUB,
                 }}
               >
-                <span className="flex items-center gap-1.5"><Wand2 className="h-3.5 w-3.5" /> Advanced Builder</span>
-                <span className="text-[9px] opacity-80 font-normal">Optional • Designers only</span>
+                <Wand2 className="h-3.5 w-3.5" /> Custom Builder
               </button>
             </div>
 
