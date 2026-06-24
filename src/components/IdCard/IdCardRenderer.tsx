@@ -201,7 +201,10 @@ function FrontVertical({ design, org, member }: { design: IdCardDesign; org: Org
         {show(e.bloodGroup) && member.bloodGroup && <div style={{ ...txt(e.bloodGroup), textAlign: "center" }}>🩸 {member.bloodGroup}</div>}
       </div>
       {show(e.qrCode) && member.qrUrl && (
-        <img src={member.qrUrl} alt="" style={{ position: "absolute", bottom: 6, right: 6, width: e.qrCode.imgSize, height: e.qrCode.imgSize, background: "#fff", padding: 2, borderRadius: 3, border: `1px solid ${design.global.accentColor}` }} />
+        <img src={member.qrUrl} alt="" style={{ ...cornerStyle(e.qrCode.corner, 6), width: e.qrCode.imgSize, height: e.qrCode.imgSize, background: "#fff", padding: 2, borderRadius: 3, border: `1px solid ${design.global.accentColor}` }} />
+      )}
+      {show(e.mbrLogo) && (
+        <img src={org.mbrLogoUrl || mbrLogoAsset.url} alt="MBR" style={{ ...cornerStyle(e.mbrLogo.corner, 4), width: e.mbrLogo.imgSize, height: e.mbrLogo.imgSize, objectFit: "contain", borderRadius: "50%", background: "rgba(255,255,255,0.85)", padding: 1, opacity: 0.9 }} />
       )}
     </div>
   );
@@ -216,40 +219,44 @@ function renderBack(design: IdCardDesign, org: OrgContext, _member: SampleMember
   const e = design.elements;
   const g = design.global;
   const mbrLogoUrl = org.mbrLogoUrl || mbrLogoAsset.url;
+  const presName = (org.presidentName || "").trim();
+  const showPresName = show(e.presidentName) && presName && presName.toLowerCase() !== "president";
+  const qrSize = Math.min(e.mbrQrCode?.imgSize ?? 56, 70);
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", padding: 10, gap: 6, position: "relative" }}>
-      <div style={{ borderBottom: `2px solid ${g.accentColor}`, paddingBottom: 4 }}>
+      <div style={{ borderBottom: `2px solid ${g.accentColor}`, paddingBottom: 4, paddingRight: show(e.mbrLogo) ? (e.mbrLogo.imgSize + 8) : 0 }}>
         <div style={{ ...txt(e.orgName, g.accentColor), color: g.accentColor }}>{org.name}</div>
       </div>
       <div style={{ flex: 1, display: "flex", gap: 8, minHeight: 0 }}>
         {show(e.backMatter) && (
-          <div style={{ flex: 1, minWidth: 0, ...txt(e.backMatter), whiteSpace: "pre-wrap", overflow: "hidden" }}>
+          <div style={{ flex: 1, minWidth: 0, ...txt(e.backMatter), whiteSpace: "pre-wrap", overflow: "hidden", wordBreak: "break-word" }}>
             {design.backMatter || ""}
           </div>
         )}
         {show(e.mbrQrCode) && (
-          <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+          <div style={{ flexShrink: 0, width: qrSize + 4, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
             {org.mbrQrUrl ? (
-              <img src={org.mbrQrUrl} alt="MBR App" style={{ width: e.mbrQrCode.imgSize, height: e.mbrQrCode.imgSize, border: `1px solid ${g.accentColor}`, padding: 2, background: "#fff" }} />
+              <img src={org.mbrQrUrl} alt="MBR App" style={{ width: qrSize, height: qrSize, border: `1px solid ${g.accentColor}`, padding: 2, background: "#fff", display: "block" }} />
             ) : (
-              <div style={{ width: e.mbrQrCode.imgSize, height: e.mbrQrCode.imgSize, border: `1px dashed ${g.accentColor}`, display: "flex", alignItems: "center", justifyContent: "center", color: g.accentColor, fontSize: 9, textAlign: "center" }}>MBR<br/>QR</div>
+              <div style={{ width: qrSize, height: qrSize, border: `1px dashed ${g.accentColor}`, display: "flex", alignItems: "center", justifyContent: "center", color: g.accentColor, fontSize: 9, textAlign: "center", background: "#fff" }}>MBR<br/>QR</div>
             )}
-            <div style={{ fontSize: 8, color: g.accentColor, fontWeight: 700 }}>కొత్త సభ్యుల నమోదు</div>
+            <div style={{ fontSize: 7, color: g.accentColor, fontWeight: 700, textAlign: "center", lineHeight: 1.1, whiteSpace: "normal" }}>కొత్త సభ్యుల నమోదు</div>
           </div>
         )}
       </div>
-      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 8 }}>
-        <div style={{ ...txt(e.presidentName), fontSize: 9, opacity: 0.85 }}>
+      <div style={{ display: "flex", alignItems: "flex-end", gap: 8, paddingRight: show(e.mbrLogo) ? (e.mbrLogo.imgSize + 8) : 0 }}>
+        <div style={{ ...txt(e.presidentName), fontSize: 9, opacity: 0.9 }}>
           {show(e.presidentSignature) && org.presidentSignatureUrl && (
             <img src={org.presidentSignatureUrl} alt="" style={{ width: e.presidentSignature.imgSize, height: 32, objectFit: "contain", display: "block" }} />
           )}
-          {show(e.presidentName) && org.presidentName && <div style={{ fontWeight: 700 }}>{org.presidentName}</div>}
-          <div style={{ opacity: 0.7 }}>అధ్యక్షుడు / President</div>
+          {showPresName && <div style={{ fontWeight: 700 }}>{presName}</div>}
+          <div style={{ opacity: 0.75 }}>President / అధ్యక్షుడు</div>
         </div>
-        {show(e.mbrLogo) && (
-          <img src={mbrLogoUrl} alt="MBR" style={{ width: e.mbrLogo.imgSize, height: e.mbrLogo.imgSize, objectFit: "contain", borderRadius: "50%", background: "#000" }} />
-        )}
       </div>
+      {show(e.mbrLogo) && (
+        <img src={mbrLogoUrl} alt="MBR" style={{ ...cornerStyle(e.mbrLogo.corner, 4), width: e.mbrLogo.imgSize, height: e.mbrLogo.imgSize, objectFit: "contain", borderRadius: "50%", background: "#000", padding: 1 }} />
+      )}
     </div>
   );
 }
+
