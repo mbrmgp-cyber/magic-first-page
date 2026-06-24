@@ -160,17 +160,19 @@ function DesignsPage() {
   const [member, setMember] = useState<MemberData>(DEFAULT_MEMBER);
 
   // Letter state
-  const [letterPick, setLetterPick] = useState<LetterLayout>("standard-header");
+  const [letterPick, setLetterPick] = useState<LetterLayout | null>(null);
   const [letterMode, setLetterMode] = useState<"rich" | "blank">("rich");
   const [letterTo, setLetterTo] = useState("");
   const [letterSubject, setLetterSubject] = useState("");
   const [letterBody, setLetterBody] = useState("");
   const [letterDate, setLetterDate] = useState(new Date().toISOString().slice(0, 10));
+  const [letterLogo, setLetterLogo] = useState<string>(mbrLogo.url);
 
   // Receipt state
   const [receiptPick, setReceiptPick] = useState<ReceiptLayout | null>(null);
   const [receipt, setReceipt] = useState<ReceiptData>(DEFAULT_RECEIPT);
   const [receiptLogo, setReceiptLogo] = useState<string>(mbrLogo.url);
+
 
   // Design Customization (per-edit-session overrides — nullable so live theme wins until user picks).
   const [cardBg, setCardBg] = useState<string>("#ffffff");
@@ -327,25 +329,20 @@ function DesignsPage() {
 
           {/* ============= MODULE 2: LETTER PAD ============= */}
           <TabsContent value="letter" className="mt-4 space-y-4">
-            <Section
-              icon={<FileText className="h-5 w-5" style={{ color: theme.icon }} />}
-              title="Letter Pad Templates"
-              subtitle="లెటర్ ప్యాడ్ టెంప్లేట్స్ — Rich Text మోడ్ లేదా Blank మోడ్"
-              theme={theme}
-            >
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {LETTER_TEMPLATES.map((tpl) => {
-                  const active = tpl.id === letterPick;
-                  return (
+            {letterPick === null ? (
+              <Section
+                icon={<FileText className="h-5 w-5" style={{ color: theme.icon }} />}
+                title="Choose a Letter Pad Template"
+                subtitle="లెటర్ ప్యాడ్ టెంప్లేట్‌ను ఎంచుకోండి"
+                theme={theme}
+              >
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {LETTER_TEMPLATES.map((tpl) => (
                     <button
                       key={tpl.id}
                       onClick={() => setLetterPick(tpl.id as LetterLayout)}
                       className="group relative rounded-xl overflow-hidden border transition text-left hover:scale-[1.02]"
-                      style={{
-                        borderColor: active ? theme.icon : PAGE_BORDER,
-                        background: PAGE_PANEL,
-                        boxShadow: active ? `0 0 0 2px ${theme.icon}` : undefined,
-                      }}
+                      style={{ borderColor: PAGE_BORDER, background: PAGE_PANEL, cursor: "pointer" }}
                     >
                       <div className="aspect-[0.77/1] w-full p-1.5" style={{ background: PAGE_BG }}>
                         <LetterThumb layout={tpl.id as LetterLayout} theme={theme} />
@@ -355,62 +352,79 @@ function DesignsPage() {
                           <p className="text-[11px] font-semibold truncate" style={{ color: PAGE_HEAD }}>{tpl.en}</p>
                           <p className="text-[10px] truncate" style={{ color: PAGE_SUB }}>{tpl.te}</p>
                         </div>
-                        {active && (
-                          <div className="rounded-full p-0.5" style={{ background: theme.icon }}>
-                            <Check className="h-3 w-3" style={{ color: theme.buttonText }} />
-                          </div>
-                        )}
+                        <EditIcon className="h-3 w-3" style={{ color: theme.icon }} />
                       </div>
                     </button>
-                  );
-                })}
-              </div>
+                  ))}
+                </div>
+              </Section>
+            ) : (
+              <Section
+                icon={<EditIcon className="h-5 w-5" style={{ color: theme.icon }} />}
+                title="Edit Mode — Letter Pad"
+                subtitle="వివరాలు నింపండి — ప్రివ్యూ లైవ్"
+                theme={theme}
+                right={
+                  <Button size="sm" variant="ghost" onClick={() => setLetterPick(null)} style={{ color: PAGE_SUB }}>
+                    <ChevronLeft className="h-4 w-4 mr-1" /> Back to gallery
+                  </Button>
+                }
+              >
+                <Tabs value={letterMode} onValueChange={(v) => setLetterMode(v as "rich" | "blank")} className="w-full">
+                  <TabsList className="grid grid-cols-2 w-full" style={{ background: PAGE_BG, border: `1px solid ${PAGE_BORDER}` }}>
+                    <TabsTrigger value="rich" className="gap-2"><Pencil className="h-3.5 w-3.5" /> Rich Text / టైప్</TabsTrigger>
+                    <TabsTrigger value="blank" className="gap-2"><FileX className="h-3.5 w-3.5" /> Blank / ఖాళీ</TabsTrigger>
+                  </TabsList>
 
-              <Tabs value={letterMode} onValueChange={(v) => setLetterMode(v as "rich" | "blank")} className="w-full">
-                <TabsList className="grid grid-cols-2 w-full" style={{ background: PAGE_BG, border: `1px solid ${PAGE_BORDER}` }}>
-                  <TabsTrigger value="rich" className="gap-2"><Pencil className="h-3.5 w-3.5" /> Rich Text / టైప్</TabsTrigger>
-                  <TabsTrigger value="blank" className="gap-2"><FileX className="h-3.5 w-3.5" /> Blank / ఖాళీ</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="rich" className="space-y-3 mt-3">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <Label className="text-[11px]" style={{ color: PAGE_SUB }}>To / గ్రహీత</Label>
-                      <Textarea rows={2} value={letterTo} onChange={(e) => setLetterTo(e.target.value)} placeholder="Recipient name & address" />
+                  <TabsContent value="rich" className="space-y-3 mt-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label className="text-[11px]" style={{ color: PAGE_SUB }}>To / గ్రహీత</Label>
+                        <Textarea rows={2} value={letterTo} onChange={(e) => setLetterTo(e.target.value)} placeholder="Recipient name & address" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[11px]" style={{ color: PAGE_SUB }}>Date / తేదీ</Label>
+                        <Input type="date" value={letterDate} onChange={(e) => setLetterDate(e.target.value)} />
+                      </div>
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-[11px]" style={{ color: PAGE_SUB }}>Date / తేదీ</Label>
-                      <Input type="date" value={letterDate} onChange={(e) => setLetterDate(e.target.value)} />
+                      <Label className="text-[11px]" style={{ color: PAGE_SUB }}>Subject / విషయం</Label>
+                      <Input value={letterSubject} onChange={(e) => setLetterSubject(e.target.value)} placeholder="Regarding..." />
                     </div>
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[11px]" style={{ color: PAGE_SUB }}>Subject / విషయం</Label>
-                    <Input value={letterSubject} onChange={(e) => setLetterSubject(e.target.value)} placeholder="Regarding..." />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[11px]" style={{ color: PAGE_SUB }}>Body / లేఖ విషయం</Label>
-                    <Textarea rows={8} value={letterBody} onChange={(e) => setLetterBody(e.target.value)} placeholder="Type your letter body here..." />
-                  </div>
-                </TabsContent>
+                    <div className="space-y-1">
+                      <Label className="text-[11px]" style={{ color: PAGE_SUB }}>Body / లేఖ విషయం</Label>
+                      <Textarea rows={8} value={letterBody} onChange={(e) => setLetterBody(e.target.value)} placeholder="Type your letter body here..." />
+                    </div>
+                  </TabsContent>
 
-                <TabsContent value="blank" className="mt-3">
-                  <div className="rounded-lg border p-3 text-[12px]" style={{ background: PAGE_BG, borderColor: PAGE_BORDER, color: PAGE_SUB }}>
-                    Blank template — header &amp; footer only. Download as PDF, print, and write content by hand.
-                  </div>
-                </TabsContent>
-              </Tabs>
+                  <TabsContent value="blank" className="mt-3">
+                    <div className="rounded-lg border p-3 text-[12px]" style={{ background: PAGE_BG, borderColor: PAGE_BORDER, color: PAGE_SUB }}>
+                      Blank template — header &amp; footer only. Download as PDF, print, and write content by hand.
+                    </div>
+                  </TabsContent>
+                </Tabs>
 
-              <LivePreview title="Letter Pad Live Preview" theme={theme}>
-                <LetterPreview layout={letterPick} theme={theme} orgName={orgName} slogan={orgSlogan} reg={orgReg} />
-              </LivePreview>
+                <LogoUploader logoUrl={letterLogo} onChange={setLetterLogo} />
 
-              <Button onClick={printLetterhead} className="w-full font-semibold h-11"
-                style={{ background: theme.buttonBg, color: theme.buttonText }}>
-                <Printer className="h-4 w-4 mr-2" />
-                {letterMode === "rich" ? "Preview & Download Letter PDF" : "Download Blank Letterhead PDF"}
-              </Button>
-            </Section>
+                <StyleControls
+                  cardBg={cardBg} setCardBg={setCardBg}
+                  accent={effectiveAccent} setAccent={setAccentColor}
+                  font={effectiveFont} setFont={setFontFamily}
+                />
+
+                <LivePreview title="Letter Pad Live Preview" theme={customTheme}>
+                  <LetterPreview layout={letterPick} theme={customTheme} orgName={orgName} slogan={orgSlogan} reg={orgReg} />
+                </LivePreview>
+
+                <Button onClick={printLetterhead} className="w-full font-semibold h-11"
+                  style={{ background: customTheme.buttonBg, color: customTheme.buttonText }}>
+                  <Printer className="h-4 w-4 mr-2" />
+                  {letterMode === "rich" ? "Preview & Download Letter PDF" : "Download Blank Letterhead PDF"}
+                </Button>
+              </Section>
+            )}
           </TabsContent>
+
 
           {/* ============= MODULE 3: RECEIPT CARD ============= */}
           <TabsContent value="receipt" className="mt-4 space-y-4">
