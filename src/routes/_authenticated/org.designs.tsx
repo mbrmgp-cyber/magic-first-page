@@ -1700,15 +1700,24 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
   const [step, setStep] = useState<"pick" | "edit">(org?.id_card_design ? "edit" : "pick");
   const [saving, setSaving] = useState(false);
 
+  const memberRegUrl = typeof window !== "undefined"
+    ? `${window.location.origin}/member/register?org=${encodeURIComponent(org?.id || "")}`
+    : "https://mbrapp.in/member/register";
+  const orgRegUrl = typeof window !== "undefined"
+    ? `${window.location.origin}/org/register`
+    : "https://mbrapp.in/org/register";
+  const qrApi = (data: string, size = 160) =>
+    `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&margin=0&data=${encodeURIComponent(data)}`;
+
   const orgCtx: OrgContext = {
     name: org?.name || "Chitvel Help Line Society",
     slogan: org?.slogan || "॥ మానవసేవే మాధవసేవ ॥",
     regNumber: org?.gov_reg_number || "356/16",
     logoUrl: org?.logo_url,
-    presidentName: org?.president_name || "President",
+    presidentName: org?.president_name || "",
     presidentSignatureUrl: org?.president_signature_url,
     mbrLogoUrl: mbrLogo.url,
-    mbrQrUrl: null, // generated live on member card
+    mbrQrUrl: qrApi(orgRegUrl, 200),
   };
   const sampleMember: SampleMember = {
     name: "మన్నూరు భాస్కర్ రెడ్డి",
@@ -1722,8 +1731,9 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
     bloodGroup: "B+",
     address: "Chitvel, Kadapa, AP",
     photoUrl: null,
-    qrUrl: null,
+    qrUrl: qrApi(memberRegUrl + "&m=A_0001", 160),
   };
+
 
   function pickTemplate(id: TemplateId) {
     setDesign(defaultDesign(id, design.cardType));
