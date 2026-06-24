@@ -296,7 +296,7 @@ function LegacyLayout(props: any) {
 
       <div className="flex items-center gap-1 justify-center">
         <Languages className="w-4 h-4 text-muted-foreground" />
-        {langs.map(l => (
+        {langs.map((l: CardLang) => (
           <Button
             key={l}
             size="sm"
