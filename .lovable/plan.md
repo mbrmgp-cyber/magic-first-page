@@ -1,85 +1,109 @@
+## లక్ష్యం
 
-# కార్యవర్గం (Committee) Feature - Updated Plan
+Design Studio ను Template-First approach తో simple చేయడం. 5 ready-made ID card designs (Front + Back) చూపించి, ఆర్గనైజేషన్ select చేసిన template కి colors, borders, line-wise text styling edit చేసుకునే option ఇవ్వడం. Save చేస్తే అదే template తో అన్ని members ID cards auto-generate అవుతాయి.
 
-## ముఖ్య మార్పు
-**సంఖ్య fixed కాదు** - ప్రతి సొసైటీ admin తన అవసరం ప్రకారం ఎంత మందినైనా (5, 11, 21, 31...) నియమించుకోవచ్చు. పదవి స్థానాలు కూడా flexible.
+## 5 Ready-Made Templates
 
-## 1. పదవులు (Roles) - తెలుగు
+ప్రతి template కి Front + Back రెండూ pre-designed:
 
-| పదవి | సంఖ్య | అధికారాలు (Auto Permissions) |
-|---|---|---|
-| అధ్యక్షుడు (president) | 1 | అన్నీ - members, rules, accounts, events, committee manage |
-| ఉపాధ్యక్షుడు (vice_president) | admin నిర్ణయం | అధ్యక్షుని అన్ని (committee manage తప్ప) |
-| గౌరవ సలహాదారు (advisor) | admin నిర్ణయం | అన్నీ view + chat |
-| కోశాధికారి (treasurer) | admin నిర్ణయం | Accounts full edit, మిగతావి view |
-| కార్యనిర్వాహకుడు (executive) | admin నిర్ణయం | Events, rules, members edit |
-| కార్యకర్త (worker) | admin నిర్ణయం | Events participate, chat |
+1. **Classic Rectangle** — సాంప్రదాయ rectangle, top header band, photo left, details right
+2. **Modern Rounded** — rounded corners, gradient header, centered photo
+3. **Vertical Portrait** — vertical layout, photo top, details bottom (lanyard friendly)
+4. **Premium Gold** — dark background, gold accents, formal look
+5. **Minimal Clean** — white minimal, thin borders, clean typography
 
-**Validation**: కేవలం **అధ్యక్షుడు** మాత్రమే ఒక్కరే ఉండాలి (DB constraint). మిగతా పదవులు ఎంతమందినైనా.
+ప్రతి template కి 2 modes: **Normal ID Card** (CR80 standard) మరియు **Keychain Type** (small, compact).
 
-## 2. Database Schema
+## Editable Properties (Selection తర్వాత)
 
-కొత్త enum `committee_role`: president, vice_president, advisor, treasurer, executive, worker.
+### Global (whole card)
+- Border color, border width, border style (solid/dashed/none)
+- Background color / gradient
+- Card corner radius
 
-కొత్త table **`committee_members`**:
-- `org_id`, `member_id`, `role`, `position_number` (display order, unique per org)
-- `term_start_date`, `term_end_date`
-- `qualifications`, `responsibilities` (text)
-- `is_active` (boolean)
-- **Unique constraint**: `(org_id, role) WHERE role='president' AND is_active=true` → ఒక్క president మాత్రమే
+### Per-Element (logo, QR, name, slogan, reg#, member name, father name, village, pincode, phone, email, blood group, address, president signature)
+- Show / Hide (delete-equivalent)
+- Font family, font size, font weight, color
+- Position adjust (optional - drag)
+- Edit label text
 
-కొత్త column `organizations.committee_term_years` (default 2, admin మార్చవచ్చు).
+### Auto-included Elements
+- **Front**: Logo, Org Name, Slogan, Reg#, Member Photo, Member Name, Father Name, Member Code, Designation, QR Code
+- **Back**: Village, Pincode, Phone, Email, Blood Group, Address, President Signature, Rules/Terms
 
-**Helper functions** (security definer):
-- `get_committee_role(_user_id, _org_id)` → role enum
-- `can_manage_committee(_org_id)` → admin OR president
-- `can_edit_accounts(_org_id)` → admin, president, vice_president, treasurer
-- `can_edit_events(_org_id)` / `can_edit_rules(_org_id)` → admin, president, vice_president, executive
+## Workflow
 
-`can_edit_org()` update - committee roles ఆధారంగా.
+```text
+Step 1: Choose Card Type    [Normal] [Keychain]
+Step 2: Choose Template     [1] [2] [3] [4] [5]   (Front+Back preview)
+Step 3: Customize           Colors • Borders • Line-wise text edit
+Step 4: Preview with sample member data
+Step 5: Save as Org Default → applies to all members auto
+```
 
-## 3. UI - కొత్త page `/org/committee`
+## Data Model
 
-### Layout:
-- **Header banner** (tricolor) - "మా కార్యవర్గం" + లోగో + "మొత్తం X మంది"
-- **Term info** - "ప్రస్తుత పదవీకాలం: YYYY - YYYY"
-- **Hierarchy sections** (పదవి వారీగా group, ఎన్ని ఉంటే అన్ని cards):
-  - 🎖️ అధ్యక్షుడు (పెద్ద center card)
-  - 🥈 ఉపాధ్యక్షులు (grid)
-  - 💡 సలహాదారులు (grid)
-  - 💰 కోశాధికారులు (grid)
-  - ⚙️ కార్యనిర్వాహకులు (grid)
-  - 🤝 కార్యకర్తలు (grid)
-- **Each card**: photo, పేరు, పదవి badge, term dates, click → modal తో qualifications/responsibilities
+Single JSONB column `id_card_design` on `organizations` table:
 
-### Admin/President controls:
-- "+ సభ్యునిని నియమించండి" button - approved members list నుండి select + role + term dates + qualifications + responsibilities
-- Edit/Remove icons per card
-- **Settings panel**: పదవీకాలం years (org-wide)
+```json
+{
+  "cardType": "normal" | "keychain",
+  "templateId": "classic" | "modern" | "vertical" | "premium" | "minimal",
+  "global": {
+    "borderColor": "#...", "borderWidth": 2, "borderStyle": "solid",
+    "backgroundColor": "#...", "cornerRadius": 12
+  },
+  "elements": {
+    "logo":        { "visible": true,  "size": 48 },
+    "orgName":     { "visible": true,  "font": "Inter", "size": 18, "weight": 700, "color": "#..." },
+    "slogan":      { "visible": true,  "font": "Inter", "size": 12, "weight": 400, "color": "#..." },
+    "regNumber":   { "visible": true,  ... },
+    "memberName":  { ... },
+    "fatherName":  { ... },
+    "village":     { ... },
+    "pincode":     { ... },
+    "phone":       { ... },
+    "email":       { ... },
+    "bloodGroup":  { ... },
+    "address":     { ... },
+    "qrCode":      { "visible": true, "size": 64 },
+    "presidentSignature": { "visible": true, "imageUrl": null }
+  }
+}
+```
 
-### Member view:
-- Read-only, "మీరు: [పదవి]" highlight
+Once saved, every member's ID card renders from this single design — no per-member customization needed.
 
-## 4. Server Functions (`src/lib/committee.functions.ts`)
-- `listCommittee(orgId?)` - group by role
-- `appointCommitteeMember({memberId, role, positionNumber, termStartDate, termEndDate, qualifications, responsibilities})`
-- `updateCommitteeMember(id, updates)`
-- `removeCommitteeMember(id)` - soft delete
-- `getMyCommitteeRole()` - current user
-- `updateTermYears(years)` - admin only
+## Files to Create/Change
 
-## 5. Navigation
-Dashboard లో కొత్త tile **"కార్యవర్గం"** → `/org/committee`.
+**New files:**
+- `src/lib/idCardTemplates.ts` — 5 template presets (default colors, layouts, font sizes)
+- `src/lib/idCardDesign.functions.ts` — server fns: `getOrgIdDesign`, `saveOrgIdDesign`
+- `src/components/IdCard/TemplatePicker.tsx` — Step 2 template gallery
+- `src/components/IdCard/TemplateCustomizer.tsx` — Step 3 customization panel (colors + per-line text editor)
+- `src/components/IdCard/IdCardRenderer.tsx` — single renderer that takes `(design, memberData)` → renders Front/Back. Used in both customizer preview and on member ID pages.
 
-## 6. Existing pages refine
-- `org.rules.tsx`, `org.events.tsx`, `org.accounts.tsx` లో edit gate ను committee role helpers ఆధారంగా update.
-- `org.members.tsx` లో committee badge చూపించడం (role తో).
+**Files to edit:**
+- `src/routes/_authenticated/org.designs.tsx` — replace current complex builder with the 4-step Template-First flow
+- `src/components/MemberIdCard.tsx` — use the new `IdCardRenderer` driven by saved org design
 
-## Out of scope (later)
-- Auto term expiry notifications
-- Election/voting
-- Term history archive
+**Migration:**
+- Add `id_card_design jsonb` column to `organizations` table (default = null → falls back to "classic" template)
 
----
+**Files to remove from active flow (keep code for now, just hide):**
+- `src/components/CustomIdBuilder.tsx` — moved to optional "Advanced" mode behind a small link
 
-**Approve చేస్తే** - migration + server functions + UI page parallel గా implement చేస్తాను.
+## Acceptance
+
+- Org admin opens `/org/designs` → sees Normal/Keychain toggle + 5 template cards with Front+Back preview
+- Selects one → customization panel opens with color pickers, border options, line-by-line text styling (size/font/color/show-hide)
+- Sample member preview updates live
+- Save → success toast, design persisted
+- Any member's ID card page now renders with this design automatically — no member-side action needed
+- Telugu labels throughout, mobile-friendly (361px viewport works)
+
+## Out of Scope (this round)
+
+- Drag-to-position elements (positions locked per template; only style/visibility editable)
+- Per-member design overrides
+- PDF export changes (existing PDF path keeps working with new renderer)
