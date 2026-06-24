@@ -35,6 +35,8 @@ export type ElementKey =
   | "presidentSignature"
   | "presidentName";
 
+export type CornerPosition = "tl" | "tr" | "bl" | "br";
+
 export type ElementStyle = {
   visible: boolean;
   font?: string;
@@ -42,7 +44,10 @@ export type ElementStyle = {
   weight?: number;
   color?: string;
   imgSize?: number;
+  lineHeight?: number;
+  corner?: CornerPosition;
 };
+
 
 export type GlobalStyle = {
   borderColor: string;
