@@ -108,7 +108,7 @@ function NumberField({ label, value, onChange, min, max }: { label: string; valu
 function ElementRow({ k, design, setElement }: { k: ElementKey; design: IdCardDesign; setElement: (k: ElementKey, p: any) => void }) {
   const meta = ELEMENT_LABELS[k];
   const el = design.elements[k];
-  const isImage = k === "logo" || k === "photo" || k === "qrCode" || k === "presidentSignature";
+  const isImage = k === "logo" || k === "photo" || k === "qrCode" || k === "presidentSignature" || k === "mbrQrCode" || k === "mbrLogo";
 
   return (
     <div className="rounded-md p-2 border space-y-2" style={{ borderColor: PANEL_BORDER, background: "#0a0a0a" }}>
