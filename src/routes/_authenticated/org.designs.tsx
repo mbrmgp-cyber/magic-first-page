@@ -418,6 +418,23 @@ function DesignsPage() {
                   font={effectiveFont} setFont={setFontFamily}
                 />
 
+                {/* Logo & Title size sliders */}
+                <div className="rounded-lg p-3 border space-y-3" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
+                  <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: PAGE_HEAD }}>
+                    Logo &amp; Title Size / లోగో &amp; టైటిల్ సైజ్
+                  </p>
+                  <div className="space-y-1">
+                    <Label className="text-[10px]" style={{ color: PAGE_SUB }}>Logo Size — {letterLogoSize}px</Label>
+                    <input type="range" min={32} max={96} step={2} value={letterLogoSize}
+                      onChange={(e) => setLetterLogoSize(Number(e.target.value))} className="w-full" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-[10px]" style={{ color: PAGE_SUB }}>Title Size — {letterTitleSize}px</Label>
+                    <input type="range" min={12} max={28} step={1} value={letterTitleSize}
+                      onChange={(e) => setLetterTitleSize(Number(e.target.value))} className="w-full" />
+                  </div>
+                </div>
+
                 <LivePreview title="Letter Pad Live Preview" theme={customTheme}>
                   <LetterPreview
                     layout={letterPick}
@@ -432,6 +449,8 @@ function DesignsPage() {
                     subject={letterSubject}
                     body={letterBody}
                     showContent={letterMode === "rich"}
+                    logoSize={letterLogoSize}
+                    titleSize={letterTitleSize}
                   />
                 </LivePreview>
 
