@@ -125,6 +125,10 @@ export const TEMPLATE_META: Record<TemplateId, { en: string; te: string; descrip
 const DEFAULT_BACK_MATTER =
   "ముఖ్య ఉద్దేశాలు:\nమండల ప్రజలకు మౌలిక సదుపాయాల (విద్య, వైద్య, పర్యావరణ) ఏర్పాట్లకై ప్రయత్నం.\nకుల, మత, ప్రాంత, వర్గ రాజకీయాలకు అతీతంగా యువకులలో దేశభక్తిని పెంచడం.\nఆపదలో ఉన్నవారికి నిస్వార్థ సహాయం అందించడం.";
 
+const DEFAULT_OATH =
+  "ప్రమాణం: ఈ సంస్థ ఆశయం కోసం, అందులోని విధివిధానాలకు అనుకూలంగా నిస్వార్థంగా సేవ చేస్తానని ప్రమాణం చేస్తున్నాను. — {name}";
+
+
 export const TEMPLATES: Record<TemplateId, Omit<IdCardDesign, "cardType">> = {
   classic: {
     templateId: "classic",
