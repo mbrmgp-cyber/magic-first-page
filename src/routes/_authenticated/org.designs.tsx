@@ -461,7 +461,8 @@ function DesignsPage() {
                       style={{ borderColor: PAGE_BORDER, background: PAGE_PANEL, cursor: "pointer" }}
                     >
                       <div className="aspect-[1.6/1] w-full p-2" style={{ background: PAGE_BG }}>
-                        <ReceiptThumb layout={tpl.id as ReceiptLayout} accent={theme.icon} />
+                        <ReceiptThumb layout={tpl.id as ReceiptLayout} accent={theme.icon}
+                          orgName={orgName} slogan={orgSlogan} reg={orgReg} logoUrl={orgLogo} />
                       </div>
                       <div className="px-2 py-1.5 flex items-center justify-between">
                         <div>
