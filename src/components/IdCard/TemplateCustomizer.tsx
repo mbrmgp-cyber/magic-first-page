@@ -49,6 +49,31 @@ export function TemplateCustomizer({ design, onChange }: Props) {
               </SelectContent>
             </Select>
           </div>
+          <div className="space-y-1">
+            <Label className="text-[11px]" style={{ color: TEXT_SUB }}>Header Align / హెడ్డర్ అలైన్</Label>
+            <Select value={design.global.headerAlign || "left"} onValueChange={(v) => setGlobal("headerAlign", v as any)}>
+              <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="left">← Left / ఎడమ</SelectItem>
+                <SelectItem value="center">↔ Center / మధ్య</SelectItem>
+                <SelectItem value="right">→ Right / కుడి</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Background image uploads — front & back */}
+        <div className="grid grid-cols-2 gap-3 pt-2">
+          <BgImageField
+            label="Front BG Image / ముందు బ్యాగ్రౌండ్"
+            value={design.global.frontBgImage}
+            onChange={(v) => setGlobal("frontBgImage", v as any)}
+          />
+          <BgImageField
+            label="Back BG Image / వెనుక బ్యాగ్రౌండ్"
+            value={design.global.backBgImage}
+            onChange={(v) => setGlobal("backBgImage", v as any)}
+          />
         </div>
       </Section>
 
