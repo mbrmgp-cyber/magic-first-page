@@ -252,15 +252,20 @@ function renderBack(design: IdCardDesign, org: OrgContext, _member: SampleMember
   const presName = (org.presidentName || "").trim();
   const showPresName = show(e.presidentName) && presName && presName.toLowerCase() !== "president";
   const qrSize = Math.min(e.mbrQrCode?.imgSize ?? 56, 70);
+  const mbrLogoSize = e.mbrLogo?.imgSize ?? 24;
+  const backText = design.backMatter || "";
+  const userSize = e.backMatter?.size;
+  const fitSize = userSize && userSize > 0 ? Math.min(userSize, autoFitSize(backText, userSize)) : autoFitSize(backText);
+  const backTextStyle = { ...txt(e.backMatter), fontSize: fitSize + "px" };
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", padding: 10, gap: 6, position: "relative" }}>
-      <div style={{ borderBottom: `2px solid ${g.accentColor}`, paddingBottom: 4, paddingRight: show(e.mbrLogo) ? ((e.mbrLogo.imgSize ?? 24) + 8) : 0 }}>
+      <div style={{ borderBottom: `2px solid ${g.accentColor}`, paddingBottom: 4, paddingRight: mbrLogoSize + 8 }}>
         <div style={{ ...txt(e.orgName, g.accentColor), color: g.accentColor }}>{org.name}</div>
       </div>
       <div style={{ flex: 1, display: "flex", gap: 8, minHeight: 0 }}>
         {show(e.backMatter) && (
-          <div style={{ flex: 1, minWidth: 0, ...txt(e.backMatter), whiteSpace: "pre-wrap", overflow: "hidden", wordBreak: "break-word" }}>
-            {design.backMatter || ""}
+          <div style={{ flex: 1, minWidth: 0, ...backTextStyle, whiteSpace: "pre-wrap", overflow: "hidden", wordBreak: "break-word" }}>
+            {backText}
           </div>
         )}
         {show(e.mbrQrCode) && (
@@ -274,7 +279,7 @@ function renderBack(design: IdCardDesign, org: OrgContext, _member: SampleMember
           </div>
         )}
       </div>
-      <div style={{ display: "flex", alignItems: "flex-end", gap: 8, paddingRight: show(e.mbrLogo) ? ((e.mbrLogo.imgSize ?? 24) + 8) : 0 }}>
+      <div style={{ display: "flex", alignItems: "flex-end", gap: 8, paddingRight: mbrLogoSize + 8 }}>
         <div style={{ ...txt(e.presidentName), fontSize: 9, opacity: 0.9 }}>
           {show(e.presidentSignature) && org.presidentSignatureUrl && (
             <img src={org.presidentSignatureUrl} alt="" style={{ width: e.presidentSignature.imgSize, height: 32, objectFit: "contain", display: "block" }} />
@@ -283,9 +288,8 @@ function renderBack(design: IdCardDesign, org: OrgContext, _member: SampleMember
           <div style={{ opacity: 0.75 }}>President / అధ్యక్షుడు</div>
         </div>
       </div>
-      {show(e.mbrLogo) && (
-        <img src={mbrLogoUrl} alt="MBR" style={{ ...cornerStyle(e.mbrLogo.corner, 4), width: e.mbrLogo.imgSize, height: e.mbrLogo.imgSize, objectFit: "contain", borderRadius: "50%", background: "#000", padding: 1 }} />
-      )}
+      {/* MBR logo is a permanent forced branding element — always visible */}
+      <img src={mbrLogoUrl} alt="MBR" style={{ ...cornerStyle(e.mbrLogo?.corner, 4), width: mbrLogoSize, height: mbrLogoSize, objectFit: "contain", borderRadius: "50%", background: "#000", padding: 1 }} />
     </div>
   );
 }
