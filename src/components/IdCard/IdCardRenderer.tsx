@@ -165,9 +165,13 @@ function FrontHorizontal({ design, org, member }: { design: IdCardDesign; org: O
           {show(e.designation) && member.designation && <div style={txt(e.designation)}>{member.designation}</div>}
         </div>
       </div>
-      {/* Front corner QR */}
+      {/* Front corner QR (member URL) */}
       {show(e.qrCode) && member.qrUrl && (
-        <img src={member.qrUrl} alt="" style={{ position: "absolute", bottom: 6, right: 6, width: e.qrCode.imgSize, height: e.qrCode.imgSize, background: "#fff", padding: 2, borderRadius: 3, border: `1px solid ${design.global.accentColor}` }} />
+        <img src={member.qrUrl} alt="" style={{ ...cornerStyle(e.qrCode.corner, 6), width: e.qrCode.imgSize, height: e.qrCode.imgSize, background: "#fff", padding: 2, borderRadius: 3, border: `1px solid ${design.global.accentColor}` }} />
+      )}
+      {/* MBR small logo watermark */}
+      {show(e.mbrLogo) && (
+        <img src={org.mbrLogoUrl || mbrLogoAsset.url} alt="MBR" style={{ ...cornerStyle(e.mbrLogo.corner, 4), width: e.mbrLogo.imgSize, height: e.mbrLogo.imgSize, objectFit: "contain", borderRadius: "50%", background: "rgba(255,255,255,0.85)", padding: 1, opacity: 0.9 }} />
       )}
       {/* Legacy footer band */}
       {design.templateId === "legacy" && design.global.footerColor && (
@@ -183,6 +187,7 @@ function FrontVertical({ design, org, member }: { design: IdCardDesign; org: Org
     <div style={{ display: "flex", flexDirection: "column", height: "100%", position: "relative" }}>
       <Header design={design} org={org} />
       <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: 10, gap: 4 }}>
+
         {show(e.photo) && (
           <div style={{ width: e.photo.imgSize, height: e.photo.imgSize, borderRadius: "50%", background: "#e5e7eb", overflow: "hidden", border: `2px solid ${design.global.accentColor}` }}>
             {member.photoUrl ? <img src={member.photoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#9ca3af", fontSize: 28 }}>👤</div>}
