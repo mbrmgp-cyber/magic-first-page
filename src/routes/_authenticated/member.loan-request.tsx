@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import {
   ArrowLeft, Send, Clock, CheckCircle2, XCircle, Camera, Loader2,
-  FileSignature, FileImage,
+  FileSignature, FileImage, Printer, Inbox,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
