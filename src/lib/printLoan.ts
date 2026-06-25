@@ -228,14 +228,14 @@ ${headerBlock(org)}
   <tr><td class="k">దరఖాస్తుదారు / Applicant</td><td>${esc(r.member?.name)} (${esc(r.member?.member_code)})</td>
       <td class="k">మొత్తం / Amount</td><td><b>₹ ${Number(r.requested_amount).toLocaleString("en-IN")}</b></td></tr>
   <tr><td class="k">కారణం / Purpose</td><td colspan="3">${esc(r.reason)}</td></tr>
-  <tr><td class="k">షూరిటీ స్థితి / Surety Status</td><td>${esc(r.surety_status)}</td>
+  <tr><td class="k">షూరిటీ స్థితి / Surety Status</td><td>${esc(statusLabel(r.surety_status))}</td>
       <td class="k">స్పందించిన తేదీ / Responded At</td><td>${fmtDate(r.surety_responded_at)}</td></tr>
   ${r.surety_decline_reason ? `<tr><td class="k">కారణం / Reason</td><td colspan="3">${esc(r.surety_decline_reason)}</td></tr>` : ""}
 </table>
 
 <div class="box" style="margin-top:14px;">
   <div class="lbl">షూరిటీ సంతకం / Surety Signature</div>
-  <div class="sigbox">${sigUrl ? `<img src="${esc(sigUrl)}" />` : "— Not provided —"}</div>
+  <div class="sigbox">${sigUrl ? `<img src="${esc(sigUrl)}" />` : `— ${esc(T.notProvided)} —`}</div>
 </div>
 
 <p style="margin-top:18px; font-size:11px; color:#444;">
