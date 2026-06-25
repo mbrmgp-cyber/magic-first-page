@@ -58,6 +58,23 @@ function MemberDashboard() {
     if (typeof window !== "undefined") navigate({ to: "/member/pending", replace: true });
     return null;
   }
+  if (m.is_active === false) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
+        <div className="max-w-sm w-full text-center space-y-4 bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6">
+          <div className="text-3xl">⏸️</div>
+          <h2 className="text-lg font-semibold">మీ సభ్యత్వం ప్రస్తుతం Inactive గా ఉంది</h2>
+          <p className="text-sm text-white/70">
+            Your membership has been marked Inactive by the organization. You will not receive
+            any updates until your membership is reactivated. Please contact the organization admin.
+          </p>
+          <button onClick={logout} className="mt-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm">
+            Logout
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const firstName = m.first_name ?? (m.name?.split(" ")[0] ?? "");
   const lastName = m.last_name ?? (m.name?.split(" ").slice(1).join(" ") ?? "");
