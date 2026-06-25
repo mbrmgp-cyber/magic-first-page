@@ -13,6 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { submitLoanRequest, listMyLoanRequests } from "@/lib/loan-requests.functions";
+import { printLoanApplication } from "@/lib/printLoan";
+import { Button } from "@/components/ui/button";
 import { SignaturePad } from "@/components/SignaturePad";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
