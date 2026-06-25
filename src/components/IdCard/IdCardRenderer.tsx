@@ -128,25 +128,42 @@ export function IdCardRenderer({ design, org, member, side, scale = 1 }: Props) 
   );
 }
 
-function Header({ design, org }: { design: IdCardDesign; org: OrgContext }) {
+function Header({ design, org, member }: { design: IdCardDesign; org: OrgContext; member: SampleMember }) {
   const e = design.elements;
   const g = design.global;
   const align = g.headerAlign || "left";
   const justify = align === "center" ? "center" : align === "right" ? "flex-end" : "flex-start";
+  const logoDx = g.headerLogoOffsetX ?? 0;
+  const badgeDx = g.headerBadgeOffsetX ?? 0;
   return (
-    <div style={{ background: g.accentColor, padding: "6px 10px", display: "flex", alignItems: "center", gap: 8 }}>
+    <div style={{ background: g.accentColor, padding: "8px 10px 6px", display: "flex", alignItems: "center", gap: 8, minHeight: 44 }}>
       {show(e.logo) && (
         org.logoUrl ? (
-          <img src={org.logoUrl} alt="" style={{ width: e.logo.imgSize, height: e.logo.imgSize, borderRadius: "50%", background: "#fff", objectFit: "cover", flexShrink: 0 }} />
+          <img src={org.logoUrl} alt="" style={{ width: e.logo.imgSize, height: e.logo.imgSize, borderRadius: "50%", background: "#fff", objectFit: "cover", flexShrink: 0, transform: `translateX(${logoDx}px)` }} />
         ) : (
-          <div style={{ width: e.logo.imgSize, height: e.logo.imgSize, borderRadius: "50%", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", color: g.accentColor, fontWeight: 900, flexShrink: 0 }}>★</div>
+          <div style={{ width: e.logo.imgSize, height: e.logo.imgSize, borderRadius: "50%", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", color: g.accentColor, fontWeight: 900, flexShrink: 0, transform: `translateX(${logoDx}px)` }}>★</div>
         )
       )}
-      <div style={{ flex: 1, minWidth: 0, textAlign: align, display: "flex", flexDirection: "column", alignItems: justify }}>
-        {show(e.orgName) && <div style={{ ...txt(e.orgName, "#fff"), maxWidth: "100%", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{org.name}</div>}
+      <div style={{ flex: 1, minWidth: 0, textAlign: align, display: "flex", flexDirection: "column", alignItems: justify, lineHeight: 1.35 }}>
+        {show(e.orgName) && <div style={{ ...txt(e.orgName, "#fff"), lineHeight: 1.35, maxWidth: "100%", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", paddingTop: 2 }}>{org.name}</div>}
         {show(e.slogan) && org.slogan && <div style={{ ...txt(e.slogan, "#fff"), opacity: 0.95, fontStyle: "italic" }}>{org.slogan}</div>}
         {show(e.regNumber) && org.regNumber && <div style={txt(e.regNumber, "#fff")}>Reg: {org.regNumber}</div>}
       </div>
+      <div style={{ flexShrink: 0, transform: `translateX(${badgeDx}px)` }}>
+        <StatusBadge status={member.status} />
+      </div>
+    </div>
+  );
+}
+
+function ContactFooter({ org, accent }: { org: OrgContext; accent: string }) {
+  const parts = [org.contactPhone, org.contactEmail].filter(Boolean);
+  if (parts.length === 0) return null;
+  return (
+    <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, padding: "2px 8px", textAlign: "center", fontSize: 8, color: "#fff", background: accent, opacity: 0.92, letterSpacing: 0.2, fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+      {org.contactPhone && <span>📞 {org.contactPhone}</span>}
+      {org.contactPhone && org.contactEmail && <span style={{ margin: "0 6px", opacity: 0.6 }}>•</span>}
+      {org.contactEmail && <span>✉ {org.contactEmail}</span>}
     </div>
   );
 }
