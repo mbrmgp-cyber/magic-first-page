@@ -1982,7 +1982,7 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
           </div>
 
           {/* Live Preview */}
-          <div className="rounded-xl p-4 border" style={{ background: PAGE_BG, borderColor: PAGE_BORDER }}>
+          <div className="rounded-xl p-3 border" style={{ background: PAGE_BG, borderColor: PAGE_BORDER }}>
             <div className="flex items-center justify-center gap-2 mb-3">
               {(["front", "back"] as const).map((s) => (
                 <button key={s} onClick={() => setSide(s)}
@@ -1996,8 +1996,21 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
                 </button>
               ))}
             </div>
-            <div className="flex justify-center">
-              <IdCardRenderer design={design} org={orgCtx} member={sampleMember} side={side} scale={1} />
+            <div
+              className="rounded-lg border"
+              style={{
+                background: "#050505",
+                borderColor: PAGE_BORDER,
+                overflow: "auto",
+                maxWidth: "100%",
+                maxHeight: "min(68vh, 430px)",
+                WebkitOverflowScrolling: "touch",
+                overscrollBehavior: "contain",
+              }}
+            >
+              <div style={{ width: "100%", minWidth: "max-content", padding: 12, display: "flex", justifyContent: "center" }}>
+                <IdCardRenderer design={design} org={orgCtx} member={sampleMember} side={side} scale={1} />
+              </div>
             </div>
           </div>
 
