@@ -184,8 +184,9 @@ function LoanRequestsAdmin() {
                   <div className="mt-3 flex flex-wrap gap-2">
                     {r.status === "pending" && (
                       <>
-                        <Button size="sm" onClick={() => { setApproving(r); setRate(String(r.interest_rate_monthly ?? "2.0")); }}
-                          className="bg-emerald-600 hover:bg-emerald-500">
+                        <Button size="sm" disabled={!!r.surety_member_id && r.surety_status !== "accepted"}
+                          onClick={() => { setApproving(r); setRate(String(r.interest_rate_monthly ?? "2.0")); }}
+                          className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40">
                           <CheckCircle2 className="h-4 w-4" /> ఆమోదించు
                         </Button>
                         <Button size="sm" variant="destructive" onClick={() => doReject(r)}>
