@@ -181,10 +181,10 @@ function FrontHorizontal({ design, org, member }: { design: IdCardDesign; org: O
   const e = design.elements;
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", position: "relative" }}>
-      <Header design={design} org={org} />
-      <div style={{ flex: 1, display: "flex", padding: 10, gap: 10, minHeight: 0 }}>
+      <Header design={design} org={org} member={member} />
+      <div style={{ flex: 1, display: "flex", padding: "10px 10px 16px", gap: 10, minHeight: 0 }}>
         {show(e.photo) && (
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0, gap: 4 }}>
             <div style={{ width: e.photo.imgSize, height: e.photo.imgSize, borderRadius: 6, background: "#e5e7eb", overflow: "hidden", border: `2px solid ${design.global.accentColor}` }}>
               {member.photoUrl ? (
                 <img src={member.photoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -192,7 +192,11 @@ function FrontHorizontal({ design, org, member }: { design: IdCardDesign; org: O
                 <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#9ca3af", fontSize: 28 }}>👤</div>
               )}
             </div>
-            <StatusBadge status={member.status} />
+            {show(e.designation) && member.designation && (
+              <div style={{ ...txt(e.designation), textAlign: "center", maxWidth: (e.photo.imgSize ?? 84) + 8, lineHeight: 1.15 }}>
+                {member.designation}
+              </div>
+            )}
           </div>
         )}
         <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
@@ -211,7 +215,6 @@ function FrontHorizontal({ design, org, member }: { design: IdCardDesign; org: O
               🩸 {member.bloodGroup}
             </div>
           )}
-          {show(e.designation) && member.designation && <div style={txt(e.designation)}>{member.designation}</div>}
         </div>
       </div>
       {/* Front corner QR (member URL) — kept clean, no logo overlap */}
@@ -222,6 +225,7 @@ function FrontHorizontal({ design, org, member }: { design: IdCardDesign; org: O
       {design.templateId === "legacy" && design.global.footerColor && (
         <div style={{ height: 4, background: design.global.footerColor }} />
       )}
+      <ContactFooter org={org} accent={design.global.accentColor} />
     </div>
   );
 }
