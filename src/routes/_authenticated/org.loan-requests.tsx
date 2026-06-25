@@ -136,7 +136,8 @@ function LoanRequestsAdmin() {
                   </div>
                   <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
                     <div><span className="text-white/50">Amount:</span> <span className="font-semibold text-orange-400">₹ {Number(r.requested_amount).toLocaleString()}</span></div>
-                    <div><span className="text-white/50">Reason:</span> {r.reason}</div>
+                    <div><span className="text-white/50">Tenure:</span> {r.tenure_months ? `${r.tenure_months} mo` : "—"}</div>
+                    <div className="col-span-2"><span className="text-white/50">Reason:</span> {r.reason}</div>
                     <div className="col-span-2"><span className="text-white/50">Surety:</span> {r.surety?.name ? `${r.surety.name} (${r.surety.member_code})` : (r.surety_member_code ?? "—")}</div>
                     {r.status === "approved" && (
                       <div className="col-span-2 text-emerald-400">
@@ -144,6 +145,27 @@ function LoanRequestsAdmin() {
                       </div>
                     )}
                   </div>
+
+                  {(r.signature_data_url || r.proof_url) && (
+                    <div className="mt-3 grid grid-cols-2 gap-2">
+                      {r.signature_data_url && (
+                        <div className="space-y-1">
+                          <div className="text-[10px] text-white/50 flex items-center gap-1"><FileSignature className="h-3 w-3" /> సంతకం / Signature</div>
+                          <a href="#" onClick={(e) => e.preventDefault()} className="block rounded border border-white/10 bg-white p-1">
+                            <SignedImage path={r.signature_data_url} alt="Signature" className="w-full h-20 object-contain" />
+                          </a>
+                        </div>
+                      )}
+                      {r.proof_url && (
+                        <div className="space-y-1">
+                          <div className="text-[10px] text-white/50 flex items-center gap-1"><FileImage className="h-3 w-3" /> ప్రూఫ్ / Proof</div>
+                          <div className="rounded border border-white/10 bg-zinc-900 overflow-hidden">
+                            <SignedImage path={r.proof_url} alt="Proof" className="w-full h-20 object-cover" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {r.status === "pending" && (
                     <div className="mt-3 flex gap-2">
