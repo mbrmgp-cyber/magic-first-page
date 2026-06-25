@@ -237,7 +237,7 @@ function LoanRequestPage() {
                 </div>
               )}
               <div className="mt-2 flex justify-end">
-                <button onClick={() => printLoanApplication({ ...r, member: { name: "", member_code: "" } })}
+                <button onClick={() => printLoanApplication(r)}
                   className="text-[11px] inline-flex items-center gap-1 px-2 py-1 rounded border border-orange-500/40 text-orange-300 hover:bg-orange-500/10">
                   <Printer className="h-3 w-3" /> {pick("ప్రింట్ / PDF", "Print / PDF")}
                 </button>
