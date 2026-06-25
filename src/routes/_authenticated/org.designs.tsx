@@ -1866,6 +1866,8 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
     presidentSignatureUrl: org?.president_signature_url,
     mbrLogoUrl: mbrLogo.url,
     mbrQrUrl: qrApi(memberRegUrl, 200),
+    contactPhone: org?.phone || "",
+    contactEmail: org?.email || "",
   };
 
   const sampleMember: SampleMember = {
