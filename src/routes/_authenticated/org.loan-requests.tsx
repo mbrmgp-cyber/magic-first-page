@@ -321,17 +321,23 @@ function LoanRequestsAdmin() {
                     </div>
                   )}
 
-                  {r.status === "pending" && (
-                    <div className="mt-3 flex gap-2">
-                      <Button size="sm" onClick={() => { setApproving(r); setRate(String(r.interest_rate_monthly ?? "2.0")); }}
-                        className="bg-emerald-600 hover:bg-emerald-500">
-                        <CheckCircle2 className="h-4 w-4" /> ఆమోదించు
-                      </Button>
-                      <Button size="sm" variant="destructive" onClick={() => doReject(r)}>
-                        <XCircle className="h-4 w-4" /> తిరస్కరించు
-                      </Button>
-                    </div>
-                  )}
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {r.status === "pending" && (
+                      <>
+                        <Button size="sm" onClick={() => { setApproving(r); setRate(String(r.interest_rate_monthly ?? "2.0")); }}
+                          className="bg-emerald-600 hover:bg-emerald-500">
+                          <CheckCircle2 className="h-4 w-4" /> ఆమోదించు
+                        </Button>
+                        <Button size="sm" variant="destructive" onClick={() => doReject(r)}>
+                          <XCircle className="h-4 w-4" /> తిరస్కరించు
+                        </Button>
+                      </>
+                    )}
+                    <Button size="sm" variant="outline" onClick={() => printLoanApplication(r)}
+                      className="border-orange-500/40 text-orange-300 hover:bg-orange-500/10">
+                      <Printer className="h-4 w-4" /> ప్రింట్ / PDF డౌన్‌లోడ్
+                    </Button>
+                  </div>
                 </div>
               </div>
             </Card>
