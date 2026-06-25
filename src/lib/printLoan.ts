@@ -158,7 +158,7 @@ ${headerBlock(org)}
 <h2>లోన్ వివరాలు / Loan Details</h2>
 <table class="kv">
   <tr><td class="k">మొత్తం / Amount</td><td><b>₹ ${Number(r.requested_amount).toLocaleString("en-IN")}</b></td>
-      <td class="k">కాలవ్యవధి / Tenure</td><td>${r.tenure_months ? esc(r.tenure_months) + " months" : "—"}</td></tr>
+      <td class="k">కాలవ్యవధి / Tenure</td><td>${tenure(r.tenure_months)}</td></tr>
   <tr><td class="k">వడ్డీ / Interest</td><td>${r.interest_rate_monthly ?? "—"} % / month</td>
       <td class="k">UTR</td><td>${esc(r.utr_number ?? "—")}</td></tr>
   <tr><td class="k">కారణం / Purpose</td><td colspan="3">${esc(r.reason)}</td></tr>
@@ -177,7 +177,7 @@ ${timelineBlock(r)}
   <div class="box">
     <div class="lbl">హామీదారు సంతకం / Surety Signature</div>
     <div class="sigbox">${suretySigUrl ? `<img src="${esc(suretySigUrl)}" />` :
-      (r.surety?.name || r.surety_member_code ? `(${esc(r.surety_status ?? "pending")})` : "— No surety —")}</div>
+      (r.surety?.name || r.surety_member_code ? esc(statusLabel(r.surety_status ?? "pending")) : esc(T.noSurety))}</div>
     <div style="margin-top:8px; font-size:11px;">
       ${r.surety?.name ? `<b>${esc(r.surety.name)}</b> · ${esc(r.surety.member_code)}` :
         (r.surety_member_code ? `Code: ${esc(r.surety_member_code)}` : "—")}
@@ -189,7 +189,7 @@ ${timelineBlock(r)}
 <div class="box" style="margin-top:12px;">
   <div class="lbl">ధృవీకరణ పత్రం / Uploaded Proof Document</div>
   <div style="text-align:center;">
-    ${proofUrl ? `<img class="proof" src="${esc(proofUrl)}" />` : "— No document uploaded —"}
+    ${proofUrl ? `<img class="proof" src="${esc(proofUrl)}" />` : `— ${esc(T.noDoc)} —`}
   </div>
 </div>
 
