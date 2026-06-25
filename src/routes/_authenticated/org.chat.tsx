@@ -383,6 +383,16 @@ function QueuePanel({ ctx }: { ctx: Ctx }) {
       return data ?? [];
     },
   });
+  const loanPending = useQuery({
+    queryKey: ["loan-pending-count", ctx.orgId],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("member_loan_requests")
+        .select("id", { count: "exact", head: true })
+        .eq("org_id", ctx.orgId).eq("status", "pending");
+      return count ?? 0;
+    },
+  });
 
   async function review(id: string, status: "approved" | "rejected") {
     const { error } = await supabase.from("chat_interactions").update({ status, reviewed_by: ctx.userId, reviewed_at: new Date().toISOString() }).eq("id", id);
@@ -399,6 +409,24 @@ function QueuePanel({ ctx }: { ctx: Ctx }) {
 
   return (
     <div className="space-y-3 mt-3">
+      <Link to="/org/loan-requests"
+        className="flex items-center justify-between gap-3 p-4 rounded-lg bg-gradient-to-r from-[#ff8c28]/15 to-amber-900/15 border border-[#ff8c28]/40 hover:border-[#ff8c28] transition">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-full bg-[#ff8c28]/20 flex items-center justify-center shrink-0">
+            <IndianRupee className="w-5 h-5 text-[#ff8c28]" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-white">{pick("లోన్ అభ్యర్థనలు", "Loan Requests")}</p>
+            <p className="text-[11px] text-zinc-400 truncate">
+              {pick("సంతకం, ప్రూఫ్‌తో సహా పూర్తి దరఖాస్తు చూసి ఆమోదించండి / తిరస్కరించండి.", "Review full applications with signature & proof, then approve or reject.")}
+            </p>
+          </div>
+        </div>
+        <span className="text-xs font-semibold text-[#ff8c28] shrink-0">
+          {loanPending.data ? `${loanPending.data} ${pick("పెండింగ్", "pending")} →` : pick("తెరువు →", "Open →")}
+        </span>
+      </Link>
+
       <div className="flex gap-2">
         {(["pending", "approved", "rejected"] as const).map(s => (
           <Button key={s} size="sm" variant={tab === s ? "default" : "outline"}
