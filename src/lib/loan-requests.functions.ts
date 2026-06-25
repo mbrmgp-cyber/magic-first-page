@@ -122,7 +122,8 @@ export const listMyLoanRequests = createServerFn({ method: "GET" })
     const me = await getMyApprovedMember(supabase, userId);
     if (!me) return { requests: [] };
     const { data } = await supabase
-      .from("member_loan_requests").select("*")
+      .from("member_loan_requests")
+      .select("*, member:members!member_loan_requests_member_id_fkey(id, name, member_code, phone), surety:members!member_loan_requests_surety_member_id_fkey(id, name, member_code)")
       .eq("member_id", me.id)
       .order("created_at", { ascending: false });
     return { requests: data ?? [] };
