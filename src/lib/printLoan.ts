@@ -87,17 +87,17 @@ function statusStamp(r: any) {
 }
 
 const T = {
-  accepted: "ఆమోదించబడింది / Accepted",
-  declined: "తిరస్కరించబడింది / Declined",
-  awaiting: "ఎదురుచూస్తోంది / Awaiting",
-  approved: "ఆమోదించబడింది / Approved",
-  rejected: "తిరస్కరించబడింది / Rejected",
-  pending: "పెండింగ్ / Pending",
-  noDoc: "ఏ పత్రం అప్‌లోడ్ చేయలేదు / No document uploaded",
-  noSurety: "షూరిటీ లేరు / No surety",
-  notProvided: "ఇవ్వలేదు / Not provided",
+  accepted: "ఆమోదించబడింది",
+  declined: "తిరస్కరించబడింది",
+  awaiting: "ఎదురుచూస్తోంది",
+  approved: "ఆమోదించబడింది",
+  rejected: "తిరస్కరించబడింది",
+  pending: "పెండింగ్‌లో ఉంది",
+  noDoc: "ఏ పత్రం అప్‌లోడ్ చేయలేదు",
+  noSurety: "షూరిటీ లేరు",
+  notProvided: "ఇవ్వలేదు",
 };
-const tenure = (n: any) => (n ? `${n} నెలలు / ${n} months` : "—");
+const tenure = (n: any) => (n ? `${n} నెలలు` : "—");
 const statusLabel = (s: string) => (T as any)[s] ?? s;
 
 function timelineBlock(r: any) {
