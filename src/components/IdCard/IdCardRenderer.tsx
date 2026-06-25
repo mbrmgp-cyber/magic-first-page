@@ -46,6 +46,8 @@ export type OrgContext = {
   presidentSignatureUrl?: string | null;
   mbrQrUrl?: string | null;     // MBR app society-registration QR
   mbrLogoUrl?: string | null;   // MBR small corner logo
+  contactPhone?: string;        // shown in fixed bottom-center footer of card front
+  contactEmail?: string;        // shown in fixed bottom-center footer of card front
 };
 
 type Side = "front" | "back";
@@ -126,25 +128,42 @@ export function IdCardRenderer({ design, org, member, side, scale = 1 }: Props) 
   );
 }
 
-function Header({ design, org }: { design: IdCardDesign; org: OrgContext }) {
+function Header({ design, org, member }: { design: IdCardDesign; org: OrgContext; member: SampleMember }) {
   const e = design.elements;
   const g = design.global;
   const align = g.headerAlign || "left";
   const justify = align === "center" ? "center" : align === "right" ? "flex-end" : "flex-start";
+  const logoDx = g.headerLogoOffsetX ?? 0;
+  const badgeDx = g.headerBadgeOffsetX ?? 0;
   return (
-    <div style={{ background: g.accentColor, padding: "6px 10px", display: "flex", alignItems: "center", gap: 8 }}>
+    <div style={{ background: g.accentColor, padding: "8px 10px 6px", display: "flex", alignItems: "center", gap: 8, minHeight: 44 }}>
       {show(e.logo) && (
         org.logoUrl ? (
-          <img src={org.logoUrl} alt="" style={{ width: e.logo.imgSize, height: e.logo.imgSize, borderRadius: "50%", background: "#fff", objectFit: "cover", flexShrink: 0 }} />
+          <img src={org.logoUrl} alt="" style={{ width: e.logo.imgSize, height: e.logo.imgSize, borderRadius: "50%", background: "#fff", objectFit: "cover", flexShrink: 0, transform: `translateX(${logoDx}px)` }} />
         ) : (
-          <div style={{ width: e.logo.imgSize, height: e.logo.imgSize, borderRadius: "50%", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", color: g.accentColor, fontWeight: 900, flexShrink: 0 }}>★</div>
+          <div style={{ width: e.logo.imgSize, height: e.logo.imgSize, borderRadius: "50%", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", color: g.accentColor, fontWeight: 900, flexShrink: 0, transform: `translateX(${logoDx}px)` }}>★</div>
         )
       )}
-      <div style={{ flex: 1, minWidth: 0, textAlign: align, display: "flex", flexDirection: "column", alignItems: justify }}>
-        {show(e.orgName) && <div style={{ ...txt(e.orgName, "#fff"), maxWidth: "100%", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{org.name}</div>}
+      <div style={{ flex: 1, minWidth: 0, textAlign: align, display: "flex", flexDirection: "column", alignItems: justify, lineHeight: 1.35 }}>
+        {show(e.orgName) && <div style={{ ...txt(e.orgName, "#fff"), lineHeight: 1.35, maxWidth: "100%", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", paddingTop: 2 }}>{org.name}</div>}
         {show(e.slogan) && org.slogan && <div style={{ ...txt(e.slogan, "#fff"), opacity: 0.95, fontStyle: "italic" }}>{org.slogan}</div>}
         {show(e.regNumber) && org.regNumber && <div style={txt(e.regNumber, "#fff")}>Reg: {org.regNumber}</div>}
       </div>
+      <div style={{ flexShrink: 0, transform: `translateX(${badgeDx}px)` }}>
+        <StatusBadge status={member.status} />
+      </div>
+    </div>
+  );
+}
+
+function ContactFooter({ org, accent }: { org: OrgContext; accent: string }) {
+  const parts = [org.contactPhone, org.contactEmail].filter(Boolean);
+  if (parts.length === 0) return null;
+  return (
+    <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, padding: "2px 8px", textAlign: "center", fontSize: 8, color: "#fff", background: accent, opacity: 0.92, letterSpacing: 0.2, fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+      {org.contactPhone && <span>📞 {org.contactPhone}</span>}
+      {org.contactPhone && org.contactEmail && <span style={{ margin: "0 6px", opacity: 0.6 }}>•</span>}
+      {org.contactEmail && <span>✉ {org.contactEmail}</span>}
     </div>
   );
 }
@@ -162,10 +181,10 @@ function FrontHorizontal({ design, org, member }: { design: IdCardDesign; org: O
   const e = design.elements;
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", position: "relative" }}>
-      <Header design={design} org={org} />
-      <div style={{ flex: 1, display: "flex", padding: 10, gap: 10, minHeight: 0 }}>
+      <Header design={design} org={org} member={member} />
+      <div style={{ flex: 1, display: "flex", padding: "10px 10px 16px", gap: 10, minHeight: 0 }}>
         {show(e.photo) && (
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0, gap: 4 }}>
             <div style={{ width: e.photo.imgSize, height: e.photo.imgSize, borderRadius: 6, background: "#e5e7eb", overflow: "hidden", border: `2px solid ${design.global.accentColor}` }}>
               {member.photoUrl ? (
                 <img src={member.photoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -173,7 +192,11 @@ function FrontHorizontal({ design, org, member }: { design: IdCardDesign; org: O
                 <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#9ca3af", fontSize: 28 }}>👤</div>
               )}
             </div>
-            <StatusBadge status={member.status} />
+            {show(e.designation) && member.designation && (
+              <div style={{ ...txt(e.designation), textAlign: "center", maxWidth: (e.photo.imgSize ?? 84) + 8, lineHeight: 1.15 }}>
+                {member.designation}
+              </div>
+            )}
           </div>
         )}
         <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
@@ -192,7 +215,6 @@ function FrontHorizontal({ design, org, member }: { design: IdCardDesign; org: O
               🩸 {member.bloodGroup}
             </div>
           )}
-          {show(e.designation) && member.designation && <div style={txt(e.designation)}>{member.designation}</div>}
         </div>
       </div>
       {/* Front corner QR (member URL) — kept clean, no logo overlap */}
@@ -203,6 +225,7 @@ function FrontHorizontal({ design, org, member }: { design: IdCardDesign; org: O
       {design.templateId === "legacy" && design.global.footerColor && (
         <div style={{ height: 4, background: design.global.footerColor }} />
       )}
+      <ContactFooter org={org} accent={design.global.accentColor} />
     </div>
   );
 }
@@ -212,15 +235,17 @@ function FrontVertical({ design, org, member }: { design: IdCardDesign; org: Org
   const accent = design.global.accentColor;
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", position: "relative" }}>
-      <Header design={design} org={org} />
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "12px 10px", gap: 6, overflow: "hidden" }}>
+      <Header design={design} org={org} member={member} />
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "12px 10px 18px", gap: 6, overflow: "hidden" }}>
 
         {show(e.photo) && (
           <div style={{ width: e.photo.imgSize, height: e.photo.imgSize, borderRadius: "50%", background: "#e5e7eb", overflow: "hidden", border: `2px solid ${accent}`, marginBottom: 2 }}>
             {member.photoUrl ? <img src={member.photoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#9ca3af", fontSize: 28 }}>👤</div>}
           </div>
         )}
-        <StatusBadge status={member.status} />
+        {show(e.designation) && member.designation && (
+          <div style={{ ...txt(e.designation), textAlign: "center", lineHeight: 1.15 }}>{member.designation}</div>
+        )}
         {show(e.memberCode) && member.memberCode && (
           <div style={{ background: accent, color: "#fff", padding: "2px 10px", borderRadius: 4, ...txt(e.memberCode, "#fff"), textAlign: "center", marginTop: 2 }}>
             {member.memberCode}
@@ -240,6 +265,7 @@ function FrontVertical({ design, org, member }: { design: IdCardDesign; org: Org
       {show(e.qrCode) && member.qrUrl && (
         <img src={member.qrUrl} alt="" style={{ ...cornerStyle(e.qrCode.corner, 12), width: e.qrCode.imgSize, height: e.qrCode.imgSize, background: "#fff", padding: 2, borderRadius: 3, border: `1px solid ${accent}` }} />
       )}
+      <ContactFooter org={org} accent={accent} />
     </div>
   );
 }

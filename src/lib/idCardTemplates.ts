@@ -60,6 +60,8 @@ export type GlobalStyle = {
   accentColor: string;
   footerColor?: string; // optional second accent (e.g. legacy green footer)
   headerAlign?: "left" | "center" | "right"; // align org name/slogan/reg next to logo
+  headerLogoOffsetX?: number;  // horizontal nudge for the header logo
+  headerBadgeOffsetX?: number; // horizontal nudge for the active/inactive badge in header
   frontBgImage?: string; // optional uploaded background image (front side)
   backBgImage?: string;  // optional uploaded background image (back side)
 };
