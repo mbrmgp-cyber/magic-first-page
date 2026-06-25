@@ -14,6 +14,114 @@ export type Database = {
   }
   public: {
     Tables: {
+      chat_announcements: {
+        Row: {
+          author_user_id: string
+          body: string
+          created_at: string
+          id: string
+          org_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_user_id: string
+          body: string
+          created_at?: string
+          id?: string
+          org_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_user_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          org_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_announcements_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_interactions: {
+        Row: {
+          created_at: string
+          id: string
+          message_en: string
+          message_te: string
+          org_id: string
+          recipient_member_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          sender_member_id: string | null
+          sender_user_id: string
+          status: string
+          template_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message_en: string
+          message_te: string
+          org_id: string
+          recipient_member_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          sender_member_id?: string | null
+          sender_user_id: string
+          status?: string
+          template_type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message_en?: string
+          message_te?: string
+          org_id?: string
+          recipient_member_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          sender_member_id?: string | null
+          sender_user_id?: string
+          status?: string
+          template_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_interactions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_interactions_recipient_member_id_fkey"
+            columns: ["recipient_member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_interactions_sender_member_id_fkey"
+            columns: ["sender_member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       committee_members: {
         Row: {
           created_at: string
