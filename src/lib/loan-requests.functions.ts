@@ -156,6 +156,9 @@ export const approveLoanRequest = createServerFn({ method: "POST" })
       .from("member_loan_requests").select("*").eq("id", data.request_id).maybeSingle();
     if (rerr || !req) throw new Error("Request not found");
     if (req.status !== "pending") throw new Error("Request already processed");
+    if (req.surety_member_id && req.surety_status !== "accepted") {
+      throw new Error("Cannot approve until the surety member consents");
+    }
     if (!data.utr_number?.trim()) throw new Error("UTR number required");
 
     const rate = data.interest_rate_monthly ?? req.interest_rate_monthly ?? 2.0;
