@@ -86,6 +86,9 @@ export function TemplateCustomizer({ design, onChange }: Props) {
               className="w-full"
             />
           </div>
+        </div>
+
+
 
         {/* Background image uploads — front & back */}
         <div className="grid grid-cols-2 gap-3 pt-2">
