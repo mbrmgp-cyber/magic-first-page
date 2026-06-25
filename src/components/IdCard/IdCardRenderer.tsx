@@ -46,6 +46,8 @@ export type OrgContext = {
   presidentSignatureUrl?: string | null;
   mbrQrUrl?: string | null;     // MBR app society-registration QR
   mbrLogoUrl?: string | null;   // MBR small corner logo
+  contactPhone?: string;        // shown in fixed bottom-center footer of card front
+  contactEmail?: string;        // shown in fixed bottom-center footer of card front
 };
 
 type Side = "front" | "back";
