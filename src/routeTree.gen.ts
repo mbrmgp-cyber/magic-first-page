@@ -31,6 +31,7 @@ import { Route as AuthenticatedOrgChatRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedOrgCashflowRouteImport } from './routes/_authenticated/org.cashflow'
 import { Route as AuthenticatedOrgAccountsHubRouteImport } from './routes/_authenticated/org.accounts-hub'
 import { Route as AuthenticatedOrgAccountsRouteImport } from './routes/_authenticated/org.accounts'
+import { Route as AuthenticatedMemberSuretyInboxRouteImport } from './routes/_authenticated/member.surety-inbox'
 import { Route as AuthenticatedMemberPendingRouteImport } from './routes/_authenticated/member.pending'
 import { Route as AuthenticatedMemberLoanRequestRouteImport } from './routes/_authenticated/member.loan-request'
 import { Route as AuthenticatedMemberLedgerRouteImport } from './routes/_authenticated/member.ledger'
@@ -154,6 +155,12 @@ const AuthenticatedOrgAccountsRoute =
     path: '/org/accounts',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedMemberSuretyInboxRoute =
+  AuthenticatedMemberSuretyInboxRouteImport.update({
+    id: '/member/surety-inbox',
+    path: '/member/surety-inbox',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMemberPendingRoute =
   AuthenticatedMemberPendingRouteImport.update({
     id: '/member/pending',
@@ -189,6 +196,7 @@ export interface FileRoutesByFullPath {
   '/member/ledger': typeof AuthenticatedMemberLedgerRoute
   '/member/loan-request': typeof AuthenticatedMemberLoanRequestRoute
   '/member/pending': typeof AuthenticatedMemberPendingRoute
+  '/member/surety-inbox': typeof AuthenticatedMemberSuretyInboxRoute
   '/org/accounts': typeof AuthenticatedOrgAccountsRoute
   '/org/accounts-hub': typeof AuthenticatedOrgAccountsHubRoute
   '/org/cashflow': typeof AuthenticatedOrgCashflowRoute
@@ -216,6 +224,7 @@ export interface FileRoutesByTo {
   '/member/ledger': typeof AuthenticatedMemberLedgerRoute
   '/member/loan-request': typeof AuthenticatedMemberLoanRequestRoute
   '/member/pending': typeof AuthenticatedMemberPendingRoute
+  '/member/surety-inbox': typeof AuthenticatedMemberSuretyInboxRoute
   '/org/accounts': typeof AuthenticatedOrgAccountsRoute
   '/org/accounts-hub': typeof AuthenticatedOrgAccountsHubRoute
   '/org/cashflow': typeof AuthenticatedOrgCashflowRoute
@@ -245,6 +254,7 @@ export interface FileRoutesById {
   '/_authenticated/member/ledger': typeof AuthenticatedMemberLedgerRoute
   '/_authenticated/member/loan-request': typeof AuthenticatedMemberLoanRequestRoute
   '/_authenticated/member/pending': typeof AuthenticatedMemberPendingRoute
+  '/_authenticated/member/surety-inbox': typeof AuthenticatedMemberSuretyInboxRoute
   '/_authenticated/org/accounts': typeof AuthenticatedOrgAccountsRoute
   '/_authenticated/org/accounts-hub': typeof AuthenticatedOrgAccountsHubRoute
   '/_authenticated/org/cashflow': typeof AuthenticatedOrgCashflowRoute
@@ -274,6 +284,7 @@ export interface FileRouteTypes {
     | '/member/ledger'
     | '/member/loan-request'
     | '/member/pending'
+    | '/member/surety-inbox'
     | '/org/accounts'
     | '/org/accounts-hub'
     | '/org/cashflow'
@@ -301,6 +312,7 @@ export interface FileRouteTypes {
     | '/member/ledger'
     | '/member/loan-request'
     | '/member/pending'
+    | '/member/surety-inbox'
     | '/org/accounts'
     | '/org/accounts-hub'
     | '/org/cashflow'
@@ -329,6 +341,7 @@ export interface FileRouteTypes {
     | '/_authenticated/member/ledger'
     | '/_authenticated/member/loan-request'
     | '/_authenticated/member/pending'
+    | '/_authenticated/member/surety-inbox'
     | '/_authenticated/org/accounts'
     | '/_authenticated/org/accounts-hub'
     | '/_authenticated/org/cashflow'
@@ -511,6 +524,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOrgAccountsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/member/surety-inbox': {
+      id: '/_authenticated/member/surety-inbox'
+      path: '/member/surety-inbox'
+      fullPath: '/member/surety-inbox'
+      preLoaderRoute: typeof AuthenticatedMemberSuretyInboxRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/member/pending': {
       id: '/_authenticated/member/pending'
       path: '/member/pending'
@@ -548,6 +568,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMemberLedgerRoute: typeof AuthenticatedMemberLedgerRoute
   AuthenticatedMemberLoanRequestRoute: typeof AuthenticatedMemberLoanRequestRoute
   AuthenticatedMemberPendingRoute: typeof AuthenticatedMemberPendingRoute
+  AuthenticatedMemberSuretyInboxRoute: typeof AuthenticatedMemberSuretyInboxRoute
   AuthenticatedOrgAccountsRoute: typeof AuthenticatedOrgAccountsRoute
   AuthenticatedOrgAccountsHubRoute: typeof AuthenticatedOrgAccountsHubRoute
   AuthenticatedOrgCashflowRoute: typeof AuthenticatedOrgCashflowRoute
@@ -572,6 +593,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMemberLedgerRoute: AuthenticatedMemberLedgerRoute,
   AuthenticatedMemberLoanRequestRoute: AuthenticatedMemberLoanRequestRoute,
   AuthenticatedMemberPendingRoute: AuthenticatedMemberPendingRoute,
+  AuthenticatedMemberSuretyInboxRoute: AuthenticatedMemberSuretyInboxRoute,
   AuthenticatedOrgAccountsRoute: AuthenticatedOrgAccountsRoute,
   AuthenticatedOrgAccountsHubRoute: AuthenticatedOrgAccountsHubRoute,
   AuthenticatedOrgCashflowRoute: AuthenticatedOrgCashflowRoute,
