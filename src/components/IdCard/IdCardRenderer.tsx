@@ -202,7 +202,7 @@ function FrontHorizontal({ design, org, member }: { design: IdCardDesign; org: O
         )}
         <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
           {show(e.memberCode) && member.memberCode && (
-            <div style={{ display: "inline-block", alignSelf: "flex-start", background: design.global.accentColor, padding: "1px 6px", borderRadius: 4, ...txt(e.memberCode, "#fff") }}>
+            <div style={{ display: "inline-block", alignSelf: "flex-start", background: design.global.memberCodeBadgeBg || design.global.accentColor, padding: "1px 6px", borderRadius: 4, ...txt(e.memberCode, "#fff") }}>
               {member.memberCode}
             </div>
           )}
@@ -220,13 +220,13 @@ function FrontHorizontal({ design, org, member }: { design: IdCardDesign; org: O
       </div>
       {/* Front corner QR (member URL) — kept clean, no logo overlap */}
       {show(e.qrCode) && member.qrUrl && (
-        <img src={member.qrUrl} alt="" style={{ ...cornerStyle(e.qrCode.corner, 12), width: e.qrCode.imgSize, height: e.qrCode.imgSize, background: "#fff", padding: 2, borderRadius: 3, border: `1px solid ${design.global.accentColor}` }} />
+        <img src={member.qrUrl} alt="" style={{ ...cornerStyle(e.qrCode.corner, 12), width: e.qrCode.imgSize, height: e.qrCode.imgSize, background: "#fff", padding: 2, borderRadius: 3, border: `1px solid ${design.global.accentColor}`, zIndex: 10 }} />
       )}
       {/* Legacy footer band */}
       {design.templateId === "legacy" && design.global.footerColor && (
         <div style={{ height: 4, background: design.global.footerColor }} />
       )}
-      <ContactFooter org={org} accent={design.global.accentColor} />
+      <ContactFooter org={org} accent={design.global.accentColor} bg={design.global.contactFooterBg} size={design.global.contactFooterTextSize} />
     </div>
   );
 }
@@ -248,7 +248,7 @@ function FrontVertical({ design, org, member }: { design: IdCardDesign; org: Org
           <div style={{ ...txt(e.designation), textAlign: "center", lineHeight: 1.15 }}>{member.designation}</div>
         )}
         {show(e.memberCode) && member.memberCode && (
-          <div style={{ background: accent, color: "#fff", padding: "2px 10px", borderRadius: 4, ...txt(e.memberCode, "#fff"), textAlign: "center", marginTop: 2 }}>
+          <div style={{ background: design.global.memberCodeBadgeBg || accent, color: "#fff", padding: "2px 10px", borderRadius: 4, ...txt(e.memberCode, "#fff"), textAlign: "center", marginTop: 2 }}>
             {member.memberCode}
           </div>
         )}
@@ -264,9 +264,9 @@ function FrontVertical({ design, org, member }: { design: IdCardDesign; org: Org
         )}
       </div>
       {show(e.qrCode) && member.qrUrl && (
-        <img src={member.qrUrl} alt="" style={{ ...cornerStyle(e.qrCode.corner, 12), width: e.qrCode.imgSize, height: e.qrCode.imgSize, background: "#fff", padding: 2, borderRadius: 3, border: `1px solid ${accent}` }} />
+        <img src={member.qrUrl} alt="" style={{ ...cornerStyle(e.qrCode.corner, 12), width: e.qrCode.imgSize, height: e.qrCode.imgSize, background: "#fff", padding: 2, borderRadius: 3, border: `1px solid ${accent}`, zIndex: 10 }} />
       )}
-      <ContactFooter org={org} accent={accent} />
+      <ContactFooter org={org} accent={accent} bg={design.global.contactFooterBg} size={design.global.contactFooterTextSize} />
     </div>
   );
 }
