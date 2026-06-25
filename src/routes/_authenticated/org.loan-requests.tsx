@@ -141,7 +141,7 @@ function LoanRequestsAdmin() {
                     <div className="col-span-2 flex items-center gap-2 flex-wrap">
                       <span className="text-white/50">Surety:</span>
                       <span>{r.surety?.name ? `${r.surety.name} (${r.surety.member_code})` : (r.surety_member_code ?? "—")}</span>
-                      {r.surety_member_id && (
+                      {r.surety_member_id && r.status === "pending" && (
                         <span className={`text-[10px] px-2 py-0.5 rounded-full ${
                           r.surety_status === "accepted" ? "bg-emerald-600/20 text-emerald-300" :
                           r.surety_status === "declined" ? "bg-red-600/20 text-red-300" :
@@ -182,11 +182,11 @@ function LoanRequestsAdmin() {
                   )}
 
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {r.status === "pending" && (
+                    {r.status === "pending" && (!r.surety_member_id || r.surety_status === "accepted") && (
                       <>
-                        <Button size="sm" disabled={!!r.surety_member_id && r.surety_status !== "accepted"}
+                        <Button size="sm"
                           onClick={() => { setApproving(r); setRate(String(r.interest_rate_monthly ?? "2.0")); }}
-                          className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40">
+                          className="bg-emerald-600 hover:bg-emerald-500">
                           <CheckCircle2 className="h-4 w-4" /> ఆమోదించు
                         </Button>
                         <Button size="sm" variant="destructive" onClick={() => doReject(r)}>
@@ -194,8 +194,18 @@ function LoanRequestsAdmin() {
                         </Button>
                       </>
                     )}
-                    <Button size="sm" variant="outline" onClick={() => printLoanApplication(r)}
-                      className="border-orange-500/40 text-orange-300 hover:bg-orange-500/10">
+                    {r.status === "pending" && r.surety_member_id && r.surety_status === "awaiting" && (
+                      <div className="text-[11px] px-3 py-1.5 rounded-md bg-amber-600/15 text-amber-300 border border-amber-600/30">
+                        ⏳ షూరిటీ సమ్మతి కోసం ఎదురుచూస్తోంది — అప్పటివరకు ఆమోదం ఇవ్వలేరు
+                      </div>
+                    )}
+                    {r.status === "pending" && r.surety_status === "declined" && (
+                      <div className="text-[11px] px-3 py-1.5 rounded-md bg-red-600/15 text-red-300 border border-red-600/30">
+                        షూరిటీ తిరస్కరించారు — దరఖాస్తు ముందుకు సాగదు
+                      </div>
+                    )}
+                    <Button size="sm" onClick={() => printLoanApplication(r)}
+                      className="bg-slate-600 hover:bg-slate-500 text-white">
                       <Printer className="h-4 w-4" /> ప్రింట్ / PDF డౌన్‌లోడ్
                     </Button>
                   </div>
