@@ -296,6 +296,26 @@ function InteractionsPanel({ ctx }: { ctx: Ctx }) {
         </Link>
       )}
 
+      {ctx.myMemberId && (
+        <Link
+          to="/member/surety-inbox"
+          className="flex items-center justify-between gap-3 p-4 rounded-lg bg-gradient-to-r from-amber-900/20 to-zinc-900 border border-amber-500/30 hover:border-amber-500 transition"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0">
+              <span className="text-amber-300 text-lg">✍️</span>
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-white">{pick("షూరిటీ అభ్యర్థనలు (ఇన్‌బాక్స్)", "Surety Inbox")}</p>
+              <p className="text-[11px] text-zinc-400 truncate">
+                {pick("ఇతరులు మిమ్మల్ని షూరిటీగా పేర్కొంటే ఇక్కడ సమీక్షించి సమ్మతించండి/తిరస్కరించండి.", "Review and accept/decline requests where someone named you as surety.")}
+              </p>
+            </div>
+          </div>
+          <span className="text-xs font-semibold text-amber-300 shrink-0">{pick("తెరువు →", "Open →")}</span>
+        </Link>
+      )}
+
       <Card className="p-3 bg-zinc-950 border-zinc-800">
         <p className="text-[11px] text-zinc-400 mb-2">{pick("ఒక సభ్యుని ఎంచుకోండి. వివాదాలను నివారించడానికి ముందుగా ఆమోదించబడిన 3 టెంప్లేట్‌లలో ఒకటి మాత్రమే పంపగలరు — ఉచిత టెక్స్ట్ నిషేధించబడింది.", "Pick a member. You can only send one of three pre-approved templates — free text is disabled to prevent disputes.")}</p>
         <Input placeholder={pick("సభ్యులను వెతకండి…", "Search members…")} value={search} onChange={e => setSearch(e.target.value)} className="bg-zinc-900 border-zinc-800 text-white" />

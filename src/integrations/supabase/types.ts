@@ -244,8 +244,12 @@ export type Database = {
           reviewed_by: string | null
           signature_data_url: string | null
           status: string
+          surety_decline_reason: string | null
           surety_member_code: string | null
           surety_member_id: string | null
+          surety_responded_at: string | null
+          surety_signature_url: string | null
+          surety_status: string
           tenure_months: number | null
           updated_at: string
           utr_number: string | null
@@ -266,8 +270,12 @@ export type Database = {
           reviewed_by?: string | null
           signature_data_url?: string | null
           status?: string
+          surety_decline_reason?: string | null
           surety_member_code?: string | null
           surety_member_id?: string | null
+          surety_responded_at?: string | null
+          surety_signature_url?: string | null
+          surety_status?: string
           tenure_months?: number | null
           updated_at?: string
           utr_number?: string | null
@@ -288,8 +296,12 @@ export type Database = {
           reviewed_by?: string | null
           signature_data_url?: string | null
           status?: string
+          surety_decline_reason?: string | null
           surety_member_code?: string | null
           surety_member_id?: string | null
+          surety_responded_at?: string | null
+          surety_signature_url?: string | null
+          surety_status?: string
           tenure_months?: number | null
           updated_at?: string
           utr_number?: string | null

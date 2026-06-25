@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import {
   ArrowLeft, Send, Clock, CheckCircle2, XCircle, Camera, Loader2,
-  FileSignature, FileImage,
+  FileSignature, FileImage, Printer, Inbox,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { submitLoanRequest, listMyLoanRequests } from "@/lib/loan-requests.functions";
+import { printLoanApplication } from "@/lib/printLoan";
 import { SignaturePad } from "@/components/SignaturePad";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
@@ -225,9 +226,34 @@ function LoanRequestPage() {
               {r.status === "rejected" && r.reject_reason && (
                 <div className="mt-2 text-[11px] text-red-400">{pick("కారణం", "Reason")}: {r.reject_reason}</div>
               )}
+              {r.surety_member_id && r.status === "pending" && (
+                <div className={`mt-2 text-[11px] ${
+                  r.surety_status === "accepted" ? "text-emerald-400" :
+                  r.surety_status === "declined" ? "text-red-400" : "text-amber-300"
+                }`}>
+                  {r.surety_status === "accepted" ? pick("షూరిటీ ఆమోదించారు — కార్యవర్గం వద్ద", "Surety accepted — at committee") :
+                   r.surety_status === "declined" ? pick(`షూరిటీ తిరస్కరించారు${r.surety_decline_reason ? `: ${r.surety_decline_reason}` : ""}`, `Surety declined${r.surety_decline_reason ? `: ${r.surety_decline_reason}` : ""}`) :
+                   pick("షూరిటీ ఆమోదం కోసం ఎదురుచూస్తోంది", "Awaiting surety consent")}
+                </div>
+              )}
+              <div className="mt-2 flex justify-end">
+                <button onClick={() => printLoanApplication(r)}
+                  className="text-[11px] inline-flex items-center gap-1 px-2 py-1 rounded border border-orange-500/40 text-orange-300 hover:bg-orange-500/10">
+                  <Printer className="h-3 w-3" /> {pick("ప్రింట్ / PDF", "Print / PDF")}
+                </button>
+              </div>
             </Card>
           ))}
         </div>
+
+        <Link to="/member/surety-inbox"
+          className="block rounded-lg border border-white/10 bg-zinc-950 p-3 text-sm hover:border-amber-500/40">
+          <div className="flex items-center gap-2">
+            <Inbox className="h-4 w-4 text-amber-300" />
+            <span className="font-semibold">{pick("షూరిటీ అభ్యర్థనలు", "Surety Inbox")}</span>
+            <span className="ml-auto text-xs text-white/50">{pick("నేను షూరిటీగా ఉన్నవి", "Where I'm the surety")} →</span>
+          </div>
+        </Link>
       </div>
     </div>
   );

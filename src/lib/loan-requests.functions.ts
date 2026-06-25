@@ -47,7 +47,9 @@ export const submitLoanRequest = createServerFn({ method: "POST" })
       const { data: s } = await supabase
         .from("members").select("id")
         .eq("org_id", me.org_id).eq("member_code", code).maybeSingle();
-      surety_member_id = s?.id ?? null;
+      if (!s?.id) throw new Error("Surety member ID not found in this society");
+      if (s.id === me.id) throw new Error("You cannot be your own surety");
+      surety_member_id = s.id;
     }
 
     const { error } = await supabase.from("member_loan_requests").insert({
@@ -60,7 +62,55 @@ export const submitLoanRequest = createServerFn({ method: "POST" })
       surety_member_id,
       signature_data_url: data.signature_data_url,
       proof_url: data.proof_url ?? null,
+      surety_status: surety_member_id ? "awaiting" : "not_required",
     });
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+// --- Surety consent flow ---
+export const listSuretyRequests = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const me = await getMyApprovedMember(supabase, userId);
+    if (!me) return { requests: [] };
+    const { data } = await supabase
+      .from("member_loan_requests")
+      .select("*, member:members!member_loan_requests_member_id_fkey(id, name, member_code, photo_url, phone)")
+      .eq("surety_member_id", me.id)
+      .order("created_at", { ascending: false });
+    return { requests: data ?? [] };
+  });
+
+export const respondAsSurety = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: {
+    request_id: string;
+    decision: "accepted" | "declined";
+    signature_data_url?: string;
+    decline_reason?: string;
+  }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const me = await getMyApprovedMember(supabase, userId);
+    if (!me) throw new Error("Approved membership not found");
+    if (data.decision === "accepted" && !data.signature_data_url) {
+      throw new Error("Signature required to accept surety");
+    }
+    const update: any = {
+      surety_status: data.decision,
+      surety_responded_at: new Date().toISOString(),
+    };
+    if (data.decision === "accepted") update.surety_signature_url = data.signature_data_url;
+    if (data.decision === "declined") update.surety_decline_reason = data.decline_reason ?? null;
+
+    const { error } = await supabase
+      .from("member_loan_requests")
+      .update(update)
+      .eq("id", data.request_id)
+      .eq("surety_member_id", me.id)
+      .eq("surety_status", "awaiting");
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
@@ -72,7 +122,8 @@ export const listMyLoanRequests = createServerFn({ method: "GET" })
     const me = await getMyApprovedMember(supabase, userId);
     if (!me) return { requests: [] };
     const { data } = await supabase
-      .from("member_loan_requests").select("*")
+      .from("member_loan_requests")
+      .select("*, member:members!member_loan_requests_member_id_fkey(id, name, member_code, phone), surety:members!member_loan_requests_surety_member_id_fkey(id, name, member_code)")
       .eq("member_id", me.id)
       .order("created_at", { ascending: false });
     return { requests: data ?? [] };
@@ -106,6 +157,9 @@ export const approveLoanRequest = createServerFn({ method: "POST" })
       .from("member_loan_requests").select("*").eq("id", data.request_id).maybeSingle();
     if (rerr || !req) throw new Error("Request not found");
     if (req.status !== "pending") throw new Error("Request already processed");
+    if (req.surety_member_id && req.surety_status !== "accepted") {
+      throw new Error("Cannot approve until the surety member consents");
+    }
     if (!data.utr_number?.trim()) throw new Error("UTR number required");
 
     const rate = data.interest_rate_monthly ?? req.interest_rate_monthly ?? 2.0;
