@@ -138,7 +138,21 @@ function LoanRequestsAdmin() {
                     <div><span className="text-white/50">Amount:</span> <span className="font-semibold text-orange-400">₹ {Number(r.requested_amount).toLocaleString()}</span></div>
                     <div><span className="text-white/50">Tenure:</span> {r.tenure_months ? `${r.tenure_months} mo` : "—"}</div>
                     <div className="col-span-2"><span className="text-white/50">Reason:</span> {r.reason}</div>
-                    <div className="col-span-2"><span className="text-white/50">Surety:</span> {r.surety?.name ? `${r.surety.name} (${r.surety.member_code})` : (r.surety_member_code ?? "—")}</div>
+                    <div className="col-span-2 flex items-center gap-2 flex-wrap">
+                      <span className="text-white/50">Surety:</span>
+                      <span>{r.surety?.name ? `${r.surety.name} (${r.surety.member_code})` : (r.surety_member_code ?? "—")}</span>
+                      {r.surety_member_id && (
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full ${
+                          r.surety_status === "accepted" ? "bg-emerald-600/20 text-emerald-300" :
+                          r.surety_status === "declined" ? "bg-red-600/20 text-red-300" :
+                          "bg-amber-600/20 text-amber-300"
+                        }`}>
+                          {r.surety_status === "accepted" ? "Surety ✓ accepted" :
+                           r.surety_status === "declined" ? `Surety ✗ declined${r.surety_decline_reason ? `: ${r.surety_decline_reason}` : ""}` :
+                           "Awaiting surety consent"}
+                        </span>
+                      )}
+                    </div>
                     {r.status === "approved" && (
                       <div className="col-span-2 text-emerald-400">
                         UTR: {r.utr_number} · Paid: {r.payment_date}
