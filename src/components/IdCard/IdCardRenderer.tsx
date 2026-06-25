@@ -156,11 +156,12 @@ function Header({ design, org, member }: { design: IdCardDesign; org: OrgContext
   );
 }
 
-function ContactFooter({ org, accent }: { org: OrgContext; accent: string }) {
+function ContactFooter({ org, accent, bg, size }: { org: OrgContext; accent: string; bg?: string; size?: number }) {
   const parts = [org.contactPhone, org.contactEmail].filter(Boolean);
   if (parts.length === 0) return null;
+  const fs = size ?? 8;
   return (
-    <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, padding: "2px 8px", textAlign: "center", fontSize: 8, color: "#fff", background: accent, opacity: 0.92, letterSpacing: 0.2, fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+    <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, padding: "2px 8px", textAlign: "center", fontSize: fs, color: "#fff", background: bg || accent, opacity: 0.92, letterSpacing: 0.2, fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", zIndex: 1 }}>
       {org.contactPhone && <span>📞 {org.contactPhone}</span>}
       {org.contactPhone && org.contactEmail && <span style={{ margin: "0 6px", opacity: 0.6 }}>•</span>}
       {org.contactEmail && <span>✉ {org.contactEmail}</span>}
