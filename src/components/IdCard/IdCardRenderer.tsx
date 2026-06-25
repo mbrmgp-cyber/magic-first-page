@@ -264,7 +264,7 @@ function FrontVertical({ design, org, member }: { design: IdCardDesign; org: Org
         )}
       </div>
       {show(e.qrCode) && member.qrUrl && (
-        <img src={member.qrUrl} alt="" style={{ ...cornerStyle(e.qrCode.corner, 12), width: e.qrCode.imgSize, height: e.qrCode.imgSize, background: "#fff", padding: 2, borderRadius: 3, border: `1px solid ${accent}`, zIndex: 10 }} />
+        <img src={member.qrUrl} alt="" style={{ ...cornerStyle(e.qrCode.corner, (e.qrCode.corner || "br").startsWith("b") ? 24 : 14), width: e.qrCode.imgSize, height: e.qrCode.imgSize, background: "#fff", padding: 2, borderRadius: 3, border: `1px solid ${accent}`, zIndex: 10, boxSizing: "border-box" }} />
       )}
       <ContactFooter org={org} accent={accent} bg={design.global.contactFooterBg} size={design.global.contactFooterTextSize} />
     </div>
