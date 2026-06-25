@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { ArrowLeft, CheckCircle2, XCircle, User, Banknote } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowLeft, CheckCircle2, XCircle, User, Banknote, FileImage, FileSignature } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,11 +14,29 @@ import { toast } from "sonner";
 import {
   listOrgLoanRequests, approveLoanRequest, rejectLoanRequest,
 } from "@/lib/loan-requests.functions";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/org/loan-requests")({
   head: () => ({ meta: [{ title: "Loan Requests — Admin" }] }),
   component: LoanRequestsAdmin,
 });
+
+function SignedImage({ path, alt, className }: { path?: string | null; alt: string; className?: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    if (!path) { setUrl(null); return; }
+    // If already an absolute URL, use it directly
+    if (/^https?:\/\//i.test(path)) { setUrl(path); return; }
+    supabase.storage.from("loan-proofs").createSignedUrl(path, 3600).then(({ data }) => {
+      if (!cancelled) setUrl(data?.signedUrl ?? null);
+    });
+    return () => { cancelled = true; };
+  }, [path]);
+  if (!path) return null;
+  if (!url) return <div className={`bg-white/5 animate-pulse ${className ?? ""}`} />;
+  return <img src={url} alt={alt} className={className} />;
+}
 
 function LoanRequestsAdmin() {
   const listFn = useServerFn(listOrgLoanRequests);
