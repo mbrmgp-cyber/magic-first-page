@@ -176,7 +176,7 @@ function InteractionsPanel({ ctx }: { ctx: Ctx }) {
   const membersQ = useQuery({
     queryKey: ["org-members-mini", ctx.orgId],
     queryFn: async () => {
-      const { data, error } = await supabase.from("members").select("id, full_name, member_code, photo_url").eq("org_id", ctx.orgId).eq("status", "approved").order("full_name");
+      const { data, error } = await supabase.from("members").select("id, name, member_code, photo_url").eq("org_id", ctx.orgId).eq("status", "approved").order("name");
       if (error) throw error;
       return data ?? [];
     },
@@ -194,7 +194,7 @@ function InteractionsPanel({ ctx }: { ctx: Ctx }) {
   const [search, setSearch] = useState("");
 
   const filtered = useMemo(() => (membersQ.data ?? []).filter(m =>
-    !search.trim() || m.full_name?.toLowerCase().includes(search.toLowerCase()) || m.member_code?.toLowerCase().includes(search.toLowerCase())
+    !search.trim() || m.name?.toLowerCase().includes(search.toLowerCase()) || m.member_code?.toLowerCase().includes(search.toLowerCase())
   ).filter(m => m.id !== ctx.myMemberId), [membersQ.data, search, ctx.myMemberId]);
 
   async function send() {
@@ -233,10 +233,10 @@ function InteractionsPanel({ ctx }: { ctx: Ctx }) {
           <button key={m.id} type="button" onClick={() => { setPicked(m); setTpl(null); }}
             className="text-left p-3 rounded-lg bg-zinc-950 border border-zinc-800 hover:border-[#ff8c28] transition flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-zinc-800 overflow-hidden flex items-center justify-center text-xs text-zinc-400">
-              {m.photo_url ? <img src={m.photo_url} alt="" className="w-full h-full object-cover" /> : (m.full_name?.[0] ?? "?")}
+              {m.photo_url ? <img src={m.photo_url} alt="" className="w-full h-full object-cover" /> : (m.name?.[0] ?? "?")}
             </div>
             <div className="min-w-0">
-              <p className="text-sm text-white truncate">{m.full_name}</p>
+              <p className="text-sm text-white truncate">{m.name}</p>
               <p className="text-[10px] text-zinc-500 font-mono">{m.member_code ?? "—"}</p>
             </div>
           </button>
@@ -261,7 +261,7 @@ function InteractionsPanel({ ctx }: { ctx: Ctx }) {
       <Dialog open={!!picked} onOpenChange={(o) => !o && (setPicked(null), setTpl(null))}>
         <DialogContent className="bg-zinc-950 border-zinc-800 text-white">
           <DialogHeader>
-            <DialogTitle className="text-white">To: {picked?.full_name}</DialogTitle>
+            <DialogTitle className="text-white">To: {picked?.name}</DialogTitle>
           </DialogHeader>
           <div className="space-y-2">
             {(Object.keys(TEMPLATES) as Tpl[]).map(k => {
@@ -298,7 +298,7 @@ function QueuePanel({ ctx }: { ctx: Ctx }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("chat_interactions")
-        .select("*, sender:sender_member_id(id, full_name, member_code), recipient:recipient_member_id(id, full_name, member_code)")
+        .select("*, sender:sender_member_id(id, name, member_code), recipient:recipient_member_id(id, name, member_code)")
         .eq("org_id", ctx.orgId).eq("status", tab).order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
@@ -331,7 +331,7 @@ function QueuePanel({ ctx }: { ctx: Ctx }) {
               <Icon className="w-5 h-5 mt-0.5 shrink-0" style={{ color: t?.tone }} />
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-zinc-400">
-                  <span className="text-white">{r.sender?.full_name ?? "?"}</span> → <span className="text-white">{r.recipient?.full_name ?? "?"}</span>
+                  <span className="text-white">{r.sender?.name ?? "?"}</span> → <span className="text-white">{r.recipient?.name ?? "?"}</span>
                 </p>
                 <p className="text-sm text-zinc-200 mt-1">{r.message_te}</p>
                 <p className="text-[11px] text-zinc-500 italic">{r.message_en}</p>
@@ -357,7 +357,7 @@ function InboxPanel({ ctx }: { ctx: Ctx }) {
     enabled: !!ctx.myMemberId,
     queryFn: async () => {
       const { data } = await supabase.from("chat_interactions")
-        .select("*, sender:sender_member_id(full_name, member_code)")
+        .select("*, sender:sender_member_id(name, member_code)")
         .eq("recipient_member_id", ctx.myMemberId!).eq("status", "approved").order("created_at", { ascending: false });
       return data ?? [];
     },
@@ -373,7 +373,7 @@ function InboxPanel({ ctx }: { ctx: Ctx }) {
           <Card key={r.id} className="p-3 bg-zinc-950 border-zinc-800 flex items-start gap-3">
             <Icon className="w-5 h-5 mt-0.5 shrink-0" style={{ color: t?.tone }} />
             <div className="min-w-0">
-              <p className="text-xs text-zinc-400">From <span className="text-white">{r.sender?.full_name ?? "Member"}</span></p>
+              <p className="text-xs text-zinc-400">From <span className="text-white">{r.sender?.name ?? "Member"}</span></p>
               <p className="text-sm text-zinc-200 mt-1">{r.message_te}</p>
               <p className="text-[11px] text-zinc-500 italic">{r.message_en}</p>
               <p className="text-[10px] text-zinc-600 mt-1">{new Date(r.reviewed_at ?? r.created_at).toLocaleString()}</p>
