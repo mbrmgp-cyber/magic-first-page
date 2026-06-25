@@ -90,6 +90,32 @@ export function TemplateCustomizer({ design, onChange }: Props) {
 
 
 
+
+        {/* Independent Footer & ID Badge controls */}
+        <div className="grid grid-cols-2 gap-3 pt-2">
+          <ColorField
+            label="Contact Footer BG / ఫుటర్ రంగు"
+            value={design.global.contactFooterBg || design.global.accentColor}
+            onChange={(v) => setGlobal("contactFooterBg", v)}
+          />
+          <div className="space-y-1">
+            <Label className="text-[11px]" style={{ color: TEXT_SUB }}>
+              Footer Text Size / ఫుటర్ సైజ్ — {(design.global.contactFooterTextSize ?? 8)}px
+            </Label>
+            <input
+              type="range" min={6} max={14} step={1}
+              value={design.global.contactFooterTextSize ?? 8}
+              onChange={(e) => setGlobal("contactFooterTextSize", Number(e.target.value))}
+              className="w-full"
+            />
+          </div>
+          <ColorField
+            label="ID Badge BG (A/0001) / ఐడీ రంగు"
+            value={design.global.memberCodeBadgeBg || design.global.accentColor}
+            onChange={(v) => setGlobal("memberCodeBadgeBg", v)}
+          />
+        </div>
+
         {/* Background image uploads — front & back */}
         <div className="grid grid-cols-2 gap-3 pt-2">
           <BgImageField
