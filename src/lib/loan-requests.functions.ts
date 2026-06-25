@@ -28,7 +28,10 @@ export const submitLoanRequest = createServerFn({ method: "POST" })
   .inputValidator((d: {
     requested_amount: number;
     reason: string;
+    tenure_months?: number;
     surety_member_code?: string;
+    signature_data_url?: string;
+    proof_url?: string;
   }) => d)
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
@@ -36,6 +39,7 @@ export const submitLoanRequest = createServerFn({ method: "POST" })
     if (!me) throw new Error("Approved membership not found");
     if (!(data.requested_amount > 0)) throw new Error("Amount must be greater than zero");
     if (!data.reason?.trim()) throw new Error("Reason is required");
+    if (!data.signature_data_url) throw new Error("Signature is required");
 
     let surety_member_id: string | null = null;
     if (data.surety_member_code?.trim()) {
@@ -51,8 +55,11 @@ export const submitLoanRequest = createServerFn({ method: "POST" })
       member_id: me.id,
       requested_amount: data.requested_amount,
       reason: data.reason,
+      tenure_months: data.tenure_months ?? null,
       surety_member_code: data.surety_member_code ?? null,
       surety_member_id,
+      signature_data_url: data.signature_data_url,
+      proof_url: data.proof_url ?? null,
     });
     if (error) throw new Error(error.message);
     return { ok: true as const };
