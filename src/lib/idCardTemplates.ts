@@ -64,6 +64,10 @@ export type GlobalStyle = {
   headerBadgeOffsetX?: number; // horizontal nudge for the active/inactive badge in header
   frontBgImage?: string; // optional uploaded background image (front side)
   backBgImage?: string;  // optional uploaded background image (back side)
+  // Independent overrides (not linked to accent):
+  contactFooterBg?: string;       // bottom contact strip background
+  contactFooterTextSize?: number; // bottom contact strip text size (px)
+  memberCodeBadgeBg?: string;     // "A/0001" id badge background
 };
 
 export type IdCardDesign = {
