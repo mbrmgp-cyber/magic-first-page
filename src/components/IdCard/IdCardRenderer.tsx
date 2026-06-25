@@ -235,15 +235,17 @@ function FrontVertical({ design, org, member }: { design: IdCardDesign; org: Org
   const accent = design.global.accentColor;
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", position: "relative" }}>
-      <Header design={design} org={org} />
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "12px 10px", gap: 6, overflow: "hidden" }}>
+      <Header design={design} org={org} member={member} />
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "12px 10px 18px", gap: 6, overflow: "hidden" }}>
 
         {show(e.photo) && (
           <div style={{ width: e.photo.imgSize, height: e.photo.imgSize, borderRadius: "50%", background: "#e5e7eb", overflow: "hidden", border: `2px solid ${accent}`, marginBottom: 2 }}>
             {member.photoUrl ? <img src={member.photoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#9ca3af", fontSize: 28 }}>👤</div>}
           </div>
         )}
-        <StatusBadge status={member.status} />
+        {show(e.designation) && member.designation && (
+          <div style={{ ...txt(e.designation), textAlign: "center", lineHeight: 1.15 }}>{member.designation}</div>
+        )}
         {show(e.memberCode) && member.memberCode && (
           <div style={{ background: accent, color: "#fff", padding: "2px 10px", borderRadius: 4, ...txt(e.memberCode, "#fff"), textAlign: "center", marginTop: 2 }}>
             {member.memberCode}
@@ -263,6 +265,7 @@ function FrontVertical({ design, org, member }: { design: IdCardDesign; org: Org
       {show(e.qrCode) && member.qrUrl && (
         <img src={member.qrUrl} alt="" style={{ ...cornerStyle(e.qrCode.corner, 12), width: e.qrCode.imgSize, height: e.qrCode.imgSize, background: "#fff", padding: 2, borderRadius: 3, border: `1px solid ${accent}` }} />
       )}
+      <ContactFooter org={org} accent={accent} />
     </div>
   );
 }
