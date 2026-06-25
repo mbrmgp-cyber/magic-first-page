@@ -236,14 +236,17 @@ export type Database = {
           member_id: string
           org_id: string
           payment_date: string | null
+          proof_url: string | null
           reason: string
           reject_reason: string | null
           requested_amount: number
           reviewed_at: string | null
           reviewed_by: string | null
+          signature_data_url: string | null
           status: string
           surety_member_code: string | null
           surety_member_id: string | null
+          tenure_months: number | null
           updated_at: string
           utr_number: string | null
         }
@@ -255,14 +258,17 @@ export type Database = {
           member_id: string
           org_id: string
           payment_date?: string | null
+          proof_url?: string | null
           reason: string
           reject_reason?: string | null
           requested_amount: number
           reviewed_at?: string | null
           reviewed_by?: string | null
+          signature_data_url?: string | null
           status?: string
           surety_member_code?: string | null
           surety_member_id?: string | null
+          tenure_months?: number | null
           updated_at?: string
           utr_number?: string | null
         }
@@ -274,14 +280,17 @@ export type Database = {
           member_id?: string
           org_id?: string
           payment_date?: string | null
+          proof_url?: string | null
           reason?: string
           reject_reason?: string | null
           requested_amount?: number
           reviewed_at?: string | null
           reviewed_by?: string | null
+          signature_data_url?: string | null
           status?: string
           surety_member_code?: string | null
           surety_member_id?: string | null
+          tenure_months?: number | null
           updated_at?: string
           utr_number?: string | null
         }
