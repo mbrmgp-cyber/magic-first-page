@@ -194,7 +194,7 @@ function FrontHorizontal({ design, org, member }: { design: IdCardDesign; org: O
               )}
             </div>
             {show(e.designation) && member.designation && (
-              <div style={{ ...txt(e.designation), textAlign: "center", maxWidth: (e.photo.imgSize ?? 84) + 8, lineHeight: 1.15 }}>
+              <div style={{ ...txt(e.designation), textAlign: "center", maxWidth: (e.photo.imgSize ?? 84) + 24, lineHeight: 1.15, wordBreak: "break-word" }}>
                 {member.designation}
               </div>
             )}
