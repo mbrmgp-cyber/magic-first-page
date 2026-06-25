@@ -305,9 +305,9 @@ function renderBack(design: IdCardDesign, org: OrgContext, member: SampleMember)
       </div>
       <div style={{ display: "flex", alignItems: "flex-end", gap: 8, paddingRight: mbrLogoSize + 8 }}>
         <div style={{ ...txt(e.presidentName), fontSize: 9, opacity: 0.9 }}>
-          {show(e.presidentSignature) && org.presidentSignatureUrl && (
-            <img src={org.presidentSignatureUrl} alt="" style={{ width: e.presidentSignature.imgSize, height: 32, objectFit: "contain", display: "block" }} />
-          )}
+          <div style={{ fontSize: 8, opacity: 0.7, letterSpacing: 0.4, textTransform: "uppercase" }}>
+            {lang === "te" ? "జారీ చేసినవారు" : "Issued by"}
+          </div>
           {showPresName && <div style={{ fontWeight: 700 }}>{presName}</div>}
           <div style={{ opacity: 0.75 }}>{presLabel}</div>
         </div>
