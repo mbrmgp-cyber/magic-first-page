@@ -194,7 +194,7 @@ function FrontHorizontal({ design, org, member }: { design: IdCardDesign; org: O
               )}
             </div>
             {show(e.designation) && member.designation && (
-              <div style={{ ...txt(e.designation), textAlign: "center", maxWidth: (e.photo.imgSize ?? 84) + 8, lineHeight: 1.15 }}>
+              <div style={{ ...txt(e.designation), textAlign: "center", maxWidth: (e.photo.imgSize ?? 84) + 24, lineHeight: 1.15, wordBreak: "break-word" }}>
                 {member.designation}
               </div>
             )}
@@ -220,7 +220,7 @@ function FrontHorizontal({ design, org, member }: { design: IdCardDesign; org: O
       </div>
       {/* Front corner QR (member URL) — kept clean, no logo overlap */}
       {show(e.qrCode) && member.qrUrl && (
-        <img src={member.qrUrl} alt="" style={{ ...cornerStyle(e.qrCode.corner, 12), width: e.qrCode.imgSize, height: e.qrCode.imgSize, background: "#fff", padding: 2, borderRadius: 3, border: `1px solid ${design.global.accentColor}`, zIndex: 10 }} />
+        <img src={member.qrUrl} alt="" style={{ ...cornerStyle(e.qrCode.corner, (e.qrCode.corner || "br").startsWith("b") ? 24 : 14), width: e.qrCode.imgSize, height: e.qrCode.imgSize, background: "#fff", padding: 2, borderRadius: 3, border: `1px solid ${design.global.accentColor}`, zIndex: 10, boxSizing: "border-box" }} />
       )}
       {/* Legacy footer band */}
       {design.templateId === "legacy" && design.global.footerColor && (
@@ -264,7 +264,7 @@ function FrontVertical({ design, org, member }: { design: IdCardDesign; org: Org
         )}
       </div>
       {show(e.qrCode) && member.qrUrl && (
-        <img src={member.qrUrl} alt="" style={{ ...cornerStyle(e.qrCode.corner, 12), width: e.qrCode.imgSize, height: e.qrCode.imgSize, background: "#fff", padding: 2, borderRadius: 3, border: `1px solid ${accent}`, zIndex: 10 }} />
+        <img src={member.qrUrl} alt="" style={{ ...cornerStyle(e.qrCode.corner, (e.qrCode.corner || "br").startsWith("b") ? 24 : 14), width: e.qrCode.imgSize, height: e.qrCode.imgSize, background: "#fff", padding: 2, borderRadius: 3, border: `1px solid ${accent}`, zIndex: 10, boxSizing: "border-box" }} />
       )}
       <ContactFooter org={org} accent={accent} bg={design.global.contactFooterBg} size={design.global.contactFooterTextSize} />
     </div>
