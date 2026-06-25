@@ -62,6 +62,31 @@ export function TemplateCustomizer({ design, onChange }: Props) {
           </div>
         </div>
 
+        {/* Horizontal alignment sliders for Logo and Header Badge */}
+        <div className="grid grid-cols-2 gap-3 pt-2">
+          <div className="space-y-1">
+            <Label className="text-[11px]" style={{ color: TEXT_SUB }}>
+              Logo X-Offset / లోగో అలైన్ — {(design.global.headerLogoOffsetX ?? 0)}px
+            </Label>
+            <input
+              type="range" min={-40} max={40} step={1}
+              value={design.global.headerLogoOffsetX ?? 0}
+              onChange={(e) => setGlobal("headerLogoOffsetX", Number(e.target.value))}
+              className="w-full"
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-[11px]" style={{ color: TEXT_SUB }}>
+              Active Badge X-Offset / బ్యాడ్జ్ అలైన్ — {(design.global.headerBadgeOffsetX ?? 0)}px
+            </Label>
+            <input
+              type="range" min={-40} max={40} step={1}
+              value={design.global.headerBadgeOffsetX ?? 0}
+              onChange={(e) => setGlobal("headerBadgeOffsetX", Number(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
         {/* Background image uploads — front & back */}
         <div className="grid grid-cols-2 gap-3 pt-2">
           <BgImageField
