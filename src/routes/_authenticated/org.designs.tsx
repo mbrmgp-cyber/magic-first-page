@@ -1874,7 +1874,7 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
     name: "మన్నూరు భాస్కర్ రెడ్డి",
     fatherName: "రోసి రెడ్డి",
     memberCode: org?.letter_code ? `${org.letter_code}/0001` : "A/0001",
-    designation: "సభ్యుడు / Member",
+    designation: (typeof window !== "undefined" && window.localStorage?.getItem("mbr_lang") === "en") ? "Member" : "సభ్యుడు",
     village: "మార్గోపల్లి",
     pincode: "516104",
     phone: "+91 90595 94989",
