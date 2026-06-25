@@ -177,7 +177,14 @@ function SuretyInbox() {
               {pick("అంగీకరిస్తే మీ సంతకం గీయండి. తిరస్కరిస్తే కారణం రాయండి.",
                 "Draw your signature to accept, or write a reason to decline.")}
             </div>
-            {r_proofPreview(active)}
+            {active.proof_url && (
+              <div>
+                <Label className="text-white/80 text-xs">{pick("అప్‌లోడ్ చేసిన పత్రం", "Uploaded proof")}</Label>
+                <div className="rounded border border-white/10 bg-zinc-900 overflow-hidden mt-1">
+                  <SignedImg path={active.proof_url} className="w-full max-h-40 object-contain" />
+                </div>
+              </div>
+            )}
             <div>
               <Label className="text-white/80 text-xs">{pick("మీ సంతకం", "Your signature")}</Label>
               <SignaturePad onChange={setSignature}

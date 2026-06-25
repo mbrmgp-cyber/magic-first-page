@@ -86,23 +86,37 @@ function statusStamp(r: any) {
   return '<span class="stamp pen">PENDING</span>';
 }
 
+const T = {
+  accepted: "ఆమోదించబడింది / Accepted",
+  declined: "తిరస్కరించబడింది / Declined",
+  awaiting: "ఎదురుచూస్తోంది / Awaiting",
+  approved: "ఆమోదించబడింది / Approved",
+  rejected: "తిరస్కరించబడింది / Rejected",
+  pending: "పెండింగ్ / Pending",
+  noDoc: "ఏ పత్రం అప్‌లోడ్ చేయలేదు / No document uploaded",
+  noSurety: "షూరిటీ లేరు / No surety",
+  notProvided: "ఇవ్వలేదు / Not provided",
+};
+const tenure = (n: any) => (n ? `${n} నెలలు / ${n} months` : "—");
+const statusLabel = (s: string) => (T as any)[s] ?? s;
+
 function timelineBlock(r: any) {
   const steps = [
-    { label: "Submitted by applicant", at: r.created_at, done: true },
+    { label: "దరఖాస్తు సమర్పణ / Submitted by applicant", at: r.created_at, done: true },
     {
-      label: r.surety_member_id ? "Surety consent" : "No surety required",
+      label: r.surety_member_id ? "షూరిటీ సమ్మతి / Surety consent" : "షూరిటీ అవసరం లేదు / No surety required",
       at: r.surety_responded_at,
       done: !r.surety_member_id || r.surety_status === "accepted" || r.surety_status === "declined",
-      note: r.surety_status === "declined" ? `Declined${r.surety_decline_reason ? `: ${r.surety_decline_reason}` : ""}` :
-            r.surety_status === "accepted" ? "Accepted" :
-            r.surety_status === "awaiting" ? "Awaiting…" : "",
+      note: r.surety_status === "declined" ? `${T.declined}${r.surety_decline_reason ? ` — ${r.surety_decline_reason}` : ""}` :
+            r.surety_status === "accepted" ? T.accepted :
+            r.surety_status === "awaiting" ? T.awaiting : "",
     },
     {
-      label: "Committee review",
+      label: "కార్యవర్గ సమీక్ష / Committee review",
       at: r.reviewed_at,
       done: r.status !== "pending",
-      note: r.status === "approved" ? `Approved · UTR ${r.utr_number ?? ""}` :
-            r.status === "rejected" ? `Rejected${r.reject_reason ? `: ${r.reject_reason}` : ""}` : "Pending",
+      note: r.status === "approved" ? `${T.approved} · UTR ${r.utr_number ?? ""}` :
+            r.status === "rejected" ? `${T.rejected}${r.reject_reason ? ` — ${r.reject_reason}` : ""}` : T.pending,
     },
   ];
   return `<div class="timeline">${steps.map(s => `
@@ -144,7 +158,7 @@ ${headerBlock(org)}
 <h2>లోన్ వివరాలు / Loan Details</h2>
 <table class="kv">
   <tr><td class="k">మొత్తం / Amount</td><td><b>₹ ${Number(r.requested_amount).toLocaleString("en-IN")}</b></td>
-      <td class="k">కాలవ్యవధి / Tenure</td><td>${r.tenure_months ? esc(r.tenure_months) + " months" : "—"}</td></tr>
+      <td class="k">కాలవ్యవధి / Tenure</td><td>${tenure(r.tenure_months)}</td></tr>
   <tr><td class="k">వడ్డీ / Interest</td><td>${r.interest_rate_monthly ?? "—"} % / month</td>
       <td class="k">UTR</td><td>${esc(r.utr_number ?? "—")}</td></tr>
   <tr><td class="k">కారణం / Purpose</td><td colspan="3">${esc(r.reason)}</td></tr>
@@ -163,7 +177,7 @@ ${timelineBlock(r)}
   <div class="box">
     <div class="lbl">హామీదారు సంతకం / Surety Signature</div>
     <div class="sigbox">${suretySigUrl ? `<img src="${esc(suretySigUrl)}" />` :
-      (r.surety?.name || r.surety_member_code ? `(${esc(r.surety_status ?? "pending")})` : "— No surety —")}</div>
+      (r.surety?.name || r.surety_member_code ? esc(statusLabel(r.surety_status ?? "pending")) : esc(T.noSurety))}</div>
     <div style="margin-top:8px; font-size:11px;">
       ${r.surety?.name ? `<b>${esc(r.surety.name)}</b> · ${esc(r.surety.member_code)}` :
         (r.surety_member_code ? `Code: ${esc(r.surety_member_code)}` : "—")}
@@ -175,7 +189,7 @@ ${timelineBlock(r)}
 <div class="box" style="margin-top:12px;">
   <div class="lbl">ధృవీకరణ పత్రం / Uploaded Proof Document</div>
   <div style="text-align:center;">
-    ${proofUrl ? `<img class="proof" src="${esc(proofUrl)}" />` : "— No document uploaded —"}
+    ${proofUrl ? `<img class="proof" src="${esc(proofUrl)}" />` : `— ${esc(T.noDoc)} —`}
   </div>
 </div>
 
@@ -214,14 +228,14 @@ ${headerBlock(org)}
   <tr><td class="k">దరఖాస్తుదారు / Applicant</td><td>${esc(r.member?.name)} (${esc(r.member?.member_code)})</td>
       <td class="k">మొత్తం / Amount</td><td><b>₹ ${Number(r.requested_amount).toLocaleString("en-IN")}</b></td></tr>
   <tr><td class="k">కారణం / Purpose</td><td colspan="3">${esc(r.reason)}</td></tr>
-  <tr><td class="k">షూరిటీ స్థితి / Surety Status</td><td>${esc(r.surety_status)}</td>
+  <tr><td class="k">షూరిటీ స్థితి / Surety Status</td><td>${esc(statusLabel(r.surety_status))}</td>
       <td class="k">స్పందించిన తేదీ / Responded At</td><td>${fmtDate(r.surety_responded_at)}</td></tr>
   ${r.surety_decline_reason ? `<tr><td class="k">కారణం / Reason</td><td colspan="3">${esc(r.surety_decline_reason)}</td></tr>` : ""}
 </table>
 
 <div class="box" style="margin-top:14px;">
   <div class="lbl">షూరిటీ సంతకం / Surety Signature</div>
-  <div class="sigbox">${sigUrl ? `<img src="${esc(sigUrl)}" />` : "— Not provided —"}</div>
+  <div class="sigbox">${sigUrl ? `<img src="${esc(sigUrl)}" />` : `— ${esc(T.notProvided)} —`}</div>
 </div>
 
 <p style="margin-top:18px; font-size:11px; color:#444;">
