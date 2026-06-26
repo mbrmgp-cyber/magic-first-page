@@ -51,7 +51,7 @@ async function sendMagicLoginLinkEmail(supabaseAdmin: any, email: string, redire
   const confirmationUrl = data?.properties?.action_link;
   if (!confirmationUrl) throw new Error("Could not generate login link");
 
-  const siteName = "చిట్యాల్ హెల్ప్ లైన్ సొసైటీ";
+  const siteName = "చిట్వేల్ హెల్ప్ లైన్ సొసైటీ";
   const element = React.createElement(MagicLinkEmail, { siteName, confirmationUrl });
   const html = await render(element);
   const text = await render(element, { plainText: true });
@@ -72,7 +72,7 @@ async function sendMagicLoginLinkEmail(supabaseAdmin: any, email: string, redire
         to: email,
         from: `${siteName} <noreply@notify.mbrplatform.com>`,
         sender_domain: "notify.mbrplatform.com",
-        subject: "చిట్యాల్ హెల్ప్ లైన్ సొసైటీ — Login link",
+        subject: "చిట్వేల్ హెల్ప్ లైన్ సొసైటీ — Login link",
         html,
         text,
         purpose: "transactional",
@@ -677,7 +677,7 @@ export const sendMeetingInvites = createServerFn({ method: "POST" })
       import("@/integrations/supabase/client.server"),
     ]);
 
-    const siteName = org.name || "చిట్యాల్ హెల్ప్ లైన్ సొసైటీ";
+    const siteName = org.name || "చిట్వేల్ హెల్ప్ లైన్ సొసైటీ";
     const whenDate = new Date(data.scheduled_at);
     const whenText = whenDate.toLocaleString("en-IN", { dateStyle: "full", timeStyle: "short" });
     const meetingTypeLabel = data.meeting_type === "online" ? "ఆన్‌లైన్ / Online" : "ఆఫ్‌లైన్ / Offline";

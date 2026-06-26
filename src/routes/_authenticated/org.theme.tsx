@@ -110,7 +110,7 @@ function OrgThemePage() {
 
   const orgName = org?.name || "Chitvel Help Line Society";
   const orgSlogan = org?.slogan || "॥ మానవసేవే మాధవసేవ ॥";
-  const orgReg = org?.gov_reg_number || "356/16";
+  const orgReg = org?.gov_reg_number || "235/16";
 
   return (
     <div className="min-h-screen bg-black text-white pb-12" style={{ fontFamily: `${t.headFont}, system-ui, sans-serif` }}>

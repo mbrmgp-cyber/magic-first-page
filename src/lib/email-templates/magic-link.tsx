@@ -25,7 +25,7 @@ export const MagicLinkEmail = ({
     <Preview>{siteName} login link</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Text style={brand}>చిట్యాల్ హెల్ప్ లైన్ సొసైటీ</Text>
+        <Text style={brand}>చిట్వేల్ హెల్ప్ లైన్ సొసైటీ</Text>
         <Heading style={h1}>Login Link / లాగిన్ లింక్</Heading>
         <Text style={text}>
           Please click the button below to login. ఈ లింక్ కొద్దిసేపు మాత్రమే పనిచేస్తుంది.
