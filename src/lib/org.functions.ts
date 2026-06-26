@@ -79,6 +79,7 @@ async function sendMagicLoginLinkEmail(supabaseAdmin: any, email: string, redire
         label: "magiclink",
         message_id: messageId,
         idempotency_key: messageId,
+        unsubscribe_token: `auth-${messageId}`,
       },
       { apiKey, idempotencyKey: messageId }
     );
