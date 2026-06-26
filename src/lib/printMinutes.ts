@@ -40,7 +40,20 @@ table.kv td.k { width:30%; color:#555; font-weight:600; }
 .footer-sigs { margin-top:36px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px; }
 .footer-sigs .slot { text-align:center; padding-top:50px; border-top:1px solid #111; font-size:11px; }
 .muted { color:#6b7280; font-size:11px; }
+.toolbar { position:fixed; top:0; left:0; right:0; background:#7c2d12; color:#fff; padding:10px 16px; display:flex; justify-content:space-between; align-items:center; z-index:9999; box-shadow:0 2px 8px rgba(0,0,0,.2); }
+.toolbar button { background:#fff; color:#7c2d12; border:none; padding:7px 14px; border-radius:6px; font-weight:700; cursor:pointer; font-size:13px; margin-left:8px; }
+.toolbar button.ghost { background:transparent; color:#fff; border:1px solid #fff; }
+.page { margin-top:60px; }
+@media print { .toolbar { display:none !important; } .page { margin-top:0; } }
 `;
+
+const toolbar = `<div class="toolbar no-print">
+  <div style="font-weight:700;font-size:13px;">📄 Print Preview</div>
+  <div>
+    <button class="ghost" onclick="window.close()">✕ మూసివేయండి / Close</button>
+    <button onclick="window.print()">🖨 ప్రింట్ / Print</button>
+  </div>
+</div>`;
 
 type Org = { name?: string; logo_url?: string; gov_reg_number?: string; phone?: string; email?: string };
 type Member = { id: string; name: string; member_code?: string | null };
