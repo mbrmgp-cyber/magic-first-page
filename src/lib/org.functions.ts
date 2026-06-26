@@ -69,7 +69,6 @@ async function sendMagicLoginLinkEmail(supabaseAdmin: any, email: string, redire
 
     await sendLovableEmail(
       {
-        run_id: messageId,
         to: email,
         from: `${siteName} <noreply@notify.mbrplatform.com>`,
         sender_domain: "notify.mbrplatform.com",
@@ -80,8 +79,9 @@ async function sendMagicLoginLinkEmail(supabaseAdmin: any, email: string, redire
         label: "magiclink",
         message_id: messageId,
         idempotency_key: messageId,
+        unsubscribe_token: `auth-${messageId}`,
       },
-      { apiKey, sendUrl: process.env.LOVABLE_SEND_URL }
+      { apiKey, idempotencyKey: messageId }
     );
 
     await supabaseAdmin.from("email_send_log").insert({
