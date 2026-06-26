@@ -21,7 +21,7 @@ import {
 } from "@/lib/members.functions";
 import { Switch } from "@/components/ui/switch";
 import { User, Plus, IndianRupee, CheckCircle2, XCircle, Trash2, Lock, UserPlus, Camera } from "lucide-react";
-import { MemberIdCardButton } from "@/components/MemberIdCard";
+
 
 
 export const Route = createFileRoute("/_authenticated/org/members")({
@@ -177,10 +177,7 @@ function MemberCard({ member, orgId, org, onReview, onChange }:
           </>
         )}
         {member.status === "approved" && (
-          <>
-            <MemberDetailsDialog member={member} orgId={orgId} onChange={onChange} />
-            <MemberIdCardButton member={member} org={org} />
-          </>
+          <MemberDetailsDialog member={member} orgId={orgId} onChange={onChange} />
         )}
       </div>
     </Card>
