@@ -36,6 +36,7 @@ import { Route as AuthenticatedMemberPendingRouteImport } from './routes/_authen
 import { Route as AuthenticatedMemberLoanRequestRouteImport } from './routes/_authenticated/member.loan-request'
 import { Route as AuthenticatedMemberLedgerRouteImport } from './routes/_authenticated/member.ledger'
 import { Route as AuthenticatedMemberDashboardRouteImport } from './routes/_authenticated/member.dashboard'
+import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -185,6 +186,12 @@ const AuthenticatedMemberDashboardRoute =
     path: '/member/dashboard',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const LovableEmailQueueProcessRoute =
+  LovableEmailQueueProcessRouteImport.update({
+    id: '/lovable/email/queue/process',
+    path: '/lovable/email/queue/process',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -213,6 +220,7 @@ export interface FileRoutesByFullPath {
   '/org/members': typeof AuthenticatedOrgMembersRoute
   '/org/rules': typeof AuthenticatedOrgRulesRoute
   '/org/theme': typeof AuthenticatedOrgThemeRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -241,6 +249,7 @@ export interface FileRoutesByTo {
   '/org/members': typeof AuthenticatedOrgMembersRoute
   '/org/rules': typeof AuthenticatedOrgRulesRoute
   '/org/theme': typeof AuthenticatedOrgThemeRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -271,6 +280,7 @@ export interface FileRoutesById {
   '/_authenticated/org/members': typeof AuthenticatedOrgMembersRoute
   '/_authenticated/org/rules': typeof AuthenticatedOrgRulesRoute
   '/_authenticated/org/theme': typeof AuthenticatedOrgThemeRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -301,6 +311,7 @@ export interface FileRouteTypes {
     | '/org/members'
     | '/org/rules'
     | '/org/theme'
+    | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -329,6 +340,7 @@ export interface FileRouteTypes {
     | '/org/members'
     | '/org/rules'
     | '/org/theme'
+    | '/lovable/email/queue/process'
   id:
     | '__root__'
     | '/'
@@ -358,6 +370,7 @@ export interface FileRouteTypes {
     | '/_authenticated/org/members'
     | '/_authenticated/org/rules'
     | '/_authenticated/org/theme'
+    | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -366,6 +379,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   MemberRegisterRoute: typeof MemberRegisterRoute
   OrgRegisterRoute: typeof OrgRegisterRoute
+  LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -559,6 +573,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMemberDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/lovable/email/queue/process': {
+      id: '/lovable/email/queue/process'
+      path: '/lovable/email/queue/process'
+      fullPath: '/lovable/email/queue/process'
+      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -621,17 +642,8 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   MemberRegisterRoute: MemberRegisterRoute,
   OrgRegisterRoute: OrgRegisterRoute,
+  LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
