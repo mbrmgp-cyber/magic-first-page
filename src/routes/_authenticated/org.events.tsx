@@ -243,8 +243,11 @@ function MeetingDialog({ open, onOpenChange, orgId, members, editing, onSaved }:
         <DialogHeader><DialogTitle className="text-orange-400">{editing ? "సమావేశం సవరించు" : "కొత్త సమావేశం"}</DialogTitle></DialogHeader>
         <div className="space-y-3 text-sm">
           <div><Label>శీర్షిక / Title *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="bg-zinc-800 border-zinc-700" /></div>
-          <div className="grid grid-cols-2 gap-2">
-            <div><Label>తేదీ / సమయం *</Label><Input type="datetime-local" value={form.scheduled_at} onChange={(e) => setForm({ ...form, scheduled_at: e.target.value })} className="bg-zinc-800 border-zinc-700" /></div>
+          <div className="space-y-2">
+            <div>
+              <Label>తేదీ / సమయం *</Label>
+              <Input type="datetime-local" value={form.scheduled_at} onChange={(e) => setForm({ ...form, scheduled_at: e.target.value })} className="bg-zinc-800 border-zinc-700 w-full" />
+            </div>
             <div>
               <Label>విధానం</Label>
               <select value={form.meeting_type} onChange={(e) => setForm({ ...form, meeting_type: e.target.value })} className="w-full h-10 bg-zinc-800 border border-zinc-700 rounded px-2">
