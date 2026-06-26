@@ -95,9 +95,9 @@ function ChatHub() {
   return (
     <div className="min-h-screen bg-black text-zinc-100 p-3 md:p-6">
       <div className="max-w-3xl mx-auto space-y-4">
-        <Link to="/org/dashboard" className="inline-flex items-center gap-1 text-sm text-zinc-300 hover:text-white">
-          <ArrowLeft className="w-4 h-4" /> {pick("డాష్‌బోర్డ్", "Dashboard")}
-        </Link>
+        <button type="button" onClick={() => window.history.back()} className="inline-flex items-center gap-1 text-sm text-zinc-300 hover:text-white">
+          <ArrowLeft className="w-4 h-4" /> {pick("వెనుకకు", "Back")}
+        </button>
         <Card className="p-4 bg-zinc-950 border-zinc-800">
           <h1 className="text-lg md:text-xl font-bold text-[#ff8c28]">{pick("సభ్యుల కమ్యూనికేషన్ హబ్", "Member Communications Hub")}</h1>
           <p className="text-xs text-zinc-400 mt-1">{pick("సభ్యులు మరియు కార్యవర్గం మధ్య నియంత్రిత, వివాద రహిత కమ్యూనికేషన్.", "Controlled, dispute-free communication between members and the working committee.")}</p>
