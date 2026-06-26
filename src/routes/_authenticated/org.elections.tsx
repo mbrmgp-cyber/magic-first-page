@@ -69,7 +69,8 @@ function ElectionsPage() {
   const qc = useQueryClient();
   const [ctx, setCtx] = useState<{ orgId: string; memberId: string | null; isAdmin: boolean; isCommittee: boolean } | null>(null);
   const [newOpen, setNewOpen] = useState(false);
-  const [selected, setSelected] = useState<Election | null>(null);
+  const [selected, setSelected] = useState<{ e: Election; tab: "overview" | "nominate" | "vote" | "results" } | null>(null);
+
 
   useEffect(() => {
     (async () => {
