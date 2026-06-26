@@ -263,13 +263,15 @@ function NewElectionDialog({ open, onOpenChange, orgId, onCreated }: {
   );
 }
 
-function ElectionDetailDialog({ election, ctx, onClose, onChanged }: {
+function ElectionDetailDialog({ election, ctx, onClose, onChanged, initialTab = "overview" }: {
   election: Election;
   ctx: { orgId: string; memberId: string | null; isAdmin: boolean; isCommittee: boolean };
   onClose: () => void;
   onChanged: () => void;
+  initialTab?: "overview" | "nominate" | "vote" | "results";
 }) {
-  const [tab, setTab] = useState<"overview" | "nominate" | "vote" | "results">("overview");
+  const [tab, setTab] = useState<"overview" | "nominate" | "vote" | "results">(initialTab);
+
 
   const nomsQ = useQuery({
     queryKey: ["election-detail", election.id, "noms"],
