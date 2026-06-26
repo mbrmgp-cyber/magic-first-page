@@ -1,0 +1,1 @@
+UPDATE public.organizations SET gov_reg_number = '235/16' WHERE gov_reg_number = '356/16';
