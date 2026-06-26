@@ -32,11 +32,10 @@ export const EmailChangeEmail = ({
 }: EmailChangeEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>{siteName} email change confirmation</Preview>
+    <Preview>Confirm your email change for {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Text style={brand}>చిట్యాల్ హెల్ప్ లైన్ సొసైటీ</Text>
-        <Heading style={h1}>Confirm Email Change</Heading>
+        <Heading style={h1}>Confirm your email change</Heading>
         <Text style={text}>
           You requested to change your email address for {siteName} from{' '}
           <Link href={`mailto:${oldEmail}`} style={link}>
@@ -66,12 +65,11 @@ export const EmailChangeEmail = ({
 export default EmailChangeEmail
 
 const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
-const container = { maxWidth: '560px', margin: '0 auto', padding: '28px 26px', borderTop: '6px solid #f97316' }
-const brand = { fontSize: '16px', fontWeight: 'bold' as const, color: '#9a3412', margin: '0 0 14px' }
+const container = { padding: '20px 25px' }
 const h1 = {
   fontSize: '22px',
   fontWeight: 'bold' as const,
-  color: '#111827',
+  color: '#000000',
   margin: '0 0 20px',
 }
 const text = {
@@ -82,7 +80,7 @@ const text = {
 }
 const link = { color: 'inherit', textDecoration: 'underline' }
 const button = {
-  backgroundColor: '#f97316',
+  backgroundColor: '#000000',
   color: '#ffffff',
   fontSize: '14px',
   borderRadius: '8px',

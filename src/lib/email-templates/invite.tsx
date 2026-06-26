@@ -25,11 +25,10 @@ export const InviteEmail = ({
 }: InviteEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>{siteName} invitation</Preview>
+    <Preview>You've been invited to join {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Text style={brand}>చిట్యాల్ హెల్ప్ లైన్ సొసైటీ</Text>
-        <Heading style={h1}>Invitation / ఆహ్వానం</Heading>
+        <Heading style={h1}>You've been invited</Heading>
         <Text style={text}>
           You've been invited to join{' '}
           <Link href={siteUrl} style={link}>
@@ -53,12 +52,11 @@ export const InviteEmail = ({
 export default InviteEmail
 
 const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
-const container = { maxWidth: '560px', margin: '0 auto', padding: '28px 26px', borderTop: '6px solid #f97316' }
-const brand = { fontSize: '16px', fontWeight: 'bold' as const, color: '#9a3412', margin: '0 0 14px' }
+const container = { padding: '20px 25px' }
 const h1 = {
   fontSize: '22px',
   fontWeight: 'bold' as const,
-  color: '#111827',
+  color: '#000000',
   margin: '0 0 20px',
 }
 const text = {
@@ -69,7 +67,7 @@ const text = {
 }
 const link = { color: 'inherit', textDecoration: 'underline' }
 const button = {
-  backgroundColor: '#f97316',
+  backgroundColor: '#000000',
   color: '#ffffff',
   fontSize: '14px',
   borderRadius: '8px',

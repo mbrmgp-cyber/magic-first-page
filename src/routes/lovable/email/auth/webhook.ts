@@ -12,12 +12,12 @@ import { EmailChangeEmail } from '@/lib/email-templates/email-change'
 import { ReauthenticationEmail } from '@/lib/email-templates/reauthentication'
 
 const EMAIL_SUBJECTS: Record<string, string> = {
-  signup: 'చిట్యాల్ హెల్ప్ లైన్ సొసైటీ — Email confirmation',
-  invite: 'చిట్యాల్ హెల్ప్ లైన్ సొసైటీ — Invitation',
-  magiclink: 'చిట్యాల్ హెల్ప్ లైన్ సొసైటీ — Login link',
-  recovery: 'చిట్యాల్ హెల్ప్ లైన్ సొసైటీ — Password reset',
-  email_change: 'చిట్యాల్ హెల్ప్ లైన్ సొసైటీ — Email change',
-  reauthentication: 'చిట్యాల్ హెల్ప్ లైన్ సొసైటీ — Verification code',
+  signup: 'Confirm your email',
+  invite: "You've been invited",
+  magiclink: 'Your login link',
+  recovery: 'Reset your password',
+  email_change: 'Confirm your new email',
+  reauthentication: 'Your verification code',
 }
 
 // Template mapping
@@ -31,7 +31,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "చిట్యాల్ హెల్ప్ లైన్ సొసైటీ"
+const SITE_NAME = "First Page Design"
 const SENDER_DOMAIN = "notify.mbrplatform.com"
 const ROOT_DOMAIN = "mbrplatform.com"
 const FROM_DOMAIN = "notify.mbrplatform.com"
