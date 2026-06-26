@@ -20,9 +20,9 @@ function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-tricolor p-3 md:p-6">
       <div className="max-w-3xl mx-auto space-y-4">
-        <Link to="/org/dashboard" className="inline-flex items-center gap-1 text-sm text-foreground/80 hover:text-foreground">
-          <ArrowLeft className="w-4 h-4" /> Dashboard
-        </Link>
+        <button type="button" onClick={() => window.history.back()} className="inline-flex items-center gap-1 text-sm text-foreground/80 hover:text-foreground">
+          <ArrowLeft className="w-4 h-4" /> Back / వెనుకకు
+        </button>
         <Card className="p-5 bg-white/95 backdrop-blur-xl shadow-xl border-white">
           <h1 className="text-xl md:text-2xl font-bold" style={{
             background: "linear-gradient(90deg,#B85C00,#0B5C06)",

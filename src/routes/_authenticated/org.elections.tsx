@@ -113,11 +113,9 @@ function ElectionsPage() {
     <div className="min-h-screen bg-black p-4 md:p-6 text-white">
       <div className="max-w-4xl mx-auto space-y-4">
         <div className="flex items-center justify-between">
-          <Link to="/org/dashboard">
-            <Button variant="ghost" size="sm" className="text-zinc-300 hover:bg-zinc-900 hover:text-white">
-              <ArrowLeft className="h-4 w-4 mr-1" /> Back / వెనుకకు
-            </Button>
-          </Link>
+          <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="text-zinc-300 hover:bg-zinc-900 hover:text-white">
+            <ArrowLeft className="h-4 w-4 mr-1" /> Back / వెనుకకు
+          </Button>
           {ctx.isAdmin && (
             <Button onClick={() => setNewOpen(true)} className="bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white">
               <Plus className="w-4 h-4 mr-1" /> కొత్త ఎన్నిక
