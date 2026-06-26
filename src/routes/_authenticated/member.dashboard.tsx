@@ -41,12 +41,23 @@ function MemberDashboard() {
   const fontFamily = (org?.theme_font as string) || "Inter";
 
   useEffect(() => {
-    const code = org?.letter_code ?? "";
-    if (!code) { setQrUrl(""); return; }
-    QRCode.toDataURL(code, { width: 256, margin: 1, color: { dark: brand, light: "#00000000" } })
+    if (!org) { setQrUrl(""); return; }
+    const orgName = (org as any)?.name ?? "చిట్వేల్ హెల్ప్ లైన్ సొసైటీ";
+    const reg = (org as any)?.gov_reg_number ?? "235/16";
+    const phone = (org as any)?.phone ?? "";
+    const email = (org as any)?.email ?? "";
+    const code = (org as any)?.letter_code ?? "";
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const payload =
+      `${orgName}\nReg No: ${reg}` +
+      (phone ? `\nPhone: ${phone}` : "") +
+      (email ? `\nEmail: ${email}` : "") +
+      (code ? `\nCode: ${code}` : "") +
+      (origin ? `\n${origin}` : "");
+    QRCode.toDataURL(payload, { width: 256, margin: 1, color: { dark: brand, light: "#00000000" } })
       .then(setQrUrl)
       .catch(() => setQrUrl(""));
-  }, [org?.letter_code, brand]);
+  }, [org, brand]);
 
   useEffect(() => {
     setPhotoBroken(false);
