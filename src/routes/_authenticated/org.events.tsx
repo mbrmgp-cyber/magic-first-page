@@ -294,6 +294,8 @@ function MeetingDialog({ open, onOpenChange, orgId, members, editing, onSaved }:
           </div>
 
           <div><Label>అదనపు గమనికలు</Label><Textarea rows={2} value={form.notes || ""} onChange={(e) => setForm({ ...form, notes: e.target.value })} className="bg-zinc-800 border-zinc-700" /></div>
+
+          <InviteSection orgId={orgId} form={form} />
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>రద్దు</Button>
@@ -301,6 +303,70 @@ function MeetingDialog({ open, onOpenChange, orgId, members, editing, onSaved }:
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function InviteSection({ orgId, form }: { orgId: string; form: any }) {
+  const send = useServerFn(sendMeetingInvites);
+  const [sending, setSending] = useState<null | "committee" | "all">(null);
+
+  async function trigger(scope: "committee" | "all") {
+    if (!orgId) { toast.error("Organization missing"); return; }
+    if (!form.title?.trim()) { toast.error("ముందుగా శీర్షిక నమోదు చేయండి"); return; }
+    if (!form.scheduled_at) { toast.error("తేదీ/సమయం నమోదు చేయండి"); return; }
+    setSending(scope);
+    try {
+      const res: any = await send({ data: {
+        org_id: orgId,
+        scope,
+        title: form.title,
+        scheduled_at: new Date(form.scheduled_at).toISOString(),
+        meeting_type: form.meeting_type,
+        location: form.location || null,
+        meeting_link: form.meeting_link || null,
+        agenda: form.agenda || null,
+      }});
+      if (res?.sent > 0) {
+        toast.success(`✅ ఆహ్వానం పంపబడింది — ${res.sent}/${res.total} మందికి`);
+      } else {
+        toast.message("ఇమెయిల్ ఉన్న సభ్యులు ఎవరూ లేరు");
+      }
+    } catch (e: any) {
+      toast.error(e?.message || "పంపడంలో విఫలమైంది");
+    } finally {
+      setSending(null);
+    }
+  }
+
+  return (
+    <div className="border border-orange-900/40 bg-orange-950/20 rounded-md p-3 space-y-2">
+      <div className="flex items-center gap-2 text-orange-300 text-xs font-semibold">
+        <Mail className="w-3.5 h-3.5" /> ఆహ్వాన నోటిఫికేషన్ పంపండి / Send Invitation
+      </div>
+      <p className="text-[11px] text-zinc-400">శీర్షిక, తేదీ/సమయం, లింక్ &amp; అజెండాతో ఇమెయిల్ వెళ్తుంది.</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <Button
+          type="button"
+          size="sm"
+          disabled={sending !== null}
+          onClick={() => trigger("committee")}
+          className="bg-orange-600 hover:bg-orange-700 text-white justify-start"
+        >
+          <Send className="w-3.5 h-3.5" />
+          {sending === "committee" ? "పంపుతోంది…" : "కార్యవర్గానికి మాత్రమే"}
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          disabled={sending !== null}
+          onClick={() => trigger("all")}
+          className="bg-emerald-600 hover:bg-emerald-700 text-white justify-start"
+        >
+          <Send className="w-3.5 h-3.5" />
+          {sending === "all" ? "పంపుతోంది…" : "సభ్యులందరికీ"}
+        </Button>
+      </div>
+    </div>
   );
 }
 
