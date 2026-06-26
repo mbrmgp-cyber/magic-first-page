@@ -291,17 +291,6 @@ function Dashboard() {
           </div>
         </Card>
 
-        {/* Accounts Summary — unified card */}
-        <Card className="p-4 border" style={{ background: theme.box, borderColor: theme.border, boxShadow: `0 0 30px ${theme.icon}1a` }}>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold" style={{ color: theme.headColor }}>{lt("Accounts Summary", "అకౌంట్స్ వివరాలు")}</h2>
-          </div>
-          <div className="flex items-stretch divide-x" style={{ borderColor: theme.border }}>
-            <MetricItem label={lt("Total Funds", "మొత్తం నిధులు")} sub="" value="₹ 0" />
-            <MetricItem label={lt("Loans Disbursed", "మార్కెట్ అప్పులు")} sub="" value="₹ 0" />
-            <MetricItem label={lt("Interest Collected", "వచ్చిన వడ్డీ")} sub="" value="₹ 0" />
-          </div>
-        </Card>
 
         {/* Menu 2-col grid */}
         <div className="grid grid-cols-2 gap-3">
