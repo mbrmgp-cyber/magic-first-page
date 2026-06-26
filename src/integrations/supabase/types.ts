@@ -639,6 +639,173 @@ export type Database = {
           },
         ]
       }
+      org_election_nominations: {
+        Row: {
+          created_at: string
+          election_id: string
+          id: string
+          member_id: string
+          org_id: string
+          position: string
+          review_notes: string | null
+          statement: string | null
+          status: Database["public"]["Enums"]["nomination_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          election_id: string
+          id?: string
+          member_id: string
+          org_id: string
+          position: string
+          review_notes?: string | null
+          statement?: string | null
+          status?: Database["public"]["Enums"]["nomination_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          election_id?: string
+          id?: string
+          member_id?: string
+          org_id?: string
+          position?: string
+          review_notes?: string | null
+          statement?: string | null
+          status?: Database["public"]["Enums"]["nomination_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_election_nominations_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "org_elections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_election_nominations_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_election_nominations_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_election_votes: {
+        Row: {
+          created_at: string
+          election_id: string
+          id: string
+          nominee_id: string
+          org_id: string
+          position: string
+          voter_member_id: string
+        }
+        Insert: {
+          created_at?: string
+          election_id: string
+          id?: string
+          nominee_id: string
+          org_id: string
+          position: string
+          voter_member_id: string
+        }
+        Update: {
+          created_at?: string
+          election_id?: string
+          id?: string
+          nominee_id?: string
+          org_id?: string
+          position?: string
+          voter_member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_election_votes_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "org_elections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_election_votes_nominee_id_fkey"
+            columns: ["nominee_id"]
+            isOneToOne: false
+            referencedRelation: "org_election_nominations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_election_votes_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_election_votes_voter_member_id_fkey"
+            columns: ["voter_member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_elections: {
+        Row: {
+          created_at: string
+          description: string | null
+          election_date: string
+          id: string
+          nomination_deadline: string
+          org_id: string
+          positions: string[]
+          status: Database["public"]["Enums"]["election_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          election_date: string
+          id?: string
+          nomination_deadline: string
+          org_id: string
+          positions?: string[]
+          status?: Database["public"]["Enums"]["election_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          election_date?: string
+          id?: string
+          nomination_deadline?: string
+          org_id?: string
+          positions?: string[]
+          status?: Database["public"]["Enums"]["election_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_elections_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_expenses: {
         Row: {
           amount: number
@@ -1234,6 +1401,9 @@ export type Database = {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
+      is_org_admin: { Args: { _org_id: string }; Returns: boolean }
+      is_org_committee: { Args: { _org_id: string }; Returns: boolean }
+      is_org_member: { Args: { _org_id: string }; Returns: boolean }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -1261,9 +1431,16 @@ export type Database = {
         | "treasurer"
         | "executive"
         | "worker"
+      election_status:
+        | "scheduled"
+        | "nominations_open"
+        | "voting_open"
+        | "completed"
+        | "cancelled"
       expense_type: "charity" | "office" | "meeting" | "misc"
       income_type: "registration_fee" | "donation" | "other"
       member_status: "pending" | "approved" | "rejected"
+      nomination_status: "pending" | "approved" | "rejected" | "withdrawn"
       org_approval_status: "pending" | "approved" | "rejected"
       wallet_type: "bank" | "accountant" | "president"
     }
@@ -1402,9 +1579,17 @@ export const Constants = {
         "executive",
         "worker",
       ],
+      election_status: [
+        "scheduled",
+        "nominations_open",
+        "voting_open",
+        "completed",
+        "cancelled",
+      ],
       expense_type: ["charity", "office", "meeting", "misc"],
       income_type: ["registration_fee", "donation", "other"],
       member_status: ["pending", "approved", "rejected"],
+      nomination_status: ["pending", "approved", "rejected", "withdrawn"],
       org_approval_status: ["pending", "approved", "rejected"],
       wallet_type: ["bank", "accountant", "president"],
     },
