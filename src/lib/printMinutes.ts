@@ -10,7 +10,9 @@ const fmtDate = (d?: string | null) =>
 function openPrint(html: string) {
   const w = window.open("", "_blank", "width=900,height=1100");
   if (!w) { toast.error("Popup blocked. Allow popups to print."); return; }
-  w.document.open(); w.document.write(html); w.document.close();
+  // inject toolbar after <body>
+  const withToolbar = html.replace(/<body[^>]*>/, (m) => `${m}${toolbar}<div class="page">`).replace("</body>", "</div></body>");
+  w.document.open(); w.document.write(withToolbar); w.document.close();
 }
 
 const styles = `
