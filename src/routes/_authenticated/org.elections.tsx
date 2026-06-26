@@ -181,11 +181,11 @@ function ElectionsPage() {
   );
 }
 
-function ElectionCard({ e, onOpen }: { e: Election; onOpen: () => void }) {
+function ElectionCard({ e, onOpen, onNominate, canNominate }: { e: Election; onOpen: () => void; onNominate: () => void; canNominate: boolean }) {
   const st = STATUS_LABEL[e.status];
   return (
-    <Card onClick={onOpen} className="p-4 bg-zinc-950 border-zinc-800 hover:border-[#ff8c28]/60 cursor-pointer transition">
-      <div className="flex items-start justify-between gap-3">
+    <Card className="p-4 bg-zinc-950 border-zinc-800 hover:border-[#ff8c28]/60 transition">
+      <div onClick={onOpen} className="flex items-start justify-between gap-3 cursor-pointer">
         <div className="min-w-0">
           <h3 className="font-bold text-white truncate">{e.title}</h3>
           <p className="text-xs text-zinc-400 mt-1 flex items-center gap-1">
@@ -200,9 +200,19 @@ function ElectionCard({ e, onOpen }: { e: Election; onOpen: () => void }) {
         </div>
         <span className={`text-[10px] px-2 py-1 rounded-full font-semibold whitespace-nowrap ${st.cls}`}>{st.te}</span>
       </div>
+      {canNominate && (
+        <Button
+          onClick={(ev) => { ev.stopPropagation(); onNominate(); }}
+          className="w-full mt-3 bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white"
+          size="sm"
+        >
+          <UserCheck className="w-4 h-4 mr-1" /> నామినేషన్ వేయండి / Nominate
+        </Button>
+      )}
     </Card>
   );
 }
+
 
 function NewElectionDialog({ open, onOpenChange, orgId, onCreated }: {
   open: boolean; onOpenChange: (v: boolean) => void; orgId: string; onCreated: () => void;
