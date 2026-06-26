@@ -486,7 +486,10 @@ function ActivitiesTab({ orgId, activities, onChange }: any) {
                   </div>
                 </div>
               </div>
-              <div className="flex gap-2 mt-2">
+              <div className="flex gap-2 mt-2 flex-wrap">
+                <Button size="sm" variant="secondary" onClick={() => printActivity({ orgId, activity: a })} className="bg-slate-700 hover:bg-slate-600 text-white text-xs h-8">
+                  <Printer className="w-3 h-3 mr-1" /> ప్రింట్
+                </Button>
                 <Button size="sm" variant="ghost" onClick={() => { setEditing(a); setOpen(true); }} className="text-xs h-8 text-zinc-300"><Pencil className="w-3 h-3 mr-1" /> సవరించు</Button>
                 <Button size="sm" variant="ghost" onClick={async () => {
                   if (!confirm("Delete?")) return;
