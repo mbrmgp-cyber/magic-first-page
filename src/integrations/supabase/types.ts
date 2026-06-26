@@ -502,6 +502,56 @@ export type Database = {
           },
         ]
       }
+      org_activities: {
+        Row: {
+          actual_expense: number
+          allocated_budget: number
+          created_at: string
+          created_by: string | null
+          description: string | null
+          event_date: string
+          event_name: string
+          id: string
+          org_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          actual_expense?: number
+          allocated_budget?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          event_date: string
+          event_name: string
+          id?: string
+          org_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          actual_expense?: number
+          allocated_budget?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          event_date?: string
+          event_name?: string
+          id?: string
+          org_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_activities_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_expenses: {
         Row: {
           amount: number
@@ -649,6 +699,68 @@ export type Database = {
           },
         ]
       }
+      org_meetings: {
+        Row: {
+          absent_member_ids: string[]
+          agenda: string | null
+          attended_member_ids: string[]
+          created_at: string
+          created_by: string | null
+          id: string
+          location: string | null
+          meeting_link: string | null
+          meeting_type: string
+          notes: string | null
+          org_id: string
+          scheduled_at: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          absent_member_ids?: string[]
+          agenda?: string | null
+          attended_member_ids?: string[]
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          location?: string | null
+          meeting_link?: string | null
+          meeting_type?: string
+          notes?: string | null
+          org_id: string
+          scheduled_at: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          absent_member_ids?: string[]
+          agenda?: string | null
+          attended_member_ids?: string[]
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          location?: string | null
+          meeting_link?: string | null
+          meeting_type?: string
+          notes?: string | null
+          org_id?: string
+          scheduled_at?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_meetings_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_milestones: {
         Row: {
           created_at: string
@@ -686,6 +798,69 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "org_milestones_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_resolutions: {
+        Row: {
+          approved_member_ids: string[]
+          created_at: string
+          created_by: string | null
+          decision_date: string
+          description: string | null
+          id: string
+          meeting_id: string | null
+          opposed_member_ids: string[]
+          org_id: string
+          resolution_no: string
+          status: string
+          topic: string
+          updated_at: string
+        }
+        Insert: {
+          approved_member_ids?: string[]
+          created_at?: string
+          created_by?: string | null
+          decision_date?: string
+          description?: string | null
+          id?: string
+          meeting_id?: string | null
+          opposed_member_ids?: string[]
+          org_id: string
+          resolution_no: string
+          status?: string
+          topic: string
+          updated_at?: string
+        }
+        Update: {
+          approved_member_ids?: string[]
+          created_at?: string
+          created_by?: string | null
+          decision_date?: string
+          description?: string | null
+          id?: string
+          meeting_id?: string | null
+          opposed_member_ids?: string[]
+          org_id?: string
+          resolution_no?: string
+          status?: string
+          topic?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_resolutions_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "org_meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_resolutions_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
