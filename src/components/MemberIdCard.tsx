@@ -297,7 +297,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
 
 function LegacyLayout(props: any) {
   const { langs, lang, setLang, langLabel, showBack, setShowBack, handlePrint,
-          frontRef, backRef, member, org, t, photoUrl, logoUrl, sigUrl, qrDataUrl, appQrUrl, memberQrLink, joined } = props;
+          frontRef, backRef, member, org, t, photoUrl, logoUrl, sigUrl, qrDataUrl, appQrUrl, memberQrLink, registrationQrLink, joined } = props;
   return (
     <>
 
@@ -339,7 +339,7 @@ function LegacyLayout(props: any) {
               />
             </div>
             <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
-              <CardBack bref={backRef} t={t} lang={lang} memberName={member.name} appQrUrl={appQrUrl} accent={org?.theme_color || "#FF9933"} />
+              <CardBack bref={backRef} t={t} lang={lang} memberName={member.name} appQrUrl={appQrUrl} appQrLink={registrationQrLink} accent={org?.theme_color || "#FF9933"} />
             </div>
           </div>
         </div>
@@ -362,7 +362,7 @@ function LegacyLayout(props: any) {
 
 
 function CardFront({
-  fref, member, org, photoUrl, logoUrl, sigUrl, qrDataUrl, joined, t, lang,
+  fref, member, org, photoUrl, logoUrl, sigUrl, qrDataUrl, qrLink, joined, t, lang,
 }: {
   fref: React.RefObject<HTMLDivElement | null>;
   member: Member; org: Org | null;
@@ -565,12 +565,13 @@ function CardFront({
 }
 
 function CardBack({
-  bref, t, memberName, appQrUrl, lang, accent,
+  bref, t, memberName, appQrUrl, appQrLink, lang, accent,
 }: {
   bref: React.RefObject<HTMLDivElement | null>;
   t: Record<string, string>;
   memberName: string;
   appQrUrl: string;
+  appQrLink?: string;
   lang: CardLang;
   accent: string;
 }) {
@@ -621,7 +622,13 @@ function CardBack({
           </div>
           <div style={{ flexShrink: 0, textAlign: "center" }}>
             {appQrUrl && (
-              <img src={appQrUrl} alt="MBR APP" style={{ height: "11mm", width: "11mm", border: "0.2mm solid #000080", padding: "0.3mm", background: "#fff" }} />
+              appQrLink ? (
+                <a href={appQrLink} aria-label="Open member registration QR" style={{ height: "11mm", width: "11mm", border: "0.2mm solid #000080", padding: "0.3mm", background: "#fff", display: "block", boxSizing: "border-box" }}>
+                  <img src={appQrUrl} alt="MBR APP" style={{ height: "100%", width: "100%", objectFit: "contain", display: "block" }} />
+                </a>
+              ) : (
+                <img src={appQrUrl} alt="MBR APP" style={{ height: "11mm", width: "11mm", border: "0.2mm solid #000080", padding: "0.3mm", background: "#fff" }} />
+              )
             )}
             <div style={{ fontSize: "1.5mm", fontWeight: 700, color: "#000080", marginTop: "0.3mm", lineHeight: 1.1, maxWidth: "13mm" }}>
               {t.mbrApp}
@@ -647,7 +654,7 @@ function Row({ label, value }: { label: string; value: string }) {
  * =================================================================== */
 function SavedDesignCard({
   design, org, member, photoUrl, logoUrl, sigUrl, qrDataUrl, appQrUrl,
-  memberQrLink, showBack, setShowBack, frontRef, backRef, onPrint, lang,
+  memberQrLink, registrationQrLink, showBack, setShowBack, frontRef, backRef, onPrint, lang,
 }: {
   design: IdCardDesign;
   org: Org | null;
@@ -674,6 +681,7 @@ function SavedDesignCard({
     presidentName: org?.president_name || undefined,
     presidentSignatureUrl: sigUrl,
     mbrQrUrl: appQrUrl || null,
+    mbrQrLink: registrationQrLink || null,
     mbrLogoUrl: mbrLogo.url,
     contactPhone: org?.phone || undefined,
     contactEmail: org?.email || undefined,

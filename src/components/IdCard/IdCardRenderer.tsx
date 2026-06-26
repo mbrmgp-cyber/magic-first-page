@@ -46,6 +46,7 @@ export type OrgContext = {
   presidentName?: string;
   presidentSignatureUrl?: string | null;
   mbrQrUrl?: string | null;     // MBR app society-registration QR
+  mbrQrLink?: string | null;    // Link opened when the QR is tapped
   mbrLogoUrl?: string | null;   // MBR small corner logo
   contactPhone?: string;        // shown in fixed bottom-center footer of card front
   contactEmail?: string;        // shown in fixed bottom-center footer of card front
@@ -339,7 +340,13 @@ function renderBack(design: IdCardDesign, org: OrgContext, member: SampleMember)
         {show(e.mbrQrCode) && (
           <div style={{ flexShrink: 0, width: qrSize + 4, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
             {org.mbrQrUrl ? (
-              <img src={org.mbrQrUrl} alt="MBR App" style={{ width: qrSize, height: qrSize, border: `1px solid ${g.accentColor}`, padding: 2, background: "#fff", display: "block" }} />
+              org.mbrQrLink ? (
+                <a href={org.mbrQrLink} aria-label="Open MBR registration QR" style={{ width: qrSize, height: qrSize, border: `1px solid ${g.accentColor}`, padding: 2, background: "#fff", display: "block", boxSizing: "border-box" }}>
+                  <img src={org.mbrQrUrl} alt="MBR App" style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }} />
+                </a>
+              ) : (
+                <img src={org.mbrQrUrl} alt="MBR App" style={{ width: qrSize, height: qrSize, border: `1px solid ${g.accentColor}`, padding: 2, background: "#fff", display: "block" }} />
+              )
             ) : (
               <div style={{ width: qrSize, height: qrSize, border: `1px dashed ${g.accentColor}`, display: "flex", alignItems: "center", justifyContent: "center", color: g.accentColor, fontSize: 9, textAlign: "center", background: "#fff" }}>MBR<br/>QR</div>
             )}
