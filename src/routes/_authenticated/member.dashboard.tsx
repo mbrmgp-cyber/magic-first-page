@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { getMyMembership } from "@/lib/org.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { MemberIdCard } from "@/components/MemberIdCard";
 import {
   LogOut, IdCard, BookOpen, Wallet, Briefcase, MessageSquare, Vote, ShieldCheck, User, ScanLine,
 } from "lucide-react";
@@ -16,7 +18,6 @@ export const Route = createFileRoute("/_authenticated/member/dashboard")({
 });
 
 const MENU = [
-  { label: "ID Card", te: "సభ్యుడి ఐడి కార్డ్", icon: IdCard, to: "/member/pending" },
   { label: "Society Rules", te: "సంస్థ నియమాలు", icon: BookOpen, to: "/org/rules" },
   { label: "Financial Ledger", te: "ఆర్థిక వివరాలు", icon: Wallet, to: "/member/ledger" },
   { label: "Request Loan", te: "అప్పు కొరకు అభ్యర్థన", icon: Wallet, to: "/member/loan-request" },
@@ -30,7 +31,9 @@ function MemberDashboard() {
   const fetchMe = useServerFn(getMyMembership);
   const meQ = useQuery({ queryKey: ["my-membership"], queryFn: () => fetchMe() });
   const [qrUrl, setQrUrl] = useState<string>("");
+  const [photoUrl, setPhotoUrl] = useState<string>("");
   const [photoBroken, setPhotoBroken] = useState(false);
+  const [idCardOpen, setIdCardOpen] = useState(false);
 
   const m: any = meQ.data?.membership;
   const org = m?.organizations;
@@ -45,7 +48,22 @@ function MemberDashboard() {
       .catch(() => setQrUrl(""));
   }, [org?.letter_code, brand]);
 
-  useEffect(() => { setPhotoBroken(false); }, [m?.photo_url]);
+  useEffect(() => {
+    setPhotoBroken(false);
+    setPhotoUrl("");
+    const path = m?.photo_url;
+    if (!path) return;
+    // Already an absolute URL? use it directly.
+    if (/^https?:\/\//i.test(path) || path.startsWith("data:")) {
+      setPhotoUrl(path);
+      return;
+    }
+    let cancel = false;
+    supabase.storage.from("member-photos").createSignedUrl(path, 3600).then(({ data }) => {
+      if (!cancel && data?.signedUrl) setPhotoUrl(data.signedUrl);
+    });
+    return () => { cancel = true; };
+  }, [m?.photo_url]);
 
   async function logout() {
     await supabase.auth.signOut();
@@ -80,7 +98,7 @@ function MemberDashboard() {
   const firstName = m.first_name ?? (m.name?.split(" ")[0] ?? "");
   const lastName = m.last_name ?? (m.name?.split(" ").slice(1).join(" ") ?? "");
   const fullName = `${firstName} ${lastName}`.trim();
-  const showPhoto = !!m.photo_url && !photoBroken;
+  const showPhoto = !!photoUrl && !photoBroken;
 
   const themeStyle = {
     ["--brand" as any]: brand,
@@ -127,7 +145,7 @@ function MemberDashboard() {
             style={{ borderWidth: 1, borderStyle: "solid", borderColor: `${brand}66` }}>
             {showPhoto ? (
               <img
-                src={m.photo_url}
+                src={photoUrl}
                 alt={fullName}
                 className="h-full w-full object-cover"
                 onError={() => setPhotoBroken(true)}
@@ -146,6 +164,22 @@ function MemberDashboard() {
 
         {/* 2-column grid menu */}
         <div className="grid grid-cols-2 gap-3">
+          {/* ID Card opens dialog */}
+          <button
+            type="button"
+            onClick={() => setIdCardOpen(true)}
+            className="rounded-xl bg-zinc-950 border border-zinc-800 p-4 flex flex-col items-center gap-2 text-center transition hover:-translate-y-0.5"
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${brand}99`; e.currentTarget.style.boxShadow = `0 0 20px ${brand}33`; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = ""; e.currentTarget.style.boxShadow = ""; }}
+          >
+            <div className="h-11 w-11 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: `${brand}26` }}>
+              <IdCard className="h-5 w-5" style={{ color: brand }} />
+            </div>
+            <p className="text-[13px] font-semibold text-white leading-tight">ID Card</p>
+            <p className="text-[10px] text-zinc-400 leading-tight">సభ్యుడి ఐడి కార్డ్</p>
+          </button>
+
           {MENU.map((it) => (
             <Link key={it.label} to={it.to as any}
               className="rounded-xl bg-zinc-950 border border-zinc-800 p-4 flex flex-col items-center gap-2 text-center transition hover:-translate-y-0.5"
@@ -170,6 +204,15 @@ function MemberDashboard() {
           </button>
         </div>
       </div>
+
+      <Dialog open={idCardOpen} onOpenChange={setIdCardOpen}>
+        <DialogContent className="max-w-[480px] p-4 bg-zinc-950 border-zinc-800 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-white">సభ్యుడి ID కార్డ్</DialogTitle>
+          </DialogHeader>
+          <MemberIdCard member={m} org={org} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
