@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { ArrowLeft, Plus, Calendar, Gavel, Activity, Printer, Trash2, Pencil, Users, CheckCircle2, XCircle } from "lucide-react";
-import { printMeetingMinutes, printResolution } from "@/lib/printMinutes";
+import { printMeetingMinutes, printResolution, printActivity } from "@/lib/printMinutes";
 
 export const Route = createFileRoute("/_authenticated/org/events")({
   head: () => ({ meta: [{ title: "Events, Meetings, Decisions" }] }),
