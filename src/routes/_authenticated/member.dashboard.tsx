@@ -6,7 +6,7 @@ import { getMyMembership } from "@/lib/org.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import {
-  LogOut, IdCard, BookOpen, Wallet, Briefcase, MessageSquare, ShieldCheck, User, ScanLine,
+  LogOut, IdCard, BookOpen, Wallet, Briefcase, MessageSquare, Vote, ShieldCheck, User, ScanLine,
 } from "lucide-react";
 import QRCode from "qrcode";
 
@@ -17,11 +17,12 @@ export const Route = createFileRoute("/_authenticated/member/dashboard")({
 
 const MENU = [
   { label: "ID Card", te: "సభ్యుడి ఐడి కార్డ్", icon: IdCard, to: "/member/pending" },
-  { label: "Society Rules", te: "సంస్థ నియమాలు", icon: BookOpen, to: "/member/pending" },
+  { label: "Society Rules", te: "సంస్థ నియమాలు", icon: BookOpen, to: "/org/rules" },
   { label: "Financial Ledger", te: "ఆర్థిక వివరాలు", icon: Wallet, to: "/member/ledger" },
   { label: "Request Loan", te: "అప్పు కొరకు అభ్యర్థన", icon: Wallet, to: "/member/loan-request" },
-  { label: "Committee Details", te: "కార్య వర్గ వివరాలు", icon: Briefcase, to: "/member/pending" },
-  { label: "Chat & Elections", te: "చాటింగ్ మరియు ఎలక్షన్", icon: MessageSquare, to: "/member/pending" },
+  { label: "Committee Details", te: "కార్య వర్గ వివరాలు", icon: Briefcase, to: "/org/committee" },
+  { label: "Chat", te: "చాటింగ్ / సందేశాలు", icon: MessageSquare, to: "/org/chat" },
+  { label: "Elections", te: "ఎన్నికలు", icon: Vote, to: "/org/elections" },
 ] as const;
 
 function MemberDashboard() {
