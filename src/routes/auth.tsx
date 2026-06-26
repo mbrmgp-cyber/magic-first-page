@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { sendApprovedMemberLoginLink } from "@/lib/org.functions";
+import { sendLoginLink } from "@/lib/org.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,7 +20,7 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
-  const sendMemberLink = useServerFn(sendApprovedMemberLoginLink);
+  const sendSecureLink = useServerFn(sendLoginLink);
   const { t, lang } = useI18n();
   const [email, setEmail] = useState("");
   const [step, setStep] = useState<"email" | "linkSent">("email");
@@ -61,22 +61,13 @@ function AuthPage() {
     e.preventDefault();
     setLoading(true);
     setStatus({ type: "info", title: t("sendingTitle"), message: t("sendingMsg") });
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { shouldCreateUser: false, emailRedirectTo: `${window.location.origin}/auth?lang=${encodeURIComponent(lang)}` },
-    });
     setLoading(false);
-    if (error) {
-      const memberRes = await sendMemberLink({ data: { email, lang } }).catch(() => null);
-      if (memberRes?.sent) {
-        setLoading(false);
-        setStep("linkSent");
-        setStatus({ type: "success", title: t("linkSentTitle"), message: t("linkSentMsg") });
-        return;
-      }
-      const msg = error.message.toLowerCase().includes("signups not allowed")
-        ? t("noAccountErr")
-        : error.message;
+    const result = await sendSecureLink({ data: { email, lang } }).catch((error) => ({
+      sent: false as const,
+      reason: error instanceof Error ? error.message : String(error),
+    }));
+    if (!result?.sent) {
+      const msg = result?.reason === "not_found" ? t("noAccountErr") : (result?.reason || t("sendFailedTitle"));
       setStatus({ type: "error", title: t("sendFailedTitle"), message: msg });
       toast.error(msg);
       return;
