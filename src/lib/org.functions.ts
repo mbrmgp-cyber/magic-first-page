@@ -630,3 +630,115 @@ export const reviewOrganization = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const sendMeetingInvites = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: {
+    org_id: string;
+    scope: "committee" | "all";
+    title: string;
+    scheduled_at: string;
+    meeting_type: string;
+    location?: string | null;
+    meeting_link?: string | null;
+    agenda?: string | null;
+  }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context as any;
+
+    const { data: org } = await supabase
+      .from("organizations")
+      .select("id, name, admin_user_id")
+      .eq("id", data.org_id)
+      .maybeSingle();
+    if (!org || org.admin_user_id !== userId) throw new Error("Forbidden");
+
+    let query = supabase
+      .from("members")
+      .select("email, is_committee")
+      .eq("org_id", data.org_id)
+      .eq("status", "approved")
+      .not("email", "is", null);
+    if (data.scope === "committee") query = query.eq("is_committee", true);
+    const { data: rows, error: memErr } = await query;
+    if (memErr) throw new Error(memErr.message);
+    const recipients = Array.from(new Set((rows ?? [])
+      .map((r: any) => (r.email || "").trim().toLowerCase())
+      .filter(Boolean)));
+    if (recipients.length === 0) return { sent: 0, total: 0, scope: data.scope };
+
+    const apiKey = process.env.LOVABLE_API_KEY;
+    if (!apiKey) throw new Error("Email service is not configured");
+
+    const [{ sendLovableEmail }, React, { render }, { MeetingInviteEmail }, { supabaseAdmin }] = await Promise.all([
+      import("@lovable.dev/email-js"),
+      import("react"),
+      import("react-email"),
+      import("@/lib/email-templates/meeting-invite"),
+      import("@/integrations/supabase/client.server"),
+    ]);
+
+    const siteName = org.name || "చిట్యాల్ హెల్ప్ లైన్ సొసైటీ";
+    const whenDate = new Date(data.scheduled_at);
+    const whenText = whenDate.toLocaleString("en-IN", { dateStyle: "full", timeStyle: "short" });
+    const meetingTypeLabel = data.meeting_type === "online" ? "ఆన్‌లైన్ / Online" : "ఆఫ్‌లైన్ / Offline";
+
+    const element = React.createElement(MeetingInviteEmail, {
+      siteName,
+      title: data.title,
+      whenText,
+      meetingType: meetingTypeLabel,
+      location: data.location,
+      meetingLink: data.meeting_link,
+      agenda: data.agenda,
+    });
+    const html = await render(element);
+    const text = await render(element, { plainText: true });
+    const subject = `${siteName} — సమావేశ ఆహ్వానం: ${data.title}`;
+
+    let sent = 0;
+    for (const to of recipients) {
+      const messageId = crypto.randomUUID();
+      try {
+        await supabaseAdmin.from("email_send_log").insert({
+          message_id: messageId,
+          template_name: "meeting_invite",
+          recipient_email: to,
+          status: "pending",
+        });
+        await sendLovableEmail(
+          {
+            to,
+            from: `${siteName} <noreply@notify.mbrplatform.com>`,
+            sender_domain: "notify.mbrplatform.com",
+            subject,
+            html,
+            text,
+            purpose: "transactional",
+            label: "meeting_invite",
+            message_id: messageId,
+            idempotency_key: messageId,
+            unsubscribe_token: `meeting-${messageId}`,
+          },
+          { apiKey, idempotencyKey: messageId }
+        );
+        await supabaseAdmin.from("email_send_log").insert({
+          message_id: messageId,
+          template_name: "meeting_invite",
+          recipient_email: to,
+          status: "sent",
+        });
+        sent += 1;
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        await supabaseAdmin.from("email_send_log").insert({
+          message_id: messageId,
+          template_name: "meeting_invite",
+          recipient_email: to,
+          status: "failed",
+          error_message: msg,
+        });
+      }
+    }
+
+    return { sent, total: recipients.length, scope: data.scope };
+  });
