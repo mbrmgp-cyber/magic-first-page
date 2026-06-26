@@ -165,7 +165,8 @@ export async function printMeetingMinutes(opts: {
     <div class="slot">కోశాధికారి<br/>Treasurer</div>
   </div>
 
-  <script>window.onload=()=>{setTimeout(()=>window.print(),300);}<\/script>
+
+
   </body></html>`;
 
   openPrint(html);
