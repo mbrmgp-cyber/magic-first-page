@@ -11,6 +11,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "sonner";
 import { ArrowLeft, Plus, Calendar, Gavel, Activity, Printer, Trash2, Pencil, Users, CheckCircle2, XCircle } from "lucide-react";
 import { printMeetingMinutes, printResolution, printActivity } from "@/lib/printMinutes";
+import { useServerFn } from "@tanstack/react-start";
+import { sendMeetingInvites } from "@/lib/org.functions";
+import { Mail, Send } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/org/events")({
   head: () => ({ meta: [{ title: "Events, Meetings, Decisions" }] }),
