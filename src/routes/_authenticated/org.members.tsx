@@ -177,10 +177,7 @@ function MemberCard({ member, orgId, org, onReview, onChange }:
           </>
         )}
         {member.status === "approved" && (
-          <>
-            <MemberDetailsDialog member={member} orgId={orgId} onChange={onChange} />
-            <MemberIdCardButton member={member} org={org} />
-          </>
+          <MemberDetailsDialog member={member} orgId={orgId} onChange={onChange} />
         )}
       </div>
     </Card>
