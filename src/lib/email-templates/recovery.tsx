@@ -22,10 +22,11 @@ export const RecoveryEmail = ({
 }: RecoveryEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Reset your password for {siteName}</Preview>
+    <Preview>{siteName} password reset</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Reset your password</Heading>
+        <Text style={brand}>చిట్యాల్ హెల్ప్ లైన్ సొసైటీ</Text>
+        <Heading style={h1}>Reset Password / పాస్‌వర్డ్ రీసెట్</Heading>
         <Text style={text}>
           We received a request to reset your password for {siteName}. Click
           the button below to choose a new password.
@@ -45,11 +46,12 @@ export const RecoveryEmail = ({
 export default RecoveryEmail
 
 const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
-const container = { padding: '20px 25px' }
+const container = { maxWidth: '560px', margin: '0 auto', padding: '28px 26px', borderTop: '6px solid #f97316' }
+const brand = { fontSize: '16px', fontWeight: 'bold' as const, color: '#9a3412', margin: '0 0 14px' }
 const h1 = {
   fontSize: '22px',
   fontWeight: 'bold' as const,
-  color: '#000000',
+  color: '#111827',
   margin: '0 0 20px',
 }
 const text = {
@@ -59,7 +61,7 @@ const text = {
   margin: '0 0 25px',
 }
 const button = {
-  backgroundColor: '#000000',
+  backgroundColor: '#f97316',
   color: '#ffffff',
   fontSize: '14px',
   borderRadius: '8px',
