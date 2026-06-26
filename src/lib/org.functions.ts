@@ -661,9 +661,9 @@ export const sendMeetingInvites = createServerFn({ method: "POST" })
     if (data.scope === "committee") query = query.eq("is_committee", true);
     const { data: rows, error: memErr } = await query;
     if (memErr) throw new Error(memErr.message);
-    const recipients = Array.from(new Set((rows ?? [])
-      .map((r: any) => (r.email || "").trim().toLowerCase())
-      .filter(Boolean)));
+    const recipients: string[] = Array.from(new Set((rows ?? [])
+      .map((r: any) => String(r.email || "").trim().toLowerCase())
+      .filter((e: string) => e.length > 0)));
     if (recipients.length === 0) return { sent: 0, total: 0, scope: data.scope };
 
     const apiKey = process.env.LOVABLE_API_KEY;
