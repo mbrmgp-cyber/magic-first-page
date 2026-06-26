@@ -14,6 +14,7 @@ export type SampleMember = {
   address?: string;
   photoUrl?: string | null;
   qrUrl?: string | null;
+  qrLink?: string | null;
   status?: "active" | "inactive";
 };
 
@@ -45,6 +46,7 @@ export type OrgContext = {
   presidentName?: string;
   presidentSignatureUrl?: string | null;
   mbrQrUrl?: string | null;     // MBR app society-registration QR
+  mbrQrLink?: string | null;    // Link opened when the QR is tapped
   mbrLogoUrl?: string | null;   // MBR small corner logo
   contactPhone?: string;        // shown in fixed bottom-center footer of card front
   contactEmail?: string;        // shown in fixed bottom-center footer of card front
@@ -178,6 +180,26 @@ function DetailLine({ icon, value, style }: { icon: string; value: string; style
   );
 }
 
+function MemberQr({ design, member, offset }: { design: IdCardDesign; member: SampleMember; offset: number }) {
+  const e = design.elements.qrCode;
+  if (!show(e) || !member.qrUrl) return null;
+  const size = e.imgSize ?? 48;
+  const boxStyle: React.CSSProperties = {
+    ...cornerStyle(e.corner, offset),
+    width: size,
+    height: size,
+    background: "#fff",
+    padding: 2,
+    borderRadius: 3,
+    border: `1px solid ${design.global.accentColor}`,
+    zIndex: 10,
+    boxSizing: "border-box",
+    display: "block",
+  };
+  const img = <img src={member.qrUrl} alt="Member QR" style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }} />;
+  return member.qrLink ? <a href={member.qrLink} style={boxStyle} aria-label="Open member QR link">{img}</a> : <div style={boxStyle}>{img}</div>;
+}
+
 function FrontHorizontal({ design, org, member }: { design: IdCardDesign; org: OrgContext; member: SampleMember }) {
   const e = design.elements;
   return (
@@ -219,9 +241,7 @@ function FrontHorizontal({ design, org, member }: { design: IdCardDesign; org: O
         </div>
       </div>
       {/* Front corner QR (member URL) — kept clean, no logo overlap */}
-      {show(e.qrCode) && member.qrUrl && (
-        <img src={member.qrUrl} alt="" style={{ ...cornerStyle(e.qrCode.corner, (e.qrCode.corner || "br").startsWith("b") ? 24 : 14), width: e.qrCode.imgSize, height: e.qrCode.imgSize, background: "#fff", padding: 2, borderRadius: 3, border: `1px solid ${design.global.accentColor}`, zIndex: 10, boxSizing: "border-box" }} />
-      )}
+      <MemberQr design={design} member={member} offset={(e.qrCode.corner || "br").startsWith("b") ? 24 : 14} />
       {/* Legacy footer band */}
       {design.templateId === "legacy" && design.global.footerColor && (
         <div style={{ height: 4, background: design.global.footerColor }} />
@@ -263,9 +283,7 @@ function FrontVertical({ design, org, member }: { design: IdCardDesign; org: Org
           </div>
         )}
       </div>
-      {show(e.qrCode) && member.qrUrl && (
-        <img src={member.qrUrl} alt="" style={{ ...cornerStyle(e.qrCode.corner, (e.qrCode.corner || "br").startsWith("b") ? 24 : 14), width: e.qrCode.imgSize, height: e.qrCode.imgSize, background: "#fff", padding: 2, borderRadius: 3, border: `1px solid ${accent}`, zIndex: 10, boxSizing: "border-box" }} />
-      )}
+      <MemberQr design={design} member={member} offset={(e.qrCode.corner || "br").startsWith("b") ? 24 : 14} />
       <ContactFooter org={org} accent={accent} bg={design.global.contactFooterBg} size={design.global.contactFooterTextSize} />
     </div>
   );
@@ -322,7 +340,13 @@ function renderBack(design: IdCardDesign, org: OrgContext, member: SampleMember)
         {show(e.mbrQrCode) && (
           <div style={{ flexShrink: 0, width: qrSize + 4, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
             {org.mbrQrUrl ? (
-              <img src={org.mbrQrUrl} alt="MBR App" style={{ width: qrSize, height: qrSize, border: `1px solid ${g.accentColor}`, padding: 2, background: "#fff", display: "block" }} />
+              org.mbrQrLink ? (
+                <a href={org.mbrQrLink} aria-label="Open MBR registration QR" style={{ width: qrSize, height: qrSize, border: `1px solid ${g.accentColor}`, padding: 2, background: "#fff", display: "block", boxSizing: "border-box" }}>
+                  <img src={org.mbrQrUrl} alt="MBR App" style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }} />
+                </a>
+              ) : (
+                <img src={org.mbrQrUrl} alt="MBR App" style={{ width: qrSize, height: qrSize, border: `1px solid ${g.accentColor}`, padding: 2, background: "#fff", display: "block" }} />
+              )
             ) : (
               <div style={{ width: qrSize, height: qrSize, border: `1px dashed ${g.accentColor}`, display: "flex", alignItems: "center", justifyContent: "center", color: g.accentColor, fontSize: 9, textAlign: "center", background: "#fff" }}>MBR<br/>QR</div>
             )}

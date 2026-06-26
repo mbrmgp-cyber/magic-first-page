@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Printer, IdCard, User, RotateCw, Languages } from "lucide-react";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
+import { IdCardRenderer, type OrgContext, type SampleMember } from "@/components/IdCard/IdCardRenderer";
+import type { IdCardDesign } from "@/lib/idCardTemplates";
 
 // Transliterate Telugu-script source text into the chosen card language script.
 // Numbers, ASCII (phone, email, codes), and punctuation pass through unchanged.
@@ -178,6 +180,8 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
   const [sigUrl, setSigUrl] = useState<string | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [appQrUrl, setAppQrUrl] = useState<string>("");
+  const [memberQrLink, setMemberQrLink] = useState<string>("");
+  const [registrationQrLink, setRegistrationQrLink] = useState<string>("");
   const [showBack, setShowBack] = useState(false);
   const [lang, setLang] = useState<CardLang>("te");
   const t = L[lang];
@@ -194,23 +198,21 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
       }
       if (org?.logo_url) setLogoUrl(org.logo_url);
       if (org?.president_signature_url) setSigUrl(org.president_signature_url);
-      const payload = JSON.stringify({
-        id: member.member_code ?? member.id,
-        name: member.name,
-        org: org?.name,
-        phone: member.phone,
-      });
-      const qr = await QRCode.toDataURL(payload, { margin: 0, width: 240 });
       const origin = typeof window !== "undefined" ? window.location.origin : "";
       const regUrl = `${origin}/member/register${org?.org_code ? `?code=${encodeURIComponent(org.org_code)}` : ""}`;
-      const appQr = await QRCode.toDataURL(regUrl, { margin: 0, width: 240 });
+      const memberUrl = `${regUrl}${regUrl.includes("?") ? "&" : "?"}ref=${encodeURIComponent(member.member_code ?? member.id)}`;
+      const qrOptions = { margin: 1, width: 240, color: { dark: "#111111", light: "#ffffff" } };
+      const qr = await QRCode.toDataURL(memberUrl, qrOptions);
+      const appQr = await QRCode.toDataURL(regUrl, qrOptions);
       if (!cancel) {
         setQrDataUrl(qr);
         setAppQrUrl(appQr);
+        setMemberQrLink(memberUrl);
+        setRegistrationQrLink(regUrl);
       }
     })();
     return () => { cancel = true; };
-  }, [member.id, member.photo_url, org?.logo_url, org?.president_signature_url]);
+  }, [member.id, member.member_code, member.photo_url, org?.logo_url, org?.president_signature_url, org?.org_code]);
 
   function handlePrint() {
     const f = frontRef.current; const b = backRef.current;
@@ -256,6 +258,8 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
           sigUrl={sigUrl}
           qrDataUrl={qrDataUrl}
           appQrUrl={appQrUrl}
+          memberQrLink={memberQrLink}
+          registrationQrLink={registrationQrLink}
           showBack={showBack}
           setShowBack={setShowBack}
           frontRef={frontRef}
@@ -282,6 +286,8 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
           sigUrl={sigUrl}
           qrDataUrl={qrDataUrl}
           appQrUrl={appQrUrl}
+          memberQrLink={memberQrLink}
+          registrationQrLink={registrationQrLink}
           joined={joined}
         />
       )}
@@ -291,7 +297,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
 
 function LegacyLayout(props: any) {
   const { langs, lang, setLang, langLabel, showBack, setShowBack, handlePrint,
-          frontRef, backRef, member, org, t, photoUrl, logoUrl, sigUrl, qrDataUrl, appQrUrl, joined } = props;
+          frontRef, backRef, member, org, t, photoUrl, logoUrl, sigUrl, qrDataUrl, appQrUrl, memberQrLink, registrationQrLink, joined } = props;
   return (
     <>
 
@@ -328,12 +334,12 @@ function LegacyLayout(props: any) {
               <CardFront
                 fref={frontRef}
                 member={member} org={org} t={t} lang={lang}
-                photoUrl={photoUrl} logoUrl={logoUrl} sigUrl={sigUrl} qrDataUrl={qrDataUrl}
+                photoUrl={photoUrl} logoUrl={logoUrl} sigUrl={sigUrl} qrDataUrl={qrDataUrl} qrLink={memberQrLink}
                 joined={joined}
               />
             </div>
             <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
-              <CardBack bref={backRef} t={t} lang={lang} memberName={member.name} appQrUrl={appQrUrl} accent={org?.theme_color || "#FF9933"} />
+              <CardBack bref={backRef} t={t} lang={lang} memberName={member.name} appQrUrl={appQrUrl} appQrLink={registrationQrLink} accent={org?.theme_color || "#FF9933"} />
             </div>
           </div>
         </div>
@@ -356,12 +362,13 @@ function LegacyLayout(props: any) {
 
 
 function CardFront({
-  fref, member, org, photoUrl, logoUrl, sigUrl, qrDataUrl, joined, t, lang,
+  fref, member, org, photoUrl, logoUrl, sigUrl, qrDataUrl, qrLink, joined, t, lang,
 }: {
   fref: React.RefObject<HTMLDivElement | null>;
   member: Member; org: Org | null;
   photoUrl: string | null; logoUrl: string | null; sigUrl: string | null;
   qrDataUrl: string;
+  qrLink?: string;
   joined: string;
   t: Record<string, string>;
   lang: CardLang;
@@ -522,7 +529,13 @@ function CardFront({
         justifyContent: "space-between", gap: "1.5mm",
       }}>
         {qrDataUrl ? (
-          <img src={qrDataUrl} alt="qr" style={{ height: "7.6mm", width: "7.6mm", background: "#fff", padding: "0.3mm", borderRadius: "0.5mm", flexShrink: 0 }} />
+          qrLink ? (
+            <a href={qrLink} aria-label="Open member QR link" style={{ height: "7.6mm", width: "7.6mm", background: "#fff", padding: "0.3mm", borderRadius: "0.5mm", flexShrink: 0, display: "block" }}>
+              <img src={qrDataUrl} alt="Member QR" style={{ height: "100%", width: "100%", objectFit: "contain", display: "block" }} />
+            </a>
+          ) : (
+            <img src={qrDataUrl} alt="Member QR" style={{ height: "7.6mm", width: "7.6mm", background: "#fff", padding: "0.3mm", borderRadius: "0.5mm", flexShrink: 0 }} />
+          )
         ) : <div style={{ width: "7.6mm" }} />}
 
         <div style={{
@@ -552,12 +565,13 @@ function CardFront({
 }
 
 function CardBack({
-  bref, t, memberName, appQrUrl, lang, accent,
+  bref, t, memberName, appQrUrl, appQrLink, lang, accent,
 }: {
   bref: React.RefObject<HTMLDivElement | null>;
   t: Record<string, string>;
   memberName: string;
   appQrUrl: string;
+  appQrLink?: string;
   lang: CardLang;
   accent: string;
 }) {
@@ -608,7 +622,13 @@ function CardBack({
           </div>
           <div style={{ flexShrink: 0, textAlign: "center" }}>
             {appQrUrl && (
-              <img src={appQrUrl} alt="MBR APP" style={{ height: "11mm", width: "11mm", border: "0.2mm solid #000080", padding: "0.3mm", background: "#fff" }} />
+              appQrLink ? (
+                <a href={appQrLink} aria-label="Open member registration QR" style={{ height: "11mm", width: "11mm", border: "0.2mm solid #000080", padding: "0.3mm", background: "#fff", display: "block", boxSizing: "border-box" }}>
+                  <img src={appQrUrl} alt="MBR APP" style={{ height: "100%", width: "100%", objectFit: "contain", display: "block" }} />
+                </a>
+              ) : (
+                <img src={appQrUrl} alt="MBR APP" style={{ height: "11mm", width: "11mm", border: "0.2mm solid #000080", padding: "0.3mm", background: "#fff" }} />
+              )
             )}
             <div style={{ fontSize: "1.5mm", fontWeight: 700, color: "#000080", marginTop: "0.3mm", lineHeight: 1.1, maxWidth: "13mm" }}>
               {t.mbrApp}
@@ -632,12 +652,9 @@ function Row({ label, value }: { label: string; value: string }) {
 /* ===================================================================
  * SavedDesignCard — renders member ID using the org-saved design.
  * =================================================================== */
-import { IdCardRenderer, type OrgContext, type SampleMember } from "@/components/IdCard/IdCardRenderer";
-import type { IdCardDesign } from "@/lib/idCardTemplates";
-
 function SavedDesignCard({
   design, org, member, photoUrl, logoUrl, sigUrl, qrDataUrl, appQrUrl,
-  showBack, setShowBack, frontRef, backRef, onPrint, lang,
+  memberQrLink, registrationQrLink, showBack, setShowBack, frontRef, backRef, onPrint, lang,
 }: {
   design: IdCardDesign;
   org: Org | null;
@@ -647,6 +664,8 @@ function SavedDesignCard({
   sigUrl: string | null;
   qrDataUrl: string;
   appQrUrl: string;
+  memberQrLink: string;
+  registrationQrLink: string;
   showBack: boolean;
   setShowBack: (fn: (v: boolean) => boolean) => void;
   frontRef: React.RefObject<HTMLDivElement | null>;
@@ -662,7 +681,10 @@ function SavedDesignCard({
     presidentName: org?.president_name || undefined,
     presidentSignatureUrl: sigUrl,
     mbrQrUrl: appQrUrl || null,
+    mbrQrLink: registrationQrLink || null,
     mbrLogoUrl: mbrLogo.url,
+    contactPhone: org?.phone || undefined,
+    contactEmail: org?.email || undefined,
   };
   const sample: SampleMember = {
     name: member.name,
@@ -677,6 +699,7 @@ function SavedDesignCard({
     address: member.address || undefined,
     photoUrl: photoUrl,
     qrUrl: qrDataUrl || null,
+    qrLink: memberQrLink || null,
     status: (member as any)?.status === "approved" || (member as any)?.status === "active" ? "active" : "inactive",
   };
   const side = showBack ? "back" : "front";
