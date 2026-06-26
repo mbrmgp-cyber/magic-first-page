@@ -31,6 +31,7 @@ function MemberDashboard() {
   const fetchMe = useServerFn(getMyMembership);
   const meQ = useQuery({ queryKey: ["my-membership"], queryFn: () => fetchMe() });
   const [qrUrl, setQrUrl] = useState<string>("");
+  const [qrTargetUrl, setQrTargetUrl] = useState<string>("");
   const [photoUrl, setPhotoUrl] = useState<string>("");
   const [photoBroken, setPhotoBroken] = useState(false);
   const [idCardOpen, setIdCardOpen] = useState(false);
@@ -42,19 +43,11 @@ function MemberDashboard() {
 
   useEffect(() => {
     if (!org) { setQrUrl(""); return; }
-    const orgName = (org as any)?.name ?? "చిట్వేల్ హెల్ప్ లైన్ సొసైటీ";
-    const reg = (org as any)?.gov_reg_number ?? "235/16";
-    const phone = (org as any)?.phone ?? "";
-    const email = (org as any)?.email ?? "";
-    const code = (org as any)?.letter_code ?? "";
     const origin = typeof window !== "undefined" ? window.location.origin : "";
-    const payload =
-      `${orgName}\nReg No: ${reg}` +
-      (phone ? `\nPhone: ${phone}` : "") +
-      (email ? `\nEmail: ${email}` : "") +
-      (code ? `\nCode: ${code}` : "") +
-      (origin ? `\n${origin}` : "");
-    QRCode.toDataURL(payload, { width: 256, margin: 1, color: { dark: brand, light: "#00000000" } })
+    const code = (org as any)?.org_code ?? "";
+    const target = origin ? `${origin}/member/register${code ? `?code=${encodeURIComponent(code)}` : ""}` : "";
+    setQrTargetUrl(target);
+    QRCode.toDataURL(target || "https://mbrplatform.com/member/register", { width: 256, margin: 2, color: { dark: "#111111", light: "#ffffff" } })
       .then(setQrUrl)
       .catch(() => setQrUrl(""));
   }, [org, brand]);
@@ -134,7 +127,9 @@ function MemberDashboard() {
           <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-950 flex items-center justify-center overflow-hidden shrink-0"
             style={{ borderWidth: 1, borderStyle: "solid", borderColor: `${brand}4d` }}>
             {qrUrl
-              ? <img src={qrUrl} alt="Society QR" className="h-full w-full object-contain p-1" />
+              ? <a href={qrTargetUrl || "/member/register"} aria-label="Open society registration QR" className="h-full w-full block rounded-xl bg-white p-1">
+                  <img src={qrUrl} alt="Society QR" className="h-full w-full object-contain" />
+                </a>
               : <ScanLine className="h-7 w-7" style={{ color: brand }} />}
           </div>
         </header>

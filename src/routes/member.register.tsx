@@ -58,16 +58,34 @@ function MemberRegister() {
     bank_ifsc: "",
   });
 
+  function normalizeCodeInput(input: string) {
+    const raw = (input || "").trim();
+    try {
+      const parsed = JSON.parse(raw);
+      const value = parsed?.code || parsed?.org_code || parsed?.orgCode;
+      if (typeof value === "string" && value.trim()) return value.trim().toUpperCase();
+    } catch {}
+    try {
+      const url = new URL(raw);
+      const value = url.searchParams.get("code") || url.searchParams.get("org_code") || url.searchParams.get("orgCode");
+      if (value) return value.trim().toUpperCase();
+    } catch {}
+    const queryMatch = raw.match(/[?&](?:code|org_code|orgCode)=([^&#]+)/i);
+    if (queryMatch?.[1]) return decodeURIComponent(queryMatch[1]).trim().toUpperCase();
+    return raw.toUpperCase();
+  }
+
   async function verifyCode(c: string) {
+    const normalized = normalizeCodeInput(c);
     setLoading(true);
     try {
-      const res = await validate({ data: { code: c } });
+      const res = await validate({ data: { code: normalized } });
       if (!res.valid) {
         toast.error(lt("Invalid QR / Code", "చెల్లని QR / కోడ్"));
         setStage("code");
         return;
       }
-      setCode(c.trim().toUpperCase());
+      setCode(normalized);
       setOrgName(res.org.name);
       setOrgId(res.org.id);
       setStage("form");

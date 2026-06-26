@@ -2,6 +2,24 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import QRCode from "qrcode";
 
+function normalizeOrgCode(input: string) {
+  const raw = (input || "").trim();
+  if (!raw) return "";
+  try {
+    const parsed = JSON.parse(raw);
+    const value = parsed?.code || parsed?.org_code || parsed?.orgCode;
+    if (typeof value === "string" && value.trim()) return value.trim().toUpperCase();
+  } catch {}
+  try {
+    const url = new URL(raw);
+    const value = url.searchParams.get("code") || url.searchParams.get("org_code") || url.searchParams.get("orgCode");
+    if (value) return value.trim().toUpperCase();
+  } catch {}
+  const queryMatch = raw.match(/[?&](?:code|org_code|orgCode)=([^&#]+)/i);
+  if (queryMatch?.[1]) return decodeURIComponent(queryMatch[1]).trim().toUpperCase();
+  return raw.toUpperCase();
+}
+
 async function getAppOrigin() {
   const { getRequest } = await import("@tanstack/react-start/server");
   const request = getRequest();
@@ -365,7 +383,7 @@ export const updateOrgIdDesign = createServerFn({ method: "POST" })
 export const validateOrgCode = createServerFn({ method: "POST" })
   .inputValidator((d: { code: string }) => d)
   .handler(async ({ data }) => {
-    const code = data.code.trim().toUpperCase();
+    const code = normalizeOrgCode(data.code);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: org } = await supabaseAdmin
       .from("organizations")
@@ -394,7 +412,7 @@ export const submitMemberRequest = createServerFn({ method: "POST" })
     preferred_lang?: string;
   }) => d)
   .handler(async ({ data }) => {
-    const code = data.code.trim().toUpperCase();
+    const code = normalizeOrgCode(data.code);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: org } = await supabaseAdmin
       .from("organizations")
@@ -455,7 +473,7 @@ export const getMyMembership = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
     const { data } = await supabase
       .from("members")
-      .select("*, organizations(name, logo_url, slogan, letter_code, gov_reg_number, phone, email, president_name, president_signature_url, theme_color, theme_font, theme_settings)")
+      .select("*, organizations(name, logo_url, slogan, letter_code, org_code, gov_reg_number, phone, email, president_name, president_signature_url, theme_color, theme_font, theme_settings, id_card_design)")
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(1)
