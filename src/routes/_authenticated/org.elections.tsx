@@ -146,7 +146,13 @@ function ElectionsPage() {
 
         <div className="grid gap-3">
           {electionsQ.data?.map((e) => (
-            <ElectionCard key={e.id} e={e} onOpen={() => setSelected(e)} />
+            <ElectionCard
+              key={e.id}
+              e={e}
+              canNominate={e.status === "nominations_open" && !!ctx.memberId}
+              onOpen={() => setSelected({ e, tab: "overview" })}
+              onNominate={() => setSelected({ e, tab: "nominate" })}
+            />
           ))}
         </div>
       </div>
@@ -160,15 +166,17 @@ function ElectionsPage() {
 
       {selected && (
         <ElectionDetailDialog
-          election={selected}
+          election={selected.e}
+          initialTab={selected.tab}
           ctx={ctx}
           onClose={() => setSelected(null)}
           onChanged={() => {
             qc.invalidateQueries({ queryKey: ["org-elections"] });
-            qc.invalidateQueries({ queryKey: ["election-detail", selected.id] });
+            qc.invalidateQueries({ queryKey: ["election-detail", selected.e.id] });
           }}
         />
       )}
+
     </div>
   );
 }
