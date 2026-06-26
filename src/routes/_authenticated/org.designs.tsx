@@ -200,7 +200,7 @@ function DesignsPage() {
 
   const orgName = org?.name || "Chitvel Help Line Society";
   const orgSlogan = org?.slogan || "॥ మానవసేవే మాధవసేవ ॥";
-  const orgReg = org?.gov_reg_number || "356/16";
+  const orgReg = org?.gov_reg_number || "235/16";
   const orgAddress = org?.address || "";
   const orgLogo: string = org?.logo_url || mbrLogo.url;
   const effectiveLetterLogo: string = letterLogo || orgLogo;
@@ -1860,7 +1860,7 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
   const orgCtx: OrgContext = {
     name: org?.name || "Chitvel Help Line Society",
     slogan: org?.slogan || "॥ మానవసేవే మాధవసేవ ॥",
-    regNumber: org?.gov_reg_number || "356/16",
+    regNumber: org?.gov_reg_number || "235/16",
     logoUrl: org?.logo_url,
     presidentName: org?.president_name || "",
     presidentSignatureUrl: org?.president_signature_url,
