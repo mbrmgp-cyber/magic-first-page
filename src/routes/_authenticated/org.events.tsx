@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { ArrowLeft, Plus, Calendar, Gavel, Activity, Printer, Trash2, Pencil, Users, CheckCircle2, XCircle } from "lucide-react";
-import { printMeetingMinutes, printResolution } from "@/lib/printMinutes";
+import { printMeetingMinutes, printResolution, printActivity } from "@/lib/printMinutes";
 
 export const Route = createFileRoute("/_authenticated/org/events")({
   head: () => ({ meta: [{ title: "Events, Meetings, Decisions" }] }),
@@ -243,8 +243,11 @@ function MeetingDialog({ open, onOpenChange, orgId, members, editing, onSaved }:
         <DialogHeader><DialogTitle className="text-orange-400">{editing ? "సమావేశం సవరించు" : "కొత్త సమావేశం"}</DialogTitle></DialogHeader>
         <div className="space-y-3 text-sm">
           <div><Label>శీర్షిక / Title *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="bg-zinc-800 border-zinc-700" /></div>
-          <div className="grid grid-cols-2 gap-2">
-            <div><Label>తేదీ / సమయం *</Label><Input type="datetime-local" value={form.scheduled_at} onChange={(e) => setForm({ ...form, scheduled_at: e.target.value })} className="bg-zinc-800 border-zinc-700" /></div>
+          <div className="space-y-2">
+            <div>
+              <Label>తేదీ / సమయం *</Label>
+              <Input type="datetime-local" value={form.scheduled_at} onChange={(e) => setForm({ ...form, scheduled_at: e.target.value })} className="bg-zinc-800 border-zinc-700 w-full" />
+            </div>
             <div>
               <Label>విధానం</Label>
               <select value={form.meeting_type} onChange={(e) => setForm({ ...form, meeting_type: e.target.value })} className="w-full h-10 bg-zinc-800 border border-zinc-700 rounded px-2">
@@ -416,17 +419,24 @@ function ResolutionDialog({ open, onOpenChange, orgId, meetings, members, editin
           </div>
 
           <div>
-            <Label>ఓటింగ్ ట్రాకింగ్</Label>
-            <div className="mt-2 max-h-56 overflow-y-auto border border-zinc-800 rounded p-2 space-y-1">
+            <div className="flex items-center justify-between mb-2">
+              <Label className="text-sm">ఓటింగ్ ట్రాకింగ్ / Voting</Label>
+              <div className="flex gap-2 text-[11px]">
+                <span className="px-2 py-0.5 rounded bg-green-600/20 text-green-300 font-semibold">✓ {form.approved_member_ids?.length || 0}</span>
+                <span className="px-2 py-0.5 rounded bg-red-600/20 text-red-300 font-semibold">✕ {form.opposed_member_ids?.length || 0}</span>
+              </div>
+            </div>
+            <p className="text-[10px] text-zinc-500 mb-2">ప్రతి సభ్యునికి ఆమోదం లేదా వ్యతిరేకం బటన్ నొక్కండి</p>
+            <div className="max-h-64 overflow-y-auto border border-zinc-700 rounded-lg p-2 space-y-1.5 bg-zinc-950/40">
               {members.map((m: any) => {
                 const app = form.approved_member_ids?.includes(m.id);
                 const opp = form.opposed_member_ids?.includes(m.id);
                 return (
-                  <div key={m.id} className="flex items-center justify-between gap-2 text-xs">
-                    <span className="truncate flex-1">{m.name} <span className="text-zinc-500">{m.member_code}</span></span>
-                    <div className="flex gap-1">
-                      <button type="button" onClick={() => toggleVote(m.id, "approved_member_ids")} className={`px-2 py-1 rounded text-[10px] ${app ? "bg-green-600 text-white" : "bg-zinc-800 text-zinc-400"}`}>ఆమోదం</button>
-                      <button type="button" onClick={() => toggleVote(m.id, "opposed_member_ids")} className={`px-2 py-1 rounded text-[10px] ${opp ? "bg-red-600 text-white" : "bg-zinc-800 text-zinc-400"}`}>వ్యతిరేకం</button>
+                  <div key={m.id} className="flex items-center justify-between gap-2 text-xs bg-zinc-900 rounded p-2 border border-zinc-800">
+                    <span className="truncate flex-1 text-zinc-200">{m.name} <span className="text-zinc-500 text-[10px]">{m.member_code}</span></span>
+                    <div className="flex gap-1.5 shrink-0">
+                      <button type="button" onClick={() => toggleVote(m.id, "approved_member_ids")} className={`px-3 py-1.5 rounded-md text-[11px] font-semibold border transition ${app ? "bg-green-600 border-green-400 text-white shadow" : "bg-zinc-800 border-zinc-700 text-zinc-400 hover:bg-green-600/20 hover:text-green-300"}`}>✓ ఆమోదం</button>
+                      <button type="button" onClick={() => toggleVote(m.id, "opposed_member_ids")} className={`px-3 py-1.5 rounded-md text-[11px] font-semibold border transition ${opp ? "bg-red-600 border-red-400 text-white shadow" : "bg-zinc-800 border-zinc-700 text-zinc-400 hover:bg-red-600/20 hover:text-red-300"}`}>✕ వ్యతిరేకం</button>
                     </div>
                   </div>
                 );
@@ -476,7 +486,10 @@ function ActivitiesTab({ orgId, activities, onChange }: any) {
                   </div>
                 </div>
               </div>
-              <div className="flex gap-2 mt-2">
+              <div className="flex gap-2 mt-2 flex-wrap">
+                <Button size="sm" variant="secondary" onClick={() => printActivity({ orgId, activity: a })} className="bg-slate-700 hover:bg-slate-600 text-white text-xs h-8">
+                  <Printer className="w-3 h-3 mr-1" /> ప్రింట్
+                </Button>
                 <Button size="sm" variant="ghost" onClick={() => { setEditing(a); setOpen(true); }} className="text-xs h-8 text-zinc-300"><Pencil className="w-3 h-3 mr-1" /> సవరించు</Button>
                 <Button size="sm" variant="ghost" onClick={async () => {
                   if (!confirm("Delete?")) return;

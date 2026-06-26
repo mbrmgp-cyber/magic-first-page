@@ -10,7 +10,9 @@ const fmtDate = (d?: string | null) =>
 function openPrint(html: string) {
   const w = window.open("", "_blank", "width=900,height=1100");
   if (!w) { toast.error("Popup blocked. Allow popups to print."); return; }
-  w.document.open(); w.document.write(html); w.document.close();
+  // inject toolbar after <body>
+  const withToolbar = html.replace(/<body[^>]*>/, (m) => `${m}${toolbar}<div class="page">`).replace("</body>", "</div></body>");
+  w.document.open(); w.document.write(withToolbar); w.document.close();
 }
 
 const styles = `
@@ -40,7 +42,20 @@ table.kv td.k { width:30%; color:#555; font-weight:600; }
 .footer-sigs { margin-top:36px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px; }
 .footer-sigs .slot { text-align:center; padding-top:50px; border-top:1px solid #111; font-size:11px; }
 .muted { color:#6b7280; font-size:11px; }
+.toolbar { position:fixed; top:0; left:0; right:0; background:#7c2d12; color:#fff; padding:10px 16px; display:flex; justify-content:space-between; align-items:center; z-index:9999; box-shadow:0 2px 8px rgba(0,0,0,.2); }
+.toolbar button { background:#fff; color:#7c2d12; border:none; padding:7px 14px; border-radius:6px; font-weight:700; cursor:pointer; font-size:13px; margin-left:8px; }
+.toolbar button.ghost { background:transparent; color:#fff; border:1px solid #fff; }
+.page { margin-top:60px; }
+@media print { .toolbar { display:none !important; } .page { margin-top:0; } }
 `;
+
+const toolbar = `<div class="toolbar no-print">
+  <div style="font-weight:700;font-size:13px;">📄 Print Preview</div>
+  <div>
+    <button class="ghost" onclick="window.close()">✕ మూసివేయండి / Close</button>
+    <button onclick="window.print()">🖨 ప్రింట్ / Print</button>
+  </div>
+</div>`;
 
 type Org = { name?: string; logo_url?: string; gov_reg_number?: string; phone?: string; email?: string };
 type Member = { id: string; name: string; member_code?: string | null };
@@ -150,7 +165,8 @@ export async function printMeetingMinutes(opts: {
     <div class="slot">కోశాధికారి<br/>Treasurer</div>
   </div>
 
-  <script>window.onload=()=>{setTimeout(()=>window.print(),300);}<\/script>
+
+
   </body></html>`;
 
   openPrint(html);
@@ -185,7 +201,55 @@ export async function printResolution(opts: {
     <div class="slot">కార్యదర్శి<br/>Secretary</div>
     <div class="slot">కోశాధికారి<br/>Treasurer</div>
   </div>
-  <script>window.onload=()=>{setTimeout(()=>window.print(),300);}<\/script>
   </body></html>`;
   openPrint(html);
 }
+
+export async function printActivity(opts: {
+  orgId: string;
+  activity: {
+    id: string;
+    event_name: string;
+    event_date: string;
+    description?: string | null;
+    allocated_budget: number | string;
+    actual_expense: number | string;
+    status: string;
+  };
+}) {
+  const org = await fetchOrg(opts.orgId);
+  const a = opts.activity;
+  const budget = Number(a.allocated_budget) || 0;
+  const expense = Number(a.actual_expense) || 0;
+  const variance = budget - expense;
+  const inr = (n: number) => `₹${n.toLocaleString("en-IN")}`;
+  const statusTel = a.status === "completed" ? "పూర్తయింది" : a.status === "ongoing" ? "జరుగుతోంది" : a.status === "cancelled" ? "రద్దు" : "ప్రణాళిక";
+  const html = `<!doctype html><html><head><meta charset="utf-8" />
+  <title>కార్యక్రమం - ${esc(a.event_name)}</title>
+  <style>${styles}</style></head><body>
+  ${header(org)}
+  <div class="doc-title">కార్యక్రమ నివేదిక / Activity Report</div>
+  <table class="kv">
+    <tr><td class="k">పేరు / Event</td><td>${esc(a.event_name)}</td></tr>
+    <tr><td class="k">తేదీ</td><td>${esc(new Date(a.event_date).toLocaleDateString("en-IN", { dateStyle: "long" }))}</td></tr>
+    <tr><td class="k">స్థితి</td><td>${statusTel}</td></tr>
+  </table>
+  ${a.description ? `<h2>వివరణ / Description</h2><div class="box">${esc(a.description).replace(/\n/g, "<br/>")}</div>` : ""}
+  <h2>ఆర్థిక సారాంశం / Financial Summary</h2>
+  <div class="vote">
+    <div class="cell app"><b>కేటాయించిన బడ్జెట్</b>${inr(budget)}</div>
+    <div class="cell opp"><b>వాస్తవిక ఖర్చు</b>${inr(expense)}</div>
+  </div>
+  <div class="box" style="margin-top:10px;">
+    <b>మిగులు / Variance:</b>
+    <span style="color:${variance >= 0 ? "#065f46" : "#991b1b"};font-weight:700;"> ${inr(variance)}</span>
+  </div>
+  <div class="footer-sigs">
+    <div class="slot">అధ్యక్షుడు<br/>President</div>
+    <div class="slot">కార్యదర్శి<br/>Secretary</div>
+    <div class="slot">కోశాధికారి<br/>Treasurer</div>
+  </div>
+  </body></html>`;
+  openPrint(html);
+}
+
