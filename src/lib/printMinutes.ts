@@ -201,7 +201,55 @@ export async function printResolution(opts: {
     <div class="slot">కార్యదర్శి<br/>Secretary</div>
     <div class="slot">కోశాధికారి<br/>Treasurer</div>
   </div>
-  <script>window.onload=()=>{setTimeout(()=>window.print(),300);}<\/script>
   </body></html>`;
   openPrint(html);
 }
+
+export async function printActivity(opts: {
+  orgId: string;
+  activity: {
+    id: string;
+    event_name: string;
+    event_date: string;
+    description?: string | null;
+    allocated_budget: number | string;
+    actual_expense: number | string;
+    status: string;
+  };
+}) {
+  const org = await fetchOrg(opts.orgId);
+  const a = opts.activity;
+  const budget = Number(a.allocated_budget) || 0;
+  const expense = Number(a.actual_expense) || 0;
+  const variance = budget - expense;
+  const inr = (n: number) => `₹${n.toLocaleString("en-IN")}`;
+  const statusTel = a.status === "completed" ? "పూర్తయింది" : a.status === "ongoing" ? "జరుగుతోంది" : a.status === "cancelled" ? "రద్దు" : "ప్రణాళిక";
+  const html = `<!doctype html><html><head><meta charset="utf-8" />
+  <title>కార్యక్రమం - ${esc(a.event_name)}</title>
+  <style>${styles}</style></head><body>
+  ${header(org)}
+  <div class="doc-title">కార్యక్రమ నివేదిక / Activity Report</div>
+  <table class="kv">
+    <tr><td class="k">పేరు / Event</td><td>${esc(a.event_name)}</td></tr>
+    <tr><td class="k">తేదీ</td><td>${esc(new Date(a.event_date).toLocaleDateString("en-IN", { dateStyle: "long" }))}</td></tr>
+    <tr><td class="k">స్థితి</td><td>${statusTel}</td></tr>
+  </table>
+  ${a.description ? `<h2>వివరణ / Description</h2><div class="box">${esc(a.description).replace(/\n/g, "<br/>")}</div>` : ""}
+  <h2>ఆర్థిక సారాంశం / Financial Summary</h2>
+  <div class="vote">
+    <div class="cell app"><b>కేటాయించిన బడ్జెట్</b>${inr(budget)}</div>
+    <div class="cell opp"><b>వాస్తవిక ఖర్చు</b>${inr(expense)}</div>
+  </div>
+  <div class="box" style="margin-top:10px;">
+    <b>మిగులు / Variance:</b>
+    <span style="color:${variance >= 0 ? "#065f46" : "#991b1b"};font-weight:700;"> ${inr(variance)}</span>
+  </div>
+  <div class="footer-sigs">
+    <div class="slot">అధ్యక్షుడు<br/>President</div>
+    <div class="slot">కార్యదర్శి<br/>Secretary</div>
+    <div class="slot">కోశాధికారి<br/>Treasurer</div>
+  </div>
+  </body></html>`;
+  openPrint(html);
+}
+
