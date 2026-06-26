@@ -61,11 +61,11 @@ function AuthPage() {
     e.preventDefault();
     setLoading(true);
     setStatus({ type: "info", title: t("sendingTitle"), message: t("sendingMsg") });
-    setLoading(false);
     const result = await sendSecureLink({ data: { email, lang } }).catch((error) => ({
       sent: false as const,
       reason: error instanceof Error ? error.message : String(error),
     }));
+    setLoading(false);
     if (!result?.sent) {
       const msg = result?.reason === "not_found" ? t("noAccountErr") : (result?.reason || t("sendFailedTitle"));
       setStatus({ type: "error", title: t("sendFailedTitle"), message: msg });
