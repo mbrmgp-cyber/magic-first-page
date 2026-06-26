@@ -69,7 +69,8 @@ function ElectionsPage() {
   const qc = useQueryClient();
   const [ctx, setCtx] = useState<{ orgId: string; memberId: string | null; isAdmin: boolean; isCommittee: boolean } | null>(null);
   const [newOpen, setNewOpen] = useState(false);
-  const [selected, setSelected] = useState<Election | null>(null);
+  const [selected, setSelected] = useState<{ e: Election; tab: "overview" | "nominate" | "vote" | "results" } | null>(null);
+
 
   useEffect(() => {
     (async () => {
@@ -145,7 +146,13 @@ function ElectionsPage() {
 
         <div className="grid gap-3">
           {electionsQ.data?.map((e) => (
-            <ElectionCard key={e.id} e={e} onOpen={() => setSelected(e)} />
+            <ElectionCard
+              key={e.id}
+              e={e}
+              canNominate={e.status === "nominations_open" && !!ctx.memberId}
+              onOpen={() => setSelected({ e, tab: "overview" })}
+              onNominate={() => setSelected({ e, tab: "nominate" })}
+            />
           ))}
         </div>
       </div>
@@ -159,24 +166,26 @@ function ElectionsPage() {
 
       {selected && (
         <ElectionDetailDialog
-          election={selected}
+          election={selected.e}
+          initialTab={selected.tab}
           ctx={ctx}
           onClose={() => setSelected(null)}
           onChanged={() => {
             qc.invalidateQueries({ queryKey: ["org-elections"] });
-            qc.invalidateQueries({ queryKey: ["election-detail", selected.id] });
+            qc.invalidateQueries({ queryKey: ["election-detail", selected.e.id] });
           }}
         />
       )}
+
     </div>
   );
 }
 
-function ElectionCard({ e, onOpen }: { e: Election; onOpen: () => void }) {
+function ElectionCard({ e, onOpen, onNominate, canNominate }: { e: Election; onOpen: () => void; onNominate: () => void; canNominate: boolean }) {
   const st = STATUS_LABEL[e.status];
   return (
-    <Card onClick={onOpen} className="p-4 bg-zinc-950 border-zinc-800 hover:border-[#ff8c28]/60 cursor-pointer transition">
-      <div className="flex items-start justify-between gap-3">
+    <Card className="p-4 bg-zinc-950 border-zinc-800 hover:border-[#ff8c28]/60 transition">
+      <div onClick={onOpen} className="flex items-start justify-between gap-3 cursor-pointer">
         <div className="min-w-0">
           <h3 className="font-bold text-white truncate">{e.title}</h3>
           <p className="text-xs text-zinc-400 mt-1 flex items-center gap-1">
@@ -191,9 +200,19 @@ function ElectionCard({ e, onOpen }: { e: Election; onOpen: () => void }) {
         </div>
         <span className={`text-[10px] px-2 py-1 rounded-full font-semibold whitespace-nowrap ${st.cls}`}>{st.te}</span>
       </div>
+      {canNominate && (
+        <Button
+          onClick={(ev) => { ev.stopPropagation(); onNominate(); }}
+          className="w-full mt-3 bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white"
+          size="sm"
+        >
+          <UserCheck className="w-4 h-4 mr-1" /> నామినేషన్ వేయండి / Nominate
+        </Button>
+      )}
     </Card>
   );
 }
+
 
 function NewElectionDialog({ open, onOpenChange, orgId, onCreated }: {
   open: boolean; onOpenChange: (v: boolean) => void; orgId: string; onCreated: () => void;
@@ -244,13 +263,15 @@ function NewElectionDialog({ open, onOpenChange, orgId, onCreated }: {
   );
 }
 
-function ElectionDetailDialog({ election, ctx, onClose, onChanged }: {
+function ElectionDetailDialog({ election, ctx, onClose, onChanged, initialTab = "overview" }: {
   election: Election;
   ctx: { orgId: string; memberId: string | null; isAdmin: boolean; isCommittee: boolean };
   onClose: () => void;
   onChanged: () => void;
+  initialTab?: "overview" | "nominate" | "vote" | "results";
 }) {
-  const [tab, setTab] = useState<"overview" | "nominate" | "vote" | "results">("overview");
+  const [tab, setTab] = useState<"overview" | "nominate" | "vote" | "results">(initialTab);
+
 
   const nomsQ = useQuery({
     queryKey: ["election-detail", election.id, "noms"],
