@@ -33,6 +33,120 @@ async function findAuthUserIdByEmail(supabaseAdmin: any, email: string) {
   return null;
 }
 
+async function sendMagicLoginLinkEmail(supabaseAdmin: any, email: string, redirectTo: string) {
+  const [{ sendLovableEmail }, React, { render }, { MagicLinkEmail }] = await Promise.all([
+    import("@lovable.dev/email-js"),
+    import("react"),
+    import("react-email"),
+    import("@/lib/email-templates/magic-link"),
+  ]);
+
+  const { data, error } = await supabaseAdmin.auth.admin.generateLink({
+    type: "magiclink",
+    email,
+    options: { redirectTo },
+  });
+  if (error) throw new Error(error.message);
+
+  const confirmationUrl = data?.properties?.action_link;
+  if (!confirmationUrl) throw new Error("Could not generate login link");
+
+  const siteName = "చిట్యాల్ హెల్ప్ లైన్ సొసైటీ";
+  const element = React.createElement(MagicLinkEmail, { siteName, confirmationUrl });
+  const html = await render(element);
+  const text = await render(element, { plainText: true });
+  const messageId = crypto.randomUUID();
+  const apiKey = process.env.LOVABLE_API_KEY;
+  if (!apiKey) throw new Error("Email service is not configured");
+
+  try {
+    await supabaseAdmin.from("email_send_log").insert({
+      message_id: messageId,
+      template_name: "magiclink",
+      recipient_email: email,
+      status: "pending",
+    });
+
+    await sendLovableEmail(
+      {
+        run_id: messageId,
+        to: email,
+        from: `${siteName} <noreply@notify.mbrplatform.com>`,
+        sender_domain: "notify.mbrplatform.com",
+        subject: "చిట్యాల్ హెల్ప్ లైన్ సొసైటీ — Login link",
+        html,
+        text,
+        purpose: "transactional",
+        label: "magiclink",
+        message_id: messageId,
+        idempotency_key: messageId,
+      },
+      { apiKey, sendUrl: process.env.LOVABLE_SEND_URL }
+    );
+
+    await supabaseAdmin.from("email_send_log").insert({
+      message_id: messageId,
+      template_name: "magiclink",
+      recipient_email: email,
+      status: "sent",
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    await supabaseAdmin.from("email_send_log").insert({
+      message_id: messageId,
+      template_name: "magiclink",
+      recipient_email: email,
+      status: "failed",
+      error_message: message,
+    });
+    throw new Error(message);
+  }
+}
+
+export const sendLoginLink = createServerFn({ method: "POST" })
+  .inputValidator((d: { email: string; lang?: string }) => d)
+  .handler(async ({ data }) => {
+    const email = data.email.trim().toLowerCase();
+    if (!email) return { sent: false as const, reason: "missing_email" as const };
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let userId = await findAuthUserIdByEmail(supabaseAdmin, email);
+
+    if (!userId) {
+      const { data: member } = await supabaseAdmin
+        .from("members")
+        .select("id, email, user_id, preferred_lang")
+        .ilike("email", email)
+        .eq("status", "approved")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (!member) return { sent: false as const, reason: "not_found" as const };
+
+      userId = (member as any).user_id ?? await findAuthUserIdByEmail(supabaseAdmin, member.email);
+      if (!userId) {
+        const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({
+          email: member.email,
+          password: `MBR-${crypto.randomUUID()}`,
+          email_confirm: true,
+          user_metadata: { role: "member" },
+        });
+        if (createError) throw new Error(createError.message);
+        userId = created.user?.id;
+      }
+
+      if (userId && !(member as any).user_id) {
+        const { error: claimError } = await supabaseAdmin.from("members").update({ user_id: userId }).eq("id", member.id);
+        if (claimError) throw new Error(claimError.message);
+      }
+    }
+
+    const redirectTo = `${await getAppOrigin()}/auth?lang=${encodeURIComponent(data.lang || "te")}`;
+    await sendMagicLoginLinkEmail(supabaseAdmin, email, redirectTo);
+    return { sent: true as const };
+  });
+
 async function uploadImageDataUrl(supabaseAdmin: any, dataUrl: string | undefined | null, folder: string) {
   if (!dataUrl?.startsWith("data:image/")) return dataUrl ?? null;
   const match = dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
@@ -381,11 +495,7 @@ export const sendApprovedMemberLoginLink = createServerFn({ method: "POST" })
     }
     const lang = data.lang || (member as any).preferred_lang || "te";
     const redirectTo = `${await getAppOrigin()}/auth?lang=${encodeURIComponent(lang)}`;
-    const { error } = await supabaseAdmin.auth.signInWithOtp({
-      email: member.email,
-      options: { shouldCreateUser: false, emailRedirectTo: redirectTo },
-    });
-    if (error) throw new Error(error.message);
+    await sendMagicLoginLinkEmail(supabaseAdmin, member.email, redirectTo);
     return { sent: true as const };
   });
 
@@ -436,11 +546,7 @@ export const reviewMember = createServerFn({ method: "POST" })
       }
       if (memberUserId) {
         const redirectTo = `${await getAppOrigin()}/auth?lang=${encodeURIComponent(lang)}`;
-        const { error: linkError } = await supabaseAdmin.auth.signInWithOtp({
-          email: memberRow.email,
-          options: { shouldCreateUser: false, emailRedirectTo: redirectTo },
-        });
-        if (linkError) throw new Error(linkError.message);
+        await sendMagicLoginLinkEmail(supabaseAdmin, memberRow.email, redirectTo);
         const { error: claimError } = await supabaseAdmin
           .from("members")
           .update({ user_id: memberUserId })
