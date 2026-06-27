@@ -18,11 +18,11 @@ export type SampleMember = {
   status?: "active" | "inactive";
 };
 
-function StatusBadge({ status }: { status?: "active" | "inactive" }) {
+function StatusBadge({ status, bg, fg }: { status?: "active" | "inactive"; bg: string; fg?: string }) {
   const inactive = status === "inactive";
-  const bg = inactive ? "#dc2626" : "#16a34a";
+  const badgeBg = inactive ? bg : bg;
   return (
-    <div style={{ display: "inline-flex", alignSelf: "center", background: bg, color: "#fff", fontSize: 9, fontWeight: 700, padding: "2px 10px", borderRadius: 999, lineHeight: 1.1, marginTop: 4, whiteSpace: "nowrap", letterSpacing: 0.3 }}>
+    <div style={{ display: "inline-flex", alignSelf: "center", background: badgeBg, color: fg || "#fff", fontSize: 9, fontWeight: 700, padding: "2px 10px", borderRadius: 999, lineHeight: 1.1, marginTop: 4, whiteSpace: "nowrap", letterSpacing: 0.3 }}>
       {inactive ? "Inactive" : "Active"}
     </div>
   );
@@ -152,7 +152,7 @@ function Header({ design, org, member }: { design: IdCardDesign; org: OrgContext
         {show(e.regNumber) && org.regNumber && <div style={txt(e.regNumber, "#fff")}>Reg: {org.regNumber}</div>}
       </div>
       <div style={{ flexShrink: 0, transform: `translateX(${badgeDx}px)` }}>
-        <StatusBadge status={member.status} />
+        <StatusBadge status={member.status} bg={g.memberCodeBadgeBg || g.accentColor} fg={e.memberCode?.color || "#fff"} />
       </div>
     </div>
   );
@@ -234,7 +234,7 @@ function FrontHorizontal({ design, org, member }: { design: IdCardDesign; org: O
           {!show(e.village)   && show(e.pincode) && member.pincode && <DetailLine icon="📍" value={member.pincode} style={txt(e.pincode)} />}
           {show(e.phone)      && member.phone      && <DetailLine icon="📞" value={member.phone} style={txt(e.phone)} />}
           {show(e.bloodGroup) && member.bloodGroup && (
-            <div style={{ display: "inline-flex", alignSelf: "flex-start", gap: 4, alignItems: "center", padding: "1px 6px", borderRadius: 4, background: "#fee2e2", ...txt(e.bloodGroup) }}>
+            <div style={{ display: "inline-flex", alignSelf: "flex-start", gap: 4, alignItems: "center", padding: "1px 6px", borderRadius: 4, background: `${design.global.accentColor}22`, ...txt(e.bloodGroup) }}>
               🩸 {member.bloodGroup}
             </div>
           )}
@@ -278,7 +278,7 @@ function FrontVertical({ design, org, member }: { design: IdCardDesign; org: Org
         {show(e.village)    && member.village    && <div style={{ ...txt(e.village), textAlign: "center" }}>📍 {member.village}{show(e.pincode) && member.pincode ? ` - ${member.pincode}` : ""}</div>}
         {show(e.phone)      && member.phone      && <div style={{ ...txt(e.phone), textAlign: "center" }}>📞 {member.phone}</div>}
         {show(e.bloodGroup) && member.bloodGroup && (
-          <div style={{ display: "inline-flex", alignSelf: "center", gap: 4, alignItems: "center", padding: "1px 8px", borderRadius: 4, background: "#fee2e2", ...txt(e.bloodGroup), marginTop: 2 }}>
+          <div style={{ display: "inline-flex", alignSelf: "center", gap: 4, alignItems: "center", padding: "1px 8px", borderRadius: 4, background: `${accent}22`, ...txt(e.bloodGroup), marginTop: 2 }}>
             🩸 {member.bloodGroup}
           </div>
         )}
