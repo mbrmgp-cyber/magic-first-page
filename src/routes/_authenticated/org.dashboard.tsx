@@ -28,7 +28,6 @@ const MENU = [
   { to: "/org/committee", en: "Executive Committee", te: "కార్యవర్గ కమిటీ వివరాలు", icon: Briefcase },
   { to: "/org/events", en: "Events, Meetings, Decisions", te: "కార్యక్రమాలు, సమావేశాలు, నిర్ణయాలు", icon: Calendar },
   { to: "/org/designs", en: "ID Cards, Mementos, Letterhead, Stamp Design", te: "ID కార్డులు, మెమెంటోలు, లెటర్‌ప్యాడ్, స్టాంప్ డిజైన్", icon: IdCard },
-  { to: "/org/theme", en: "Design & Theme", te: "రంగులు మరియు డిజైన్", icon: Settings },
   { to: "/org/accounts-hub", en: "Accounts Hub", te: "అకౌంట్స్ బాక్స్", icon: Wallet },
   { to: "/org/chat", en: "Member Chat", te: "సభ్యులతో చాటింగ్", icon: MessageSquare },
   { to: "/org/elections", en: "Board Elections", te: "బోర్డు ఎన్నికలు", icon: Vote },
@@ -62,7 +61,28 @@ function Dashboard() {
   const [exporting, setExporting] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [leaveOpen, setLeaveOpen] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  async function leaveOrganization() {
+    setLeaving(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not signed in");
+      const { error } = await supabase.from("members").delete().eq("user_id", user.id);
+      if (error) throw error;
+      toast.success("మీరు సంస్థ నుండి విజయవంతంగా వైదొలిగారు");
+      setLeaveOpen(false);
+      setSettingsOpen(false);
+      await supabase.auth.signOut();
+      navigate({ to: "/auth", replace: true });
+    } catch (e: any) {
+      toast.error(e.message ?? "Failed to leave organization");
+    } finally {
+      setLeaving(false);
+    }
+  }
 
   async function logout() {
     await supabase.auth.signOut();
@@ -246,7 +266,7 @@ function Dashboard() {
             )}
           </button>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/org/theme" })} className="text-zinc-200 hover:bg-zinc-900 hover:text-white" aria-label="Theme & Design">
+            <Button variant="ghost" size="sm" onClick={() => setSettingsOpen(true)} className="text-zinc-200 hover:bg-zinc-900 hover:text-white" aria-label="Settings">
               <Settings className="h-4 w-4" />
             </Button>
             <Button variant="ghost" size="sm" onClick={logout} className="text-zinc-200 hover:bg-zinc-900 hover:text-white">
@@ -351,12 +371,45 @@ function Dashboard() {
           </DialogHeader>
           <div className="space-y-3 pt-2">
             <Button
+              onClick={() => { setSettingsOpen(false); navigate({ to: "/org/theme" }); }}
+              className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-semibold border border-zinc-700"
+            >
+              <Settings className="h-4 w-4 mr-1" /> Design & Theme / రంగులు & డిజైన్
+            </Button>
+            <Button
+              onClick={() => { setSettingsOpen(false); setLeaveOpen(true); }}
+              className="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold border-0"
+            >
+              <LogOut className="h-4 w-4 mr-1" /> Leave Organization / సంస్థ నుండి వైదొలగండి
+            </Button>
+            <Button
               onClick={() => { setCancelStep(1); setResolutionUrl(""); setSettingsOpen(false); setCancelOpen(true); }}
               className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold border-0 shadow-[0_0_24px_rgba(220,38,38,0.45)]"
             >
               <ShieldAlert className="h-4 w-4 mr-1" /> Cancel MBR Registration / సభ్యత్వం రద్దు
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Leave Organization Confirmation */}
+      <Dialog open={leaveOpen} onOpenChange={setLeaveOpen}>
+        <DialogContent className="max-w-sm bg-zinc-950 border-zinc-800 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" /> Leave Organization?
+            </DialogTitle>
+            <DialogDescription className="text-zinc-400">
+              మీరు ఈ సంస్థ నుండి వైదొలగాలనుకుంటున్నారా? మీ సభ్యత్వ ప్రొఫైల్ తొలగించబడుతుంది మరియు మీరు లాగ్ అవుట్ చేయబడతారు. ఈ చర్య తిరిగి మార్చబడదు.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setLeaveOpen(false)} className="border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800">Cancel</Button>
+            <Button disabled={leaving} onClick={leaveOrganization} className="bg-amber-600 hover:bg-amber-700 text-white font-semibold">
+              {leaving ? <RefreshCw className="h-4 w-4 mr-1 animate-spin" /> : <LogOut className="h-4 w-4 mr-1" />}
+              Confirm Leave
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
