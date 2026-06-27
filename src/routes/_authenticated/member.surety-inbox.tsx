@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { listSuretyRequests, respondAsSurety } from "@/lib/loan-requests.functions";
 import { SignaturePad } from "@/components/SignaturePad";
 import { supabase } from "@/integrations/supabase/client";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, localizeText } from "@/lib/i18n";
 import { printSuretyConsent } from "@/lib/printLoan";
 
 export const Route = createFileRoute("/_authenticated/member/surety-inbox")({
@@ -37,8 +37,8 @@ function SignedImg({ path, className }: { path?: string | null; className?: stri
 
 function SuretyInbox() {
   const { lang } = useI18n();
-  const isTe = lang === "te";
-  const pick = <T,>(te: T, en: T) => (isTe ? te : en);
+  const isTe = lang !== "en";
+  const pick = (te: string, en: string) => (lang === "en" ? en : localizeText({ te, en }, lang));
 
   const listFn = useServerFn(listSuretyRequests);
   const respondFn = useServerFn(respondAsSurety);
@@ -96,9 +96,9 @@ function SuretyInbox() {
     <div className="min-h-screen bg-black text-white pb-16">
       <div className="max-w-md mx-auto p-4 space-y-5">
         <header className="flex items-center gap-3">
-          <Link to="/org/chat" className="p-2 rounded-lg hover:bg-white/10">
+          <button type="button" onClick={() => window.history.back()} className="p-2 rounded-lg hover:bg-white/10">
             <ArrowLeft className="h-5 w-5" />
-          </Link>
+          </button>
           <div>
             <h1 className="text-lg font-bold">{pick("షూరిటీ అభ్యర్థనలు", "Surety Requests")}</h1>
             <p className="text-xs text-white/60">{pick("మీరు షూరిటీగా ఉన్న లోన్ అభ్యర్థనలు", "Loans where you are named as surety")}</p>
@@ -231,7 +231,9 @@ function r_proofPreview(r: any) {
 }
 
 function Pill({ status, isTe }: { status: string; isTe: boolean }) {
-  if (status === "accepted") return <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-600/20 text-emerald-300"><CheckCircle2 className="h-3 w-3"/>{isTe ? "సమ్మతించారు" : "Accepted"}</span>;
-  if (status === "declined") return <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-red-600/20 text-red-300"><XCircle className="h-3 w-3"/>{isTe ? "తిరస్కరించారు" : "Declined"}</span>;
-  return <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-600/20 text-amber-300"><Clock className="h-3 w-3"/>{isTe ? "వేచిఉంది" : "Awaiting"}</span>;
+  const lang = typeof document !== "undefined" ? document.documentElement.lang || "te" : "te";
+  const tr = (te: string, en: string) => (lang === "en" || !isTe ? en : localizeText({ te, en }, lang));
+  if (status === "accepted") return <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-600/20 text-emerald-300"><CheckCircle2 className="h-3 w-3"/>{tr("సమ్మతించారు", "Accepted")}</span>;
+  if (status === "declined") return <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-red-600/20 text-red-300"><XCircle className="h-3 w-3"/>{tr("తిరస్కరించారు", "Declined")}</span>;
+  return <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-600/20 text-amber-300"><Clock className="h-3 w-3"/>{tr("వేచిఉంది", "Awaiting")}</span>;
 }

@@ -10,7 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ArrowLeft, Megaphone, Users, ShieldCheck, ThumbsUp, HandHeart, Handshake, CheckCircle2, XCircle, Inbox, Loader2, User, IndianRupee } from "lucide-react";
 import { toast } from "sonner";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, localizeText } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/org/chat")({
   head: () => ({ meta: [{ title: "Member Communications Hub" }] }),
@@ -37,11 +37,11 @@ const GENERAL_LABEL = { te: "సాధారణ సభ్యుడు", en: "Gen
 
 function useLangPick() {
   const { lang } = useI18n();
-  const isTe = lang === "te";
+  const isTe = lang !== "en";
   return {
     lang,
     isTe,
-    pick: <T,>(te: T, en: T) => (isTe ? te : en),
+    pick: (te: string, en: string) => (lang === "en" ? en : localizeText({ te, en }, lang)),
   };
 }
 
@@ -323,7 +323,7 @@ function InteractionsPanel({ ctx }: { ctx: Ctx }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {filtered.map(m => {
           const roleLabel = m.role
-            ? (isTe ? ROLE_LABEL[m.role]?.te : ROLE_LABEL[m.role]?.en) ?? m.role
+            ? pick(ROLE_LABEL[m.role]?.te ?? m.role, ROLE_LABEL[m.role]?.en ?? m.role)
             : pick(GENERAL_LABEL.te, GENERAL_LABEL.en);
           const isCommitteeMember = !!m.role;
           return (
@@ -347,7 +347,7 @@ function InteractionsPanel({ ctx }: { ctx: Ctx }) {
           <div className="space-y-1">
             {sentQ.data.map(s => (
               <div key={s.id} className="flex items-center justify-between text-xs text-zinc-400 py-1 border-b border-zinc-800 last:border-0">
-                <span>{isTe ? TEMPLATES[s.template_type as Tpl]?.label_te : TEMPLATES[s.template_type as Tpl]?.label_en}</span>
+                <span>{pick(TEMPLATES[s.template_type as Tpl]?.label_te ?? "", TEMPLATES[s.template_type as Tpl]?.label_en ?? "")}</span>
                 <span className={s.status === "approved" ? "text-green-400" : s.status === "rejected" ? "text-red-400" : "text-amber-400"}>{s.status.toUpperCase()}</span>
               </div>
             ))}
@@ -370,8 +370,8 @@ function InteractionsPanel({ ctx }: { ctx: Ctx }) {
                   className={`w-full text-left p-3 rounded-lg border transition flex items-start gap-3 ${active ? "border-[#ff8c28] bg-[#ff8c28]/10" : "border-zinc-800 bg-zinc-900 hover:border-zinc-600"}`}>
                   <Icon className="w-5 h-5 mt-0.5 shrink-0" style={{ color: t.tone }} />
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-white">{isTe ? t.label_te : t.label_en}</p>
-                    <p className="text-xs text-zinc-300 mt-1">{isTe ? t.msg_te : t.msg_en}</p>
+                    <p className="text-sm font-semibold text-white">{pick(t.label_te, t.label_en)}</p>
+                    <p className="text-xs text-zinc-300 mt-1">{pick(t.msg_te, t.msg_en)}</p>
                   </div>
                 </button>
               );
@@ -466,7 +466,7 @@ function QueuePanel({ ctx }: { ctx: Ctx }) {
                 <p className="text-xs text-zinc-400">
                   <span className="text-white">{r.sender?.name ?? "?"}</span> → <span className="text-white">{r.recipient?.name ?? "?"}</span>
                 </p>
-                <p className="text-sm text-zinc-200 mt-1">{isTe ? r.message_te : r.message_en}</p>
+                <p className="text-sm text-zinc-200 mt-1">{pick(r.message_te ?? "", r.message_en ?? "")}</p>
                 <p className="text-[10px] text-zinc-600 mt-1">{new Date(r.created_at).toLocaleString()}</p>
               </div>
               {tab === "pending" && (
@@ -507,7 +507,7 @@ function InboxPanel({ ctx }: { ctx: Ctx }) {
             <Icon className="w-5 h-5 mt-0.5 shrink-0" style={{ color: t?.tone }} />
             <div className="min-w-0">
               <p className="text-xs text-zinc-400">{pick("నుండి", "From")} <span className="text-white">{r.sender?.name ?? "Member"}</span></p>
-              <p className="text-sm text-zinc-200 mt-1">{isTe ? r.message_te : r.message_en}</p>
+              <p className="text-sm text-zinc-200 mt-1">{pick(r.message_te ?? "", r.message_en ?? "")}</p>
               <p className="text-[10px] text-zinc-600 mt-1">{new Date(r.reviewed_at ?? r.created_at).toLocaleString()}</p>
             </div>
           </Card>
