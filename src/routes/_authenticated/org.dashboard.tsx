@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { getMyOrg, updateOrgLogo } from "@/lib/org.functions";
+import { getMyOrg, updateOrgLogo, getMyRoles } from "@/lib/org.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import {
   LogOut, BookOpen, Users, Briefcase, Calendar, IdCard, Wallet,
   MessageSquare, QrCode, Camera, Download, RefreshCw, Settings, AlertTriangle,
-  Upload, ShieldAlert, FileDown, CheckCircle2, Vote, TrendingUp, TrendingDown, PieChart,
+  Upload, ShieldAlert, FileDown, CheckCircle2, Vote, TrendingUp, TrendingDown, PieChart, ShieldCheck,
 } from "lucide-react";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 import { localizeText, transliterateText, useI18n } from "@/lib/i18n";
@@ -52,6 +52,9 @@ function Dashboard() {
   const { lang } = useI18n();
   const lt = (en: string, te: string) => localizeText({ en, te }, lang);
   const orgQ = useQuery({ queryKey: ["my-org"], queryFn: () => fetchOrg() });
+  const fetchRoles = useServerFn(getMyRoles);
+  const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: () => fetchRoles() });
+  const isMbrAdmin = rolesQ.data?.roles?.includes("mbr_admin") ?? false;
   const [qrOpen, setQrOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
@@ -311,6 +314,34 @@ function Dashboard() {
           </div>
         </Card>
 
+
+        {/* Super Admin shortcut */}
+        {isMbrAdmin && (
+          <Link to="/admin" className="block">
+            <Card
+              className="p-4 border-2 flex items-center gap-3 transition-all hover:scale-[1.01] animate-pulse-slow"
+              style={{
+                background: `linear-gradient(135deg, ${theme.icon}33, ${theme.bigBox})`,
+                borderColor: theme.icon,
+                boxShadow: `0 0 28px ${theme.icon}66`,
+              }}
+            >
+              <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 border-2"
+                style={{ background: `${theme.icon}40`, borderColor: theme.icon }}>
+                <ShieldCheck className="w-6 h-6" style={{ color: theme.icon }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-bold text-base leading-tight" style={{ color: theme.headColor }}>
+                  {lt("Admin Panel", "అడ్మిన్ ప్యానెల్")}
+                </div>
+                <div className="text-xs leading-tight" style={{ color: theme.subColor }}>
+                  {lt("Member ID Update · Society Approvals", "మెంబర్ ID అప్‌డేట్ · సొసైటీ ఆమోదాలు")}
+                </div>
+              </div>
+              <span className="text-2xl shrink-0" style={{ color: theme.icon }}>→</span>
+            </Card>
+          </Link>
+        )}
 
         {/* Menu 2-col grid */}
         <div className="grid grid-cols-2 gap-3">
