@@ -130,20 +130,46 @@ export function GlobalThemeApplier() {
       }
 
       html[data-mbr-theme="on"] .mbr-themed-app .bg-card,
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-black"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-zinc-"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-slate-"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-neutral-"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-gray-"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-white/"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-[#ff8c28]"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-orange-"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-amber-"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-emerald-"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-green-"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-blue-"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-red-"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-gradient-to-"]:not([class*="bg-clip-text"]),
       html[data-mbr-theme="on"] .mbr-themed-app [class*="data-[state=active]:bg-[#ff8c28]"][data-state="active"],
+      html[data-mbr-theme="on"] [role="dialog"][class*="bg-black"],
       html[data-mbr-theme="on"] [role="dialog"][class*="bg-zinc-"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="bg-black"],
       html[data-mbr-theme="on"] [role="dialog"] [class*="bg-zinc-"],
       html[data-mbr-theme="on"] [role="dialog"] [class*="bg-slate-"],
       html[data-mbr-theme="on"] [role="dialog"] [class*="bg-gray-"],
-      html[data-mbr-theme="on"] [role="dialog"] [class*="bg-white/"] {
+      html[data-mbr-theme="on"] [role="dialog"] [class*="bg-white/"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="bg-orange-"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="bg-amber-"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="bg-emerald-"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="bg-green-"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="bg-blue-"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="bg-red-"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="bg-gradient-to-"]:not([class*="bg-clip-text"]) {
         background: var(--mbr-theme-mini-card) !important;
+        background-image: none !important;
         color: var(--mbr-theme-heading) !important;
+      }
+
+      html[data-mbr-theme="on"] .mbr-themed-app [style*="linear-gradient"]:not([style*="background-clip"]):not([style*="BackgroundClip"]),
+      html[data-mbr-theme="on"] [role="dialog"] [style*="linear-gradient"]:not([style*="background-clip"]):not([style*="BackgroundClip"]) {
+        background: var(--mbr-theme-primary) !important;
+        background-image: none !important;
+        border-color: var(--mbr-theme-primary) !important;
+        color: var(--mbr-theme-primary-fg) !important;
       }
 
       html[data-mbr-theme="on"] .mbr-themed-app button[class*="bg-primary"],
@@ -158,6 +184,11 @@ export function GlobalThemeApplier() {
       html[data-mbr-theme="on"] .mbr-themed-app .btn-saffron-green,
       html[data-mbr-theme="on"] .mbr-themed-app [role="tab"][data-state="active"],
       html[data-mbr-theme="on"] [role="dialog"] button[class*="bg-orange-"],
+      html[data-mbr-theme="on"] [role="dialog"] button[class*="bg-amber-"],
+      html[data-mbr-theme="on"] [role="dialog"] button[class*="bg-emerald-"],
+      html[data-mbr-theme="on"] [role="dialog"] button[class*="bg-green-"],
+      html[data-mbr-theme="on"] [role="dialog"] button[class*="bg-blue-"],
+      html[data-mbr-theme="on"] [role="dialog"] button[class*="bg-red-"],
       html[data-mbr-theme="on"] [role="dialog"] button[class*="bg-[#ff8c28]"],
       html[data-mbr-theme="on"] [role="dialog"] button[class*="bg-primary"] {
         background-color: var(--mbr-theme-primary) !important;
@@ -236,15 +267,26 @@ export function GlobalThemeApplier() {
         font-family: ${JSON.stringify(t.headFont)}, system-ui, sans-serif !important;
       }
 
-      html[data-mbr-theme="on"] .mbr-themed-app [class*="text-[#ff8c28]"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="border-[#ff8c28]"],
       html[data-mbr-theme="on"] .mbr-themed-app svg[class*="text-[#ff8c28]"] {
         color: var(--mbr-theme-icon) !important;
         border-color: var(--mbr-theme-icon) !important;
       }
 
+      html[data-mbr-theme="on"] .mbr-themed-app :not(svg)[class*="text-[#ff8c28]"] {
+        color: var(--mbr-theme-heading) !important;
+      }
+
+      html[data-mbr-theme="on"] .mbr-themed-app svg {
+        color: var(--mbr-theme-icon) !important;
+      }
+
       /* Kill hardcoded saffron→green text-clip gradients on sub-pages so
          titles always use the selected head color. */
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-clip-text"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="text-transparent"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="from-orange-"][class*="to-"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="from-[#"][class*="to-[#"],
       html[data-mbr-theme="on"] .mbr-themed-app [style*="-webkit-background-clip"],
       html[data-mbr-theme="on"] .mbr-themed-app [style*="background-clip: text"],
       html[data-mbr-theme="on"] .mbr-themed-app [style*="background-clip:text"] {
