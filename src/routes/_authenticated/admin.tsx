@@ -126,6 +126,10 @@ function AdminPanel() {
           ))}
         </div>
 
+        <MemberIdUpdater />
+
+
+
         {orgsQ.isLoading && <Card className="p-6 text-center bg-white/90">Loading societies…</Card>}
 
         {!orgsQ.isLoading && filtered.length === 0 && (
