@@ -639,7 +639,7 @@ function Section({
   theme: Required<ThemeSettings>; children: React.ReactNode; right?: React.ReactNode;
 }) {
   return (
-    <Card className="p-4 space-y-4 border" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
+    <Card className="p-4 space-y-4 border" data-theme-surface="big-box" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
       <div className="flex items-center gap-2 justify-between">
         <div className="flex items-center gap-2">
           {icon}
@@ -659,7 +659,7 @@ function LivePreview({
   title, theme, children,
 }: { title: string; theme: Required<ThemeSettings>; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl p-3 border" style={{ background: PAGE_MINI, borderColor: PAGE_BORDER }}>
+    <div className="rounded-xl p-3 border" data-theme-surface="mini-box" style={{ background: PAGE_MINI, borderColor: PAGE_BORDER }}>
       <div className="flex items-center gap-2 mb-2">
         <Sparkles className="h-3.5 w-3.5" style={{ color: theme.icon }} />
         <p className="text-[11px] uppercase tracking-wide font-semibold" style={{ color: PAGE_HEAD }}>
@@ -694,7 +694,7 @@ function StyleControls({
   font: string; setFont: (v: string) => void;
 }) {
   return (
-    <div className="rounded-lg p-3 border space-y-3" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
+    <div className="rounded-lg p-3 border space-y-3" data-theme-surface="big-box" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
       <div className="flex items-center gap-2">
         <Palette className="h-3.5 w-3.5" style={{ color: accent }} />
         <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: PAGE_HEAD }}>
@@ -744,7 +744,7 @@ function StyleControls({
 
 function LogoUploader({ logoUrl, onChange }: { logoUrl: string; onChange: (url: string) => void }) {
   return (
-    <div className="rounded-lg p-3 border flex items-center gap-3" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
+    <div className="rounded-lg p-3 border flex items-center gap-3" data-theme-surface="big-box" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
       <div style={{ width: 44, height: 44, borderRadius: 6, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", padding: 4, border: `1px solid ${PAGE_BORDER}` }}>
         {logoUrl ? <img src={logoUrl} alt="Logo" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} /> : null}
       </div>
