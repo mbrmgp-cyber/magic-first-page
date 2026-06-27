@@ -61,7 +61,28 @@ function Dashboard() {
   const [exporting, setExporting] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [leaveOpen, setLeaveOpen] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  async function leaveOrganization() {
+    setLeaving(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not signed in");
+      const { error } = await supabase.from("members").delete().eq("user_id", user.id);
+      if (error) throw error;
+      toast.success("మీరు సంస్థ నుండి విజయవంతంగా వైదొలిగారు");
+      setLeaveOpen(false);
+      setSettingsOpen(false);
+      await supabase.auth.signOut();
+      navigate({ to: "/auth", replace: true });
+    } catch (e: any) {
+      toast.error(e.message ?? "Failed to leave organization");
+    } finally {
+      setLeaving(false);
+    }
+  }
 
   async function logout() {
     await supabase.auth.signOut();
