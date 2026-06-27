@@ -144,6 +144,43 @@ const FONT_OPTIONS = [
   { v: "Courier New", label: "Courier (Mono)" },
 ];
 
+function applyOrgThemeToIdDesign(base: IdCardDesign, theme: Required<ThemeSettings>): IdCardDesign {
+  const next: IdCardDesign = JSON.parse(JSON.stringify(base));
+  next.global = {
+    ...next.global,
+    backgroundColor: theme.miniBox,
+    borderColor: theme.border,
+    accentColor: theme.icon,
+    footerColor: theme.icon,
+    contactFooterBg: theme.icon,
+    memberCodeBadgeBg: theme.buttonBg,
+  };
+
+  const textKeys: ElementKey[] = [
+    "memberName", "fatherName", "village", "pincode", "phone", "email", "address",
+    "backMatter", "oath", "presidentName",
+  ];
+  const headKeys: ElementKey[] = ["orgName", "slogan", "regNumber"];
+  for (const key of headKeys) {
+    if (next.elements[key]) {
+      next.elements[key] = {
+        ...next.elements[key],
+        color: key === "slogan" ? theme.subColor : theme.headColor,
+        font: key === "slogan" ? theme.subFont : theme.headFont,
+      };
+    }
+  }
+  for (const key of textKeys) {
+    if (next.elements[key]) {
+      next.elements[key] = { ...next.elements[key], color: key === "backMatter" ? theme.headColor : theme.headColor, font: theme.headFont };
+    }
+  }
+  if (next.elements.memberCode) next.elements.memberCode = { ...next.elements.memberCode, color: theme.buttonText, font: theme.headFont };
+  if (next.elements.designation) next.elements.designation = { ...next.elements.designation, color: theme.icon, font: theme.headFont };
+  if (next.elements.bloodGroup) next.elements.bloodGroup = { ...next.elements.bloodGroup, color: theme.icon, font: theme.headFont };
+  return next;
+}
+
 function DesignsPage() {
   const navigate = useNavigate();
   const fetchOrg = useServerFn(getMyOrg);
