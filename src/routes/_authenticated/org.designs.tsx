@@ -2018,8 +2018,8 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
               return (
                 <button key={id} onClick={() => pickTemplate(id)}
                   className="rounded-xl border p-3 text-left hover:scale-[1.02] transition space-y-2"
-                  style={{ borderColor: PAGE_BORDER, background: PAGE_BG }}>
-                  <div className="flex justify-center bg-zinc-900/40 rounded-lg p-2" style={{ height: 130, overflow: "hidden" }}>
+                  style={{ borderColor: PAGE_BORDER, background: PAGE_MINI }}>
+                  <div className="flex justify-center rounded-lg p-2" style={{ height: 130, overflow: "hidden", background: PAGE_PANEL }}>
                     <IdCardRenderer design={tplDesign} org={orgCtx} member={sampleMember} side="front" scale={0.55} />
                   </div>
                   <div>
