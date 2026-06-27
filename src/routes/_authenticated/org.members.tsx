@@ -464,6 +464,66 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
   );
 }
 
+function MemberCodeEditor({ member, onSaved }: { member: Member; onSaved: () => void }) {
+  const update = useServerFn(orgUpdateMemberCode);
+  const locked = !!member.member_code_locked;
+  const [editing, setEditing] = useState(false);
+  const [val, setVal] = useState<string>(member.member_code ?? "");
+  const [saving, setSaving] = useState(false);
+
+  async function save() {
+    const v = val.trim();
+    if (!v || v === member.member_code) { setEditing(false); return; }
+    setSaving(true);
+    try {
+      await update({ data: { member_id: member.id, new_code: v } });
+      toast.success("ఐడి అప్‌డేట్ అయింది & లాక్ చేయబడింది");
+      setEditing(false);
+      onSaved();
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally { setSaving(false); }
+  }
+
+  if (locked) {
+    return (
+      <div className="rounded-md border bg-primary/5 p-3 flex items-center justify-between">
+        <div>
+          <Label className="text-xs text-muted-foreground flex items-center gap-1"><Lock className="w-3 h-3" /> ఐడి నెంబర్ (లాక్ అయింది)</Label>
+          <p className="font-mono text-lg font-semibold text-primary">{member.member_code}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-md border bg-amber-50 border-amber-300 p-3 space-y-2">
+      <Label className="text-xs text-amber-800">
+        ఐడి నెంబర్ — ఇప్పుడు ఒకసారి మార్చవచ్చు. Save చేస్తే లాక్ అవుతుంది.
+      </Label>
+      {editing ? (
+        <div className="flex gap-2">
+          <Input
+            value={val}
+            onChange={(e) => setVal(e.target.value.toUpperCase())}
+            className="font-mono"
+            autoFocus
+          />
+          <Button size="sm" onClick={save} disabled={saving}>{saving ? "…" : "Save & Lock"}</Button>
+          <Button size="sm" variant="ghost" onClick={() => { setVal(member.member_code ?? ""); setEditing(false); }}>రద్దు</Button>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between">
+          <p className="font-mono text-lg font-semibold text-primary">{member.member_code}</p>
+          <Button size="sm" variant="outline" onClick={() => setEditing(true)}>Edit ID</Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+
 
 function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
   const listL = useServerFn(listMemberLoans);
