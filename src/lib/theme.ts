@@ -5,6 +5,8 @@ export type TextAlign = "left" | "center" | "right";
 export type ThemeSettings = {
   bg?: string;          // page background
   box?: string;         // card / box fill
+  bigBox?: string;      // large section/header box fill
+  miniBox?: string;     // small tile/card fill
   border?: string;      // card / button border
   icon?: string;        // dashboard icon color
   buttonBg?: string;    // primary button fill
@@ -21,6 +23,8 @@ export type ThemeSettings = {
 export const DEFAULT_THEME: Required<ThemeSettings> = {
   bg: "#000000",
   box: "#0a0a0a",
+  bigBox: "#0a0a0a",
+  miniBox: "#0a0a0a",
   border: "#27272a",
   icon: "#ff8c28",
   buttonBg: "#ff8c28",
@@ -56,17 +60,23 @@ export function resolveTheme(org: any): Required<ThemeSettings> {
     buttonBg: org?.theme_color,
     headFont: org?.theme_font,
   } as ThemeSettings;
-  return {
+  const merged = {
     ...DEFAULT_THEME,
     ...legacy,
     ...t,
   } as Required<ThemeSettings>;
+  merged.bigBox = t.bigBox || t.box || merged.bigBox;
+  merged.miniBox = t.miniBox || t.box || merged.miniBox;
+  merged.box = t.box || merged.miniBox;
+  return merged;
 }
 
 export function themeStyle(t: Required<ThemeSettings>): React.CSSProperties {
   return {
     ["--tbg" as any]: t.bg,
     ["--tbox" as any]: t.box,
+    ["--tbigbox" as any]: t.bigBox,
+    ["--tminibox" as any]: t.miniBox,
     ["--tborder" as any]: t.border,
     ["--ticon" as any]: t.icon,
     ["--tbtn" as any]: t.buttonBg,

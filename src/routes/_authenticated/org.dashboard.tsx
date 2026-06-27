@@ -277,7 +277,7 @@ function Dashboard() {
         </div>
 
         {/* Society headline card */}
-        <Card className="p-4 border" style={{ background: theme.box, borderColor: theme.border, boxShadow: `0 0 40px ${theme.icon}1a` }}>
+        <Card className="p-4 border" style={{ background: theme.bigBox, borderColor: theme.border, boxShadow: `0 0 40px ${theme.icon}1a` }}>
           <div className={`flex items-start gap-4 ${theme.headAlign === "right" ? "flex-row-reverse" : ""}`}>
             <button
               type="button"
@@ -317,7 +317,7 @@ function Dashboard() {
           {MENU.map((m) => (
             <Link key={m.to} to={m.to}>
               <Card className="p-4 border transition-all cursor-pointer h-full"
-                style={{ background: theme.box, borderColor: theme.border }}
+                style={{ background: theme.miniBox, borderColor: theme.border }}
                 onMouseEnter={(e) => { e.currentTarget.style.boxShadow = `0 0 24px ${theme.icon}40`; e.currentTarget.style.borderColor = theme.icon; }}
                 onMouseLeave={(e) => { e.currentTarget.style.boxShadow = ``; e.currentTarget.style.borderColor = theme.border; }}>
                 <div className="flex flex-col items-center text-center gap-2">

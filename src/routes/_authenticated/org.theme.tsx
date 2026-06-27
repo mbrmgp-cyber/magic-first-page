@@ -25,7 +25,8 @@ type Field = { key: keyof ThemeSettings; en: string; te: string; icon: any };
 
 const COLOR_FIELDS: Field[] = [
   { key: "bg", en: "Background", te: "బ్యాక్‌గ్రౌండ్ కలర్", icon: Palette },
-  { key: "box", en: "Box / Card Fill", te: "బాక్స్ కలర్", icon: Square },
+  { key: "bigBox", en: "Big Box Fill", te: "బిగ్ బాక్స్ కలర్", icon: Square },
+  { key: "miniBox", en: "Mini Box Fill", te: "మినీ బాక్స్ కలర్", icon: Square },
   { key: "border", en: "Border Lines", te: "బార్డర్ లైన్ కలర్", icon: Frame },
   { key: "icon", en: "Icons", te: "ఐకాన్ కలర్", icon: Sparkles },
   { key: "buttonBg", en: "Button Fill", te: "బటన్ కలర్", icon: MousePointerClick },
@@ -81,6 +82,8 @@ function OrgThemePage() {
   const previewVars = useMemo<React.CSSProperties>(() => ({
     ["--tbg" as any]: t.bg,
     ["--tbox" as any]: t.box,
+    ["--tbigbox" as any]: t.bigBox,
+    ["--tminibox" as any]: t.miniBox,
     ["--tborder" as any]: t.border,
     ["--ticon" as any]: t.icon,
     ["--tbtn" as any]: t.buttonBg,
@@ -133,7 +136,7 @@ function OrgThemePage() {
           </p>
           <div className="rounded-xl p-3 space-y-3" style={{ background: t.bg, border: `1px solid ${t.border}` }}>
             {/* Headline card (mirrors org.dashboard) */}
-            <div className="rounded-lg p-3 border" style={{ background: t.box, borderColor: t.border, boxShadow: `0 0 24px ${t.icon}22` }}>
+            <div className="rounded-lg p-3 border" style={{ background: t.bigBox, borderColor: t.border, boxShadow: `0 0 24px ${t.icon}22` }}>
               <div className={`flex items-start gap-3 ${t.headAlign === "right" ? "flex-row-reverse" : ""}`}>
                 <div className="w-12 h-12 shrink-0 rounded-full border flex items-center justify-center"
                   style={{ background: t.bg, borderColor: t.border, color: t.smallColor }}>
@@ -163,7 +166,7 @@ function OrgThemePage() {
                 { i: Briefcase, l: "Committee" },
               ].map((x) => (
                 <div key={x.l} className="rounded-lg p-3 flex flex-col items-center gap-2 border"
-                  style={{ background: t.box, borderColor: t.border }}>
+                  style={{ background: t.miniBox, borderColor: t.border }}>
                   <div className="h-9 w-9 rounded-md flex items-center justify-center" style={{ background: `${t.icon}22` }}>
                     <x.i className="h-5 w-5" style={{ color: t.icon }} />
                   </div>
@@ -173,7 +176,7 @@ function OrgThemePage() {
             </div>
 
             {/* ID card row */}
-            <div className="rounded-lg p-3 flex items-center gap-3 border" style={{ background: t.box, borderColor: t.border }}>
+            <div className="rounded-lg p-3 flex items-center gap-3 border" style={{ background: t.miniBox, borderColor: t.border }}>
               <IdCard className="h-5 w-5" style={{ color: t.icon }} />
               <div className="flex-1">
                 <p style={{ color: t.headColor }} className="text-sm font-semibold">Member ID Card</p>

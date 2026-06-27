@@ -44,7 +44,9 @@ export function GlobalThemeApplier() {
     // Tailwind v4 reads --background etc. as plain CSS values.
     const vars: Record<string, string> = {
       "--mbr-theme-bg": t.bg,
-      "--mbr-theme-card": t.box,
+      "--mbr-theme-card": t.miniBox,
+      "--mbr-theme-big-card": t.bigBox,
+      "--mbr-theme-mini-card": t.miniBox,
       "--mbr-theme-border": t.border,
       "--mbr-theme-primary": t.buttonBg,
       "--mbr-theme-primary-fg": t.buttonText,
@@ -53,22 +55,22 @@ export function GlobalThemeApplier() {
       "--mbr-theme-icon": t.icon,
       "--background": t.bg,
       "--foreground": t.headColor,
-      "--card": t.box,
+      "--card": t.miniBox,
       "--card-foreground": t.headColor,
-      "--popover": t.box,
+      "--popover": t.bigBox,
       "--popover-foreground": t.headColor,
       "--primary": t.buttonBg,
       "--primary-foreground": t.buttonText,
-      "--secondary": t.box,
+      "--secondary": t.miniBox,
       "--secondary-foreground": t.headColor,
-      "--muted": t.box,
+      "--muted": t.miniBox,
       "--muted-foreground": t.smallColor,
-      "--accent": t.box,
+      "--accent": t.miniBox,
       "--accent-foreground": t.headColor,
       "--border": t.border,
       "--input": t.border,
       "--ring": t.buttonBg,
-      "--sidebar": t.box,
+      "--sidebar": t.bigBox,
       "--sidebar-foreground": t.headColor,
       "--sidebar-border": t.border,
     };
@@ -106,6 +108,27 @@ export function GlobalThemeApplier() {
         font-family: ${JSON.stringify(t.headFont)}, system-ui, sans-serif !important;
       }
 
+      html[data-mbr-theme="on"] .mbr-themed-app,
+      html[data-mbr-theme="on"] .mbr-themed-app *:not(svg):not(path) {
+        font-family: ${JSON.stringify(t.headFont)}, system-ui, sans-serif !important;
+      }
+
+      html[data-mbr-theme="on"] .mbr-theme-big-box,
+      html[data-mbr-theme="on"] .mbr-themed-app .mbr-theme-big-box,
+      html[data-mbr-theme="on"] [role="dialog"] .mbr-theme-big-box {
+        background: var(--mbr-theme-big-card) !important;
+        border-color: var(--mbr-theme-border) !important;
+        color: var(--mbr-theme-heading) !important;
+      }
+
+      html[data-mbr-theme="on"] .mbr-theme-mini-box,
+      html[data-mbr-theme="on"] .mbr-themed-app .mbr-theme-mini-box,
+      html[data-mbr-theme="on"] [role="dialog"] .mbr-theme-mini-box {
+        background: var(--mbr-theme-mini-card) !important;
+        border-color: var(--mbr-theme-border) !important;
+        color: var(--mbr-theme-heading) !important;
+      }
+
       html[data-mbr-theme="on"] .mbr-themed-app .bg-card,
       html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-zinc-"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-slate-"],
@@ -113,17 +136,32 @@ export function GlobalThemeApplier() {
       html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-gray-"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-white/"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-[#ff8c28]"],
-      html[data-mbr-theme="on"] .mbr-themed-app [class*="data-[state=active]:bg-[#ff8c28]"][data-state="active"] {
-        background: var(--mbr-theme-card) !important;
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="data-[state=active]:bg-[#ff8c28]"][data-state="active"],
+      html[data-mbr-theme="on"] [role="dialog"][class*="bg-zinc-"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="bg-zinc-"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="bg-slate-"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="bg-gray-"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="bg-white/"] {
+        background: var(--mbr-theme-mini-card) !important;
         color: var(--mbr-theme-heading) !important;
       }
 
       html[data-mbr-theme="on"] .mbr-themed-app button[class*="bg-primary"],
       html[data-mbr-theme="on"] .mbr-themed-app a[class*="bg-[#ff8c28]"],
       html[data-mbr-theme="on"] .mbr-themed-app button[class*="bg-[#ff8c28]"],
+      html[data-mbr-theme="on"] .mbr-themed-app button[class*="bg-orange-"],
+      html[data-mbr-theme="on"] .mbr-themed-app button[class*="bg-amber-"],
+      html[data-mbr-theme="on"] .mbr-themed-app button[class*="bg-emerald-"],
+      html[data-mbr-theme="on"] .mbr-themed-app button[class*="bg-green-"],
+      html[data-mbr-theme="on"] .mbr-themed-app button[class*="bg-blue-"],
+      html[data-mbr-theme="on"] .mbr-themed-app button[class*="bg-red-"],
       html[data-mbr-theme="on"] .mbr-themed-app .btn-saffron-green,
-      html[data-mbr-theme="on"] .mbr-themed-app [role="tab"][data-state="active"] {
+      html[data-mbr-theme="on"] .mbr-themed-app [role="tab"][data-state="active"],
+      html[data-mbr-theme="on"] [role="dialog"] button[class*="bg-orange-"],
+      html[data-mbr-theme="on"] [role="dialog"] button[class*="bg-[#ff8c28]"],
+      html[data-mbr-theme="on"] [role="dialog"] button[class*="bg-primary"] {
         background-color: var(--mbr-theme-primary) !important;
+        background-image: none !important;
         border-color: var(--mbr-theme-primary) !important;
         color: var(--mbr-theme-primary-fg) !important;
       }
@@ -131,8 +169,12 @@ export function GlobalThemeApplier() {
       html[data-mbr-theme="on"] .mbr-themed-app input,
       html[data-mbr-theme="on"] .mbr-themed-app textarea,
       html[data-mbr-theme="on"] .mbr-themed-app select,
-      html[data-mbr-theme="on"] .mbr-themed-app [role="combobox"] {
-        background-color: transparent !important;
+      html[data-mbr-theme="on"] .mbr-themed-app [role="combobox"],
+      html[data-mbr-theme="on"] [role="dialog"] input,
+      html[data-mbr-theme="on"] [role="dialog"] textarea,
+      html[data-mbr-theme="on"] [role="dialog"] select,
+      html[data-mbr-theme="on"] [role="dialog"] [role="combobox"] {
+        background-color: color-mix(in srgb, var(--mbr-theme-mini-card) 80%, var(--mbr-theme-bg)) !important;
         border-color: var(--mbr-theme-border) !important;
         color: var(--mbr-theme-heading) !important;
         -webkit-text-fill-color: var(--mbr-theme-heading) !important;
@@ -148,7 +190,11 @@ export function GlobalThemeApplier() {
       html[data-mbr-theme="on"] .mbr-themed-app [class*="border-slate"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="border-neutral"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="border-gray"],
-      html[data-mbr-theme="on"] .mbr-themed-app [class*="border-white"] {
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="border-white"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="border-zinc"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="border-slate"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="border-gray"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="border-white"] {
         border-color: var(--mbr-theme-border) !important;
       }
 
@@ -159,9 +205,35 @@ export function GlobalThemeApplier() {
         color: var(--mbr-theme-muted) !important;
       }
 
-      html[data-mbr-theme="on"] .mbr-themed-app [class~="text-white"],
-      html[data-mbr-theme="on"] .mbr-themed-app [class*="text-white/"] {
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="text-orange-"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="text-amber-"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="text-blue-"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="text-green-"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="text-emerald-"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="text-red-"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="text-rose-"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="text-orange-"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="text-amber-"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="text-blue-"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="text-green-"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="text-emerald-"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="text-red-"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="text-rose-"] {
         color: var(--mbr-theme-heading) !important;
+      }
+
+      html[data-mbr-theme="on"] .mbr-themed-app [class~="text-white"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="text-white/"],
+      html[data-mbr-theme="on"] [role="dialog"] [class~="text-white"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="text-white/"] {
+        color: var(--mbr-theme-heading) !important;
+      }
+
+      html[data-mbr-theme="on"] [role="dialog"] {
+        background: var(--mbr-theme-big-card) !important;
+        border-color: var(--mbr-theme-border) !important;
+        color: var(--mbr-theme-heading) !important;
+        font-family: ${JSON.stringify(t.headFont)}, system-ui, sans-serif !important;
       }
 
       html[data-mbr-theme="on"] .mbr-themed-app [class*="text-[#ff8c28]"],
