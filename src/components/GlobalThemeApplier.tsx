@@ -81,7 +81,7 @@ export function GlobalThemeApplier() {
     // Global font + base body colors
     document.body.style.backgroundColor = t.bg;
     document.body.style.color = t.headColor;
-    document.body.style.fontFamily = `${JSON.stringify(t.headFont)}, system-ui, sans-serif`;
+    document.body.style.fontFamily = `${JSON.stringify(t.headFont)}, "Noto Sans Telugu", "Noto Sans Devanagari", system-ui, sans-serif`;
 
     // Inject high-specificity overrides for legacy pages that still use fixed
     // Tailwind colors (bg-black, bg-zinc-950, bg-white/95, text-white, etc.).
@@ -98,7 +98,7 @@ export function GlobalThemeApplier() {
       html[data-mbr-theme="on"], html[data-mbr-theme="on"] body {
         background-color: var(--mbr-theme-bg) !important;
         color: var(--mbr-theme-heading) !important;
-        font-family: ${JSON.stringify(t.headFont)}, system-ui, sans-serif !important;
+        font-family: ${JSON.stringify(t.headFont)}, "Noto Sans Telugu", "Noto Sans Devanagari", system-ui, sans-serif !important;
       }
 
       html[data-mbr-theme="on"] .mbr-themed-app,
@@ -107,11 +107,11 @@ export function GlobalThemeApplier() {
       html[data-mbr-theme="on"] .mbr-themed-app .bg-tricolor-strong {
         background: var(--mbr-theme-bg) !important;
         color: var(--mbr-theme-heading) !important;
-        font-family: ${JSON.stringify(t.headFont)}, system-ui, sans-serif !important;
+        font-family: ${JSON.stringify(t.headFont)}, "Noto Sans Telugu", "Noto Sans Devanagari", system-ui, sans-serif !important;
       }
 
       html[data-mbr-theme="on"] .mbr-themed-app :not(.mbr-preserve-design):not(.mbr-preserve-design *):not(svg):not(path) {
-        font-family: ${JSON.stringify(t.headFont)}, system-ui, sans-serif !important;
+        font-family: ${JSON.stringify(t.headFont)}, "Noto Sans Telugu", "Noto Sans Devanagari", system-ui, sans-serif !important;
       }
 
       html[data-mbr-theme="on"] .mbr-theme-big-box,
@@ -349,7 +349,7 @@ export function GlobalThemeApplier() {
         background: var(--mbr-theme-big-card) !important;
         border-color: var(--mbr-theme-border) !important;
         color: var(--mbr-theme-heading) !important;
-        font-family: ${JSON.stringify(t.headFont)}, system-ui, sans-serif !important;
+        font-family: ${JSON.stringify(t.headFont)}, "Noto Sans Telugu", "Noto Sans Devanagari", system-ui, sans-serif !important;
       }
 
       html[data-mbr-theme="on"] .mbr-themed-app [class*="border-[#ff8c28]"],
@@ -379,13 +379,29 @@ export function GlobalThemeApplier() {
         background: transparent !important;
         -webkit-text-fill-color: var(--mbr-theme-heading) !important;
         color: var(--mbr-theme-heading) !important;
-        font-family: ${JSON.stringify(t.headFont)}, system-ui, sans-serif !important;
+        font-family: ${JSON.stringify(t.headFont)}, "Noto Sans Telugu", "Noto Sans Devanagari", system-ui, sans-serif !important;
       }
 
       html[data-mbr-theme="on"] .mbr-themed-app .shadow,
       html[data-mbr-theme="on"] .mbr-themed-app .shadow-xl,
       html[data-mbr-theme="on"] .mbr-themed-app [class*="shadow-"] {
         box-shadow: 0 10px 28px color-mix(in srgb, var(--mbr-theme-primary) 16%, transparent) !important;
+      }
+
+      /* Prevent stray text-decoration lines (strike-through / underline / overline)
+         appearing across Telugu glyphs from inherited link or global styles. */
+      html[data-mbr-theme="on"] .mbr-themed-app p,
+      html[data-mbr-theme="on"] .mbr-themed-app span,
+      html[data-mbr-theme="on"] .mbr-themed-app h1,
+      html[data-mbr-theme="on"] .mbr-themed-app h2,
+      html[data-mbr-theme="on"] .mbr-themed-app h3,
+      html[data-mbr-theme="on"] .mbr-themed-app h4,
+      html[data-mbr-theme="on"] .mbr-themed-app h5,
+      html[data-mbr-theme="on"] .mbr-themed-app h6,
+      html[data-mbr-theme="on"] .mbr-themed-app label,
+      html[data-mbr-theme="on"] .mbr-themed-app li {
+        text-decoration: none !important;
+        text-decoration-line: none !important;
       }
     `;
   }, [org]);
