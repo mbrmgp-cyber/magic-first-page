@@ -1914,10 +1914,14 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
     setDesign(applyOrgThemeToIdDesign((org?.id_card_design as IdCardDesign) || defaultDesign(design.templateId, design.cardType), theme));
   }, [org?.id, org?.theme_settings, org?.id_card_design, theme.bg, theme.bigBox, theme.miniBox, theme.border, theme.icon, theme.buttonBg, theme.buttonText, theme.headColor, theme.subColor, theme.headFont, theme.subFont]);
 
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://mbrapp.in";
+  // CRITICAL: QR codes printed on physical ID cards MUST point to the stable
+  // public production URL — never the `id-preview--…` host (which is behind
+  // Lovable's auth bridge and returns 302 to login when scanned by the public).
+  // `project--<id>.lovable.app` is the immutable published URL.
+  const PUBLIC_ORIGIN = "https://project--71d8de89-15b6-4972-9c28-cb5a7b3fd345.lovable.app";
   const orgCode = org?.org_code || "";
   // Member-registration deep link for this society (back QR scans straight into the form)
-  const memberRegUrl = `${origin}/member/register${orgCode ? `?code=${encodeURIComponent(orgCode)}` : ""}`;
+  const memberRegUrl = `${PUBLIC_ORIGIN}/member/register${orgCode ? `?code=${encodeURIComponent(orgCode)}` : ""}`;
   const qrApi = (data: string, size = 160) =>
     `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&margin=0&data=${encodeURIComponent(data)}`;
 
