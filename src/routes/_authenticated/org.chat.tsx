@@ -37,11 +37,11 @@ const GENERAL_LABEL = { te: "సాధారణ సభ్యుడు", en: "Gen
 
 function useLangPick() {
   const { lang } = useI18n();
-  const isTe = lang === "te";
+  const isTe = lang !== "en";
   return {
     lang,
     isTe,
-    pick: <T,>(te: T, en: T) => (isTe ? te : en),
+    pick: (te: string, en: string) => (lang === "en" ? en : localizeText({ te, en }, lang)),
   };
 }
 
