@@ -16,7 +16,7 @@ import { submitLoanRequest, listMyLoanRequests } from "@/lib/loan-requests.funct
 import { printLoanApplication } from "@/lib/printLoan";
 import { SignaturePad } from "@/components/SignaturePad";
 import { supabase } from "@/integrations/supabase/client";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, localizeText } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/member/loan-request")({
   head: () => ({ meta: [{ title: "లోన్ అభ్యర్థన — Loan Request" }] }),
