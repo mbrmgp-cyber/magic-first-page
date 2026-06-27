@@ -423,12 +423,7 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
   return (
     <div className="space-y-3 pt-3">
       {member.member_code && (
-        <div className="rounded-md border bg-primary/5 p-3 flex items-center justify-between">
-          <div>
-            <Label className="text-xs text-muted-foreground">ఐడి నెంబర్ (మార్చలేరు)</Label>
-            <p className="font-mono text-lg font-semibold text-primary">{member.member_code}</p>
-          </div>
-        </div>
+        <MemberCodeEditor member={member} onSaved={onSaved} />
       )}
       <div className="flex items-center gap-3">
 
