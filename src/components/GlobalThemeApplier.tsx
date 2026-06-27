@@ -130,19 +130,39 @@ export function GlobalThemeApplier() {
       }
 
       html[data-mbr-theme="on"] .mbr-themed-app .bg-card,
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-black"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-zinc-"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-slate-"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-neutral-"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-gray-"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-white/"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-[#ff8c28]"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-orange-"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-amber-"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-emerald-"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-green-"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-blue-"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-red-"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="from-orange-"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="to-amber-"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="from-green-"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="to-emerald-"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="data-[state=active]:bg-[#ff8c28]"][data-state="active"],
+      html[data-mbr-theme="on"] [role="dialog"][class*="bg-black"],
       html[data-mbr-theme="on"] [role="dialog"][class*="bg-zinc-"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="bg-black"],
       html[data-mbr-theme="on"] [role="dialog"] [class*="bg-zinc-"],
       html[data-mbr-theme="on"] [role="dialog"] [class*="bg-slate-"],
       html[data-mbr-theme="on"] [role="dialog"] [class*="bg-gray-"],
-      html[data-mbr-theme="on"] [role="dialog"] [class*="bg-white/"] {
+      html[data-mbr-theme="on"] [role="dialog"] [class*="bg-white/"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="bg-orange-"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="bg-amber-"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="bg-emerald-"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="bg-green-"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="bg-blue-"],
+      html[data-mbr-theme="on"] [role="dialog"] [class*="bg-red-"] {
         background: var(--mbr-theme-mini-card) !important;
+        background-image: none !important;
         color: var(--mbr-theme-heading) !important;
       }
 
