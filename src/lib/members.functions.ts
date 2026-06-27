@@ -87,7 +87,21 @@ export const adminAddMember = createServerFn({ method: "POST" })
       status: data.status ?? "approved",
     }).select("id").single();
     if (error) throw new Error(error.message);
-    return { ok: true, id: row?.id, orgId };
+
+    // Send welcome / login link email to the new member (best-effort).
+    let emailSent = false;
+    let emailError: string | null = null;
+    const email = (data.email || "").trim().toLowerCase();
+    if (email && (data.status ?? "approved") === "approved") {
+      try {
+        const { sendMemberWelcomeEmail } = await import("@/lib/org.functions");
+        await sendMemberWelcomeEmail({ data: { email, name: data.name, member_id: row!.id } });
+        emailSent = true;
+      } catch (e) {
+        emailError = e instanceof Error ? e.message : String(e);
+      }
+    }
+    return { ok: true, id: row?.id, orgId, emailSent, emailError };
   });
 
 export const adminDeleteMember = createServerFn({ method: "POST" })

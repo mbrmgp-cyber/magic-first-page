@@ -165,6 +165,32 @@ export const sendLoginLink = createServerFn({ method: "POST" })
     return { sent: true as const };
   });
 
+export const sendMemberWelcomeEmail = createServerFn({ method: "POST" })
+  .inputValidator((d: { email: string; name?: string; member_id?: string }) => d)
+  .handler(async ({ data }) => {
+    const email = data.email.trim().toLowerCase();
+    if (!email) return { sent: false as const, reason: "missing_email" as const };
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Ensure auth user exists & is linked to the member row.
+    let userId = await findAuthUserIdByEmail(supabaseAdmin, email);
+    if (!userId) {
+      const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password: `MBR-${crypto.randomUUID()}`,
+        email_confirm: true,
+        user_metadata: { role: "member" },
+      });
+      if (createError) throw new Error(createError.message);
+      userId = created.user?.id ?? null;
+    }
+    if (userId && data.member_id) {
+      await supabaseAdmin.from("members").update({ user_id: userId }).eq("id", data.member_id);
+    }
+    const redirectTo = `${await getAppOrigin()}/auth?lang=te`;
+    await sendMagicLoginLinkEmail(supabaseAdmin, email, redirectTo);
+    return { sent: true as const };
+  });
+
 async function uploadImageDataUrl(supabaseAdmin: any, dataUrl: string | undefined | null, folder: string) {
   if (!dataUrl?.startsWith("data:image/")) return dataUrl ?? null;
   const match = dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
