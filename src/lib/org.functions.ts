@@ -21,16 +21,6 @@ function normalizeOrgCode(input: string) {
   return raw.toUpperCase();
 }
 
-async function getAppOrigin() {
-  const { getRequest } = await import("@tanstack/react-start/server");
-  const request = getRequest();
-  const origin = request?.headers.get("origin");
-  if (origin) return origin;
-  const host = request?.headers.get("x-forwarded-host") ?? request?.headers.get("host");
-  const proto = request?.headers.get("x-forwarded-proto") ?? "https";
-  return host ? `${proto}://${host}` : "";
-}
-
 function genOrgCode() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let s = "";
