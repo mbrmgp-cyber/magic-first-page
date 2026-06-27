@@ -143,10 +143,6 @@ export function GlobalThemeApplier() {
       html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-green-"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-blue-"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-red-"],
-      html[data-mbr-theme="on"] .mbr-themed-app [class*="from-orange-"],
-      html[data-mbr-theme="on"] .mbr-themed-app [class*="to-amber-"],
-      html[data-mbr-theme="on"] .mbr-themed-app [class*="from-green-"],
-      html[data-mbr-theme="on"] .mbr-themed-app [class*="to-emerald-"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="data-[state=active]:bg-[#ff8c28]"][data-state="active"],
       html[data-mbr-theme="on"] [role="dialog"][class*="bg-black"],
       html[data-mbr-theme="on"] [role="dialog"][class*="bg-zinc-"],
@@ -265,6 +261,10 @@ export function GlobalThemeApplier() {
 
       /* Kill hardcoded saffron→green text-clip gradients on sub-pages so
          titles always use the selected head color. */
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-clip-text"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="text-transparent"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="from-orange-"][class*="to-"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="from-[#"][class*="to-[#"],
       html[data-mbr-theme="on"] .mbr-themed-app [style*="-webkit-background-clip"],
       html[data-mbr-theme="on"] .mbr-themed-app [style*="background-clip: text"],
       html[data-mbr-theme="on"] .mbr-themed-app [style*="background-clip:text"] {
