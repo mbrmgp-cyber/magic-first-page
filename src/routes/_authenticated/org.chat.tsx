@@ -466,7 +466,7 @@ function QueuePanel({ ctx }: { ctx: Ctx }) {
                 <p className="text-xs text-zinc-400">
                   <span className="text-white">{r.sender?.name ?? "?"}</span> → <span className="text-white">{r.recipient?.name ?? "?"}</span>
                 </p>
-                <p className="text-sm text-zinc-200 mt-1">{isTe ? r.message_te : r.message_en}</p>
+                <p className="text-sm text-zinc-200 mt-1">{pick(r.message_te ?? "", r.message_en ?? "")}</p>
                 <p className="text-[10px] text-zinc-600 mt-1">{new Date(r.created_at).toLocaleString()}</p>
               </div>
               {tab === "pending" && (
