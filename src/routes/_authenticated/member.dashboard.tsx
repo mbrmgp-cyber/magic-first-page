@@ -161,9 +161,9 @@ function MemberDashboard() {
             )}
           </div>
           <div className="min-w-0">
-            <p className="text-[11px] text-zinc-400">First Name / పేరు</p>
+            <p className="text-[11px] text-zinc-400">First Name</p>
             <p className="text-xl font-bold text-white truncate">{firstName || "—"}</p>
-            <p className="text-[11px] text-zinc-400 mt-2">Last Name / ఇంటి పేరు</p>
+            <p className="text-[11px] text-zinc-400 mt-2">Last Name</p>
             <p className="text-xl font-bold text-white truncate">{lastName || "—"}</p>
           </div>
         </Card>
