@@ -351,7 +351,7 @@ function DesignsPage() {
   }
 
   return (
-    <div className="min-h-screen pb-16" style={designVars}>
+    <div className="min-h-screen pb-16" data-theme-surface="background" style={designVars}>
       <div className="max-w-5xl mx-auto p-4 space-y-5">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -373,7 +373,7 @@ function DesignsPage() {
 
         {/* Module tabs */}
         <Tabs value={tab} onValueChange={(v) => setTab(v as any)} className="w-full">
-          <TabsList className="grid grid-cols-3 w-full h-11" style={{ background: PAGE_PANEL, border: `1px solid ${PAGE_BORDER}` }}>
+          <TabsList className="grid grid-cols-3 w-full h-11" data-theme-surface="big-box" style={{ background: PAGE_PANEL, border: `1px solid ${PAGE_BORDER}` }}>
             <TabsTrigger value="id" className="gap-2 text-xs sm:text-sm">
               <IdCard className="h-4 w-4" /> ID Card
             </TabsTrigger>
@@ -471,7 +471,7 @@ function DesignsPage() {
                   </TabsContent>
 
                   <TabsContent value="blank" className="mt-3">
-                    <div className="rounded-lg border p-3 text-[12px]" style={{ background: PAGE_MINI, borderColor: PAGE_BORDER, color: PAGE_SUB }}>
+                    <div className="rounded-lg border p-3 text-[12px]" data-theme-surface="mini-box" style={{ background: PAGE_MINI, borderColor: PAGE_BORDER, color: PAGE_SUB }}>
                       Blank template — header &amp; footer only. Download as PDF, print, and write content by hand.
                     </div>
                   </TabsContent>
@@ -486,7 +486,7 @@ function DesignsPage() {
                 />
 
                 {/* Logo & Title size sliders */}
-                <div className="rounded-lg p-3 border space-y-3" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
+                <div className="rounded-lg p-3 border space-y-3" data-theme-surface="big-box" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
                   <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: PAGE_HEAD }}>
                     Logo &amp; Title Size / లోగో &amp; టైటిల్ సైజ్
                   </p>
@@ -591,7 +591,7 @@ function DesignsPage() {
                 }
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-3 rounded-lg p-3 border" style={{ background: PAGE_MINI, borderColor: PAGE_BORDER }}>
+                  <div className="space-y-3 rounded-lg p-3 border" data-theme-surface="mini-box" style={{ background: PAGE_MINI, borderColor: PAGE_BORDER }}>
                     <div className="grid grid-cols-2 gap-2">
                       <Field label="Receipt No" value={receipt.receiptNo} onChange={(v) => setReceipt({ ...receipt, receiptNo: v })} />
                       <Field label="Date" value={receipt.date} onChange={(v) => setReceipt({ ...receipt, date: v })} type="date" />
@@ -617,7 +617,7 @@ function DesignsPage() {
                       <Download className="h-4 w-4 mr-2" /> Save & Download Receipt
                     </Button>
                   </div>
-                  <div className="rounded-lg p-3 border flex items-center justify-center" style={{ background: PAGE_MINI, borderColor: PAGE_BORDER, minHeight: 260 }}>
+                  <div className="rounded-lg p-3 border flex items-center justify-center" data-theme-surface="mini-box" style={{ background: PAGE_MINI, borderColor: PAGE_BORDER, minHeight: 260 }}>
                     <ReceiptPreview layout={receiptPick} theme={customTheme} orgName={orgName} slogan={orgSlogan} reg={orgReg} data={receipt} cardBg={cardBg} logoUrl={effectiveReceiptLogo} />
                   </div>
                 </div>
