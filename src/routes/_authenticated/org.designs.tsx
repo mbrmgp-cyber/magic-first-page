@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getMyOrg, updateOrgIdDesign } from "@/lib/org.functions";
 import { defaultDesign, TEMPLATE_META, type IdCardDesign, type TemplateId, type CardType } from "@/lib/idCardTemplates";
 import { IdCardRenderer, type OrgContext, type SampleMember } from "@/components/IdCard/IdCardRenderer";
@@ -150,9 +150,8 @@ function DesignsPage() {
   const orgQ = useQuery({ queryKey: ["my-org"], queryFn: () => fetchOrg() });
   const org: any = orgQ.data?.org;
 
-  // Pass org theme straight through to inner templates so Settings → Theme changes
-  // (colors, fonts, accent) immediately apply to ID Cards, Letter Pads, Receipts.
-  // Page chrome (background/panel) stays dark via the PAGE_* constants.
+  // Pass org theme straight through to every surface so Settings → Theme changes
+  // (background, boxes, fonts, text) immediately apply to this full module too.
   const theme = useMemo(() => resolveTheme(org), [org]);
 
   // Module tab
@@ -201,6 +200,10 @@ function DesignsPage() {
     headFont: effectiveFont,
     subFont: effectiveFont,
   }), [theme, effectiveAccent, effectiveFont]);
+
+  useEffect(() => {
+    setCardBg((prev) => (prev === "#ffffff" || prev === DEFAULT_THEME.miniBox ? theme.miniBox : prev));
+  }, [theme.miniBox]);
 
   const designVars = useMemo<React.CSSProperties>(() => ({
     ["--design-bg" as any]: theme.bg,
