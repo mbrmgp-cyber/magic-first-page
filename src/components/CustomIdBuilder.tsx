@@ -441,6 +441,7 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
   return (
     <div
       className="rounded-xl border overflow-hidden"
+      data-theme-surface="big-box"
       style={{
         background: PANEL,
         borderColor: BORDER,
@@ -449,6 +450,7 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
     >
       <div
         className="flex items-center gap-2 px-3 py-2 border-b"
+        data-theme-surface="mini-box"
         style={{ background: PANEL_HEAD_BG, borderColor: BORDER }}
       >
         <span className="h-3 w-1 rounded-sm" style={{ background: ACCENT }} />
