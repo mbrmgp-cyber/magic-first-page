@@ -323,7 +323,7 @@ function InteractionsPanel({ ctx }: { ctx: Ctx }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {filtered.map(m => {
           const roleLabel = m.role
-            ? (isTe ? ROLE_LABEL[m.role]?.te : ROLE_LABEL[m.role]?.en) ?? m.role
+            ? pick(ROLE_LABEL[m.role]?.te ?? m.role, ROLE_LABEL[m.role]?.en ?? m.role)
             : pick(GENERAL_LABEL.te, GENERAL_LABEL.en);
           const isCommitteeMember = !!m.role;
           return (
