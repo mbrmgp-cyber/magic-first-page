@@ -1974,7 +1974,7 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
   return (
     <div className="space-y-4">
       {/* Step 1: Card Type + Print Dimensions */}
-      <div className="rounded-xl p-3 border space-y-3" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
+      <div className="rounded-xl p-3 border space-y-3" data-theme-surface="big-box" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
         <div className="text-[11px] font-bold uppercase tracking-wider" style={{ color: PAGE_SUB }}>
           Step 1 • కార్డ్ టైప్ ఎంచుకోండి
         </div>
@@ -2009,7 +2009,7 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
 
       {/* Step 2: Template Picker */}
       {step === "pick" && (
-        <div className="rounded-xl p-3 border" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
+        <div className="rounded-xl p-3 border" data-theme-surface="big-box" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
           <div className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: PAGE_SUB }}>
             Step 2 • టెంప్లేట్ ఎంచుకోండి (5 రెడీమేడ్ డిజైన్స్)
           </div>
@@ -2020,8 +2020,9 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
               return (
                 <button key={id} onClick={() => pickTemplate(id)}
                   className="rounded-xl border p-3 text-left hover:scale-[1.02] transition space-y-2"
+                  data-theme-surface="mini-box"
                   style={{ borderColor: PAGE_BORDER, background: PAGE_MINI }}>
-                  <div className="flex justify-center rounded-lg p-2" style={{ height: 130, overflow: "hidden", background: PAGE_PANEL }}>
+                  <div className="flex justify-center rounded-lg p-2" data-theme-surface="big-box" style={{ height: 130, overflow: "hidden", background: PAGE_PANEL }}>
                     <IdCardRenderer design={tplDesign} org={orgCtx} member={sampleMember} side="front" scale={0.55} />
                   </div>
                   <div>
@@ -2049,7 +2050,7 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
           </div>
 
           {/* Live Preview */}
-          <div className="rounded-xl p-3 border" style={{ background: PAGE_MINI, borderColor: PAGE_BORDER }}>
+          <div className="rounded-xl p-3 border" data-theme-surface="mini-box" style={{ background: PAGE_MINI, borderColor: PAGE_BORDER }}>
             <div className="flex items-center justify-center gap-2 mb-3">
               {(["front", "back"] as const).map((s) => (
                 <button key={s} onClick={() => setSide(s)}
@@ -2085,7 +2086,7 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
           <TemplateCustomizer design={design} onChange={setDesign} />
 
           {/* Save */}
-          <div className="sticky bottom-0 -mx-4 px-4 py-3 border-t" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
+          <div className="sticky bottom-0 -mx-4 px-4 py-3 border-t" data-theme-surface="big-box" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
             <Button onClick={onSave} disabled={saving}
               className="w-full h-12 text-sm font-bold"
               style={{ background: theme.buttonBg, color: theme.buttonText }}>
