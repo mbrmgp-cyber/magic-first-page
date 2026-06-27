@@ -72,6 +72,8 @@ export function resolveTheme(org: any): Required<ThemeSettings> {
   merged.bigBox = t.bigBox || t.box || merged.bigBox;
   merged.miniBox = t.miniBox || t.box || merged.miniBox;
   merged.box = t.box || merged.miniBox;
+  merged.inputBg = t.inputBg || merged.miniBox;
+  merged.inputText = t.inputText || merged.headColor;
   return merged;
 }
 
