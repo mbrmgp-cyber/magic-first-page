@@ -110,8 +110,7 @@ export function GlobalThemeApplier() {
         font-family: ${JSON.stringify(t.headFont)}, system-ui, sans-serif !important;
       }
 
-      html[data-mbr-theme="on"] .mbr-themed-app,
-      html[data-mbr-theme="on"] .mbr-themed-app *:not(svg):not(path) {
+      html[data-mbr-theme="on"] .mbr-themed-app :not(.mbr-preserve-design):not(.mbr-preserve-design *):not(svg):not(path) {
         font-family: ${JSON.stringify(t.headFont)}, system-ui, sans-serif !important;
       }
 
@@ -295,12 +294,12 @@ export function GlobalThemeApplier() {
 
       html[data-mbr-theme="on"] .mbr-themed-app [data-theme-preserve],
       html[data-mbr-theme="on"] .mbr-themed-app [data-theme-preserve] * {
-        font-family: inherit !important;
+        forced-color-adjust: none;
       }
 
       html[data-mbr-theme="on"] .mbr-themed-app [data-theme-preserve="card"],
       html[data-mbr-theme="on"] .mbr-themed-app [data-theme-preserve="card"] * {
-        background-image: revert !important;
+        forced-color-adjust: none;
       }
 
       html[data-mbr-theme="on"] .mbr-themed-app [class*="border-zinc"],
