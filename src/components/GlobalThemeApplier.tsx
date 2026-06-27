@@ -203,7 +203,7 @@ export function GlobalThemeApplier() {
         color: var(--mbr-theme-heading) !important;
       }
 
-      html[data-mbr-theme="on"] .mbr-themed-app [style*="linear-gradient"]:not([style*="background-clip"]):not([style*="BackgroundClip"]),
+      html[data-mbr-theme="on"] .mbr-themed-app [style*="linear-gradient"]:not(.mbr-preserve-design):not(.mbr-preserve-design *):not([style*="background-clip"]):not([style*="BackgroundClip"]),
       html[data-mbr-theme="on"] [role="dialog"] [style*="linear-gradient"]:not([style*="background-clip"]):not([style*="BackgroundClip"]) {
         background: var(--mbr-theme-primary) !important;
         background-image: none !important;
@@ -372,9 +372,9 @@ export function GlobalThemeApplier() {
       html[data-mbr-theme="on"] .mbr-themed-app [class*="text-transparent"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="from-orange-"][class*="to-"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="from-[#"][class*="to-[#"],
-      html[data-mbr-theme="on"] .mbr-themed-app [style*="-webkit-background-clip"],
-      html[data-mbr-theme="on"] .mbr-themed-app [style*="background-clip: text"],
-      html[data-mbr-theme="on"] .mbr-themed-app [style*="background-clip:text"] {
+      html[data-mbr-theme="on"] .mbr-themed-app [style*="-webkit-background-clip"]:not(.mbr-preserve-design):not(.mbr-preserve-design *),
+      html[data-mbr-theme="on"] .mbr-themed-app [style*="background-clip: text"]:not(.mbr-preserve-design):not(.mbr-preserve-design *),
+      html[data-mbr-theme="on"] .mbr-themed-app [style*="background-clip:text"]:not(.mbr-preserve-design):not(.mbr-preserve-design *) {
         background-image: none !important;
         background: transparent !important;
         -webkit-text-fill-color: var(--mbr-theme-heading) !important;
