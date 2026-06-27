@@ -106,7 +106,7 @@ function EventsPage() {
               <button
                 key={t.k}
                 onClick={() => setTab(t.k)}
-                className={`mbr-theme-mini-box flex flex-col items-center gap-1 rounded-lg p-2 border text-xs transition ${active ? "bg-primary border-primary text-primary-foreground" : "bg-card border-border text-foreground hover:border-primary"}`}
+                className={`mbr-theme-mini-box flex flex-col items-center gap-1 rounded-lg p-2 border text-xs transition ${active ? "bg-card border-primary text-foreground ring-1 ring-primary/60" : "bg-card border-border text-foreground hover:border-primary"}`}
               >
                 <Ic className="w-4 h-4" />
                 <span className="font-semibold leading-tight">{t.te}</span>
