@@ -16,6 +16,7 @@ import {
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 import { localizeText, transliterateText, useI18n } from "@/lib/i18n";
 import { resolveTheme } from "@/lib/theme";
+import { memberRegistrationUrl } from "@/lib/public-url";
 
 export const Route = createFileRoute("/_authenticated/org/dashboard")({
   head: () => ({ meta: [{ title: "Society Dashboard — MBR App" }] }),
@@ -244,6 +245,7 @@ function Dashboard() {
   }
 
   const theme = resolveTheme(org);
+  const registrationUrl = memberRegistrationUrl(org.org_code);
   return (
     <div className="min-h-screen p-3 md:p-6"
       style={{
@@ -379,6 +381,14 @@ function Dashboard() {
             <div className="flex flex-col items-center gap-3">
               <img src={qrDataUrl} alt="Org QR" className="w-64 h-64 border rounded-md bg-white" />
               <p className="text-sm font-mono text-[#ff8c28]">{org.org_code}</p>
+              <a
+                href={registrationUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="w-full rounded-md border border-emerald-700 bg-emerald-950/50 p-2 text-center text-xs font-semibold text-emerald-200 break-all"
+              >
+                {registrationUrl}
+              </a>
               <a href={qrDataUrl} download={`${org.org_code}-qr.png`}>
                 <Button variant="outline" size="sm" className="border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800"><Download className="w-4 h-4 mr-1" />Download</Button>
               </a>

@@ -22,6 +22,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 import { resolveTheme, type ThemeSettings, DEFAULT_THEME } from "@/lib/theme";
+import { memberRegistrationUrl } from "@/lib/public-url";
 import { CustomIdBuilder } from "@/components/CustomIdBuilder";
 import { Wand2 } from "lucide-react";
 
@@ -1914,14 +1915,9 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
     setDesign(applyOrgThemeToIdDesign((org?.id_card_design as IdCardDesign) || defaultDesign(design.templateId, design.cardType), theme));
   }, [org?.id, org?.theme_settings, org?.id_card_design, theme.bg, theme.bigBox, theme.miniBox, theme.border, theme.icon, theme.buttonBg, theme.buttonText, theme.headColor, theme.subColor, theme.headFont, theme.subFont]);
 
-  // CRITICAL: QR codes printed on physical ID cards MUST point to the stable
-  // public production URL — never the `id-preview--…` host (which is behind
-  // Lovable's auth bridge and returns 302 to login when scanned by the public).
-  // Public published URL (open to anyone, no Lovable login).
-  const PUBLIC_ORIGIN = "https://magic-first-page.lovable.app";
   const orgCode = org?.org_code || "";
   // Member-registration deep link for this society (back QR scans straight into the form)
-  const memberRegUrl = `${PUBLIC_ORIGIN}/member/register${orgCode ? `?code=${encodeURIComponent(orgCode)}` : ""}`;
+  const memberRegUrl = memberRegistrationUrl(orgCode);
   const qrApi = (data: string, size = 160) =>
     `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&margin=0&data=${encodeURIComponent(data)}`;
 

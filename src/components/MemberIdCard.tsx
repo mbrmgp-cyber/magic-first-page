@@ -8,6 +8,7 @@ import { Printer, IdCard, User, RotateCw, Languages } from "lucide-react";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 import { IdCardRenderer, type OrgContext, type SampleMember } from "@/components/IdCard/IdCardRenderer";
 import type { IdCardDesign } from "@/lib/idCardTemplates";
+import { memberRegistrationUrl } from "@/lib/public-url";
 
 // Transliterate Telugu-script source text into the chosen card language script.
 // Numbers, ASCII (phone, email, codes), and punctuation pass through unchanged.
@@ -200,8 +201,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
       if (org?.president_signature_url) setSigUrl(org.president_signature_url);
       // Stable public production URL — preview origin is behind Lovable auth bridge
       // and won't open for the general public when they scan the printed ID card.
-      const origin = "https://magic-first-page.lovable.app";
-      const regUrl = `${origin}/member/register${org?.org_code ? `?code=${encodeURIComponent(org.org_code)}` : ""}`;
+      const regUrl = memberRegistrationUrl(org?.org_code);
       const memberUrl = `${regUrl}${regUrl.includes("?") ? "&" : "?"}ref=${encodeURIComponent(member.member_code ?? member.id)}`;
       const qrOptions = { margin: 1, width: 240, color: { dark: "#111111", light: "#ffffff" } };
       const qr = await QRCode.toDataURL(memberUrl, qrOptions);

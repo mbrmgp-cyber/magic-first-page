@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { PUBLIC_APP_ORIGIN, memberRegistrationUrl } from "@/lib/public-url";
 import QRCode from "qrcode";
 
 function normalizeOrgCode(input: string) {
@@ -18,16 +19,6 @@ function normalizeOrgCode(input: string) {
   const queryMatch = raw.match(/[?&](?:code|org_code|orgCode)=([^&#]+)/i);
   if (queryMatch?.[1]) return decodeURIComponent(queryMatch[1]).trim().toUpperCase();
   return raw.toUpperCase();
-}
-
-async function getAppOrigin() {
-  const { getRequest } = await import("@tanstack/react-start/server");
-  const request = getRequest();
-  const origin = request?.headers.get("origin");
-  if (origin) return origin;
-  const host = request?.headers.get("x-forwarded-host") ?? request?.headers.get("host");
-  const proto = request?.headers.get("x-forwarded-proto") ?? "https";
-  return host ? `${proto}://${host}` : "";
 }
 
 function genOrgCode() {
@@ -160,7 +151,7 @@ export const sendLoginLink = createServerFn({ method: "POST" })
       }
     }
 
-    const redirectTo = `${await getAppOrigin()}/auth?lang=${encodeURIComponent(data.lang || "te")}`;
+    const redirectTo = `${PUBLIC_APP_ORIGIN}/auth?lang=${encodeURIComponent(data.lang || "te")}`;
     await sendMagicLoginLinkEmail(supabaseAdmin, email, redirectTo);
     return { sent: true as const };
   });
@@ -186,7 +177,7 @@ export const sendMemberWelcomeEmail = createServerFn({ method: "POST" })
     if (userId && data.member_id) {
       await supabaseAdmin.from("members").update({ user_id: userId }).eq("id", data.member_id);
     }
-    const redirectTo = `${await getAppOrigin()}/auth?lang=te`;
+    const redirectTo = `${PUBLIC_APP_ORIGIN}/auth?lang=te`;
     await sendMagicLoginLinkEmail(supabaseAdmin, email, redirectTo);
     return { sent: true as const };
   });
@@ -266,7 +257,7 @@ export const registerOrganization = createServerFn({ method: "POST" })
       .select()
       .single();
     if (error) throw new Error(error.message);
-    const qrDataUrl = await QRCode.toDataURL(org_code, { width: 512, margin: 2 });
+    const qrDataUrl = await QRCode.toDataURL(memberRegistrationUrl(org_code), { width: 512, margin: 2 });
     return { org, qrDataUrl };
   });
 
@@ -281,7 +272,7 @@ export const getMyOrg = createServerFn({ method: "GET" })
       .eq("admin_user_id", userId)
       .maybeSingle();
     if (!org) return { org: null, qrDataUrl: null };
-    const qrDataUrl = await QRCode.toDataURL(org.org_code, { width: 512, margin: 2 });
+    const qrDataUrl = await QRCode.toDataURL(memberRegistrationUrl(org.org_code), { width: 512, margin: 2 });
     return { org, qrDataUrl };
   });
 
@@ -303,7 +294,7 @@ export const regenerateOrgQr = createServerFn({ method: "POST" })
       .select()
       .single();
     if (error) throw new Error(error.message);
-    const qrDataUrl = await QRCode.toDataURL(newCode, { width: 512, margin: 2 });
+    const qrDataUrl = await QRCode.toDataURL(memberRegistrationUrl(newCode), { width: 512, margin: 2 });
     return { org: updated, qrDataUrl };
   });
 
@@ -538,7 +529,7 @@ export const sendApprovedMemberLoginLink = createServerFn({ method: "POST" })
       if (claimError) throw new Error(claimError.message);
     }
     const lang = data.lang || (member as any).preferred_lang || "te";
-    const redirectTo = `${await getAppOrigin()}/auth?lang=${encodeURIComponent(lang)}`;
+    const redirectTo = `${PUBLIC_APP_ORIGIN}/auth?lang=${encodeURIComponent(lang)}`;
     await sendMagicLoginLinkEmail(supabaseAdmin, member.email, redirectTo);
     return { sent: true as const };
   });
@@ -589,7 +580,7 @@ export const reviewMember = createServerFn({ method: "POST" })
         memberUserId = created.user?.id;
       }
       if (memberUserId) {
-        const redirectTo = `${await getAppOrigin()}/auth?lang=${encodeURIComponent(lang)}`;
+        const redirectTo = `${PUBLIC_APP_ORIGIN}/auth?lang=${encodeURIComponent(lang)}`;
         await sendMagicLoginLinkEmail(supabaseAdmin, memberRow.email, redirectTo);
         const { error: claimError } = await supabaseAdmin
           .from("members")
