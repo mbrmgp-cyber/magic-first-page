@@ -1902,11 +1902,15 @@ function OfficialSaffronPreview({
 
 function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme: Required<ThemeSettings> }) {
   const saveDesign = useServerFn(updateOrgIdDesign);
-  const initial: IdCardDesign = (org?.id_card_design as IdCardDesign) || defaultDesign("classic", "normal");
+  const initial: IdCardDesign = applyOrgThemeToIdDesign((org?.id_card_design as IdCardDesign) || defaultDesign("classic", "normal"), theme);
   const [design, setDesign] = useState<IdCardDesign>(initial);
   const [side, setSide] = useState<"front" | "back">("front");
   const [step, setStep] = useState<"pick" | "edit">(org?.id_card_design ? "edit" : "pick");
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setDesign(applyOrgThemeToIdDesign((org?.id_card_design as IdCardDesign) || defaultDesign(design.templateId, design.cardType), theme));
+  }, [org?.id, org?.theme_settings, org?.id_card_design, theme.bg, theme.bigBox, theme.miniBox, theme.border, theme.icon, theme.buttonBg, theme.buttonText, theme.headColor, theme.subColor, theme.headFont, theme.subFont]);
 
   const origin = typeof window !== "undefined" ? window.location.origin : "https://mbrapp.in";
   const orgCode = org?.org_code || "";
@@ -1947,10 +1951,10 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
 
 
   function pickTemplate(id: TemplateId) {
-    setDesign(defaultDesign(id, design.cardType));
+    setDesign(applyOrgThemeToIdDesign(defaultDesign(id, design.cardType), theme));
     setStep("edit");
   }
-  function setCardType(t: CardType) { setDesign({ ...design, cardType: t }); }
+  function setCardType(t: CardType) { setDesign(applyOrgThemeToIdDesign({ ...design, cardType: t }, theme)); }
 
   async function onSave() {
     setSaving(true);
@@ -2010,7 +2014,7 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {(Object.keys(TEMPLATE_META) as TemplateId[]).map((id) => {
               const meta = TEMPLATE_META[id];
-              const tplDesign: IdCardDesign = defaultDesign(id, design.cardType);
+              const tplDesign: IdCardDesign = applyOrgThemeToIdDesign(defaultDesign(id, design.cardType), theme);
               return (
                 <button key={id} onClick={() => pickTemplate(id)}
                   className="rounded-xl border p-3 text-left hover:scale-[1.02] transition space-y-2"
