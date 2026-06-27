@@ -18,6 +18,7 @@ import {
   listMemberLoans, listLoanPayments,
   addMemberLoan, addLoanPayment, closeLoan, deleteLoan,
   adminAddMember, adminDeleteMember, listApprovedMembers, setMemberActive,
+  orgUpdateMemberCode,
 } from "@/lib/members.functions";
 import { Switch } from "@/components/ui/switch";
 import { User, Plus, IndianRupee, CheckCircle2, XCircle, Trash2, Lock, UserPlus, Camera } from "lucide-react";
