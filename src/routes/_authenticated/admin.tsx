@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { ShieldCheck, CheckCircle2, XCircle, Clock, LogOut, Image as ImageIcon, FileText, Users } from "lucide-react";
+import { ShieldCheck, CheckCircle2, XCircle, Clock, LogOut, Image as ImageIcon, FileText, Users, IdCard, Search, Save } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 
 export const Route = createFileRoute("/_authenticated/admin")({
