@@ -288,6 +288,21 @@ export function GlobalThemeApplier() {
         -webkit-text-fill-color: color-mix(in srgb, var(--mbr-theme-muted) 72%, transparent) !important;
       }
 
+      html[data-mbr-theme="on"] .mbr-themed-app input[type="color"] {
+        background-color: transparent !important;
+        -webkit-text-fill-color: initial !important;
+      }
+
+      html[data-mbr-theme="on"] .mbr-themed-app [data-theme-preserve],
+      html[data-mbr-theme="on"] .mbr-themed-app [data-theme-preserve] * {
+        font-family: inherit !important;
+      }
+
+      html[data-mbr-theme="on"] .mbr-themed-app [data-theme-preserve="card"],
+      html[data-mbr-theme="on"] .mbr-themed-app [data-theme-preserve="card"] * {
+        background-image: revert !important;
+      }
+
       html[data-mbr-theme="on"] .mbr-themed-app [class*="border-zinc"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="border-slate"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="border-neutral"],
