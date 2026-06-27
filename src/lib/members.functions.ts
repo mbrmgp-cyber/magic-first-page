@@ -133,6 +133,21 @@ export const setMemberActive = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const orgUpdateMemberCode = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { member_id: string; new_code: string }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { data: row, error } = await supabase.rpc("org_admin_update_member_code", {
+      _member_id: data.member_id,
+      _new_code: data.new_code,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true, member: row };
+  });
+
+
+
 
 // ===== Loans =====
 
