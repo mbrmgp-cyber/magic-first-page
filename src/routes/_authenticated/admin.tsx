@@ -249,3 +249,88 @@ function AdminPanel() {
     </div>
   );
 }
+
+function MemberIdUpdater() {
+  const search = useServerFn(adminSearchMembers);
+  const update = useServerFn(adminUpdateMemberCode);
+  const [q, setQ] = useState("");
+  const [results, setResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [edits, setEdits] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState<string | null>(null);
+
+  async function doSearch(e?: React.FormEvent) {
+    e?.preventDefault();
+    if (!q.trim()) return;
+    setLoading(true);
+    try {
+      const r = await search({ data: { q: q.trim() } });
+      setResults(r.members);
+      const init: Record<string, string> = {};
+      r.members.forEach((m: any) => { init[m.id] = m.member_code ?? ""; });
+      setEdits(init);
+    } catch (err: any) {
+      toast.error(err.message ?? "Search failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function save(m: any) {
+    const code = (edits[m.id] ?? "").trim();
+    if (!code || code === m.member_code) return;
+    setBusy(m.id);
+    try {
+      await update({ data: { member_id: m.id, new_code: code } });
+      toast.success(`ID updated to ${code}`);
+      setResults((rs) => rs.map((r) => r.id === m.id ? { ...r, member_code: code } : r));
+    } catch (e: any) {
+      toast.error(e.message ?? "Update failed");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  return (
+    <Card className="p-4 bg-white/95 backdrop-blur border-white shadow-md space-y-3">
+      <div className="flex items-center gap-2">
+        <IdCard className="h-5 w-5 text-[#FF9933]" />
+        <h2 className="font-bold">Member ID Update (Super Admin)</h2>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        ఏ సొసైటీ లోనైనా సభ్యుని ID నెంబరును మార్చండి. Name / ID / Email / Phone తో వెతకండి.
+      </p>
+      <form onSubmit={doSearch} className="flex gap-2">
+        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, ID, email, phone…" />
+        <Button type="submit" disabled={loading || !q.trim()}>
+          <Search className="h-4 w-4 mr-1" />{loading ? "…" : "Search"}
+        </Button>
+      </form>
+      {results.length > 0 && (
+        <div className="space-y-2">
+          {results.map((m) => (
+            <div key={m.id} className="flex items-center gap-2 p-2 border rounded bg-muted/30">
+              <div className="flex-1 min-w-0">
+                <div className="font-semibold text-sm truncate">{m.name}</div>
+                <div className="text-[11px] text-muted-foreground truncate">
+                  {(m.organizations as any)?.name ?? "—"} · {m.email ?? ""} {m.phone ? `· ${m.phone}` : ""}
+                </div>
+              </div>
+              <Input
+                className="w-36 font-mono text-sm"
+                value={edits[m.id] ?? ""}
+                onChange={(e) => setEdits((x) => ({ ...x, [m.id]: e.target.value.toUpperCase() }))}
+              />
+              <Button size="sm" disabled={busy === m.id || !edits[m.id]?.trim() || edits[m.id] === m.member_code} onClick={() => save(m)}>
+                <Save className="h-4 w-4 mr-1" />Save
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+      {!loading && results.length === 0 && q && (
+        <div className="text-xs text-muted-foreground">No results yet — try Search.</div>
+      )}
+    </Card>
+  );
+}
