@@ -410,6 +410,7 @@ function DesignsPage() {
                       key={tpl.id}
                       onClick={() => setLetterPick(tpl.id as LetterLayout)}
                       className="group relative rounded-xl overflow-hidden border transition text-left hover:scale-[1.02]"
+                      data-theme-surface="mini-box"
                       style={{ borderColor: PAGE_BORDER, background: PAGE_MINI, cursor: "pointer" }}
                     >
                       <div className="aspect-[0.77/1] w-full p-1.5" style={{ background: PAGE_MINI }}>
@@ -561,6 +562,7 @@ function DesignsPage() {
                       key={tpl.id}
                       onClick={() => setReceiptPick(tpl.id as ReceiptLayout)}
                       className="group relative rounded-xl overflow-hidden border transition text-left hover:scale-[1.02]"
+                      data-theme-surface="mini-box"
                       style={{ borderColor: PAGE_BORDER, background: PAGE_MINI, cursor: "pointer" }}
                     >
                       <div className="aspect-[1.6/1] w-full p-2" style={{ background: PAGE_MINI }}>
