@@ -1359,6 +1359,45 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_update_member_code: {
+        Args: { _member_id: string; _new_code: string }
+        Returns: {
+          address: string | null
+          bank_account_number: string | null
+          bank_ifsc: string | null
+          bank_name: string | null
+          blood_group: string | null
+          committee_fee_paid: number | null
+          created_at: string
+          email: string
+          father_name: string | null
+          first_name: string | null
+          id: string
+          introducer_member_id: string | null
+          is_active: boolean
+          is_committee: boolean
+          joined_date: string | null
+          last_name: string | null
+          member_code: string | null
+          name: string
+          org_id: string
+          phone: string | null
+          photo_url: string | null
+          pin_code: string | null
+          preferred_lang: string | null
+          reviewed_at: string | null
+          status: Database["public"]["Enums"]["member_status"]
+          updated_at: string
+          user_id: string | null
+          village: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "members"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       can_edit_accounts: { Args: { _org_id: string }; Returns: boolean }
       can_edit_events: { Args: { _org_id: string }; Returns: boolean }
       can_edit_org: { Args: { _org_id: string }; Returns: boolean }
