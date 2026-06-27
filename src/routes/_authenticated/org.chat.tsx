@@ -507,7 +507,7 @@ function InboxPanel({ ctx }: { ctx: Ctx }) {
             <Icon className="w-5 h-5 mt-0.5 shrink-0" style={{ color: t?.tone }} />
             <div className="min-w-0">
               <p className="text-xs text-zinc-400">{pick("నుండి", "From")} <span className="text-white">{r.sender?.name ?? "Member"}</span></p>
-              <p className="text-sm text-zinc-200 mt-1">{isTe ? r.message_te : r.message_en}</p>
+              <p className="text-sm text-zinc-200 mt-1">{pick(r.message_te ?? "", r.message_en ?? "")}</p>
               <p className="text-[10px] text-zinc-600 mt-1">{new Date(r.reviewed_at ?? r.created_at).toLocaleString()}</p>
             </div>
           </Card>
