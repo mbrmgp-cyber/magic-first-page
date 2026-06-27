@@ -31,6 +31,8 @@ export const DEFAULT_THEME: Required<ThemeSettings> = {
   icon: "#ff8c28",
   buttonBg: "#ff8c28",
   buttonText: "#ffffff",
+  inputBg: "#0a0a0a",
+  inputText: "#ffffff",
   headColor: "#ffffff",
   headFont: "Inter",
   subColor: "#a1a1aa",
