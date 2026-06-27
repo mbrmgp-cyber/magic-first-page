@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { getMyOrg, updateOrgIdDesign } from "@/lib/org.functions";
-import { defaultDesign, TEMPLATE_META, type IdCardDesign, type TemplateId, type CardType } from "@/lib/idCardTemplates";
+import { defaultDesign, TEMPLATE_META, type IdCardDesign, type TemplateId, type CardType, type ElementKey } from "@/lib/idCardTemplates";
 import { IdCardRenderer, type OrgContext, type SampleMember } from "@/components/IdCard/IdCardRenderer";
 import { TemplateCustomizer } from "@/components/IdCard/TemplateCustomizer";
 import { Card } from "@/components/ui/card";
