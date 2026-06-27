@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { getMyOrg, updateOrgLogo } from "@/lib/org.functions";
+import { getMyOrg, updateOrgLogo, getMyRoles } from "@/lib/org.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import {
   LogOut, BookOpen, Users, Briefcase, Calendar, IdCard, Wallet,
   MessageSquare, QrCode, Camera, Download, RefreshCw, Settings, AlertTriangle,
-  Upload, ShieldAlert, FileDown, CheckCircle2, Vote, TrendingUp, TrendingDown, PieChart,
+  Upload, ShieldAlert, FileDown, CheckCircle2, Vote, TrendingUp, TrendingDown, PieChart, ShieldCheck,
 } from "lucide-react";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 import { localizeText, transliterateText, useI18n } from "@/lib/i18n";
@@ -52,6 +52,9 @@ function Dashboard() {
   const { lang } = useI18n();
   const lt = (en: string, te: string) => localizeText({ en, te }, lang);
   const orgQ = useQuery({ queryKey: ["my-org"], queryFn: () => fetchOrg() });
+  const fetchRoles = useServerFn(getMyRoles);
+  const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: () => fetchRoles() });
+  const isMbrAdmin = rolesQ.data?.roles?.includes("mbr_admin") ?? false;
   const [qrOpen, setQrOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
