@@ -38,13 +38,13 @@ const SIZES: Record<CardSize, { w: number; h: number; pdf: [number, number]; ori
   keychain:  { w: 380, h: 240, pdf: [60, 38],   orient: "landscape", label: "Keychain",  icon: <KeyRound className="h-3.5 w-3.5" /> },
 };
 
-const PANEL = "#1b1b22";        // section card surface (lifted off page bg for clarity)
-const PANEL_HEAD_BG = "#242430"; // header strip inside a section
-const FIELD_BG = "#0f0f14";      // inputs / file buttons
-const BORDER = "#3a3a46";        // brighter, easier to see
-const HEAD = "#f4f4f6";
-const SUB = "#b8b8c2";           // lifted from #8a8a91 for readability
-const ACCENT = "#f97316";
+const PANEL = "var(--design-big-box, var(--mbr-theme-big-card, #1b1b22))";
+const PANEL_HEAD_BG = "var(--design-mini-box, var(--mbr-theme-mini-card, #242430))";
+const FIELD_BG = "var(--design-input-bg, var(--mbr-theme-input-bg, #0f0f14))";
+const BORDER = "var(--design-border, var(--mbr-theme-border, #3a3a46))";
+const HEAD = "var(--design-heading, var(--mbr-theme-heading, #f4f4f6))";
+const SUB = "var(--design-muted, var(--mbr-theme-muted, #b8b8c2))";
+const ACCENT = "var(--mbr-theme-primary, var(--design-icon, #f97316))";
 
 function defaultBuiltins(w: number, h: number): Record<BuiltinKey, ElState> {
   return {
@@ -201,7 +201,7 @@ export function CustomIdBuilder({ defaultName = "Member Name", defaultDesignatio
       {/* Canvas */}
       <div className="space-y-3">
         {/* Card size selector */}
-        <div className="rounded-lg border p-2 flex items-center gap-2" style={{ background: PANEL, borderColor: BORDER }}>
+        <div className="rounded-lg border p-2 flex items-center gap-2" data-theme-surface="big-box" style={{ background: PANEL, borderColor: BORDER }}>
           <span className="text-[10px] font-bold uppercase tracking-wider px-1 shrink-0" style={{ color: SUB }}>Size</span>
           <div className="flex flex-1 gap-1.5 flex-wrap">
             {(Object.keys(SIZES) as CardSize[]).map((k) => {
@@ -212,8 +212,8 @@ export function CustomIdBuilder({ defaultName = "Member Name", defaultDesignatio
                   onClick={() => setSize(k)}
                   className="flex-1 min-w-[90px] flex items-center justify-center gap-1.5 h-8 rounded text-[11px] font-semibold transition-colors"
                   style={{
-                    background: active ? ACCENT : "#0a0a0a",
-                    color: active ? "#fff" : HEAD,
+                    background: active ? ACCENT : FIELD_BG,
+                    color: active ? "var(--mbr-theme-primary-fg, #fff)" : HEAD,
                     border: `1px solid ${active ? ACCENT : BORDER}`,
                   }}
                 >
@@ -226,8 +226,9 @@ export function CustomIdBuilder({ defaultName = "Member Name", defaultDesignatio
 
         <div
           className="rounded-xl border-2 p-4"
+          data-theme-surface="big-box"
           style={{
-            background: "linear-gradient(135deg, #0a0a0a 0%, #15151a 100%)",
+            background: PANEL,
             borderColor: BORDER,
             boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
           }}
@@ -235,7 +236,8 @@ export function CustomIdBuilder({ defaultName = "Member Name", defaultDesignatio
           <div
             ref={canvasRef}
             onPointerDown={(e) => { if (e.target === e.currentTarget) setSelected(null); }}
-            className="relative mx-auto select-none touch-none"
+            className="relative mx-auto select-none touch-none mbr-preserve-design"
+            data-theme-preserve="card"
             style={{
               width: "100%",
               maxWidth: CANVAS_W,
