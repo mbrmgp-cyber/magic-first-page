@@ -122,7 +122,7 @@ export function IdCardRenderer({ design, org, member, side, scale = 1 }: Props) 
   };
 
   return (
-    <div style={containerStyle}>
+    <div className="mbr-preserve-design" data-theme-preserve="card" style={containerStyle}>
       <div style={inner}>
         {side === "front" ? renderFront(design, org, member) : renderBack(design, org, member)}
       </div>
