@@ -219,6 +219,30 @@ export function GlobalThemeApplier() {
         color: var(--mbr-theme-heading) !important;
       }
 
+      /* Authoritative surface mapping: Settings Background → page,
+         Big Box → large panels, Mini Box → small cards. Keep this after
+         legacy bg/gradient overrides so old Tailwind classes cannot invert it. */
+      html[data-mbr-theme="on"] .mbr-themed-app [data-theme-surface="background"] {
+        background: var(--mbr-theme-bg) !important;
+        background-color: var(--mbr-theme-bg) !important;
+        background-image: none !important;
+        color: var(--mbr-theme-heading) !important;
+      }
+      html[data-mbr-theme="on"] .mbr-themed-app [data-theme-surface="big-box"] {
+        background: var(--mbr-theme-big-card) !important;
+        background-color: var(--mbr-theme-big-card) !important;
+        background-image: none !important;
+        border-color: var(--mbr-theme-border) !important;
+        color: var(--mbr-theme-heading) !important;
+      }
+      html[data-mbr-theme="on"] .mbr-themed-app [data-theme-surface="mini-box"] {
+        background: var(--mbr-theme-mini-card) !important;
+        background-color: var(--mbr-theme-mini-card) !important;
+        background-image: none !important;
+        border-color: var(--mbr-theme-border) !important;
+        color: var(--mbr-theme-heading) !important;
+      }
+
       html[data-mbr-theme="on"] .mbr-themed-app button[class*="bg-primary"],
       html[data-mbr-theme="on"] .mbr-themed-app a[class*="bg-[#ff8c28]"],
       html[data-mbr-theme="on"] .mbr-themed-app button[class*="bg-[#ff8c28]"],
