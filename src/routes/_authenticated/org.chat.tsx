@@ -370,8 +370,8 @@ function InteractionsPanel({ ctx }: { ctx: Ctx }) {
                   className={`w-full text-left p-3 rounded-lg border transition flex items-start gap-3 ${active ? "border-[#ff8c28] bg-[#ff8c28]/10" : "border-zinc-800 bg-zinc-900 hover:border-zinc-600"}`}>
                   <Icon className="w-5 h-5 mt-0.5 shrink-0" style={{ color: t.tone }} />
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-white">{isTe ? t.label_te : t.label_en}</p>
-                    <p className="text-xs text-zinc-300 mt-1">{isTe ? t.msg_te : t.msg_en}</p>
+                    <p className="text-sm font-semibold text-white">{pick(t.label_te, t.label_en)}</p>
+                    <p className="text-xs text-zinc-300 mt-1">{pick(t.msg_te, t.msg_en)}</p>
                   </div>
                 </button>
               );
