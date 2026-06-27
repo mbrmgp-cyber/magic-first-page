@@ -1917,8 +1917,8 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
   // CRITICAL: QR codes printed on physical ID cards MUST point to the stable
   // public production URL — never the `id-preview--…` host (which is behind
   // Lovable's auth bridge and returns 302 to login when scanned by the public).
-  // `project--<id>.lovable.app` is the immutable published URL.
-  const PUBLIC_ORIGIN = "https://project--71d8de89-15b6-4972-9c28-cb5a7b3fd345.lovable.app";
+  // Public published URL (open to anyone, no Lovable login).
+  const PUBLIC_ORIGIN = "https://magic-first-page.lovable.app";
   const orgCode = org?.org_code || "";
   // Member-registration deep link for this society (back QR scans straight into the form)
   const memberRegUrl = `${PUBLIC_ORIGIN}/member/register${orgCode ? `?code=${encodeURIComponent(orgCode)}` : ""}`;
