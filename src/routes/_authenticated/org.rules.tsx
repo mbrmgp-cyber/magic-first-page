@@ -18,17 +18,13 @@ type Milestone = { id: string; event_date: string; title: string; description: s
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-tricolor p-3 md:p-6">
+    <div className="min-h-screen bg-background text-foreground p-3 md:p-6">
       <div className="max-w-3xl mx-auto space-y-4">
         <button type="button" onClick={() => window.history.back()} className="inline-flex items-center gap-1 text-sm text-foreground/80 hover:text-foreground">
           <ArrowLeft className="w-4 h-4" /> Back / వెనుకకు
         </button>
-        <Card className="p-5 bg-white/95 backdrop-blur-xl shadow-xl border-white">
-          <h1 className="text-xl md:text-2xl font-bold" style={{
-            background: "linear-gradient(90deg,#B85C00,#0B5C06)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-          }}>సొసైటీ నియమాలు & చరిత్ర</h1>
+        <Card className="p-5 bg-card backdrop-blur-xl shadow-xl border-border">
+          <h1 className="text-xl md:text-2xl font-bold text-foreground">సొసైటీ నియమాలు & చరిత్ర</h1>
           <p className="text-xs text-muted-foreground mt-1">Admin / కమిటీ సభ్యులు మాత్రమే మార్పులు చేయగలరు</p>
         </Card>
         {children}
