@@ -231,7 +231,9 @@ function r_proofPreview(r: any) {
 }
 
 function Pill({ status, isTe }: { status: string; isTe: boolean }) {
-  if (status === "accepted") return <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-600/20 text-emerald-300"><CheckCircle2 className="h-3 w-3"/>{isTe ? "సమ్మతించారు" : "Accepted"}</span>;
-  if (status === "declined") return <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-red-600/20 text-red-300"><XCircle className="h-3 w-3"/>{isTe ? "తిరస్కరించారు" : "Declined"}</span>;
-  return <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-600/20 text-amber-300"><Clock className="h-3 w-3"/>{isTe ? "వేచిఉంది" : "Awaiting"}</span>;
+  const lang = typeof document !== "undefined" ? document.documentElement.lang || "te" : "te";
+  const tr = (te: string, en: string) => (lang === "en" || !isTe ? en : localizeText({ te, en }, lang));
+  if (status === "accepted") return <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-600/20 text-emerald-300"><CheckCircle2 className="h-3 w-3"/>{tr("సమ్మతించారు", "Accepted")}</span>;
+  if (status === "declined") return <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-red-600/20 text-red-300"><XCircle className="h-3 w-3"/>{tr("తిరస్కరించారు", "Declined")}</span>;
+  return <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-600/20 text-amber-300"><Clock className="h-3 w-3"/>{tr("వేచిఉంది", "Awaiting")}</span>;
 }
