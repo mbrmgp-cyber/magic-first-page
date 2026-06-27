@@ -77,7 +77,7 @@ export function GlobalThemeApplier() {
     // Global font + base body colors
     document.body.style.backgroundColor = t.bg;
     document.body.style.color = t.headColor;
-    document.body.style.fontFamily = `${t.headFont}, system-ui, sans-serif`;
+    document.body.style.fontFamily = `${JSON.stringify(t.headFont)}, system-ui, sans-serif`;
 
     // Inject high-specificity overrides for legacy pages that still use fixed
     // Tailwind colors (bg-black, bg-zinc-950, bg-white/95, text-white, etc.).
@@ -118,10 +118,10 @@ export function GlobalThemeApplier() {
         color: var(--mbr-theme-heading) !important;
       }
 
-      html[data-mbr-theme="on"] .mbr-themed-app button:not([class*="variant-ghost"]),
+      html[data-mbr-theme="on"] .mbr-themed-app button[class*="bg-primary"],
       html[data-mbr-theme="on"] .mbr-themed-app a[class*="bg-[#ff8c28]"],
       html[data-mbr-theme="on"] .mbr-themed-app button[class*="bg-[#ff8c28]"],
-      html[data-mbr-theme="on"] .mbr-themed-app button[class*="bg-primary"],
+      html[data-mbr-theme="on"] .mbr-themed-app .btn-saffron-green,
       html[data-mbr-theme="on"] .mbr-themed-app [role="tab"][data-state="active"] {
         background-color: var(--mbr-theme-primary) !important;
         border-color: var(--mbr-theme-primary) !important;
