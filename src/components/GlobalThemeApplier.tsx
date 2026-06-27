@@ -184,6 +184,13 @@ export function GlobalThemeApplier() {
         color: var(--mbr-theme-primary-fg) !important;
       }
 
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="min-h-screen"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="min-h-dvh"] {
+        background: var(--mbr-theme-bg) !important;
+        background-image: none !important;
+        color: var(--mbr-theme-heading) !important;
+      }
+
       html[data-mbr-theme="on"] .mbr-themed-app button[class*="bg-primary"],
       html[data-mbr-theme="on"] .mbr-themed-app a[class*="bg-[#ff8c28]"],
       html[data-mbr-theme="on"] .mbr-themed-app button[class*="bg-[#ff8c28]"],
