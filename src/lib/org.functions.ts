@@ -760,3 +760,39 @@ export const sendMeetingInvites = createServerFn({ method: "POST" })
 
     return { sent, total: recipients.length, scope: data.scope };
   });
+
+// ===== MBR Admin: search members & update member_code globally =====
+
+export const adminSearchMembers = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { q: string }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "mbr_admin" });
+    if (!isAdmin) throw new Error("Forbidden");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const q = (data.q || "").trim();
+    if (!q) return { members: [] };
+    const { data: rows, error } = await supabaseAdmin
+      .from("members")
+      .select("id, name, member_code, email, phone, org_id, organizations:org_id(name)")
+      .or(`member_code.ilike.%${q}%,name.ilike.%${q}%,email.ilike.%${q}%,phone.ilike.%${q}%`)
+      .limit(25);
+    if (error) throw new Error(error.message);
+    return { members: rows ?? [] };
+  });
+
+export const adminUpdateMemberCode = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { member_id: string; new_code: string }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "mbr_admin" });
+    if (!isAdmin) throw new Error("Forbidden");
+    const { data: row, error } = await supabase.rpc("admin_update_member_code", {
+      _member_id: data.member_id,
+      _new_code: data.new_code,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true, member: row };
+  });
