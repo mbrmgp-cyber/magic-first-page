@@ -11,6 +11,8 @@ export type ThemeSettings = {
   icon?: string;        // dashboard icon color
   buttonBg?: string;    // primary button fill
   buttonText?: string;  // primary button text
+  inputBg?: string;     // input / textarea fill
+  inputText?: string;   // input / textarea text color
   headColor?: string;   // big header text color
   headFont?: string;    // header font family
   subColor?: string;    // sub-title (slogan) color
