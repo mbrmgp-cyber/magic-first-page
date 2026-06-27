@@ -37,8 +37,8 @@ function SignedImg({ path, className }: { path?: string | null; className?: stri
 
 function SuretyInbox() {
   const { lang } = useI18n();
-  const isTe = lang === "te";
-  const pick = <T,>(te: T, en: T) => (isTe ? te : en);
+  const isTe = lang !== "en";
+  const pick = (te: string, en: string) => (lang === "en" ? en : localizeText({ te, en }, lang));
 
   const listFn = useServerFn(listSuretyRequests);
   const respondFn = useServerFn(respondAsSurety);
