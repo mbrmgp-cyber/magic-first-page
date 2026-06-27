@@ -315,6 +315,34 @@ function Dashboard() {
         </Card>
 
 
+        {/* Super Admin shortcut */}
+        {isMbrAdmin && (
+          <Link to="/admin" className="block">
+            <Card
+              className="p-4 border-2 flex items-center gap-3 transition-all hover:scale-[1.01] animate-pulse-slow"
+              style={{
+                background: `linear-gradient(135deg, ${theme.icon}33, ${theme.bigBox})`,
+                borderColor: theme.icon,
+                boxShadow: `0 0 28px ${theme.icon}66`,
+              }}
+            >
+              <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 border-2"
+                style={{ background: `${theme.icon}40`, borderColor: theme.icon }}>
+                <ShieldCheck className="w-6 h-6" style={{ color: theme.icon }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-bold text-base leading-tight" style={{ color: theme.headColor }}>
+                  {lt("Admin Panel", "అడ్మిన్ ప్యానెల్")}
+                </div>
+                <div className="text-xs leading-tight" style={{ color: theme.subColor }}>
+                  {lt("Member ID Update · Society Approvals", "మెంబర్ ID అప్‌డేట్ · సొసైటీ ఆమోదాలు")}
+                </div>
+              </div>
+              <span className="text-2xl shrink-0" style={{ color: theme.icon }}>→</span>
+            </Card>
+          </Link>
+        )}
+
         {/* Menu 2-col grid */}
         <div className="grid grid-cols-2 gap-3">
           {MENU.map((m) => (
