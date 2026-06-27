@@ -347,7 +347,7 @@ function InteractionsPanel({ ctx }: { ctx: Ctx }) {
           <div className="space-y-1">
             {sentQ.data.map(s => (
               <div key={s.id} className="flex items-center justify-between text-xs text-zinc-400 py-1 border-b border-zinc-800 last:border-0">
-                <span>{isTe ? TEMPLATES[s.template_type as Tpl]?.label_te : TEMPLATES[s.template_type as Tpl]?.label_en}</span>
+                <span>{pick(TEMPLATES[s.template_type as Tpl]?.label_te ?? "", TEMPLATES[s.template_type as Tpl]?.label_en ?? "")}</span>
                 <span className={s.status === "approved" ? "text-green-400" : s.status === "rejected" ? "text-red-400" : "text-amber-400"}>{s.status.toUpperCase()}</span>
               </div>
             ))}
