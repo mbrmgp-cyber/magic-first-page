@@ -53,6 +53,8 @@ export function GlobalThemeApplier() {
       "--mbr-theme-heading": t.headColor,
       "--mbr-theme-muted": t.smallColor,
       "--mbr-theme-icon": t.icon,
+      "--mbr-theme-input-bg": t.inputBg,
+      "--mbr-theme-input-text": t.inputText,
       "--background": t.bg,
       "--foreground": t.headColor,
       "--card": t.miniBox,
