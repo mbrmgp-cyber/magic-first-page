@@ -188,7 +188,7 @@ export function TemplateCustomizer({ design, onChange }: Props) {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-lg p-3 border space-y-3" style={{ background: PANEL_BG, borderColor: PANEL_BORDER }}>
+    <div className="rounded-lg p-3 border space-y-3" data-theme-surface="big-box" style={{ background: PANEL_BG, borderColor: PANEL_BORDER }}>
       <div className="text-[11px] font-bold uppercase tracking-wider" style={{ color: TEXT_SUB }}>{title}</div>
       {children}
     </div>
@@ -247,7 +247,7 @@ function ElementRow({ k, design, setElement }: { k: ElementKey; design: IdCardDe
   const isImage = k === "logo" || k === "photo" || k === "qrCode" || k === "presidentSignature" || k === "mbrQrCode" || k === "mbrLogo";
 
   return (
-    <div className="rounded-md p-2 border space-y-2" style={{ borderColor: PANEL_BORDER, background: MINI_BG }}>
+    <div className="rounded-md p-2 border space-y-2" data-theme-surface="mini-box" style={{ borderColor: PANEL_BORDER, background: MINI_BG }}>
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0">
           <div className="text-[12px] font-semibold truncate" style={{ color: TEXT_HEAD }}>{meta.en}</div>

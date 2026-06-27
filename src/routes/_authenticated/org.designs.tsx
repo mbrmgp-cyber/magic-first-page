@@ -148,7 +148,7 @@ function applyOrgThemeToIdDesign(base: IdCardDesign, theme: Required<ThemeSettin
   const next: IdCardDesign = JSON.parse(JSON.stringify(base));
   next.global = {
     ...next.global,
-    backgroundColor: theme.miniBox,
+    backgroundColor: theme.bg,
     borderColor: theme.border,
     accentColor: theme.icon,
     footerColor: theme.icon,
@@ -2050,7 +2050,7 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
           </div>
 
           {/* Live Preview */}
-          <div className="rounded-xl p-3 border" data-theme-surface="mini-box" style={{ background: PAGE_MINI, borderColor: PAGE_BORDER }}>
+          <div className="rounded-xl p-3 border" data-theme-surface="big-box" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
             <div className="flex items-center justify-center gap-2 mb-3">
               {(["front", "back"] as const).map((s) => (
                 <button key={s} onClick={() => setSide(s)}
@@ -2066,6 +2066,7 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
             </div>
             <div
               className="rounded-lg border"
+              data-theme-surface="mini-box"
               style={{
                 background: PAGE_MINI,
                 borderColor: PAGE_BORDER,

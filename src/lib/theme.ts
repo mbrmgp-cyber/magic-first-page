@@ -69,8 +69,13 @@ export function resolveTheme(org: any): Required<ThemeSettings> {
     ...legacy,
     ...t,
   } as Required<ThemeSettings>;
-  merged.bigBox = t.bigBox || t.box || merged.bigBox;
-  merged.miniBox = t.miniBox || t.box || merged.miniBox;
+  // Older saved themes had only one `box` color. Some organizations also have
+  // saved default bigBox/miniBox values from before these controls were visible,
+  // so treat a non-default legacy `box` as the selected box color unless the
+  // newer fields were explicitly changed away from the default.
+  const legacyBox = t.box && t.box !== DEFAULT_THEME.box ? t.box : undefined;
+  merged.bigBox = (t.bigBox && t.bigBox !== DEFAULT_THEME.bigBox ? t.bigBox : undefined) || legacyBox || t.bigBox || merged.bigBox;
+  merged.miniBox = (t.miniBox && t.miniBox !== DEFAULT_THEME.miniBox ? t.miniBox : undefined) || legacyBox || t.miniBox || merged.miniBox;
   merged.box = t.box || merged.miniBox;
   merged.inputBg = t.inputBg || merged.miniBox;
   merged.inputText = t.inputText || merged.headColor;

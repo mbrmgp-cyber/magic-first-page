@@ -110,8 +110,7 @@ export function GlobalThemeApplier() {
         font-family: ${JSON.stringify(t.headFont)}, system-ui, sans-serif !important;
       }
 
-      html[data-mbr-theme="on"] .mbr-themed-app,
-      html[data-mbr-theme="on"] .mbr-themed-app *:not(svg):not(path) {
+      html[data-mbr-theme="on"] .mbr-themed-app :not(.mbr-preserve-design):not(.mbr-preserve-design *):not(svg):not(path) {
         font-family: ${JSON.stringify(t.headFont)}, system-ui, sans-serif !important;
       }
 
@@ -204,7 +203,7 @@ export function GlobalThemeApplier() {
         color: var(--mbr-theme-heading) !important;
       }
 
-      html[data-mbr-theme="on"] .mbr-themed-app [style*="linear-gradient"]:not([style*="background-clip"]):not([style*="BackgroundClip"]),
+      html[data-mbr-theme="on"] .mbr-themed-app [style*="linear-gradient"]:not(.mbr-preserve-design):not(.mbr-preserve-design *):not([style*="background-clip"]):not([style*="BackgroundClip"]),
       html[data-mbr-theme="on"] [role="dialog"] [style*="linear-gradient"]:not([style*="background-clip"]):not([style*="BackgroundClip"]) {
         background: var(--mbr-theme-primary) !important;
         background-image: none !important;
@@ -288,6 +287,21 @@ export function GlobalThemeApplier() {
         -webkit-text-fill-color: color-mix(in srgb, var(--mbr-theme-muted) 72%, transparent) !important;
       }
 
+      html[data-mbr-theme="on"] .mbr-themed-app input[type="color"] {
+        background-color: transparent !important;
+        -webkit-text-fill-color: initial !important;
+      }
+
+      html[data-mbr-theme="on"] .mbr-themed-app [data-theme-preserve],
+      html[data-mbr-theme="on"] .mbr-themed-app [data-theme-preserve] * {
+        forced-color-adjust: none;
+      }
+
+      html[data-mbr-theme="on"] .mbr-themed-app [data-theme-preserve="card"],
+      html[data-mbr-theme="on"] .mbr-themed-app [data-theme-preserve="card"] * {
+        forced-color-adjust: none;
+      }
+
       html[data-mbr-theme="on"] .mbr-themed-app [class*="border-zinc"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="border-slate"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="border-neutral"],
@@ -358,9 +372,9 @@ export function GlobalThemeApplier() {
       html[data-mbr-theme="on"] .mbr-themed-app [class*="text-transparent"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="from-orange-"][class*="to-"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="from-[#"][class*="to-[#"],
-      html[data-mbr-theme="on"] .mbr-themed-app [style*="-webkit-background-clip"],
-      html[data-mbr-theme="on"] .mbr-themed-app [style*="background-clip: text"],
-      html[data-mbr-theme="on"] .mbr-themed-app [style*="background-clip:text"] {
+      html[data-mbr-theme="on"] .mbr-themed-app [style*="-webkit-background-clip"]:not(.mbr-preserve-design):not(.mbr-preserve-design *),
+      html[data-mbr-theme="on"] .mbr-themed-app [style*="background-clip: text"]:not(.mbr-preserve-design):not(.mbr-preserve-design *),
+      html[data-mbr-theme="on"] .mbr-themed-app [style*="background-clip:text"]:not(.mbr-preserve-design):not(.mbr-preserve-design *) {
         background-image: none !important;
         background: transparent !important;
         -webkit-text-fill-color: var(--mbr-theme-heading) !important;
