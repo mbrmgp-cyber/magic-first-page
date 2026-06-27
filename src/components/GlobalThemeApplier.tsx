@@ -131,6 +131,29 @@ export function GlobalThemeApplier() {
         color: var(--mbr-theme-heading) !important;
       }
 
+      html[data-mbr-theme="on"] .mbr-themed-app [data-theme-surface="background"] {
+        background: var(--mbr-theme-bg) !important;
+        background-color: var(--mbr-theme-bg) !important;
+        background-image: none !important;
+        color: var(--mbr-theme-heading) !important;
+      }
+
+      html[data-mbr-theme="on"] .mbr-themed-app [data-theme-surface="big-box"] {
+        background: var(--mbr-theme-big-card) !important;
+        background-color: var(--mbr-theme-big-card) !important;
+        background-image: none !important;
+        border-color: var(--mbr-theme-border) !important;
+        color: var(--mbr-theme-heading) !important;
+      }
+
+      html[data-mbr-theme="on"] .mbr-themed-app [data-theme-surface="mini-box"] {
+        background: var(--mbr-theme-mini-card) !important;
+        background-color: var(--mbr-theme-mini-card) !important;
+        background-image: none !important;
+        border-color: var(--mbr-theme-border) !important;
+        color: var(--mbr-theme-heading) !important;
+      }
+
       html[data-mbr-theme="on"] .mbr-themed-app .bg-card,
       html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-black"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-zinc-"],
@@ -146,6 +169,11 @@ export function GlobalThemeApplier() {
       html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-blue-"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-red-"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="bg-gradient-to-"]:not([class*="bg-clip-text"]),
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="from-blue-"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="to-blue-"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="via-blue-"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="from-orange-"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="to-green-"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="data-[state=active]:bg-[#ff8c28]"][data-state="active"],
       html[data-mbr-theme="on"] [role="dialog"][class*="bg-black"],
       html[data-mbr-theme="on"] [role="dialog"][class*="bg-zinc-"],
@@ -166,12 +194,53 @@ export function GlobalThemeApplier() {
         color: var(--mbr-theme-heading) !important;
       }
 
+      /* Full-page wrappers must always use the Background setting, not the
+         Box/Mini Box setting. This prevents pages with old bg-blue/bg-gradient
+         classes from swapping the selected background and box colors. */
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="min-h-screen"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="min-h-dvh"] {
+        background: var(--mbr-theme-bg) !important;
+        background-image: none !important;
+        color: var(--mbr-theme-heading) !important;
+      }
+
       html[data-mbr-theme="on"] .mbr-themed-app [style*="linear-gradient"]:not([style*="background-clip"]):not([style*="BackgroundClip"]),
       html[data-mbr-theme="on"] [role="dialog"] [style*="linear-gradient"]:not([style*="background-clip"]):not([style*="BackgroundClip"]) {
         background: var(--mbr-theme-primary) !important;
         background-image: none !important;
         border-color: var(--mbr-theme-primary) !important;
         color: var(--mbr-theme-primary-fg) !important;
+      }
+
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="min-h-screen"],
+      html[data-mbr-theme="on"] .mbr-themed-app [class*="min-h-dvh"] {
+        background: var(--mbr-theme-bg) !important;
+        background-image: none !important;
+        color: var(--mbr-theme-heading) !important;
+      }
+
+      /* Authoritative surface mapping: Settings Background → page,
+         Big Box → large panels, Mini Box → small cards. Keep this after
+         legacy bg/gradient overrides so old Tailwind classes cannot invert it. */
+      html[data-mbr-theme="on"] .mbr-themed-app [data-theme-surface="background"] {
+        background: var(--mbr-theme-bg) !important;
+        background-color: var(--mbr-theme-bg) !important;
+        background-image: none !important;
+        color: var(--mbr-theme-heading) !important;
+      }
+      html[data-mbr-theme="on"] .mbr-themed-app [data-theme-surface="big-box"] {
+        background: var(--mbr-theme-big-card) !important;
+        background-color: var(--mbr-theme-big-card) !important;
+        background-image: none !important;
+        border-color: var(--mbr-theme-border) !important;
+        color: var(--mbr-theme-heading) !important;
+      }
+      html[data-mbr-theme="on"] .mbr-themed-app [data-theme-surface="mini-box"] {
+        background: var(--mbr-theme-mini-card) !important;
+        background-color: var(--mbr-theme-mini-card) !important;
+        background-image: none !important;
+        border-color: var(--mbr-theme-border) !important;
+        color: var(--mbr-theme-heading) !important;
       }
 
       html[data-mbr-theme="on"] .mbr-themed-app button[class*="bg-primary"],

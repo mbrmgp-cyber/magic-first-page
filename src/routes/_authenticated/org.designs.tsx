@@ -1,9 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getMyOrg, updateOrgIdDesign } from "@/lib/org.functions";
-import { defaultDesign, TEMPLATE_META, type IdCardDesign, type TemplateId, type CardType } from "@/lib/idCardTemplates";
+import { defaultDesign, TEMPLATE_META, type IdCardDesign, type TemplateId, type CardType, type ElementKey } from "@/lib/idCardTemplates";
 import { IdCardRenderer, type OrgContext, type SampleMember } from "@/components/IdCard/IdCardRenderer";
 import { TemplateCustomizer } from "@/components/IdCard/TemplateCustomizer";
 import { Card } from "@/components/ui/card";
@@ -122,12 +122,16 @@ const DEFAULT_RECEIPT: ReceiptData = {
   mode: "Cash",
 };
 
-// Premium dark page chrome (constant — accent/font/colors flow from org theme to inner templates).
-const PAGE_BG = "#0a0a0a";
-const PAGE_PANEL = "#111113";
-const PAGE_BORDER = "#27272a";
-const PAGE_HEAD = "#fafafa";
-const PAGE_SUB = "#a1a1aa";
+// Page chrome follows Settings → Theme exactly.
+// These CSS variables are set on the Designs page root and also by GlobalThemeApplier.
+const PAGE_BG = "var(--design-bg, var(--mbr-theme-bg, #000000))";
+const PAGE_PANEL = "var(--design-big-box, var(--mbr-theme-big-card, #0a0a0a))";
+const PAGE_MINI = "var(--design-mini-box, var(--mbr-theme-mini-card, #0a0a0a))";
+const PAGE_BORDER = "var(--design-border, var(--mbr-theme-border, #27272a))";
+const PAGE_HEAD = "var(--design-heading, var(--mbr-theme-heading, #fafafa))";
+const PAGE_SUB = "var(--design-muted, var(--mbr-theme-muted, #a1a1aa))";
+const PAGE_INPUT_BG = "var(--design-input-bg, var(--mbr-theme-input-bg, #0a0a0a))";
+const PAGE_INPUT_TEXT = "var(--design-input-text, var(--mbr-theme-input-text, #ffffff))";
 
 const FONT_OPTIONS = [
   { v: "Inter", label: "Inter (Modern)" },
@@ -140,15 +144,51 @@ const FONT_OPTIONS = [
   { v: "Courier New", label: "Courier (Mono)" },
 ];
 
+function applyOrgThemeToIdDesign(base: IdCardDesign, theme: Required<ThemeSettings>): IdCardDesign {
+  const next: IdCardDesign = JSON.parse(JSON.stringify(base));
+  next.global = {
+    ...next.global,
+    backgroundColor: theme.miniBox,
+    borderColor: theme.border,
+    accentColor: theme.icon,
+    footerColor: theme.icon,
+    contactFooterBg: theme.icon,
+    memberCodeBadgeBg: theme.buttonBg,
+  };
+
+  const textKeys: ElementKey[] = [
+    "memberName", "fatherName", "village", "pincode", "phone", "email", "address",
+    "backMatter", "oath", "presidentName",
+  ];
+  const headKeys: ElementKey[] = ["orgName", "slogan", "regNumber"];
+  for (const key of headKeys) {
+    if (next.elements[key]) {
+      next.elements[key] = {
+        ...next.elements[key],
+        color: key === "slogan" ? theme.subColor : theme.headColor,
+        font: key === "slogan" ? theme.subFont : theme.headFont,
+      };
+    }
+  }
+  for (const key of textKeys) {
+    if (next.elements[key]) {
+      next.elements[key] = { ...next.elements[key], color: key === "backMatter" ? theme.headColor : theme.headColor, font: theme.headFont };
+    }
+  }
+  if (next.elements.memberCode) next.elements.memberCode = { ...next.elements.memberCode, color: theme.buttonText, font: theme.headFont };
+  if (next.elements.designation) next.elements.designation = { ...next.elements.designation, color: theme.icon, font: theme.headFont };
+  if (next.elements.bloodGroup) next.elements.bloodGroup = { ...next.elements.bloodGroup, color: theme.icon, font: theme.headFont };
+  return next;
+}
+
 function DesignsPage() {
   const navigate = useNavigate();
   const fetchOrg = useServerFn(getMyOrg);
   const orgQ = useQuery({ queryKey: ["my-org"], queryFn: () => fetchOrg() });
   const org: any = orgQ.data?.org;
 
-  // Pass org theme straight through to inner templates so Settings → Theme changes
-  // (colors, fonts, accent) immediately apply to ID Cards, Letter Pads, Receipts.
-  // Page chrome (background/panel) stays dark via the PAGE_* constants.
+  // Pass org theme straight through to every surface so Settings → Theme changes
+  // (background, boxes, fonts, text) immediately apply to this full module too.
   const theme = useMemo(() => resolveTheme(org), [org]);
 
   // Module tab
@@ -182,7 +222,7 @@ function DesignsPage() {
 
 
   // Design Customization (per-edit-session overrides — nullable so live theme wins until user picks).
-  const [cardBg, setCardBg] = useState<string>("#ffffff");
+  const [cardBg, setCardBg] = useState<string>(theme.miniBox);
   const [accentColor, setAccentColor] = useState<string | null>(null);
   const [fontFamily, setFontFamily] = useState<string | null>(null);
 
@@ -197,6 +237,24 @@ function DesignsPage() {
     headFont: effectiveFont,
     subFont: effectiveFont,
   }), [theme, effectiveAccent, effectiveFont]);
+
+  useEffect(() => {
+    setCardBg((prev) => (prev === "#ffffff" || prev === DEFAULT_THEME.miniBox ? theme.miniBox : prev));
+  }, [theme.miniBox]);
+
+  const designVars = useMemo<React.CSSProperties>(() => ({
+    ["--design-bg" as any]: theme.bg,
+    ["--design-big-box" as any]: theme.bigBox,
+    ["--design-mini-box" as any]: theme.miniBox,
+    ["--design-border" as any]: theme.border,
+    ["--design-heading" as any]: theme.headColor,
+    ["--design-muted" as any]: theme.smallColor,
+    ["--design-input-bg" as any]: theme.inputBg,
+    ["--design-input-text" as any]: theme.inputText,
+    backgroundColor: theme.bg,
+    color: theme.headColor,
+    fontFamily: `${theme.headFont}, system-ui, sans-serif`,
+  }), [theme]);
 
   const orgName = org?.name || "Chitvel Help Line Society";
   const orgSlogan = org?.slogan || "॥ మానవసేవే మాధవసేవ ॥";
@@ -293,7 +351,7 @@ function DesignsPage() {
   }
 
   return (
-    <div className="min-h-screen pb-16 [&_input]:!text-white [&_input]:!bg-white/5 [&_input]:!border-white/25 [&_input::placeholder]:!text-white/40 [&_textarea]:!text-white [&_textarea]:!bg-white/5 [&_textarea]:!border-white/25 [&_textarea::placeholder]:!text-white/40 [&_input[type=date]]:[color-scheme:dark]" style={{ background: PAGE_BG, color: PAGE_HEAD }}>
+    <div className="min-h-screen pb-16" data-theme-surface="background" style={designVars}>
       <div className="max-w-5xl mx-auto p-4 space-y-5">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -315,7 +373,7 @@ function DesignsPage() {
 
         {/* Module tabs */}
         <Tabs value={tab} onValueChange={(v) => setTab(v as any)} className="w-full">
-          <TabsList className="grid grid-cols-3 w-full h-11" style={{ background: PAGE_PANEL, border: `1px solid ${PAGE_BORDER}` }}>
+          <TabsList className="grid grid-cols-3 w-full h-11" data-theme-surface="big-box" style={{ background: PAGE_PANEL, border: `1px solid ${PAGE_BORDER}` }}>
             <TabsTrigger value="id" className="gap-2 text-xs sm:text-sm">
               <IdCard className="h-4 w-4" /> ID Card
             </TabsTrigger>
@@ -352,9 +410,10 @@ function DesignsPage() {
                       key={tpl.id}
                       onClick={() => setLetterPick(tpl.id as LetterLayout)}
                       className="group relative rounded-xl overflow-hidden border transition text-left hover:scale-[1.02]"
-                      style={{ borderColor: PAGE_BORDER, background: PAGE_PANEL, cursor: "pointer" }}
+                      data-theme-surface="mini-box"
+                      style={{ borderColor: PAGE_BORDER, background: PAGE_MINI, cursor: "pointer" }}
                     >
-                      <div className="aspect-[0.77/1] w-full p-1.5" style={{ background: PAGE_BG }}>
+                      <div className="aspect-[0.77/1] w-full p-1.5" style={{ background: PAGE_MINI }}>
                         <LetterThumb layout={tpl.id as LetterLayout} theme={theme}
                           orgName={orgName} slogan={orgSlogan} reg={orgReg} logoUrl={orgLogo} />
                       </div>
@@ -413,7 +472,7 @@ function DesignsPage() {
                   </TabsContent>
 
                   <TabsContent value="blank" className="mt-3">
-                    <div className="rounded-lg border p-3 text-[12px]" style={{ background: PAGE_BG, borderColor: PAGE_BORDER, color: PAGE_SUB }}>
+                    <div className="rounded-lg border p-3 text-[12px]" data-theme-surface="mini-box" style={{ background: PAGE_MINI, borderColor: PAGE_BORDER, color: PAGE_SUB }}>
                       Blank template — header &amp; footer only. Download as PDF, print, and write content by hand.
                     </div>
                   </TabsContent>
@@ -428,7 +487,7 @@ function DesignsPage() {
                 />
 
                 {/* Logo & Title size sliders */}
-                <div className="rounded-lg p-3 border space-y-3" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
+                <div className="rounded-lg p-3 border space-y-3" data-theme-surface="big-box" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
                   <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: PAGE_HEAD }}>
                     Logo &amp; Title Size / లోగో &amp; టైటిల్ సైజ్
                   </p>
@@ -503,9 +562,10 @@ function DesignsPage() {
                       key={tpl.id}
                       onClick={() => setReceiptPick(tpl.id as ReceiptLayout)}
                       className="group relative rounded-xl overflow-hidden border transition text-left hover:scale-[1.02]"
-                      style={{ borderColor: PAGE_BORDER, background: PAGE_PANEL, cursor: "pointer" }}
+                      data-theme-surface="mini-box"
+                      style={{ borderColor: PAGE_BORDER, background: PAGE_MINI, cursor: "pointer" }}
                     >
-                      <div className="aspect-[1.6/1] w-full p-2" style={{ background: PAGE_BG }}>
+                      <div className="aspect-[1.6/1] w-full p-2" style={{ background: PAGE_MINI }}>
                         <ReceiptThumb layout={tpl.id as ReceiptLayout} accent={theme.icon}
                           orgName={orgName} slogan={orgSlogan} reg={orgReg} logoUrl={orgLogo} />
                       </div>
@@ -533,7 +593,7 @@ function DesignsPage() {
                 }
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-3 rounded-lg p-3 border" style={{ background: PAGE_BG, borderColor: PAGE_BORDER }}>
+                  <div className="space-y-3 rounded-lg p-3 border" data-theme-surface="mini-box" style={{ background: PAGE_MINI, borderColor: PAGE_BORDER }}>
                     <div className="grid grid-cols-2 gap-2">
                       <Field label="Receipt No" value={receipt.receiptNo} onChange={(v) => setReceipt({ ...receipt, receiptNo: v })} />
                       <Field label="Date" value={receipt.date} onChange={(v) => setReceipt({ ...receipt, date: v })} type="date" />
@@ -559,7 +619,7 @@ function DesignsPage() {
                       <Download className="h-4 w-4 mr-2" /> Save & Download Receipt
                     </Button>
                   </div>
-                  <div className="rounded-lg p-3 border flex items-center justify-center" style={{ background: PAGE_BG, borderColor: PAGE_BORDER, minHeight: 260 }}>
+                  <div className="rounded-lg p-3 border flex items-center justify-center" data-theme-surface="mini-box" style={{ background: PAGE_MINI, borderColor: PAGE_BORDER, minHeight: 260 }}>
                     <ReceiptPreview layout={receiptPick} theme={customTheme} orgName={orgName} slogan={orgSlogan} reg={orgReg} data={receipt} cardBg={cardBg} logoUrl={effectiveReceiptLogo} />
                   </div>
                 </div>
@@ -581,7 +641,7 @@ function Section({
   theme: Required<ThemeSettings>; children: React.ReactNode; right?: React.ReactNode;
 }) {
   return (
-    <Card className="p-4 space-y-4 border" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
+    <Card className="p-4 space-y-4 border" data-theme-surface="big-box" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
       <div className="flex items-center gap-2 justify-between">
         <div className="flex items-center gap-2">
           {icon}
@@ -601,7 +661,7 @@ function LivePreview({
   title, theme, children,
 }: { title: string; theme: Required<ThemeSettings>; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl p-3 border" style={{ background: PAGE_BG, borderColor: PAGE_BORDER }}>
+    <div className="rounded-xl p-3 border" data-theme-surface="mini-box" style={{ background: PAGE_MINI, borderColor: PAGE_BORDER }}>
       <div className="flex items-center gap-2 mb-2">
         <Sparkles className="h-3.5 w-3.5" style={{ color: theme.icon }} />
         <p className="text-[11px] uppercase tracking-wide font-semibold" style={{ color: PAGE_HEAD }}>
@@ -621,7 +681,7 @@ function Field({ label, value, onChange, type = "text" }: {
       <Label className="text-[10px]" style={{ color: PAGE_SUB }}>{label}</Label>
       <Input type={type} value={value} onChange={(e) => onChange(e.target.value)}
         className="h-9 text-[12px]"
-        style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER, color: PAGE_HEAD }} />
+        style={{ background: PAGE_INPUT_BG, borderColor: PAGE_BORDER, color: PAGE_INPUT_TEXT }} />
     </div>
   );
 }
@@ -636,7 +696,7 @@ function StyleControls({
   font: string; setFont: (v: string) => void;
 }) {
   return (
-    <div className="rounded-lg p-3 border space-y-3" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
+    <div className="rounded-lg p-3 border space-y-3" data-theme-surface="big-box" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
       <div className="flex items-center gap-2">
         <Palette className="h-3.5 w-3.5" style={{ color: accent }} />
         <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: PAGE_HEAD }}>
@@ -651,7 +711,7 @@ function StyleControls({
               className="h-9 w-12 rounded border cursor-pointer" style={{ borderColor: PAGE_BORDER, background: "transparent" }} />
             <Input value={cardBg} onChange={(e) => setCardBg(e.target.value)}
               className="h-9 text-[11px] flex-1"
-              style={{ background: PAGE_BG, borderColor: PAGE_BORDER, color: PAGE_HEAD }} />
+              style={{ background: PAGE_INPUT_BG, borderColor: PAGE_BORDER, color: PAGE_INPUT_TEXT }} />
           </div>
         </div>
         <div className="space-y-1">
@@ -661,7 +721,7 @@ function StyleControls({
               className="h-9 w-12 rounded border cursor-pointer" style={{ borderColor: PAGE_BORDER, background: "transparent" }} />
             <Input value={accent} onChange={(e) => setAccent(e.target.value)}
               className="h-9 text-[11px] flex-1"
-              style={{ background: PAGE_BG, borderColor: PAGE_BORDER, color: PAGE_HEAD }} />
+              style={{ background: PAGE_INPUT_BG, borderColor: PAGE_BORDER, color: PAGE_INPUT_TEXT }} />
           </div>
         </div>
       </div>
@@ -670,7 +730,7 @@ function StyleControls({
           <TypeIcon className="h-3 w-3" /> Font Style / ఫాంట్
         </Label>
         <Select value={font} onValueChange={setFont}>
-          <SelectTrigger className="h-9 text-[12px]" style={{ background: PAGE_BG, borderColor: PAGE_BORDER, color: PAGE_HEAD }}>
+          <SelectTrigger className="h-9 text-[12px]" style={{ background: PAGE_INPUT_BG, borderColor: PAGE_BORDER, color: PAGE_INPUT_TEXT }}>
             <SelectValue placeholder="Choose font" />
           </SelectTrigger>
           <SelectContent>
@@ -686,7 +746,7 @@ function StyleControls({
 
 function LogoUploader({ logoUrl, onChange }: { logoUrl: string; onChange: (url: string) => void }) {
   return (
-    <div className="rounded-lg p-3 border flex items-center gap-3" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
+    <div className="rounded-lg p-3 border flex items-center gap-3" data-theme-surface="big-box" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
       <div style={{ width: 44, height: 44, borderRadius: 6, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", padding: 4, border: `1px solid ${PAGE_BORDER}` }}>
         {logoUrl ? <img src={logoUrl} alt="Logo" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} /> : null}
       </div>
@@ -695,7 +755,7 @@ function LogoUploader({ logoUrl, onChange }: { logoUrl: string; onChange: (url: 
         <p className="text-[10px]" style={{ color: PAGE_SUB }}>Shown in the receipt header</p>
       </div>
       <label className="inline-flex items-center gap-1 px-3 h-8 rounded-md text-[11px] cursor-pointer border"
-        style={{ background: PAGE_BG, borderColor: PAGE_BORDER, color: PAGE_HEAD }}>
+        style={{ background: PAGE_INPUT_BG, borderColor: PAGE_BORDER, color: PAGE_INPUT_TEXT }}>
         <Upload className="h-3 w-3" /> Upload
         <input type="file" accept="image/*" className="hidden" onChange={(e) => {
           const f = e.target.files?.[0]; if (!f) return;
@@ -1844,11 +1904,15 @@ function OfficialSaffronPreview({
 
 function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme: Required<ThemeSettings> }) {
   const saveDesign = useServerFn(updateOrgIdDesign);
-  const initial: IdCardDesign = (org?.id_card_design as IdCardDesign) || defaultDesign("classic", "normal");
+  const initial: IdCardDesign = applyOrgThemeToIdDesign((org?.id_card_design as IdCardDesign) || defaultDesign("classic", "normal"), theme);
   const [design, setDesign] = useState<IdCardDesign>(initial);
   const [side, setSide] = useState<"front" | "back">("front");
   const [step, setStep] = useState<"pick" | "edit">(org?.id_card_design ? "edit" : "pick");
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setDesign(applyOrgThemeToIdDesign((org?.id_card_design as IdCardDesign) || defaultDesign(design.templateId, design.cardType), theme));
+  }, [org?.id, org?.theme_settings, org?.id_card_design, theme.bg, theme.bigBox, theme.miniBox, theme.border, theme.icon, theme.buttonBg, theme.buttonText, theme.headColor, theme.subColor, theme.headFont, theme.subFont]);
 
   const origin = typeof window !== "undefined" ? window.location.origin : "https://mbrapp.in";
   const orgCode = org?.org_code || "";
@@ -1889,10 +1953,10 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
 
 
   function pickTemplate(id: TemplateId) {
-    setDesign(defaultDesign(id, design.cardType));
+    setDesign(applyOrgThemeToIdDesign(defaultDesign(id, design.cardType), theme));
     setStep("edit");
   }
-  function setCardType(t: CardType) { setDesign({ ...design, cardType: t }); }
+  function setCardType(t: CardType) { setDesign(applyOrgThemeToIdDesign({ ...design, cardType: t }, theme)); }
 
   async function onSave() {
     setSaving(true);
@@ -1910,7 +1974,7 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
   return (
     <div className="space-y-4">
       {/* Step 1: Card Type + Print Dimensions */}
-      <div className="rounded-xl p-3 border space-y-3" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
+      <div className="rounded-xl p-3 border space-y-3" data-theme-surface="big-box" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
         <div className="text-[11px] font-bold uppercase tracking-wider" style={{ color: PAGE_SUB }}>
           Step 1 • కార్డ్ టైప్ ఎంచుకోండి
         </div>
@@ -1919,9 +1983,9 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
             <button key={t} onClick={() => setCardType(t)}
               className="h-12 rounded-lg text-xs font-semibold transition"
               style={{
-                background: design.cardType === t ? theme.icon : "transparent",
-                color: design.cardType === t ? "#fff" : PAGE_SUB,
-                border: `1px solid ${design.cardType === t ? theme.icon : PAGE_BORDER}`,
+                background: design.cardType === t ? theme.buttonBg : "transparent",
+                color: design.cardType === t ? theme.buttonText : PAGE_SUB,
+                border: `1px solid ${design.cardType === t ? theme.buttonBg : PAGE_BORDER}`,
               }}>
               {t === "normal" ? "🪪 Normal ID Card / నార్మల్" : "🔑 Keychain Type / కీ చైన్"}
             </button>
@@ -1945,19 +2009,20 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
 
       {/* Step 2: Template Picker */}
       {step === "pick" && (
-        <div className="rounded-xl p-3 border" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
+        <div className="rounded-xl p-3 border" data-theme-surface="big-box" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
           <div className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: PAGE_SUB }}>
             Step 2 • టెంప్లేట్ ఎంచుకోండి (5 రెడీమేడ్ డిజైన్స్)
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {(Object.keys(TEMPLATE_META) as TemplateId[]).map((id) => {
               const meta = TEMPLATE_META[id];
-              const tplDesign: IdCardDesign = defaultDesign(id, design.cardType);
+              const tplDesign: IdCardDesign = applyOrgThemeToIdDesign(defaultDesign(id, design.cardType), theme);
               return (
                 <button key={id} onClick={() => pickTemplate(id)}
                   className="rounded-xl border p-3 text-left hover:scale-[1.02] transition space-y-2"
-                  style={{ borderColor: PAGE_BORDER, background: PAGE_BG }}>
-                  <div className="flex justify-center bg-zinc-900/40 rounded-lg p-2" style={{ height: 130, overflow: "hidden" }}>
+                  data-theme-surface="mini-box"
+                  style={{ borderColor: PAGE_BORDER, background: PAGE_MINI }}>
+                  <div className="flex justify-center rounded-lg p-2" data-theme-surface="big-box" style={{ height: 130, overflow: "hidden", background: PAGE_PANEL }}>
                     <IdCardRenderer design={tplDesign} org={orgCtx} member={sampleMember} side="front" scale={0.55} />
                   </div>
                   <div>
@@ -1985,15 +2050,15 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
           </div>
 
           {/* Live Preview */}
-          <div className="rounded-xl p-3 border" style={{ background: PAGE_BG, borderColor: PAGE_BORDER }}>
+          <div className="rounded-xl p-3 border" data-theme-surface="mini-box" style={{ background: PAGE_MINI, borderColor: PAGE_BORDER }}>
             <div className="flex items-center justify-center gap-2 mb-3">
               {(["front", "back"] as const).map((s) => (
                 <button key={s} onClick={() => setSide(s)}
                   className="h-8 px-4 rounded text-xs font-semibold transition"
                   style={{
-                    background: side === s ? theme.icon : "transparent",
-                    color: side === s ? "#fff" : PAGE_SUB,
-                    border: `1px solid ${side === s ? theme.icon : PAGE_BORDER}`,
+                    background: side === s ? theme.buttonBg : "transparent",
+                    color: side === s ? theme.buttonText : PAGE_SUB,
+                    border: `1px solid ${side === s ? theme.buttonBg : PAGE_BORDER}`,
                   }}>
                   {s === "front" ? "ముందు / Front" : "వెనుక / Back"}
                 </button>
@@ -2002,7 +2067,7 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
             <div
               className="rounded-lg border"
               style={{
-                background: "#050505",
+                background: PAGE_MINI,
                 borderColor: PAGE_BORDER,
                 overflow: "auto",
                 maxWidth: "100%",
@@ -2021,7 +2086,7 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
           <TemplateCustomizer design={design} onChange={setDesign} />
 
           {/* Save */}
-          <div className="sticky bottom-0 -mx-4 px-4 py-3 border-t" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
+          <div className="sticky bottom-0 -mx-4 px-4 py-3 border-t" data-theme-surface="big-box" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
             <Button onClick={onSave} disabled={saving}
               className="w-full h-12 text-sm font-bold"
               style={{ background: theme.buttonBg, color: theme.buttonText }}>
@@ -2042,7 +2107,7 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
 function LineColor({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
     <div className="space-y-1">
-      <Label className="text-[10px]" style={{ color: "#a1a1aa" }}>{label}</Label>
+      <Label className="text-[10px]" style={{ color: PAGE_SUB }}>{label}</Label>
       <div className="flex items-center gap-1">
         <input type="color" value={value} onChange={(e) => onChange(e.target.value)} className="h-8 w-8 rounded border" />
         <Input value={value} onChange={(e) => onChange(e.target.value)} className="h-8 text-[10px] font-mono" />
