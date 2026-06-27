@@ -11,9 +11,13 @@ type Props = {
   onChange: (next: IdCardDesign) => void;
 };
 
-const PANEL_BORDER = "#27272a";
-const PANEL_BG = "#111113";
-const TEXT_SUB = "#a1a1aa";
+const PANEL_BORDER = "var(--design-border, var(--mbr-theme-border, #27272a))";
+const PANEL_BG = "var(--design-big-box, var(--mbr-theme-big-card, #111113))";
+const MINI_BG = "var(--design-mini-box, var(--mbr-theme-mini-card, #0a0a0a))";
+const TEXT_HEAD = "var(--design-heading, var(--mbr-theme-heading, #ffffff))";
+const TEXT_SUB = "var(--design-muted, var(--mbr-theme-muted, #a1a1aa))";
+const INPUT_BG = "var(--design-input-bg, var(--mbr-theme-input-bg, #0a0a0a))";
+const INPUT_TEXT = "var(--design-input-text, var(--mbr-theme-input-text, #ffffff))";
 
 export function TemplateCustomizer({ design, onChange }: Props) {
   function setGlobal<K extends keyof IdCardDesign["global"]>(key: K, value: IdCardDesign["global"][K]) {
@@ -217,9 +221,9 @@ function BgImageField({ label, value, onChange }: { label: string; value: string
     <div className="space-y-1">
       <Label className="text-[11px]" style={{ color: TEXT_SUB }}>{label}</Label>
       <div className="flex items-center gap-2">
-        <div style={{ width: 36, height: 36, borderRadius: 4, background: value ? `url(${value}) center/cover` : "#0a0a0a", border: `1px solid ${PANEL_BORDER}` }} />
+        <div style={{ width: 36, height: 36, borderRadius: 4, background: value ? `url(${value}) center/cover` : MINI_BG, border: `1px solid ${PANEL_BORDER}` }} />
         <label className="inline-flex items-center justify-center px-2 h-8 rounded-md text-[10px] cursor-pointer border flex-1"
-          style={{ background: "#0a0a0a", borderColor: PANEL_BORDER, color: "#fff" }}>
+          style={{ background: INPUT_BG, borderColor: PANEL_BORDER, color: INPUT_TEXT }}>
           {value ? "Change" : "Upload"}
           <input type="file" accept="image/*" className="hidden" onChange={(e) => {
             const f = e.target.files?.[0]; if (!f) return;
@@ -230,7 +234,7 @@ function BgImageField({ label, value, onChange }: { label: string; value: string
         </label>
         {value && (
           <button type="button" onClick={() => onChange(undefined)} className="text-[10px] px-2 h-8 rounded border"
-            style={{ borderColor: PANEL_BORDER, color: TEXT_SUB, background: "#0a0a0a" }}>Clear</button>
+            style={{ borderColor: PANEL_BORDER, color: TEXT_SUB, background: MINI_BG }}>Clear</button>
         )}
       </div>
     </div>
@@ -243,17 +247,17 @@ function ElementRow({ k, design, setElement }: { k: ElementKey; design: IdCardDe
   const isImage = k === "logo" || k === "photo" || k === "qrCode" || k === "presidentSignature" || k === "mbrQrCode" || k === "mbrLogo";
 
   return (
-    <div className="rounded-md p-2 border space-y-2" style={{ borderColor: PANEL_BORDER, background: "#0a0a0a" }}>
+    <div className="rounded-md p-2 border space-y-2" style={{ borderColor: PANEL_BORDER, background: MINI_BG }}>
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0">
-          <div className="text-[12px] font-semibold text-white truncate">{meta.en}</div>
+          <div className="text-[12px] font-semibold truncate" style={{ color: TEXT_HEAD }}>{meta.en}</div>
           <div className="text-[10px] truncate" style={{ color: TEXT_SUB }}>{meta.te}</div>
         </div>
         <button
           type="button"
           onClick={() => setElement(k, { visible: !el.visible })}
           className="flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded"
-          style={{ background: el.visible ? "#138808" : "#3f3f46", color: "#fff" }}
+          style={{ background: el.visible ? "var(--mbr-theme-primary, #138808)" : MINI_BG, border: `1px solid ${PANEL_BORDER}`, color: el.visible ? "var(--mbr-theme-primary-fg, #ffffff)" : TEXT_SUB }}
         >
           {el.visible ? <><Eye className="h-3 w-3" /> Show</> : <><EyeOff className="h-3 w-3" /> Hidden</>}
         </button>
