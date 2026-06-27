@@ -121,7 +121,7 @@ function MemberDashboard() {
               : <ShieldCheck className="h-7 w-7" style={{ color: brand }} />}
           </div>
           <div className="flex-1 min-w-0 text-center">
-            <p className="text-[11px] text-zinc-400">Welcome / నమస్కారం</p>
+            <p className="text-[11px] text-zinc-400">నమస్కారం 🙏</p>
             <p className="text-sm font-semibold text-white truncate">{fullName}</p>
           </div>
           <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-950 flex items-center justify-center overflow-hidden shrink-0"
