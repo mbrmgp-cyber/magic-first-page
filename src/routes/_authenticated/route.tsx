@@ -12,7 +12,9 @@ export const Route = createFileRoute("/_authenticated")({
   component: () => (
     <>
       <GlobalThemeApplier />
-      <Outlet />
+      <div className="mbr-themed-app min-h-screen bg-background text-foreground">
+        <Outlet />
+      </div>
     </>
   ),
 });
