@@ -81,17 +81,17 @@ function EventsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-5xl px-3 py-4">
         <div className="flex items-center gap-2 mb-3">
-          <Link to="/org/dashboard" className="inline-flex items-center gap-1 text-zinc-300 hover:text-orange-400 text-sm">
+          <Link to="/org/dashboard" className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground text-sm">
             <ArrowLeft className="w-4 h-4" /> డాష్‌బోర్డ్
           </Link>
         </div>
 
-        <Card className="bg-gradient-to-br from-orange-500/10 to-amber-500/10 border-orange-500/30 p-4 mb-4">
-          <h1 className="text-xl font-bold text-orange-400">కార్యక్రమాలు, సమావేశాలు, నిర్ణయాలు</h1>
-          <p className="text-xs text-zinc-400 mt-1">Events, Meetings & Decisions Hub</p>
+        <Card className="mbr-theme-big-box border p-4 mb-4">
+          <h1 className="text-xl font-bold text-foreground">కార్యక్రమాలు, సమావేశాలు, నిర్ణయాలు</h1>
+          <p className="text-xs text-muted-foreground mt-1">Events, Meetings & Decisions Hub</p>
         </Card>
 
         <div className="grid grid-cols-3 gap-2 mb-4">
@@ -106,7 +106,7 @@ function EventsPage() {
               <button
                 key={t.k}
                 onClick={() => setTab(t.k)}
-                className={`flex flex-col items-center gap-1 rounded-lg p-2 border text-xs transition ${active ? "bg-orange-500 border-orange-400 text-white" : "bg-zinc-900 border-zinc-800 text-zinc-300 hover:border-orange-500/60"}`}
+                className={`mbr-theme-mini-box flex flex-col items-center gap-1 rounded-lg p-2 border text-xs transition ${active ? "bg-primary border-primary text-primary-foreground" : "bg-card border-border text-foreground hover:border-primary"}`}
               >
                 <Ic className="w-4 h-4" />
                 <span className="font-semibold leading-tight">{t.te}</span>
@@ -116,7 +116,7 @@ function EventsPage() {
           })}
         </div>
 
-        {!orgId ? <p className="text-zinc-400 text-sm">లోడ్ అవుతోంది…</p> : (
+        {!orgId ? <p className="text-muted-foreground text-sm">లోడ్ అవుతోంది…</p> : (
           <>
             {tab === "meetings" && (
               <MeetingsTab orgId={orgId} meetings={meetingsQ.data ?? []} resolutions={resolutionsQ.data ?? []} members={membersQ.data ?? []} onChange={refetchAll} />
@@ -145,20 +145,20 @@ function MeetingsTab({ orgId, meetings, resolutions, members, onChange }: any) {
 
   return (
     <div className="space-y-4">
-      <Button onClick={() => { setEditing(null); setOpen(true); }} className="w-full bg-orange-600 hover:bg-orange-700">
+      <Button type="button" onClick={() => { setEditing(null); setOpen(true); }} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
         <Plus className="w-4 h-4 mr-1" /> కొత్త సమావేశం / New Meeting
       </Button>
 
       {upcoming.length > 0 && (
         <section>
-          <h3 className="text-orange-400 font-semibold text-sm mb-2">రాబోయే సమావేశాలు ({upcoming.length})</h3>
+          <h3 className="text-foreground font-semibold text-sm mb-2">రాబోయే సమావేశాలు ({upcoming.length})</h3>
           <div className="space-y-2">{upcoming.map((m: any) => <MeetingCard key={m.id} m={m} resolutions={resolutions} members={members} orgId={orgId} onEdit={() => { setEditing(m); setOpen(true); }} onChange={onChange} />)}</div>
         </section>
       )}
 
       <section>
-        <h3 className="text-zinc-400 font-semibold text-sm mb-2">గత సమావేశాలు ({past.length})</h3>
-        {past.length === 0 ? <p className="text-zinc-500 text-xs">ఇంకా రికార్డ్ చేయలేదు.</p> :
+        <h3 className="text-muted-foreground font-semibold text-sm mb-2">గత సమావేశాలు ({past.length})</h3>
+        {past.length === 0 ? <p className="text-muted-foreground text-xs">ఇంకా రికార్డ్ చేయలేదు.</p> :
           <div className="space-y-2">{past.map((m: any) => <MeetingCard key={m.id} m={m} resolutions={resolutions} members={members} orgId={orgId} onEdit={() => { setEditing(m); setOpen(true); }} onChange={onChange} />)}</div>}
       </section>
 
