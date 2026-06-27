@@ -96,9 +96,9 @@ function SuretyInbox() {
     <div className="min-h-screen bg-black text-white pb-16">
       <div className="max-w-md mx-auto p-4 space-y-5">
         <header className="flex items-center gap-3">
-          <Link to="/org/chat" className="p-2 rounded-lg hover:bg-white/10">
+          <button type="button" onClick={() => window.history.back()} className="p-2 rounded-lg hover:bg-white/10">
             <ArrowLeft className="h-5 w-5" />
-          </Link>
+          </button>
           <div>
             <h1 className="text-lg font-bold">{pick("షూరిటీ అభ్యర్థనలు", "Surety Requests")}</h1>
             <p className="text-xs text-white/60">{pick("మీరు షూరిటీగా ఉన్న లోన్ అభ్యర్థనలు", "Loans where you are named as surety")}</p>
