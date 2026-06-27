@@ -76,7 +76,11 @@ function OrgThemePage() {
   }, [org?.id]);
 
   function set<K extends keyof ThemeSettings>(k: K, v: any) {
-    setT((p) => ({ ...p, [k]: v }));
+    setT((p) => {
+      const next = { ...p, [k]: v };
+      if (k === "miniBox") next.box = v;
+      return next;
+    });
   }
 
   const previewVars = useMemo<React.CSSProperties>(() => ({

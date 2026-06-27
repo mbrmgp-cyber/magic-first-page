@@ -175,31 +175,31 @@ function MeetingCard({ m, resolutions, members, orgId, onEdit, onChange }: any) 
     if (error) toast.error(error.message); else { toast.success("Deleted"); onChange(); }
   }
   return (
-    <Card className="bg-zinc-900 border-zinc-800 p-3">
+    <Card className="mbr-theme-mini-box bg-card border-border p-3">
       <div className="flex justify-between items-start gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={`text-[10px] px-2 py-0.5 rounded ${m.meeting_type === "online" ? "bg-blue-500/20 text-blue-300" : "bg-green-500/20 text-green-300"}`}>
+            <span className="text-[10px] px-2 py-0.5 rounded border border-border text-foreground">
               {m.meeting_type === "online" ? "ఆన్‌లైన్" : "ఆఫ్‌లైన్"}
             </span>
-            <span className="text-[10px] px-2 py-0.5 rounded bg-zinc-800 text-zinc-300">{m.status}</span>
+            <span className="text-[10px] px-2 py-0.5 rounded bg-card text-muted-foreground border border-border">{m.status}</span>
           </div>
-          <h4 className="text-white font-semibold mt-1 text-sm">{m.title}</h4>
-          <p className="text-xs text-zinc-400">{new Date(m.scheduled_at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}</p>
-          {m.location && <p className="text-xs text-zinc-500 mt-0.5">📍 {m.location}</p>}
-          <div className="flex gap-3 mt-2 text-[11px] text-zinc-400">
-            <span className="text-green-400">✓ హాజరు {m.attended_member_ids?.length || 0}</span>
-            <span className="text-red-400">✗ గైర్హాజరు {m.absent_member_ids?.length || 0}</span>
-            {linkedRes.length > 0 && <span className="text-orange-400">⚖ నిర్ణయాలు {linkedRes.length}</span>}
+          <h4 className="text-foreground font-semibold mt-1 text-sm">{m.title}</h4>
+          <p className="text-xs text-muted-foreground">{new Date(m.scheduled_at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}</p>
+          {m.location && <p className="text-xs text-muted-foreground mt-0.5">📍 {m.location}</p>}
+          <div className="flex gap-3 mt-2 text-[11px] text-muted-foreground">
+            <span>✓ హాజరు {m.attended_member_ids?.length || 0}</span>
+            <span>✗ గైర్హాజరు {m.absent_member_ids?.length || 0}</span>
+            {linkedRes.length > 0 && <span>⚖ నిర్ణయాలు {linkedRes.length}</span>}
           </div>
         </div>
       </div>
       <div className="flex gap-2 mt-3 flex-wrap">
-        <Button size="sm" variant="secondary" onClick={() => printMeetingMinutes({ orgId, meeting: m, resolutions: linkedRes, members })} className="bg-slate-700 hover:bg-slate-600 text-white text-xs h-8">
+        <Button size="sm" variant="secondary" onClick={() => printMeetingMinutes({ orgId, meeting: m, resolutions: linkedRes, members })} className="text-xs h-8">
           <Printer className="w-3 h-3 mr-1" /> ప్రింట్ / PDF
         </Button>
-        <Button size="sm" variant="ghost" onClick={onEdit} className="text-xs h-8 text-zinc-300"><Pencil className="w-3 h-3 mr-1" /> సవరించు</Button>
-        <Button size="sm" variant="ghost" onClick={del} className="text-xs h-8 text-red-400 hover:text-red-300"><Trash2 className="w-3 h-3" /></Button>
+        <Button size="sm" variant="ghost" onClick={onEdit} className="text-xs h-8 text-foreground"><Pencil className="w-3 h-3 mr-1" /> సవరించు</Button>
+        <Button size="sm" variant="ghost" onClick={del} className="text-xs h-8 text-foreground"><Trash2 className="w-3 h-3" /></Button>
       </div>
     </Card>
   );
@@ -243,7 +243,7 @@ function MeetingDialog({ open, onOpenChange, orgId, members, editing, onSaved }:
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg bg-zinc-900 border-zinc-800 text-zinc-100 max-h-[90vh] overflow-y-auto">
-        <DialogHeader><DialogTitle className="text-orange-400">{editing ? "సమావేశం సవరించు" : "కొత్త సమావేశం"}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle className="text-foreground">{editing ? "సమావేశం సవరించు" : "కొత్త సమావేశం"}</DialogTitle></DialogHeader>
         <div className="space-y-3 text-sm">
           <div><Label>శీర్షిక / Title *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="bg-zinc-800 border-zinc-700" /></div>
           <div className="space-y-2">
@@ -276,16 +276,16 @@ function MeetingDialog({ open, onOpenChange, orgId, members, editing, onSaved }:
 
           <div>
             <Label className="flex items-center gap-1"><Users className="w-3 h-3" /> హాజరు ట్రాకర్ ({members.length} సభ్యులు)</Label>
-            <div className="mt-2 max-h-56 overflow-y-auto border border-zinc-800 rounded p-2 space-y-1">
+             <div className="mbr-theme-mini-box mt-2 max-h-56 overflow-y-auto border border-border rounded p-2 space-y-1">
               {members.map((m: any) => {
                 const att = form.attended_member_ids?.includes(m.id);
                 const abs = form.absent_member_ids?.includes(m.id);
                 return (
                   <div key={m.id} className="flex items-center justify-between gap-2 text-xs">
-                    <span className="truncate flex-1">{m.name} <span className="text-zinc-500">{m.member_code}</span></span>
+                    <span className="truncate flex-1">{m.name} <span className="text-muted-foreground">{m.member_code}</span></span>
                     <div className="flex gap-1">
-                      <button type="button" onClick={() => toggleMember(m.id, "attended_member_ids")} className={`px-2 py-1 rounded text-[10px] ${att ? "bg-green-600 text-white" : "bg-zinc-800 text-zinc-400"}`}>✓ హాజరు</button>
-                      <button type="button" onClick={() => toggleMember(m.id, "absent_member_ids")} className={`px-2 py-1 rounded text-[10px] ${abs ? "bg-red-600 text-white" : "bg-zinc-800 text-zinc-400"}`}>✗ గైర్హాజరు</button>
+                      <button type="button" onClick={() => toggleMember(m.id, "attended_member_ids")} className={`px-2 py-1 rounded text-[10px] border ${att ? "bg-primary text-primary-foreground border-primary" : "bg-card text-foreground border-border"}`}>✓ హాజరు</button>
+                      <button type="button" onClick={() => toggleMember(m.id, "absent_member_ids")} className={`px-2 py-1 rounded text-[10px] border ${abs ? "bg-primary text-primary-foreground border-primary" : "bg-card text-foreground border-border"}`}>✗ గైర్హాజరు</button>
                     </div>
                   </div>
                 );
@@ -298,8 +298,8 @@ function MeetingDialog({ open, onOpenChange, orgId, members, editing, onSaved }:
           <InviteSection orgId={orgId} form={form} />
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>రద్దు</Button>
-          <Button onClick={save} disabled={saving} className="bg-orange-600 hover:bg-orange-700">{saving ? "సేవ్…" : "సేవ్"}</Button>
+          <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>రద్దు</Button>
+          <Button type="button" onClick={save} disabled={saving} className="bg-primary text-primary-foreground hover:bg-primary/90">{saving ? "సేవ్…" : "సేవ్"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -339,18 +339,18 @@ function InviteSection({ orgId, form }: { orgId: string; form: any }) {
   }
 
   return (
-    <div className="border border-orange-900/40 bg-orange-950/20 rounded-md p-3 space-y-2">
-      <div className="flex items-center gap-2 text-orange-300 text-xs font-semibold">
+    <div className="mbr-theme-mini-box border border-border bg-card rounded-md p-3 space-y-2">
+      <div className="flex items-center gap-2 text-foreground text-xs font-semibold">
         <Mail className="w-3.5 h-3.5" /> ఆహ్వాన నోటిఫికేషన్ పంపండి / Send Invitation
       </div>
-      <p className="text-[11px] text-zinc-400">శీర్షిక, తేదీ/సమయం, లింక్ &amp; అజెండాతో ఇమెయిల్ వెళ్తుంది.</p>
+      <p className="text-[11px] text-muted-foreground">శీర్షిక, తేదీ/సమయం, లింక్ &amp; అజెండాతో ఇమెయిల్ వెళ్తుంది.</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <Button
           type="button"
           size="sm"
           disabled={sending !== null}
           onClick={() => trigger("committee")}
-          className="bg-orange-600 hover:bg-orange-700 text-white justify-start"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 justify-start"
         >
           <Send className="w-3.5 h-3.5" />
           {sending === "committee" ? "పంపుతోంది…" : "కార్యవర్గానికి మాత్రమే"}
@@ -360,7 +360,7 @@ function InviteSection({ orgId, form }: { orgId: string; form: any }) {
           size="sm"
           disabled={sending !== null}
           onClick={() => trigger("all")}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white justify-start"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 justify-start"
         >
           <Send className="w-3.5 h-3.5" />
           {sending === "all" ? "పంపుతోంది…" : "సభ్యులందరికీ"}
@@ -384,39 +384,39 @@ function ResolutionsTab({ orgId, resolutions, meetings, members, onChange }: any
   const [editing, setEditing] = useState<any>(null);
   return (
     <div className="space-y-3">
-      <Button onClick={() => { setEditing(null); setOpen(true); }} className="w-full bg-orange-600 hover:bg-orange-700">
+      <Button type="button" onClick={() => { setEditing(null); setOpen(true); }} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
         <Plus className="w-4 h-4 mr-1" /> కొత్త నిర్ణయం / New Resolution
       </Button>
-      {resolutions.length === 0 ? <p className="text-zinc-500 text-xs">ఇంకా నిర్ణయాలు లేవు.</p> :
+      {resolutions.length === 0 ? <p className="text-muted-foreground text-xs">ఇంకా నిర్ణయాలు లేవు.</p> :
         resolutions.map((r: any) => (
-          <Card key={r.id} className="bg-zinc-900 border-zinc-800 p-3">
+          <Card key={r.id} className="mbr-theme-mini-box bg-card border-border p-3">
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-orange-600 text-white font-bold">{r.resolution_no}</span>
-                  <span className={`text-[10px] px-2 py-0.5 rounded ${r.status === "passed" ? "bg-green-500/20 text-green-300" : r.status === "rejected" ? "bg-red-500/20 text-red-300" : "bg-amber-500/20 text-amber-300"}`}>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-primary text-primary-foreground font-bold">{r.resolution_no}</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded border border-border text-foreground">
                     {r.status === "passed" ? "ఆమోదించబడింది" : r.status === "rejected" ? "తిరస్కరించబడింది" : "పెండింగ్"}
                   </span>
                 </div>
-                <h4 className="text-white font-semibold mt-1 text-sm">{r.topic}</h4>
-                <p className="text-[11px] text-zinc-500">{new Date(r.decision_date).toLocaleDateString("en-IN", { dateStyle: "long" })}</p>
-                {r.description && <p className="text-xs text-zinc-300 mt-1 line-clamp-2">{r.description}</p>}
+                <h4 className="text-foreground font-semibold mt-1 text-sm">{r.topic}</h4>
+                <p className="text-[11px] text-muted-foreground">{new Date(r.decision_date).toLocaleDateString("en-IN", { dateStyle: "long" })}</p>
+                {r.description && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{r.description}</p>}
                 <div className="flex gap-3 mt-2 text-[11px]">
-                  <span className="text-green-400 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> {r.approved_member_ids?.length || 0}</span>
-                  <span className="text-red-400 flex items-center gap-1"><XCircle className="w-3 h-3" /> {r.opposed_member_ids?.length || 0}</span>
+                  <span className="text-foreground flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> {r.approved_member_ids?.length || 0}</span>
+                  <span className="text-foreground flex items-center gap-1"><XCircle className="w-3 h-3" /> {r.opposed_member_ids?.length || 0}</span>
                 </div>
               </div>
             </div>
             <div className="flex gap-2 mt-2 flex-wrap">
-              <Button size="sm" variant="secondary" onClick={() => printResolution({ orgId, resolution: r, members })} className="bg-slate-700 hover:bg-slate-600 text-white text-xs h-8">
+              <Button size="sm" variant="secondary" onClick={() => printResolution({ orgId, resolution: r, members })} className="text-xs h-8">
                 <Printer className="w-3 h-3 mr-1" /> ప్రింట్
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => { setEditing(r); setOpen(true); }} className="text-xs h-8 text-zinc-300"><Pencil className="w-3 h-3 mr-1" /> సవరించు</Button>
+              <Button size="sm" variant="ghost" onClick={() => { setEditing(r); setOpen(true); }} className="text-xs h-8 text-foreground"><Pencil className="w-3 h-3 mr-1" /> సవరించు</Button>
               <Button size="sm" variant="ghost" onClick={async () => {
                 if (!confirm("Delete?")) return;
                 const { error } = await supabase.from("org_resolutions").delete().eq("id", r.id);
                 if (error) toast.error(error.message); else { toast.success("Deleted"); onChange(); }
-              }} className="text-xs h-8 text-red-400"><Trash2 className="w-3 h-3" /></Button>
+              }} className="text-xs h-8 text-foreground"><Trash2 className="w-3 h-3" /></Button>
             </div>
           </Card>
         ))
@@ -461,7 +461,7 @@ function ResolutionDialog({ open, onOpenChange, orgId, meetings, members, editin
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg bg-zinc-900 border-zinc-800 text-zinc-100 max-h-[90vh] overflow-y-auto">
-        <DialogHeader><DialogTitle className="text-orange-400">{editing ? "నిర్ణయం సవరించు" : "కొత్త నిర్ణయం"}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle className="text-foreground">{editing ? "నిర్ణయం సవరించు" : "కొత్త నిర్ణయం"}</DialogTitle></DialogHeader>
         <div className="space-y-3 text-sm">
           <div className="grid grid-cols-2 gap-2">
             <div><Label>నిర్ణయ సంఖ్య *</Label><Input value={form.resolution_no} onChange={(e) => setForm({ ...form, resolution_no: e.target.value })} placeholder="R-001" className="bg-zinc-800 border-zinc-700" /></div>
@@ -491,21 +491,21 @@ function ResolutionDialog({ open, onOpenChange, orgId, meetings, members, editin
             <div className="flex items-center justify-between mb-2">
               <Label className="text-sm">ఓటింగ్ ట్రాకింగ్ / Voting</Label>
               <div className="flex gap-2 text-[11px]">
-                <span className="px-2 py-0.5 rounded bg-green-600/20 text-green-300 font-semibold">✓ {form.approved_member_ids?.length || 0}</span>
-                <span className="px-2 py-0.5 rounded bg-red-600/20 text-red-300 font-semibold">✕ {form.opposed_member_ids?.length || 0}</span>
+                <span className="px-2 py-0.5 rounded bg-card text-foreground border border-border font-semibold">✓ {form.approved_member_ids?.length || 0}</span>
+                <span className="px-2 py-0.5 rounded bg-card text-foreground border border-border font-semibold">✕ {form.opposed_member_ids?.length || 0}</span>
               </div>
             </div>
-            <p className="text-[10px] text-zinc-500 mb-2">ప్రతి సభ్యునికి ఆమోదం లేదా వ్యతిరేకం బటన్ నొక్కండి</p>
-            <div className="max-h-64 overflow-y-auto border border-zinc-700 rounded-lg p-2 space-y-1.5 bg-zinc-950/40">
+            <p className="text-[10px] text-muted-foreground mb-2">ప్రతి సభ్యునికి ఆమోదం లేదా వ్యతిరేకం బటన్ నొక్కండి</p>
+            <div className="mbr-theme-mini-box max-h-64 overflow-y-auto border border-border rounded-lg p-2 space-y-1.5 bg-card">
               {members.map((m: any) => {
                 const app = form.approved_member_ids?.includes(m.id);
                 const opp = form.opposed_member_ids?.includes(m.id);
                 return (
-                  <div key={m.id} className="flex items-center justify-between gap-2 text-xs bg-zinc-900 rounded p-2 border border-zinc-800">
-                    <span className="truncate flex-1 text-zinc-200">{m.name} <span className="text-zinc-500 text-[10px]">{m.member_code}</span></span>
+                  <div key={m.id} className="mbr-theme-mini-box flex items-center justify-between gap-2 text-xs bg-card rounded p-2 border border-border">
+                    <span className="truncate flex-1 text-foreground">{m.name} <span className="text-muted-foreground text-[10px]">{m.member_code}</span></span>
                     <div className="flex gap-1.5 shrink-0">
-                      <button type="button" onClick={() => toggleVote(m.id, "approved_member_ids")} className={`px-3 py-1.5 rounded-md text-[11px] font-semibold border transition ${app ? "bg-green-600 border-green-400 text-white shadow" : "bg-zinc-800 border-zinc-700 text-zinc-400 hover:bg-green-600/20 hover:text-green-300"}`}>✓ ఆమోదం</button>
-                      <button type="button" onClick={() => toggleVote(m.id, "opposed_member_ids")} className={`px-3 py-1.5 rounded-md text-[11px] font-semibold border transition ${opp ? "bg-red-600 border-red-400 text-white shadow" : "bg-zinc-800 border-zinc-700 text-zinc-400 hover:bg-red-600/20 hover:text-red-300"}`}>✕ వ్యతిరేకం</button>
+                      <button type="button" onClick={() => toggleVote(m.id, "approved_member_ids")} className={`px-3 py-1.5 rounded-md text-[11px] font-semibold border transition ${app ? "bg-primary border-primary text-primary-foreground shadow" : "bg-card border-border text-foreground"}`}>✓ ఆమోదం</button>
+                      <button type="button" onClick={() => toggleVote(m.id, "opposed_member_ids")} className={`px-3 py-1.5 rounded-md text-[11px] font-semibold border transition ${opp ? "bg-primary border-primary text-primary-foreground shadow" : "bg-card border-border text-foreground"}`}>✕ వ్యతిరేకం</button>
                     </div>
                   </div>
                 );
@@ -514,8 +514,8 @@ function ResolutionDialog({ open, onOpenChange, orgId, meetings, members, editin
           </div>
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>రద్దు</Button>
-          <Button onClick={save} disabled={saving} className="bg-orange-600 hover:bg-orange-700">{saving ? "సేవ్…" : "సేవ్"}</Button>
+          <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>రద్దు</Button>
+          <Button type="button" onClick={save} disabled={saving} className="bg-primary text-primary-foreground hover:bg-primary/90">{saving ? "సేవ్…" : "సేవ్"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -532,39 +532,39 @@ function ActivitiesTab({ orgId, activities, onChange }: any) {
   const [editing, setEditing] = useState<any>(null);
   return (
     <div className="space-y-3">
-      <Button onClick={() => { setEditing(null); setOpen(true); }} className="w-full bg-orange-600 hover:bg-orange-700">
+      <Button type="button" onClick={() => { setEditing(null); setOpen(true); }} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
         <Plus className="w-4 h-4 mr-1" /> కొత్త కార్యక్రమం
       </Button>
-      {activities.length === 0 ? <p className="text-zinc-500 text-xs">ఇంకా కార్యక్రమాలు లేవు.</p> :
+      {activities.length === 0 ? <p className="text-muted-foreground text-xs">ఇంకా కార్యక్రమాలు లేవు.</p> :
         activities.map((a: any) => {
           const variance = Number(a.allocated_budget) - Number(a.actual_expense);
           return (
-            <Card key={a.id} className="bg-zinc-900 border-zinc-800 p-3">
+            <Card key={a.id} className="mbr-theme-mini-box bg-card border-border p-3">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className={`text-[10px] px-2 py-0.5 rounded ${a.status === "completed" ? "bg-green-500/20 text-green-300" : a.status === "ongoing" ? "bg-blue-500/20 text-blue-300" : a.status === "cancelled" ? "bg-red-500/20 text-red-300" : "bg-zinc-700 text-zinc-300"}`}>{a.status}</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded border border-border text-foreground">{a.status}</span>
                   </div>
-                  <h4 className="text-white font-semibold mt-1 text-sm">{a.event_name}</h4>
-                  <p className="text-[11px] text-zinc-500">{new Date(a.event_date).toLocaleDateString("en-IN", { dateStyle: "long" })}</p>
-                  {a.description && <p className="text-xs text-zinc-300 mt-1 line-clamp-2">{a.description}</p>}
+                  <h4 className="text-foreground font-semibold mt-1 text-sm">{a.event_name}</h4>
+                  <p className="text-[11px] text-muted-foreground">{new Date(a.event_date).toLocaleDateString("en-IN", { dateStyle: "long" })}</p>
+                  {a.description && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{a.description}</p>}
                   <div className="grid grid-cols-3 gap-2 mt-2 text-[11px]">
-                    <div className="bg-zinc-800/60 rounded p-1.5"><div className="text-zinc-500">బడ్జెట్</div><div className="text-white font-semibold">₹{Number(a.allocated_budget).toLocaleString("en-IN")}</div></div>
-                    <div className="bg-zinc-800/60 rounded p-1.5"><div className="text-zinc-500">ఖర్చు</div><div className="text-white font-semibold">₹{Number(a.actual_expense).toLocaleString("en-IN")}</div></div>
-                    <div className={`rounded p-1.5 ${variance >= 0 ? "bg-green-500/10" : "bg-red-500/10"}`}><div className="text-zinc-500">మిగులు</div><div className={`font-semibold ${variance >= 0 ? "text-green-400" : "text-red-400"}`}>₹{variance.toLocaleString("en-IN")}</div></div>
+                    <div className="bg-card border border-border rounded p-1.5"><div className="text-muted-foreground">బడ్జెట్</div><div className="text-foreground font-semibold">₹{Number(a.allocated_budget).toLocaleString("en-IN")}</div></div>
+                    <div className="bg-card border border-border rounded p-1.5"><div className="text-muted-foreground">ఖర్చు</div><div className="text-foreground font-semibold">₹{Number(a.actual_expense).toLocaleString("en-IN")}</div></div>
+                    <div className="bg-card border border-border rounded p-1.5"><div className="text-muted-foreground">మిగులు</div><div className="text-foreground font-semibold">₹{variance.toLocaleString("en-IN")}</div></div>
                   </div>
                 </div>
               </div>
               <div className="flex gap-2 mt-2 flex-wrap">
-                <Button size="sm" variant="secondary" onClick={() => printActivity({ orgId, activity: a })} className="bg-slate-700 hover:bg-slate-600 text-white text-xs h-8">
+                <Button size="sm" variant="secondary" onClick={() => printActivity({ orgId, activity: a })} className="text-xs h-8">
                   <Printer className="w-3 h-3 mr-1" /> ప్రింట్
                 </Button>
-                <Button size="sm" variant="ghost" onClick={() => { setEditing(a); setOpen(true); }} className="text-xs h-8 text-zinc-300"><Pencil className="w-3 h-3 mr-1" /> సవరించు</Button>
+                <Button size="sm" variant="ghost" onClick={() => { setEditing(a); setOpen(true); }} className="text-xs h-8 text-foreground"><Pencil className="w-3 h-3 mr-1" /> సవరించు</Button>
                 <Button size="sm" variant="ghost" onClick={async () => {
                   if (!confirm("Delete?")) return;
                   const { error } = await supabase.from("org_activities").delete().eq("id", a.id);
                   if (error) toast.error(error.message); else { toast.success("Deleted"); onChange(); }
-                }} className="text-xs h-8 text-red-400"><Trash2 className="w-3 h-3" /></Button>
+                }} className="text-xs h-8 text-foreground"><Trash2 className="w-3 h-3" /></Button>
               </div>
             </Card>
           );
@@ -600,7 +600,7 @@ function ActivityDialog({ open, onOpenChange, orgId, editing, onSaved }: any) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg bg-zinc-900 border-zinc-800 text-zinc-100 max-h-[90vh] overflow-y-auto">
-        <DialogHeader><DialogTitle className="text-orange-400">{editing ? "కార్యక్రమం సవరించు" : "కొత్త కార్యక్రమం"}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle className="text-foreground">{editing ? "కార్యక్రమం సవరించు" : "కొత్త కార్యక్రమం"}</DialogTitle></DialogHeader>
         <div className="space-y-3 text-sm">
           <div><Label>పేరు / Event Name *</Label><Input value={form.event_name} onChange={(e) => setForm({ ...form, event_name: e.target.value })} className="bg-zinc-800 border-zinc-700" /></div>
           <div className="grid grid-cols-2 gap-2">
@@ -622,8 +622,8 @@ function ActivityDialog({ open, onOpenChange, orgId, editing, onSaved }: any) {
           </div>
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>రద్దు</Button>
-          <Button onClick={save} disabled={saving} className="bg-orange-600 hover:bg-orange-700">{saving ? "సేవ్…" : "సేవ్"}</Button>
+          <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>రద్దు</Button>
+          <Button type="button" onClick={save} disabled={saving} className="bg-primary text-primary-foreground hover:bg-primary/90">{saving ? "సేవ్…" : "సేవ్"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
