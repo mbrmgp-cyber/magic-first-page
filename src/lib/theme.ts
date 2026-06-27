@@ -11,6 +11,8 @@ export type ThemeSettings = {
   icon?: string;        // dashboard icon color
   buttonBg?: string;    // primary button fill
   buttonText?: string;  // primary button text
+  inputBg?: string;     // input / textarea fill
+  inputText?: string;   // input / textarea text color
   headColor?: string;   // big header text color
   headFont?: string;    // header font family
   subColor?: string;    // sub-title (slogan) color
@@ -29,6 +31,8 @@ export const DEFAULT_THEME: Required<ThemeSettings> = {
   icon: "#ff8c28",
   buttonBg: "#ff8c28",
   buttonText: "#ffffff",
+  inputBg: "#0a0a0a",
+  inputText: "#ffffff",
   headColor: "#ffffff",
   headFont: "Inter",
   subColor: "#a1a1aa",
@@ -68,6 +72,8 @@ export function resolveTheme(org: any): Required<ThemeSettings> {
   merged.bigBox = t.bigBox || t.box || merged.bigBox;
   merged.miniBox = t.miniBox || t.box || merged.miniBox;
   merged.box = t.box || merged.miniBox;
+  merged.inputBg = t.inputBg || merged.miniBox;
+  merged.inputText = t.inputText || merged.headColor;
   return merged;
 }
 

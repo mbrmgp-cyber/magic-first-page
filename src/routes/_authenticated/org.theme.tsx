@@ -31,6 +31,8 @@ const COLOR_FIELDS: Field[] = [
   { key: "icon", en: "Icons", te: "ఐకాన్ కలర్", icon: Sparkles },
   { key: "buttonBg", en: "Button Fill", te: "బటన్ కలర్", icon: MousePointerClick },
   { key: "buttonText", en: "Button Text", te: "బటన్ టెక్స్ట్", icon: Type },
+  { key: "inputBg", en: "Input Box Fill", te: "టెక్స్ట్ బాక్స్ కలర్", icon: Square },
+  { key: "inputText", en: "Input Text", te: "టెక్స్ట్ బాక్స్ అక్షరాల కలర్", icon: Type },
 ];
 
 const ALIGN_ICON: Record<TextAlign, any> = { left: AlignLeft, center: AlignCenter, right: AlignRight };
