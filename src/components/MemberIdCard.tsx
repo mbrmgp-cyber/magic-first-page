@@ -711,11 +711,16 @@ function SavedDesignCard({
         </div>
       </div>
       <div className="flex justify-between items-center gap-2 pt-2">
-        <Button size="sm" variant="outline" onClick={() => setShowBack((v: boolean) => !v)}>
-          <RotateCw className="w-4 h-4 mr-1" />
+        <Button
+          size="sm"
+          onClick={() => setShowBack((v: boolean) => !v)}
+          className="bg-white text-zinc-900 border border-zinc-300 hover:bg-zinc-100"
+          aria-label="Flip card"
+        >
+          <RotateCw className="w-4 h-4 mr-1.5" />
           {showBack
-            ? (lang === "en" ? "Front" : lang === "hi" ? "सामने" : "ముందు")
-            : (lang === "en" ? "Back" : lang === "hi" ? "पीछे" : "వెనుక")}
+            ? (lang === "en" ? "Front" : lang === "hi" ? "सामने" : "ముందు భాగం")
+            : (lang === "en" ? "Flip / Back" : lang === "hi" ? "पलटें" : "తిప్పు / వెనుక")}
         </Button>
         <Button size="sm" onClick={onPrint}>
           <Printer className="w-4 h-4 mr-1" />
