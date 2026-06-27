@@ -132,14 +132,16 @@ export function GlobalThemeApplier() {
       html[data-mbr-theme="on"] .mbr-themed-app textarea,
       html[data-mbr-theme="on"] .mbr-themed-app select,
       html[data-mbr-theme="on"] .mbr-themed-app [role="combobox"] {
-        background-color: color-mix(in srgb, var(--mbr-theme-card) 88%, var(--mbr-theme-bg)) !important;
+        background-color: transparent !important;
         border-color: var(--mbr-theme-border) !important;
         color: var(--mbr-theme-heading) !important;
+        -webkit-text-fill-color: var(--mbr-theme-heading) !important;
       }
 
       html[data-mbr-theme="on"] .mbr-themed-app input::placeholder,
       html[data-mbr-theme="on"] .mbr-themed-app textarea::placeholder {
         color: color-mix(in srgb, var(--mbr-theme-muted) 72%, transparent) !important;
+        -webkit-text-fill-color: color-mix(in srgb, var(--mbr-theme-muted) 72%, transparent) !important;
       }
 
       html[data-mbr-theme="on"] .mbr-themed-app [class*="border-zinc"],
@@ -167,6 +169,18 @@ export function GlobalThemeApplier() {
       html[data-mbr-theme="on"] .mbr-themed-app svg[class*="text-[#ff8c28]"] {
         color: var(--mbr-theme-icon) !important;
         border-color: var(--mbr-theme-icon) !important;
+      }
+
+      /* Kill hardcoded saffron→green text-clip gradients on sub-pages so
+         titles always use the selected head color. */
+      html[data-mbr-theme="on"] .mbr-themed-app [style*="-webkit-background-clip"],
+      html[data-mbr-theme="on"] .mbr-themed-app [style*="background-clip: text"],
+      html[data-mbr-theme="on"] .mbr-themed-app [style*="background-clip:text"] {
+        background-image: none !important;
+        background: transparent !important;
+        -webkit-text-fill-color: var(--mbr-theme-heading) !important;
+        color: var(--mbr-theme-heading) !important;
+        font-family: ${JSON.stringify(t.headFont)}, system-ui, sans-serif !important;
       }
 
       html[data-mbr-theme="on"] .mbr-themed-app .shadow,
