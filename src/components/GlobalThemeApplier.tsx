@@ -387,6 +387,22 @@ export function GlobalThemeApplier() {
       html[data-mbr-theme="on"] .mbr-themed-app [class*="shadow-"] {
         box-shadow: 0 10px 28px color-mix(in srgb, var(--mbr-theme-primary) 16%, transparent) !important;
       }
+
+      /* Prevent stray text-decoration lines (strike-through / underline / overline)
+         appearing across Telugu glyphs from inherited link or global styles. */
+      html[data-mbr-theme="on"] .mbr-themed-app p,
+      html[data-mbr-theme="on"] .mbr-themed-app span,
+      html[data-mbr-theme="on"] .mbr-themed-app h1,
+      html[data-mbr-theme="on"] .mbr-themed-app h2,
+      html[data-mbr-theme="on"] .mbr-themed-app h3,
+      html[data-mbr-theme="on"] .mbr-themed-app h4,
+      html[data-mbr-theme="on"] .mbr-themed-app h5,
+      html[data-mbr-theme="on"] .mbr-themed-app h6,
+      html[data-mbr-theme="on"] .mbr-themed-app label,
+      html[data-mbr-theme="on"] .mbr-themed-app li {
+        text-decoration: none !important;
+        text-decoration-line: none !important;
+      }
     `;
   }, [org]);
 
