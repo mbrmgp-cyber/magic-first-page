@@ -30,6 +30,13 @@ async function getAppOrigin() {
   return host ? `${proto}://${host}` : "";
 }
 
+const PUBLIC_APP_ORIGIN = "https://magic-first-page.lovable.app";
+
+function getPublicMemberRegistrationUrl(orgCode: string | null | undefined) {
+  const code = (orgCode || "").trim();
+  return `${PUBLIC_APP_ORIGIN}/member/register${code ? `?code=${encodeURIComponent(code)}` : ""}`;
+}
+
 function genOrgCode() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let s = "";
@@ -266,7 +273,7 @@ export const registerOrganization = createServerFn({ method: "POST" })
       .select()
       .single();
     if (error) throw new Error(error.message);
-    const qrDataUrl = await QRCode.toDataURL(org_code, { width: 512, margin: 2 });
+    const qrDataUrl = await QRCode.toDataURL(getPublicMemberRegistrationUrl(org_code), { width: 512, margin: 2 });
     return { org, qrDataUrl };
   });
 
@@ -281,7 +288,7 @@ export const getMyOrg = createServerFn({ method: "GET" })
       .eq("admin_user_id", userId)
       .maybeSingle();
     if (!org) return { org: null, qrDataUrl: null };
-    const qrDataUrl = await QRCode.toDataURL(org.org_code, { width: 512, margin: 2 });
+    const qrDataUrl = await QRCode.toDataURL(getPublicMemberRegistrationUrl(org.org_code), { width: 512, margin: 2 });
     return { org, qrDataUrl };
   });
 
@@ -303,7 +310,7 @@ export const regenerateOrgQr = createServerFn({ method: "POST" })
       .select()
       .single();
     if (error) throw new Error(error.message);
-    const qrDataUrl = await QRCode.toDataURL(newCode, { width: 512, margin: 2 });
+    const qrDataUrl = await QRCode.toDataURL(getPublicMemberRegistrationUrl(newCode), { width: 512, margin: 2 });
     return { org: updated, qrDataUrl };
   });
 
