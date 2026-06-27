@@ -252,11 +252,18 @@ export function GlobalThemeApplier() {
         font-family: ${JSON.stringify(t.headFont)}, system-ui, sans-serif !important;
       }
 
-      html[data-mbr-theme="on"] .mbr-themed-app [class*="text-[#ff8c28]"],
       html[data-mbr-theme="on"] .mbr-themed-app [class*="border-[#ff8c28]"],
       html[data-mbr-theme="on"] .mbr-themed-app svg[class*="text-[#ff8c28]"] {
         color: var(--mbr-theme-icon) !important;
         border-color: var(--mbr-theme-icon) !important;
+      }
+
+      html[data-mbr-theme="on"] .mbr-themed-app :not(svg)[class*="text-[#ff8c28]"] {
+        color: var(--mbr-theme-heading) !important;
+      }
+
+      html[data-mbr-theme="on"] .mbr-themed-app svg {
+        color: var(--mbr-theme-icon) !important;
       }
 
       /* Kill hardcoded saffron→green text-clip gradients on sub-pages so
