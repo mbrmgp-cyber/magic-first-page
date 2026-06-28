@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { ArrowLeft, Wallet, TrendingUp, TrendingDown, Building2, User, Briefcase } from "lucide-react";
+import { ArrowLeft, Wallet, TrendingUp, TrendingDown, Building2, User, Briefcase, Users, AlarmClock, Printer } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,6 +17,8 @@ export const Route = createFileRoute("/_authenticated/org/cashflow")({
 const INCOME_LABEL: Record<string, string> = {
   registration_fee: "Registration Fees",
   donation: "Donations",
+  loan_principal: "Loan Principal Collected",
+  loan_interest: "Loan Interest Collected",
   other: "Other Income",
 };
 const EXPENSE_LABEL: Record<string, string> = {
