@@ -1529,7 +1529,12 @@ export type Database = {
         | "completed"
         | "cancelled"
       expense_type: "charity" | "office" | "meeting" | "misc"
-      income_type: "registration_fee" | "donation" | "other"
+      income_type:
+        | "registration_fee"
+        | "donation"
+        | "other"
+        | "loan_principal"
+        | "loan_interest"
       member_status: "pending" | "approved" | "rejected"
       nomination_status: "pending" | "approved" | "rejected" | "withdrawn"
       org_approval_status: "pending" | "approved" | "rejected" | "suspended"
@@ -1678,7 +1683,13 @@ export const Constants = {
         "cancelled",
       ],
       expense_type: ["charity", "office", "meeting", "misc"],
-      income_type: ["registration_fee", "donation", "other"],
+      income_type: [
+        "registration_fee",
+        "donation",
+        "other",
+        "loan_principal",
+        "loan_interest",
+      ],
       member_status: ["pending", "approved", "rejected"],
       nomination_status: ["pending", "approved", "rejected", "withdrawn"],
       org_approval_status: ["pending", "approved", "rejected", "suspended"],
