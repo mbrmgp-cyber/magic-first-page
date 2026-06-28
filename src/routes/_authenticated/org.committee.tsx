@@ -142,7 +142,7 @@ function MemberCard({
         >
           {showPhoto ? (
             <img
-              src={m!.photo_url!}
+              src={photoUrl!}
               alt=""
               className="w-full h-full object-cover"
               onError={() => setImgBroken(true)}
