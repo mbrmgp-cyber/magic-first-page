@@ -277,7 +277,7 @@ function Dashboard() {
             <Button variant="ghost" size="sm" onClick={logout} className="text-zinc-200 hover:bg-zinc-900 hover:text-white">
               <LogOut className="h-4 w-4 mr-1" />{lt("Logout", "లాగ్ అవుట్")}
             </Button>
-            <img src={mbrLogo.url} alt="MBR" className="w-12 h-12 rounded-md bg-black border border-zinc-800 object-contain p-1" />
+            <img src={mbrLogo.url} alt="MBR" data-mbr-logo className="w-12 h-12 rounded-md border border-zinc-800 object-contain p-1" style={{ backgroundColor: "#000" }} />
           </div>
         </div>
 
