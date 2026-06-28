@@ -2,15 +2,17 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { getMyRoles, claimMbrAdmin, listAllOrgsForAdmin, reviewOrganization, adminSearchMembers, adminUpdateMemberCode } from "@/lib/org.functions";
+import { getMyRoles, claimMbrAdmin, listAllOrgsForAdmin, reviewOrganization, adminSearchMembers, adminUpdateMemberCode, setOrganizationStatus, getOrganizationDetails } from "@/lib/org.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { ShieldCheck, CheckCircle2, XCircle, Clock, LogOut, Image as ImageIcon, FileText, Users, IdCard, Search, Save } from "lucide-react";
+import { ShieldCheck, CheckCircle2, XCircle, Clock, LogOut, Image as ImageIcon, FileText, Users, IdCard, Search, Save, Building2, Eye, Ban, PlayCircle, PauseCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 
 export const Route = createFileRoute("/_authenticated/admin")({
