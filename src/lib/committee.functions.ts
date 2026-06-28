@@ -220,3 +220,27 @@ export const updateTermYears = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const updateMemberSignature = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { member_id: string; signature_url: string | null }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: m } = await supabase
+      .from("members")
+      .select("org_id, user_id")
+      .eq("id", data.member_id)
+      .maybeSingle();
+    if (!m) throw new Error("Member not found");
+    const orgId = m.org_id as string;
+    const admin = await isOrgAdmin(supabase, userId, orgId);
+    const president = !admin ? await isPresident(supabase, userId, orgId) : false;
+    const isSelf = m.user_id === userId;
+    if (!admin && !president && !isSelf) throw new Error("Forbidden");
+    const { error } = await supabase
+      .from("members")
+      .update({ signature_url: data.signature_url })
+      .eq("id", data.member_id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
