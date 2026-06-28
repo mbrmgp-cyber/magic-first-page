@@ -150,7 +150,7 @@ function MemberCard({ member, orgId, org, onReview, onChange }:
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             {member.member_code && (
-              <span className="text-xs font-mono bg-primary/10 text-primary px-2 py-0.5 rounded">
+              <span className="text-base font-mono font-bold bg-primary text-primary-foreground px-2.5 py-1 rounded-md shadow-sm">
                 {member.member_code}
               </span>
             )}
