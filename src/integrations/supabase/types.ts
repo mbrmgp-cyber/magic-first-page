@@ -508,6 +508,7 @@ export type Database = {
           pin_code: string | null
           preferred_lang: string | null
           reviewed_at: string | null
+          signature_url: string | null
           status: Database["public"]["Enums"]["member_status"]
           updated_at: string
           user_id: string | null
@@ -539,6 +540,7 @@ export type Database = {
           pin_code?: string | null
           preferred_lang?: string | null
           reviewed_at?: string | null
+          signature_url?: string | null
           status?: Database["public"]["Enums"]["member_status"]
           updated_at?: string
           user_id?: string | null
@@ -570,6 +572,7 @@ export type Database = {
           pin_code?: string | null
           preferred_lang?: string | null
           reviewed_at?: string | null
+          signature_url?: string | null
           status?: Database["public"]["Enums"]["member_status"]
           updated_at?: string
           user_id?: string | null
@@ -1393,6 +1396,7 @@ export type Database = {
           pin_code: string | null
           preferred_lang: string | null
           reviewed_at: string | null
+          signature_url: string | null
           status: Database["public"]["Enums"]["member_status"]
           updated_at: string
           user_id: string | null
@@ -1487,6 +1491,7 @@ export type Database = {
           pin_code: string | null
           preferred_lang: string | null
           reviewed_at: string | null
+          signature_url: string | null
           status: Database["public"]["Enums"]["member_status"]
           updated_at: string
           user_id: string | null
