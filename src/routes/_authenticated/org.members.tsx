@@ -55,10 +55,21 @@ function MembersPage() {
   }
   useEffect(() => { refresh(); }, []);
 
-  const filtered = useMemo(
-    () => filter === "all" ? members : members.filter((m) => m.status === filter),
-    [members, filter]
-  );
+  const filtered = useMemo(() => {
+    const base = filter === "all"
+      ? members.filter((m) => m.status !== "rejected")
+      : members.filter((m) => m.status === filter);
+    const codeNum = (c: string | null | undefined) => {
+      if (!c) return Number.MAX_SAFE_INTEGER;
+      const n = parseInt(String(c).replace(/[^0-9]/g, ""), 10);
+      return Number.isFinite(n) ? n : Number.MAX_SAFE_INTEGER;
+    };
+    return [...base].sort((a, b) => {
+      const d = codeNum(a.member_code) - codeNum(b.member_code);
+      if (d !== 0) return d;
+      return (a.name ?? "").localeCompare(b.name ?? "");
+    });
+  }, [members, filter]);
 
   async function onReview(id: string, action: "approve" | "reject") {
     try {
@@ -76,7 +87,9 @@ function MembersPage() {
             <Button key={s} size="sm" variant={filter === s ? "default" : "outline"} onClick={() => setFilter(s)}>
               {s === "all" ? "అందరూ" : s === "pending" ? "Pending" : s === "approved" ? "Approved" : "Rejected"}
               <Badge variant="secondary" className="ml-2">
-                {s === "all" ? members.length : members.filter((m) => m.status === s).length}
+                {s === "all"
+                  ? members.filter((m) => m.status !== "rejected").length
+                  : members.filter((m) => m.status === s).length}
               </Badge>
             </Button>
           ))}
@@ -137,7 +150,7 @@ function MemberCard({ member, orgId, org, onReview, onChange }:
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             {member.member_code && (
-              <span className="text-xs font-mono bg-primary/10 text-primary px-2 py-0.5 rounded">
+              <span className="text-base font-mono font-bold bg-primary text-primary-foreground px-2.5 py-1 rounded-md shadow-sm">
                 {member.member_code}
               </span>
             )}
@@ -451,7 +464,10 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
       <div><Label>అడ్రస్</Label><Textarea rows={2} value={f.address} onChange={(e) => setF({ ...f, address: e.target.value })} /></div>
       <div className="grid grid-cols-2 gap-3">
         <div><Label>Phone</Label><Input value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} /></div>
-        <div><Label>చేరిన తేదీ</Label><Input type="date" value={f.joined_date ?? ""} onChange={(e) => setF({ ...f, joined_date: e.target.value })} /></div>
+        <div>
+          <Label>చేరిన తేదీ</Label>
+          <JoinedDateInput value={f.joined_date ?? ""} onChange={(v) => setF({ ...f, joined_date: v })} />
+        </div>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div><Label>బ్లడ్ గ్రూప్</Label>
@@ -521,6 +537,60 @@ function MemberCodeEditor({ member, onSaved }: { member: Member; onSaved: () => 
     </div>
   );
 }
+
+function JoinedDateInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const toDisplay = (iso: string) => {
+    if (!iso) return "";
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+    return m ? `${m[3]}-${m[2]}-${m[1]}` : iso;
+  };
+  const parseDisplay = (s: string): string | null => {
+    const t = s.trim();
+    if (!t) return "";
+    let m = /^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/.exec(t);
+    if (m) {
+      const d = m[1].padStart(2, "0"), mo = m[2].padStart(2, "0"), y = m[3];
+      return `${y}-${mo}-${d}`;
+    }
+    m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(t);
+    if (m) return t;
+    return null;
+  };
+  const [text, setText] = useState(toDisplay(value));
+  useEffect(() => { setText(toDisplay(value)); }, [value]);
+  return (
+    <div className="flex gap-2">
+      <Input
+        type="text"
+        inputMode="numeric"
+        placeholder="DD-MM-YYYY"
+        value={text}
+        onChange={(e) => {
+          setText(e.target.value);
+          const iso = parseDisplay(e.target.value);
+          if (iso !== null) onChange(iso);
+        }}
+        onBlur={() => {
+          const iso = parseDisplay(text);
+          if (iso === null) {
+            toast.error("తేదీ format: DD-MM-YYYY");
+            setText(toDisplay(value));
+          }
+        }}
+        className="flex-1"
+      />
+      <Input
+        type="date"
+        value={value ?? ""}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-[44px] p-1"
+        aria-label="Pick date"
+      />
+    </div>
+  );
+}
+
+
 
 
 
