@@ -403,6 +403,33 @@ export function GlobalThemeApplier() {
         text-decoration: none !important;
         text-decoration-line: none !important;
       }
+
+      /* Strong, unmistakable active state for tab triggers so the selected
+         filter/section is obvious even when the theme paints inactive tabs
+         in similar colors. */
+      html[data-mbr-theme="on"] [role="tab"] {
+        opacity: 0.55 !important;
+        background: transparent !important;
+        background-color: transparent !important;
+        background-image: none !important;
+        color: var(--mbr-theme-heading) !important;
+        border: 1px solid transparent !important;
+        transition: opacity .15s ease, box-shadow .15s ease, transform .15s ease !important;
+      }
+      html[data-mbr-theme="on"] [role="tab"][data-state="active"] {
+        opacity: 1 !important;
+        background: var(--mbr-theme-primary) !important;
+        background-color: var(--mbr-theme-primary) !important;
+        background-image: none !important;
+        color: var(--mbr-theme-primary-fg) !important;
+        border: 2px solid var(--mbr-theme-heading) !important;
+        box-shadow: 0 0 0 2px var(--mbr-theme-bg), 0 0 0 4px var(--mbr-theme-heading), 0 4px 14px color-mix(in srgb, var(--mbr-theme-primary) 60%, transparent) !important;
+        transform: translateY(-1px);
+        font-weight: 700 !important;
+      }
+      html[data-mbr-theme="on"] [role="tab"][data-state="active"] * {
+        color: var(--mbr-theme-primary-fg) !important;
+      }
     `;
   }, [org]);
 

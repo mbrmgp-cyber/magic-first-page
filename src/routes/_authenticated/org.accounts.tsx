@@ -190,10 +190,7 @@ function AccountsPage() {
               <span className="text-[10px] uppercase tracking-wide text-muted-foreground">Base currency set in Accounts Hub</span>
             </div>
           </div>
-          <h1 className="mt-3 text-lg md:text-2xl font-bold" style={{
-            background: "linear-gradient(90deg,#FF9933,#138808)",
-            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-          }}>
+          <h1 className="mt-3 text-lg md:text-2xl font-bold text-orange-700">
             కమిటీ అకౌంట్స్ – నెలవారీ అప్పు వివరాల నమోదు
           </h1>
           <div className="flex items-center justify-between flex-wrap gap-2">
