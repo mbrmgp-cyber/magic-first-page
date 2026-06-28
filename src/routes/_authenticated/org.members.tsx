@@ -538,6 +538,60 @@ function MemberCodeEditor({ member, onSaved }: { member: Member; onSaved: () => 
   );
 }
 
+function JoinedDateInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const toDisplay = (iso: string) => {
+    if (!iso) return "";
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+    return m ? `${m[3]}-${m[2]}-${m[1]}` : iso;
+  };
+  const parseDisplay = (s: string): string | null => {
+    const t = s.trim();
+    if (!t) return "";
+    let m = /^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/.exec(t);
+    if (m) {
+      const d = m[1].padStart(2, "0"), mo = m[2].padStart(2, "0"), y = m[3];
+      return `${y}-${mo}-${d}`;
+    }
+    m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(t);
+    if (m) return t;
+    return null;
+  };
+  const [text, setText] = useState(toDisplay(value));
+  useEffect(() => { setText(toDisplay(value)); }, [value]);
+  return (
+    <div className="flex gap-2">
+      <Input
+        type="text"
+        inputMode="numeric"
+        placeholder="DD-MM-YYYY"
+        value={text}
+        onChange={(e) => {
+          setText(e.target.value);
+          const iso = parseDisplay(e.target.value);
+          if (iso !== null) onChange(iso);
+        }}
+        onBlur={() => {
+          const iso = parseDisplay(text);
+          if (iso === null) {
+            toast.error("తేదీ format: DD-MM-YYYY");
+            setText(toDisplay(value));
+          }
+        }}
+        className="flex-1"
+      />
+      <Input
+        type="date"
+        value={value ?? ""}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-[44px] p-1"
+        aria-label="Pick date"
+      />
+    </div>
+  );
+}
+
+
+
 
 
 
