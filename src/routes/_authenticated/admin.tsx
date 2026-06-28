@@ -339,3 +339,215 @@ function MemberIdUpdater() {
     </Card>
   );
 }
+
+type OrgStatus = "pending" | "approved" | "rejected" | "suspended";
+
+const STATUS_STYLES: Record<OrgStatus, string> = {
+  pending: "bg-amber-100 text-amber-800 border-amber-300",
+  approved: "bg-green-100 text-green-800 border-green-300",
+  rejected: "bg-red-100 text-red-800 border-red-300",
+  suspended: "bg-zinc-200 text-zinc-800 border-zinc-400",
+};
+
+const STATUS_LABEL: Record<OrgStatus, string> = {
+  pending: "Pending",
+  approved: "Active",
+  rejected: "Rejected",
+  suspended: "Suspended",
+};
+
+function AllOrganizationsManager() {
+  const qc = useQueryClient();
+  const fetchOrgs = useServerFn(listAllOrgsForAdmin);
+  const setStatus = useServerFn(setOrganizationStatus);
+  const getDetails = useServerFn(getOrganizationDetails);
+
+  const orgsQ = useQuery({ queryKey: ["admin-all-orgs"], queryFn: () => fetchOrgs() });
+  const [busy, setBusy] = useState<string | null>(null);
+  const [detailsId, setDetailsId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+
+  const detailsQ = useQuery({
+    queryKey: ["admin-org-details", detailsId],
+    queryFn: () => getDetails({ data: { org_id: detailsId! } }),
+    enabled: !!detailsId,
+  });
+
+  async function changeStatus(orgId: string, status: OrgStatus) {
+    setBusy(orgId);
+    try {
+      await setStatus({ data: { org_id: orgId, status } });
+      toast.success(`Status updated to ${STATUS_LABEL[status]}`);
+      qc.invalidateQueries({ queryKey: ["admin-all-orgs"] });
+    } catch (e: any) {
+      toast.error(e.message ?? "Update failed");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  const orgs = (orgsQ.data?.orgs ?? []) as any[];
+  const q = search.trim().toLowerCase();
+  const filtered = q
+    ? orgs.filter((o) =>
+        [o.name, o.email, o.phone, o.org_code, o.gov_reg_number]
+          .filter(Boolean)
+          .some((v: string) => String(v).toLowerCase().includes(q)),
+      )
+    : orgs;
+
+  return (
+    <>
+      <Card className="p-4 bg-white/95 backdrop-blur border-white shadow-md space-y-3">
+        <div className="flex items-center gap-2">
+          <Building2 className="h-5 w-5 text-[#138808]" />
+          <h2 className="font-bold">All Organizations ({orgs.length})</h2>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          సొసైటీని Active / Suspended / Rejected గా మార్చండి. వివరాలు చూడడానికి View నొక్కండి.
+        </p>
+        <Input
+          placeholder="Search by name, code, email, phone…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+
+        {orgsQ.isLoading && <div className="text-sm text-muted-foreground text-center py-4">Loading…</div>}
+
+        <div className="space-y-2">
+          {filtered.map((o) => {
+            const status = (o.approval_status ?? "pending") as OrgStatus;
+            return (
+              <div key={o.id} className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 border rounded-lg bg-muted/30">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  {o.logo_url ? (
+                    <img src={o.logo_url} alt="" className="w-10 h-10 rounded border object-cover bg-white shrink-0" />
+                  ) : (
+                    <div className="w-10 h-10 rounded border bg-background flex items-center justify-center shrink-0">
+                      <Building2 className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <div className="font-semibold text-sm truncate">{o.name}</div>
+                    <div className="text-[11px] text-muted-foreground truncate font-mono">
+                      {o.org_code} · {o.email ?? "—"}
+                    </div>
+                  </div>
+                </div>
+
+                <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold uppercase ${STATUS_STYLES[status]}`}>
+                  {STATUS_LABEL[status]}
+                </span>
+
+                <Select
+                  value={status}
+                  onValueChange={(v) => changeStatus(o.id, v as OrgStatus)}
+                  disabled={busy === o.id}
+                >
+                  <SelectTrigger className="h-8 w-full sm:w-[140px] text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending"><Clock className="h-3 w-3 inline mr-1" />Pending</SelectItem>
+                    <SelectItem value="approved"><PlayCircle className="h-3 w-3 inline mr-1" />Active</SelectItem>
+                    <SelectItem value="suspended"><PauseCircle className="h-3 w-3 inline mr-1" />Suspended</SelectItem>
+                    <SelectItem value="rejected"><Ban className="h-3 w-3 inline mr-1" />Rejected</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Button size="sm" variant="outline" onClick={() => setDetailsId(o.id)}>
+                  <Eye className="h-3 w-3 mr-1" />View
+                </Button>
+              </div>
+            );
+          })}
+          {!orgsQ.isLoading && filtered.length === 0 && (
+            <div className="text-center text-xs text-muted-foreground py-4">No organizations.</div>
+          )}
+        </div>
+      </Card>
+
+      <Dialog open={!!detailsId} onOpenChange={(o) => !o && setDetailsId(null)}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5" />
+              {detailsQ.data?.org.name ?? "Organization Details"}
+            </DialogTitle>
+            <DialogDescription className="text-xs font-mono">
+              {detailsQ.data?.org.org_code}
+            </DialogDescription>
+          </DialogHeader>
+
+          {detailsQ.isLoading && <div className="text-center py-6 text-sm">Loading…</div>}
+
+          {detailsQ.data && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-4 gap-2 text-center">
+                <div className="p-2 bg-muted rounded">
+                  <div className="text-xl font-bold">{detailsQ.data.counts.total}</div>
+                  <div className="text-[10px] uppercase text-muted-foreground">Total</div>
+                </div>
+                <div className="p-2 bg-green-50 rounded">
+                  <div className="text-xl font-bold text-green-700">{detailsQ.data.counts.approved}</div>
+                  <div className="text-[10px] uppercase text-muted-foreground">Approved</div>
+                </div>
+                <div className="p-2 bg-amber-50 rounded">
+                  <div className="text-xl font-bold text-amber-700">{detailsQ.data.counts.pending}</div>
+                  <div className="text-[10px] uppercase text-muted-foreground">Pending</div>
+                </div>
+                <div className="p-2 bg-red-50 rounded">
+                  <div className="text-xl font-bold text-red-700">{detailsQ.data.counts.rejected}</div>
+                  <div className="text-[10px] uppercase text-muted-foreground">Rejected</div>
+                </div>
+              </div>
+
+              <div className="text-xs space-y-1 border rounded p-3 bg-muted/30">
+                <div><b>Email:</b> {detailsQ.data.org.email ?? "—"}</div>
+                <div><b>Phone:</b> {detailsQ.data.org.phone ?? "—"}</div>
+                {detailsQ.data.org.gov_reg_number && <div><b>Reg No:</b> {detailsQ.data.org.gov_reg_number}</div>}
+                {detailsQ.data.org.slogan && <div><b>Slogan:</b> {detailsQ.data.org.slogan}</div>}
+                {detailsQ.data.org.address && <div><b>Address:</b> {detailsQ.data.org.address}</div>}
+                <div><b>Created:</b> {new Date(detailsQ.data.org.created_at).toLocaleDateString()}</div>
+                <div>
+                  <b>Status:</b>{" "}
+                  <span className={`text-[10px] px-2 py-0.5 rounded border font-semibold uppercase ${STATUS_STYLES[(detailsQ.data.org.approval_status ?? "pending") as OrgStatus]}`}>
+                    {STATUS_LABEL[(detailsQ.data.org.approval_status ?? "pending") as OrgStatus]}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <div className="font-semibold text-sm mb-2 flex items-center gap-1">
+                  <Users className="h-4 w-4" /> Members ({detailsQ.data.members.length})
+                </div>
+                <div className="space-y-1 max-h-64 overflow-y-auto border rounded">
+                  {detailsQ.data.members.length === 0 && (
+                    <div className="text-xs text-muted-foreground text-center py-4">No members yet.</div>
+                  )}
+                  {detailsQ.data.members.map((m: any) => (
+                    <div key={m.id} className="flex items-center gap-2 p-2 border-b last:border-0 text-xs">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold truncate">{m.name}</div>
+                        <div className="text-[10px] text-muted-foreground truncate">
+                          {m.member_code ?? "—"} · {m.email ?? m.phone ?? ""}
+                        </div>
+                      </div>
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded border uppercase font-semibold ${
+                        m.status === "approved" ? "bg-green-100 text-green-800 border-green-300" :
+                        m.status === "rejected" ? "bg-red-100 text-red-800 border-red-300" :
+                        "bg-amber-100 text-amber-800 border-amber-300"
+                      }`}>
+                        {m.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
