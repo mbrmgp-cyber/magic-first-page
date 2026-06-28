@@ -464,7 +464,10 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
       <div><Label>అడ్రస్</Label><Textarea rows={2} value={f.address} onChange={(e) => setF({ ...f, address: e.target.value })} /></div>
       <div className="grid grid-cols-2 gap-3">
         <div><Label>Phone</Label><Input value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} /></div>
-        <div><Label>చేరిన తేదీ</Label><Input type="date" value={f.joined_date ?? ""} onChange={(e) => setF({ ...f, joined_date: e.target.value })} /></div>
+        <div>
+          <Label>చేరిన తేదీ</Label>
+          <JoinedDateInput value={f.joined_date ?? ""} onChange={(v) => setF({ ...f, joined_date: v })} />
+        </div>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div><Label>బ్లడ్ గ్రూప్</Label>
