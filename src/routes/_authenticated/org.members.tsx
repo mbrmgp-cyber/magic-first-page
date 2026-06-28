@@ -55,10 +55,21 @@ function MembersPage() {
   }
   useEffect(() => { refresh(); }, []);
 
-  const filtered = useMemo(
-    () => filter === "all" ? members : members.filter((m) => m.status === filter),
-    [members, filter]
-  );
+  const filtered = useMemo(() => {
+    const base = filter === "all"
+      ? members.filter((m) => m.status !== "rejected")
+      : members.filter((m) => m.status === filter);
+    const codeNum = (c: string | null | undefined) => {
+      if (!c) return Number.MAX_SAFE_INTEGER;
+      const n = parseInt(String(c).replace(/[^0-9]/g, ""), 10);
+      return Number.isFinite(n) ? n : Number.MAX_SAFE_INTEGER;
+    };
+    return [...base].sort((a, b) => {
+      const d = codeNum(a.member_code) - codeNum(b.member_code);
+      if (d !== 0) return d;
+      return (a.name ?? "").localeCompare(b.name ?? "");
+    });
+  }, [members, filter]);
 
   async function onReview(id: string, action: "approve" | "reject") {
     try {
