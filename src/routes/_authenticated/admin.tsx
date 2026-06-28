@@ -2,14 +2,14 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { getMyRoles, claimMbrAdmin, listAllOrgsForAdmin, reviewOrganization, adminSearchMembers, adminUpdateMemberCode, setOrganizationStatus, getOrganizationDetails } from "@/lib/org.functions";
+import { getMyRoles, claimMbrAdmin, listAllOrgsForAdmin, reviewOrganization, adminSearchMembers, adminUpdateMemberCode, setOrganizationStatus, getOrganizationDetails, setOrgSubscription } from "@/lib/org.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { ShieldCheck, CheckCircle2, XCircle, Clock, LogOut, Image as ImageIcon, FileText, Users, IdCard, Search, Save, Building2, Eye, Ban, PlayCircle, PauseCircle } from "lucide-react";
+import { ShieldCheck, CheckCircle2, XCircle, Clock, LogOut, Image as ImageIcon, FileText, Users, IdCard, Search, Save, Building2, Eye, Ban, PlayCircle, PauseCircle, CalendarClock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -361,11 +361,13 @@ function AllOrganizationsManager() {
   const fetchOrgs = useServerFn(listAllOrgsForAdmin);
   const setStatus = useServerFn(setOrganizationStatus);
   const getDetails = useServerFn(getOrganizationDetails);
+  const setSub = useServerFn(setOrgSubscription);
 
   const orgsQ = useQuery({ queryKey: ["admin-all-orgs"], queryFn: () => fetchOrgs() });
   const [busy, setBusy] = useState<string | null>(null);
   const [detailsId, setDetailsId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [expiryEdits, setExpiryEdits] = useState<Record<string, string>>({});
 
   const detailsQ = useQuery({
     queryKey: ["admin-org-details", detailsId],
@@ -385,6 +387,21 @@ function AllOrganizationsManager() {
       setBusy(null);
     }
   }
+
+  async function saveExpiry(orgId: string, expires_at?: string, extend_days?: number) {
+    setBusy(orgId);
+    try {
+      await setSub({ data: { org_id: orgId, expires_at, extend_days } });
+      toast.success("Subscription updated");
+      setExpiryEdits((p) => ({ ...p, [orgId]: "" }));
+      qc.invalidateQueries({ queryKey: ["admin-all-orgs"] });
+    } catch (e: any) {
+      toast.error(e.message ?? "Update failed");
+    } finally {
+      setBusy(null);
+    }
+  }
+
 
   const orgs = (orgsQ.data?.orgs ?? []) as any[];
   const q = search.trim().toLowerCase();
@@ -417,50 +434,95 @@ function AllOrganizationsManager() {
         <div className="space-y-2">
           {filtered.map((o) => {
             const status = (o.approval_status ?? "pending") as OrgStatus;
+            const expRaw = o.subscription_expires_at as string | null;
+            const expDate = expRaw ? new Date(expRaw) : null;
+            const expired = !!expDate && expDate.getTime() < Date.now();
+            const expLabel = expDate
+              ? expDate.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })
+              : "—";
+            const inputVal =
+              expiryEdits[o.id] ?? (expDate ? expDate.toISOString().slice(0, 10) : "");
             return (
-              <div key={o.id} className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 border rounded-lg bg-muted/30">
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  {o.logo_url ? (
-                    <img src={o.logo_url} alt="" className="w-10 h-10 rounded border object-cover bg-white shrink-0" />
-                  ) : (
-                    <div className="w-10 h-10 rounded border bg-background flex items-center justify-center shrink-0">
-                      <Building2 className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <div className="font-semibold text-sm truncate">{o.name}</div>
-                    <div className="text-[11px] text-muted-foreground truncate font-mono">
-                      {o.org_code} · {o.email ?? "—"}
+              <div key={o.id} className="p-3 border rounded-lg bg-muted/30 space-y-2">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    {o.logo_url ? (
+                      <img src={o.logo_url} alt="" className="w-10 h-10 rounded border object-cover bg-white shrink-0" />
+                    ) : (
+                      <div className="w-10 h-10 rounded border bg-background flex items-center justify-center shrink-0">
+                        <Building2 className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="font-semibold text-sm truncate">{o.name}</div>
+                      <div className="text-[11px] text-muted-foreground truncate font-mono">
+                        {o.org_code} · {o.email ?? "—"}
+                      </div>
                     </div>
                   </div>
+
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold uppercase ${STATUS_STYLES[status]}`}>
+                    {STATUS_LABEL[status]}
+                  </span>
+
+                  <Select
+                    value={status}
+                    onValueChange={(v) => changeStatus(o.id, v as OrgStatus)}
+                    disabled={busy === o.id}
+                  >
+                    <SelectTrigger className="h-8 w-full sm:w-[140px] text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending"><Clock className="h-3 w-3 inline mr-1" />Pending</SelectItem>
+                      <SelectItem value="approved"><PlayCircle className="h-3 w-3 inline mr-1" />Active</SelectItem>
+                      <SelectItem value="suspended"><PauseCircle className="h-3 w-3 inline mr-1" />Suspended</SelectItem>
+                      <SelectItem value="rejected"><Ban className="h-3 w-3 inline mr-1" />Rejected</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Button size="sm" variant="outline" onClick={() => setDetailsId(o.id)}>
+                    <Eye className="h-3 w-3 mr-1" />View
+                  </Button>
                 </div>
 
-                <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold uppercase ${STATUS_STYLES[status]}`}>
-                  {STATUS_LABEL[status]}
-                </span>
-
-                <Select
-                  value={status}
-                  onValueChange={(v) => changeStatus(o.id, v as OrgStatus)}
-                  disabled={busy === o.id}
-                >
-                  <SelectTrigger className="h-8 w-full sm:w-[140px] text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pending"><Clock className="h-3 w-3 inline mr-1" />Pending</SelectItem>
-                    <SelectItem value="approved"><PlayCircle className="h-3 w-3 inline mr-1" />Active</SelectItem>
-                    <SelectItem value="suspended"><PauseCircle className="h-3 w-3 inline mr-1" />Suspended</SelectItem>
-                    <SelectItem value="rejected"><Ban className="h-3 w-3 inline mr-1" />Rejected</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Button size="sm" variant="outline" onClick={() => setDetailsId(o.id)}>
-                  <Eye className="h-3 w-3 mr-1" />View
-                </Button>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 pt-2 border-t border-dashed">
+                  <div className="flex items-center gap-1 text-xs flex-1 min-w-0">
+                    <CalendarClock className="h-3.5 w-3.5 shrink-0" />
+                    <span className="text-muted-foreground">Expires on:</span>
+                    <span className={`font-semibold ${expired ? "text-destructive" : "text-foreground"}`}>
+                      {expLabel}
+                    </span>
+                    {expired && (
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-destructive text-destructive-foreground font-bold uppercase">
+                        Expired
+                      </span>
+                    )}
+                  </div>
+                  <Input
+                    type="date"
+                    value={inputVal}
+                    onChange={(e) => setExpiryEdits((p) => ({ ...p, [o.id]: e.target.value }))}
+                    className="h-8 text-xs w-full sm:w-[150px]"
+                    disabled={busy === o.id}
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={busy === o.id || !inputVal}
+                    onClick={() => saveExpiry(o.id, new Date(inputVal).toISOString())}
+                  >
+                    <Save className="h-3 w-3 mr-1" />Set
+                  </Button>
+                  <div className="flex gap-1">
+                    <Button size="sm" variant="secondary" disabled={busy === o.id} onClick={() => saveExpiry(o.id, undefined, 30)}>+30d</Button>
+                    <Button size="sm" variant="secondary" disabled={busy === o.id} onClick={() => saveExpiry(o.id, undefined, 365)}>+1yr</Button>
+                  </div>
+                </div>
               </div>
             );
           })}
+
           {!orgsQ.isLoading && filtered.length === 0 && (
             <div className="text-center text-xs text-muted-foreground py-4">No organizations.</div>
           )}

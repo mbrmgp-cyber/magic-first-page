@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { GlobalThemeApplier } from "@/components/GlobalThemeApplier";
+import { SubscriptionGate } from "@/components/SubscriptionGate";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -13,7 +14,9 @@ export const Route = createFileRoute("/_authenticated")({
     <>
       <GlobalThemeApplier />
       <div className="mbr-themed-app min-h-screen bg-background text-foreground">
-        <Outlet />
+        <SubscriptionGate>
+          <Outlet />
+        </SubscriptionGate>
       </div>
     </>
   ),

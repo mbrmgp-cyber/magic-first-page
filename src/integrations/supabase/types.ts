@@ -1196,6 +1196,7 @@ export type Database = {
           president_signature_url: string | null
           registration_certificate_url: string | null
           slogan: string | null
+          subscription_expires_at: string
           theme_color: string
           theme_font: string
           theme_settings: Json
@@ -1230,6 +1231,7 @@ export type Database = {
           president_signature_url?: string | null
           registration_certificate_url?: string | null
           slogan?: string | null
+          subscription_expires_at?: string
           theme_color?: string
           theme_font?: string
           theme_settings?: Json
@@ -1264,6 +1266,7 @@ export type Database = {
           president_signature_url?: string | null
           registration_certificate_url?: string | null
           slogan?: string | null
+          subscription_expires_at?: string
           theme_color?: string
           theme_font?: string
           theme_settings?: Json
