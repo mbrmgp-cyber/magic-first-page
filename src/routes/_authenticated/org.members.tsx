@@ -87,7 +87,9 @@ function MembersPage() {
             <Button key={s} size="sm" variant={filter === s ? "default" : "outline"} onClick={() => setFilter(s)}>
               {s === "all" ? "అందరూ" : s === "pending" ? "Pending" : s === "approved" ? "Approved" : "Rejected"}
               <Badge variant="secondary" className="ml-2">
-                {s === "all" ? members.length : members.filter((m) => m.status === s).length}
+                {s === "all"
+                  ? members.filter((m) => m.status !== "rejected").length
+                  : members.filter((m) => m.status === s).length}
               </Badge>
             </Button>
           ))}
