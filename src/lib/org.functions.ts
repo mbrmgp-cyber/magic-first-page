@@ -638,7 +638,7 @@ export const listAllOrgsForAdmin = createServerFn({ method: "GET" })
     if (!isAdmin) throw new Error("Forbidden");
     const { data: orgs, error } = await supabase
       .from("organizations")
-      .select("id, name, email, phone, slogan, logo_url, gov_reg_number, founders, org_code, approval_status, approval_notes, approved_at, created_at")
+      .select("id, name, email, phone, slogan, logo_url, gov_reg_number, founders, org_code, approval_status, approval_notes, approved_at, created_at, subscription_expires_at")
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     return { orgs: orgs ?? [] };
