@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import {
   listCommittee, listEligibleMembers, appointCommitteeMember,
   updateCommitteeMember, removeCommitteeMember, updateTermYears,
+  updateMemberSignature,
   type CommitteeRole,
 } from "@/lib/committee.functions";
 import { getMyOrg, updateOrgPresident } from "@/lib/org.functions";
@@ -28,7 +29,7 @@ type CM = {
   term_end_date: string;
   qualifications: string | null;
   responsibilities: string | null;
-  members: { id: string; name: string; photo_url: string | null; email: string | null; phone: string | null } | null;
+  members: { id: string; name: string; photo_url: string | null; email: string | null; phone: string | null; signature_url: string | null } | null;
 };
 
 const ROLE_LABELS: Record<CommitteeRole, string> = {
