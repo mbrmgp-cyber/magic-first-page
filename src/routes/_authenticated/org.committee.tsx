@@ -331,6 +331,7 @@ function CommitteePage() {
                     onDelete={() => handleDelete(presidentRow)}
                     onView={() => setViewing(presidentRow)}
                     isMe={data.myRole === "president"}
+                    onReload={load}
                   />
                 </div>
               </div>
