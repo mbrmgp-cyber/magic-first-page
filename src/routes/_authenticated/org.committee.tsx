@@ -352,7 +352,8 @@ function CommitteePage() {
                       onEdit={() => openEdit(cm)}
                       onDelete={() => handleDelete(cm)}
                       onView={() => setViewing(cm)}
-                      isMe={cm.member_id === viewing?.member_id ? false : false}
+                      isMe={false}
+                      onReload={load}
                     />
                   ))}
                 </div>
