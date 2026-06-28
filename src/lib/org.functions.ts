@@ -665,6 +665,58 @@ export const reviewOrganization = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const setOrganizationStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { org_id: string; status: "pending" | "approved" | "rejected" | "suspended"; notes?: string }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "mbr_admin" });
+    if (!isAdmin) throw new Error("Forbidden");
+    const { error } = await supabase
+      .from("organizations")
+      .update({
+        approval_status: data.status,
+        approval_notes: data.notes ?? null,
+        approved_at: new Date().toISOString(),
+        approved_by: userId,
+      })
+      .eq("id", data.org_id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const getOrganizationDetails = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { org_id: string }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "mbr_admin" });
+    if (!isAdmin) throw new Error("Forbidden");
+    const { data: org, error } = await supabase
+      .from("organizations")
+      .select("*")
+      .eq("id", data.org_id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!org) throw new Error("Organization not found");
+    const { data: members } = await supabase
+      .from("members")
+      .select("id, name, member_code, status, email, phone, created_at")
+      .eq("org_id", data.org_id)
+      .order("created_at", { ascending: false });
+    const list = (members ?? []) as any[];
+    return {
+      org,
+      members: list,
+      counts: {
+        total: list.length,
+        approved: list.filter((m) => m.status === "approved").length,
+        pending: list.filter((m) => m.status === "pending").length,
+        rejected: list.filter((m) => m.status === "rejected").length,
+      },
+    };
+  });
+
 export const sendMeetingInvites = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: {

@@ -1,0 +1,1 @@
+ALTER TYPE public.org_approval_status ADD VALUE IF NOT EXISTS 'suspended';

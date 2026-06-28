@@ -1524,7 +1524,7 @@ export type Database = {
       income_type: "registration_fee" | "donation" | "other"
       member_status: "pending" | "approved" | "rejected"
       nomination_status: "pending" | "approved" | "rejected" | "withdrawn"
-      org_approval_status: "pending" | "approved" | "rejected"
+      org_approval_status: "pending" | "approved" | "rejected" | "suspended"
       wallet_type: "bank" | "accountant" | "president"
     }
     CompositeTypes: {
@@ -1673,7 +1673,7 @@ export const Constants = {
       income_type: ["registration_fee", "donation", "other"],
       member_status: ["pending", "approved", "rejected"],
       nomination_status: ["pending", "approved", "rejected", "withdrawn"],
-      org_approval_status: ["pending", "approved", "rejected"],
+      org_approval_status: ["pending", "approved", "rejected", "suspended"],
       wallet_type: ["bank", "accountant", "president"],
     },
   },
