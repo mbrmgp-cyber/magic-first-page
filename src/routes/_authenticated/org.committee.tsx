@@ -60,13 +60,47 @@ function fmtDate(d: string) {
 }
 
 function MemberCard({
-  cm, large = false, canManage, onEdit, onDelete, onView, isMe,
+  cm, large = false, canManage, onEdit, onDelete, onView, isMe, onReload,
 }: {
   cm: CM; large?: boolean; canManage: boolean;
   onEdit: () => void; onDelete: () => void; onView: () => void; isMe: boolean;
+  onReload: () => void;
 }) {
   const m = cm.members;
   const initials = (m?.name ?? "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+  const [imgBroken, setImgBroken] = useState(false);
+  const showPhoto = !!m?.photo_url && !imgBroken;
+  const sigInp = useRef<HTMLInputElement>(null);
+  const [sigBusy, setSigBusy] = useState(false);
+  const [sigUrl, setSigUrl] = useState<string | null>(m?.signature_url ?? null);
+  const fnSig = useServerFn(updateMemberSignature);
+
+  useEffect(() => { setSigUrl(m?.signature_url ?? null); }, [m?.signature_url]);
+
+  async function onPickSig(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !m) return;
+    if (file.size > 2 * 1024 * 1024) { toast.error("ఫైల్ 2MB మించరాదు"); return; }
+    setSigBusy(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Login required");
+      const ext = file.name.split(".").pop() || "png";
+      const path = `${user.id}/member-sig/${m.id}-${crypto.randomUUID()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("org-documents").upload(path, file, { upsert: false });
+      if (upErr) throw upErr;
+      const { data: signed } = await supabase.storage.from("org-documents").createSignedUrl(path, 60 * 60 * 24 * 365);
+      const url = signed?.signedUrl;
+      if (!url) throw new Error("URL generation failed");
+      await fnSig({ data: { member_id: m.id, signature_url: url } });
+      setSigUrl(url);
+      toast.success("సంతకం సేవ్ అయింది");
+      onReload();
+    } catch (err: any) { toast.error(err.message); }
+    finally { setSigBusy(false); }
+  }
+
   return (
     <Card
       className={`relative p-3 bg-white/95 border-white shadow-md hover:shadow-lg transition cursor-pointer ${large ? "p-5" : ""} ${isMe ? "ring-2 ring-amber-500" : ""}`}
@@ -87,7 +121,16 @@ function MemberCard({
           className={`shrink-0 rounded-full overflow-hidden flex items-center justify-center text-white font-bold ${large ? "w-24 h-24 text-2xl" : "w-14 h-14 text-base"}`}
           style={{ background: ROLE_GRADIENT[cm.role] }}
         >
-          {m?.photo_url ? <img src={m.photo_url} alt={m.name} className="w-full h-full object-cover" /> : <span>{initials}</span>}
+          {showPhoto ? (
+            <img
+              src={m!.photo_url!}
+              alt=""
+              className="w-full h-full object-cover"
+              onError={() => setImgBroken(true)}
+            />
+          ) : (
+            <span>{initials}</span>
+          )}
         </div>
         <div className={`min-w-0 ${large ? "" : "flex-1"}`}>
           <div className={`font-semibold leading-tight ${large ? "text-lg" : "text-sm"} truncate`}>{m?.name ?? "—"}</div>
@@ -97,6 +140,28 @@ function MemberCard({
           <div className="text-[10px] text-muted-foreground mt-1">
             {fmtDate(cm.term_start_date)} → {fmtDate(cm.term_end_date)}
           </div>
+        </div>
+      </div>
+
+      {/* Per-member signature */}
+      <div className="mt-3 pt-3 border-t border-muted/40" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-[11px] font-medium text-muted-foreground">సంతకం</span>
+          {canManage && (
+            <>
+              <input ref={sigInp} type="file" accept="image/png,image/jpeg" className="hidden" onChange={onPickSig} />
+              <Button size="sm" variant="outline" className="h-7 text-[11px]" disabled={sigBusy} onClick={() => sigInp.current?.click()}>
+                <Camera className="w-3 h-3 mr-1" /> {sigUrl ? "మార్చండి" : "అప్‌లోడ్"}
+              </Button>
+            </>
+          )}
+        </div>
+        <div className="mt-2 h-12 w-full rounded-md border bg-white flex items-center justify-center overflow-hidden">
+          {sigUrl ? (
+            <img src={sigUrl} alt="signature" className="h-full w-full object-contain" />
+          ) : (
+            <span className="text-[10px] text-muted-foreground">సంతకం లేదు</span>
+          )}
         </div>
       </div>
     </Card>
