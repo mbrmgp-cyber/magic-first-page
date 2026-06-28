@@ -865,3 +865,76 @@ export const adminUpdateMemberCode = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true, member: row };
   });
+
+export const setOrgSubscription = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { org_id: string; expires_at?: string | null; extend_days?: number }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "mbr_admin" });
+    if (!isAdmin) throw new Error("Forbidden");
+    let nextExpiry: string;
+    if (typeof data.extend_days === "number" && data.extend_days !== 0) {
+      const { data: row } = await supabase
+        .from("organizations")
+        .select("subscription_expires_at")
+        .eq("id", data.org_id)
+        .maybeSingle();
+      const base = row?.subscription_expires_at
+        ? new Date(row.subscription_expires_at as string)
+        : new Date();
+      const start = base.getTime() > Date.now() ? base : new Date();
+      start.setDate(start.getDate() + data.extend_days);
+      nextExpiry = start.toISOString();
+    } else if (data.expires_at) {
+      const d = new Date(data.expires_at);
+      if (isNaN(d.getTime())) throw new Error("Invalid date");
+      nextExpiry = d.toISOString();
+    } else {
+      throw new Error("Provide expires_at or extend_days");
+    }
+    const { error } = await supabase
+      .from("organizations")
+      .update({ subscription_expires_at: nextExpiry })
+      .eq("id", data.org_id);
+    if (error) throw new Error(error.message);
+    return { ok: true, subscription_expires_at: nextExpiry };
+  });
+
+export const getMySubscriptionStatus = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    // try admin first
+    let { data: org } = await supabase
+      .from("organizations")
+      .select("id, name, subscription_expires_at, admin_user_id")
+      .eq("admin_user_id", userId)
+      .maybeSingle();
+    if (!org) {
+      const { data: mem } = await supabase
+        .from("members")
+        .select("org_id")
+        .eq("user_id", userId)
+        .eq("status", "approved")
+        .maybeSingle();
+      if (mem?.org_id) {
+        const { data: o2 } = await supabase
+          .from("organizations")
+          .select("id, name, subscription_expires_at, admin_user_id")
+          .eq("id", mem.org_id)
+          .maybeSingle();
+        org = o2 ?? null;
+      }
+    }
+    if (!org) return { has_org: false, expired: false, expires_at: null, org_name: null };
+    const exp = org.subscription_expires_at ? new Date(org.subscription_expires_at as string) : null;
+    const expired = !!exp && exp.getTime() < Date.now();
+    return {
+      has_org: true,
+      expired,
+      expires_at: org.subscription_expires_at,
+      org_name: org.name,
+    };
+  });
+
