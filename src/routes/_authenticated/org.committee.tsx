@@ -69,13 +69,32 @@ function MemberCard({
   const m = cm.members;
   const initials = (m?.name ?? "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
   const [imgBroken, setImgBroken] = useState(false);
-  const showPhoto = !!m?.photo_url && !imgBroken;
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const sigInp = useRef<HTMLInputElement>(null);
   const [sigBusy, setSigBusy] = useState(false);
   const [sigUrl, setSigUrl] = useState<string | null>(m?.signature_url ?? null);
   const fnSig = useServerFn(updateMemberSignature);
 
   useEffect(() => { setSigUrl(m?.signature_url ?? null); }, [m?.signature_url]);
+
+  // Resolve member photo. photo_url may be either a storage path (member-photos
+  // bucket) or already a full URL. Sign it when it's a path so <img> can load.
+  useEffect(() => {
+    const raw = m?.photo_url;
+    setImgBroken(false);
+    if (!raw) { setPhotoUrl(null); return; }
+    if (/^https?:\/\//i.test(raw) || raw.startsWith("data:") || raw.startsWith("blob:")) {
+      setPhotoUrl(raw); return;
+    }
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.storage.from("member-photos").createSignedUrl(raw, 3600);
+      if (!cancelled) setPhotoUrl(data?.signedUrl ?? null);
+    })();
+    return () => { cancelled = true; };
+  }, [m?.photo_url]);
+
+  const showPhoto = !!photoUrl && !imgBroken;
 
   async function onPickSig(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
