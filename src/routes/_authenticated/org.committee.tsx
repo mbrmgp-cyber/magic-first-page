@@ -286,43 +286,27 @@ function CommitteePage() {
           <ArrowLeft className="w-4 h-4" /> Back / వెనుకకు
         </button>
 
-        {/* Header banner */}
-        <Card className="p-5 bg-white/95 backdrop-blur-xl shadow-xl border-white">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <h1 className="text-xl md:text-2xl font-bold flex items-center gap-2" style={{
-                background: "linear-gradient(90deg,#B85C00,#0B5C06)",
-                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-              }}>
-                <Crown className="w-6 h-6 text-amber-600" /> మా కార్యవర్గం
-              </h1>
-              <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-                <Badge variant="outline" className="bg-white"><Users className="w-3 h-3 mr-1" />మొత్తం {totalCount} మంది</Badge>
-                <Badge variant="outline" className="bg-white">పదవీకాలం: {data.termYears} సం.</Badge>
-                {data.myRole && (
-                  <Badge style={{ background: ROLE_GRADIENT[data.myRole], color: "white" }}>
-                    మీరు: {ROLE_LABELS[data.myRole]}
-                  </Badge>
-                )}
-              </div>
-            </div>
-            {data.canManage && (
-              <Button size="sm" variant="outline" onClick={() => setSettingsOpen(true)} className="shrink-0">
-                <Settings className="w-4 h-4" />
-              </Button>
-            )}
-          </div>
-        </Card>
-
-        {data.canManage && (
-          <PresidentSignatureSection />
-        )}
+        {/* Compact title row */}
+        <div className="flex items-center justify-between gap-2">
+          <h1 className="text-lg md:text-xl font-bold flex items-center gap-2 text-foreground">
+            <Crown className="w-5 h-5 text-amber-500" /> మా కార్యవర్గం
+            <span className="text-xs font-normal text-muted-foreground">
+              ({totalCount} మంది · {data.termYears} సం.)
+            </span>
+          </h1>
+          {data.canManage && (
+            <Button size="sm" variant="outline" onClick={() => setSettingsOpen(true)} className="shrink-0">
+              <Settings className="w-4 h-4" />
+            </Button>
+          )}
+        </div>
 
         {data.canManage && (
           <Button onClick={openAdd} className="w-full" style={{ background: "linear-gradient(90deg,#B85C00,#0B5C06)" }}>
             <Plus className="w-4 h-4 mr-1" /> సభ్యునిని నియమించండి
           </Button>
         )}
+
 
         {loading ? (
           <Card className="p-6 text-center text-muted-foreground bg-white/92 border-white">లోడ్ అవుతోంది...</Card>
