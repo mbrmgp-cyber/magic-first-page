@@ -12,7 +12,7 @@ async function resolveOrgId(supabase: any, userId: string): Promise<string | nul
 }
 
 export type WalletType = "bank" | "accountant" | "president";
-export type IncomeType = "registration_fee" | "donation" | "other";
+export type IncomeType = "registration_fee" | "donation" | "loan_principal" | "loan_interest" | "other";
 export type ExpenseType = "charity" | "office" | "meeting" | "misc";
 export type TimeRange = "this_month" | "3m" | "6m" | "yearly" | "all";
 
