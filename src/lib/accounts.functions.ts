@@ -73,6 +73,7 @@ export const recordMonthlyPayment = createServerFn({ method: "POST" })
     interest_amount: number;
     new_loan_amount?: number;
     new_loan_interest_rate?: number;
+    wallet?: "bank" | "accountant" | "president";
     remarks?: string;
   }) => d)
   .handler(async ({ data, context }) => {
