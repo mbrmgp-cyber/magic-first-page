@@ -110,7 +110,7 @@ export const recordIncome = createServerFn({ method: "POST" })
       currency,
       exchange_rate: rate,
       base_amount,
-      income_type: data.income_type,
+      income_type: data.income_type as any,
       wallet: data.wallet,
       wallet_account_id: data.wallet_account_id || null,
       receipt_no,
