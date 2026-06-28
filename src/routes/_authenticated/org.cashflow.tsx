@@ -60,13 +60,16 @@ function CashFlowPage() {
               <p className="text-xs text-white/60">Society Cash Flow Statement</p>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2 items-center">
+          <div className="flex flex-wrap gap-2 items-center print:hidden">
             <Link to="/org/income">
               <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">+ Income</Button>
             </Link>
             <Link to="/org/expenses">
               <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white">+ Expense</Button>
             </Link>
+            <Button size="sm" variant="outline" onClick={() => window.print()} className="gap-1">
+              <Printer className="h-4 w-4" /> Print
+            </Button>
           </div>
         </header>
 
