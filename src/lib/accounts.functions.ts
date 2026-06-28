@@ -73,6 +73,7 @@ export const recordMonthlyPayment = createServerFn({ method: "POST" })
     interest_amount: number;
     new_loan_amount?: number;
     new_loan_interest_rate?: number;
+    wallet?: "bank" | "accountant" | "president";
     remarks?: string;
   }) => d)
   .handler(async ({ data, context }) => {
@@ -89,7 +90,9 @@ export const recordMonthlyPayment = createServerFn({ method: "POST" })
     const newLoanAmt = Number(data.new_loan_amount || 0);
     if (paidTotal <= 0 && newLoanAmt <= 0) throw new Error("ఏదైనా మొత్తం నమోదు చేయండి");
 
-    // 1. Record collection against oldest active loan (if any)
+    const wallet = data.wallet ?? "accountant";
+
+    // 1. Record collection against oldest active loan (if any) + auto-credit org_income
     if (paidTotal > 0) {
       const { data: loans } = await supabase
         .from("member_loans").select("id")
@@ -107,6 +110,44 @@ export const recordMonthlyPayment = createServerFn({ method: "POST" })
         payment_date: data.payment_date, notes,
       });
       if (error) throw new Error(error.message);
+
+      // Auto-credit income: separate entries for principal & interest
+      const { count } = await supabase
+        .from("org_income").select("id", { count: "exact", head: true })
+        .eq("org_id", orgId);
+      let seq = count ?? 0;
+      const incRows: any[] = [];
+      const baseEmail = (member.email ?? `${code.toLowerCase()}@member.local`).toLowerCase();
+      const principalAmt = Number(data.principal_amount || 0);
+      const interestAmt = Number(data.interest_amount || 0);
+      if (principalAmt > 0) {
+        seq += 1;
+        incRows.push({
+          org_id: orgId, entry_date: data.payment_date,
+          payer_name: member.name, payer_email: baseEmail,
+          amount: principalAmt, currency: "INR", exchange_rate: 1, base_amount: principalAmt,
+          income_type: "loan_principal" as any, wallet,
+          receipt_no: `RCPT-${String(seq).padStart(5, "0")}`,
+          remarks: `Loan principal repayment — ${member.name} (${code})${data.remarks ? " • " + data.remarks : ""}`,
+          created_by: userId,
+        });
+      }
+      if (interestAmt > 0) {
+        seq += 1;
+        incRows.push({
+          org_id: orgId, entry_date: data.payment_date,
+          payer_name: member.name, payer_email: baseEmail,
+          amount: interestAmt, currency: "INR", exchange_rate: 1, base_amount: interestAmt,
+          income_type: "loan_interest" as any, wallet,
+          receipt_no: `RCPT-${String(seq).padStart(5, "0")}`,
+          remarks: `Loan interest — ${member.name} (${code})${data.remarks ? " • " + data.remarks : ""}`,
+          created_by: userId,
+        });
+      }
+      if (incRows.length) {
+        const { error: incErr } = await supabase.from("org_income").insert(incRows);
+        if (incErr) console.error("[accounts] income auto-credit failed:", incErr.message);
+      }
     }
 
     // 2. Disburse new loan (if any)

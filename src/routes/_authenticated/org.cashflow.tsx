@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { ArrowLeft, Wallet, TrendingUp, TrendingDown, Building2, User, Briefcase } from "lucide-react";
+import { ArrowLeft, Wallet, TrendingUp, TrendingDown, Building2, User, Briefcase, Users, AlarmClock, Printer } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,6 +17,8 @@ export const Route = createFileRoute("/_authenticated/org/cashflow")({
 const INCOME_LABEL: Record<string, string> = {
   registration_fee: "Registration Fees",
   donation: "Donations",
+  loan_principal: "Loan Principal Collected",
+  loan_interest: "Loan Interest Collected",
   other: "Other Income",
 };
 const EXPENSE_LABEL: Record<string, string> = {
@@ -58,13 +60,16 @@ function CashFlowPage() {
               <p className="text-xs text-white/60">Society Cash Flow Statement</p>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2 items-center">
+          <div className="flex flex-wrap gap-2 items-center print:hidden">
             <Link to="/org/income">
               <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">+ Income</Button>
             </Link>
             <Link to="/org/expenses">
               <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white">+ Expense</Button>
             </Link>
+            <Button size="sm" variant="outline" onClick={() => window.print()} className="gap-1">
+              <Printer className="h-4 w-4" /> Print
+            </Button>
           </div>
         </header>
 
@@ -93,20 +98,30 @@ function CashFlowPage() {
           <>
             {/* Wallets */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <WalletCard fmt={fmt} icon={<Building2 className="h-5 w-5" />} label="Bank" value={d.wallets.bank} accent="from-blue-500/30" />
-              <WalletCard fmt={fmt} icon={<Briefcase className="h-5 w-5" />} label="Accountant / NPR" value={d.wallets.accountant} accent="from-amber-500/30" />
+              <WalletCard fmt={fmt} icon={<Building2 className="h-5 w-5" />} label="Bank (బ్యాంకులో)" value={d.wallets.bank} accent="from-blue-500/30" />
+              <WalletCard fmt={fmt} icon={<Briefcase className="h-5 w-5" />} label="Accountant / Petty Cash" value={d.wallets.accountant} accent="from-amber-500/30" />
               <WalletCard fmt={fmt} icon={<User className="h-5 w-5" />} label="President / PSR" value={d.wallets.president} accent="from-purple-500/30" />
+            </div>
+
+            {/* Members holdings + pending interest */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <WalletCard fmt={fmt} icon={<Users className="h-5 w-5" />}
+                label="With Members (సభ్యుల వద్ద ఉన్న మొత్తం)"
+                value={d.membersOutstanding ?? 0} accent="from-orange-500/30" />
+              <WalletCard fmt={fmt} icon={<AlarmClock className="h-5 w-5" />}
+                label="Pending Interest (పెండింగ్ వడ్డీ)"
+                value={d.pendingInterest ?? 0} accent="from-rose-500/30" />
             </div>
 
             {/* Totals */}
             <Card className="bg-zinc-950 border-white/10 p-4">
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div>
-                  <p className="text-[11px] uppercase text-green-400 flex items-center justify-center gap-1"><TrendingUp className="h-3 w-3" />Total Income</p>
+                  <p className="text-[11px] uppercase text-green-400 flex items-center justify-center gap-1"><TrendingUp className="h-3 w-3" />Total Income (వచ్చినది)</p>
                   <p className="text-lg font-bold text-green-400">{fmt(d.totalIncome)}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] uppercase text-red-400 flex items-center justify-center gap-1"><TrendingDown className="h-3 w-3" />Total Expense</p>
+                  <p className="text-[11px] uppercase text-red-400 flex items-center justify-center gap-1"><TrendingDown className="h-3 w-3" />Total Expense (పోయినది)</p>
                   <p className="text-lg font-bold text-red-400">{fmt(d.totalExpense)}</p>
                 </div>
                 <div>

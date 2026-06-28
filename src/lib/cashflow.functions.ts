@@ -12,7 +12,7 @@ async function resolveOrgId(supabase: any, userId: string): Promise<string | nul
 }
 
 export type WalletType = "bank" | "accountant" | "president";
-export type IncomeType = "registration_fee" | "donation" | "other";
+export type IncomeType = "registration_fee" | "donation" | "loan_principal" | "loan_interest" | "other";
 export type ExpenseType = "charity" | "office" | "meeting" | "misc";
 export type TimeRange = "this_month" | "3m" | "6m" | "yearly" | "all";
 
@@ -110,7 +110,7 @@ export const recordIncome = createServerFn({ method: "POST" })
       currency,
       exchange_rate: rate,
       base_amount,
-      income_type: data.income_type,
+      income_type: data.income_type as any,
       wallet: data.wallet,
       wallet_account_id: data.wallet_account_id || null,
       receipt_no,
@@ -211,11 +211,13 @@ export const getCashFlowSummary = createServerFn({ method: "GET" })
     const incomeByType: Record<string, number> = {};
     const expenseByType: Record<string, number> = {};
     let totalIncome = 0, totalExpense = 0;
+    let interestCollectedInRange = 0;
     for (const r of (inc ?? [])) {
       const a = Number(r.base_amount ?? r.amount ?? 0);
       wallets[r.wallet as WalletType] = (wallets[r.wallet as WalletType] || 0) + a;
       incomeByType[r.income_type] = (incomeByType[r.income_type] || 0) + a;
       totalIncome += a;
+      if (r.income_type === "loan_interest") interestCollectedInRange += a;
     }
     for (const r of (exp ?? [])) {
       const a = Number(r.base_amount ?? r.amount ?? 0);
@@ -223,6 +225,31 @@ export const getCashFlowSummary = createServerFn({ method: "GET" })
       expenseByType[r.expense_type] = (expenseByType[r.expense_type] || 0) + a;
       totalExpense += a;
     }
+
+    // Total outstanding with members (all active loans) + accrued interest pending in range
+    const { data: activeLoans } = await supabase
+      .from("member_loans")
+      .select("id, principal, interest_rate_monthly, start_date")
+      .eq("org_id", orgId).eq("status", "active");
+    let membersOutstanding = 0;
+    let accruedInterestInRange = 0;
+    const rangeStartDate = since ? new Date(since) : null;
+    const now = new Date();
+    for (const l of (activeLoans ?? [])) {
+      const { data: s } = await supabase.rpc("get_loan_summary", { _loan_id: l.id });
+      const summary = Array.isArray(s) ? s[0] : s;
+      membersOutstanding += Number(summary?.balance ?? 0);
+
+      // Accrued interest within the selected period
+      const principal = Number(l.principal ?? 0);
+      const rate = Number(l.interest_rate_monthly ?? 0) / 100;
+      const loanStart = new Date(l.start_date);
+      const periodStart = rangeStartDate && rangeStartDate > loanStart ? rangeStartDate : loanStart;
+      const months = Math.max(0, (now.getTime() - periodStart.getTime()) / (1000 * 60 * 60 * 24 * 30));
+      accruedInterestInRange += principal * rate * months;
+    }
+    const pendingInterest = Math.max(0, accruedInterestInRange - interestCollectedInRange);
+
     return {
       range,
       since,
@@ -232,5 +259,8 @@ export const getCashFlowSummary = createServerFn({ method: "GET" })
       totalIncome: Math.round(totalIncome * 100) / 100,
       totalExpense: Math.round(totalExpense * 100) / 100,
       closingBalance: Math.round((totalIncome - totalExpense) * 100) / 100,
+      membersOutstanding: Math.round(membersOutstanding * 100) / 100,
+      pendingInterest: Math.round(pendingInterest * 100) / 100,
+      interestCollectedInRange: Math.round(interestCollectedInRange * 100) / 100,
     };
   });
