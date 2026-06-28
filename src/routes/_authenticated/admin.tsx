@@ -128,6 +128,9 @@ function AdminPanel() {
 
         <MemberIdUpdater />
 
+        <AllOrganizationsManager />
+
+
 
 
         {orgsQ.isLoading && <Card className="p-6 text-center bg-white/90">Loading societies…</Card>}
