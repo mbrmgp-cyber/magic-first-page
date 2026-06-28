@@ -361,11 +361,13 @@ function AllOrganizationsManager() {
   const fetchOrgs = useServerFn(listAllOrgsForAdmin);
   const setStatus = useServerFn(setOrganizationStatus);
   const getDetails = useServerFn(getOrganizationDetails);
+  const setSub = useServerFn(setOrgSubscription);
 
   const orgsQ = useQuery({ queryKey: ["admin-all-orgs"], queryFn: () => fetchOrgs() });
   const [busy, setBusy] = useState<string | null>(null);
   const [detailsId, setDetailsId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [expiryEdits, setExpiryEdits] = useState<Record<string, string>>({});
 
   const detailsQ = useQuery({
     queryKey: ["admin-org-details", detailsId],
@@ -385,6 +387,21 @@ function AllOrganizationsManager() {
       setBusy(null);
     }
   }
+
+  async function saveExpiry(orgId: string, expires_at?: string, extend_days?: number) {
+    setBusy(orgId);
+    try {
+      await setSub({ data: { org_id: orgId, expires_at, extend_days } });
+      toast.success("Subscription updated");
+      setExpiryEdits((p) => ({ ...p, [orgId]: "" }));
+      qc.invalidateQueries({ queryKey: ["admin-all-orgs"] });
+    } catch (e: any) {
+      toast.error(e.message ?? "Update failed");
+    } finally {
+      setBusy(null);
+    }
+  }
+
 
   const orgs = (orgsQ.data?.orgs ?? []) as any[];
   const q = search.trim().toLowerCase();
