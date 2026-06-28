@@ -65,7 +65,7 @@ export const listCommittee = createServerFn({ method: "GET" })
 
     const { data: cmRows } = await supabase
       .from("committee_members")
-      .select("*, members(id, name, photo_url, email, phone)")
+      .select("*, members(id, name, photo_url, email, phone, signature_url)")
       .eq("org_id", orgId)
       .eq("is_active", true)
       .order("position_number", { ascending: true });
