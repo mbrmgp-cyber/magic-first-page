@@ -73,10 +73,7 @@ function MasterLedgerPage() {
         <Card className="p-4 bg-white/95 shadow-xl">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h1 className="text-lg md:text-2xl font-bold" style={{
-                background: "linear-gradient(90deg,#FF9933,#138808)",
-                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-              }}>Admin Master Ledger / మాస్టర్ లెడ్జర్</h1>
+              <h1 className="text-lg md:text-2xl font-bold text-orange-700">Admin Master Ledger / మాస్టర్ లెడ్జర్</h1>
               <p className="text-xs text-muted-foreground">Live aggregated entries from Committee Accounts</p>
             </div>
             <div className="flex flex-wrap gap-2">
