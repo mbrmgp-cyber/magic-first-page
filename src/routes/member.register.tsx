@@ -32,13 +32,13 @@ function BiLabel({ en, te, required }: { en: string; te: string; required?: bool
   );
 }
 
-function MemberRegister() {
+function MemberRegister({ initialCode }: { initialCode?: string }) {
   const navigate = useNavigate();
   const validate = useServerFn(validateOrgCode);
   const submit = useServerFn(submitMemberRequest);
   const { lang } = useI18n();
   const lt = (en: string, te: string) => localizeText({ en, te }, lang);
-  const search = Route.useSearch();
+  const search = { code: initialCode };
 
   const [stage, setStage] = useState<"code" | "scan" | "form" | "done">(search.code ? "form" : "code");
   const [code, setCode] = useState(search.code?.toUpperCase() ?? "");
