@@ -58,6 +58,7 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
     pin_code: "",
     email: "",
     phone: "",
+    blood_group: "",
     bank_name: "",
     bank_account_number: "",
     bank_ifsc: "",
