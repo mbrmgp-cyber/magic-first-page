@@ -238,7 +238,36 @@ function MemberDashboard() {
             <p className="text-[10px] text-zinc-400">లాగ్ అవుట్</p>
           </button>
         </div>
+
+        {/* Social Media / Connect with Us */}
+        <Card className="bg-zinc-950 border-zinc-800 p-4"
+          style={{ boxShadow: `0 0 24px ${brand}1f` }}>
+          <div className="text-center mb-3">
+            <p className="text-sm font-semibold text-white">మాతో కనెక్ట్ అవ్వండి</p>
+            <p className="text-[11px] text-zinc-400">Connect with Us</p>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            {SOCIAL_LINKS.map((s) => (
+              <a
+                key={s.label}
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-xl p-3 flex flex-col items-center gap-1.5 text-center text-white transition hover:-translate-y-0.5 hover:brightness-110"
+                style={{ backgroundColor: s.bg, boxShadow: `0 6px 18px ${s.bg}55` }}
+                aria-label={s.label}
+              >
+                <span className="h-10 w-10 rounded-full bg-white/15 flex items-center justify-center">
+                  {s.icon}
+                </span>
+                <p className="text-[12px] font-semibold leading-tight">{s.label}</p>
+                <p className="text-[10px] opacity-90 leading-tight">{s.te}</p>
+              </a>
+            ))}
+          </div>
+        </Card>
       </div>
+
 
       <Dialog open={idCardOpen} onOpenChange={setIdCardOpen}>
         <DialogContent className="max-w-[480px] p-4 bg-zinc-950 border-zinc-800 text-white">
