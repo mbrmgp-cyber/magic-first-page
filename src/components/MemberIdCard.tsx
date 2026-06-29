@@ -302,12 +302,14 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
   const langs: CardLang[] = ["te", "en", "hi"];
   const langLabel: Record<CardLang, string> = { te: "తెలుగు", en: "English", hi: "हिन्दी" };
 
+  const effectiveOrg = org ? { ...org, president_name: presidentName || org.president_name || null } : org;
+
   return (
     <div className="space-y-3">
       {org?.id_card_design ? (
         <SavedDesignCard
           design={org.id_card_design}
-          org={org}
+          org={effectiveOrg}
           member={member}
           photoUrl={photoUrl}
           logoUrl={logoUrl}
@@ -336,7 +338,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
           frontRef={frontRef}
           backRef={backRef}
           member={member}
-          org={org}
+          org={effectiveOrg}
           t={t}
           photoUrl={photoUrl}
           logoUrl={logoUrl}
