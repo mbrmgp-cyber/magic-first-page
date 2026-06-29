@@ -159,6 +159,7 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
           bank_name: showBank ? form.bank_name || undefined : undefined,
           bank_account_number: showBank ? form.bank_account_number || undefined : undefined,
           bank_ifsc: showBank ? form.bank_ifsc || undefined : undefined,
+          blood_group: form.blood_group || undefined,
           preferred_lang: lang,
         },
       });
