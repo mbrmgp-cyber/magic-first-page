@@ -58,6 +58,7 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
     pin_code: "",
     email: "",
     phone: "",
+    blood_group: "",
     bank_name: "",
     bank_account_number: "",
     bank_ifsc: "",
@@ -158,6 +159,7 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
           bank_name: showBank ? form.bank_name || undefined : undefined,
           bank_account_number: showBank ? form.bank_account_number || undefined : undefined,
           bank_ifsc: showBank ? form.bank_ifsc || undefined : undefined,
+          blood_group: form.blood_group || undefined,
           preferred_lang: lang,
         },
       });
@@ -277,6 +279,21 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
                 <Input className="bg-zinc-900 border-zinc-700 text-white" inputMode="tel"
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+              </div>
+
+              <div className="space-y-1.5">
+                <BiLabel en="Blood Group" te="బ్లడ్ గ్రూప్" required />
+                <select
+                  required
+                  value={form.blood_group}
+                  onChange={(e) => setForm({ ...form, blood_group: e.target.value })}
+                  className="w-full h-10 rounded-md bg-zinc-900 border border-zinc-700 text-white px-3 text-sm"
+                >
+                  <option value="">{lt("Select Blood Group", "బ్లడ్ గ్రూప్ ఎంచుకోండి")}</option>
+                  {["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"].map((bg) => (
+                    <option key={bg} value={bg}>{bg}</option>
+                  ))}
+                </select>
               </div>
 
               <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4 space-y-3">

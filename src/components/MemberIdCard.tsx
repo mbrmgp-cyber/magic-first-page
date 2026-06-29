@@ -62,6 +62,7 @@ type Org = {
 
 type Member = {
   id: string;
+  org_id?: string;
   name: string;
   member_code?: string | null;
   father_name?: string | null;
@@ -186,6 +187,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
   const [showBack, setShowBack] = useState(false);
   const [lang, setLang] = useState<CardLang>("te");
   const [designation, setDesignation] = useState<string>("సభ్యుడు");
+  const [presidentName, setPresidentName] = useState<string | null>(null);
   const t = L[lang];
   const frontRef = useRef<HTMLDivElement>(null);
   const backRef = useRef<HTMLDivElement>(null);
@@ -199,7 +201,31 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
         if (!cancel && data?.signedUrl) setPhotoUrl(data.signedUrl);
       }
       if (org?.logo_url) setLogoUrl(org.logo_url);
-      if (org?.president_signature_url) setSigUrl(org.president_signature_url);
+
+      // Fetch active committee president — name + signature override the
+      // legacy org-level president fields so the card always reflects the
+      // currently elected president from committee_members.
+      if (member.org_id) {
+        const { data: pres } = await supabase
+          .from("committee_members")
+          .select("members(name, signature_url)")
+          .eq("org_id", member.org_id)
+          .eq("role", "president")
+          .eq("is_active", true)
+          .order("position_number", { ascending: true })
+          .limit(1)
+          .maybeSingle();
+        const m = (pres as any)?.members;
+        if (!cancel && m?.name) setPresidentName(m.name);
+        if (!cancel && m?.signature_url) {
+          setSigUrl(m.signature_url);
+        } else if (!cancel && org?.president_signature_url) {
+          setSigUrl(org.president_signature_url);
+        }
+      } else if (org?.president_signature_url) {
+        setSigUrl(org.president_signature_url);
+      }
+
       // Stable public production URL — preview origin is behind Lovable auth bridge
       // and won't open for the general public when they scan the printed ID card.
       const regUrl = memberRegistrationUrl(org?.org_code);
@@ -215,7 +241,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
       }
     })();
     return () => { cancel = true; };
-  }, [member.id, member.member_code, member.photo_url, org?.logo_url, org?.president_signature_url, org?.org_code]);
+  }, [member.id, member.org_id, member.member_code, member.photo_url, org?.logo_url, org?.president_signature_url, org?.org_code]);
 
   // Fetch current committee role for this member to drive ID-card designation.
   useEffect(() => {
@@ -276,12 +302,14 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
   const langs: CardLang[] = ["te", "en", "hi"];
   const langLabel: Record<CardLang, string> = { te: "తెలుగు", en: "English", hi: "हिन्दी" };
 
+  const effectiveOrg = org ? { ...org, president_name: presidentName || org.president_name || null } : org;
+
   return (
     <div className="space-y-3">
       {org?.id_card_design ? (
         <SavedDesignCard
           design={org.id_card_design}
-          org={org}
+          org={effectiveOrg}
           member={member}
           photoUrl={photoUrl}
           logoUrl={logoUrl}
@@ -310,7 +338,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
           frontRef={frontRef}
           backRef={backRef}
           member={member}
-          org={org}
+          org={effectiveOrg}
           t={t}
           photoUrl={photoUrl}
           logoUrl={logoUrl}
@@ -546,11 +574,11 @@ function CardFront({
                   textOverflow: "ellipsis",
                 }}
               >
-                {tr(org?.president_name ?? "M. Bhaskar Reddy", lang)}
+                {tr(org?.president_name ?? "", lang)}
               </div>
             )}
             <div style={{ borderTop: "0.2mm solid #000080", marginTop: "0.2mm", paddingTop: "0.2mm", fontSize: "1.8mm", color: "#000080", fontWeight: 700, lineHeight: 1.1 }}>
-              {tr(org?.president_name ?? "M. Bhaskar Reddy", lang)}
+              {tr(org?.president_name ?? "", lang)}
               <div style={{ fontSize: "1.5mm", color: "#666", fontWeight: 500 }}>{t.president}</div>
             </div>
           </div>
