@@ -3,6 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getMyOrg, getMyMembership } from "@/lib/org.functions";
 import { resolveTheme } from "@/lib/theme";
+import mbrLogoAsset from "@/assets/mbr-logo.png.asset.json";
+
+const MBR_LOGO_URL = mbrLogoAsset.url;
 
 /**
  * Injects a per-tenant Web App Manifest + Apple touch icon so that when a user
@@ -81,15 +84,13 @@ export function DynamicAppManifest() {
     const theme = resolveTheme(org);
     const name = (org.name || "MBR APP").trim();
     const shortName = acronymOf(org.name, org.letter_code);
-    const logo = (org.logo_url || "").trim();
+    const logo = (org.logo_url || "").trim() || MBR_LOGO_URL;
 
-    const icons = logo
-      ? [
-          { src: logo, sizes: "192x192", type: "image/png", purpose: "any" },
-          { src: logo, sizes: "512x512", type: "image/png", purpose: "any" },
-          { src: logo, sizes: "512x512", type: "image/png", purpose: "maskable" },
-        ]
-      : [];
+    const icons = [
+      { src: logo, sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: logo, sizes: "512x512", type: "image/png", purpose: "any" },
+      { src: logo, sizes: "512x512", type: "image/png", purpose: "maskable" },
+    ];
 
     const manifest = {
       name,
@@ -111,12 +112,10 @@ export function DynamicAppManifest() {
     blobUrlRef.current = url;
 
     upsertLink("manifest", { href: url });
-    if (logo) {
-      upsertLink("apple-touch-icon", { href: logo });
-      upsertLink("apple-touch-icon", { sizes: "180x180", href: logo });
-      upsertLink("icon", { href: logo, type: "image/png" });
-      upsertLink("shortcut icon", { href: logo });
-    }
+    upsertLink("apple-touch-icon", { href: logo });
+    upsertLink("apple-touch-icon", { sizes: "180x180", href: logo });
+    upsertLink("icon", { href: logo, type: "image/png" });
+    upsertLink("shortcut icon", { href: logo });
     upsertMeta("apple-mobile-web-app-title", shortName);
     upsertMeta("application-name", shortName);
     upsertMeta("apple-mobile-web-app-capable", "yes");

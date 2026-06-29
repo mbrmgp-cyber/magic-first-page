@@ -15,6 +15,27 @@ import { Toaster } from "@/components/ui/sonner";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import mbrLogoAsset from "../assets/mbr-logo.png.asset.json";
+
+const MBR_LOGO = mbrLogoAsset.url;
+const MBR_MANIFEST = `data:application/manifest+json;charset=utf-8,${encodeURIComponent(
+  JSON.stringify({
+    name: "MBR APP",
+    short_name: "MBR",
+    description: "MBR APP",
+    start_url: "/",
+    scope: "/",
+    display: "standalone",
+    orientation: "portrait",
+    background_color: "#000000",
+    theme_color: "#000000",
+    icons: [
+      { src: MBR_LOGO, sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: MBR_LOGO, sizes: "512x512", type: "image/png", purpose: "any" },
+      { src: MBR_LOGO, sizes: "512x512", type: "image/png", purpose: "maskable" },
+    ],
+  }),
+)}`;
 
 function NotFoundComponent() {
   return (
@@ -81,20 +102,29 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "MBR APP" },
+      { name: "description", content: "MBR APP — Member Based Registry" },
+      { name: "author", content: "MBR APP" },
+      { name: "application-name", content: "MBR APP" },
+      { name: "apple-mobile-web-app-title", content: "MBR APP" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "theme-color", content: "#000000" },
+      { property: "og:title", content: "MBR APP" },
+      { property: "og:description", content: "MBR APP — Member Based Registry" },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: MBR_LOGO },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:image", content: MBR_LOGO },
     ],
     links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
+      { rel: "stylesheet", href: appCss },
+      { rel: "icon", href: MBR_LOGO, type: "image/png" },
+      { rel: "shortcut icon", href: MBR_LOGO },
+      { rel: "apple-touch-icon", href: MBR_LOGO },
+      { rel: "apple-touch-icon", sizes: "180x180", href: MBR_LOGO },
+      { rel: "manifest", href: MBR_MANIFEST },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
