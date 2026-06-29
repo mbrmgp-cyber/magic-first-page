@@ -62,6 +62,7 @@ type Org = {
 
 type Member = {
   id: string;
+  org_id?: string;
   name: string;
   member_code?: string | null;
   father_name?: string | null;
