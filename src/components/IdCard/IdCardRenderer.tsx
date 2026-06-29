@@ -359,7 +359,14 @@ function renderBack(design: IdCardDesign, org: OrgContext, member: SampleMember)
           <div style={{ fontSize: 8, opacity: 0.7, letterSpacing: 0.4, textTransform: "uppercase" }}>
             {lang === "te" ? "జారీ చేసినవారు" : "Issued by"}
           </div>
-          {showPresName && <div style={{ fontWeight: 700 }}>{presName}</div>}
+          {show(e.presidentSignature) && org.presidentSignatureUrl && (
+            <img
+              src={org.presidentSignatureUrl}
+              alt="signature"
+              style={{ height: 22, maxWidth: 110, objectFit: "contain", display: "block", marginTop: 2, marginBottom: 1 }}
+            />
+          )}
+          {showPresName && presName && <div style={{ fontWeight: 700 }}>{presName}</div>}
           <div style={{ opacity: 0.75 }}>{presLabel}</div>
         </div>
       </div>
