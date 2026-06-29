@@ -359,6 +359,23 @@ function MemberDetailsDialog({ member, orgId, onChange }:
   );
 }
 
+function EditMemberDialog({ member, onChange }: { member: Member; onChange: () => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="outline" className="bg-blue-50 hover:bg-blue-100 border-blue-300 text-blue-700">
+          <Pencil className="w-4 h-4 mr-1" /> మార్చండి
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader><DialogTitle>{member.name} — వివరాలు సరిచేయండి</DialogTitle></DialogHeader>
+        <ProfileEdit member={member} onSaved={() => { onChange(); setOpen(false); }} />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void }) {
   const upd = useServerFn(updateMemberProfile);
   const toggleActive = useServerFn(setMemberActive);
