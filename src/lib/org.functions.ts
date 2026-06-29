@@ -694,14 +694,15 @@ export const getOrganizationDetails = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
     const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "mbr_admin" });
     if (!isAdmin) throw new Error("Forbidden");
-    const { data: org, error } = await supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: org, error } = await supabaseAdmin
       .from("organizations")
       .select("*")
       .eq("id", data.org_id)
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!org) throw new Error("Organization not found");
-    const { data: members } = await supabase
+    const { data: members } = await supabaseAdmin
       .from("members")
       .select("id, name, member_code, status, email, phone, created_at")
       .eq("org_id", data.org_id)

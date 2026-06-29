@@ -118,6 +118,7 @@ export const updateMemberProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: {
     member_id: string;
+    name?: string | null;
     father_name?: string | null;
     address?: string | null;
     phone?: string | null;

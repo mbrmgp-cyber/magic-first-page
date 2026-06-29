@@ -21,7 +21,7 @@ import {
   orgUpdateMemberCode,
 } from "@/lib/members.functions";
 import { Switch } from "@/components/ui/switch";
-import { User, Plus, IndianRupee, CheckCircle2, XCircle, Trash2, Lock, UserPlus, Camera } from "lucide-react";
+import { User, Plus, IndianRupee, CheckCircle2, XCircle, Trash2, Lock, UserPlus, Camera, Pencil } from "lucide-react";
 
 
 
@@ -191,7 +191,10 @@ function MemberCard({ member, orgId, org, onReview, onChange }:
           </>
         )}
         {member.status === "approved" && (
-          <MemberDetailsDialog member={member} orgId={orgId} onChange={onChange} />
+          <>
+            <EditMemberDialog member={member} onChange={onChange} />
+            <MemberDetailsDialog member={member} orgId={orgId} onChange={onChange} />
+          </>
         )}
       </div>
     </Card>
@@ -356,10 +359,28 @@ function MemberDetailsDialog({ member, orgId, onChange }:
   );
 }
 
+function EditMemberDialog({ member, onChange }: { member: Member; onChange: () => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="outline" className="bg-blue-50 hover:bg-blue-100 border-blue-300 text-blue-700">
+          <Pencil className="w-4 h-4 mr-1" /> మార్చండి
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader><DialogTitle>{member.name} — వివరాలు సరిచేయండి</DialogTitle></DialogHeader>
+        <ProfileEdit member={member} onSaved={() => { onChange(); setOpen(false); }} />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void }) {
   const upd = useServerFn(updateMemberProfile);
   const toggleActive = useServerFn(setMemberActive);
   const [f, setF] = useState({
+    name: member.name ?? "",
     father_name: member.father_name ?? "",
     address: member.address ?? "",
     phone: member.phone ?? "",
@@ -405,6 +426,7 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
       await upd({
         data: {
           member_id: member.id,
+          name: f.name?.trim() || member.name,
           father_name: f.father_name || null,
           address: f.address || null,
           phone: f.phone || null,
@@ -460,6 +482,7 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
         </div>
         <Switch checked={active} onCheckedChange={quickToggle} />
       </div>
+      <div><Label>పేరు</Label><Input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></div>
       <div><Label>తండ్రి పేరు</Label><Input value={f.father_name} onChange={(e) => setF({ ...f, father_name: e.target.value })} /></div>
       <div><Label>అడ్రస్</Label><Textarea rows={2} value={f.address} onChange={(e) => setF({ ...f, address: e.target.value })} /></div>
       <div className="grid grid-cols-2 gap-3">
