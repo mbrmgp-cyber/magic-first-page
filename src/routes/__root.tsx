@@ -181,6 +181,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
         <CurrencyProvider>
+          <StaticAppIcons />
           {showSplash && <SplashScreen onDone={handleSplashDone} />}
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
