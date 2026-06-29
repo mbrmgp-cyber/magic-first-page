@@ -3,6 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getMyOrg, getMyMembership } from "@/lib/org.functions";
 import { resolveTheme } from "@/lib/theme";
+import mbrLogoAsset from "@/assets/mbr-logo.png.asset.json";
+
+const MBR_LOGO_URL = mbrLogoAsset.url;
 
 /**
  * Injects a per-tenant Web App Manifest + Apple touch icon so that when a user
