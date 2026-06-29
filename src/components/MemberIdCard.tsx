@@ -727,7 +727,7 @@ function SavedDesignCard({
     name: member.name,
     fatherName: member.father_name || undefined,
     memberCode: member.member_code || undefined,
-    designation: "సభ్యుడు",
+    designation: designation || "సభ్యుడు",
     village: member.village || undefined,
     pincode: undefined,
     phone: member.phone || undefined,
