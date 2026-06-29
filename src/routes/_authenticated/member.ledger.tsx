@@ -91,11 +91,20 @@ function fmt(n: number) {
 }
 
 function Stat({ label, te, value, accent }: { label: string; te: string; value: number; accent: string }) {
+  const text = `₹ ${value.toLocaleString("en-IN")}`;
+  // Auto-shrink so large figures (e.g. 1,50,123.66) never overflow the card.
+  const len = text.length;
+  const sizeClass = len > 14 ? "text-[11px]" : len > 11 ? "text-xs" : len > 9 ? "text-sm" : "text-lg";
   return (
-    <Card className="bg-zinc-950 border-zinc-800 p-3">
-      <p className="text-[10px] uppercase tracking-wide text-zinc-400">{label}</p>
-      <p className="text-[10px] text-zinc-500">{te}</p>
-      <p className="text-lg font-bold mt-1" style={{ color: accent }}>₹ {value.toLocaleString("en-IN")}</p>
+    <Card className="bg-zinc-950 border-zinc-800 p-3 overflow-hidden">
+      <p className="text-[10px] uppercase tracking-wide text-zinc-400 truncate">{label}</p>
+      <p className="text-[10px] text-zinc-500 truncate">{te}</p>
+      <p
+        className={`${sizeClass} font-bold mt-1 leading-tight tabular-nums break-all`}
+        style={{ color: accent }}
+      >
+        {text}
+      </p>
     </Card>
   );
 }

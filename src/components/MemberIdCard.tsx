@@ -185,6 +185,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
   const [registrationQrLink, setRegistrationQrLink] = useState<string>("");
   const [showBack, setShowBack] = useState(false);
   const [lang, setLang] = useState<CardLang>("te");
+  const [designation, setDesignation] = useState<string>("సభ్యుడు");
   const t = L[lang];
   const frontRef = useRef<HTMLDivElement>(null);
   const backRef = useRef<HTMLDivElement>(null);
@@ -215,6 +216,33 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
     })();
     return () => { cancel = true; };
   }, [member.id, member.member_code, member.photo_url, org?.logo_url, org?.president_signature_url, org?.org_code]);
+
+  // Fetch current committee role for this member to drive ID-card designation.
+  useEffect(() => {
+    let cancel = false;
+    (async () => {
+      const { data } = await supabase
+        .from("committee_members")
+        .select("role")
+        .eq("member_id", member.id)
+        .eq("is_active", true)
+        .order("position_number", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      if (cancel) return;
+      const role = (data as any)?.role as string | undefined;
+      const map: Record<string, string> = {
+        president: "అధ్యక్షుడు",
+        vice_president: "ఉపాధ్యక్షుడు",
+        treasurer: "కోశాధికారి",
+        advisor: "సలహాదారు",
+        executive: "కార్యవర్గ సభ్యుడు",
+        worker: "కార్యకర్త",
+      };
+      setDesignation(role && map[role] ? map[role] : "సభ్యుడు");
+    })();
+    return () => { cancel = true; };
+  }, [member.id]);
 
   function handlePrint() {
     const f = frontRef.current; const b = backRef.current;
@@ -268,6 +296,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
           backRef={backRef}
           onPrint={handlePrint}
           lang={lang}
+          designation={designation}
         />
       ) : (
         <LegacyLayout
@@ -661,7 +690,7 @@ function Row({ label, value }: { label: string; value: string }) {
  * =================================================================== */
 function SavedDesignCard({
   design, org, member, photoUrl, logoUrl, sigUrl, qrDataUrl, appQrUrl,
-  memberQrLink, registrationQrLink, showBack, setShowBack, frontRef, backRef, onPrint, lang,
+  memberQrLink, registrationQrLink, showBack, setShowBack, frontRef, backRef, onPrint, lang, designation,
 }: {
   design: IdCardDesign;
   org: Org | null;
@@ -679,6 +708,7 @@ function SavedDesignCard({
   backRef: React.RefObject<HTMLDivElement | null>;
   onPrint: () => void;
   lang: CardLang;
+  designation?: string;
 }) {
   const orgCtx: OrgContext = {
     name: org?.name || "",
@@ -697,7 +727,7 @@ function SavedDesignCard({
     name: member.name,
     fatherName: member.father_name || undefined,
     memberCode: member.member_code || undefined,
-    designation: "సభ్యుడు",
+    designation: designation || "సభ్యుడు",
     village: member.village || undefined,
     pincode: undefined,
     phone: member.phone || undefined,
