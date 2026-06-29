@@ -482,6 +482,7 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
         </div>
         <Switch checked={active} onCheckedChange={quickToggle} />
       </div>
+      <div><Label>పేరు</Label><Input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></div>
       <div><Label>తండ్రి పేరు</Label><Input value={f.father_name} onChange={(e) => setF({ ...f, father_name: e.target.value })} /></div>
       <div><Label>అడ్రస్</Label><Textarea rows={2} value={f.address} onChange={(e) => setF({ ...f, address: e.target.value })} /></div>
       <div className="grid grid-cols-2 gap-3">
