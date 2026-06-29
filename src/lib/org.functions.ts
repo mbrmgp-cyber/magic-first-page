@@ -206,6 +206,7 @@ export const registerOrganization = createServerFn({ method: "POST" })
     email: string;
     phone?: string;
     slogan?: string;
+    address?: string;
     logo_url?: string;
     gov_reg_number?: string;
     is_gov_registered?: boolean;
