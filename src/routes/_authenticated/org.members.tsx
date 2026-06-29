@@ -426,6 +426,7 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
       await upd({
         data: {
           member_id: member.id,
+          name: f.name?.trim() || member.name,
           father_name: f.father_name || null,
           address: f.address || null,
           phone: f.phone || null,
