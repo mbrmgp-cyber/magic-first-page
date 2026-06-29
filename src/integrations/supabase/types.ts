@@ -1171,6 +1171,7 @@ export type Database = {
       }
       organizations: {
         Row: {
+          address: string | null
           admin_aadhaar_url: string | null
           admin_designation: string | null
           admin_name: string | null
@@ -1206,6 +1207,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          address?: string | null
           admin_aadhaar_url?: string | null
           admin_designation?: string | null
           admin_name?: string | null
@@ -1241,6 +1243,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          address?: string | null
           admin_aadhaar_url?: string | null
           admin_designation?: string | null
           admin_name?: string | null
