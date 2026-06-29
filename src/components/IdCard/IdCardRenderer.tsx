@@ -300,7 +300,7 @@ function renderBack(design: IdCardDesign, org: OrgContext, member: SampleMember)
   const e = design.elements;
   const g = design.global;
   const mbrLogoUrl = org.mbrLogoUrl || mbrLogoAsset.url;
-  const presName = (org.presidentName || "").trim() || "(President Name / అధ్యక్షుడి పేరు)";
+  const presName = (org.presidentName || "").trim();
   const showPresName = show(e.presidentName);
   const qrSize = Math.min(e.mbrQrCode?.imgSize ?? 56, 70);
   const mbrLogoSize = e.mbrLogo?.imgSize ?? 24;
