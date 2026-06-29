@@ -241,7 +241,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
       }
     })();
     return () => { cancel = true; };
-  }, [member.id, member.member_code, member.photo_url, org?.id, org?.logo_url, org?.president_signature_url, org?.org_code]);
+  }, [member.id, member.org_id, member.member_code, member.photo_url, org?.logo_url, org?.president_signature_url, org?.org_code]);
 
   // Fetch current committee role for this member to drive ID-card designation.
   useEffect(() => {
