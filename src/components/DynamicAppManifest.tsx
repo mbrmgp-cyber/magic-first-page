@@ -85,48 +85,60 @@ export function DynamicAppManifest() {
     const theme = resolveTheme(org);
     const name = (org.name || "MBR APP").trim();
     const shortName = acronymOf(org.name, org.letter_code);
-    const logo = (org.logo_url || "").trim() || MBR_LOGO_URL;
+    const rawLogo = (org.logo_url || "").trim() || MBR_LOGO_URL;
+    // Maskable safe-zone background: prefer white when the logo is likely
+    // dark-on-light (org logos), else use the theme background.
+    const iconBg = (org.logo_url || "").trim() ? "#ffffff" : theme.bg || "#000000";
 
-    const icons = [
-      { src: logo, sizes: "192x192", type: "image/png", purpose: "any" },
-      { src: logo, sizes: "512x512", type: "image/png", purpose: "any" },
-      { src: logo, sizes: "512x512", type: "image/png", purpose: "maskable" },
-    ];
+    let cancelled = false;
+    (async () => {
+      const set = await buildPaddedIconSet(rawLogo, iconBg);
+      if (cancelled) return;
 
-    const manifest = {
-      name,
-      short_name: shortName,
-      description: name,
-      start_url: "/",
-      scope: "/",
-      display: "standalone",
-      orientation: "portrait",
-      background_color: theme.bg,
-      theme_color: theme.bg,
-      icons,
+      const icons = [
+        { src: set.any192, sizes: "192x192", type: "image/png", purpose: "any" },
+        { src: set.any512, sizes: "512x512", type: "image/png", purpose: "any" },
+        { src: set.maskable512, sizes: "512x512", type: "image/png", purpose: "maskable" },
+      ];
+
+      const manifest = {
+        name,
+        short_name: shortName,
+        description: name,
+        start_url: "/",
+        scope: "/",
+        display: "standalone",
+        orientation: "portrait",
+        background_color: iconBg,
+        theme_color: theme.bg,
+        icons,
+      };
+
+      if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+      const blob = new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" });
+      const url = URL.createObjectURL(blob);
+      blobUrlRef.current = url;
+
+      upsertLink("manifest", { href: url });
+      upsertLink("apple-touch-icon", { href: set.apple180 });
+      upsertLink("apple-touch-icon", { sizes: "180x180", href: set.apple180 });
+      upsertLink("icon", { href: set.any192, type: "image/png" });
+      upsertLink("shortcut icon", { href: set.any192 });
+      upsertMeta("apple-mobile-web-app-title", shortName);
+      upsertMeta("application-name", shortName);
+      upsertMeta("apple-mobile-web-app-capable", "yes");
+      upsertMeta("mobile-web-app-capable", "yes");
+      upsertMeta("apple-mobile-web-app-status-bar-style", "black-translucent");
+      upsertMeta("theme-color", theme.bg);
+
+      if (document.title && !document.title.includes(name)) {
+        document.title = `${name} — MBR APP`;
+      }
+    })();
+
+    return () => {
+      cancelled = true;
     };
-
-    // Revoke previous blob URL before creating a new one.
-    if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
-    const blob = new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" });
-    const url = URL.createObjectURL(blob);
-    blobUrlRef.current = url;
-
-    upsertLink("manifest", { href: url });
-    upsertLink("apple-touch-icon", { href: logo });
-    upsertLink("apple-touch-icon", { sizes: "180x180", href: logo });
-    upsertLink("icon", { href: logo, type: "image/png" });
-    upsertLink("shortcut icon", { href: logo });
-    upsertMeta("apple-mobile-web-app-title", shortName);
-    upsertMeta("application-name", shortName);
-    upsertMeta("apple-mobile-web-app-capable", "yes");
-    upsertMeta("mobile-web-app-capable", "yes");
-    upsertMeta("apple-mobile-web-app-status-bar-style", "black-translucent");
-    upsertMeta("theme-color", theme.bg);
-
-    if (document.title && !document.title.includes(name)) {
-      document.title = `${name} — MBR APP`;
-    }
   }, [org]);
 
   useEffect(() => {
