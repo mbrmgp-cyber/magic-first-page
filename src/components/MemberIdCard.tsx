@@ -186,6 +186,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
   const [showBack, setShowBack] = useState(false);
   const [lang, setLang] = useState<CardLang>("te");
   const [designation, setDesignation] = useState<string>("సభ్యుడు");
+  const [presidentName, setPresidentName] = useState<string | null>(null);
   const t = L[lang];
   const frontRef = useRef<HTMLDivElement>(null);
   const backRef = useRef<HTMLDivElement>(null);
@@ -199,7 +200,31 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
         if (!cancel && data?.signedUrl) setPhotoUrl(data.signedUrl);
       }
       if (org?.logo_url) setLogoUrl(org.logo_url);
-      if (org?.president_signature_url) setSigUrl(org.president_signature_url);
+
+      // Fetch active committee president — name + signature override the
+      // legacy org-level president fields so the card always reflects the
+      // currently elected president from committee_members.
+      if (org?.id) {
+        const { data: pres } = await supabase
+          .from("committee_members")
+          .select("members(name, signature_url)")
+          .eq("org_id", org.id)
+          .eq("role", "president")
+          .eq("is_active", true)
+          .order("position_number", { ascending: true })
+          .limit(1)
+          .maybeSingle();
+        const m = (pres as any)?.members;
+        if (!cancel && m?.name) setPresidentName(m.name);
+        if (!cancel && m?.signature_url) {
+          setSigUrl(m.signature_url);
+        } else if (!cancel && org?.president_signature_url) {
+          setSigUrl(org.president_signature_url);
+        }
+      } else if (org?.president_signature_url) {
+        setSigUrl(org.president_signature_url);
+      }
+
       // Stable public production URL — preview origin is behind Lovable auth bridge
       // and won't open for the general public when they scan the printed ID card.
       const regUrl = memberRegistrationUrl(org?.org_code);
@@ -215,7 +240,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
       }
     })();
     return () => { cancel = true; };
-  }, [member.id, member.member_code, member.photo_url, org?.logo_url, org?.president_signature_url, org?.org_code]);
+  }, [member.id, member.member_code, member.photo_url, org?.id, org?.logo_url, org?.president_signature_url, org?.org_code]);
 
   // Fetch current committee role for this member to drive ID-card designation.
   useEffect(() => {
