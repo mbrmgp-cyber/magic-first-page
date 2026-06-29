@@ -296,6 +296,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
           backRef={backRef}
           onPrint={handlePrint}
           lang={lang}
+          designation={designation}
         />
       ) : (
         <LegacyLayout
