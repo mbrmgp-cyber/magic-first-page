@@ -281,6 +281,21 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
                   onChange={(e) => setForm({ ...form, phone: e.target.value })} />
               </div>
 
+              <div className="space-y-1.5">
+                <BiLabel en="Blood Group" te="బ్లడ్ గ్రూప్" required />
+                <select
+                  required
+                  value={form.blood_group}
+                  onChange={(e) => setForm({ ...form, blood_group: e.target.value })}
+                  className="w-full h-10 rounded-md bg-zinc-900 border border-zinc-700 text-white px-3 text-sm"
+                >
+                  <option value="">{lt("Select Blood Group", "బ్లడ్ గ్రూప్ ఎంచుకోండి")}</option>
+                  {["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"].map((bg) => (
+                    <option key={bg} value={bg}>{bg}</option>
+                  ))}
+                </select>
+              </div>
+
               <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4 space-y-3">
                 <button type="button" onClick={() => setShowBank((v) => !v)}
                   className="w-full flex items-center justify-between text-left">
