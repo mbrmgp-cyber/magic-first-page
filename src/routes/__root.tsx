@@ -12,6 +12,7 @@ import { LanguageProvider } from "@/lib/i18n";
 import { CurrencyProvider } from "@/lib/currency-context";
 import { SplashScreen } from "@/components/SplashScreen";
 import { Toaster } from "@/components/ui/sonner";
+import { StaticAppIcons } from "@/components/StaticAppIcons";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
