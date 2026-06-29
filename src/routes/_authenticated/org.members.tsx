@@ -380,6 +380,7 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
   const upd = useServerFn(updateMemberProfile);
   const toggleActive = useServerFn(setMemberActive);
   const [f, setF] = useState({
+    name: member.name ?? "",
     father_name: member.father_name ?? "",
     address: member.address ?? "",
     phone: member.phone ?? "",
