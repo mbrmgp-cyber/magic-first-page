@@ -191,7 +191,10 @@ function MemberCard({ member, orgId, org, onReview, onChange }:
           </>
         )}
         {member.status === "approved" && (
-          <MemberDetailsDialog member={member} orgId={orgId} onChange={onChange} />
+          <>
+            <EditMemberDialog member={member} onChange={onChange} />
+            <MemberDetailsDialog member={member} orgId={orgId} onChange={onChange} />
+          </>
         )}
       </div>
     </Card>
