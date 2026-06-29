@@ -128,7 +128,15 @@ function RootComponent() {
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && sessionStorage.getItem("mbr_splash_seen")) {
+    if (typeof window === "undefined") return;
+    const path = window.location.pathname;
+    // Skip splash entirely on public registration entry points so unauthenticated
+    // users see the form immediately with no loading screen.
+    if (path === "/register" || path === "/member/register") {
+      setShowSplash(false);
+      return;
+    }
+    if (sessionStorage.getItem("mbr_splash_seen")) {
       setShowSplash(false);
     }
   }, []);
