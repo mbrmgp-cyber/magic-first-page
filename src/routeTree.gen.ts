@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as NewOrganizationRouteImport } from './routes/new-organization'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -44,6 +45,11 @@ import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/em
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewOrganizationRoute = NewOrganizationRouteImport.update({
+  id: '/new-organization',
+  path: '/new-organization',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -214,6 +220,7 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/new-organization': typeof NewOrganizationRoute
   '/register': typeof RegisterRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/member/register': typeof MemberRegisterRoute
@@ -246,6 +253,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/new-organization': typeof NewOrganizationRoute
   '/register': typeof RegisterRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/member/register': typeof MemberRegisterRoute
@@ -280,6 +288,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/new-organization': typeof NewOrganizationRoute
   '/register': typeof RegisterRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/member/register': typeof MemberRegisterRoute
@@ -314,6 +323,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/new-organization'
     | '/register'
     | '/admin'
     | '/member/register'
@@ -346,6 +356,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/new-organization'
     | '/register'
     | '/admin'
     | '/member/register'
@@ -379,6 +390,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/new-organization'
     | '/register'
     | '/_authenticated/admin'
     | '/member/register'
@@ -413,6 +425,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  NewOrganizationRoute: typeof NewOrganizationRoute
   RegisterRoute: typeof RegisterRoute
   MemberRegisterRoute: typeof MemberRegisterRoute
   OrgRegisterRoute: typeof OrgRegisterRoute
@@ -428,6 +441,13 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/new-organization': {
+      id: '/new-organization'
+      path: '/new-organization'
+      fullPath: '/new-organization'
+      preLoaderRoute: typeof NewOrganizationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -700,6 +720,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  NewOrganizationRoute: NewOrganizationRoute,
   RegisterRoute: RegisterRoute,
   MemberRegisterRoute: MemberRegisterRoute,
   OrgRegisterRoute: OrgRegisterRoute,
