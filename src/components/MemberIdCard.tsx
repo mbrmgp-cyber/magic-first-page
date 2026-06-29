@@ -205,11 +205,11 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
       // Fetch active committee president — name + signature override the
       // legacy org-level president fields so the card always reflects the
       // currently elected president from committee_members.
-      if (org?.id) {
+      if (member.org_id) {
         const { data: pres } = await supabase
           .from("committee_members")
           .select("members(name, signature_url)")
-          .eq("org_id", org.id)
+          .eq("org_id", member.org_id)
           .eq("role", "president")
           .eq("is_active", true)
           .order("position_number", { ascending: true })
