@@ -15,6 +15,27 @@ import { Toaster } from "@/components/ui/sonner";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import mbrLogoAsset from "../assets/mbr-logo.png.asset.json";
+
+const MBR_LOGO = mbrLogoAsset.url;
+const MBR_MANIFEST = `data:application/manifest+json;charset=utf-8,${encodeURIComponent(
+  JSON.stringify({
+    name: "MBR APP",
+    short_name: "MBR",
+    description: "MBR APP",
+    start_url: "/",
+    scope: "/",
+    display: "standalone",
+    orientation: "portrait",
+    background_color: "#000000",
+    theme_color: "#000000",
+    icons: [
+      { src: MBR_LOGO, sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: MBR_LOGO, sizes: "512x512", type: "image/png", purpose: "any" },
+      { src: MBR_LOGO, sizes: "512x512", type: "image/png", purpose: "maskable" },
+    ],
+  }),
+)}`;
 
 function NotFoundComponent() {
   return (
