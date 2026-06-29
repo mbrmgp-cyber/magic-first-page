@@ -116,10 +116,6 @@ export function DynamicAppManifest() {
     upsertLink("apple-touch-icon", { sizes: "180x180", href: logo });
     upsertLink("icon", { href: logo, type: "image/png" });
     upsertLink("shortcut icon", { href: logo });
-      upsertLink("apple-touch-icon", { sizes: "180x180", href: logo });
-      upsertLink("icon", { href: logo, type: "image/png" });
-      upsertLink("shortcut icon", { href: logo });
-    }
     upsertMeta("apple-mobile-web-app-title", shortName);
     upsertMeta("application-name", shortName);
     upsertMeta("apple-mobile-web-app-capable", "yes");
