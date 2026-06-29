@@ -185,6 +185,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
   const [registrationQrLink, setRegistrationQrLink] = useState<string>("");
   const [showBack, setShowBack] = useState(false);
   const [lang, setLang] = useState<CardLang>("te");
+  const [designation, setDesignation] = useState<string>("సభ్యుడు");
   const t = L[lang];
   const frontRef = useRef<HTMLDivElement>(null);
   const backRef = useRef<HTMLDivElement>(null);
