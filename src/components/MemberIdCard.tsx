@@ -690,7 +690,7 @@ function Row({ label, value }: { label: string; value: string }) {
  * =================================================================== */
 function SavedDesignCard({
   design, org, member, photoUrl, logoUrl, sigUrl, qrDataUrl, appQrUrl,
-  memberQrLink, registrationQrLink, showBack, setShowBack, frontRef, backRef, onPrint, lang,
+  memberQrLink, registrationQrLink, showBack, setShowBack, frontRef, backRef, onPrint, lang, designation,
 }: {
   design: IdCardDesign;
   org: Org | null;
@@ -708,6 +708,7 @@ function SavedDesignCard({
   backRef: React.RefObject<HTMLDivElement | null>;
   onPrint: () => void;
   lang: CardLang;
+  designation?: string;
 }) {
   const orgCtx: OrgContext = {
     name: org?.name || "",
