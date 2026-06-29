@@ -426,6 +426,7 @@ export const submitMemberRequest = createServerFn({ method: "POST" })
     bank_name?: string;
     bank_account_number?: string;
     bank_ifsc?: string;
+    blood_group?: string;
     preferred_lang?: string;
   }) => d)
   .handler(async ({ data }) => {
