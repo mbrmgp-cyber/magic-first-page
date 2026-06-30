@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Image as ImageIcon, QrCode, ScanLine, RefreshCw, Camera, Plus, CheckCircle2, ShieldCheck, UserPlus, LogIn, Building2, ArrowLeft } from "lucide-react";
+import { Image as ImageIcon, QrCode, ScanLine, RefreshCw, Camera, Plus, CheckCircle2, ShieldCheck, UserPlus, LogIn, ArrowLeft } from "lucide-react";
+import mbrLogoAsset from "@/assets/mbr-logo.png.asset.json";
 import { decodeQrFromFile, QrScanner } from "@/components/QrScanner";
 import { localizeText, useI18n } from "@/lib/i18n";
 
