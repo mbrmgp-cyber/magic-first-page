@@ -1,40 +1,117 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Gavel, TrendingDown, Wallet, Percent } from "lucide-react";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import {
+  ArrowLeft, Gavel, TrendingDown, Wallet, Percent, Users, Plus, X, Trophy,
+} from "lucide-react";
 import { useCurrency } from "@/lib/currency-context";
+import { listApprovedMembers } from "@/lib/members.functions";
 
 export const Route = createFileRoute("/_authenticated/org/auction")({
   head: () => ({ meta: [{ title: "Live Chit Auction — MBR App" }] }),
   component: AuctionRoom,
 });
 
+type MemberLite = { id: string; name: string };
+type BidEntry = {
+  id: string;
+  memberId: string;
+  memberName: string;
+  amount: number;
+  submittedAt: number;
+};
+
 function AuctionRoom() {
   const { fmt, symbol } = useCurrency();
+  const fetchMembers = useServerFn(listApprovedMembers);
+
+  const { data: memberData } = useQuery({
+    queryKey: ["approved-members-auction"],
+    queryFn: () => fetchMembers({}),
+  });
+  const allMembers: MemberLite[] = memberData?.members ?? [];
+
+  // Chit group participant selection
+  const [participants, setParticipants] = useState<MemberLite[]>([]);
+  const [pickerValue, setPickerValue] = useState<string>("");
+
+  const addParticipant = () => {
+    if (!pickerValue) return;
+    const m = allMembers.find((x) => x.id === pickerValue);
+    if (!m || participants.some((p) => p.id === m.id)) {
+      setPickerValue("");
+      return;
+    }
+    setParticipants((prev) => [...prev, m]);
+    setPickerValue("");
+  };
+  const removeParticipant = (id: string) =>
+    setParticipants((prev) => prev.filter((p) => p.id !== id));
+
+  // Bidding inputs
   const [chitValue, setChitValue] = useState<number>(100000);
   const [totalMonths, setTotalMonths] = useState<number>(20);
   const [currentMonth, setCurrentMonth] = useState<number>(1);
   const [commissionPct, setCommissionPct] = useState<number>(5);
   const [bid, setBid] = useState<number>(0);
+  const [activeBidder, setActiveBidder] = useState<string>("");
+
+  // Live bids
+  const [bids, setBids] = useState<BidEntry[]>([]);
 
   const calc = useMemo(() => {
     const cv = Math.max(0, Number(chitValue) || 0);
     const b = Math.max(0, Number(bid) || 0);
     const commission = (cv * (Number(commissionPct) || 0)) / 100;
-    const loss = b; // discount given up by the winner
+    const loss = b;
     const net = Math.max(0, cv - b - commission);
-    const remaining = Math.max(1, (Number(totalMonths) || 1) - (Number(currentMonth) || 1) + 1);
-    // Effective monthly interest rate that this discount costs the borrower
-    // monthly cost ≈ loss / remaining months; rate = monthlyCost / net * 100
+    const remaining = Math.max(
+      1,
+      (Number(totalMonths) || 1) - (Number(currentMonth) || 1) + 1,
+    );
     const monthlyPct = net > 0 ? (loss / remaining) / net * 100 : 0;
     const annualPct = monthlyPct * 12;
-    const maxBid = cv * 0.4; // chit fund cap (40%)
+    const maxBid = cv * 0.4;
     const overCap = b > maxBid;
     return { commission, loss, net, remaining, monthlyPct, annualPct, maxBid, overCap };
   }, [chitValue, bid, commissionPct, totalMonths, currentMonth]);
+
+  const sortedBids = useMemo(
+    () => [...bids].sort((a, b) => b.amount - a.amount || a.submittedAt - b.submittedAt),
+    [bids],
+  );
+  const topBidId = sortedBids[0]?.id;
+
+  const submitBid = () => {
+    if (!activeBidder || !bid || calc.overCap) return;
+    const m = participants.find((p) => p.id === activeBidder);
+    if (!m) return;
+    setBids((prev) => [
+      ...prev,
+      {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        memberId: m.id,
+        memberName: m.name,
+        amount: bid,
+        submittedAt: Date.now(),
+      },
+    ]);
+    setBid(0);
+  };
+
+  const clearBids = () => setBids([]);
 
   return (
     <div className="min-h-screen bg-[var(--app-bg,#0a0a0a)] text-foreground p-4 md:p-6">
@@ -59,6 +136,66 @@ function AuctionRoom() {
           </div>
         </div>
 
+        {/* Participant Selection Panel */}
+        <Card className="p-4 md:p-5 space-y-3 bg-card">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Users className="size-4 text-amber-400" />
+              <h2 className="font-semibold">Chit Group Members</h2>
+              <Badge variant="secondary" className="text-xs">
+                {participants.length} selected
+              </Badge>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              సభ్యులను ఎంచుకోండి (10–20)
+            </p>
+          </div>
+
+          <div className="flex gap-2">
+            <Select value={pickerValue} onValueChange={setPickerValue}>
+              <SelectTrigger className="flex-1">
+                <SelectValue placeholder="Select a member to add…" />
+              </SelectTrigger>
+              <SelectContent>
+                {allMembers
+                  .filter((m) => !participants.some((p) => p.id === m.id))
+                  .map((m) => (
+                    <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
+                  ))}
+                {allMembers.length === 0 && (
+                  <div className="px-2 py-3 text-xs text-muted-foreground">
+                    No approved members found.
+                  </div>
+                )}
+              </SelectContent>
+            </Select>
+            <Button onClick={addParticipant} disabled={!pickerValue} className="gap-1">
+              <Plus className="size-4" /> Add
+            </Button>
+          </div>
+
+          {participants.length > 0 && (
+            <div className="flex flex-wrap gap-2 pt-1">
+              {participants.map((p, i) => (
+                <span
+                  key={p.id}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 text-xs"
+                >
+                  <span className="text-amber-400 font-semibold">#{i + 1}</span>
+                  <span>{p.name}</span>
+                  <button
+                    onClick={() => removeParticipant(p.id)}
+                    className="ml-0.5 opacity-60 hover:opacity-100"
+                    aria-label={`Remove ${p.name}`}
+                  >
+                    <X className="size-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+        </Card>
+
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
           {/* Bidding area */}
           <Card className="lg:col-span-3 p-4 md:p-6 space-y-4 bg-card">
@@ -68,7 +205,7 @@ function AuctionRoom() {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-xs">Chit Value / చిట్ విలువ</Label>
+                <Label className="text-xs">Chit Value</Label>
                 <Input type="number" inputMode="decimal" value={chitValue}
                   onChange={(e) => setChitValue(Number(e.target.value))} />
               </div>
@@ -90,7 +227,19 @@ function AuctionRoom() {
             </div>
 
             <div className="space-y-2 pt-2 border-t border-border">
-              <Label className="text-sm font-semibold text-amber-400">
+              <Label className="text-xs">Bidding Member</Label>
+              <Select value={activeBidder} onValueChange={setActiveBidder}>
+                <SelectTrigger>
+                  <SelectValue placeholder={participants.length ? "Choose bidder…" : "Add participants first"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {participants.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Label className="text-sm font-semibold text-amber-400 pt-1">
                 Your Challenge / Bid Amount (సవాలు)
               </Label>
               <Input
@@ -106,7 +255,11 @@ function AuctionRoom() {
                   ⚠️ Bid exceeds typical 40% cap (max {fmt(calc.maxBid)})
                 </p>
               )}
-              <Button className="w-full h-12 text-base font-bold mt-2" disabled={!bid || calc.overCap}>
+              <Button
+                onClick={submitBid}
+                className="w-full h-12 text-base font-bold mt-2"
+                disabled={!bid || calc.overCap || !activeBidder}
+              >
                 Submit Bid / బిడ్ సమర్పించండి
               </Button>
             </div>
@@ -146,10 +299,76 @@ function AuctionRoom() {
             />
 
             <div className="text-[11px] text-muted-foreground border-t border-border pt-3 leading-relaxed">
-              💡 Tip: లాస్ ఎక్కువ ఇస్తే మీకు తక్కువ అమౌంట్ వస్తుంది, వడ్డీ శాతం పెరుగుతుంది. తెలివిగా బిడ్ చేయండి.
+              💡 Tip: లాస్ ఎక్కువ ఇస్తే మీకు తక్కువ అమౌంట్ వస్తుంది, వడ్డీ శాతం పెరుగుతుంది.
             </div>
           </Card>
         </div>
+
+        {/* Live Bids Activity Table */}
+        <Card className="p-4 md:p-5 space-y-3 bg-card">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <Trophy className="size-4 text-amber-400" />
+              <h2 className="font-semibold">Live Bids Activity</h2>
+              <Badge variant="secondary" className="text-xs">{bids.length}</Badge>
+            </div>
+            {bids.length > 0 && (
+              <Button variant="ghost" size="sm" onClick={clearBids} className="text-xs">
+                Clear All
+              </Button>
+            )}
+          </div>
+
+          {sortedBids.length === 0 ? (
+            <div className="text-center py-8 text-sm text-muted-foreground">
+              No bids yet. Submit the first bid to start the auction.
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-12">#</TableHead>
+                  <TableHead>Member</TableHead>
+                  <TableHead className="text-right">Bid Amount</TableHead>
+                  <TableHead className="text-right">Time</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sortedBids.map((b, i) => {
+                  const isTop = b.id === topBidId;
+                  return (
+                    <TableRow
+                      key={b.id}
+                      className={isTop ? "bg-amber-500/10 hover:bg-amber-500/15" : ""}
+                    >
+                      <TableCell className="font-semibold">
+                        {isTop ? (
+                          <span className="inline-flex items-center gap-1 text-amber-400">
+                            <Trophy className="size-3.5" />1
+                          </span>
+                        ) : (
+                          i + 1
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="font-medium">{b.memberName}</div>
+                        <div className="text-[10px] text-muted-foreground font-mono">
+                          {b.memberId.slice(0, 8)}
+                        </div>
+                      </TableCell>
+                      <TableCell className={`text-right font-bold tabular-nums ${isTop ? "text-amber-400" : ""}`}>
+                        {fmt(b.amount)}
+                      </TableCell>
+                      <TableCell className="text-right text-xs text-muted-foreground tabular-nums">
+                        {new Date(b.submittedAt).toLocaleTimeString()}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </Card>
       </div>
     </div>
   );
