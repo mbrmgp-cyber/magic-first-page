@@ -122,6 +122,35 @@ export type Database = {
           },
         ]
       }
+      chit_auctions: {
+        Row: {
+          org_id: string
+          state: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          org_id: string
+          state?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          org_id?: string
+          state?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chit_auctions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       committee_members: {
         Row: {
           created_at: string
@@ -1514,6 +1543,21 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      submit_chit_consent: {
+        Args: { _org_id: string; _signature_tag: string }
+        Returns: {
+          org_id: string
+          state: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "chit_auctions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
     }
     Enums: {

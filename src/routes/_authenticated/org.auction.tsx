@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState, useRef } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Card } from "@/components/ui/card";
@@ -23,8 +23,11 @@ import {
 import { useCurrency } from "@/lib/currency-context";
 import { listApprovedMembers } from "@/lib/members.functions";
 import { getMyRoles, getMyMembership } from "@/lib/org.functions";
+import { getAuctionState, saveAuctionState, submitAuctionConsent, type AuctionStateDTO } from "@/lib/auction.functions";
 import { useSimRole } from "@/lib/rbac";
 import { RoleGate } from "@/components/RoleGate";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/org/auction")({
   head: () => ({ meta: [{ title: "Live Chit Auction — MBR App" }] }),
@@ -130,6 +133,100 @@ function AuctionRoom() {
   const [winnerOpen, setWinnerOpen] = useState(false);
   const [pastWinners, setPastWinners] = useState<PastWinner[]>([]);
   const [consents, setConsents] = useState<Record<string, Consent>>({});
+
+  // ─────────── Realtime sync with admin (DB-backed) ───────────
+  const orgId: string | undefined = me?.org_id;
+  const loadState = useServerFn(getAuctionState);
+  const saveState = useServerFn(saveAuctionState);
+  const submitConsent = useServerFn(submitAuctionConsent);
+
+  const hydratedRef = useRef(false);
+  const lastRemoteJsonRef = useRef<string>("");
+  const skipNextPushRef = useRef(false);
+
+  const applyRemote = (s: AuctionStateDTO | null | undefined) => {
+    if (!s) return;
+    skipNextPushRef.current = true;
+    if (typeof s.groupName === "string") setChitGroupName(s.groupName);
+    if (typeof s.chitValue === "number") setChitValue(s.chitValue);
+    if (typeof s.totalMonths === "number") setTotalMonths(s.totalMonths);
+    if (typeof s.currentMonth === "number") setCurrentMonth(s.currentMonth);
+    if (typeof s.commissionPct === "number") setCommissionPct(s.commissionPct);
+    if (Array.isArray(s.participants)) setParticipants(s.participants);
+    if (Array.isArray(s.bids)) setBids(s.bids);
+    if (Array.isArray(s.pastWinners)) setPastWinners(s.pastWinners);
+    if (s.consents && typeof s.consents === "object") setConsents(s.consents as any);
+    if (typeof s.auctionClosed === "boolean") setAuctionClosed(s.auctionClosed);
+    setWinner(s.winner ?? null);
+    setTurnStart(s.turnStart ?? null);
+    setTurnEnd(s.turnEnd ?? null);
+  };
+
+  // Initial load + Supabase realtime subscription
+  useEffect(() => {
+    if (!orgId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await loadState({ data: { orgId } });
+        if (cancelled) return;
+        if (res?.state) {
+          lastRemoteJsonRef.current = JSON.stringify(res.state);
+          applyRemote(res.state);
+        }
+      } catch (e) { /* ignore */ }
+      hydratedRef.current = true;
+    })();
+
+    const channel = supabase
+      .channel(`chit-auction-${orgId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "chit_auctions", filter: `org_id=eq.${orgId}` },
+        (payload: any) => {
+          const next = (payload.new?.state ?? null) as AuctionStateDTO | null;
+          if (!next) return;
+          const js = JSON.stringify(next);
+          if (js === lastRemoteJsonRef.current) return;
+          lastRemoteJsonRef.current = js;
+          applyRemote(next);
+        },
+      )
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orgId]);
+
+  // Admin writes: push state whenever it changes (debounced)
+  useEffect(() => {
+    if (!orgId || !isAdmin || !hydratedRef.current) return;
+    if (skipNextPushRef.current) { skipNextPushRef.current = false; return; }
+    const snapshot: AuctionStateDTO = {
+      groupName: chitGroupName,
+      chitValue, totalMonths, currentMonth, commissionPct,
+      participants, bids, pastWinners, consents,
+      winner, auctionClosed, turnStart, turnEnd,
+    };
+    const js = JSON.stringify(snapshot);
+    if (js === lastRemoteJsonRef.current) return;
+    const t = setTimeout(async () => {
+      try {
+        lastRemoteJsonRef.current = js;
+        await saveState({ data: { orgId, state: snapshot } });
+      } catch (e: any) {
+        console.error("Auction sync failed:", e?.message || e);
+      }
+    }, 250);
+    return () => clearTimeout(t);
+  }, [
+    orgId, isAdmin, chitGroupName, chitValue, totalMonths, currentMonth,
+    commissionPct, participants, bids, pastWinners, consents, winner,
+    auctionClosed, turnStart, turnEnd, saveState,
+  ]);
 
   const startTurn = () => setTurnStart(Date.now());
 
@@ -237,13 +334,25 @@ function AuctionRoom() {
     setCurrentMonth((m) => m + 1);
   };
 
-  const giveConsent = () => {
-    if (!myId || !auctionClosed) return;
+  const giveConsent = async () => {
+    if (!myId || !auctionClosed || !orgId) return;
     const tag = `e-sig:${(myCode || myId.slice(0, 6)).toString()}:${Date.now().toString(36)}`;
+    // Optimistic local update for the signer
     setConsents((prev) => ({
       ...prev,
       [myId]: { memberId: myId, memberName: myName || "Member", signatureTag: tag, signedAt: Date.now() },
     }));
+    try {
+      const res = await submitConsent({ data: { orgId, signatureTag: tag } });
+      if (res?.state?.consents) {
+        skipNextPushRef.current = true;
+        setConsents(res.state.consents as any);
+        lastRemoteJsonRef.current = JSON.stringify({ ...res.state });
+      }
+      toast.success("నాకు సమ్మతము — Consent recorded");
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to submit consent");
+    }
   };
 
   const myConsent = consents[myId];
@@ -351,6 +460,8 @@ function AuctionRoom() {
           </Card>
         )}
 
+        {/* Admin-only controls: Participants + Bidding form + Calculator */}
+        {isAdmin && (<>
         {/* Participant Selection Panel */}
         <Card className="p-4 md:p-5 space-y-3 bg-card">
           <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -553,6 +664,7 @@ function AuctionRoom() {
             </div>
           </Card>
         </div>
+        </>)}
 
         {/* Live Bidding Board: per-member sequential bids */}
         <Card className="p-4 md:p-5 space-y-3 bg-card">
