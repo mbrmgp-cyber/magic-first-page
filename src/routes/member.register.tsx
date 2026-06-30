@@ -128,7 +128,7 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
   // Auto-verify when ?code=ABC is supplied (e.g. from ID card back QR)
   useEffect(() => {
     if (search.code && !orgId) {
-      void verifyCode(search.code);
+      void verifyCode(search.code, { goTo: "form" });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search.code]);
