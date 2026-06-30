@@ -14,10 +14,15 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from "@/components/ui/dialog";
+import {
   ArrowLeft, Gavel, TrendingDown, Wallet, Percent, Users, Plus, X, Trophy,
+  Lock, RotateCcw, PartyPopper,
 } from "lucide-react";
 import { useCurrency } from "@/lib/currency-context";
 import { listApprovedMembers } from "@/lib/members.functions";
+import { getMyRoles } from "@/lib/org.functions";
 
 export const Route = createFileRoute("/_authenticated/org/auction")({
   head: () => ({ meta: [{ title: "Live Chit Auction — MBR App" }] }),
@@ -36,11 +41,14 @@ type BidEntry = {
 function AuctionRoom() {
   const { fmt, symbol } = useCurrency();
   const fetchMembers = useServerFn(listApprovedMembers);
+  const fetchRoles = useServerFn(getMyRoles);
 
   const { data: memberData } = useQuery({
     queryKey: ["approved-members-auction"],
     queryFn: () => fetchMembers({}),
   });
+  const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: () => fetchRoles() });
+  const isAdmin = rolesQ.data?.roles?.includes("mbr_admin") ?? false;
   const allMembers: MemberLite[] = memberData?.members ?? [];
 
   // Chit group participant selection
@@ -71,6 +79,11 @@ function AuctionRoom() {
   // Live bids
   const [bids, setBids] = useState<BidEntry[]>([]);
 
+  // Auction lifecycle
+  const [auctionClosed, setAuctionClosed] = useState(false);
+  const [winner, setWinner] = useState<BidEntry | null>(null);
+  const [winnerOpen, setWinnerOpen] = useState(false);
+
   const calc = useMemo(() => {
     const cv = Math.max(0, Number(chitValue) || 0);
     const b = Math.max(0, Number(bid) || 0);
@@ -94,7 +107,19 @@ function AuctionRoom() {
   );
   const topBidId = sortedBids[0]?.id;
 
+  // Dividend = (winning bid - foreman commission) / other participants
+  const winnerCalc = useMemo(() => {
+    if (!winner) return null;
+    const cv = Math.max(0, Number(chitValue) || 0);
+    const commission = (cv * (Number(commissionPct) || 0)) / 100;
+    const net = Math.max(0, cv - winner.amount - commission);
+    const others = Math.max(1, participants.length - 1);
+    const dividend = Math.max(0, (winner.amount - commission)) / others;
+    return { commission, net, dividend, others };
+  }, [winner, chitValue, commissionPct, participants.length]);
+
   const submitBid = () => {
+    if (auctionClosed) return;
     if (!activeBidder || !bid || calc.overCap) return;
     const m = participants.find((p) => p.id === activeBidder);
     if (!m) return;
@@ -112,6 +137,22 @@ function AuctionRoom() {
   };
 
   const clearBids = () => setBids([]);
+
+  const finalizeAuction = () => {
+    if (sortedBids.length === 0) return;
+    setWinner(sortedBids[0]);
+    setAuctionClosed(true);
+    setWinnerOpen(true);
+  };
+
+  const resetAuction = () => {
+    setBids([]);
+    setWinner(null);
+    setAuctionClosed(false);
+    setBid(0);
+    setActiveBidder("");
+    setCurrentMonth((m) => m + 1);
+  };
 
   return (
     <div className="min-h-screen bg-[var(--app-bg,#0a0a0a)] text-foreground p-4 md:p-6">
@@ -249,16 +290,22 @@ function AuctionRoom() {
                 onChange={(e) => setBid(Number(e.target.value))}
                 placeholder={`${symbol} 0`}
                 className="text-2xl font-bold h-14"
+                disabled={auctionClosed}
               />
-              {calc.overCap && (
+              {calc.overCap && !auctionClosed && (
                 <p className="text-xs text-red-400">
                   ⚠️ Bid exceeds typical 40% cap (max {fmt(calc.maxBid)})
+                </p>
+              )}
+              {auctionClosed && (
+                <p className="text-xs text-emerald-400 flex items-center gap-1.5 font-semibold">
+                  <Lock className="size-3.5" /> Auction closed — bidding frozen.
                 </p>
               )}
               <Button
                 onClick={submitBid}
                 className="w-full h-12 text-base font-bold mt-2"
-                disabled={!bid || calc.overCap || !activeBidder}
+                disabled={auctionClosed || !bid || calc.overCap || !activeBidder}
               >
                 Submit Bid / బిడ్ సమర్పించండి
               </Button>
@@ -311,13 +358,41 @@ function AuctionRoom() {
               <Trophy className="size-4 text-amber-400" />
               <h2 className="font-semibold">Live Bids Activity</h2>
               <Badge variant="secondary" className="text-xs">{bids.length}</Badge>
+              {auctionClosed && (
+                <Badge className="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                  Finalized
+                </Badge>
+              )}
             </div>
-            {bids.length > 0 && (
-              <Button variant="ghost" size="sm" onClick={clearBids} className="text-xs">
-                Clear All
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              {bids.length > 0 && !auctionClosed && (
+                <Button variant="ghost" size="sm" onClick={clearBids} className="text-xs">
+                  Clear All
+                </Button>
+              )}
+              {isAdmin && !auctionClosed && (
+                <Button
+                  size="sm"
+                  onClick={finalizeAuction}
+                  disabled={sortedBids.length === 0}
+                  className="text-xs gap-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+                >
+                  <Lock className="size-3.5" /> End Auction & Finalize Winner
+                </Button>
+              )}
+              {isAdmin && auctionClosed && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={resetAuction}
+                  className="text-xs gap-1"
+                >
+                  <RotateCcw className="size-3.5" /> Reset / Schedule Next Month
+                </Button>
+              )}
+            </div>
           </div>
+
 
           {sortedBids.length === 0 ? (
             <div className="text-center py-8 text-sm text-muted-foreground">
@@ -370,6 +445,68 @@ function AuctionRoom() {
           )}
         </Card>
       </div>
+
+      {/* Winner Declaration Dialog */}
+      <Dialog open={winnerOpen} onOpenChange={setWinnerOpen}>
+        <DialogContent className="sm:max-w-md bg-gradient-to-b from-zinc-900 to-black border-amber-500/40">
+          <DialogHeader>
+            <div className="mx-auto mb-2 flex h-14 w-14 items-center justify-center rounded-full bg-amber-500/15 border border-amber-500/40">
+              <PartyPopper className="size-7 text-amber-400" />
+            </div>
+            <DialogTitle className="text-center text-xl text-amber-400">
+              Auction Finalized 🎉
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              ఈ నెల చిట్ ఆక్షన్ విజేత ప్రకటించబడింది
+            </DialogDescription>
+          </DialogHeader>
+
+          {winner && winnerCalc && (
+            <div className="space-y-3 pt-2">
+              <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 text-center">
+                <p className="text-[11px] uppercase tracking-wide text-amber-300/80">Winner</p>
+                <p className="text-lg font-bold text-white mt-0.5">{winner.memberName}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="rounded-lg border border-border bg-black/40 p-3">
+                  <p className="text-[10px] uppercase text-zinc-400">Winning Bid</p>
+                  <p className="text-base font-bold text-red-400 tabular-nums">
+                    {fmt(winner.amount)}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-border bg-black/40 p-3">
+                  <p className="text-[10px] uppercase text-zinc-400">Net to Winner</p>
+                  <p className="text-base font-bold text-emerald-400 tabular-nums">
+                    {fmt(winnerCalc.net)}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-border bg-black/40 p-3 col-span-2">
+                  <p className="text-[10px] uppercase text-zinc-400">
+                    Dividend per Member · డివిడెండ్ ({winnerCalc.others} సభ్యులకు)
+                  </p>
+                  <p className="text-lg font-bold text-amber-400 tabular-nums">
+                    {fmt(winnerCalc.dividend)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="sm:justify-between gap-2">
+            <Button variant="outline" onClick={() => setWinnerOpen(false)}>
+              Close
+            </Button>
+            {isAdmin && (
+              <Button
+                onClick={() => { setWinnerOpen(false); resetAuction(); }}
+                className="gap-1"
+              >
+                <RotateCcw className="size-4" /> Next Month
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
