@@ -46,10 +46,10 @@ export const listApprovedMembers = createServerFn({ method: "GET" })
     if (!orgId) return { members: [] };
     const { data } = await supabase
       .from("members")
-      .select("id, name")
+      .select("id, name, member_code")
       .eq("org_id", orgId)
       .eq("status", "approved")
-      .order("name");
+      .order("member_code", { ascending: true });
     return { members: data ?? [] };
   });
 
