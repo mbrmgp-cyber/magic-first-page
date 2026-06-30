@@ -480,7 +480,7 @@ export const submitMemberRequest = createServerFn({ method: "POST" })
     const { data: org } = await supabaseAdmin
       .from("organizations")
       .select("id")
-      .eq("org_code", code)
+      .or(`org_code.eq.${code},letter_code.eq.${code}`)
       .maybeSingle();
     if (!org) throw new Error("Invalid QR / Code");
 
