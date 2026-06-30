@@ -100,6 +100,7 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
       setOrgName(res.org.name);
       setOrgId(res.org.id);
       setOrgLetter(res.org.letter_code ?? normalized);
+      setOrgLogo(res.org.logo_url ?? null);
       setStage(opts?.goTo ?? "portal");
     } finally { setLoading(false); }
   }
