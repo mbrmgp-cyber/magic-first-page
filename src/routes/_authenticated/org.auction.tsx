@@ -290,16 +290,22 @@ function AuctionRoom() {
                 onChange={(e) => setBid(Number(e.target.value))}
                 placeholder={`${symbol} 0`}
                 className="text-2xl font-bold h-14"
+                disabled={auctionClosed}
               />
-              {calc.overCap && (
+              {calc.overCap && !auctionClosed && (
                 <p className="text-xs text-red-400">
                   ⚠️ Bid exceeds typical 40% cap (max {fmt(calc.maxBid)})
+                </p>
+              )}
+              {auctionClosed && (
+                <p className="text-xs text-emerald-400 flex items-center gap-1.5 font-semibold">
+                  <Lock className="size-3.5" /> Auction closed — bidding frozen.
                 </p>
               )}
               <Button
                 onClick={submitBid}
                 className="w-full h-12 text-base font-bold mt-2"
-                disabled={!bid || calc.overCap || !activeBidder}
+                disabled={auctionClosed || !bid || calc.overCap || !activeBidder}
               >
                 Submit Bid / బిడ్ సమర్పించండి
               </Button>
