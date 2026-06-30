@@ -663,7 +663,7 @@ function AuctionRoom() {
               💡 Tip: లాస్ ఎక్కువ ఇస్తే మీకు తక్కువ అమౌంట్ వస్తుంది, వడ్డీ శాతం పెరుగుతుంది.
             </div>
           </Card>
-        </div>
+        </>)}
 
         {/* Live Bidding Board: per-member sequential bids */}
         <Card className="p-4 md:p-5 space-y-3 bg-card">
