@@ -25,9 +25,11 @@ import { listApprovedMembers } from "@/lib/members.functions";
 import { getMyRoles } from "@/lib/org.functions";
 import { useSimRole } from "@/lib/rbac";
 
+import { RoleGate } from "@/components/RoleGate";
+
 export const Route = createFileRoute("/_authenticated/org/auction")({
   head: () => ({ meta: [{ title: "Live Chit Auction — MBR App" }] }),
-  component: AuctionRoom,
+  component: () => <RoleGate need="auction"><AuctionRoom /></RoleGate>,
 });
 
 type MemberLite = { id: string; name: string };
