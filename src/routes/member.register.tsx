@@ -40,11 +40,14 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
   const lt = (en: string, te: string) => localizeText({ en, te }, lang);
   const search = { code: initialCode };
 
-  const [stage, setStage] = useState<"code" | "scan" | "form" | "done">(search.code ? "form" : "code");
+  const [stage, setStage] = useState<"code" | "scan" | "portal" | "login" | "form" | "done">(search.code ? "form" : "code");
   const [code, setCode] = useState(search.code?.toUpperCase() ?? "");
   const [orgId, setOrgId] = useState<string | null>(null);
   const [orgName, setOrgName] = useState("");
+  const [orgLetter, setOrgLetter] = useState("");
   const [loading, setLoading] = useState(!!search.code);
+  const [memberSeq, setMemberSeq] = useState("");
+  const sendLogin = useServerFn(sendMemberIdLoginLink);
   const qrFileRef = useRef<HTMLInputElement>(null);
   const qrHostId = useRef(`qr-file-${Math.random().toString(36).slice(2)}`);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
