@@ -14,10 +14,15 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from "@/components/ui/dialog";
+import {
   ArrowLeft, Gavel, TrendingDown, Wallet, Percent, Users, Plus, X, Trophy,
+  Lock, RotateCcw, PartyPopper,
 } from "lucide-react";
 import { useCurrency } from "@/lib/currency-context";
 import { listApprovedMembers } from "@/lib/members.functions";
+import { getMyRoles } from "@/lib/org.functions";
 
 export const Route = createFileRoute("/_authenticated/org/auction")({
   head: () => ({ meta: [{ title: "Live Chit Auction — MBR App" }] }),
