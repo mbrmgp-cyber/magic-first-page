@@ -349,9 +349,17 @@ function Dashboard() {
           </Link>
         )}
 
+        {/* Active role indicator */}
+        <div className="text-center text-[11px] -mt-1">
+          <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 border" style={{ borderColor: theme.border, background: theme.miniBox, color: theme.subColor }}>
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: theme.icon }} />
+            {lt("Logged in as", "ప్రస్తుత పాత్ర")}: <span className="font-semibold" style={{ color: theme.headColor }}>{lt(ROLE_LABELS[simRole].en, ROLE_LABELS[simRole].te)}</span>
+          </span>
+        </div>
+
         {/* Menu 2-col grid */}
         <div className="grid grid-cols-2 gap-3">
-          {MENU.map((m) => (
+          {visibleMenu.map((m) => (
             <Link key={m.to} to={m.to}>
               <Card className="p-4 border transition-all cursor-pointer h-full"
                 style={{ background: theme.miniBox, borderColor: theme.border }}
