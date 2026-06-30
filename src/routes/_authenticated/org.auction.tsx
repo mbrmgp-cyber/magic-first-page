@@ -49,7 +49,9 @@ function AuctionRoom() {
     queryFn: () => fetchMembers({}),
   });
   const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: () => fetchRoles() });
-  const isAdmin = rolesQ.data?.roles?.includes("mbr_admin") ?? false;
+  const { role: simRole } = useSimRole();
+  const isAdmin = simRole === "super_admin" || simRole === "chit_admin"
+    || (rolesQ.data?.roles?.includes("mbr_admin") ?? false);
   const allMembers: MemberLite[] = memberData?.members ?? [];
 
   // Chit group participant selection
