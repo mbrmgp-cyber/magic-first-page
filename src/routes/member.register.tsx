@@ -1,13 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
-import { validateOrgCode, submitMemberRequest } from "@/lib/org.functions";
+import { validateOrgCode, submitMemberRequest, sendMemberIdLoginLink } from "@/lib/org.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Image as ImageIcon, QrCode, ScanLine, RefreshCw, Camera, Plus, CheckCircle2, ShieldCheck } from "lucide-react";
+import { Image as ImageIcon, QrCode, ScanLine, RefreshCw, Camera, Plus, CheckCircle2, ShieldCheck, UserPlus, LogIn, Building2, ArrowLeft } from "lucide-react";
 import { decodeQrFromFile, QrScanner } from "@/components/QrScanner";
 import { localizeText, useI18n } from "@/lib/i18n";
 
