@@ -76,8 +76,12 @@ function AuctionRoom() {
   const org: any = me?.organizations;
 
   const { role: simRole } = useSimRole();
-  const isAdmin = simRole === "super_admin" || simRole === "chit_admin"
-    || (rolesQ.data?.roles?.includes("mbr_admin") ?? false);
+  // Real admin = either platform admin (mbr_admin role) OR this org's admin_user_id.
+  // Sim role only further restricts among real admins (so a real member never sees admin UI).
+  const realAdmin =
+    (rolesQ.data?.roles?.includes("mbr_admin") ?? false) ||
+    (!!org?.admin_user_id && !!rolesQ.data?.userId && org.admin_user_id === rolesQ.data.userId);
+  const isAdmin = realAdmin && (simRole === "super_admin" || simRole === "chit_admin");
   const allMembers: MemberLite[] = memberData?.members ?? [];
 
   const myCode = me?.member_code ?? "";

@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { MemberIdCard } from "@/components/MemberIdCard";
 import {
   LogOut, IdCard, BookOpen, Wallet, Briefcase, MessageSquare, Vote, ShieldCheck, User, ScanLine,
-  Facebook, Youtube,
+  Facebook, Youtube, Gavel,
 } from "lucide-react";
 
 const SOCIAL_LINKS = [
@@ -50,6 +50,7 @@ const MENU = [
   { label: "Society Rules", te: "సంస్థ నియమాలు", icon: BookOpen, to: "/org/rules" },
   { label: "Financial Ledger", te: "ఆర్థిక వివరాలు", icon: Wallet, to: "/member/ledger" },
   { label: "Request Loan", te: "అప్పు కొరకు అభ్యర్థన", icon: Wallet, to: "/member/loan-request" },
+  { label: "Live Chit Auction", te: "లైవ్ చిట్ ఆక్షన్", icon: Gavel, to: "/org/auction" },
   { label: "Committee Details", te: "కార్య వర్గ వివరాలు", icon: Briefcase, to: "/org/committee" },
   { label: "Chat", te: "చాటింగ్ / సందేశాలు", icon: MessageSquare, to: "/org/chat" },
   { label: "Elections", te: "ఎన్నికలు", icon: Vote, to: "/org/elections" },
