@@ -134,6 +134,100 @@ function AuctionRoom() {
   const [pastWinners, setPastWinners] = useState<PastWinner[]>([]);
   const [consents, setConsents] = useState<Record<string, Consent>>({});
 
+  // ─────────── Realtime sync with admin (DB-backed) ───────────
+  const orgId: string | undefined = me?.org_id;
+  const loadState = useServerFn(getAuctionState);
+  const saveState = useServerFn(saveAuctionState);
+  const submitConsent = useServerFn(submitAuctionConsent);
+
+  const hydratedRef = useRef(false);
+  const lastRemoteJsonRef = useRef<string>("");
+  const skipNextPushRef = useRef(false);
+
+  const applyRemote = (s: AuctionStateDTO | null | undefined) => {
+    if (!s) return;
+    skipNextPushRef.current = true;
+    if (typeof s.groupName === "string") setChitGroupName(s.groupName);
+    if (typeof s.chitValue === "number") setChitValue(s.chitValue);
+    if (typeof s.totalMonths === "number") setTotalMonths(s.totalMonths);
+    if (typeof s.currentMonth === "number") setCurrentMonth(s.currentMonth);
+    if (typeof s.commissionPct === "number") setCommissionPct(s.commissionPct);
+    if (Array.isArray(s.participants)) setParticipants(s.participants);
+    if (Array.isArray(s.bids)) setBids(s.bids);
+    if (Array.isArray(s.pastWinners)) setPastWinners(s.pastWinners);
+    if (s.consents && typeof s.consents === "object") setConsents(s.consents as any);
+    if (typeof s.auctionClosed === "boolean") setAuctionClosed(s.auctionClosed);
+    setWinner(s.winner ?? null);
+    setTurnStart(s.turnStart ?? null);
+    setTurnEnd(s.turnEnd ?? null);
+  };
+
+  // Initial load + Supabase realtime subscription
+  useEffect(() => {
+    if (!orgId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await loadState({ data: { orgId } });
+        if (cancelled) return;
+        if (res?.state) {
+          lastRemoteJsonRef.current = JSON.stringify(res.state);
+          applyRemote(res.state);
+        }
+      } catch (e) { /* ignore */ }
+      hydratedRef.current = true;
+    })();
+
+    const channel = supabase
+      .channel(`chit-auction-${orgId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "chit_auctions", filter: `org_id=eq.${orgId}` },
+        (payload: any) => {
+          const next = (payload.new?.state ?? null) as AuctionStateDTO | null;
+          if (!next) return;
+          const js = JSON.stringify(next);
+          if (js === lastRemoteJsonRef.current) return;
+          lastRemoteJsonRef.current = js;
+          applyRemote(next);
+        },
+      )
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orgId]);
+
+  // Admin writes: push state whenever it changes (debounced)
+  useEffect(() => {
+    if (!orgId || !isAdmin || !hydratedRef.current) return;
+    if (skipNextPushRef.current) { skipNextPushRef.current = false; return; }
+    const snapshot: AuctionStateDTO = {
+      groupName: chitGroupName,
+      chitValue, totalMonths, currentMonth, commissionPct,
+      participants, bids, pastWinners, consents,
+      winner, auctionClosed, turnStart, turnEnd,
+    };
+    const js = JSON.stringify(snapshot);
+    if (js === lastRemoteJsonRef.current) return;
+    const t = setTimeout(async () => {
+      try {
+        lastRemoteJsonRef.current = js;
+        await saveState({ data: { orgId, state: snapshot } });
+      } catch (e: any) {
+        console.error("Auction sync failed:", e?.message || e);
+      }
+    }, 250);
+    return () => clearTimeout(t);
+  }, [
+    orgId, isAdmin, chitGroupName, chitValue, totalMonths, currentMonth,
+    commissionPct, participants, bids, pastWinners, consents, winner,
+    auctionClosed, turnStart, turnEnd, saveState,
+  ]);
+
   const startTurn = () => setTurnStart(Date.now());
 
   const calc = useMemo(() => {
