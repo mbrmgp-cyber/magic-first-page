@@ -404,13 +404,56 @@ export const validateOrgCode = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const code = normalizeOrgCode(data.code);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Match either full org_code (legacy long hash) or the short letter_code (A, B, C...)
     const { data: org } = await supabaseAdmin
       .from("organizations")
-      .select("id, name, logo_url")
-      .eq("org_code", code)
+      .select("id, name, logo_url, org_code, letter_code")
+      .or(`org_code.eq.${code},letter_code.eq.${code}`)
       .maybeSingle();
     if (!org) return { valid: false as const };
-    return { valid: true as const, org };
+    // Return the canonical org_code so downstream registration flow keeps working
+    return { valid: true as const, org: { id: org.id, name: org.name, logo_url: org.logo_url, org_code: org.org_code, letter_code: org.letter_code } };
+  });
+
+export const sendMemberIdLoginLink = createServerFn({ method: "POST" })
+  .inputValidator((d: { org_code: string; member_seq: string; lang?: string }) => d)
+  .handler(async ({ data }) => {
+    const code = normalizeOrgCode(data.org_code);
+    const seq = (data.member_seq || "").trim().replace(/^0+(?=\d)/, "");
+    if (!code || !seq) return { sent: false as const, reason: "missing" as const };
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: org } = await supabaseAdmin
+      .from("organizations")
+      .select("id, letter_code, org_code")
+      .or(`org_code.eq.${code},letter_code.eq.${code}`)
+      .maybeSingle();
+    if (!org) return { sent: false as const, reason: "org_not_found" as const };
+    const padded = seq.padStart(4, "0");
+    const memberCode = `${org.letter_code}/${padded}`;
+    const { data: member } = await supabaseAdmin
+      .from("members")
+      .select("id, email, name")
+      .eq("org_id", org.id)
+      .eq("member_code", memberCode)
+      .eq("status", "approved")
+      .maybeSingle();
+    if (!member || !member.email) return { sent: false as const, reason: "member_not_found" as const };
+    const email = member.email.trim().toLowerCase();
+    let userId = await findAuthUserIdByEmail(supabaseAdmin, email);
+    if (!userId) {
+      const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password: `MBR-${crypto.randomUUID()}`,
+        email_confirm: true,
+        user_metadata: { role: "member" },
+      });
+      if (createError) throw new Error(createError.message);
+      userId = created.user?.id ?? null;
+      if (userId) await supabaseAdmin.from("members").update({ user_id: userId }).eq("id", member.id);
+    }
+    const redirectTo = `${PUBLIC_APP_ORIGIN}/auth?lang=${encodeURIComponent(data.lang || "te")}`;
+    await sendMagicLoginLinkEmail(supabaseAdmin, email, redirectTo);
+    return { sent: true as const, email_hint: email.replace(/^(.).+(@.+)$/, "$1***$2") };
   });
 
 export const submitMemberRequest = createServerFn({ method: "POST" })
