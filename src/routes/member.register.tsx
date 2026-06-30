@@ -448,10 +448,10 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
     <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
       <Card className="w-full max-w-md p-7 space-y-5 bg-zinc-950 border-zinc-800 shadow-[0_0_30px_rgba(255,140,40,0.15)]">
         <div className="text-center space-y-2">
-          <div className="mx-auto h-14 w-14 rounded-full bg-[#ff8c28]/15 flex items-center justify-center">
-            <Building2 className="h-7 w-7 text-[#ff8c28]" />
+          <div className="mx-auto h-20 w-20 rounded-full bg-black border-2 border-[#ff8c28]/40 overflow-hidden flex items-center justify-center shadow-[0_0_24px_rgba(255,140,40,0.35)]">
+            <img src={mbrLogoAsset.url} alt="MBR APP" className="h-full w-full object-contain p-1.5" />
           </div>
-          <h1 className="text-2xl font-bold">{lt("Enter Society Code", "సొసైటీ కోడ్ నమోదు చేయండి")}</h1>
+          <h1 className="text-2xl font-bold text-white">{lt("Enter Society Code", "సొసైటీ కోడ్ నమోదు చేయండి")}</h1>
           <p className="text-sm text-zinc-400">
             {lt("Type your short society code (A, B, C…)", "మీ సొసైటీ యొక్క చిన్న కోడ్ టైప్ చేయండి (A, B, C…)")}
           </p>
