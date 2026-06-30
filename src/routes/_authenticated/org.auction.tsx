@@ -334,13 +334,25 @@ function AuctionRoom() {
     setCurrentMonth((m) => m + 1);
   };
 
-  const giveConsent = () => {
-    if (!myId || !auctionClosed) return;
+  const giveConsent = async () => {
+    if (!myId || !auctionClosed || !orgId) return;
     const tag = `e-sig:${(myCode || myId.slice(0, 6)).toString()}:${Date.now().toString(36)}`;
+    // Optimistic local update for the signer
     setConsents((prev) => ({
       ...prev,
       [myId]: { memberId: myId, memberName: myName || "Member", signatureTag: tag, signedAt: Date.now() },
     }));
+    try {
+      const res = await submitConsent({ data: { orgId, signatureTag: tag } });
+      if (res?.state?.consents) {
+        skipNextPushRef.current = true;
+        setConsents(res.state.consents as any);
+        lastRemoteJsonRef.current = JSON.stringify({ ...res.state });
+      }
+      toast.success("నాకు సమ్మతము — Consent recorded");
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to submit consent");
+    }
   };
 
   const myConsent = consents[myId];
