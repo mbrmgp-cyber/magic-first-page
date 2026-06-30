@@ -1,13 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
-import { validateOrgCode, submitMemberRequest } from "@/lib/org.functions";
+import { validateOrgCode, submitMemberRequest, sendMemberIdLoginLink } from "@/lib/org.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Image as ImageIcon, QrCode, ScanLine, RefreshCw, Camera, Plus, CheckCircle2, ShieldCheck } from "lucide-react";
+import { Image as ImageIcon, QrCode, ScanLine, RefreshCw, Camera, Plus, CheckCircle2, ShieldCheck, UserPlus, LogIn, Building2, ArrowLeft } from "lucide-react";
 import { decodeQrFromFile, QrScanner } from "@/components/QrScanner";
 import { localizeText, useI18n } from "@/lib/i18n";
 
@@ -40,11 +40,14 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
   const lt = (en: string, te: string) => localizeText({ en, te }, lang);
   const search = { code: initialCode };
 
-  const [stage, setStage] = useState<"code" | "scan" | "form" | "done">(search.code ? "form" : "code");
+  const [stage, setStage] = useState<"code" | "scan" | "portal" | "login" | "form" | "done">(search.code ? "form" : "code");
   const [code, setCode] = useState(search.code?.toUpperCase() ?? "");
   const [orgId, setOrgId] = useState<string | null>(null);
   const [orgName, setOrgName] = useState("");
+  const [orgLetter, setOrgLetter] = useState("");
   const [loading, setLoading] = useState(!!search.code);
+  const [memberSeq, setMemberSeq] = useState("");
+  const sendLogin = useServerFn(sendMemberIdLoginLink);
   const qrFileRef = useRef<HTMLInputElement>(null);
   const qrHostId = useRef(`qr-file-${Math.random().toString(36).slice(2)}`);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -81,27 +84,51 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
     return raw.toUpperCase();
   }
 
-  async function verifyCode(c: string) {
+  async function verifyCode(c: string, opts?: { goTo?: "portal" | "form" }) {
     const normalized = normalizeCodeInput(c);
     setLoading(true);
     try {
       const res = await validate({ data: { code: normalized } });
       if (!res.valid) {
-        toast.error(lt("Invalid QR / Code", "చెల్లని QR / కోడ్"));
+        toast.error(lt("Invalid Code", "చెల్లని కోడ్"));
         setStage("code");
         return;
       }
-      setCode(normalized);
+      setCode(res.org.org_code ?? normalized);
       setOrgName(res.org.name);
       setOrgId(res.org.id);
-      setStage("form");
+      setOrgLetter(res.org.letter_code ?? normalized);
+      setStage(opts?.goTo ?? "portal");
     } finally { setLoading(false); }
   }
+
+  async function onSendMemberLogin() {
+    if (!memberSeq.trim()) {
+      toast.error(lt("Enter Member ID", "మెంబర్ ఐడి నమోదు చేయండి"));
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await sendLogin({ data: { org_code: orgLetter || code, member_seq: memberSeq.trim(), lang } });
+      if (!res.sent) {
+        if (res.reason === "member_not_found") {
+          toast.error(lt("Member ID not found in this society", "ఈ సొసైటీలో ఈ మెంబర్ ఐడి లేదు"));
+        } else {
+          toast.error(lt("Could not send login link", "లాగిన్ లింక్ పంపలేకపోయాం"));
+        }
+        return;
+      }
+      toast.success(lt(`Login link sent to ${res.email_hint ?? "your email"}`, `లాగిన్ లింక్ ${res.email_hint ?? "మీ ఈమెయిల్"} కు పంపబడింది`));
+    } catch (e: any) {
+      toast.error(e.message ?? lt("Failed", "విఫలమైంది"));
+    } finally { setLoading(false); }
+  }
+
 
   // Auto-verify when ?code=ABC is supplied (e.g. from ID card back QR)
   useEffect(() => {
     if (search.code && !orgId) {
-      void verifyCode(search.code);
+      void verifyCode(search.code, { goTo: "form" });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search.code]);
@@ -340,39 +367,120 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
     );
   }
 
-  // stage === "code"
-  return (
-    <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
-      <Card className="w-full max-w-md p-6 space-y-6 bg-zinc-950 border-zinc-800 shadow-[0_0_30px_rgba(255,140,40,0.15)]">
-        <div>
-          <h1 className="text-2xl font-bold">{lt("Society QR / Code", "సొసైటీ QR / కోడ్")}</h1>
-        </div>
-        <p className="text-sm text-zinc-400 -mt-2">
-          {lt("Scan or Enter Society QR Code", "సంస్థ క్యూఆర్ కోడ్ స్కాన్ చేయండి లేదా టైప్ చేయండి")}
-        </p>
-        <Button onClick={() => setStage("scan")}
-          className="w-full bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white shadow-[0_0_24px_rgba(255,140,40,0.45)]">
-          <ScanLine className="h-4 w-4 mr-2" /> {lt("Scan QR with Camera", "కెమెరాతో QR స్కాన్")}
-        </Button>
-        <div id={qrHostId.current} className="hidden" />
-        <input ref={qrFileRef} type="file" accept="image/png,image/jpeg,image/jpg,image/webp,image/*" className="hidden" onChange={onQrImage} />
-        <Button type="button" onClick={() => qrFileRef.current?.click()} disabled={loading}
-          className="w-full bg-zinc-900 hover:bg-zinc-800 border border-[#ff8c28]/60 text-[#ff8c28] font-semibold">
-          {loading ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <ImageIcon className="h-4 w-4 mr-2" />}
-          {lt("Upload QR from Gallery", "గ్యాలరీ నుండి QR అప్లోడ్")}
-        </Button>
-        <div className="space-y-2">
-          <Label className="text-zinc-200">{lt("Or type the code", "లేదా కోడ్ టైప్ చేయండి")}</Label>
-          <div className="flex gap-2">
-            <Input value={code}
-              className="bg-zinc-900 border-zinc-700 text-white"
-              onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="ABCD1234EFGH" />
-            <Button onClick={() => verifyCode(code)} disabled={!code || loading}
-              className="bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white">
-              {loading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <QrCode className="h-4 w-4" />}
+  // stage === "portal" — after verifying short org code, show two clear actions
+  if (stage === "portal") {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
+        <Card className="w-full max-w-md p-7 space-y-6 bg-zinc-950 border-zinc-800 shadow-[0_0_30px_rgba(255,140,40,0.15)]">
+          <button onClick={() => setStage("code")} className="text-xs text-zinc-400 hover:text-white inline-flex items-center gap-1">
+            <ArrowLeft className="h-3.5 w-3.5" /> {lt("Change Code", "కోడ్ మార్చండి")}
+          </button>
+          <div className="text-center space-y-2">
+            <div className="mx-auto h-14 w-14 rounded-full bg-[#ff8c28]/15 flex items-center justify-center">
+              <Building2 className="h-7 w-7 text-[#ff8c28]" />
+            </div>
+            <div className="text-xs uppercase tracking-wider text-zinc-500">{lt("Society", "సొసైటీ")} · {orgLetter || code}</div>
+            <h1 className="text-xl font-bold leading-snug">{orgName}</h1>
+          </div>
+
+          <div className="space-y-3 pt-2">
+            <Button onClick={() => setStage("form")}
+              className="w-full h-12 bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white shadow-[0_0_24px_rgba(255,140,40,0.4)]">
+              <UserPlus className="h-5 w-5 mr-2" />
+              {lt("New Member Registration", "కొత్త సభ్యుడి రిజిస్ట్రేషన్")}
+            </Button>
+            <Button onClick={() => setStage("login")} variant="outline"
+              className="w-full h-12 bg-transparent border-[#ff8c28]/60 text-[#ff8c28] hover:bg-[#ff8c28]/10">
+              <LogIn className="h-5 w-5 mr-2" />
+              {lt("Login with Member ID (0002)", "సభ్యుడి ఐడి (0002) తో లాగిన్ అవ్వండి")}
             </Button>
           </div>
+        </Card>
+      </div>
+    );
+  }
+
+  // stage === "login" — member-id login flow
+  if (stage === "login") {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
+        <Card className="w-full max-w-md p-7 space-y-5 bg-zinc-950 border-zinc-800 shadow-[0_0_30px_rgba(255,140,40,0.15)]">
+          <button onClick={() => setStage("portal")} className="text-xs text-zinc-400 hover:text-white inline-flex items-center gap-1">
+            <ArrowLeft className="h-3.5 w-3.5" /> {lt("Back", "వెనుకకు")}
+          </button>
+          <div className="space-y-1">
+            <h1 className="text-xl font-bold">{lt("Member Login", "సభ్యుడి లాగిన్")}</h1>
+            <p className="text-xs text-zinc-400">{orgName}</p>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-zinc-200">{lt("Your Member ID (e.g. 0002)", "మీ సభ్యుడి ఐడి (ఉదా. 0002)")}</Label>
+            <div className="flex gap-2 items-stretch">
+              <div className="flex items-center px-3 rounded-md bg-zinc-900 border border-zinc-700 text-zinc-400 text-sm font-mono">
+                {orgLetter || code}/
+              </div>
+              <Input value={memberSeq} inputMode="numeric" maxLength={4}
+                placeholder="0002"
+                className="bg-zinc-900 border-zinc-700 text-white font-mono tracking-widest text-center"
+                onChange={(e) => setMemberSeq(e.target.value.replace(/[^0-9]/g, ""))} />
+            </div>
+            <p className="text-[11px] text-zinc-500">{lt("A login link will be sent to your registered email.", "మీ రిజిస్టర్డ్ ఈమెయిల్‌కు లాగిన్ లింక్ పంపబడుతుంది.")}</p>
+          </div>
+          <Button onClick={onSendMemberLogin} disabled={loading || !memberSeq}
+            className="w-full h-11 bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white">
+            {loading ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <LogIn className="h-4 w-4 mr-2" />}
+            {lt("Send Login Link", "లాగిన్ లింక్ పంపండి")}
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
+  // stage === "code" — simplified short-code entry portal
+  return (
+    <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
+      <Card className="w-full max-w-md p-7 space-y-5 bg-zinc-950 border-zinc-800 shadow-[0_0_30px_rgba(255,140,40,0.15)]">
+        <div className="text-center space-y-2">
+          <div className="mx-auto h-14 w-14 rounded-full bg-[#ff8c28]/15 flex items-center justify-center">
+            <Building2 className="h-7 w-7 text-[#ff8c28]" />
+          </div>
+          <h1 className="text-2xl font-bold">{lt("Enter Society Code", "సొసైటీ కోడ్ నమోదు చేయండి")}</h1>
+          <p className="text-sm text-zinc-400">
+            {lt("Type your short society code (A, B, C…)", "మీ సొసైటీ యొక్క చిన్న కోడ్ టైప్ చేయండి (A, B, C…)")}
+          </p>
         </div>
+
+        <div className="space-y-2">
+          <Input value={code}
+            autoFocus
+            className="bg-zinc-900 border-zinc-700 text-white text-center text-2xl font-bold tracking-[0.4em] h-14 uppercase"
+            onChange={(e) => setCode(e.target.value.toUpperCase().replace(/\s+/g, ""))}
+            onKeyDown={(e) => { if (e.key === "Enter" && code) verifyCode(code); }}
+            placeholder="A" />
+        </div>
+
+        <Button onClick={() => verifyCode(code)} disabled={!code || loading}
+          className="w-full h-12 bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white shadow-[0_0_24px_rgba(255,140,40,0.45)]">
+          {loading ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <ShieldCheck className="h-4 w-4 mr-2" />}
+          {lt("Verify", "ధృవీకరించండి")}
+        </Button>
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-zinc-800" /></div>
+          <div className="relative flex justify-center text-[10px] uppercase tracking-widest"><span className="bg-zinc-950 px-2 text-zinc-500">{lt("or", "లేదా")}</span></div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          <Button type="button" variant="outline" onClick={() => setStage("scan")} disabled={loading}
+            className="bg-transparent border-zinc-700 text-zinc-200 hover:bg-zinc-900">
+            <ScanLine className="h-4 w-4 mr-1.5" /> {lt("Scan QR", "QR స్కాన్")}
+          </Button>
+          <Button type="button" variant="outline" onClick={() => qrFileRef.current?.click()} disabled={loading}
+            className="bg-transparent border-zinc-700 text-zinc-200 hover:bg-zinc-900">
+            <ImageIcon className="h-4 w-4 mr-1.5" /> {lt("Upload QR", "QR అప్లోడ్")}
+          </Button>
+        </div>
+        <div id={qrHostId.current} className="hidden" />
+        <input ref={qrFileRef} type="file" accept="image/png,image/jpeg,image/jpg,image/webp,image/*" className="hidden" onChange={onQrImage} />
       </Card>
     </div>
   );
