@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { GlobalThemeApplier } from "@/components/GlobalThemeApplier";
 import { DynamicAppManifest } from "@/components/DynamicAppManifest";
 import { SubscriptionGate } from "@/components/SubscriptionGate";
+import { RbacProvider } from "@/lib/rbac";
+import { RoleSwitcher } from "@/components/RoleSwitcher";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -12,7 +14,7 @@ export const Route = createFileRoute("/_authenticated")({
     return { user: data.user };
   },
   component: () => (
-    <>
+    <RbacProvider>
       <GlobalThemeApplier />
       <DynamicAppManifest />
       <div className="mbr-themed-app min-h-screen bg-background text-foreground">
@@ -20,6 +22,7 @@ export const Route = createFileRoute("/_authenticated")({
           <Outlet />
         </SubscriptionGate>
       </div>
-    </>
+      <RoleSwitcher />
+    </RbacProvider>
   ),
 });

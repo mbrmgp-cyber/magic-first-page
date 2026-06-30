@@ -17,6 +17,7 @@ import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 import { localizeText, transliterateText, useI18n } from "@/lib/i18n";
 import { resolveTheme } from "@/lib/theme";
 import { memberRegistrationUrl } from "@/lib/public-url";
+import { useSimRole, canAccess, ROUTE_ACCESS, ROLE_LABELS } from "@/lib/rbac";
 
 export const Route = createFileRoute("/_authenticated/org/dashboard")({
   head: () => ({ meta: [{ title: "Society Dashboard — MBR App" }] }),
@@ -56,7 +57,9 @@ function Dashboard() {
   const orgQ = useQuery({ queryKey: ["my-org"], queryFn: () => fetchOrg() });
   const fetchRoles = useServerFn(getMyRoles);
   const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: () => fetchRoles() });
-  const isMbrAdmin = rolesQ.data?.roles?.includes("mbr_admin") ?? false;
+  const { role: simRole } = useSimRole();
+  const isMbrAdmin = (rolesQ.data?.roles?.includes("mbr_admin") ?? false) && simRole === "super_admin";
+  const visibleMenu = MENU.filter((m) => canAccess(simRole, ROUTE_ACCESS[m.to] ?? "dashboard"));
   const [qrOpen, setQrOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
@@ -346,9 +349,17 @@ function Dashboard() {
           </Link>
         )}
 
+        {/* Active role indicator */}
+        <div className="text-center text-[11px] -mt-1">
+          <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 border" style={{ borderColor: theme.border, background: theme.miniBox, color: theme.subColor }}>
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: theme.icon }} />
+            {lt("Logged in as", "ప్రస్తుత పాత్ర")}: <span className="font-semibold" style={{ color: theme.headColor }}>{lt(ROLE_LABELS[simRole].en, ROLE_LABELS[simRole].te)}</span>
+          </span>
+        </div>
+
         {/* Menu 2-col grid */}
         <div className="grid grid-cols-2 gap-3">
-          {MENU.map((m) => (
+          {visibleMenu.map((m) => (
             <Link key={m.to} to={m.to}>
               <Card className="p-4 border transition-all cursor-pointer h-full"
                 style={{ background: theme.miniBox, borderColor: theme.border }}

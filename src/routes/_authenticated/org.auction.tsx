@@ -23,10 +23,13 @@ import {
 import { useCurrency } from "@/lib/currency-context";
 import { listApprovedMembers } from "@/lib/members.functions";
 import { getMyRoles } from "@/lib/org.functions";
+import { useSimRole } from "@/lib/rbac";
+
+import { RoleGate } from "@/components/RoleGate";
 
 export const Route = createFileRoute("/_authenticated/org/auction")({
   head: () => ({ meta: [{ title: "Live Chit Auction — MBR App" }] }),
-  component: AuctionRoom,
+  component: () => <RoleGate need="auction"><AuctionRoom /></RoleGate>,
 });
 
 type MemberLite = { id: string; name: string };
@@ -48,7 +51,9 @@ function AuctionRoom() {
     queryFn: () => fetchMembers({}),
   });
   const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: () => fetchRoles() });
-  const isAdmin = rolesQ.data?.roles?.includes("mbr_admin") ?? false;
+  const { role: simRole } = useSimRole();
+  const isAdmin = simRole === "super_admin" || simRole === "chit_admin"
+    || (rolesQ.data?.roles?.includes("mbr_admin") ?? false);
   const allMembers: MemberLite[] = memberData?.members ?? [];
 
   // Chit group participant selection
