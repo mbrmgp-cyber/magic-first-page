@@ -46,6 +46,7 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
   const [orgId, setOrgId] = useState<string | null>(null);
   const [orgName, setOrgName] = useState("");
   const [orgLetter, setOrgLetter] = useState("");
+  const [orgLogo, setOrgLogo] = useState<string | null>(null);
   const [loading, setLoading] = useState(!!search.code);
   const [memberSeq, setMemberSeq] = useState("");
   const sendLogin = useServerFn(sendMemberIdLoginLink);
