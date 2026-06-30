@@ -50,8 +50,8 @@ export const getAuctionState = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { orgId: string }) => d)
   .handler(async ({ data, context }) => {
-    const { supabase } = context;
-    const { data: row, error } = await supabase
+    const sb = context.supabase as any;
+    const { data: row, error } = await sb
       .from("chit_auctions")
       .select("state, updated_at")
       .eq("org_id", data.orgId)
@@ -64,11 +64,16 @@ export const saveAuctionState = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { orgId: string; state: AuctionStateDTO }) => d)
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
-    const { data: row, error } = await supabase
+    const sb = context.supabase as any;
+    const { data: row, error } = await sb
       .from("chit_auctions")
       .upsert(
-        { org_id: data.orgId, state: data.state as any, updated_by: userId, updated_at: new Date().toISOString() },
+        {
+          org_id: data.orgId,
+          state: data.state,
+          updated_by: context.userId,
+          updated_at: new Date().toISOString(),
+        },
         { onConflict: "org_id" },
       )
       .select("state, updated_at")
@@ -81,8 +86,8 @@ export const submitAuctionConsent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { orgId: string; signatureTag: string }) => d)
   .handler(async ({ data, context }) => {
-    const { supabase } = context;
-    const { data: row, error } = await supabase.rpc("submit_chit_consent", {
+    const sb = context.supabase as any;
+    const { data: row, error } = await sb.rpc("submit_chit_consent", {
       _org_id: data.orgId,
       _signature_tag: data.signatureTag,
     });
