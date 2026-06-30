@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Image as ImageIcon, QrCode, ScanLine, RefreshCw, Camera, Plus, CheckCircle2, ShieldCheck, UserPlus, LogIn, Building2, ArrowLeft } from "lucide-react";
+import { Image as ImageIcon, QrCode, ScanLine, RefreshCw, Camera, Plus, CheckCircle2, ShieldCheck, UserPlus, LogIn, ArrowLeft } from "lucide-react";
+import mbrLogoAsset from "@/assets/mbr-logo.png.asset.json";
 import { decodeQrFromFile, QrScanner } from "@/components/QrScanner";
 import { localizeText, useI18n } from "@/lib/i18n";
 
@@ -45,6 +46,7 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
   const [orgId, setOrgId] = useState<string | null>(null);
   const [orgName, setOrgName] = useState("");
   const [orgLetter, setOrgLetter] = useState("");
+  const [orgLogo, setOrgLogo] = useState<string | null>(null);
   const [loading, setLoading] = useState(!!search.code);
   const [memberSeq, setMemberSeq] = useState("");
   const sendLogin = useServerFn(sendMemberIdLoginLink);
@@ -98,6 +100,7 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
       setOrgName(res.org.name);
       setOrgId(res.org.id);
       setOrgLetter(res.org.letter_code ?? normalized);
+      setOrgLogo(res.org.logo_url ?? null);
       setStage(opts?.goTo ?? "portal");
     } finally { setLoading(false); }
   }
@@ -376,11 +379,16 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
             <ArrowLeft className="h-3.5 w-3.5" /> {lt("Change Code", "కోడ్ మార్చండి")}
           </button>
           <div className="text-center space-y-2">
-            <div className="mx-auto h-14 w-14 rounded-full bg-[#ff8c28]/15 flex items-center justify-center">
-              <Building2 className="h-7 w-7 text-[#ff8c28]" />
+            <div className="mx-auto h-20 w-20 rounded-full bg-black border-2 border-[#ff8c28]/40 overflow-hidden flex items-center justify-center shadow-[0_0_24px_rgba(255,140,40,0.35)]">
+              <img
+                src={orgLogo || mbrLogoAsset.url}
+                alt={orgName || "MBR APP"}
+                className="h-full w-full object-contain p-1.5"
+                onError={(e) => { (e.currentTarget as HTMLImageElement).src = mbrLogoAsset.url; }}
+              />
             </div>
-            <div className="text-xs uppercase tracking-wider text-zinc-500">{lt("Society", "సొసైటీ")} · {orgLetter || code}</div>
-            <h1 className="text-xl font-bold leading-snug">{orgName}</h1>
+            <div className="text-xs uppercase tracking-wider text-[#ff8c28]/90">{lt("Society", "సొసైటీ")} · {orgLetter || code}</div>
+            <h1 className="text-xl font-bold leading-snug text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{orgName}</h1>
           </div>
 
           <div className="space-y-3 pt-2">
@@ -440,10 +448,10 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
     <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
       <Card className="w-full max-w-md p-7 space-y-5 bg-zinc-950 border-zinc-800 shadow-[0_0_30px_rgba(255,140,40,0.15)]">
         <div className="text-center space-y-2">
-          <div className="mx-auto h-14 w-14 rounded-full bg-[#ff8c28]/15 flex items-center justify-center">
-            <Building2 className="h-7 w-7 text-[#ff8c28]" />
+          <div className="mx-auto h-20 w-20 rounded-full bg-black border-2 border-[#ff8c28]/40 overflow-hidden flex items-center justify-center shadow-[0_0_24px_rgba(255,140,40,0.35)]">
+            <img src={mbrLogoAsset.url} alt="MBR APP" className="h-full w-full object-contain p-1.5" />
           </div>
-          <h1 className="text-2xl font-bold">{lt("Enter Society Code", "సొసైటీ కోడ్ నమోదు చేయండి")}</h1>
+          <h1 className="text-2xl font-bold text-white">{lt("Enter Society Code", "సొసైటీ కోడ్ నమోదు చేయండి")}</h1>
           <p className="text-sm text-zinc-400">
             {lt("Type your short society code (A, B, C…)", "మీ సొసైటీ యొక్క చిన్న కోడ్ టైప్ చేయండి (A, B, C…)")}
           </p>
