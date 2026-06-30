@@ -379,11 +379,16 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
             <ArrowLeft className="h-3.5 w-3.5" /> {lt("Change Code", "కోడ్ మార్చండి")}
           </button>
           <div className="text-center space-y-2">
-            <div className="mx-auto h-14 w-14 rounded-full bg-[#ff8c28]/15 flex items-center justify-center">
-              <Building2 className="h-7 w-7 text-[#ff8c28]" />
+            <div className="mx-auto h-20 w-20 rounded-full bg-black border-2 border-[#ff8c28]/40 overflow-hidden flex items-center justify-center shadow-[0_0_24px_rgba(255,140,40,0.35)]">
+              <img
+                src={orgLogo || mbrLogoAsset.url}
+                alt={orgName || "MBR APP"}
+                className="h-full w-full object-contain p-1.5"
+                onError={(e) => { (e.currentTarget as HTMLImageElement).src = mbrLogoAsset.url; }}
+              />
             </div>
-            <div className="text-xs uppercase tracking-wider text-zinc-500">{lt("Society", "సొసైటీ")} · {orgLetter || code}</div>
-            <h1 className="text-xl font-bold leading-snug">{orgName}</h1>
+            <div className="text-xs uppercase tracking-wider text-[#ff8c28]/90">{lt("Society", "సొసైటీ")} · {orgLetter || code}</div>
+            <h1 className="text-xl font-bold leading-snug text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{orgName}</h1>
           </div>
 
           <div className="space-y-3 pt-2">
