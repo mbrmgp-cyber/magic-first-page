@@ -57,7 +57,9 @@ function Dashboard() {
   const orgQ = useQuery({ queryKey: ["my-org"], queryFn: () => fetchOrg() });
   const fetchRoles = useServerFn(getMyRoles);
   const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: () => fetchRoles() });
-  const isMbrAdmin = rolesQ.data?.roles?.includes("mbr_admin") ?? false;
+  const { role: simRole } = useSimRole();
+  const isMbrAdmin = (rolesQ.data?.roles?.includes("mbr_admin") ?? false) && simRole === "super_admin";
+  const visibleMenu = MENU.filter((m) => canAccess(simRole, ROUTE_ACCESS[m.to] ?? "dashboard"));
   const [qrOpen, setQrOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
