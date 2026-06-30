@@ -484,5 +484,4 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
       </Card>
     </div>
   );
-  );
 }
