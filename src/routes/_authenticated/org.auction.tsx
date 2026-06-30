@@ -460,6 +460,8 @@ function AuctionRoom() {
           </Card>
         )}
 
+        {/* Admin-only controls: Participants + Bidding form + Calculator */}
+        {isAdmin && (<>
         {/* Participant Selection Panel */}
         <Card className="p-4 md:p-5 space-y-3 bg-card">
           <div className="flex items-center justify-between gap-2 flex-wrap">
