@@ -41,11 +41,14 @@ type BidEntry = {
 function AuctionRoom() {
   const { fmt, symbol } = useCurrency();
   const fetchMembers = useServerFn(listApprovedMembers);
+  const fetchRoles = useServerFn(getMyRoles);
 
   const { data: memberData } = useQuery({
     queryKey: ["approved-members-auction"],
     queryFn: () => fetchMembers({}),
   });
+  const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: () => fetchRoles() });
+  const isAdmin = rolesQ.data?.roles?.includes("mbr_admin") ?? false;
   const allMembers: MemberLite[] = memberData?.members ?? [];
 
   // Chit group participant selection
