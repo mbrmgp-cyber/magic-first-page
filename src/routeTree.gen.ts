@@ -31,6 +31,7 @@ import { Route as AuthenticatedOrgDashboardRouteImport } from './routes/_authent
 import { Route as AuthenticatedOrgCommitteeRouteImport } from './routes/_authenticated/org.committee'
 import { Route as AuthenticatedOrgChatRouteImport } from './routes/_authenticated/org.chat'
 import { Route as AuthenticatedOrgCashflowRouteImport } from './routes/_authenticated/org.cashflow'
+import { Route as AuthenticatedOrgAuctionRouteImport } from './routes/_authenticated/org.auction'
 import { Route as AuthenticatedOrgAccountsHubRouteImport } from './routes/_authenticated/org.accounts-hub'
 import { Route as AuthenticatedOrgAccountsRouteImport } from './routes/_authenticated/org.accounts'
 import { Route as AuthenticatedMemberSuretyInboxRouteImport } from './routes/_authenticated/member.surety-inbox'
@@ -158,6 +159,11 @@ const AuthenticatedOrgCashflowRoute =
     path: '/org/cashflow',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedOrgAuctionRoute = AuthenticatedOrgAuctionRouteImport.update({
+  id: '/org/auction',
+  path: '/org/auction',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedOrgAccountsHubRoute =
   AuthenticatedOrgAccountsHubRouteImport.update({
     id: '/org/accounts-hub',
@@ -232,6 +238,7 @@ export interface FileRoutesByFullPath {
   '/member/surety-inbox': typeof AuthenticatedMemberSuretyInboxRoute
   '/org/accounts': typeof AuthenticatedOrgAccountsRoute
   '/org/accounts-hub': typeof AuthenticatedOrgAccountsHubRoute
+  '/org/auction': typeof AuthenticatedOrgAuctionRoute
   '/org/cashflow': typeof AuthenticatedOrgCashflowRoute
   '/org/chat': typeof AuthenticatedOrgChatRoute
   '/org/committee': typeof AuthenticatedOrgCommitteeRoute
@@ -265,6 +272,7 @@ export interface FileRoutesByTo {
   '/member/surety-inbox': typeof AuthenticatedMemberSuretyInboxRoute
   '/org/accounts': typeof AuthenticatedOrgAccountsRoute
   '/org/accounts-hub': typeof AuthenticatedOrgAccountsHubRoute
+  '/org/auction': typeof AuthenticatedOrgAuctionRoute
   '/org/cashflow': typeof AuthenticatedOrgCashflowRoute
   '/org/chat': typeof AuthenticatedOrgChatRoute
   '/org/committee': typeof AuthenticatedOrgCommitteeRoute
@@ -300,6 +308,7 @@ export interface FileRoutesById {
   '/_authenticated/member/surety-inbox': typeof AuthenticatedMemberSuretyInboxRoute
   '/_authenticated/org/accounts': typeof AuthenticatedOrgAccountsRoute
   '/_authenticated/org/accounts-hub': typeof AuthenticatedOrgAccountsHubRoute
+  '/_authenticated/org/auction': typeof AuthenticatedOrgAuctionRoute
   '/_authenticated/org/cashflow': typeof AuthenticatedOrgCashflowRoute
   '/_authenticated/org/chat': typeof AuthenticatedOrgChatRoute
   '/_authenticated/org/committee': typeof AuthenticatedOrgCommitteeRoute
@@ -335,6 +344,7 @@ export interface FileRouteTypes {
     | '/member/surety-inbox'
     | '/org/accounts'
     | '/org/accounts-hub'
+    | '/org/auction'
     | '/org/cashflow'
     | '/org/chat'
     | '/org/committee'
@@ -368,6 +378,7 @@ export interface FileRouteTypes {
     | '/member/surety-inbox'
     | '/org/accounts'
     | '/org/accounts-hub'
+    | '/org/auction'
     | '/org/cashflow'
     | '/org/chat'
     | '/org/committee'
@@ -402,6 +413,7 @@ export interface FileRouteTypes {
     | '/_authenticated/member/surety-inbox'
     | '/_authenticated/org/accounts'
     | '/_authenticated/org/accounts-hub'
+    | '/_authenticated/org/auction'
     | '/_authenticated/org/cashflow'
     | '/_authenticated/org/chat'
     | '/_authenticated/org/committee'
@@ -590,6 +602,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOrgCashflowRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/org/auction': {
+      id: '/_authenticated/org/auction'
+      path: '/org/auction'
+      fullPath: '/org/auction'
+      preLoaderRoute: typeof AuthenticatedOrgAuctionRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/org/accounts-hub': {
       id: '/_authenticated/org/accounts-hub'
       path: '/org/accounts-hub'
@@ -672,6 +691,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMemberSuretyInboxRoute: typeof AuthenticatedMemberSuretyInboxRoute
   AuthenticatedOrgAccountsRoute: typeof AuthenticatedOrgAccountsRoute
   AuthenticatedOrgAccountsHubRoute: typeof AuthenticatedOrgAccountsHubRoute
+  AuthenticatedOrgAuctionRoute: typeof AuthenticatedOrgAuctionRoute
   AuthenticatedOrgCashflowRoute: typeof AuthenticatedOrgCashflowRoute
   AuthenticatedOrgChatRoute: typeof AuthenticatedOrgChatRoute
   AuthenticatedOrgCommitteeRoute: typeof AuthenticatedOrgCommitteeRoute
@@ -697,6 +717,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMemberSuretyInboxRoute: AuthenticatedMemberSuretyInboxRoute,
   AuthenticatedOrgAccountsRoute: AuthenticatedOrgAccountsRoute,
   AuthenticatedOrgAccountsHubRoute: AuthenticatedOrgAccountsHubRoute,
+  AuthenticatedOrgAuctionRoute: AuthenticatedOrgAuctionRoute,
   AuthenticatedOrgCashflowRoute: AuthenticatedOrgCashflowRoute,
   AuthenticatedOrgChatRoute: AuthenticatedOrgChatRoute,
   AuthenticatedOrgCommitteeRoute: AuthenticatedOrgCommitteeRoute,
@@ -731,13 +752,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
