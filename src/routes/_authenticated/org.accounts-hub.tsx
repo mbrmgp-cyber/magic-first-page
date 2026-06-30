@@ -2,10 +2,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Wallet, TrendingUp, TrendingDown, PieChart, FileDown, Coins } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { CurrencySelector } from "@/lib/currency-context";
+import { RoleGate } from "@/components/RoleGate";
 
 export const Route = createFileRoute("/_authenticated/org/accounts-hub")({
   head: () => ({ meta: [{ title: "Accounts Hub / అకౌంట్స్ బాక్స్" }] }),
-  component: AccountsHub,
+  component: () => <RoleGate need="accounts"><AccountsHub /></RoleGate>,
 });
 
 const TILES = [
