@@ -445,6 +445,68 @@ function AuctionRoom() {
           )}
         </Card>
       </div>
+
+      {/* Winner Declaration Dialog */}
+      <Dialog open={winnerOpen} onOpenChange={setWinnerOpen}>
+        <DialogContent className="sm:max-w-md bg-gradient-to-b from-zinc-900 to-black border-amber-500/40">
+          <DialogHeader>
+            <div className="mx-auto mb-2 flex h-14 w-14 items-center justify-center rounded-full bg-amber-500/15 border border-amber-500/40">
+              <PartyPopper className="size-7 text-amber-400" />
+            </div>
+            <DialogTitle className="text-center text-xl text-amber-400">
+              Auction Finalized 🎉
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              ఈ నెల చిట్ ఆక్షన్ విజేత ప్రకటించబడింది
+            </DialogDescription>
+          </DialogHeader>
+
+          {winner && winnerCalc && (
+            <div className="space-y-3 pt-2">
+              <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 text-center">
+                <p className="text-[11px] uppercase tracking-wide text-amber-300/80">Winner</p>
+                <p className="text-lg font-bold text-white mt-0.5">{winner.memberName}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="rounded-lg border border-border bg-black/40 p-3">
+                  <p className="text-[10px] uppercase text-zinc-400">Winning Bid</p>
+                  <p className="text-base font-bold text-red-400 tabular-nums">
+                    {fmt(winner.amount)}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-border bg-black/40 p-3">
+                  <p className="text-[10px] uppercase text-zinc-400">Net to Winner</p>
+                  <p className="text-base font-bold text-emerald-400 tabular-nums">
+                    {fmt(winnerCalc.net)}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-border bg-black/40 p-3 col-span-2">
+                  <p className="text-[10px] uppercase text-zinc-400">
+                    Dividend per Member · డివిడెండ్ ({winnerCalc.others} సభ్యులకు)
+                  </p>
+                  <p className="text-lg font-bold text-amber-400 tabular-nums">
+                    {fmt(winnerCalc.dividend)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="sm:justify-between gap-2">
+            <Button variant="outline" onClick={() => setWinnerOpen(false)}>
+              Close
+            </Button>
+            {isAdmin && (
+              <Button
+                onClick={() => { setWinnerOpen(false); resetAuction(); }}
+                className="gap-1"
+              >
+                <RotateCcw className="size-4" /> Next Month
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
