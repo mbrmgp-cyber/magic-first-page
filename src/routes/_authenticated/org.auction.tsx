@@ -358,13 +358,41 @@ function AuctionRoom() {
               <Trophy className="size-4 text-amber-400" />
               <h2 className="font-semibold">Live Bids Activity</h2>
               <Badge variant="secondary" className="text-xs">{bids.length}</Badge>
+              {auctionClosed && (
+                <Badge className="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                  Finalized
+                </Badge>
+              )}
             </div>
-            {bids.length > 0 && (
-              <Button variant="ghost" size="sm" onClick={clearBids} className="text-xs">
-                Clear All
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              {bids.length > 0 && !auctionClosed && (
+                <Button variant="ghost" size="sm" onClick={clearBids} className="text-xs">
+                  Clear All
+                </Button>
+              )}
+              {isAdmin && !auctionClosed && (
+                <Button
+                  size="sm"
+                  onClick={finalizeAuction}
+                  disabled={sortedBids.length === 0}
+                  className="text-xs gap-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+                >
+                  <Lock className="size-3.5" /> End Auction & Finalize Winner
+                </Button>
+              )}
+              {isAdmin && auctionClosed && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={resetAuction}
+                  className="text-xs gap-1"
+                >
+                  <RotateCcw className="size-3.5" /> Reset / Schedule Next Month
+                </Button>
+              )}
+            </div>
           </div>
+
 
           {sortedBids.length === 0 ? (
             <div className="text-center py-8 text-sm text-muted-foreground">
