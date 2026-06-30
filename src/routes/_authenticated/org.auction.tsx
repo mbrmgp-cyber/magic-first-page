@@ -79,6 +79,11 @@ function AuctionRoom() {
   // Live bids
   const [bids, setBids] = useState<BidEntry[]>([]);
 
+  // Auction lifecycle
+  const [auctionClosed, setAuctionClosed] = useState(false);
+  const [winner, setWinner] = useState<BidEntry | null>(null);
+  const [winnerOpen, setWinnerOpen] = useState(false);
+
   const calc = useMemo(() => {
     const cv = Math.max(0, Number(chitValue) || 0);
     const b = Math.max(0, Number(bid) || 0);
@@ -102,7 +107,19 @@ function AuctionRoom() {
   );
   const topBidId = sortedBids[0]?.id;
 
+  // Dividend = (winning bid - foreman commission) / other participants
+  const winnerCalc = useMemo(() => {
+    if (!winner) return null;
+    const cv = Math.max(0, Number(chitValue) || 0);
+    const commission = (cv * (Number(commissionPct) || 0)) / 100;
+    const net = Math.max(0, cv - winner.amount - commission);
+    const others = Math.max(1, participants.length - 1);
+    const dividend = Math.max(0, (winner.amount - commission)) / others;
+    return { commission, net, dividend, others };
+  }, [winner, chitValue, commissionPct, participants.length]);
+
   const submitBid = () => {
+    if (auctionClosed) return;
     if (!activeBidder || !bid || calc.overCap) return;
     const m = participants.find((p) => p.id === activeBidder);
     if (!m) return;
@@ -120,6 +137,22 @@ function AuctionRoom() {
   };
 
   const clearBids = () => setBids([]);
+
+  const finalizeAuction = () => {
+    if (sortedBids.length === 0) return;
+    setWinner(sortedBids[0]);
+    setAuctionClosed(true);
+    setWinnerOpen(true);
+  };
+
+  const resetAuction = () => {
+    setBids([]);
+    setWinner(null);
+    setAuctionClosed(false);
+    setBid(0);
+    setActiveBidder("");
+    setCurrentMonth((m) => m + 1);
+  };
 
   return (
     <div className="min-h-screen bg-[var(--app-bg,#0a0a0a)] text-foreground p-4 md:p-6">
