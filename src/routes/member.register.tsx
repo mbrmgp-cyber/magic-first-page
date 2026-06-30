@@ -84,22 +84,46 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
     return raw.toUpperCase();
   }
 
-  async function verifyCode(c: string) {
+  async function verifyCode(c: string, opts?: { goTo?: "portal" | "form" }) {
     const normalized = normalizeCodeInput(c);
     setLoading(true);
     try {
       const res = await validate({ data: { code: normalized } });
       if (!res.valid) {
-        toast.error(lt("Invalid QR / Code", "చెల్లని QR / కోడ్"));
+        toast.error(lt("Invalid Code", "చెల్లని కోడ్"));
         setStage("code");
         return;
       }
-      setCode(normalized);
+      setCode(res.org.org_code ?? normalized);
       setOrgName(res.org.name);
       setOrgId(res.org.id);
-      setStage("form");
+      setOrgLetter(res.org.letter_code ?? normalized);
+      setStage(opts?.goTo ?? "portal");
     } finally { setLoading(false); }
   }
+
+  async function onSendMemberLogin() {
+    if (!memberSeq.trim()) {
+      toast.error(lt("Enter Member ID", "మెంబర్ ఐడి నమోదు చేయండి"));
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await sendLogin({ data: { org_code: orgLetter || code, member_seq: memberSeq.trim(), lang } });
+      if (!res.sent) {
+        if (res.reason === "member_not_found") {
+          toast.error(lt("Member ID not found in this society", "ఈ సొసైటీలో ఈ మెంబర్ ఐడి లేదు"));
+        } else {
+          toast.error(lt("Could not send login link", "లాగిన్ లింక్ పంపలేకపోయాం"));
+        }
+        return;
+      }
+      toast.success(lt(`Login link sent to ${res.email_hint ?? "your email"}`, `లాగిన్ లింక్ ${res.email_hint ?? "మీ ఈమెయిల్"} కు పంపబడింది`));
+    } catch (e: any) {
+      toast.error(e.message ?? lt("Failed", "విఫలమైంది"));
+    } finally { setLoading(false); }
+  }
+
 
   // Auto-verify when ?code=ABC is supplied (e.g. from ID card back QR)
   useEffect(() => {
