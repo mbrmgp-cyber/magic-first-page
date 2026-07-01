@@ -559,6 +559,25 @@ function AuctionRoom() {
               ))}
             </div>
           )}
+
+          {/* Save / Assign Group */}
+          <div className="flex items-center justify-between gap-3 pt-2 border-t border-border flex-wrap">
+            <div className="text-[11px] text-muted-foreground">
+              {groups.length > 0 ? (
+                <>Saved groups: <b className="text-foreground">{groups.map((g) => g.name).join(", ")}</b></>
+              ) : (
+                <>Assign selected members to a group so members see it on their dashboard.</>
+              )}
+            </div>
+            <Button
+              onClick={saveGroup}
+              disabled={participants.length === 0 || !chitGroupName.trim()}
+              size="sm"
+              className="gap-1.5 bg-amber-500 hover:bg-amber-600 text-black font-semibold"
+            >
+              <CheckCircle2 className="size-4" /> Save / Assign Group
+            </Button>
+          </div>
         </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
