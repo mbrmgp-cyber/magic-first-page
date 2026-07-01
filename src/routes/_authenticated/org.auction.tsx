@@ -396,6 +396,10 @@ function AuctionRoom() {
       toast.error("Add members to the group first");
       return;
     }
+    if (!totalMonths || totalMonths <= 0) {
+      toast.error("Enter Total Months (మొత్తం నెలలు)");
+      return;
+    }
     setGroups((prev) => {
       const others = prev.filter((g) => g.name.toLowerCase() !== name.toLowerCase());
       return [
@@ -406,9 +410,13 @@ function AuctionRoom() {
           memberCodes: participants.map((p) => p.member_code ?? null),
           memberNames: participants.map((p) => p.name),
           savedAt: Date.now(),
-        },
+          // Persist totalMonths per group so the Live board can restore it on selection
+          totalMonths,
+        } as any,
       ];
     });
+    setSetupCollapsed(true);
+    setLiveGroupName(name);
     toast.success(`Saved "${name}" — synced to members`);
   };
 
