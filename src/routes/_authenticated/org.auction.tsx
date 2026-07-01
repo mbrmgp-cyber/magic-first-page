@@ -188,6 +188,7 @@ function AuctionRoom() {
     if (!s) return;
     skipNextPushRef.current = true;
     if (typeof s.groupName === "string") setChitGroupName(s.groupName);
+    if (typeof (s as any).liveGroupName === "string") setLiveGroupName((s as any).liveGroupName);
     if (typeof s.chitValue === "number") setChitValue(s.chitValue);
     if (typeof s.totalMonths === "number") setTotalMonths(s.totalMonths);
     if (typeof s.currentMonth === "number") setCurrentMonth(s.currentMonth);
