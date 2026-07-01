@@ -247,8 +247,15 @@ function AuctionRoom() {
   // Admin UX: collapse Group Setup card after save + which saved group is loaded into the Live board
   const [setupCollapsed, setSetupCollapsed] = useState<boolean>(false);
   const [liveGroupName, setLiveGroupName] = useState<string>("");
+  // While the admin is drafting a brand-new group in the setup card, freeze
+  // remote sync from overwriting the setup form and freeze auto-save from
+  // pushing a half-built row (which was overwriting Group A back to itself).
+  const [editingSetup, setEditingSetup] = useState<boolean>(false);
+  const editingSetupRef = useRef(false);
+  useEffect(() => { editingSetupRef.current = editingSetup; }, [editingSetup]);
 
   const startNewGroup = () => {
+    setEditingSetup(true);
     setSetupCollapsed(false);
     setParticipants([]);
     setChitGroupName("");
