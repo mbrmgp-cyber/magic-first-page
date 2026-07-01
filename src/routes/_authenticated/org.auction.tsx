@@ -241,7 +241,7 @@ function AuctionRoom() {
     return () => clearTimeout(t);
   }, [
     orgId, isAdmin, chitGroupName, chitValue, totalMonths, currentMonth,
-    commissionPct, participants, bids, pastWinners, consents, groups, winner,
+    commissionPct, chitStartDate, participants, bids, pastWinners, consents, groups, winner,
     auctionClosed, turnStart, turnEnd, saveState,
   ]);
 
