@@ -481,7 +481,7 @@ function AuctionRoom() {
   }, [
     orgId, isAdmin, activeAuctionId, chitGroupName, liveGroupName, chitValue, totalMonths, currentMonth,
     commissionPct, chitStartDate, participants, bids, pastWinners, consents, groups, winner,
-    auctionClosed, turnStart, turnEnd, saveState,
+    auctionClosed, turnStart, turnEnd, saveState, editingSetup,
   ]);
 
   const buildSessionSnapshot = (overrides: Partial<AuctionStateDTO> = {}): AuctionStateDTO => ({
