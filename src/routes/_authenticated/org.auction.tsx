@@ -351,6 +351,16 @@ function AuctionRoom() {
     setCurrentMonth((m) => m + 1);
   };
 
+  const deleteGroup = (name: string) => {
+    setGroups((prev) => prev.filter((g) => g.name.toLowerCase() !== name.toLowerCase()));
+    toast.success(`Deleted group "${name}"`);
+  };
+
+  const closeEntry = () => {
+    setTurnEnd(Date.now());
+    toast.info("Entry closed · ఎంట్రీ క్లోజ్");
+  };
+
   const saveGroup = () => {
     const name = (chitGroupName || "").trim();
     if (!name) {
@@ -684,74 +694,73 @@ function AuctionRoom() {
         })()}
 
 
-        {/* Admin-only controls: Participants + Bidding form + Calculator */}
+        {/* ═══════════════ ADMIN MAIN LIVE BOARD (wireframe layout) ═══════════════ */}
         {isAdmin && (<>
 
-        {/* Participant Selection Panel */}
+        {/* 1. Top Admin Creation Section */}
         <Card className="p-4 md:p-5 space-y-3 bg-card">
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            <div className="flex items-center gap-2">
-              <Users className="size-4 text-amber-400" />
-              <h2 className="font-semibold">Chit Group Members</h2>
-              <Badge variant="secondary" className="text-xs">
-                {participants.length} selected
-              </Badge>
-            </div>
-            <div className="flex items-center gap-2">
-              <Label className="text-[11px] text-muted-foreground">Group Name</Label>
+          <div className="flex items-center gap-2">
+            <Users className="size-4 text-amber-400" />
+            <h2 className="font-semibold">Group Setup · గ్రూప్ సెటప్</h2>
+            <Badge variant="secondary" className="text-xs">{participants.length} members</Badge>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs">Group + · గ్రూప్</Label>
               <Input
                 value={chitGroupName}
                 onChange={(e) => setChitGroupName(e.target.value)}
-                className="h-8 w-32 text-xs"
+                placeholder="Group A"
+                className="h-10 font-semibold"
               />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Select a member to add (ID / Name)</Label>
+              <div className="flex gap-1.5">
+                <Select value={pickerValue} onValueChange={setPickerValue}>
+                  <SelectTrigger className="flex-1 h-10">
+                    <SelectValue placeholder="Pick — e.g., A / 0003" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {allMembers
+                      .filter((m) => !participants.some((p) => p.id === m.id))
+                      .filter((m) => {
+                        if (chitFilter === "ALL") return true;
+                        const letter = (m.member_code || "").match(/^[A-Za-z]/)?.[0]?.toUpperCase();
+                        return letter === chitFilter;
+                      })
+                      .map((m) => (
+                        <SelectItem key={m.id} value={m.id}>
+                          {m.member_code ? `${m.member_code} — ` : ""}{m.name}
+                        </SelectItem>
+                      ))}
+                    {allMembers.length === 0 && (
+                      <div className="px-2 py-3 text-xs text-muted-foreground">No approved members.</div>
+                    )}
+                  </SelectContent>
+                </Select>
+                <Button onClick={addParticipant} disabled={!pickerValue} size="icon" className="h-10 w-10 shrink-0">
+                  <Plus className="size-4" />
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">బిగినింగ్ Date · Start</Label>
+              <Input type="date" value={chitStartDate} onChange={(e) => setChitStartDate(e.target.value)} className="h-10" />
             </div>
           </div>
 
-          <div className="flex gap-2">
-            <Select value={pickerValue} onValueChange={setPickerValue}>
-              <SelectTrigger className="flex-1">
-                <SelectValue placeholder="Select a member to add…" />
-              </SelectTrigger>
-              <SelectContent>
-                {allMembers
-                  .filter((m) => !participants.some((p) => p.id === m.id))
-                  .filter((m) => {
-                    if (chitFilter === "ALL") return true;
-                    const letter = (m.member_code || "").match(/^[A-Za-z]/)?.[0]?.toUpperCase();
-                    return letter === chitFilter;
-                  })
-                  .map((m) => (
-                    <SelectItem key={m.id} value={m.id}>
-                      {m.member_code ? `${m.member_code} — ` : ""}{m.name}
-                    </SelectItem>
-                  ))}
-                {allMembers.length === 0 && (
-                  <div className="px-2 py-3 text-xs text-muted-foreground">
-                    No approved members found.
-                  </div>
-                )}
-              </SelectContent>
-            </Select>
-            <Button onClick={addParticipant} disabled={!pickerValue} className="gap-1">
-              <Plus className="size-4" /> Add
-            </Button>
-          </div>
-
+          {/* Members chip list */}
           {participants.length > 0 && (
-            <div className="flex flex-wrap gap-2 pt-1">
+            <div className="flex flex-wrap gap-2">
               {participants.map((p, i) => (
-                <span
-                  key={p.id}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 text-xs"
-                >
+                <span key={p.id}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 text-xs">
                   <span className="text-amber-400 font-semibold">#{i + 1}</span>
                   <span className="font-mono opacity-80">{p.member_code || "—"}</span>
                   <span>{p.name}</span>
-                  <button
-                    onClick={() => removeParticipant(p.id)}
-                    className="ml-0.5 opacity-60 hover:opacity-100"
-                    aria-label={`Remove ${p.name}`}
-                  >
+                  <button onClick={() => removeParticipant(p.id)} className="ml-0.5 opacity-60 hover:opacity-100" aria-label={`Remove ${p.name}`}>
                     <X className="size-3" />
                   </button>
                 </span>
@@ -759,162 +768,304 @@ function AuctionRoom() {
             </div>
           )}
 
-          {/* Save / Assign Group */}
-          <div className="flex items-center justify-between gap-3 pt-2 border-t border-border flex-wrap">
-            <div className="text-[11px] text-muted-foreground">
-              {groups.length > 0 ? (
-                <>Saved groups: <b className="text-foreground">{groups.map((g) => g.name).join(", ")}</b></>
-              ) : (
-                <>Assign selected members to a group so members see it on their dashboard.</>
-              )}
+          {/* Totals + action buttons */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 pt-2 border-t border-border">
+            <div className="rounded-md border border-border bg-black/30 p-2.5">
+              <p className="text-[10px] uppercase text-muted-foreground">మొత్తం మెంబర్స్</p>
+              <p className="text-lg font-bold tabular-nums">{participants.length}</p>
+            </div>
+            <div className="rounded-md border border-border bg-black/30 p-2.5">
+              <p className="text-[10px] uppercase text-muted-foreground">Total అమౌంటు</p>
+              <Input
+                type="number" inputMode="decimal" value={chitValue}
+                onChange={(e) => setChitValue(Number(e.target.value))}
+                className="h-7 text-base font-bold p-1 tabular-nums border-0 bg-transparent focus-visible:ring-0"
+              />
             </div>
             <Button
               onClick={saveGroup}
               disabled={participants.length === 0 || !chitGroupName.trim()}
-              size="sm"
-              className="gap-1.5 bg-amber-500 hover:bg-amber-600 text-black font-semibold"
+              className="h-full bg-amber-500 hover:bg-amber-600 text-black font-bold gap-1.5"
             >
-              <CheckCircle2 className="size-4" /> Save / Assign Group
+              <CheckCircle2 className="size-4" /> సేవ్ / ఎడిట్
+            </Button>
+            <Button
+              onClick={() => deleteGroup(chitGroupName)}
+              disabled={!groups.some((g) => g.name.toLowerCase() === chitGroupName.trim().toLowerCase())}
+              variant="destructive"
+              className="h-full font-bold gap-1.5"
+            >
+              <X className="size-4" /> డిలీట్
             </Button>
           </div>
+
+          <p className="text-[11px] text-amber-300/80 italic">(సభ్యులు అందరూ అప్రూవల్ చేయాలి)</p>
+
+          {groups.length > 0 && (
+            <div className="text-[11px] text-muted-foreground pt-1 border-t border-border">
+              Saved: <b className="text-foreground">{groups.map((g) => g.name).join(", ")}</b>
+            </div>
+          )}
         </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-          {/* Bidding area */}
-          <Card className="lg:col-span-3 p-4 md:p-6 space-y-4 bg-card">
-            <div className="flex items-center justify-between">
-              <h2 className="font-semibold flex items-center gap-2">
-                <Gavel className="size-4" /> Bidding Area / బిడ్డింగ్
-              </h2>
-              {isAdmin && !turnStart && !auctionClosed && (
-                <Button size="sm" variant="outline" onClick={startTurn} className="gap-1">
+        {/* 2 + 3. Main "లైవ్ చీటీ" Container: Left members board + Right metrics panel */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+          {/* LEFT — Member List Display with sequential bidding capsules */}
+          <Card className="lg:col-span-2 p-4 md:p-5 space-y-3 bg-card border-red-500/30">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                <h2 className="font-bold text-red-300">లైవ్ చీటీ · Live Auction</h2>
+                <Badge variant="secondary" className="text-xs">Month {currentMonth}/{totalMonths}</Badge>
+              </div>
+              {!turnStart && !auctionClosed && (
+                <Button size="sm" variant="outline" onClick={startTurn} className="gap-1 text-xs">
                   <Clock className="size-3.5" /> Start Turn
                 </Button>
               )}
             </div>
 
-            {/* Turn timestamps */}
-            <div className="flex items-center gap-4 text-[11px] text-muted-foreground">
-              <span>Start: <b className="text-foreground">{turnStart ? new Date(turnStart).toLocaleTimeString() : "—"}</b></span>
-              <span>Close: <b className="text-foreground">{turnEnd ? new Date(turnEnd).toLocaleTimeString() : "—"}</b></span>
-              <span>Month: <b className="text-foreground">{currentMonth}/{totalMonths}</b></span>
-            </div>
+            {participants.length === 0 ? (
+              <div className="text-center py-8 text-sm text-muted-foreground">
+                Add chit group members above to see the live board.
+              </div>
+            ) : (
+              <div className="space-y-1.5">
+                {participants.map((p) => {
+                  const list = perMember[p.id] || [];
+                  const isWinner = auctionClosed && winner?.memberId === p.id;
+                  return (
+                    <div
+                      key={p.id}
+                      className={`flex items-center gap-2 rounded-lg border px-2 py-1.5 ${
+                        isWinner ? "border-emerald-500/50 bg-emerald-500/10" : "border-border bg-black/30"
+                      }`}
+                    >
+                      <span className="font-mono text-[11px] w-14 shrink-0 opacity-80">{p.member_code || "—"}</span>
+                      <span className="text-sm font-medium truncate w-28 shrink-0">{p.name}</span>
+                      {/* Wide horizontal bid capsule */}
+                      <div className="flex-1 flex items-center gap-1 overflow-x-auto rounded-full bg-black/50 border border-border px-2 py-1 min-h-[28px]">
+                        {list.length === 0 ? (
+                          <span className="text-[10px] text-muted-foreground italic px-1">— no bids —</span>
+                        ) : (
+                          list.map((b, i) => (
+                            <span
+                              key={b.id}
+                              className={`text-[11px] tabular-nums px-1.5 py-0.5 rounded-full ${
+                                i === list.length - 1
+                                  ? "bg-amber-500/25 text-amber-200 font-bold"
+                                  : "bg-white/5 text-foreground/80"
+                              }`}
+                            >
+                              {fmt(b.amount)}
+                            </span>
+                          ))
+                        )}
+                      </div>
+                      {isWinner && <Trophy className="size-4 text-emerald-400 shrink-0" />}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label className="text-xs">Chit Value</Label>
-                <Input type="number" inputMode="decimal" value={chitValue}
-                  onChange={(e) => setChitValue(Number(e.target.value))} />
+            {/* Bottom Left Row — Control Inputs */}
+            <div className="pt-3 border-t border-border space-y-2">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                {/* సవాలు సెట్ */}
+                <div className="md:col-span-1 space-y-1">
+                  <Label className="text-[11px] text-amber-300">సవాలు సెట్</Label>
+                  <Select value={activeBidder} onValueChange={setActiveBidder}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder={participants.length ? "Bidder" : "Add members"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {participants.map((p) => (
+                        <SelectItem key={p.id} value={p.id}>
+                          {p.member_code ? `${p.member_code} — ` : ""}{p.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="md:col-span-1 space-y-1">
+                  <Label className="text-[11px] text-amber-300">Bid Amount</Label>
+                  <Input
+                    type="number" inputMode="decimal" value={bid || ""}
+                    onChange={(e) => setBid(Number(e.target.value))}
+                    placeholder={`${symbol} 0`}
+                    className="h-9 font-bold"
+                    disabled={auctionClosed}
+                  />
+                </div>
+                <div className="md:col-span-1 space-y-1">
+                  <Label className="text-[11px] text-transparent select-none">.</Label>
+                  <Button
+                    onClick={submitBid}
+                    disabled={auctionClosed || !bid || calc.overCap || !activeBidder}
+                    className="w-full h-9 font-bold"
+                  >
+                    సవాలు సెట్
+                  </Button>
+                </div>
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Foreman Commission %</Label>
-                <Input type="number" inputMode="decimal" value={commissionPct}
-                  onChange={(e) => setCommissionPct(Number(e.target.value))} />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Total Months</Label>
-                <Input type="number" inputMode="numeric" value={totalMonths}
-                  onChange={(e) => setTotalMonths(Number(e.target.value))} />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Current Month</Label>
-                <Input type="number" inputMode="numeric" value={currentMonth}
-                  onChange={(e) => setCurrentMonth(Number(e.target.value))} />
-              <div className="space-y-1.5 col-span-2">
-                <Label className="text-xs">Chit Start Date</Label>
-                <Input type="date" value={chitStartDate}
-                  onChange={(e) => setChitStartDate(e.target.value)} />
-              </div>
-            </div>
-            </div>
 
-            <div className="space-y-2 pt-2 border-t border-border">
-              <Label className="text-xs">Bidding Member</Label>
-              <Select value={activeBidder} onValueChange={setActiveBidder}>
-                <SelectTrigger>
-                  <SelectValue placeholder={participants.length ? "Choose bidder…" : "Add participants first"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {participants.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.member_code ? `${p.member_code} — ` : ""}{p.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Label className="text-sm font-semibold text-amber-400 pt-1">
-                Your Challenge / Bid Amount (సవాలు)
-              </Label>
-              <Input
-                type="number"
-                inputMode="decimal"
-                value={bid || ""}
-                onChange={(e) => setBid(Number(e.target.value))}
-                placeholder={`${symbol} 0`}
-                className="text-2xl font-bold h-14"
-                disabled={auctionClosed}
-              />
               {calc.overCap && !auctionClosed && (
-                <p className="text-xs text-red-400">
-                  ⚠️ Bid exceeds typical 40% cap (max {fmt(calc.maxBid)})
-                </p>
+                <p className="text-[11px] text-red-400">⚠️ Bid exceeds 40% cap (max {fmt(calc.maxBid)})</p>
               )}
+
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <Button
+                  onClick={closeEntry}
+                  disabled={auctionClosed || bids.length === 0}
+                  variant="outline"
+                  className="gap-1.5 font-semibold"
+                >
+                  <Lock className="size-3.5" /> ఎంట్రీ క్లోజ్
+                </Button>
+                <Button
+                  onClick={finalizeAuction}
+                  disabled={auctionClosed || sortedBids.length === 0}
+                  className="gap-1.5 font-bold bg-emerald-600 hover:bg-emerald-700 text-white"
+                >
+                  <Trophy className="size-3.5" /> క్లోజ్ · Finalize
+                </Button>
+              </div>
+
               {auctionClosed && (
-                <p className="text-xs text-emerald-400 flex items-center gap-1.5 font-semibold">
-                  <Lock className="size-3.5" /> Auction closed — bidding frozen.
-                </p>
+                <Button
+                  size="sm" variant="outline" onClick={resetAuction}
+                  className="w-full gap-1.5 text-xs mt-1"
+                >
+                  <RotateCcw className="size-3.5" /> Reset / Next Month
+                </Button>
               )}
-              <Button
-                onClick={submitBid}
-                className="w-full h-12 text-base font-bold mt-2"
-                disabled={auctionClosed || !bid || calc.overCap || !activeBidder}
-              >
-                Submit Bid / బిడ్ సమర్పించండి
-              </Button>
             </div>
           </Card>
 
-          {/* Live Calculator Widget */}
-          <Card className="lg:col-span-2 p-4 md:p-5 space-y-4 bg-gradient-to-b from-zinc-900 to-black border-amber-500/30">
-            <div>
-              <h2 className="font-bold text-amber-400 flex items-center gap-2">
-                <Percent className="size-4" /> Live Interest & Loss Calculator
-              </h2>
-              <p className="text-[11px] text-muted-foreground">పడిన వడ్డీ & నష్టం లెక్క</p>
+          {/* RIGHT — Live Metrics & Calculator Panel */}
+          <Card className="lg:col-span-1 p-3 md:p-4 space-y-2 bg-gradient-to-b from-zinc-900 to-black border-amber-500/30">
+            <div className="flex items-center gap-2">
+              <Percent className="size-4 text-amber-400" />
+              <h2 className="font-bold text-amber-400 text-sm">Live Metrics</h2>
             </div>
 
-            <MetricRow
-              icon={<TrendingDown className="size-5 text-red-400" />}
-              label="Total Loss"
-              sub="నష్టపోయిన అమౌంట్"
-              value={fmt(calc.loss)}
-              tone="loss"
-            />
-            <MetricRow
-              icon={<Wallet className="size-5 text-emerald-400" />}
-              label="Net Received"
-              sub="వచ్చిన అమౌంట్"
-              value={fmt(calc.net)}
-              tone="gain"
-              hint={`After ${commissionPct}% commission (${fmt(calc.commission)})`}
-            />
-            <MetricRow
-              icon={<Percent className="size-5 text-amber-400" />}
-              label="Effective Interest"
-              sub="పడిన వడ్డీ శాతం"
-              value={`${calc.monthlyPct.toFixed(2)}% / month`}
-              tone="rate"
-              hint={`≈ ${calc.annualPct.toFixed(2)}% per year • over ${calc.remaining} months`}
-            />
+            {/* Start / Close time */}
+            <div className="grid grid-cols-2 gap-2">
+              <StatBox label="Start · స్టార్ట్" value={turnStart ? new Date(turnStart).toLocaleTimeString() : "—"} />
+              <StatBox label="Close · క్లోజ్" value={turnEnd ? new Date(turnEnd).toLocaleTimeString() : "—"} />
+            </div>
 
-            <div className="text-[11px] text-muted-foreground border-t border-border pt-3 leading-relaxed">
-              💡 Tip: లాస్ ఎక్కువ ఇస్తే మీకు తక్కువ అమౌంట్ వస్తుంది, వడ్డీ శాతం పెరుగుతుంది.
+            {/* Current Month / Interest */}
+            <div className="grid grid-cols-2 gap-2">
+              <div className="rounded-md border border-border bg-black/30 p-2">
+                <p className="text-[10px] uppercase text-muted-foreground">కరెంటు నెల</p>
+                <Input
+                  type="number" inputMode="numeric" value={currentMonth}
+                  onChange={(e) => setCurrentMonth(Number(e.target.value))}
+                  className="h-7 text-base font-bold p-1 tabular-nums border-0 bg-transparent focus-visible:ring-0"
+                />
+                <p className="text-[9px] text-muted-foreground">of {totalMonths}</p>
+              </div>
+              <StatBox
+                label="Interest · ఇన్ట్రెస్ట్"
+                value={`${calc.monthlyPct.toFixed(2)}%`}
+                sub={`≈ ${calc.annualPct.toFixed(1)}%/yr`}
+              />
+            </div>
+
+            {/* Commission / Members must pay */}
+            <div className="grid grid-cols-2 gap-2">
+              <div className="rounded-md border border-border bg-black/30 p-2">
+                <p className="text-[10px] uppercase text-muted-foreground">కమిషన్ %</p>
+                <Input
+                  type="number" inputMode="decimal" value={commissionPct}
+                  onChange={(e) => setCommissionPct(Number(e.target.value))}
+                  className="h-7 text-base font-bold p-1 tabular-nums border-0 bg-transparent focus-visible:ring-0"
+                />
+                <p className="text-[9px] text-muted-foreground tabular-nums">{fmt(calc.commission)}</p>
+              </div>
+              <StatBox
+                label="సభ్యులు కట్టవలసిన"
+                value={fmt(participants.length > 0 ? chitValue / participants.length : 0)}
+                sub="per member"
+              />
+            </div>
+
+            {/* Winner box */}
+            <div className={`rounded-md border p-2.5 ${winner ? "border-emerald-500/50 bg-emerald-500/10" : "border-border bg-black/30"}`}>
+              <p className="text-[10px] uppercase text-muted-foreground">విజేత ఎవరు · Winner</p>
+              {winner ? (
+                <>
+                  <p className="text-sm font-bold text-emerald-300 truncate">
+                    <span className="font-mono opacity-80 mr-1">{winner.memberCode || "—"}</span>
+                    {winner.memberName}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground tabular-nums">Bid {fmt(winner.amount)}</p>
+                </>
+              ) : (
+                <p className="text-sm italic text-muted-foreground">— pending —</p>
+              )}
+            </div>
+
+            {/* Amount handed over */}
+            <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-2.5">
+              <p className="text-[10px] uppercase text-amber-200/80">అతనికి అందజేసే మొత్తం</p>
+              <p className="text-lg font-bold text-amber-300 tabular-nums">
+                {winnerCalc ? fmt(winnerCalc.net) : fmt(Math.max(0, chitValue - bid - calc.commission))}
+              </p>
+              {winnerCalc && (
+                <p className="text-[10px] text-muted-foreground tabular-nums">
+                  Dividend: {fmt(winnerCalc.dividend)}
+                </p>
+              )}
             </div>
           </Card>
         </div>
+
+        {/* 4. Footer — పాస్ట్ డిటైల్స్ + Save + PDF */}
+        <Card className="p-4 md:p-5 space-y-3 bg-card">
+          <div className="flex items-center gap-2">
+            <Trophy className="size-4 text-amber-400" />
+            <h2 className="font-semibold">పాస్ట్ డిటైల్స్ · Past History</h2>
+            <Badge variant="secondary" className="text-xs">{pastWinners.length}</Badge>
+          </div>
+
+          {pastWinners.length === 0 ? (
+            <p className="text-xs text-muted-foreground italic text-center py-3">No past auctions yet.</p>
+          ) : (
+            <ul className="space-y-1.5 text-sm">
+              {[...pastWinners].sort((a, b) => a.month - b.month).map((w) => (
+                <li key={w.month} className="flex items-center justify-between gap-3 rounded-md border border-border bg-black/30 px-3 py-2">
+                  <span className="min-w-0 truncate">
+                    <b className="text-amber-300">{ordinal(w.month)}</b>
+                    <span className="font-mono text-xs opacity-80 mx-2">{w.memberCode || "—"}</span>
+                    <b>{w.memberName}</b>
+                  </span>
+                  <span className="text-amber-400 font-bold tabular-nums shrink-0">{fmt(w.amount)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border">
+            <Button
+              onClick={saveGroup}
+              disabled={participants.length === 0 || !chitGroupName.trim()}
+              className="gap-1.5 bg-amber-500 hover:bg-amber-600 text-black font-bold"
+            >
+              <CheckCircle2 className="size-4" /> సేవ్
+            </Button>
+            <Button onClick={handlePrint} variant="outline" className="gap-1.5 font-semibold">
+              <Printer className="size-4" /> PDF
+            </Button>
+          </div>
+        </Card>
+
         </>)}
 
+        {!isAdmin && (<>
         {/* Live Bidding Board: per-member sequential bids */}
         <Card className="p-4 md:p-5 space-y-3 bg-card">
           <div className="flex items-center gap-2">
@@ -1085,6 +1236,7 @@ function AuctionRoom() {
             </Table>
           )}
         </Card>
+        </>)}
 
         {/* Digital Consent (member view) */}
         {auctionClosed && winner && winnerCalc && me && (
@@ -1176,18 +1328,20 @@ function AuctionRoom() {
           );
         })()}
 
-        {/* Footer — Print button at the very bottom */}
-        <div className="pt-4 pb-6 border-t border-border">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-[11px] text-muted-foreground text-center sm:text-left">
-              {orgName} · {org?.slogan || "చిట్వేల్ హెల్ప్ లైన్ సొసైటీ"}
-              {orgRegNo && <> · Reg {orgRegNo}</>}
-            </p>
-            <Button onClick={handlePrint} variant="outline" size="sm" className="gap-1.5 w-full sm:w-auto">
-              <Printer className="size-4" /> Print Official Auction PDF
-            </Button>
+        {/* Footer — Print button at the very bottom (member view; admin has its own PDF footer above) */}
+        {!isAdmin && (
+          <div className="pt-4 pb-6 border-t border-border">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+              <p className="text-[11px] text-muted-foreground text-center sm:text-left">
+                {orgName} · {org?.slogan || "చిట్వేల్ హెల్ప్ లైన్ సొసైటీ"}
+                {orgRegNo && <> · Reg {orgRegNo}</>}
+              </p>
+              <Button onClick={handlePrint} variant="outline" size="sm" className="gap-1.5 w-full sm:w-auto">
+                <Printer className="size-4" /> Print Official Auction PDF
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Winner Declaration Dialog */}
