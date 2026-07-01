@@ -140,6 +140,8 @@ function AuctionRoom() {
   const [pastWinners, setPastWinners] = useState<PastWinner[]>([]);
   const [consents, setConsents] = useState<Record<string, Consent>>({});
   const [groups, setGroups] = useState<NonNullable<AuctionStateDTO["groups"]>>([]);
+  const [selectedGroupName, setSelectedGroupName] = useState<string>("");
+  const [chitStartDate, setChitStartDate] = useState<string>("");
 
   // ─────────── Realtime sync with admin (DB-backed) ───────────
   const orgId: string | undefined = me?.org_id;
