@@ -252,7 +252,9 @@ function AuctionRoom() {
   // pushing a half-built row (which was overwriting Group A back to itself).
   const [editingSetup, setEditingSetup] = useState<boolean>(false);
   const editingSetupRef = useRef(false);
+  const setupCollapsedRef = useRef(false);
   useEffect(() => { editingSetupRef.current = editingSetup; }, [editingSetup]);
+  useEffect(() => { setupCollapsedRef.current = setupCollapsed; }, [setupCollapsed]);
 
   const startNewGroup = () => {
     setEditingSetup(true);
