@@ -247,8 +247,17 @@ function AuctionRoom() {
   // Admin UX: collapse Group Setup card after save + which saved group is loaded into the Live board
   const [setupCollapsed, setSetupCollapsed] = useState<boolean>(false);
   const [liveGroupName, setLiveGroupName] = useState<string>("");
+  // While the admin is drafting a brand-new group in the setup card, freeze
+  // remote sync from overwriting the setup form and freeze auto-save from
+  // pushing a half-built row (which was overwriting Group A back to itself).
+  const [editingSetup, setEditingSetup] = useState<boolean>(false);
+  const editingSetupRef = useRef(false);
+  const setupCollapsedRef = useRef(false);
+  useEffect(() => { editingSetupRef.current = editingSetup; }, [editingSetup]);
+  useEffect(() => { setupCollapsedRef.current = setupCollapsed; }, [setupCollapsed]);
 
   const startNewGroup = () => {
+    setEditingSetup(true);
     setSetupCollapsed(false);
     setParticipants([]);
     setChitGroupName("");
@@ -346,14 +355,15 @@ function AuctionRoom() {
       setActiveAuctionId(s.activeAuctionId);
       activeAuctionIdRef.current = s.activeAuctionId;
     }
-    if (typeof s.groupName === "string") setChitGroupName(s.groupName);
+    const freezeSetup = editingSetupRef.current || !setupCollapsedRef.current;
+    if (!freezeSetup && typeof s.groupName === "string") setChitGroupName(s.groupName);
     if (typeof (s as any).liveGroupName === "string") setLiveGroupName((s as any).liveGroupName);
-    if (typeof s.chitValue === "number") setChitValue(s.chitValue);
-    if (typeof s.totalMonths === "number") setTotalMonths(s.totalMonths);
+    if (!freezeSetup && typeof s.chitValue === "number") setChitValue(s.chitValue);
+    if (!freezeSetup && typeof s.totalMonths === "number") setTotalMonths(s.totalMonths);
     if (typeof s.currentMonth === "number") setCurrentMonth(s.currentMonth);
     if (typeof s.commissionPct === "number") setCommissionPct(s.commissionPct);
-    if (typeof s.startDate === "string") setChitStartDate(s.startDate);
-    if (Array.isArray(s.participants)) setParticipants(s.participants);
+    if (!freezeSetup && typeof s.startDate === "string") setChitStartDate(s.startDate);
+    if (!freezeSetup && Array.isArray(s.participants)) setParticipants(s.participants);
     if (Array.isArray(s.bids)) setBids(s.bids);
     if (Array.isArray(s.pastWinners)) setPastWinners(s.pastWinners);
     if (s.consents && typeof s.consents === "object") setConsents(s.consents as any);
@@ -442,8 +452,11 @@ function AuctionRoom() {
   // Admin writes: push state whenever it changes (debounced)
   useEffect(() => {
     if (!orgId || !isAdmin || !hydratedRef.current) return;
+    // While the admin is drafting a new group in the setup card, do NOT push —
+    // otherwise the half-built row upserts on (org_id, group_name) and wipes
+    // the current live group.
+    if (editingSetup) return;
     // Do not persist a half-built setup card before the admin clicks Save/Assign.
-    // Once a group is live (or a session already exists), every admin change is written to auction_sessions.
     if (!liveGroupName.trim() && !activeAuctionId && !turnStart && bids.length === 0 && !auctionClosed) return;
     if (skipNextPushRef.current) { skipNextPushRef.current = false; return; }
     const snapshot: AuctionStateDTO = {
@@ -470,7 +483,7 @@ function AuctionRoom() {
   }, [
     orgId, isAdmin, activeAuctionId, chitGroupName, liveGroupName, chitValue, totalMonths, currentMonth,
     commissionPct, chitStartDate, participants, bids, pastWinners, consents, groups, winner,
-    auctionClosed, turnStart, turnEnd, saveState,
+    auctionClosed, turnStart, turnEnd, saveState, editingSetup,
   ]);
 
   const buildSessionSnapshot = (overrides: Partial<AuctionStateDTO> = {}): AuctionStateDTO => ({
@@ -712,46 +725,73 @@ function AuctionRoom() {
       toast.error("Enter Total Months (మొత్తం నెలలు)");
       return;
     }
-    const nextGroup = {
-      name,
-      memberIds: participants.map((p) => p.id),
-      memberCodes: participants.map((p) => p.member_code ?? null),
-      memberNames: participants.map((p) => p.name),
-      savedAt: Date.now(),
-      totalMonths,
-      chitValue,
-      startDate: chitStartDate || null,
-    } as NonNullable<AuctionStateDTO["groups"]>[number];
-    const nextGroups = [
-      ...groups.filter((g) => g.name.toLowerCase() !== name.toLowerCase()),
-      nextGroup,
-    ];
-    setGroups(nextGroups);
-    setSetupCollapsed(true);
-    setLiveGroupName(name);
+    // Existing group with same name → this is an edit of that saved group.
+    const existing = groups.find((g) => g.name.toLowerCase() === name.toLowerCase());
+    const hasLiveOther = !!liveGroupName && liveGroupName.toLowerCase() !== name.toLowerCase();
+    // Preserve the currently live group: write ONLY this group's row, do not
+    // sweep other fields (bids/turn/etc.) from unrelated live state.
     try {
-      const res: any = await saveState({
-        data: {
-          orgId,
-          state: buildSessionSnapshot({
-            groupName: name,
-            liveGroupName: name,
-            groups: nextGroups,
-            participants,
-            chitValue,
-            totalMonths,
-            startDate: chitStartDate,
-            auctionClosed: false,
-          }),
-        },
-      });
-      if (res?.state) applyRemote(res.state);
+      const payload: any = {
+        org_id: orgId,
+        group_name: name,
+        live_group_name: name,
+        participants: participants.map((p) => ({ id: p.id, name: p.name, member_code: p.member_code ?? null })),
+        chit_value: chitValue,
+        total_months: totalMonths,
+        current_month: 1,
+        commission_pct: commissionPct,
+        start_date: chitStartDate || null,
+        auction_closed: false,
+        status: "active",
+        updated_at: new Date().toISOString(),
+      };
+      const { data: row, error } = await (supabase as any)
+        .from("auction_sessions")
+        .upsert(payload, { onConflict: "org_id,group_name" })
+        .select("*")
+        .maybeSingle();
+      if (error) throw error;
+      // Refresh the groups list from DB so both Group A and Group B coexist.
+      const { data: allRows } = await (supabase as any)
+        .from("auction_sessions")
+        .select("*")
+        .eq("org_id", orgId)
+        .order("updated_at", { ascending: false });
+      const mapped = ((allRows ?? []) as any[]).map((r) => ({
+        auctionId: r.id,
+        name: r.group_name,
+        memberIds: Array.isArray(r.participants) ? r.participants.map((p: any) => String(p.id ?? "")) : [],
+        memberCodes: Array.isArray(r.participants) ? r.participants.map((p: any) => p.member_code ?? null) : [],
+        memberNames: Array.isArray(r.participants) ? r.participants.map((p: any) => String(p.name ?? "")) : [],
+        totalMonths: r.total_months,
+        chitValue: Number(r.chit_value) || 0,
+        startDate: r.start_date,
+        savedAt: new Date(r.updated_at || r.created_at).getTime(),
+      }));
+      setGroups(mapped);
+      setEditingSetup(false);
+      setSetupCollapsed(true);
+      // If no live group yet, or the admin is editing the group that's already
+      // live, promote this row into the live board. Otherwise keep the other
+      // group live and do NOT overwrite its bidding state.
+      if (!hasLiveOther) {
+        setLiveGroupName(name);
+        setActiveAuctionId(row?.id ?? null);
+        activeAuctionIdRef.current = row?.id ?? null;
+      }
+      toast.success(
+        existing
+          ? `Updated "${name}"`
+          : hasLiveOther
+            ? `Saved "${name}" — "${liveGroupName}" remains live`
+            : `Saved "${name}" — synced to members`,
+      );
     } catch (e: any) {
       toast.error(e?.message || "Failed to save group to database");
       return;
     }
-    toast.success(`Saved "${name}" — synced to members`);
   };
+
 
   const submitOwnBid = async () => {
     if (!orgId || !myBidAmount || myBidAmount <= 0 || auctionClosed) return;
