@@ -44,6 +44,13 @@ export type AuctionStateDTO = {
   auctionClosed?: boolean;
   turnStart?: number | null;
   turnEnd?: number | null;
+  groups?: Array<{
+    name: string;
+    memberIds: string[];
+    memberCodes?: Array<string | null>;
+    memberNames?: string[];
+    savedAt: number;
+  }>;
 };
 
 export const getAuctionState = createServerFn({ method: "GET" })
