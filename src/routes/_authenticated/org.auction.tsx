@@ -1132,6 +1132,7 @@ function AuctionRoom() {
             </div>
           </Card>
         </div>
+        )}
 
         {/* 4. Footer — పాస్ట్ డిటైల్స్ + Save + PDF */}
         <Card className="p-4 md:p-5 space-y-3 bg-card">
