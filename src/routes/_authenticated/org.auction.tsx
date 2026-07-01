@@ -98,8 +98,6 @@ type BidRow = {
 };
 
 const toMs = (value?: string | null) => (value ? new Date(value).getTime() : null);
-const toIso = (value?: number | null) => (value ? new Date(value).toISOString() : null);
-
 function normalizeSessionParticipants(value: unknown): MemberLite[] {
   return Array.isArray(value)
     ? value
@@ -564,6 +562,10 @@ function AuctionRoom() {
 
   const submitBid = async () => {
     if (auctionClosed) return;
+    if (turnEnd) {
+      toast.error("Entry is closed for this turn");
+      return;
+    }
     if (!activeBidder || !bid || calc.overCap) return;
     const m = participants.find((p) => p.id === activeBidder);
     if (!m) return;
@@ -710,6 +712,10 @@ function AuctionRoom() {
   };
 
   const saveGroup = async () => {
+    if (!orgId) {
+      toast.error("Organization not found");
+      return;
+    }
     const name = (chitGroupName || "").trim();
     if (!name) {
       toast.error("Enter a Group Name first");
@@ -743,7 +749,7 @@ function AuctionRoom() {
     try {
       const res: any = await saveState({
         data: {
-          orgId: orgId!,
+          orgId,
           state: buildSessionSnapshot({
             groupName: name,
             liveGroupName: name,
@@ -785,6 +791,10 @@ function AuctionRoom() {
 
   const submitOwnBid = async () => {
     if (!orgId || !myBidAmount || myBidAmount <= 0 || auctionClosed) return;
+    if (turnEnd) {
+      toast.error("Entry is closed for this turn");
+      return;
+    }
     setSubmittingMyBid(true);
     try {
       let auctionId = activeAuctionIdRef.current;
