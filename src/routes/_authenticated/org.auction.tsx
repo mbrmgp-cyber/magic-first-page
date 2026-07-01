@@ -486,8 +486,66 @@ function AuctionRoom() {
           </Card>
         )}
 
+        {/* Member-side: My Chit Groups */}
+        {!isAdmin && me && (() => {
+          const mine = groups.filter((g) => g.memberIds.includes(myId));
+          return (
+            <Card className="p-3 md:p-4 bg-card space-y-2">
+              <div className="flex items-center gap-2">
+                <Users className="size-4 text-amber-400" />
+                <h2 className="font-semibold text-sm">My Chit Groups · నా చిట్ గ్రూపులు</h2>
+              </div>
+              {mine.length === 0 ? (
+                <p className="text-xs text-muted-foreground">
+                  You are not yet assigned to any chit group. The admin will assign you soon.
+                </p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {mine.map((g) => (
+                    <Badge key={g.name} className="bg-amber-500/15 border border-amber-500/40 text-amber-300">
+                      {g.name} · {g.memberIds.length} members
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </Card>
+          );
+        })()}
+
+        {/* Member-side bidding input */}
+        {!isAdmin && me && !auctionClosed && (
+          <Card className="p-4 md:p-5 bg-card space-y-3 border-amber-500/30">
+            <div className="flex items-center gap-2">
+              <Gavel className="size-4 text-amber-400" />
+              <h2 className="font-semibold text-sm">Submit Your Bid · మీ బిడ్ సమర్పించండి</h2>
+            </div>
+            <Label className="text-xs text-muted-foreground">
+              Your Challenge / Bid Amount (సవాలు)
+            </Label>
+            <Input
+              type="number"
+              inputMode="decimal"
+              value={myBidAmount || ""}
+              onChange={(e) => setMyBidAmount(Number(e.target.value))}
+              placeholder={`${symbol} 0`}
+              className="text-2xl font-bold h-14"
+            />
+            <Button
+              onClick={submitOwnBid}
+              disabled={!myBidAmount || myBidAmount <= 0 || submittingMyBid}
+              className="w-full h-11 font-bold"
+            >
+              {submittingMyBid ? "Submitting…" : "Submit Bid / బిడ్ సమర్పించండి"}
+            </Button>
+            <p className="text-[11px] text-muted-foreground">
+              Your bid syncs live to the admin and all members instantly.
+            </p>
+          </Card>
+        )}
+
         {/* Admin-only controls: Participants + Bidding form + Calculator */}
         {isAdmin && (<>
+
         {/* Participant Selection Panel */}
         <Card className="p-4 md:p-5 space-y-3 bg-card">
           <div className="flex items-center justify-between gap-2 flex-wrap">
