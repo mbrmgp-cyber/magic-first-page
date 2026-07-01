@@ -1596,60 +1596,9 @@ function AuctionRoom() {
         </>)}
 
         {!isAdmin && (<>
-        {/* Live Bidding Board: per-member sequential bids */}
-        <Card className="p-4 md:p-5 space-y-3 bg-card">
-          <div className="flex items-center gap-2">
-            <Trophy className="size-4 text-amber-400" />
-            <h2 className="font-semibold">Live Bidding Board · లైవ్ బిడ్డింగ్ బోర్డు</h2>
-            <Badge variant="secondary" className="text-xs">Month {currentMonth}</Badge>
-          </div>
-          {participants.length === 0 ? (
-            <div className="text-center py-6 text-sm text-muted-foreground">
-              Add chit group members to see the live board.
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-16">ID</TableHead>
-                  <TableHead>Member</TableHead>
-                  {Array.from({ length: maxCols }).map((_, i) => (
-                    <TableHead key={i} className="text-right">Bid {i + 1}</TableHead>
-                  ))}
-                  <TableHead className="text-right">Latest</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {participants.map((p) => {
-                  const list = perMember[p.id] || [];
-                  const latest = list[list.length - 1];
-                  const isWinner = auctionClosed && winner?.memberId === p.id;
-                  return (
-                    <TableRow key={p.id} className={isWinner ? "bg-emerald-500/10" : ""}>
-                      <TableCell className="font-mono text-xs">{p.member_code || "—"}</TableCell>
-                      <TableCell className="font-medium">
-                        {p.name}
-                        {isWinner && (
-                          <Badge className="ml-2 text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                            Winner
-                          </Badge>
-                        )}
-                      </TableCell>
-                      {Array.from({ length: maxCols }).map((_, i) => (
-                        <TableCell key={i} className="text-right tabular-nums text-xs">
-                          {list[i] ? fmt(list[i].amount) : "—"}
-                        </TableCell>
-                      ))}
-                      <TableCell className="text-right font-bold tabular-nums">
-                        {latest ? fmt(latest.amount) : "—"}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          )}
-        </Card>
+        {/* Members see a single, unified "Live Bids Activity" feed below —
+            the per-member sequential board is admin-only to avoid a duplicate
+            bidding surface on mobile screens. */}
 
         {/* Past Winners */}
         {pastWinners.length > 0 && (
