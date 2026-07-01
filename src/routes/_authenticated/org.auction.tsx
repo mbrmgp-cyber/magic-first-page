@@ -163,6 +163,7 @@ function AuctionRoom() {
     if (Array.isArray(s.bids)) setBids(s.bids);
     if (Array.isArray(s.pastWinners)) setPastWinners(s.pastWinners);
     if (s.consents && typeof s.consents === "object") setConsents(s.consents as any);
+    if (Array.isArray(s.groups)) setGroups(s.groups);
     if (typeof s.auctionClosed === "boolean") setAuctionClosed(s.auctionClosed);
     setWinner(s.winner ?? null);
     setTurnStart(s.turnStart ?? null);
