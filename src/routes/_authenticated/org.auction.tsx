@@ -457,7 +457,8 @@ function AuctionRoom() {
           <Gavel className="size-7 text-amber-400" />
           <div className="flex-1">
             <h1 className="text-xl md:text-2xl font-bold">C H S Live Online Chit Auction</h1>
-            <p className="text-xs text-muted-foreground">లైవ్ చిట్ ఆక్షన్ రూమ్</p>
+            <p className="text-xs text-amber-300/90 font-medium">Welcome to C.H.S Chits</p>
+            <p className="text-[11px] text-muted-foreground">లైవ్ చిట్ ఆక్షన్ రూమ్</p>
           </div>
         </div>
 
