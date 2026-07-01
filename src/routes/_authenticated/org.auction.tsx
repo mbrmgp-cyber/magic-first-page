@@ -142,6 +142,31 @@ function AuctionRoom() {
   const [groups, setGroups] = useState<NonNullable<AuctionStateDTO["groups"]>>([]);
   const [selectedGroupName, setSelectedGroupName] = useState<string>("");
   const [chitStartDate, setChitStartDate] = useState<string>("");
+  // Admin UX: collapse Group Setup card after save + which saved group is loaded into the Live board
+  const [setupCollapsed, setSetupCollapsed] = useState<boolean>(false);
+  const [liveGroupName, setLiveGroupName] = useState<string>("");
+
+  const startNewGroup = () => {
+    setSetupCollapsed(false);
+    setParticipants([]);
+    setChitGroupName("");
+    setChitStartDate("");
+  };
+
+  const loadGroupIntoLive = (name: string) => {
+    setLiveGroupName(name);
+    const g = groups.find((x) => x.name === name);
+    if (!g) return;
+    const members: MemberLite[] = (g.memberIds || []).map((id, i) => ({
+      id,
+      name: g.memberNames?.[i] || "",
+      member_code: g.memberCodes?.[i] ?? null,
+    }));
+    setParticipants(members);
+    const tm = (g as any).totalMonths;
+    if (typeof tm === "number" && tm > 0) setTotalMonths(tm);
+    setChitGroupName(name);
+  };
 
   // ─────────── Realtime sync with admin (DB-backed) ───────────
   const orgId: string | undefined = me?.org_id;
