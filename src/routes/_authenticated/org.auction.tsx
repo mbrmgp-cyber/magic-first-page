@@ -23,7 +23,7 @@ import {
 import { useCurrency } from "@/lib/currency-context";
 import { listApprovedMembers } from "@/lib/members.functions";
 import { getMyRoles, getMyMembership, getMyOrg } from "@/lib/org.functions";
-import { getAuctionState, saveAuctionState, submitAuctionConsent, type AuctionStateDTO } from "@/lib/auction.functions";
+import { getAuctionState, saveAuctionState, submitAuctionConsent, submitMemberBid, type AuctionStateDTO } from "@/lib/auction.functions";
 import { useSimRole } from "@/lib/rbac";
 import { RoleGate } from "@/components/RoleGate";
 import { supabase } from "@/integrations/supabase/client";
@@ -139,12 +139,18 @@ function AuctionRoom() {
   const [winnerOpen, setWinnerOpen] = useState(false);
   const [pastWinners, setPastWinners] = useState<PastWinner[]>([]);
   const [consents, setConsents] = useState<Record<string, Consent>>({});
+  const [groups, setGroups] = useState<NonNullable<AuctionStateDTO["groups"]>>([]);
 
   // ─────────── Realtime sync with admin (DB-backed) ───────────
   const orgId: string | undefined = me?.org_id;
   const loadState = useServerFn(getAuctionState);
   const saveState = useServerFn(saveAuctionState);
   const submitConsent = useServerFn(submitAuctionConsent);
+  const submitMyBid = useServerFn(submitMemberBid);
+
+  // Member's own bidding input
+  const [myBidAmount, setMyBidAmount] = useState<number>(0);
+  const [submittingMyBid, setSubmittingMyBid] = useState(false);
 
   const hydratedRef = useRef(false);
   const lastRemoteJsonRef = useRef<string>("");
@@ -162,6 +168,7 @@ function AuctionRoom() {
     if (Array.isArray(s.bids)) setBids(s.bids);
     if (Array.isArray(s.pastWinners)) setPastWinners(s.pastWinners);
     if (s.consents && typeof s.consents === "object") setConsents(s.consents as any);
+    if (Array.isArray(s.groups)) setGroups(s.groups);
     if (typeof s.auctionClosed === "boolean") setAuctionClosed(s.auctionClosed);
     setWinner(s.winner ?? null);
     setTurnStart(s.turnStart ?? null);
@@ -214,7 +221,7 @@ function AuctionRoom() {
     const snapshot: AuctionStateDTO = {
       groupName: chitGroupName,
       chitValue, totalMonths, currentMonth, commissionPct,
-      participants, bids, pastWinners, consents,
+      participants, bids, pastWinners, consents, groups,
       winner, auctionClosed, turnStart, turnEnd,
     };
     const js = JSON.stringify(snapshot);
@@ -230,7 +237,7 @@ function AuctionRoom() {
     return () => clearTimeout(t);
   }, [
     orgId, isAdmin, chitGroupName, chitValue, totalMonths, currentMonth,
-    commissionPct, participants, bids, pastWinners, consents, winner,
+    commissionPct, participants, bids, pastWinners, consents, groups, winner,
     auctionClosed, turnStart, turnEnd, saveState,
   ]);
 
@@ -340,6 +347,46 @@ function AuctionRoom() {
     setCurrentMonth((m) => m + 1);
   };
 
+  const saveGroup = () => {
+    const name = (chitGroupName || "").trim();
+    if (!name) {
+      toast.error("Enter a Group Name first");
+      return;
+    }
+    if (participants.length === 0) {
+      toast.error("Add members to the group first");
+      return;
+    }
+    setGroups((prev) => {
+      const others = prev.filter((g) => g.name.toLowerCase() !== name.toLowerCase());
+      return [
+        ...others,
+        {
+          name,
+          memberIds: participants.map((p) => p.id),
+          memberCodes: participants.map((p) => p.member_code ?? null),
+          memberNames: participants.map((p) => p.name),
+          savedAt: Date.now(),
+        },
+      ];
+    });
+    toast.success(`Saved "${name}" — synced to members`);
+  };
+
+  const submitOwnBid = async () => {
+    if (!orgId || !myBidAmount || myBidAmount <= 0 || auctionClosed) return;
+    setSubmittingMyBid(true);
+    try {
+      await submitMyBid({ data: { orgId, amount: myBidAmount } });
+      setMyBidAmount(0);
+      toast.success("Bid submitted");
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to submit bid");
+    } finally {
+      setSubmittingMyBid(false);
+    }
+  };
+
   const giveConsent = async () => {
     if (!myId || !auctionClosed || !orgId) return;
     const tag = `e-sig:${(myCode || myId.slice(0, 6)).toString()}:${Date.now().toString(36)}`;
@@ -404,37 +451,10 @@ function AuctionRoom() {
           </div>
         </div>
 
-        {/* Society Header */}
-        <Card className="p-4 md:p-5 bg-card">
-          <div className="flex items-center gap-4">
-            {org?.logo_url ? (
-              <img src={org.logo_url} alt="" className="size-14 rounded-md object-cover bg-white" />
-            ) : (
-              <div className="size-14 rounded-md bg-amber-500/15 border border-amber-500/30 flex items-center justify-center">
-                <ShieldCheck className="size-7 text-amber-400" />
-              </div>
-            )}
-            <div className="flex-1 min-w-0">
-              <h1 className="text-lg md:text-2xl font-bold leading-tight">{orgName}</h1>
-              <p className="text-[11px] md:text-xs text-muted-foreground">
-                {org?.slogan || "చిట్వేల్ హెల్ప్ లైన్ సొసైటీ"}
-              </p>
-              <p className="text-[10px] md:text-[11px] text-muted-foreground mt-0.5">
-                {orgRegNo && <>Reg: {orgRegNo} · </>}
-                {orgPhone && <>📞 {orgPhone} · </>}
-                {orgEmail && <>✉️ {orgEmail}</>}
-              </p>
-            </div>
-            <Button onClick={handlePrint} variant="outline" size="sm" className="gap-1.5">
-              <Printer className="size-4" /> Print Official Auction PDF
-            </Button>
-          </div>
-        </Card>
-
         <div className="flex items-center gap-3">
           <Gavel className="size-7 text-amber-400" />
           <div className="flex-1">
-            <h2 className="text-xl md:text-2xl font-bold">Live Online Chit Auction</h2>
+            <h1 className="text-xl md:text-2xl font-bold">C H S Live Online Chit Auction</h1>
             <p className="text-xs text-muted-foreground">లైవ్ చిట్ ఆక్షన్ రూమ్</p>
           </div>
         </div>
@@ -466,8 +486,66 @@ function AuctionRoom() {
           </Card>
         )}
 
+        {/* Member-side: My Chit Groups */}
+        {!isAdmin && me && (() => {
+          const mine = groups.filter((g) => g.memberIds.includes(myId));
+          return (
+            <Card className="p-3 md:p-4 bg-card space-y-2">
+              <div className="flex items-center gap-2">
+                <Users className="size-4 text-amber-400" />
+                <h2 className="font-semibold text-sm">My Chit Groups · నా చిట్ గ్రూపులు</h2>
+              </div>
+              {mine.length === 0 ? (
+                <p className="text-xs text-muted-foreground">
+                  You are not yet assigned to any chit group. The admin will assign you soon.
+                </p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {mine.map((g) => (
+                    <Badge key={g.name} className="bg-amber-500/15 border border-amber-500/40 text-amber-300">
+                      {g.name} · {g.memberIds.length} members
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </Card>
+          );
+        })()}
+
+        {/* Member-side bidding input */}
+        {!isAdmin && me && !auctionClosed && (
+          <Card className="p-4 md:p-5 bg-card space-y-3 border-amber-500/30">
+            <div className="flex items-center gap-2">
+              <Gavel className="size-4 text-amber-400" />
+              <h2 className="font-semibold text-sm">Submit Your Bid · మీ బిడ్ సమర్పించండి</h2>
+            </div>
+            <Label className="text-xs text-muted-foreground">
+              Your Challenge / Bid Amount (సవాలు)
+            </Label>
+            <Input
+              type="number"
+              inputMode="decimal"
+              value={myBidAmount || ""}
+              onChange={(e) => setMyBidAmount(Number(e.target.value))}
+              placeholder={`${symbol} 0`}
+              className="text-2xl font-bold h-14"
+            />
+            <Button
+              onClick={submitOwnBid}
+              disabled={!myBidAmount || myBidAmount <= 0 || submittingMyBid}
+              className="w-full h-11 font-bold"
+            >
+              {submittingMyBid ? "Submitting…" : "Submit Bid / బిడ్ సమర్పించండి"}
+            </Button>
+            <p className="text-[11px] text-muted-foreground">
+              Your bid syncs live to the admin and all members instantly.
+            </p>
+          </Card>
+        )}
+
         {/* Admin-only controls: Participants + Bidding form + Calculator */}
         {isAdmin && (<>
+
         {/* Participant Selection Panel */}
         <Card className="p-4 md:p-5 space-y-3 bg-card">
           <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -539,6 +617,25 @@ function AuctionRoom() {
               ))}
             </div>
           )}
+
+          {/* Save / Assign Group */}
+          <div className="flex items-center justify-between gap-3 pt-2 border-t border-border flex-wrap">
+            <div className="text-[11px] text-muted-foreground">
+              {groups.length > 0 ? (
+                <>Saved groups: <b className="text-foreground">{groups.map((g) => g.name).join(", ")}</b></>
+              ) : (
+                <>Assign selected members to a group so members see it on their dashboard.</>
+              )}
+            </div>
+            <Button
+              onClick={saveGroup}
+              disabled={participants.length === 0 || !chitGroupName.trim()}
+              size="sm"
+              className="gap-1.5 bg-amber-500 hover:bg-amber-600 text-black font-semibold"
+            >
+              <CheckCircle2 className="size-4" /> Save / Assign Group
+            </Button>
+          </div>
         </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
@@ -886,6 +983,19 @@ function AuctionRoom() {
             )}
           </Card>
         )}
+
+        {/* Footer — Print button at the very bottom */}
+        <div className="pt-4 pb-6 border-t border-border">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-[11px] text-muted-foreground text-center sm:text-left">
+              {orgName} · {org?.slogan || "చిట్వేల్ హెల్ప్ లైన్ సొసైటీ"}
+              {orgRegNo && <> · Reg {orgRegNo}</>}
+            </p>
+            <Button onClick={handlePrint} variant="outline" size="sm" className="gap-1.5 w-full sm:w-auto">
+              <Printer className="size-4" /> Print Official Auction PDF
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Winner Declaration Dialog */}
