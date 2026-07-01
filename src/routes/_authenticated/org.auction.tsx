@@ -304,6 +304,25 @@ function AuctionRoom() {
     if (typeof (g as any).chitValue === "number") setChitValue((g as any).chitValue);
     if (typeof (g as any).startDate === "string") setChitStartDate((g as any).startDate || "");
     setChitGroupName(name);
+    if (orgId) {
+      try {
+        await saveState({
+          data: {
+            orgId,
+            state: buildSessionSnapshot({
+              groupName: name,
+              liveGroupName: name,
+              participants: members,
+              totalMonths: typeof tm === "number" && tm > 0 ? tm : totalMonths,
+              chitValue: typeof (g as any).chitValue === "number" ? (g as any).chitValue : chitValue,
+              startDate: typeof (g as any).startDate === "string" ? (g as any).startDate : chitStartDate,
+            }),
+          },
+        });
+      } catch (e: any) {
+        toast.error(e?.message || "Failed to activate live group");
+      }
+    }
   };
 
   // ─────────── Realtime sync with admin (DB-backed) ───────────
