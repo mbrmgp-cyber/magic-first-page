@@ -283,7 +283,10 @@ function AuctionRoom() {
             .eq("auction_id", g.auctionId)
             .order("submitted_at", { ascending: true });
           if (bidError) throw bidError;
-          applyRemote(sessionState(session as AuctionSessionRow, bidRows ?? [], (sessionRows ?? []) as AuctionSessionRow[]));
+          const nextState = sessionState(session as AuctionSessionRow, bidRows ?? [], (sessionRows ?? []) as AuctionSessionRow[]);
+          nextState.liveGroupName = name;
+          applyRemote(nextState);
+          if (orgId) await saveState({ data: { orgId, state: nextState } });
           return;
         }
       } catch (e: any) {
