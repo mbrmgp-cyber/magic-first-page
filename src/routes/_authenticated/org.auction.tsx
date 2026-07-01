@@ -224,6 +224,7 @@ function AuctionRoom() {
     const snapshot: AuctionStateDTO = {
       groupName: chitGroupName,
       chitValue, totalMonths, currentMonth, commissionPct,
+      startDate: chitStartDate,
       participants, bids, pastWinners, consents, groups,
       winner, auctionClosed, turnStart, turnEnd,
     };
