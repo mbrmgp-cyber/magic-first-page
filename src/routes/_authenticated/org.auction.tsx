@@ -351,6 +351,16 @@ function AuctionRoom() {
     setCurrentMonth((m) => m + 1);
   };
 
+  const deleteGroup = (name: string) => {
+    setGroups((prev) => prev.filter((g) => g.name.toLowerCase() !== name.toLowerCase()));
+    toast.success(`Deleted group "${name}"`);
+  };
+
+  const closeEntry = () => {
+    setTurnEnd(Date.now());
+    toast.info("Entry closed · ఎంట్రీ క్లోజ్");
+  };
+
   const saveGroup = () => {
     const name = (chitGroupName || "").trim();
     if (!name) {
