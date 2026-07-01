@@ -404,37 +404,10 @@ function AuctionRoom() {
           </div>
         </div>
 
-        {/* Society Header */}
-        <Card className="p-4 md:p-5 bg-card">
-          <div className="flex items-center gap-4">
-            {org?.logo_url ? (
-              <img src={org.logo_url} alt="" className="size-14 rounded-md object-cover bg-white" />
-            ) : (
-              <div className="size-14 rounded-md bg-amber-500/15 border border-amber-500/30 flex items-center justify-center">
-                <ShieldCheck className="size-7 text-amber-400" />
-              </div>
-            )}
-            <div className="flex-1 min-w-0">
-              <h1 className="text-lg md:text-2xl font-bold leading-tight">{orgName}</h1>
-              <p className="text-[11px] md:text-xs text-muted-foreground">
-                {org?.slogan || "చిట్వేల్ హెల్ప్ లైన్ సొసైటీ"}
-              </p>
-              <p className="text-[10px] md:text-[11px] text-muted-foreground mt-0.5">
-                {orgRegNo && <>Reg: {orgRegNo} · </>}
-                {orgPhone && <>📞 {orgPhone} · </>}
-                {orgEmail && <>✉️ {orgEmail}</>}
-              </p>
-            </div>
-            <Button onClick={handlePrint} variant="outline" size="sm" className="gap-1.5">
-              <Printer className="size-4" /> Print Official Auction PDF
-            </Button>
-          </div>
-        </Card>
-
         <div className="flex items-center gap-3">
           <Gavel className="size-7 text-amber-400" />
           <div className="flex-1">
-            <h2 className="text-xl md:text-2xl font-bold">Live Online Chit Auction</h2>
+            <h1 className="text-xl md:text-2xl font-bold">C H S Live Online Chit Auction</h1>
             <p className="text-xs text-muted-foreground">లైవ్ చిట్ ఆక్షన్ రూమ్</p>
           </div>
         </div>
