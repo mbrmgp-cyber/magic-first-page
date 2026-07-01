@@ -896,8 +896,9 @@ function AuctionRoom() {
         {/* ═══════════════ MEMBER WIREFRAME VIEW ═══════════════ */}
         {!isAdmin && me && (() => {
           const myGroups = groups.filter((g) => g.memberIds.includes(myId));
+          const visibleGroupName = selectedGroupName || liveGroupName || myGroups[0]?.name || "";
           const activeGroup =
-            myGroups.find((g) => g.name === selectedGroupName) || myGroups[0] || null;
+            myGroups.find((g) => g.name === visibleGroupName) || myGroups[0] || null;
           const closedMonths = pastWinners.length;
           const myBidsList = bids
             .filter((b) => b.memberId === myId)
@@ -925,7 +926,7 @@ function AuctionRoom() {
                       <span className="text-[10px] text-muted-foreground italic">Not assigned</span>
                     ) : (
                       myGroups.map((g) => {
-                        const active = (selectedGroupName || myGroups[0]?.name) === g.name;
+                        const active = visibleGroupName === g.name;
                         return (
                           <button
                             key={g.name}
