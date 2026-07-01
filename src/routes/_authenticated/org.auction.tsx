@@ -1130,6 +1130,52 @@ function AuctionRoom() {
           </Card>
         )}
 
+        {/* 7. Footer — Paid & Received History (member) + Print button */}
+        {!isAdmin && me && (() => {
+          const myReceived = pastWinners
+            .filter((w) => w.memberId === myId)
+            .reduce((s, w) => s + w.net, 0);
+          const myPaid = pastWinners
+            .filter((w) => w.memberId !== myId)
+            .reduce((s, w) => s + w.dividend, 0);
+          const myWins = pastWinners.filter((w) => w.memberId === myId);
+          return (
+            <Card className="p-3 md:p-4 bg-card">
+              <div className="flex items-center gap-2 mb-2">
+                <Wallet className="size-4 text-amber-400" />
+                <h2 className="font-semibold text-sm">
+                  Paid & Received History · చెల్లింపు వివరాలు
+                </h2>
+              </div>
+              <div className="grid grid-cols-2 gap-2 mb-2">
+                <StatBox label="Total Received" value={fmt(myReceived)} highlight />
+                <StatBox label="Total Paid (Dividends)" value={fmt(myPaid)} />
+              </div>
+              {myWins.length > 0 ? (
+                <ul className="space-y-1 text-xs">
+                  {myWins.map((w) => (
+                    <li
+                      key={w.month}
+                      className="flex items-center justify-between rounded border border-border bg-black/30 px-2 py-1.5"
+                    >
+                      <span>
+                        <b>{ordinal(w.month)}</b> Month · You won
+                      </span>
+                      <span className="text-amber-400 font-bold tabular-nums">
+                        {fmt(w.net)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-[11px] text-muted-foreground">
+                  No wins yet. Keep participating!
+                </p>
+              )}
+            </Card>
+          );
+        })()}
+
         {/* Footer — Print button at the very bottom */}
         <div className="pt-4 pb-6 border-t border-border">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
