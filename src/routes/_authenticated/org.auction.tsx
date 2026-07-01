@@ -95,6 +95,7 @@ type BidRow = {
   member_code: string | null;
   amount: number;
   submitted_at: string;
+  auction_id?: string | null;
 };
 
 const toMs = (value?: string | null) => (value ? new Date(value).getTime() : null);
