@@ -543,40 +543,98 @@ function AuctionRoom() {
     return { commission, net, dividend, others };
   }, [winner, chitValue, commissionPct, participants.length]);
 
-  const submitBid = () => {
+  const submitBid = async () => {
     if (auctionClosed) return;
     if (!activeBidder || !bid || calc.overCap) return;
     const m = participants.find((p) => p.id === activeBidder);
     if (!m) return;
-    if (!turnStart) setTurnStart(Date.now());
-    setBids((prev) => [
-      ...prev,
-      {
-        id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-        memberId: m.id,
-        memberName: m.name,
-        memberCode: m.member_code ?? null,
+    try {
+      const turnTs = turnStart ?? Date.now();
+      if (!turnStart) setTurnStart(turnTs);
+      const auctionId = await ensureCurrentSession({ turnStart: turnTs, auctionClosed: false, turnEnd: null });
+      const { error } = await (supabase as any).from("bids").insert({
+        auction_id: auctionId,
+        org_id: orgId,
+        member_id: m.id,
+        member_name: m.name || "Member",
+        member_code: m.member_code ?? null,
         amount: bid,
-        submittedAt: Date.now(),
-      },
-    ]);
-    setBid(0);
+        submitted_by: rolesQ.data?.userId ?? null,
+      });
+      if (error) throw error;
+      setBid(0);
+      toast.success("Bid saved to database");
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to submit bid");
+    }
   };
 
-  const clearBids = () => { setBids([]); setTurnStart(null); setTurnEnd(null); };
+  const clearBids = async () => {
+    const auctionId = activeAuctionIdRef.current;
+    setBids([]); setTurnStart(null); setTurnEnd(null);
+    try {
+      if (auctionId) {
+        const { error } = await (supabase as any).from("bids").delete().eq("auction_id", auctionId);
+        if (error) throw error;
+      }
+      await ensureCurrentSession({ bids: [], turnStart: null, turnEnd: null, winner: null, auctionClosed: false });
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to clear bids");
+    }
+  };
 
-  const finalizeAuction = () => {
+  const finalizeAuction = async () => {
     if (sortedBids.length === 0) return;
     const w = sortedBids[0];
     setWinner(w);
     setAuctionClosed(true);
-    setTurnEnd(Date.now());
+    const closedAt = Date.now();
+    setTurnEnd(closedAt);
     setWinnerOpen(true);
     const cv = Math.max(0, Number(chitValue) || 0);
     const commission = (cv * (Number(commissionPct) || 0)) / 100;
     const net = Math.max(0, cv - w.amount - commission);
     const others = Math.max(1, participants.length - 1);
     const dividend = Math.max(0, (w.amount - commission)) / others;
+    const nextPastWinners = [
+      ...pastWinners.filter((p) => p.month !== currentMonth),
+      {
+        month: currentMonth, memberId: w.memberId, memberCode: w.memberCode,
+        memberName: w.memberName, amount: w.amount, net, dividend, closedAt,
+      },
+    ];
+    setPastWinners(nextPastWinners);
+    try {
+      await ensureCurrentSession({ winner: w, auctionClosed: true, turnEnd: closedAt, pastWinners: nextPastWinners });
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to finalize auction");
+    }
+  };
+
+  const resetAuction = async () => {
+    const nextMonth = currentMonth + 1;
+    setBids([]);
+    setWinner(null);
+    setAuctionClosed(false);
+    setBid(0);
+    setActiveBidder("");
+    setTurnStart(null);
+    setTurnEnd(null);
+    setCurrentMonth(nextMonth);
+    try {
+      if (activeAuctionIdRef.current) {
+        const { error } = await (supabase as any).from("bids").delete().eq("auction_id", activeAuctionIdRef.current);
+        if (error) throw error;
+      }
+      await ensureCurrentSession({
+        bids: [], winner: null, auctionClosed: false, turnStart: null, turnEnd: null, currentMonth: nextMonth,
+      });
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to reset auction");
+    }
+  };
+
+  /* previous local-only finalize/reset logic replaced by database-backed writes
     setPastWinners((prev) => [
       ...prev.filter((p) => p.month !== currentMonth),
       {
@@ -596,6 +654,7 @@ function AuctionRoom() {
     setTurnEnd(null);
     setCurrentMonth((m) => m + 1);
   };
+  */
 
   const deleteGroup = (name: string) => {
     setGroups((prev) => prev.filter((g) => g.name.toLowerCase() !== name.toLowerCase()));
