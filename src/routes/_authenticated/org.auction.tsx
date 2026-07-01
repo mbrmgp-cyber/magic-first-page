@@ -142,6 +142,31 @@ function AuctionRoom() {
   const [groups, setGroups] = useState<NonNullable<AuctionStateDTO["groups"]>>([]);
   const [selectedGroupName, setSelectedGroupName] = useState<string>("");
   const [chitStartDate, setChitStartDate] = useState<string>("");
+  // Admin UX: collapse Group Setup card after save + which saved group is loaded into the Live board
+  const [setupCollapsed, setSetupCollapsed] = useState<boolean>(false);
+  const [liveGroupName, setLiveGroupName] = useState<string>("");
+
+  const startNewGroup = () => {
+    setSetupCollapsed(false);
+    setParticipants([]);
+    setChitGroupName("");
+    setChitStartDate("");
+  };
+
+  const loadGroupIntoLive = (name: string) => {
+    setLiveGroupName(name);
+    const g = groups.find((x) => x.name === name);
+    if (!g) return;
+    const members: MemberLite[] = (g.memberIds || []).map((id, i) => ({
+      id,
+      name: g.memberNames?.[i] || "",
+      member_code: g.memberCodes?.[i] ?? null,
+    }));
+    setParticipants(members);
+    const tm = (g as any).totalMonths;
+    if (typeof tm === "number" && tm > 0) setTotalMonths(tm);
+    setChitGroupName(name);
+  };
 
   // ─────────── Realtime sync with admin (DB-backed) ───────────
   const orgId: string | undefined = me?.org_id;
@@ -371,6 +396,10 @@ function AuctionRoom() {
       toast.error("Add members to the group first");
       return;
     }
+    if (!totalMonths || totalMonths <= 0) {
+      toast.error("Enter Total Months (మొత్తం నెలలు)");
+      return;
+    }
     setGroups((prev) => {
       const others = prev.filter((g) => g.name.toLowerCase() !== name.toLowerCase());
       return [
@@ -381,9 +410,13 @@ function AuctionRoom() {
           memberCodes: participants.map((p) => p.member_code ?? null),
           memberNames: participants.map((p) => p.name),
           savedAt: Date.now(),
-        },
+          // Persist totalMonths per group so the Live board can restore it on selection
+          totalMonths,
+        } as any,
       ];
     });
+    setSetupCollapsed(true);
+    setLiveGroupName(name);
     toast.success(`Saved "${name}" — synced to members`);
   };
 
@@ -699,13 +732,35 @@ function AuctionRoom() {
 
         {/* 1. Top Admin Creation Section */}
         <Card className="p-4 md:p-5 space-y-3 bg-card">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Users className="size-4 text-amber-400" />
             <h2 className="font-semibold">Group Setup · గ్రూప్ సెటప్</h2>
             <Badge variant="secondary" className="text-xs">{participants.length} members</Badge>
+            {setupCollapsed && liveGroupName && (
+              <Badge className="bg-emerald-500/15 text-emerald-300 border border-emerald-500/40 text-xs">
+                Saved: {liveGroupName}
+              </Badge>
+            )}
+            <div className="ml-auto flex gap-2">
+              {setupCollapsed ? (
+                <>
+                  <Button size="sm" variant="outline" onClick={() => setSetupCollapsed(false)} className="gap-1.5 text-xs">
+                    Edit
+                  </Button>
+                  <Button size="sm" onClick={startNewGroup} className="gap-1.5 text-xs bg-amber-500 hover:bg-amber-600 text-black font-bold">
+                    <Plus className="size-3.5" /> Setup Next Group
+                  </Button>
+                </>
+              ) : (
+                <Button size="sm" variant="ghost" onClick={() => setSetupCollapsed(true)} className="gap-1.5 text-xs">
+                  Minimize
+                </Button>
+              )}
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {!setupCollapsed && (<>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <div className="space-y-1.5">
               <Label className="text-xs">Group + · గ్రూప్</Label>
               <Input
@@ -749,9 +804,21 @@ function AuctionRoom() {
               <Label className="text-xs">బిగినింగ్ Date · Start</Label>
               <Input type="date" value={chitStartDate} onChange={(e) => setChitStartDate(e.target.value)} className="h-10" />
             </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Total Months · మొత్తం నెలలు</Label>
+              <Input
+                type="number"
+                inputMode="numeric"
+                min={1}
+                value={totalMonths || ""}
+                onChange={(e) => setTotalMonths(Number(e.target.value))}
+                placeholder="e.g., 10 or 20"
+                className="h-10 font-bold tabular-nums"
+              />
+              <p className="text-[10px] text-muted-foreground">Once a month · నెలకు ఒకసారి</p>
+            </div>
           </div>
 
-          {/* Members chip list */}
           {participants.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {participants.map((p, i) => (
@@ -768,7 +835,6 @@ function AuctionRoom() {
             </div>
           )}
 
-          {/* Totals + action buttons */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3 pt-2 border-t border-border">
             <div className="rounded-md border border-border bg-black/30 p-2.5">
               <p className="text-[10px] uppercase text-muted-foreground">మొత్తం మెంబర్స్</p>
@@ -784,7 +850,7 @@ function AuctionRoom() {
             </div>
             <Button
               onClick={saveGroup}
-              disabled={participants.length === 0 || !chitGroupName.trim()}
+              disabled={participants.length === 0 || !chitGroupName.trim() || !totalMonths}
               className="h-full bg-amber-500 hover:bg-amber-600 text-black font-bold gap-1.5"
             >
               <CheckCircle2 className="size-4" /> సేవ్ / ఎడిట్
@@ -806,9 +872,52 @@ function AuctionRoom() {
               Saved: <b className="text-foreground">{groups.map((g) => g.name).join(", ")}</b>
             </div>
           )}
+          </>)}
+        </Card>
+
+        {/* Live-auction group selector — nothing loads until admin picks a saved group */}
+        <Card className="p-3 md:p-4 bg-card border-amber-500/30">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Gavel className="size-4 text-amber-400" />
+            <h2 className="font-semibold text-sm">Select Group for Live Auction</h2>
+            <div className="ml-auto flex items-center gap-2 flex-1 md:flex-none md:min-w-[240px]">
+              <Select
+                value={liveGroupName}
+                onValueChange={loadGroupIntoLive}
+                disabled={groups.length === 0}
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder={groups.length ? "— Choose a saved group —" : "Save a group first"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {groups.map((g) => (
+                    <SelectItem key={g.name} value={g.name}>
+                      {g.name} · {(g.memberIds || []).length} members
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {liveGroupName && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => { setLiveGroupName(""); setParticipants([]); }}
+                  className="text-xs"
+                >
+                  Clear
+                </Button>
+              )}
+            </div>
+          </div>
+          {!liveGroupName && (
+            <p className="text-[11px] text-muted-foreground italic mt-2">
+              Live members and metrics load only after you select a saved group.
+            </p>
+          )}
         </Card>
 
         {/* 2 + 3. Main "లైవ్ చీటీ" Container: Left members board + Right metrics panel */}
+        {liveGroupName && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
           {/* LEFT — Member List Display with sequential bidding capsules */}
@@ -1023,6 +1132,7 @@ function AuctionRoom() {
             </div>
           </Card>
         </div>
+        )}
 
         {/* 4. Footer — పాస్ట్ డిటైల్స్ + Save + PDF */}
         <Card className="p-4 md:p-5 space-y-3 bg-card">
