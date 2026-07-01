@@ -732,13 +732,35 @@ function AuctionRoom() {
 
         {/* 1. Top Admin Creation Section */}
         <Card className="p-4 md:p-5 space-y-3 bg-card">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Users className="size-4 text-amber-400" />
             <h2 className="font-semibold">Group Setup · గ్రూప్ సెటప్</h2>
             <Badge variant="secondary" className="text-xs">{participants.length} members</Badge>
+            {setupCollapsed && liveGroupName && (
+              <Badge className="bg-emerald-500/15 text-emerald-300 border border-emerald-500/40 text-xs">
+                Saved: {liveGroupName}
+              </Badge>
+            )}
+            <div className="ml-auto flex gap-2">
+              {setupCollapsed ? (
+                <>
+                  <Button size="sm" variant="outline" onClick={() => setSetupCollapsed(false)} className="gap-1.5 text-xs">
+                    Edit
+                  </Button>
+                  <Button size="sm" onClick={startNewGroup} className="gap-1.5 text-xs bg-amber-500 hover:bg-amber-600 text-black font-bold">
+                    <Plus className="size-3.5" /> Setup Next Group
+                  </Button>
+                </>
+              ) : (
+                <Button size="sm" variant="ghost" onClick={() => setSetupCollapsed(true)} className="gap-1.5 text-xs">
+                  Minimize
+                </Button>
+              )}
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {!setupCollapsed && (<>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <div className="space-y-1.5">
               <Label className="text-xs">Group + · గ్రూప్</Label>
               <Input
@@ -782,9 +804,21 @@ function AuctionRoom() {
               <Label className="text-xs">బిగినింగ్ Date · Start</Label>
               <Input type="date" value={chitStartDate} onChange={(e) => setChitStartDate(e.target.value)} className="h-10" />
             </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Total Months · మొత్తం నెలలు</Label>
+              <Input
+                type="number"
+                inputMode="numeric"
+                min={1}
+                value={totalMonths || ""}
+                onChange={(e) => setTotalMonths(Number(e.target.value))}
+                placeholder="e.g., 10 or 20"
+                className="h-10 font-bold tabular-nums"
+              />
+              <p className="text-[10px] text-muted-foreground">Once a month · నెలకు ఒకసారి</p>
+            </div>
           </div>
 
-          {/* Members chip list */}
           {participants.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {participants.map((p, i) => (
@@ -801,7 +835,6 @@ function AuctionRoom() {
             </div>
           )}
 
-          {/* Totals + action buttons */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3 pt-2 border-t border-border">
             <div className="rounded-md border border-border bg-black/30 p-2.5">
               <p className="text-[10px] uppercase text-muted-foreground">మొత్తం మెంబర్స్</p>
@@ -817,7 +850,7 @@ function AuctionRoom() {
             </div>
             <Button
               onClick={saveGroup}
-              disabled={participants.length === 0 || !chitGroupName.trim()}
+              disabled={participants.length === 0 || !chitGroupName.trim() || !totalMonths}
               className="h-full bg-amber-500 hover:bg-amber-600 text-black font-bold gap-1.5"
             >
               <CheckCircle2 className="size-4" /> సేవ్ / ఎడిట్
@@ -839,6 +872,7 @@ function AuctionRoom() {
               Saved: <b className="text-foreground">{groups.map((g) => g.name).join(", ")}</b>
             </div>
           )}
+          </>)}
         </Card>
 
         {/* 2 + 3. Main "లైవ్ చీటీ" Container: Left members board + Right metrics panel */}
