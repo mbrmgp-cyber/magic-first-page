@@ -402,9 +402,17 @@ function AuctionRoom() {
           </div>
         </div>
 
-        {/* Society Header */}
-        <Card className="p-4 md:p-5 bg-card">
-          <div className="flex items-center gap-4">
+        {/* Society Header — compact on mobile, full on desktop */}
+        <Card className="p-3 md:p-5 bg-card">
+          {/* Mobile: just name + print button */}
+          <div className="flex md:hidden items-center justify-between gap-2">
+            <h1 className="text-sm font-bold leading-tight truncate">{orgName}</h1>
+            <Button onClick={handlePrint} variant="outline" size="sm" className="gap-1.5 shrink-0">
+              <Printer className="size-4" /> Print PDF
+            </Button>
+          </div>
+          {/* Desktop: full profile */}
+          <div className="hidden md:flex items-center gap-4">
             {org?.logo_url ? (
               <img src={org.logo_url} alt="" className="size-14 rounded-md object-cover bg-white" />
             ) : (
@@ -413,11 +421,11 @@ function AuctionRoom() {
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <h1 className="text-lg md:text-2xl font-bold leading-tight">{orgName}</h1>
-              <p className="text-[11px] md:text-xs text-muted-foreground">
+              <h1 className="text-2xl font-bold leading-tight">{orgName}</h1>
+              <p className="text-xs text-muted-foreground">
                 {org?.slogan || "చిట్వేల్ హెల్ప్ లైన్ సొసైటీ"}
               </p>
-              <p className="text-[10px] md:text-[11px] text-muted-foreground mt-0.5">
+              <p className="text-[11px] text-muted-foreground mt-0.5">
                 {orgRegNo && <>Reg: {orgRegNo} · </>}
                 {orgPhone && <>📞 {orgPhone} · </>}
                 {orgEmail && <>✉️ {orgEmail}</>}
@@ -428,6 +436,7 @@ function AuctionRoom() {
             </Button>
           </div>
         </Card>
+
 
         <div className="flex items-center gap-3">
           <Gavel className="size-7 text-amber-400" />
