@@ -1065,6 +1065,7 @@ function AuctionRoom() {
 
         </>)}
 
+        {!isAdmin && (<>
         {/* Live Bidding Board: per-member sequential bids */}
         <Card className="p-4 md:p-5 space-y-3 bg-card">
           <div className="flex items-center gap-2">
