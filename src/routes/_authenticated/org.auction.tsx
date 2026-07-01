@@ -355,7 +355,7 @@ function AuctionRoom() {
       setActiveAuctionId(s.activeAuctionId);
       activeAuctionIdRef.current = s.activeAuctionId;
     }
-    const freezeSetup = editingSetupRef.current;
+    const freezeSetup = editingSetupRef.current || !setupCollapsedRef.current;
     if (!freezeSetup && typeof s.groupName === "string") setChitGroupName(s.groupName);
     if (typeof (s as any).liveGroupName === "string") setLiveGroupName((s as any).liveGroupName);
     if (!freezeSetup && typeof s.chitValue === "number") setChitValue(s.chitValue);
