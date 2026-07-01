@@ -657,28 +657,6 @@ function AuctionRoom() {
     }
   };
 
-  /* previous local-only finalize/reset logic replaced by database-backed writes
-    setPastWinners((prev) => [
-      ...prev.filter((p) => p.month !== currentMonth),
-      {
-        month: currentMonth, memberId: w.memberId, memberCode: w.memberCode,
-        memberName: w.memberName, amount: w.amount, net, dividend, closedAt: Date.now(),
-      },
-    ]);
-  };
-
-  const resetAuction = () => {
-    setBids([]);
-    setWinner(null);
-    setAuctionClosed(false);
-    setBid(0);
-    setActiveBidder("");
-    setTurnStart(null);
-    setTurnEnd(null);
-    setCurrentMonth((m) => m + 1);
-  };
-  */
-
   const deleteGroup = async (name: string) => {
     const g = groups.find((x) => x.name.toLowerCase() === name.toLowerCase());
     setGroups((prev) => prev.filter((g) => g.name.toLowerCase() !== name.toLowerCase()));
@@ -769,25 +747,6 @@ function AuctionRoom() {
       toast.error(e?.message || "Failed to save group to database");
       return;
     }
-    /* previous local-only group save kept for reference
-    setGroups((prev) => {
-      const others = prev.filter((g) => g.name.toLowerCase() !== name.toLowerCase());
-      return [
-        ...others,
-        {
-          name,
-          memberIds: participants.map((p) => p.id),
-          memberCodes: participants.map((p) => p.member_code ?? null),
-          memberNames: participants.map((p) => p.name),
-          savedAt: Date.now(),
-          // Persist totalMonths per group so the Live board can restore it on selection
-          totalMonths,
-        } as any,
-      ];
-    });
-    setSetupCollapsed(true);
-    setLiveGroupName(name);
-    */
     toast.success(`Saved "${name}" — synced to members`);
   };
 
