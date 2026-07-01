@@ -1236,6 +1236,7 @@ function AuctionRoom() {
             </Table>
           )}
         </Card>
+        </>)}
 
         {/* Digital Consent (member view) */}
         {auctionClosed && winner && winnerCalc && me && (
