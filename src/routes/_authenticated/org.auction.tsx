@@ -169,7 +169,8 @@ function AuctionRoom() {
   };
 
   // ─────────── Realtime sync with admin (DB-backed) ───────────
-  const orgId: string | undefined = me?.org_id;
+  // For org admins without a member row, fall back to org.id so they still sync.
+  const orgId: string | undefined = me?.org_id ?? org?.id;
   const loadState = useServerFn(getAuctionState);
   const saveState = useServerFn(saveAuctionState);
   const submitConsent = useServerFn(submitAuctionConsent);
@@ -187,6 +188,7 @@ function AuctionRoom() {
     if (!s) return;
     skipNextPushRef.current = true;
     if (typeof s.groupName === "string") setChitGroupName(s.groupName);
+    if (typeof (s as any).liveGroupName === "string") setLiveGroupName((s as any).liveGroupName);
     if (typeof s.chitValue === "number") setChitValue(s.chitValue);
     if (typeof s.totalMonths === "number") setTotalMonths(s.totalMonths);
     if (typeof s.currentMonth === "number") setCurrentMonth(s.currentMonth);
@@ -248,6 +250,7 @@ function AuctionRoom() {
     if (skipNextPushRef.current) { skipNextPushRef.current = false; return; }
     const snapshot: AuctionStateDTO = {
       groupName: chitGroupName,
+      liveGroupName,
       chitValue, totalMonths, currentMonth, commissionPct,
       startDate: chitStartDate,
       participants, bids, pastWinners, consents, groups,
@@ -265,7 +268,7 @@ function AuctionRoom() {
     }, 250);
     return () => clearTimeout(t);
   }, [
-    orgId, isAdmin, chitGroupName, chitValue, totalMonths, currentMonth,
+    orgId, isAdmin, chitGroupName, liveGroupName, chitValue, totalMonths, currentMonth,
     commissionPct, chitStartDate, participants, bids, pastWinners, consents, groups, winner,
     auctionClosed, turnStart, turnEnd, saveState,
   ]);

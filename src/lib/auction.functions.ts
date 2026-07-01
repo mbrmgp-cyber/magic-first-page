@@ -3,6 +3,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export type AuctionStateDTO = {
   groupName?: string;
+  liveGroupName?: string;
   chitValue?: number;
   totalMonths?: number;
   currentMonth?: number;
