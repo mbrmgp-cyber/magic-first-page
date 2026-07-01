@@ -439,7 +439,9 @@ function AuctionRoom() {
   // Admin writes: push state whenever it changes (debounced)
   useEffect(() => {
     if (!orgId || !isAdmin || !hydratedRef.current) return;
-    if (!chitGroupName.trim() && !liveGroupName.trim() && participants.length === 0) return;
+    // Do not persist a half-built setup card before the admin clicks Save/Assign.
+    // Once a group is live (or a session already exists), every admin change is written to auction_sessions.
+    if (!liveGroupName.trim() && !activeAuctionId && !turnStart && bids.length === 0 && !auctionClosed) return;
     if (skipNextPushRef.current) { skipNextPushRef.current = false; return; }
     const snapshot: AuctionStateDTO = {
       activeAuctionId: activeAuctionId ?? undefined,
@@ -463,7 +465,7 @@ function AuctionRoom() {
     }, 250);
     return () => clearTimeout(t);
   }, [
-    orgId, isAdmin, chitGroupName, liveGroupName, chitValue, totalMonths, currentMonth,
+    orgId, isAdmin, activeAuctionId, chitGroupName, liveGroupName, chitValue, totalMonths, currentMonth,
     commissionPct, chitStartDate, participants, bids, pastWinners, consents, groups, winner,
     auctionClosed, turnStart, turnEnd, saveState,
   ]);
