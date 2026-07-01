@@ -404,6 +404,9 @@ function AuctionRoom() {
         if (res?.state) {
           lastRemoteJsonRef.current = JSON.stringify(res.state);
           applyRemote(res.state);
+          // Initial hydration happens before the admin auto-save effect is active;
+          // clear the echo-suppression flag so the first real admin change is persisted.
+          skipNextPushRef.current = false;
         }
       } catch (e) { /* ignore */ }
       hydratedRef.current = true;
