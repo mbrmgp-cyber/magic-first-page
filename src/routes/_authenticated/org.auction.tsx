@@ -353,14 +353,15 @@ function AuctionRoom() {
       setActiveAuctionId(s.activeAuctionId);
       activeAuctionIdRef.current = s.activeAuctionId;
     }
-    if (typeof s.groupName === "string") setChitGroupName(s.groupName);
+    const freezeSetup = editingSetupRef.current;
+    if (!freezeSetup && typeof s.groupName === "string") setChitGroupName(s.groupName);
     if (typeof (s as any).liveGroupName === "string") setLiveGroupName((s as any).liveGroupName);
-    if (typeof s.chitValue === "number") setChitValue(s.chitValue);
-    if (typeof s.totalMonths === "number") setTotalMonths(s.totalMonths);
+    if (!freezeSetup && typeof s.chitValue === "number") setChitValue(s.chitValue);
+    if (!freezeSetup && typeof s.totalMonths === "number") setTotalMonths(s.totalMonths);
     if (typeof s.currentMonth === "number") setCurrentMonth(s.currentMonth);
     if (typeof s.commissionPct === "number") setCommissionPct(s.commissionPct);
-    if (typeof s.startDate === "string") setChitStartDate(s.startDate);
-    if (Array.isArray(s.participants)) setParticipants(s.participants);
+    if (!freezeSetup && typeof s.startDate === "string") setChitStartDate(s.startDate);
+    if (!freezeSetup && Array.isArray(s.participants)) setParticipants(s.participants);
     if (Array.isArray(s.bids)) setBids(s.bids);
     if (Array.isArray(s.pastWinners)) setPastWinners(s.pastWinners);
     if (s.consents && typeof s.consents === "object") setConsents(s.consents as any);
