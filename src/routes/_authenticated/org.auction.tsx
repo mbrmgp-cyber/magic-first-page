@@ -23,7 +23,7 @@ import {
 import { useCurrency } from "@/lib/currency-context";
 import { listApprovedMembers } from "@/lib/members.functions";
 import { getMyRoles, getMyMembership, getMyOrg } from "@/lib/org.functions";
-import { getAuctionState, saveAuctionState, submitAuctionConsent, submitMemberBid, type AuctionStateDTO } from "@/lib/auction.functions";
+import { getAuctionState, saveAuctionState, submitAuctionConsent, type AuctionStateDTO } from "@/lib/auction.functions";
 import { useSimRole } from "@/lib/rbac";
 import { RoleGate } from "@/components/RoleGate";
 import { supabase } from "@/integrations/supabase/client";
@@ -59,6 +59,107 @@ type Consent = {
   signatureTag: string;
   signedAt: number;
 };
+
+type AuctionSessionRow = {
+  id: string;
+  org_id: string;
+  group_name: string;
+  live_group_name: string | null;
+  participants: unknown;
+  chit_value: number;
+  total_months: number;
+  current_month: number;
+  commission_pct: number;
+  start_date: string | null;
+  turn_start: string | null;
+  turn_end: string | null;
+  auction_closed: boolean;
+  status: string;
+  winner_bid_id: string | null;
+  winner_member_id: string | null;
+  winner_member_name: string | null;
+  winner_member_code: string | null;
+  winner_amount: number | null;
+  winner_net: number | null;
+  winner_dividend: number | null;
+  past_winners: unknown;
+  consents: unknown;
+  created_at: string;
+  updated_at: string;
+};
+
+type BidRow = {
+  id: string;
+  member_id: string;
+  member_name: string;
+  member_code: string | null;
+  amount: number;
+  submitted_at: string;
+};
+
+const toMs = (value?: string | null) => (value ? new Date(value).getTime() : null);
+function normalizeSessionParticipants(value: unknown): MemberLite[] {
+  return Array.isArray(value)
+    ? value
+        .map((p: any) => ({ id: String(p.id ?? ""), name: String(p.name ?? ""), member_code: p.member_code ?? null }))
+        .filter((p) => p.id)
+    : [];
+}
+
+function mapBidRows(rows: BidRow[] | null | undefined): BidEntry[] {
+  return (rows ?? []).map((b) => ({
+    id: b.id,
+    memberId: b.member_id,
+    memberName: b.member_name,
+    memberCode: b.member_code,
+    amount: Number(b.amount) || 0,
+    submittedAt: new Date(b.submitted_at).getTime(),
+  }));
+}
+
+function sessionGroup(row: AuctionSessionRow): NonNullable<AuctionStateDTO["groups"]>[number] {
+  const members = normalizeSessionParticipants(row.participants);
+  return {
+    auctionId: row.id,
+    name: row.group_name,
+    memberIds: members.map((m) => m.id),
+    memberCodes: members.map((m) => m.member_code ?? null),
+    memberNames: members.map((m) => m.name),
+    totalMonths: row.total_months,
+    chitValue: Number(row.chit_value) || 0,
+    startDate: row.start_date,
+    savedAt: new Date(row.created_at || row.updated_at).getTime(),
+  };
+}
+
+function sessionState(row: AuctionSessionRow, bidRows: BidRow[], allRows: AuctionSessionRow[]): AuctionStateDTO {
+  return {
+    activeAuctionId: row.id,
+    groupName: row.group_name,
+    liveGroupName: row.live_group_name ?? row.group_name,
+    chitValue: Number(row.chit_value) || 0,
+    totalMonths: row.total_months,
+    currentMonth: row.current_month,
+    commissionPct: Number(row.commission_pct) || 0,
+    startDate: row.start_date ?? undefined,
+    participants: normalizeSessionParticipants(row.participants),
+    bids: mapBidRows(bidRows),
+    pastWinners: Array.isArray(row.past_winners) ? row.past_winners as any : [],
+    consents: row.consents && typeof row.consents === "object" && !Array.isArray(row.consents) ? row.consents as any : {},
+    groups: allRows.map(sessionGroup),
+    winner: row.winner_member_id ? {
+      id: row.winner_bid_id ?? `winner-${row.winner_member_id}`,
+      memberId: row.winner_member_id,
+      memberName: row.winner_member_name ?? "Winner",
+      memberCode: row.winner_member_code,
+      amount: Number(row.winner_amount) || 0,
+      submittedAt: toMs(row.turn_end) ?? Date.now(),
+    } : null,
+    auctionClosed: row.auction_closed || row.status === "closed",
+    turnStart: toMs(row.turn_start),
+    turnEnd: toMs(row.turn_end),
+  };
+}
 
 function AuctionRoom() {
   const { fmt, symbol } = useCurrency();
@@ -140,6 +241,7 @@ function AuctionRoom() {
   const [pastWinners, setPastWinners] = useState<PastWinner[]>([]);
   const [consents, setConsents] = useState<Record<string, Consent>>({});
   const [groups, setGroups] = useState<NonNullable<AuctionStateDTO["groups"]>>([]);
+  const [activeAuctionId, setActiveAuctionId] = useState<string | null>(null);
   const [selectedGroupName, setSelectedGroupName] = useState<string>("");
   const [chitStartDate, setChitStartDate] = useState<string>("");
   // Admin UX: collapse Group Setup card after save + which saved group is loaded into the Live board
@@ -153,10 +255,42 @@ function AuctionRoom() {
     setChitStartDate("");
   };
 
-  const loadGroupIntoLive = (name: string) => {
+  const loadGroupIntoLive = async (name: string) => {
     setLiveGroupName(name);
     const g = groups.find((x) => x.name === name);
     if (!g) return;
+    if (g.auctionId) {
+      setActiveAuctionId(g.auctionId);
+      activeAuctionIdRef.current = g.auctionId;
+      try {
+        const { data: session, error: sessionError } = await (supabase as any)
+          .from("auction_sessions")
+          .select("*")
+          .eq("id", g.auctionId)
+          .maybeSingle();
+        if (sessionError) throw sessionError;
+        if (session) {
+          const { data: sessionRows } = await (supabase as any)
+            .from("auction_sessions")
+            .select("*")
+            .eq("org_id", orgId)
+            .order("updated_at", { ascending: false });
+          const { data: bidRows, error: bidError } = await (supabase as any)
+            .from("bids")
+            .select("id, member_id, member_name, member_code, amount, submitted_at")
+            .eq("auction_id", g.auctionId)
+            .order("submitted_at", { ascending: true });
+          if (bidError) throw bidError;
+          const nextState = sessionState(session as AuctionSessionRow, bidRows ?? [], (sessionRows ?? []) as AuctionSessionRow[]);
+          nextState.liveGroupName = name;
+          applyRemote(nextState);
+          if (orgId) await saveState({ data: { orgId, state: nextState } });
+          return;
+        }
+      } catch (e: any) {
+        console.error("Failed to load auction group:", e?.message || e);
+      }
+    }
     const members: MemberLite[] = (g.memberIds || []).map((id, i) => ({
       id,
       name: g.memberNames?.[i] || "",
@@ -165,7 +299,28 @@ function AuctionRoom() {
     setParticipants(members);
     const tm = (g as any).totalMonths;
     if (typeof tm === "number" && tm > 0) setTotalMonths(tm);
+    if (typeof (g as any).chitValue === "number") setChitValue((g as any).chitValue);
+    if (typeof (g as any).startDate === "string") setChitStartDate((g as any).startDate || "");
     setChitGroupName(name);
+    if (orgId) {
+      try {
+        await saveState({
+          data: {
+            orgId,
+            state: buildSessionSnapshot({
+              groupName: name,
+              liveGroupName: name,
+              participants: members,
+              totalMonths: typeof tm === "number" && tm > 0 ? tm : totalMonths,
+              chitValue: typeof (g as any).chitValue === "number" ? (g as any).chitValue : chitValue,
+              startDate: typeof (g as any).startDate === "string" ? (g as any).startDate : chitStartDate,
+            }),
+          },
+        });
+      } catch (e: any) {
+        toast.error(e?.message || "Failed to activate live group");
+      }
+    }
   };
 
   // ─────────── Realtime sync with admin (DB-backed) ───────────
@@ -174,7 +329,6 @@ function AuctionRoom() {
   const loadState = useServerFn(getAuctionState);
   const saveState = useServerFn(saveAuctionState);
   const submitConsent = useServerFn(submitAuctionConsent);
-  const submitMyBid = useServerFn(submitMemberBid);
 
   // Member's own bidding input
   const [myBidAmount, setMyBidAmount] = useState<number>(0);
@@ -183,10 +337,15 @@ function AuctionRoom() {
   const hydratedRef = useRef(false);
   const lastRemoteJsonRef = useRef<string>("");
   const skipNextPushRef = useRef(false);
+  const activeAuctionIdRef = useRef<string | null>(null);
 
   const applyRemote = (s: AuctionStateDTO | null | undefined) => {
     if (!s) return;
     skipNextPushRef.current = true;
+    if (typeof s.activeAuctionId === "string") {
+      setActiveAuctionId(s.activeAuctionId);
+      activeAuctionIdRef.current = s.activeAuctionId;
+    }
     if (typeof s.groupName === "string") setChitGroupName(s.groupName);
     if (typeof (s as any).liveGroupName === "string") setLiveGroupName((s as any).liveGroupName);
     if (typeof s.chitValue === "number") setChitValue(s.chitValue);
@@ -205,10 +364,39 @@ function AuctionRoom() {
     setTurnEnd(s.turnEnd ?? null);
   };
 
-  // Initial load + Supabase realtime subscription
+  useEffect(() => { activeAuctionIdRef.current = activeAuctionId; }, [activeAuctionId]);
+
+  // Initial load + Supabase realtime subscriptions backed by auction_sessions + bids tables
   useEffect(() => {
     if (!orgId) return;
     let cancelled = false;
+    const fetchAndApply = async (preferredAuctionId?: string | null) => {
+      const { data: sessionRows, error: sessionError } = await (supabase as any)
+        .from("auction_sessions")
+        .select("*")
+        .eq("org_id", orgId)
+        .order("updated_at", { ascending: false });
+      if (sessionError) throw sessionError;
+      const sessions = (sessionRows ?? []) as AuctionSessionRow[];
+      const session =
+        (preferredAuctionId ? sessions.find((s) => s.id === preferredAuctionId) : null) ||
+        sessions.find((s) => s.status === "active" && !s.auction_closed) ||
+        sessions[0];
+      if (!session) return;
+
+      const { data: bidRows, error: bidError } = await (supabase as any)
+        .from("bids")
+        .select("id, member_id, member_name, member_code, amount, submitted_at")
+        .eq("auction_id", session.id)
+        .order("submitted_at", { ascending: true });
+      if (bidError) throw bidError;
+      const next = sessionState(session, bidRows ?? [], sessions);
+      const js = JSON.stringify(next);
+      if (js === lastRemoteJsonRef.current) return;
+      lastRemoteJsonRef.current = js;
+      if (!cancelled) applyRemote(next);
+    };
+
     (async () => {
       try {
         const res = await loadState({ data: { orgId } });
@@ -216,23 +404,30 @@ function AuctionRoom() {
         if (res?.state) {
           lastRemoteJsonRef.current = JSON.stringify(res.state);
           applyRemote(res.state);
+          // Initial hydration happens before the admin auto-save effect is active;
+          // clear the echo-suppression flag so the first real admin change is persisted.
+          skipNextPushRef.current = false;
         }
       } catch (e) { /* ignore */ }
       hydratedRef.current = true;
     })();
 
     const channel = supabase
-      .channel(`chit-auction-${orgId}`)
+      .channel(`auction-sessions-and-bids-${orgId}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "chit_auctions", filter: `org_id=eq.${orgId}` },
+        { event: "*", schema: "public", table: "auction_sessions", filter: `org_id=eq.${orgId}` },
         (payload: any) => {
-          const next = (payload.new?.state ?? null) as AuctionStateDTO | null;
-          if (!next) return;
-          const js = JSON.stringify(next);
-          if (js === lastRemoteJsonRef.current) return;
-          lastRemoteJsonRef.current = js;
-          applyRemote(next);
+          const id = payload.new?.id ?? payload.old?.id ?? activeAuctionIdRef.current;
+          fetchAndApply(id).catch((e) => console.error("Auction session realtime failed:", e?.message || e));
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "bids", filter: `org_id=eq.${orgId}` },
+        (payload: any) => {
+          const auctionId = payload.new?.auction_id ?? payload.old?.auction_id ?? activeAuctionIdRef.current;
+          fetchAndApply(auctionId).catch((e) => console.error("Auction bids realtime failed:", e?.message || e));
         },
       )
       .subscribe();
@@ -247,8 +442,12 @@ function AuctionRoom() {
   // Admin writes: push state whenever it changes (debounced)
   useEffect(() => {
     if (!orgId || !isAdmin || !hydratedRef.current) return;
+    // Do not persist a half-built setup card before the admin clicks Save/Assign.
+    // Once a group is live (or a session already exists), every admin change is written to auction_sessions.
+    if (!liveGroupName.trim() && !activeAuctionId && !turnStart && bids.length === 0 && !auctionClosed) return;
     if (skipNextPushRef.current) { skipNextPushRef.current = false; return; }
     const snapshot: AuctionStateDTO = {
+      activeAuctionId: activeAuctionId ?? undefined,
       groupName: chitGroupName,
       liveGroupName,
       chitValue, totalMonths, currentMonth, commissionPct,
@@ -261,19 +460,60 @@ function AuctionRoom() {
     const t = setTimeout(async () => {
       try {
         lastRemoteJsonRef.current = js;
-        await saveState({ data: { orgId, state: snapshot } });
+        const res = await saveState({ data: { orgId, state: snapshot } });
+        if (res?.state) applyRemote(res.state);
       } catch (e: any) {
         console.error("Auction sync failed:", e?.message || e);
       }
     }, 250);
     return () => clearTimeout(t);
   }, [
-    orgId, isAdmin, chitGroupName, liveGroupName, chitValue, totalMonths, currentMonth,
+    orgId, isAdmin, activeAuctionId, chitGroupName, liveGroupName, chitValue, totalMonths, currentMonth,
     commissionPct, chitStartDate, participants, bids, pastWinners, consents, groups, winner,
     auctionClosed, turnStart, turnEnd, saveState,
   ]);
 
-  const startTurn = () => setTurnStart(Date.now());
+  const buildSessionSnapshot = (overrides: Partial<AuctionStateDTO> = {}): AuctionStateDTO => ({
+    activeAuctionId: overrides.activeAuctionId ?? activeAuctionId ?? undefined,
+    groupName: overrides.groupName ?? chitGroupName,
+    liveGroupName: overrides.liveGroupName ?? liveGroupName,
+    chitValue: overrides.chitValue ?? chitValue,
+    totalMonths: overrides.totalMonths ?? totalMonths,
+    currentMonth: overrides.currentMonth ?? currentMonth,
+    commissionPct: overrides.commissionPct ?? commissionPct,
+    startDate: "startDate" in overrides ? overrides.startDate : chitStartDate,
+    participants: overrides.participants ?? participants,
+    bids: overrides.bids ?? bids,
+    pastWinners: overrides.pastWinners ?? pastWinners,
+    consents: overrides.consents ?? consents,
+    groups: overrides.groups ?? groups,
+    winner: "winner" in overrides ? overrides.winner : winner,
+    auctionClosed: overrides.auctionClosed ?? auctionClosed,
+    turnStart: overrides.turnStart === undefined ? turnStart : overrides.turnStart,
+    turnEnd: overrides.turnEnd === undefined ? turnEnd : overrides.turnEnd,
+  });
+
+  const ensureCurrentSession = async (overrides: Partial<AuctionStateDTO> = {}) => {
+    if (!orgId) throw new Error("Organization not found");
+    const state = buildSessionSnapshot(overrides);
+    const res: any = await saveState({ data: { orgId, state } });
+    const id = res?.sessionId ?? res?.state?.activeAuctionId ?? null;
+    if (!id) throw new Error("Could not create auction session");
+    setActiveAuctionId(id);
+    activeAuctionIdRef.current = id;
+    if (res?.state) applyRemote(res.state);
+    return id as string;
+  };
+
+  const startTurn = async () => {
+    const ts = Date.now();
+    setTurnStart(ts);
+    try {
+      await ensureCurrentSession({ turnStart: ts, turnEnd: null, auctionClosed: false });
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to start auction turn");
+    }
+  };
 
   const calc = useMemo(() => {
     const cv = Math.max(0, Number(chitValue) || 0);
@@ -325,50 +565,80 @@ function AuctionRoom() {
     return { commission, net, dividend, others };
   }, [winner, chitValue, commissionPct, participants.length]);
 
-  const submitBid = () => {
+  const submitBid = async () => {
     if (auctionClosed) return;
+    if (turnEnd) {
+      toast.error("Entry is closed for this turn");
+      return;
+    }
     if (!activeBidder || !bid || calc.overCap) return;
     const m = participants.find((p) => p.id === activeBidder);
     if (!m) return;
-    if (!turnStart) setTurnStart(Date.now());
-    setBids((prev) => [
-      ...prev,
-      {
-        id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-        memberId: m.id,
-        memberName: m.name,
-        memberCode: m.member_code ?? null,
+    try {
+      const turnTs = turnStart ?? Date.now();
+      if (!turnStart) setTurnStart(turnTs);
+      const auctionId = await ensureCurrentSession({ turnStart: turnTs, auctionClosed: false, turnEnd: null });
+      const { error } = await (supabase as any).from("bids").insert({
+        auction_id: auctionId,
+        org_id: orgId,
+        member_id: m.id,
+        member_name: m.name || "Member",
+        member_code: m.member_code ?? null,
         amount: bid,
-        submittedAt: Date.now(),
-      },
-    ]);
-    setBid(0);
+        submitted_by: rolesQ.data?.userId ?? null,
+      });
+      if (error) throw error;
+      setBid(0);
+      toast.success("Bid saved to database");
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to submit bid");
+    }
   };
 
-  const clearBids = () => { setBids([]); setTurnStart(null); setTurnEnd(null); };
+  const clearBids = async () => {
+    const auctionId = activeAuctionIdRef.current;
+    setBids([]); setTurnStart(null); setTurnEnd(null);
+    try {
+      if (auctionId) {
+        const { error } = await (supabase as any).from("bids").delete().eq("auction_id", auctionId);
+        if (error) throw error;
+      }
+      await ensureCurrentSession({ bids: [], turnStart: null, turnEnd: null, winner: null, auctionClosed: false });
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to clear bids");
+    }
+  };
 
-  const finalizeAuction = () => {
+  const finalizeAuction = async () => {
     if (sortedBids.length === 0) return;
     const w = sortedBids[0];
     setWinner(w);
     setAuctionClosed(true);
-    setTurnEnd(Date.now());
+    const closedAt = Date.now();
+    setTurnEnd(closedAt);
     setWinnerOpen(true);
     const cv = Math.max(0, Number(chitValue) || 0);
     const commission = (cv * (Number(commissionPct) || 0)) / 100;
     const net = Math.max(0, cv - w.amount - commission);
     const others = Math.max(1, participants.length - 1);
     const dividend = Math.max(0, (w.amount - commission)) / others;
-    setPastWinners((prev) => [
-      ...prev.filter((p) => p.month !== currentMonth),
+    const nextPastWinners = [
+      ...pastWinners.filter((p) => p.month !== currentMonth),
       {
         month: currentMonth, memberId: w.memberId, memberCode: w.memberCode,
-        memberName: w.memberName, amount: w.amount, net, dividend, closedAt: Date.now(),
+        memberName: w.memberName, amount: w.amount, net, dividend, closedAt,
       },
-    ]);
+    ];
+    setPastWinners(nextPastWinners);
+    try {
+      await ensureCurrentSession({ winner: w, auctionClosed: true, turnEnd: closedAt, pastWinners: nextPastWinners });
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to finalize auction");
+    }
   };
 
-  const resetAuction = () => {
+  const resetAuction = async () => {
+    const nextMonth = currentMonth + 1;
     setBids([]);
     setWinner(null);
     setAuctionClosed(false);
@@ -376,20 +646,59 @@ function AuctionRoom() {
     setActiveBidder("");
     setTurnStart(null);
     setTurnEnd(null);
-    setCurrentMonth((m) => m + 1);
+    setCurrentMonth(nextMonth);
+    try {
+      if (activeAuctionIdRef.current) {
+        const { error } = await (supabase as any).from("bids").delete().eq("auction_id", activeAuctionIdRef.current);
+        if (error) throw error;
+      }
+      await ensureCurrentSession({
+        bids: [], winner: null, auctionClosed: false, turnStart: null, turnEnd: null, currentMonth: nextMonth,
+      });
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to reset auction");
+    }
   };
 
-  const deleteGroup = (name: string) => {
+  const deleteGroup = async (name: string) => {
+    const g = groups.find((x) => x.name.toLowerCase() === name.toLowerCase());
     setGroups((prev) => prev.filter((g) => g.name.toLowerCase() !== name.toLowerCase()));
+    try {
+      if (g?.auctionId) {
+        const { error } = await (supabase as any).from("auction_sessions").delete().eq("id", g.auctionId);
+        if (error) throw error;
+      } else if (orgId) {
+        const { error } = await (supabase as any)
+          .from("auction_sessions")
+          .delete()
+          .eq("org_id", orgId)
+          .eq("group_name", name);
+        if (error) throw error;
+      }
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to delete group from database");
+      return;
+    }
     toast.success(`Deleted group "${name}"`);
   };
 
-  const closeEntry = () => {
-    setTurnEnd(Date.now());
+  const closeEntry = async () => {
+    const ts = Date.now();
+    setTurnEnd(ts);
+    try {
+      await ensureCurrentSession({ turnEnd: ts });
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to close entry");
+      return;
+    }
     toast.info("Entry closed · ఎంట్రీ క్లోజ్");
   };
 
-  const saveGroup = () => {
+  const saveGroup = async () => {
+    if (!orgId) {
+      toast.error("Organization not found");
+      return;
+    }
     const name = (chitGroupName || "").trim();
     if (!name) {
       toast.error("Enter a Group Name first");
@@ -403,31 +712,81 @@ function AuctionRoom() {
       toast.error("Enter Total Months (మొత్తం నెలలు)");
       return;
     }
-    setGroups((prev) => {
-      const others = prev.filter((g) => g.name.toLowerCase() !== name.toLowerCase());
-      return [
-        ...others,
-        {
-          name,
-          memberIds: participants.map((p) => p.id),
-          memberCodes: participants.map((p) => p.member_code ?? null),
-          memberNames: participants.map((p) => p.name),
-          savedAt: Date.now(),
-          // Persist totalMonths per group so the Live board can restore it on selection
-          totalMonths,
-        } as any,
-      ];
-    });
+    const nextGroup = {
+      name,
+      memberIds: participants.map((p) => p.id),
+      memberCodes: participants.map((p) => p.member_code ?? null),
+      memberNames: participants.map((p) => p.name),
+      savedAt: Date.now(),
+      totalMonths,
+      chitValue,
+      startDate: chitStartDate || null,
+    } as NonNullable<AuctionStateDTO["groups"]>[number];
+    const nextGroups = [
+      ...groups.filter((g) => g.name.toLowerCase() !== name.toLowerCase()),
+      nextGroup,
+    ];
+    setGroups(nextGroups);
     setSetupCollapsed(true);
     setLiveGroupName(name);
+    try {
+      const res: any = await saveState({
+        data: {
+          orgId,
+          state: buildSessionSnapshot({
+            groupName: name,
+            liveGroupName: name,
+            groups: nextGroups,
+            participants,
+            chitValue,
+            totalMonths,
+            startDate: chitStartDate,
+            auctionClosed: false,
+          }),
+        },
+      });
+      if (res?.state) applyRemote(res.state);
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to save group to database");
+      return;
+    }
     toast.success(`Saved "${name}" — synced to members`);
   };
 
   const submitOwnBid = async () => {
     if (!orgId || !myBidAmount || myBidAmount <= 0 || auctionClosed) return;
+    if (turnEnd) {
+      toast.error("Entry is closed for this turn");
+      return;
+    }
     setSubmittingMyBid(true);
     try {
-      await submitMyBid({ data: { orgId, amount: myBidAmount } });
+      let auctionId = activeAuctionIdRef.current;
+      if (!auctionId) {
+        const { data: session, error: sessionError } = await (supabase as any)
+          .from("auction_sessions")
+          .select("id")
+          .eq("org_id", orgId)
+          .neq("status", "closed")
+          .eq("auction_closed", false)
+          .order("updated_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (sessionError) throw sessionError;
+        auctionId = session?.id ?? null;
+      }
+      if (!auctionId) throw new Error("No active auction session found");
+      if (!myId) throw new Error("Member profile not found");
+      const { error } = await (supabase as any).from("bids").insert({
+        auction_id: auctionId,
+        org_id: orgId,
+        member_id: myId,
+        member_name: myName || "Member",
+        member_code: myCode || null,
+        amount: myBidAmount,
+        submitted_by: rolesQ.data?.userId ?? null,
+      });
+      if (error) throw error;
       setMyBidAmount(0);
       toast.success("Bid submitted");
     } catch (e: any) {
@@ -540,8 +899,9 @@ function AuctionRoom() {
         {/* ═══════════════ MEMBER WIREFRAME VIEW ═══════════════ */}
         {!isAdmin && me && (() => {
           const myGroups = groups.filter((g) => g.memberIds.includes(myId));
+          const visibleGroupName = selectedGroupName || liveGroupName || myGroups[0]?.name || "";
           const activeGroup =
-            myGroups.find((g) => g.name === selectedGroupName) || myGroups[0] || null;
+            myGroups.find((g) => g.name === visibleGroupName) || myGroups[0] || null;
           const closedMonths = pastWinners.length;
           const myBidsList = bids
             .filter((b) => b.memberId === myId)
@@ -569,7 +929,7 @@ function AuctionRoom() {
                       <span className="text-[10px] text-muted-foreground italic">Not assigned</span>
                     ) : (
                       myGroups.map((g) => {
-                        const active = (selectedGroupName || myGroups[0]?.name) === g.name;
+                        const active = visibleGroupName === g.name;
                         return (
                           <button
                             key={g.name}

@@ -14,6 +14,169 @@ export type Database = {
   }
   public: {
     Tables: {
+      auction_sessions: {
+        Row: {
+          auction_closed: boolean
+          chit_value: number
+          commission_pct: number
+          consents: Json
+          created_at: string
+          current_month: number
+          group_name: string
+          id: string
+          live_group_name: string | null
+          org_id: string
+          participants: Json
+          past_winners: Json
+          start_date: string | null
+          status: string
+          total_months: number
+          turn_end: string | null
+          turn_start: string | null
+          updated_at: string
+          updated_by: string | null
+          winner_amount: number | null
+          winner_bid_id: string | null
+          winner_dividend: number | null
+          winner_member_code: string | null
+          winner_member_id: string | null
+          winner_member_name: string | null
+          winner_net: number | null
+        }
+        Insert: {
+          auction_closed?: boolean
+          chit_value?: number
+          commission_pct?: number
+          consents?: Json
+          created_at?: string
+          current_month?: number
+          group_name: string
+          id?: string
+          live_group_name?: string | null
+          org_id: string
+          participants?: Json
+          past_winners?: Json
+          start_date?: string | null
+          status?: string
+          total_months?: number
+          turn_end?: string | null
+          turn_start?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          winner_amount?: number | null
+          winner_bid_id?: string | null
+          winner_dividend?: number | null
+          winner_member_code?: string | null
+          winner_member_id?: string | null
+          winner_member_name?: string | null
+          winner_net?: number | null
+        }
+        Update: {
+          auction_closed?: boolean
+          chit_value?: number
+          commission_pct?: number
+          consents?: Json
+          created_at?: string
+          current_month?: number
+          group_name?: string
+          id?: string
+          live_group_name?: string | null
+          org_id?: string
+          participants?: Json
+          past_winners?: Json
+          start_date?: string | null
+          status?: string
+          total_months?: number
+          turn_end?: string | null
+          turn_start?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          winner_amount?: number | null
+          winner_bid_id?: string | null
+          winner_dividend?: number | null
+          winner_member_code?: string | null
+          winner_member_id?: string | null
+          winner_member_name?: string | null
+          winner_net?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auction_sessions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auction_sessions_winner_member_id_fkey"
+            columns: ["winner_member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bids: {
+        Row: {
+          amount: number
+          auction_id: string
+          created_at: string
+          id: string
+          member_code: string | null
+          member_id: string
+          member_name: string
+          org_id: string
+          submitted_at: string
+          submitted_by: string | null
+        }
+        Insert: {
+          amount: number
+          auction_id: string
+          created_at?: string
+          id?: string
+          member_code?: string | null
+          member_id: string
+          member_name: string
+          org_id: string
+          submitted_at?: string
+          submitted_by?: string | null
+        }
+        Update: {
+          amount?: number
+          auction_id?: string
+          created_at?: string
+          id?: string
+          member_code?: string | null
+          member_id?: string
+          member_name?: string
+          org_id?: string
+          submitted_at?: string
+          submitted_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bids_auction_id_fkey"
+            columns: ["auction_id"]
+            isOneToOne: false
+            referencedRelation: "auction_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bids_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bids_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_announcements: {
         Row: {
           author_user_id: string
@@ -1546,20 +1709,42 @@ export type Database = {
         }[]
       }
       submit_chit_bid: {
-        Args: { _amount: number; _org_id: string }
+        Args: { _amount: number; _auction_id?: string; _org_id: string }
         Returns: Json
       }
       submit_chit_consent: {
         Args: { _org_id: string; _signature_tag: string }
         Returns: {
+          auction_closed: boolean
+          chit_value: number
+          commission_pct: number
+          consents: Json
+          created_at: string
+          current_month: number
+          group_name: string
+          id: string
+          live_group_name: string | null
           org_id: string
-          state: Json
+          participants: Json
+          past_winners: Json
+          start_date: string | null
+          status: string
+          total_months: number
+          turn_end: string | null
+          turn_start: string | null
           updated_at: string
           updated_by: string | null
+          winner_amount: number | null
+          winner_bid_id: string | null
+          winner_dividend: number | null
+          winner_member_code: string | null
+          winner_member_id: string | null
+          winner_member_name: string | null
+          winner_net: number | null
         }
         SetofOptions: {
           from: "*"
-          to: "chit_auctions"
+          to: "auction_sessions"
           isOneToOne: true
           isSetofReturn: false
         }
