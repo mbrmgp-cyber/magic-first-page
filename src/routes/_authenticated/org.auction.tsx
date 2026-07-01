@@ -250,6 +250,7 @@ function AuctionRoom() {
     if (skipNextPushRef.current) { skipNextPushRef.current = false; return; }
     const snapshot: AuctionStateDTO = {
       groupName: chitGroupName,
+      liveGroupName,
       chitValue, totalMonths, currentMonth, commissionPct,
       startDate: chitStartDate,
       participants, bids, pastWinners, consents, groups,
@@ -267,7 +268,7 @@ function AuctionRoom() {
     }, 250);
     return () => clearTimeout(t);
   }, [
-    orgId, isAdmin, chitGroupName, chitValue, totalMonths, currentMonth,
+    orgId, isAdmin, chitGroupName, liveGroupName, chitValue, totalMonths, currentMonth,
     commissionPct, chitStartDate, participants, bids, pastWinners, consents, groups, winner,
     auctionClosed, turnStart, turnEnd, saveState,
   ]);
