@@ -146,6 +146,11 @@ function AuctionRoom() {
   const loadState = useServerFn(getAuctionState);
   const saveState = useServerFn(saveAuctionState);
   const submitConsent = useServerFn(submitAuctionConsent);
+  const submitMyBid = useServerFn(submitMemberBid);
+
+  // Member's own bidding input
+  const [myBidAmount, setMyBidAmount] = useState<number>(0);
+  const [submittingMyBid, setSubmittingMyBid] = useState(false);
 
   const hydratedRef = useRef(false);
   const lastRemoteJsonRef = useRef<string>("");
