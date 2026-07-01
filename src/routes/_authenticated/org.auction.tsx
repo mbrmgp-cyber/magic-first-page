@@ -434,9 +434,25 @@ function AuctionRoom() {
       )
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "bids", filter: `org_id=eq.${orgId}` },
+        { event: "INSERT", schema: "public", table: "bids", filter: `org_id=eq.${orgId}` },
         (payload: any) => {
-          const auctionId = payload.new?.auction_id ?? payload.old?.auction_id ?? activeAuctionIdRef.current;
+          const row = payload.new as BidRow | undefined;
+          const auctionId = row?.auction_id ?? activeAuctionIdRef.current;
+          // Fast path: if the new bid belongs to the session we're currently
+          // watching, append immediately so every subscriber (admin + members)
+          // sees the row without waiting for the full refetch round-trip.
+          if (row && auctionId && activeAuctionIdRef.current && auctionId === activeAuctionIdRef.current) {
+            const entry = mapBidRows([row])[0];
+            setBids((prev) => (prev.some((b) => b.id === entry.id) ? prev : [...prev, entry]));
+          }
+          fetchAndApply(auctionId).catch((e) => console.error("Auction bids realtime failed:", e?.message || e));
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "bids", filter: `org_id=eq.${orgId}` },
+        (payload: any) => {
+          const auctionId = payload.old?.auction_id ?? activeAuctionIdRef.current;
           fetchAndApply(auctionId).catch((e) => console.error("Auction bids realtime failed:", e?.message || e));
         },
       )
