@@ -347,6 +347,46 @@ function AuctionRoom() {
     setCurrentMonth((m) => m + 1);
   };
 
+  const saveGroup = () => {
+    const name = (chitGroupName || "").trim();
+    if (!name) {
+      toast.error("Enter a Group Name first");
+      return;
+    }
+    if (participants.length === 0) {
+      toast.error("Add members to the group first");
+      return;
+    }
+    setGroups((prev) => {
+      const others = prev.filter((g) => g.name.toLowerCase() !== name.toLowerCase());
+      return [
+        ...others,
+        {
+          name,
+          memberIds: participants.map((p) => p.id),
+          memberCodes: participants.map((p) => p.member_code ?? null),
+          memberNames: participants.map((p) => p.name),
+          savedAt: Date.now(),
+        },
+      ];
+    });
+    toast.success(`Saved "${name}" — synced to members`);
+  };
+
+  const submitOwnBid = async () => {
+    if (!orgId || !myBidAmount || myBidAmount <= 0 || auctionClosed) return;
+    setSubmittingMyBid(true);
+    try {
+      await submitMyBid({ data: { orgId, amount: myBidAmount } });
+      setMyBidAmount(0);
+      toast.success("Bid submitted");
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to submit bid");
+    } finally {
+      setSubmittingMyBid(false);
+    }
+  };
+
   const giveConsent = async () => {
     if (!myId || !auctionClosed || !orgId) return;
     const tag = `e-sig:${(myCode || myId.slice(0, 6)).toString()}:${Date.now().toString(36)}`;
