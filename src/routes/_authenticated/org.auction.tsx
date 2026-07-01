@@ -656,17 +656,41 @@ function AuctionRoom() {
   };
   */
 
-  const deleteGroup = (name: string) => {
+  const deleteGroup = async (name: string) => {
+    const g = groups.find((x) => x.name.toLowerCase() === name.toLowerCase());
     setGroups((prev) => prev.filter((g) => g.name.toLowerCase() !== name.toLowerCase()));
+    try {
+      if (g?.auctionId) {
+        const { error } = await (supabase as any).from("auction_sessions").delete().eq("id", g.auctionId);
+        if (error) throw error;
+      } else if (orgId) {
+        const { error } = await (supabase as any)
+          .from("auction_sessions")
+          .delete()
+          .eq("org_id", orgId)
+          .eq("group_name", name);
+        if (error) throw error;
+      }
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to delete group from database");
+      return;
+    }
     toast.success(`Deleted group "${name}"`);
   };
 
-  const closeEntry = () => {
-    setTurnEnd(Date.now());
+  const closeEntry = async () => {
+    const ts = Date.now();
+    setTurnEnd(ts);
+    try {
+      await ensureCurrentSession({ turnEnd: ts });
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to close entry");
+      return;
+    }
     toast.info("Entry closed · ఎంట్రీ క్లోజ్");
   };
 
-  const saveGroup = () => {
+  const saveGroup = async () => {
     const name = (chitGroupName || "").trim();
     if (!name) {
       toast.error("Enter a Group Name first");
@@ -680,6 +704,45 @@ function AuctionRoom() {
       toast.error("Enter Total Months (మొత్తం నెలలు)");
       return;
     }
+    const nextGroup = {
+      name,
+      memberIds: participants.map((p) => p.id),
+      memberCodes: participants.map((p) => p.member_code ?? null),
+      memberNames: participants.map((p) => p.name),
+      savedAt: Date.now(),
+      totalMonths,
+      chitValue,
+      startDate: chitStartDate || null,
+    } as NonNullable<AuctionStateDTO["groups"]>[number];
+    const nextGroups = [
+      ...groups.filter((g) => g.name.toLowerCase() !== name.toLowerCase()),
+      nextGroup,
+    ];
+    setGroups(nextGroups);
+    setSetupCollapsed(true);
+    setLiveGroupName(name);
+    try {
+      const res: any = await saveState({
+        data: {
+          orgId: orgId!,
+          state: buildSessionSnapshot({
+            groupName: name,
+            liveGroupName: name,
+            groups: nextGroups,
+            participants,
+            chitValue,
+            totalMonths,
+            startDate: chitStartDate,
+            auctionClosed: false,
+          }),
+        },
+      });
+      if (res?.state) applyRemote(res.state);
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to save group to database");
+      return;
+    }
+    /* previous local-only group save kept for reference
     setGroups((prev) => {
       const others = prev.filter((g) => g.name.toLowerCase() !== name.toLowerCase());
       return [
@@ -697,6 +760,7 @@ function AuctionRoom() {
     });
     setSetupCollapsed(true);
     setLiveGroupName(name);
+    */
     toast.success(`Saved "${name}" — synced to members`);
   };
 
@@ -704,7 +768,32 @@ function AuctionRoom() {
     if (!orgId || !myBidAmount || myBidAmount <= 0 || auctionClosed) return;
     setSubmittingMyBid(true);
     try {
-      await submitMyBid({ data: { orgId, amount: myBidAmount } });
+      let auctionId = activeAuctionIdRef.current;
+      if (!auctionId) {
+        const { data: session, error: sessionError } = await (supabase as any)
+          .from("auction_sessions")
+          .select("id")
+          .eq("org_id", orgId)
+          .neq("status", "closed")
+          .eq("auction_closed", false)
+          .order("updated_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (sessionError) throw sessionError;
+        auctionId = session?.id ?? null;
+      }
+      if (!auctionId) throw new Error("No active auction session found");
+      if (!myId) throw new Error("Member profile not found");
+      const { error } = await (supabase as any).from("bids").insert({
+        auction_id: auctionId,
+        org_id: orgId,
+        member_id: myId,
+        member_name: myName || "Member",
+        member_code: myCode || null,
+        amount: myBidAmount,
+        submitted_by: rolesQ.data?.userId ?? null,
+      });
+      if (error) throw error;
       setMyBidAmount(0);
       toast.success("Bid submitted");
     } catch (e: any) {
