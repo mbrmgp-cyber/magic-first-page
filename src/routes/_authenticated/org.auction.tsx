@@ -169,7 +169,8 @@ function AuctionRoom() {
   };
 
   // ─────────── Realtime sync with admin (DB-backed) ───────────
-  const orgId: string | undefined = me?.org_id;
+  // For org admins without a member row, fall back to org.id so they still sync.
+  const orgId: string | undefined = me?.org_id ?? org?.id;
   const loadState = useServerFn(getAuctionState);
   const saveState = useServerFn(saveAuctionState);
   const submitConsent = useServerFn(submitAuctionConsent);
