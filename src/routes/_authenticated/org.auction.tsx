@@ -257,10 +257,39 @@ function AuctionRoom() {
     setChitStartDate("");
   };
 
-  const loadGroupIntoLive = (name: string) => {
+  const loadGroupIntoLive = async (name: string) => {
     setLiveGroupName(name);
     const g = groups.find((x) => x.name === name);
     if (!g) return;
+    if (g.auctionId) {
+      setActiveAuctionId(g.auctionId);
+      activeAuctionIdRef.current = g.auctionId;
+      try {
+        const { data: session, error: sessionError } = await (supabase as any)
+          .from("auction_sessions")
+          .select("*")
+          .eq("id", g.auctionId)
+          .maybeSingle();
+        if (sessionError) throw sessionError;
+        if (session) {
+          const { data: sessionRows } = await (supabase as any)
+            .from("auction_sessions")
+            .select("*")
+            .eq("org_id", orgId)
+            .order("updated_at", { ascending: false });
+          const { data: bidRows, error: bidError } = await (supabase as any)
+            .from("bids")
+            .select("id, member_id, member_name, member_code, amount, submitted_at")
+            .eq("auction_id", g.auctionId)
+            .order("submitted_at", { ascending: true });
+          if (bidError) throw bidError;
+          applyRemote(sessionState(session as AuctionSessionRow, bidRows ?? [], (sessionRows ?? []) as AuctionSessionRow[]));
+          return;
+        }
+      } catch (e: any) {
+        console.error("Failed to load auction group:", e?.message || e);
+      }
+    }
     const members: MemberLite[] = (g.memberIds || []).map((id, i) => ({
       id,
       name: g.memberNames?.[i] || "",
@@ -269,6 +298,8 @@ function AuctionRoom() {
     setParticipants(members);
     const tm = (g as any).totalMonths;
     if (typeof tm === "number" && tm > 0) setTotalMonths(tm);
+    if (typeof (g as any).chitValue === "number") setChitValue((g as any).chitValue);
+    if (typeof (g as any).startDate === "string") setChitStartDate((g as any).startDate || "");
     setChitGroupName(name);
   };
 
