@@ -875,7 +875,49 @@ function AuctionRoom() {
           </>)}
         </Card>
 
+        {/* Live-auction group selector — nothing loads until admin picks a saved group */}
+        <Card className="p-3 md:p-4 bg-card border-amber-500/30">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Gavel className="size-4 text-amber-400" />
+            <h2 className="font-semibold text-sm">Select Group for Live Auction</h2>
+            <div className="ml-auto flex items-center gap-2 flex-1 md:flex-none md:min-w-[240px]">
+              <Select
+                value={liveGroupName}
+                onValueChange={loadGroupIntoLive}
+                disabled={groups.length === 0}
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder={groups.length ? "— Choose a saved group —" : "Save a group first"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {groups.map((g) => (
+                    <SelectItem key={g.name} value={g.name}>
+                      {g.name} · {(g.memberIds || []).length} members
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {liveGroupName && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => { setLiveGroupName(""); setParticipants([]); }}
+                  className="text-xs"
+                >
+                  Clear
+                </Button>
+              )}
+            </div>
+          </div>
+          {!liveGroupName && (
+            <p className="text-[11px] text-muted-foreground italic mt-2">
+              Live members and metrics load only after you select a saved group.
+            </p>
+          )}
+        </Card>
+
         {/* 2 + 3. Main "లైవ్ చీటీ" Container: Left members board + Right metrics panel */}
+        {liveGroupName && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
           {/* LEFT — Member List Display with sequential bidding capsules */}
