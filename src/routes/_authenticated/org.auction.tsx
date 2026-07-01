@@ -243,6 +243,7 @@ function AuctionRoom() {
   const [pastWinners, setPastWinners] = useState<PastWinner[]>([]);
   const [consents, setConsents] = useState<Record<string, Consent>>({});
   const [groups, setGroups] = useState<NonNullable<AuctionStateDTO["groups"]>>([]);
+  const [activeAuctionId, setActiveAuctionId] = useState<string | null>(null);
   const [selectedGroupName, setSelectedGroupName] = useState<string>("");
   const [chitStartDate, setChitStartDate] = useState<string>("");
   // Admin UX: collapse Group Setup card after save + which saved group is loaded into the Live board
@@ -277,7 +278,6 @@ function AuctionRoom() {
   const loadState = useServerFn(getAuctionState);
   const saveState = useServerFn(saveAuctionState);
   const submitConsent = useServerFn(submitAuctionConsent);
-  const submitMyBid = useServerFn(submitMemberBid);
 
   // Member's own bidding input
   const [myBidAmount, setMyBidAmount] = useState<number>(0);
@@ -286,10 +286,15 @@ function AuctionRoom() {
   const hydratedRef = useRef(false);
   const lastRemoteJsonRef = useRef<string>("");
   const skipNextPushRef = useRef(false);
+  const activeAuctionIdRef = useRef<string | null>(null);
 
   const applyRemote = (s: AuctionStateDTO | null | undefined) => {
     if (!s) return;
     skipNextPushRef.current = true;
+    if (typeof s.activeAuctionId === "string") {
+      setActiveAuctionId(s.activeAuctionId);
+      activeAuctionIdRef.current = s.activeAuctionId;
+    }
     if (typeof s.groupName === "string") setChitGroupName(s.groupName);
     if (typeof (s as any).liveGroupName === "string") setLiveGroupName((s as any).liveGroupName);
     if (typeof s.chitValue === "number") setChitValue(s.chitValue);
@@ -308,10 +313,39 @@ function AuctionRoom() {
     setTurnEnd(s.turnEnd ?? null);
   };
 
-  // Initial load + Supabase realtime subscription
+  useEffect(() => { activeAuctionIdRef.current = activeAuctionId; }, [activeAuctionId]);
+
+  // Initial load + Supabase realtime subscriptions backed by auction_sessions + bids tables
   useEffect(() => {
     if (!orgId) return;
     let cancelled = false;
+    const fetchAndApply = async (preferredAuctionId?: string | null) => {
+      const { data: sessionRows, error: sessionError } = await (supabase as any)
+        .from("auction_sessions")
+        .select("*")
+        .eq("org_id", orgId)
+        .order("updated_at", { ascending: false });
+      if (sessionError) throw sessionError;
+      const sessions = (sessionRows ?? []) as AuctionSessionRow[];
+      const session =
+        (preferredAuctionId ? sessions.find((s) => s.id === preferredAuctionId) : null) ||
+        sessions.find((s) => s.status === "active" && !s.auction_closed) ||
+        sessions[0];
+      if (!session) return;
+
+      const { data: bidRows, error: bidError } = await (supabase as any)
+        .from("bids")
+        .select("id, member_id, member_name, member_code, amount, submitted_at")
+        .eq("auction_id", session.id)
+        .order("submitted_at", { ascending: true });
+      if (bidError) throw bidError;
+      const next = sessionState(session, bidRows ?? [], sessions);
+      const js = JSON.stringify(next);
+      if (js === lastRemoteJsonRef.current) return;
+      lastRemoteJsonRef.current = js;
+      if (!cancelled) applyRemote(next);
+    };
+
     (async () => {
       try {
         const res = await loadState({ data: { orgId } });
@@ -325,17 +359,21 @@ function AuctionRoom() {
     })();
 
     const channel = supabase
-      .channel(`chit-auction-${orgId}`)
+      .channel(`auction-sessions-and-bids-${orgId}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "chit_auctions", filter: `org_id=eq.${orgId}` },
+        { event: "*", schema: "public", table: "auction_sessions", filter: `org_id=eq.${orgId}` },
         (payload: any) => {
-          const next = (payload.new?.state ?? null) as AuctionStateDTO | null;
-          if (!next) return;
-          const js = JSON.stringify(next);
-          if (js === lastRemoteJsonRef.current) return;
-          lastRemoteJsonRef.current = js;
-          applyRemote(next);
+          const id = payload.new?.id ?? payload.old?.id ?? activeAuctionIdRef.current;
+          fetchAndApply(id).catch((e) => console.error("Auction session realtime failed:", e?.message || e));
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "bids", filter: `org_id=eq.${orgId}` },
+        (payload: any) => {
+          const auctionId = payload.new?.auction_id ?? payload.old?.auction_id ?? activeAuctionIdRef.current;
+          fetchAndApply(auctionId).catch((e) => console.error("Auction bids realtime failed:", e?.message || e));
         },
       )
       .subscribe();
@@ -350,8 +388,10 @@ function AuctionRoom() {
   // Admin writes: push state whenever it changes (debounced)
   useEffect(() => {
     if (!orgId || !isAdmin || !hydratedRef.current) return;
+    if (!chitGroupName.trim() && !liveGroupName.trim() && participants.length === 0) return;
     if (skipNextPushRef.current) { skipNextPushRef.current = false; return; }
     const snapshot: AuctionStateDTO = {
+      activeAuctionId: activeAuctionId ?? undefined,
       groupName: chitGroupName,
       liveGroupName,
       chitValue, totalMonths, currentMonth, commissionPct,
@@ -364,7 +404,8 @@ function AuctionRoom() {
     const t = setTimeout(async () => {
       try {
         lastRemoteJsonRef.current = js;
-        await saveState({ data: { orgId, state: snapshot } });
+        const res = await saveState({ data: { orgId, state: snapshot } });
+        if (res?.state) applyRemote(res.state);
       } catch (e: any) {
         console.error("Auction sync failed:", e?.message || e);
       }
