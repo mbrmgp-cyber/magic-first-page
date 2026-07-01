@@ -166,6 +166,7 @@ function AuctionRoom() {
     if (typeof s.totalMonths === "number") setTotalMonths(s.totalMonths);
     if (typeof s.currentMonth === "number") setCurrentMonth(s.currentMonth);
     if (typeof s.commissionPct === "number") setCommissionPct(s.commissionPct);
+    if (typeof s.startDate === "string") setChitStartDate(s.startDate);
     if (Array.isArray(s.participants)) setParticipants(s.participants);
     if (Array.isArray(s.bids)) setBids(s.bids);
     if (Array.isArray(s.pastWinners)) setPastWinners(s.pastWinners);
