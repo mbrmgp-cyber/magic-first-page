@@ -216,7 +216,7 @@ function AuctionRoom() {
     const snapshot: AuctionStateDTO = {
       groupName: chitGroupName,
       chitValue, totalMonths, currentMonth, commissionPct,
-      participants, bids, pastWinners, consents,
+      participants, bids, pastWinners, consents, groups,
       winner, auctionClosed, turnStart, turnEnd,
     };
     const js = JSON.stringify(snapshot);
@@ -232,7 +232,7 @@ function AuctionRoom() {
     return () => clearTimeout(t);
   }, [
     orgId, isAdmin, chitGroupName, chitValue, totalMonths, currentMonth,
-    commissionPct, participants, bids, pastWinners, consents, winner,
+    commissionPct, participants, bids, pastWinners, consents, groups, winner,
     auctionClosed, turnStart, turnEnd, saveState,
   ]);
 
