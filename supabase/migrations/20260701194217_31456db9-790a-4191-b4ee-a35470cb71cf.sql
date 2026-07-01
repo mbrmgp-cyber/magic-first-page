@@ -1,0 +1,11 @@
+GRANT EXECUTE ON FUNCTION public.can_edit_org(uuid) TO authenticated, anon;
+GRANT EXECUTE ON FUNCTION public.can_edit_rules(uuid) TO authenticated, anon;
+GRANT EXECUTE ON FUNCTION public.can_edit_accounts(uuid) TO authenticated, anon;
+GRANT EXECUTE ON FUNCTION public.can_edit_events(uuid) TO authenticated, anon;
+GRANT EXECUTE ON FUNCTION public.can_manage_committee(uuid) TO authenticated, anon;
+GRANT EXECUTE ON FUNCTION public.get_committee_role(uuid, uuid) TO authenticated, anon;
+GRANT EXECUTE ON FUNCTION public.has_role(uuid, public.app_role) TO authenticated, anon;
+GRANT EXECUTE ON FUNCTION public.is_org_admin(uuid) TO authenticated, anon;
+GRANT EXECUTE ON FUNCTION public.is_org_member(uuid) TO authenticated, anon;
+GRANT EXECUTE ON FUNCTION public.is_org_committee(uuid) TO authenticated, anon;
+GRANT EXECUTE ON FUNCTION public.is_approved_member(uuid, uuid) TO authenticated, anon;
