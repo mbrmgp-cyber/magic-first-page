@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { useCurrency } from "@/lib/currency-context";
 import { listApprovedMembers } from "@/lib/members.functions";
-import { getMyRoles, getMyMembership } from "@/lib/org.functions";
+import { getMyRoles, getMyMembership, getMyOrg } from "@/lib/org.functions";
 import { getAuctionState, saveAuctionState, submitAuctionConsent, type AuctionStateDTO } from "@/lib/auction.functions";
 import { useSimRole } from "@/lib/rbac";
 import { RoleGate } from "@/components/RoleGate";
@@ -65,6 +65,7 @@ function AuctionRoom() {
   const fetchMembers = useServerFn(listApprovedMembers);
   const fetchRoles = useServerFn(getMyRoles);
   const fetchMe = useServerFn(getMyMembership);
+  const fetchMyOrg = useServerFn(getMyOrg);
 
   const { data: memberData } = useQuery({
     queryKey: ["approved-members-auction"],
@@ -72,12 +73,13 @@ function AuctionRoom() {
   });
   const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: () => fetchRoles() });
   const meQ = useQuery({ queryKey: ["my-membership"], queryFn: () => fetchMe() });
+  const myOrgQ = useQuery({ queryKey: ["my-org"], queryFn: () => fetchMyOrg() });
   const me: any = meQ.data?.membership;
-  const org: any = me?.organizations;
+  // Prefer org from membership; fall back to org owned by this user (org admin has no member row).
+  const org: any = me?.organizations ?? myOrgQ.data?.org ?? null;
 
   const { role: simRole } = useSimRole();
-  // Real admin = either platform admin (mbr_admin role) OR this org's admin_user_id.
-  // Sim role only further restricts among real admins (so a real member never sees admin UI).
+  // Real admin = platform admin (mbr_admin role) OR the org's admin_user_id.
   const realAdmin =
     (rolesQ.data?.roles?.includes("mbr_admin") ?? false) ||
     (!!org?.admin_user_id && !!rolesQ.data?.userId && org.admin_user_id === rolesQ.data.userId);
