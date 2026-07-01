@@ -1351,3 +1351,29 @@ function MetricRow({
     </div>
   );
 }
+
+function StatBox({
+  label, value, sub, highlight,
+}: { label: string; value: string; sub?: string; highlight?: boolean }) {
+  return (
+    <div
+      className={`rounded-md border p-2 ${
+        highlight
+          ? "border-amber-500/60 bg-amber-500/10"
+          : "border-border bg-black/30"
+      }`}
+    >
+      <p className="text-[10px] uppercase tracking-wide text-muted-foreground leading-tight">
+        {label}
+      </p>
+      <p
+        className={`text-sm font-bold tabular-nums leading-tight mt-0.5 ${
+          highlight ? "text-amber-300" : "text-foreground"
+        }`}
+      >
+        {value}
+      </p>
+      {sub && <p className="text-[9px] text-muted-foreground mt-0.5">{sub}</p>}
+    </div>
+  );
+}
