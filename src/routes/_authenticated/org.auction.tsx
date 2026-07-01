@@ -451,7 +451,47 @@ function AuctionRoom() {
     auctionClosed, turnStart, turnEnd, saveState,
   ]);
 
-  const startTurn = () => setTurnStart(Date.now());
+  const buildSessionSnapshot = (overrides: Partial<AuctionStateDTO> = {}): AuctionStateDTO => ({
+    activeAuctionId: overrides.activeAuctionId ?? activeAuctionId ?? undefined,
+    groupName: overrides.groupName ?? chitGroupName,
+    liveGroupName: overrides.liveGroupName ?? liveGroupName,
+    chitValue: overrides.chitValue ?? chitValue,
+    totalMonths: overrides.totalMonths ?? totalMonths,
+    currentMonth: overrides.currentMonth ?? currentMonth,
+    commissionPct: overrides.commissionPct ?? commissionPct,
+    startDate: overrides.startDate ?? chitStartDate,
+    participants: overrides.participants ?? participants,
+    bids: overrides.bids ?? bids,
+    pastWinners: overrides.pastWinners ?? pastWinners,
+    consents: overrides.consents ?? consents,
+    groups: overrides.groups ?? groups,
+    winner: overrides.winner ?? winner,
+    auctionClosed: overrides.auctionClosed ?? auctionClosed,
+    turnStart: overrides.turnStart === undefined ? turnStart : overrides.turnStart,
+    turnEnd: overrides.turnEnd === undefined ? turnEnd : overrides.turnEnd,
+  });
+
+  const ensureCurrentSession = async (overrides: Partial<AuctionStateDTO> = {}) => {
+    if (!orgId) throw new Error("Organization not found");
+    const state = buildSessionSnapshot(overrides);
+    const res: any = await saveState({ data: { orgId, state } });
+    const id = res?.sessionId ?? res?.state?.activeAuctionId ?? null;
+    if (!id) throw new Error("Could not create auction session");
+    setActiveAuctionId(id);
+    activeAuctionIdRef.current = id;
+    if (res?.state) applyRemote(res.state);
+    return id as string;
+  };
+
+  const startTurn = async () => {
+    const ts = Date.now();
+    setTurnStart(ts);
+    try {
+      await ensureCurrentSession({ turnStart: ts, turnEnd: null, auctionClosed: false });
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to start auction turn");
+    }
+  };
 
   const calc = useMemo(() => {
     const cv = Math.max(0, Number(chitValue) || 0);
