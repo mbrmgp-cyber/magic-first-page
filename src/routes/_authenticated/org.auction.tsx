@@ -983,6 +983,19 @@ function AuctionRoom() {
             )}
           </Card>
         )}
+
+        {/* Footer — Print button at the very bottom */}
+        <div className="pt-4 pb-6 border-t border-border">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-[11px] text-muted-foreground text-center sm:text-left">
+              {orgName} · {org?.slogan || "చిట్వేల్ హెల్ప్ లైన్ సొసైటీ"}
+              {orgRegNo && <> · Reg {orgRegNo}</>}
+            </p>
+            <Button onClick={handlePrint} variant="outline" size="sm" className="gap-1.5 w-full sm:w-auto">
+              <Printer className="size-4" /> Print Official Auction PDF
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Winner Declaration Dialog */}
