@@ -7,6 +7,7 @@ export type AuctionStateDTO = {
   totalMonths?: number;
   currentMonth?: number;
   commissionPct?: number;
+  startDate?: string;
   participants?: Array<{ id: string; name: string; member_code?: string | null }>;
   bids?: Array<{
     id: string;

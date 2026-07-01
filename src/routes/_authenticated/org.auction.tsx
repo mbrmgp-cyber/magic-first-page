@@ -140,6 +140,8 @@ function AuctionRoom() {
   const [pastWinners, setPastWinners] = useState<PastWinner[]>([]);
   const [consents, setConsents] = useState<Record<string, Consent>>({});
   const [groups, setGroups] = useState<NonNullable<AuctionStateDTO["groups"]>>([]);
+  const [selectedGroupName, setSelectedGroupName] = useState<string>("");
+  const [chitStartDate, setChitStartDate] = useState<string>("");
 
   // ─────────── Realtime sync with admin (DB-backed) ───────────
   const orgId: string | undefined = me?.org_id;
@@ -164,6 +166,7 @@ function AuctionRoom() {
     if (typeof s.totalMonths === "number") setTotalMonths(s.totalMonths);
     if (typeof s.currentMonth === "number") setCurrentMonth(s.currentMonth);
     if (typeof s.commissionPct === "number") setCommissionPct(s.commissionPct);
+    if (typeof s.startDate === "string") setChitStartDate(s.startDate);
     if (Array.isArray(s.participants)) setParticipants(s.participants);
     if (Array.isArray(s.bids)) setBids(s.bids);
     if (Array.isArray(s.pastWinners)) setPastWinners(s.pastWinners);
@@ -221,6 +224,7 @@ function AuctionRoom() {
     const snapshot: AuctionStateDTO = {
       groupName: chitGroupName,
       chitValue, totalMonths, currentMonth, commissionPct,
+      startDate: chitStartDate,
       participants, bids, pastWinners, consents, groups,
       winner, auctionClosed, turnStart, turnEnd,
     };
@@ -237,7 +241,7 @@ function AuctionRoom() {
     return () => clearTimeout(t);
   }, [
     orgId, isAdmin, chitGroupName, chitValue, totalMonths, currentMonth,
-    commissionPct, participants, bids, pastWinners, consents, groups, winner,
+    commissionPct, chitStartDate, participants, bids, pastWinners, consents, groups, winner,
     auctionClosed, turnStart, turnEnd, saveState,
   ]);
 
@@ -455,18 +459,19 @@ function AuctionRoom() {
           <Gavel className="size-7 text-amber-400" />
           <div className="flex-1">
             <h1 className="text-xl md:text-2xl font-bold">C H S Live Online Chit Auction</h1>
-            <p className="text-xs text-muted-foreground">లైవ్ చిట్ ఆక్షన్ రూమ్</p>
+            <p className="text-xs text-amber-300/90 font-medium">Welcome to C.H.S Chits</p>
+            <p className="text-[11px] text-muted-foreground">లైవ్ చిట్ ఆక్షన్ రూమ్</p>
           </div>
         </div>
 
-        {/* Logged-in Member Info */}
-        {me && (
+        {/* Admin-only compact header bar (member gets richer wireframe below) */}
+        {isAdmin && me && (
           <Card className="p-3 md:p-4 bg-card flex items-center gap-3 flex-wrap">
             <Badge className="bg-amber-500/15 text-amber-300 border border-amber-500/40 text-xs">
               {myCode || "—"}
             </Badge>
-            <span className="font-semibold text-sm">{myName || "Member"}</span>
-            <span className="text-[11px] text-muted-foreground">Logged-in Member · లాగిన్ సభ్యుడు</span>
+            <span className="font-semibold text-sm">{myName || "Admin"}</span>
+            <span className="text-[11px] text-muted-foreground">Logged-in · లాగిన్</span>
             <div className="ml-auto flex items-center gap-1.5 text-[11px] text-muted-foreground">
               <span className="opacity-80">Chit Filters:</span>
               {(["ALL", ...availableLetters]).map((l) => (
@@ -486,62 +491,198 @@ function AuctionRoom() {
           </Card>
         )}
 
-        {/* Member-side: My Chit Groups */}
+        {/* ═══════════════ MEMBER WIREFRAME VIEW ═══════════════ */}
         {!isAdmin && me && (() => {
-          const mine = groups.filter((g) => g.memberIds.includes(myId));
+          const myGroups = groups.filter((g) => g.memberIds.includes(myId));
+          const activeGroup =
+            myGroups.find((g) => g.name === selectedGroupName) || myGroups[0] || null;
+          const closedMonths = pastWinners.length;
+          const myBidsList = bids
+            .filter((b) => b.memberId === myId)
+            .sort((a, b) => a.submittedAt - b.submittedAt);
+
           return (
-            <Card className="p-3 md:p-4 bg-card space-y-2">
-              <div className="flex items-center gap-2">
-                <Users className="size-4 text-amber-400" />
-                <h2 className="font-semibold text-sm">My Chit Groups · నా చిట్ గ్రూపులు</h2>
-              </div>
-              {mine.length === 0 ? (
-                <p className="text-xs text-muted-foreground">
-                  You are not yet assigned to any chit group. The admin will assign you soon.
-                </p>
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  {mine.map((g) => (
-                    <Badge key={g.name} className="bg-amber-500/15 border border-amber-500/40 text-amber-300">
-                      {g.name} · {g.memberIds.length} members
+            <div className="space-y-3">
+              {/* 2. Member Info Row */}
+              <Card className="p-3 bg-card">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Badge className="bg-amber-500/15 text-amber-300 border border-amber-500/40 text-xs font-mono">
+                      {myCode || "—"}
                     </Badge>
-                  ))}
+                    <div className="min-w-0">
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground leading-none">
+                        Logged-in Member
+                      </p>
+                      <p className="font-semibold text-sm truncate">{myName || "Member"}</p>
+                    </div>
+                  </div>
+                  <div className="ml-auto flex items-center gap-1.5">
+                    <span className="text-[10px] text-muted-foreground mr-1">Groups:</span>
+                    {myGroups.length === 0 ? (
+                      <span className="text-[10px] text-muted-foreground italic">Not assigned</span>
+                    ) : (
+                      myGroups.map((g) => {
+                        const active = (selectedGroupName || myGroups[0]?.name) === g.name;
+                        return (
+                          <button
+                            key={g.name}
+                            onClick={() => setSelectedGroupName(g.name)}
+                            className={`size-8 rounded-md border text-xs font-bold transition ${
+                              active
+                                ? "bg-amber-500 border-amber-500 text-black"
+                                : "border-border hover:border-amber-500/60 text-foreground"
+                            }`}
+                            aria-label={g.name}
+                          >
+                            {g.name.replace(/^Group\s+/i, "").slice(0, 2) || g.name.slice(0, 2)}
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
                 </div>
+              </Card>
+
+              {/* 3. Group Summary Card */}
+              {activeGroup && (
+                <Card className="p-3 md:p-4 bg-card">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Users className="size-4 text-amber-400" />
+                    <h2 className="font-semibold text-sm">{activeGroup.name} · Group Summary</h2>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                    <StatBox label="Total Members" value={String(activeGroup.memberIds.length)} />
+                    <StatBox label="Total Months" value={String(totalMonths)} />
+                    <StatBox
+                      label="Start Date"
+                      value={chitStartDate ? new Date(chitStartDate).toLocaleDateString() : "—"}
+                    />
+                    <StatBox label="Closed Months" value={`${closedMonths} / ${totalMonths}`} />
+                  </div>
+                </Card>
               )}
-            </Card>
+
+              {/* 4. LIVE Chit Auction Board strip (table below is shared) */}
+              <Card className="p-3 md:p-4 bg-card border-red-500/30">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="inline-flex h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                  <h2 className="font-semibold text-sm text-red-300">LIVE Chit Auction Board</h2>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <StatBox
+                    label="Start Time"
+                    value={turnStart ? new Date(turnStart).toLocaleTimeString() : "—"}
+                  />
+                  <StatBox
+                    label="Running Month"
+                    value={`${currentMonth} / ${totalMonths}`}
+                    highlight
+                  />
+                  <StatBox
+                    label="Close Time"
+                    value={turnEnd ? new Date(turnEnd).toLocaleTimeString() : "—"}
+                  />
+                </div>
+              </Card>
+
+              {/* 5. Calculator Metrics Row (member perspective) */}
+              <Card className="p-3 md:p-4 bg-card">
+                <div className="flex items-center gap-2 mb-2">
+                  <Percent className="size-4 text-amber-400" />
+                  <h2 className="font-semibold text-sm">My Calculator · నా లెక్క</h2>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <StatBox
+                    label="Commission %"
+                    value={`${commissionPct}%`}
+                    sub={fmt((chitValue * commissionPct) / 100)}
+                  />
+                  <StatBox
+                    label="Interest"
+                    value={`${calc.monthlyPct.toFixed(2)}%`}
+                    sub={`≈ ${calc.annualPct.toFixed(1)}% /yr`}
+                  />
+                  <StatBox
+                    label="Total"
+                    value={fmt(
+                      (chitValue * commissionPct) / 100 +
+                        (myBidAmount || 0) +
+                        (winner && winner.memberId !== myId ? winnerCalc?.dividend || 0 : 0),
+                    )}
+                    sub="Commission + Bid + Share"
+                  />
+                </div>
+              </Card>
+
+              {/* 6. Member Interactive Bidding Chat Box */}
+              {!auctionClosed && (
+                <Card className="p-3 md:p-4 bg-card border-amber-500/30">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Gavel className="size-4 text-amber-400" />
+                    <h2 className="font-semibold text-sm">
+                      {(myName || "Member").split(" ")[0]}'s Bidding Box
+                    </h2>
+                  </div>
+                  <div className="flex gap-2">
+                    <Input
+                      type="number"
+                      inputMode="decimal"
+                      value={myBidAmount || ""}
+                      onChange={(e) => setMyBidAmount(Number(e.target.value))}
+                      placeholder={`${symbol} Enter challenge…`}
+                      className="flex-1 h-11 text-base font-semibold"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") submitOwnBid();
+                      }}
+                    />
+                    <Button
+                      onClick={submitOwnBid}
+                      disabled={!myBidAmount || myBidAmount <= 0 || submittingMyBid}
+                      className="h-11 font-bold px-4 bg-amber-500 hover:bg-amber-600 text-black"
+                    >
+                      {submittingMyBid ? "…" : "Send"}
+                    </Button>
+                  </div>
+                  {myBidsList.length > 0 && (
+                    <p className="text-[11px] text-muted-foreground mt-2">
+                      Your bids this round:{" "}
+                      <b className="text-amber-300 tabular-nums">
+                        {myBidsList.map((b) => fmt(b.amount)).join(", ")}
+                      </b>
+                    </p>
+                  )}
+                </Card>
+              )}
+
+              {/* Winner ID & Amount summary card */}
+              {auctionClosed && winner && (
+                <Card className="p-3 md:p-4 bg-card border-emerald-500/40">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Trophy className="size-4 text-emerald-400" />
+                    <h2 className="font-semibold text-sm text-emerald-300">Winner · విజేత</h2>
+                  </div>
+                  <p className="text-sm">
+                    <span className="font-mono text-xs opacity-80 mr-2">
+                      {winner.memberCode || "—"}
+                    </span>
+                    <b>{winner.memberName}</b>
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Amount: <b className="text-amber-400 tabular-nums">{fmt(winner.amount)}</b>
+                    {winnerCalc && (
+                      <>
+                        {" · "}Net Paid:{" "}
+                        <b className="text-emerald-400 tabular-nums">{fmt(winnerCalc.net)}</b>
+                      </>
+                    )}
+                  </p>
+                </Card>
+              )}
+            </div>
           );
         })()}
 
-        {/* Member-side bidding input */}
-        {!isAdmin && me && !auctionClosed && (
-          <Card className="p-4 md:p-5 bg-card space-y-3 border-amber-500/30">
-            <div className="flex items-center gap-2">
-              <Gavel className="size-4 text-amber-400" />
-              <h2 className="font-semibold text-sm">Submit Your Bid · మీ బిడ్ సమర్పించండి</h2>
-            </div>
-            <Label className="text-xs text-muted-foreground">
-              Your Challenge / Bid Amount (సవాలు)
-            </Label>
-            <Input
-              type="number"
-              inputMode="decimal"
-              value={myBidAmount || ""}
-              onChange={(e) => setMyBidAmount(Number(e.target.value))}
-              placeholder={`${symbol} 0`}
-              className="text-2xl font-bold h-14"
-            />
-            <Button
-              onClick={submitOwnBid}
-              disabled={!myBidAmount || myBidAmount <= 0 || submittingMyBid}
-              className="w-full h-11 font-bold"
-            >
-              {submittingMyBid ? "Submitting…" : "Submit Bid / బిడ్ సమర్పించండి"}
-            </Button>
-            <p className="text-[11px] text-muted-foreground">
-              Your bid syncs live to the admin and all members instantly.
-            </p>
-          </Card>
-        )}
 
         {/* Admin-only controls: Participants + Bidding form + Calculator */}
         {isAdmin && (<>
@@ -679,7 +820,12 @@ function AuctionRoom() {
                 <Label className="text-xs">Current Month</Label>
                 <Input type="number" inputMode="numeric" value={currentMonth}
                   onChange={(e) => setCurrentMonth(Number(e.target.value))} />
+              <div className="space-y-1.5 col-span-2">
+                <Label className="text-xs">Chit Start Date</Label>
+                <Input type="date" value={chitStartDate}
+                  onChange={(e) => setChitStartDate(e.target.value)} />
               </div>
+            </div>
             </div>
 
             <div className="space-y-2 pt-2 border-t border-border">
@@ -984,6 +1130,52 @@ function AuctionRoom() {
           </Card>
         )}
 
+        {/* 7. Footer — Paid & Received History (member) + Print button */}
+        {!isAdmin && me && (() => {
+          const myReceived = pastWinners
+            .filter((w) => w.memberId === myId)
+            .reduce((s, w) => s + w.net, 0);
+          const myPaid = pastWinners
+            .filter((w) => w.memberId !== myId)
+            .reduce((s, w) => s + w.dividend, 0);
+          const myWins = pastWinners.filter((w) => w.memberId === myId);
+          return (
+            <Card className="p-3 md:p-4 bg-card">
+              <div className="flex items-center gap-2 mb-2">
+                <Wallet className="size-4 text-amber-400" />
+                <h2 className="font-semibold text-sm">
+                  Paid & Received History · చెల్లింపు వివరాలు
+                </h2>
+              </div>
+              <div className="grid grid-cols-2 gap-2 mb-2">
+                <StatBox label="Total Received" value={fmt(myReceived)} highlight />
+                <StatBox label="Total Paid (Dividends)" value={fmt(myPaid)} />
+              </div>
+              {myWins.length > 0 ? (
+                <ul className="space-y-1 text-xs">
+                  {myWins.map((w) => (
+                    <li
+                      key={w.month}
+                      className="flex items-center justify-between rounded border border-border bg-black/30 px-2 py-1.5"
+                    >
+                      <span>
+                        <b>{ordinal(w.month)}</b> Month · You won
+                      </span>
+                      <span className="text-amber-400 font-bold tabular-nums">
+                        {fmt(w.net)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-[11px] text-muted-foreground">
+                  No wins yet. Keep participating!
+                </p>
+              )}
+            </Card>
+          );
+        })()}
+
         {/* Footer — Print button at the very bottom */}
         <div className="pt-4 pb-6 border-t border-border">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -1207,6 +1399,32 @@ function MetricRow({
         <p className={`mt-1 text-lg font-bold tabular-nums ${toneClass} truncate`}>{value}</p>
         {hint && <p className="text-[10px] text-zinc-500 mt-0.5">{hint}</p>}
       </div>
+    </div>
+  );
+}
+
+function StatBox({
+  label, value, sub, highlight,
+}: { label: string; value: string; sub?: string; highlight?: boolean }) {
+  return (
+    <div
+      className={`rounded-md border p-2 ${
+        highlight
+          ? "border-amber-500/60 bg-amber-500/10"
+          : "border-border bg-black/30"
+      }`}
+    >
+      <p className="text-[10px] uppercase tracking-wide text-muted-foreground leading-tight">
+        {label}
+      </p>
+      <p
+        className={`text-sm font-bold tabular-nums leading-tight mt-0.5 ${
+          highlight ? "text-amber-300" : "text-foreground"
+        }`}
+      >
+        {value}
+      </p>
+      {sub && <p className="text-[9px] text-muted-foreground mt-0.5">{sub}</p>}
     </div>
   );
 }
