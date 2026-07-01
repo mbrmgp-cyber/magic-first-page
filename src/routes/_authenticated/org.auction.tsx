@@ -820,7 +820,12 @@ function AuctionRoom() {
                 <Label className="text-xs">Current Month</Label>
                 <Input type="number" inputMode="numeric" value={currentMonth}
                   onChange={(e) => setCurrentMonth(Number(e.target.value))} />
+              <div className="space-y-1.5 col-span-2">
+                <Label className="text-xs">Chit Start Date</Label>
+                <Input type="date" value={chitStartDate}
+                  onChange={(e) => setChitStartDate(e.target.value)} />
               </div>
+            </div>
             </div>
 
             <div className="space-y-2 pt-2 border-t border-border">
