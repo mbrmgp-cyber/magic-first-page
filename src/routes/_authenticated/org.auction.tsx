@@ -450,8 +450,11 @@ function AuctionRoom() {
   // Admin writes: push state whenever it changes (debounced)
   useEffect(() => {
     if (!orgId || !isAdmin || !hydratedRef.current) return;
+    // While the admin is drafting a new group in the setup card, do NOT push —
+    // otherwise the half-built row upserts on (org_id, group_name) and wipes
+    // the current live group.
+    if (editingSetup) return;
     // Do not persist a half-built setup card before the admin clicks Save/Assign.
-    // Once a group is live (or a session already exists), every admin change is written to auction_sessions.
     if (!liveGroupName.trim() && !activeAuctionId && !turnStart && bids.length === 0 && !auctionClosed) return;
     if (skipNextPushRef.current) { skipNextPushRef.current = false; return; }
     const snapshot: AuctionStateDTO = {
