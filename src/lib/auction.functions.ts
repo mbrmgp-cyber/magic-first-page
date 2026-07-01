@@ -101,3 +101,16 @@ export const submitAuctionConsent = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { state: ((row as any)?.state as AuctionStateDTO) ?? null };
   });
+
+export const submitMemberBid = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { orgId: string; amount: number }) => d)
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+    const { data: row, error } = await sb.rpc("submit_chit_bid", {
+      _org_id: data.orgId,
+      _amount: data.amount,
+    });
+    if (error) throw new Error(error.message);
+    return { state: (row as AuctionStateDTO) ?? null };
+  });
