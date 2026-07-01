@@ -23,7 +23,7 @@ import {
 import { useCurrency } from "@/lib/currency-context";
 import { listApprovedMembers } from "@/lib/members.functions";
 import { getMyRoles, getMyMembership, getMyOrg } from "@/lib/org.functions";
-import { getAuctionState, saveAuctionState, submitAuctionConsent, submitMemberBid, type AuctionStateDTO } from "@/lib/auction.functions";
+import { getAuctionState, saveAuctionState, submitAuctionConsent, type AuctionStateDTO } from "@/lib/auction.functions";
 import { useSimRole } from "@/lib/rbac";
 import { RoleGate } from "@/components/RoleGate";
 import { supabase } from "@/integrations/supabase/client";
@@ -59,6 +59,109 @@ type Consent = {
   signatureTag: string;
   signedAt: number;
 };
+
+type AuctionSessionRow = {
+  id: string;
+  org_id: string;
+  group_name: string;
+  live_group_name: string | null;
+  participants: unknown;
+  chit_value: number;
+  total_months: number;
+  current_month: number;
+  commission_pct: number;
+  start_date: string | null;
+  turn_start: string | null;
+  turn_end: string | null;
+  auction_closed: boolean;
+  status: string;
+  winner_bid_id: string | null;
+  winner_member_id: string | null;
+  winner_member_name: string | null;
+  winner_member_code: string | null;
+  winner_amount: number | null;
+  winner_net: number | null;
+  winner_dividend: number | null;
+  past_winners: unknown;
+  consents: unknown;
+  created_at: string;
+  updated_at: string;
+};
+
+type BidRow = {
+  id: string;
+  member_id: string;
+  member_name: string;
+  member_code: string | null;
+  amount: number;
+  submitted_at: string;
+};
+
+const toMs = (value?: string | null) => (value ? new Date(value).getTime() : null);
+const toIso = (value?: number | null) => (value ? new Date(value).toISOString() : null);
+
+function normalizeSessionParticipants(value: unknown): MemberLite[] {
+  return Array.isArray(value)
+    ? value
+        .map((p: any) => ({ id: String(p.id ?? ""), name: String(p.name ?? ""), member_code: p.member_code ?? null }))
+        .filter((p) => p.id)
+    : [];
+}
+
+function mapBidRows(rows: BidRow[] | null | undefined): BidEntry[] {
+  return (rows ?? []).map((b) => ({
+    id: b.id,
+    memberId: b.member_id,
+    memberName: b.member_name,
+    memberCode: b.member_code,
+    amount: Number(b.amount) || 0,
+    submittedAt: new Date(b.submitted_at).getTime(),
+  }));
+}
+
+function sessionGroup(row: AuctionSessionRow): NonNullable<AuctionStateDTO["groups"]>[number] {
+  const members = normalizeSessionParticipants(row.participants);
+  return {
+    auctionId: row.id,
+    name: row.group_name,
+    memberIds: members.map((m) => m.id),
+    memberCodes: members.map((m) => m.member_code ?? null),
+    memberNames: members.map((m) => m.name),
+    totalMonths: row.total_months,
+    chitValue: Number(row.chit_value) || 0,
+    startDate: row.start_date,
+    savedAt: new Date(row.created_at || row.updated_at).getTime(),
+  };
+}
+
+function sessionState(row: AuctionSessionRow, bidRows: BidRow[], allRows: AuctionSessionRow[]): AuctionStateDTO {
+  return {
+    activeAuctionId: row.id,
+    groupName: row.group_name,
+    liveGroupName: row.live_group_name ?? row.group_name,
+    chitValue: Number(row.chit_value) || 0,
+    totalMonths: row.total_months,
+    currentMonth: row.current_month,
+    commissionPct: Number(row.commission_pct) || 0,
+    startDate: row.start_date ?? undefined,
+    participants: normalizeSessionParticipants(row.participants),
+    bids: mapBidRows(bidRows),
+    pastWinners: Array.isArray(row.past_winners) ? row.past_winners as any : [],
+    consents: row.consents && typeof row.consents === "object" && !Array.isArray(row.consents) ? row.consents as any : {},
+    groups: allRows.map(sessionGroup),
+    winner: row.winner_member_id ? {
+      id: row.winner_bid_id ?? `winner-${row.winner_member_id}`,
+      memberId: row.winner_member_id,
+      memberName: row.winner_member_name ?? "Winner",
+      memberCode: row.winner_member_code,
+      amount: Number(row.winner_amount) || 0,
+      submittedAt: toMs(row.turn_end) ?? Date.now(),
+    } : null,
+    auctionClosed: row.auction_closed || row.status === "closed",
+    turnStart: toMs(row.turn_start),
+    turnEnd: toMs(row.turn_end),
+  };
+}
 
 function AuctionRoom() {
   const { fmt, symbol } = useCurrency();
