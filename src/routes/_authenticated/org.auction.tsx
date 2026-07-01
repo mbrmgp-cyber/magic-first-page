@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { useCurrency } from "@/lib/currency-context";
 import { listApprovedMembers } from "@/lib/members.functions";
-import { getMyRoles, getMyMembership } from "@/lib/org.functions";
+import { getMyRoles, getMyMembership, getMyOrg } from "@/lib/org.functions";
 import { getAuctionState, saveAuctionState, submitAuctionConsent, type AuctionStateDTO } from "@/lib/auction.functions";
 import { useSimRole } from "@/lib/rbac";
 import { RoleGate } from "@/components/RoleGate";
