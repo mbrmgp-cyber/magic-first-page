@@ -1545,6 +1545,10 @@ export type Database = {
           read_ct: number
         }[]
       }
+      submit_chit_bid: {
+        Args: { _amount: number; _org_id: string }
+        Returns: Json
+      }
       submit_chit_consent: {
         Args: { _org_id: string; _signature_tag: string }
         Returns: {
