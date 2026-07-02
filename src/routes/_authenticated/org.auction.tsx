@@ -1651,10 +1651,11 @@ function AuctionRoom() {
                 <p className="text-[9px] text-muted-foreground tabular-nums">{fmt(calc.commission)}</p>
               </div>
               <StatBox
-                label="సభ్యులు కట్టవలసిన"
-                value={fmt(participants.length > 0 ? chitValue / participants.length : 0)}
-                sub="per member"
+                label="Amount per member"
+                value={fmt(calc.perMember)}
+                sub={calc.topBid > 0 ? `(${fmt(chitValue)} − ${fmt(calc.topBid)}) / ${participants.length || 0}` : "per member"}
               />
+
             </div>
 
             {/* Winner box */}
