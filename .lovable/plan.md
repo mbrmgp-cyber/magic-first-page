@@ -1,109 +1,111 @@
-## లక్ష్యం
 
-Design Studio ను Template-First approach తో simple చేయడం. 5 ready-made ID card designs (Front + Back) చూపించి, ఆర్గనైజేషన్ select చేసిన template కి colors, borders, line-wise text styling edit చేసుకునే option ఇవ్వడం. Save చేస్తే అదే template తో అన్ని members ID cards auto-generate అవుతాయి.
+# Chit Fund Core Rewrite Plan
 
-## 5 Ready-Made Templates
+Scope: rewrite the Chit Auction module (`org.auction.tsx`, `auction.functions.ts`, DB schema, RPCs) so every rule below is dynamic, Supabase-backed, and shared live between Admin and Member dashboards.
 
-ప్రతి template కి Front + Back రెండూ pre-designed:
+---
 
-1. **Classic Rectangle** — సాంప్రదాయ rectangle, top header band, photo left, details right
-2. **Modern Rounded** — rounded corners, gradient header, centered photo
-3. **Vertical Portrait** — vertical layout, photo top, details bottom (lanyard friendly)
-4. **Premium Gold** — dark background, gold accents, formal look
-5. **Minimal Clean** — white minimal, thin borders, clean typography
+## 1. Database (single migration)
 
-ప్రతి template కి 2 modes: **Normal ID Card** (CR80 standard) మరియు **Keychain Type** (small, compact).
+Extend `auction_sessions` and add supporting tables:
 
-## Editable Properties (Selection తర్వాత)
+- `auction_sessions` — add columns:
+  - `foreman_mode` text — `'commission'` | `'free_month'`
+  - `foreman_free_month` int — nullable, used when mode = `free_month`
+  - `terms` text — group terms & conditions
+  - `close_at` timestamptz — auction close time (drives 5-min warning)
+  - `total_members` int — derived at save time (participants + foreman if included)
+  - `foreman_included` boolean — company/owner counted as a member
+- New table `auction_payments` — receipt uploads per member per month
+  - `auction_id`, `org_id`, `member_id`, `month_no`, `amount`, `receipt_url`, `status` (`pending`|`verified`|`rejected`), `note`, `uploaded_by`, timestamps
+  - RLS: member can insert/select own rows; org admin/committee can select/update all.
+  - GRANTs to authenticated + service_role.
+- Storage bucket `chit-receipts` (private) with RLS policies for uploads/reads.
+- RPC `finalize_chit_auction(_org_id, _auction_id)` — picks highest bid, writes winner fields, sets `auction_closed=true`, appends to `past_winners`.
+- RPC `reset_chit_month(_org_id, _auction_id)` — advances `current_month`, clears bids for next round (keeps history in `past_winners`).
+- Keep existing `submit_chit_bid` / `submit_chit_consent`.
 
-### Global (whole card)
-- Border color, border width, border style (solid/dashed/none)
-- Background color / gradient
-- Card corner radius
+## 2. Server functions (`src/lib/auction.functions.ts`)
 
-### Per-Element (logo, QR, name, slogan, reg#, member name, father name, village, pincode, phone, email, blood group, address, president signature)
-- Show / Hide (delete-equivalent)
-- Font family, font size, font weight, color
-- Position adjust (optional - drag)
-- Edit label text
+Extend `AuctionStateDTO` with `foremanMode`, `foremanFreeMonth`, `foremanIncluded`, `terms`, `closeAt`, `totalMembers`. New server fns:
 
-### Auto-included Elements
-- **Front**: Logo, Org Name, Slogan, Reg#, Member Photo, Member Name, Father Name, Member Code, Designation, QR Code
-- **Back**: Village, Pincode, Phone, Email, Blood Group, Address, President Signature, Rules/Terms
+- `saveGroupConfig` — upsert config (name, chit value, months, start date, close time, foreman rules, terms, participants). Never touches `bids`.
+- `deleteGroup` — delete an `auction_sessions` row by id (admin only).
+- `finalizeAuction` — calls `finalize_chit_auction` RPC.
+- `resetToNextMonth` — calls `reset_chit_month` RPC.
+- `uploadPaymentReceipt` — inserts into `auction_payments` (file already in storage).
+- `verifyPayment` — admin updates status.
+- `listPayments` — admin/member scoped view.
 
-## Workflow
+## 3. Admin UI (`org.auction.tsx` admin view)
 
-```text
-Step 1: Choose Card Type    [Normal] [Keychain]
-Step 2: Choose Template     [1] [2] [3] [4] [5]   (Front+Back preview)
-Step 3: Customize           Colors • Borders • Line-wise text edit
-Step 4: Preview with sample member data
-Step 5: Save as Org Default → applies to all members auto
+Rebuild into 4 sections:
+
+1. **Group Manager** — card list of all groups (from `groups[]`). Buttons: `Create New Group`, `Edit`, `Delete`. Create/Edit dialog fields:
+   - Group Name, Total Chit Amount, Total Months (free input), Start Date, Close Time (per-round), Terms textarea
+   - Foreman toggle: "Include Company as Member"
+   - Foreman Benefit radio: `Percentage Commission` (%) OR `Free Month` (month number)
+   - Add-member row: search/pick member by ID → append to participants list
+2. **Live Auction Board** (after selecting a group card):
+   - Header: Group name, Current Month, Chit Value, Start Time, Close Time countdown
+   - Member rows with live bid capsule + progress bar (bid / chit value)
+   - Live Metrics panel using the exact formulas below
+   - Buttons: `Start Turn`, `Close / Finalize Winner`, `Reset / Next Month`
+3. **Payments Panel** — table of receipts for current month, verify/reject actions, image preview.
+4. **PDF Print** (footer button) — see §6.
+
+## 4. Member UI
+
+- Group cards visible (A, B, C). Selecting one shows: Current Month, Chit Value, Start/Close time, live metrics, sequential bid table, own bid input + submit, `Approve Winner` consent button when auction closed.
+- Payment upload widget: file picker → `chit-receipts` bucket → `auction_payments` row.
+- 5-minute toast warning driven by `close_at` timer in a `useEffect` interval.
+
+## 5. Calculation module (`src/lib/chit-math.ts`)
+
+Pure functions (no hardcoded values):
 ```
-
-## Data Model
-
-Single JSONB column `id_card_design` on `organizations` table:
-
-```json
-{
-  "cardType": "normal" | "keychain",
-  "templateId": "classic" | "modern" | "vertical" | "premium" | "minimal",
-  "global": {
-    "borderColor": "#...", "borderWidth": 2, "borderStyle": "solid",
-    "backgroundColor": "#...", "cornerRadius": 12
-  },
-  "elements": {
-    "logo":        { "visible": true,  "size": 48 },
-    "orgName":     { "visible": true,  "font": "Inter", "size": 18, "weight": 700, "color": "#..." },
-    "slogan":      { "visible": true,  "font": "Inter", "size": 12, "weight": 400, "color": "#..." },
-    "regNumber":   { "visible": true,  ... },
-    "memberName":  { ... },
-    "fatherName":  { ... },
-    "village":     { ... },
-    "pincode":     { ... },
-    "phone":       { ... },
-    "email":       { ... },
-    "bloodGroup":  { ... },
-    "address":     { ... },
-    "qrCode":      { "visible": true, "size": 64 },
-    "presidentSignature": { "visible": true, "imageUrl": null }
-  }
-}
+topBid                 = max(bids.amount)
+interestPct            = (topBid / chitValue) * 100
+dividendPool           = topBid
+dividendPerMember      = dividendPool / totalMembers
+netPayPerMember        = (chitValue / totalMembers) - dividendPerMember
+foremanCommissionAmt   = mode === 'commission' ? chitValue * commissionPct/100 : 0
 ```
+Called from both admin & member views so numbers always match.
 
-Once saved, every member's ID card renders from this single design — no per-member customization needed.
+## 6. PDF Report
 
-## Files to Create/Change
+Client-side `window.print()` with a hidden print template rendering:
+- Org logo + name (from `organizations` row)
+- Group config block (chit value, months, start date, foreman rule, terms)
+- Sequential bid history table for current month
+- Past winners table (from `past_winners`)
+- Payments status table (from `auction_payments`)
+- Two signature lines: "CHS Accountant" / "Society President"
 
-**New files:**
-- `src/lib/idCardTemplates.ts` — 5 template presets (default colors, layouts, font sizes)
-- `src/lib/idCardDesign.functions.ts` — server fns: `getOrgIdDesign`, `saveOrgIdDesign`
-- `src/components/IdCard/TemplatePicker.tsx` — Step 2 template gallery
-- `src/components/IdCard/TemplateCustomizer.tsx` — Step 3 customization panel (colors + per-line text editor)
-- `src/components/IdCard/IdCardRenderer.tsx` — single renderer that takes `(design, memberData)` → renders Front/Back. Used in both customizer preview and on member ID pages.
+## 7. Realtime
 
-**Files to edit:**
-- `src/routes/_authenticated/org.designs.tsx` — replace current complex builder with the 4-step Template-First flow
-- `src/components/MemberIdCard.tsx` — use the new `IdCardRenderer` driven by saved org design
+Already subscribed to `auction_sessions` and `bids`. Add subscription to `auction_payments` filtered by `org_id` so payment verifications reflect instantly on member view.
 
-**Migration:**
-- Add `id_card_design jsonb` column to `organizations` table (default = null → falls back to "classic" template)
+---
 
-**Files to remove from active flow (keep code for now, just hide):**
-- `src/components/CustomIdBuilder.tsx` — moved to optional "Advanced" mode behind a small link
+## Technical notes
 
-## Acceptance
+- Group cards are the `groups[]` array already returned by `getAuctionState`; no schema change needed for listing.
+- `Start Turn` / `Close` / `Reset` are surgical UPDATE RPCs — they never write `participants`, preventing the member-wipe bug.
+- All formula values recomputed in a `useMemo` from `bids + config`; no stored `interest_rate`.
+- Foreman "free month" logic: on that month number, `Close / Finalize` auto-assigns winner = foreman with amount 0, skipping bidding.
+- File uploads go to private `chit-receipts` bucket; signed URLs generated on read.
 
-- Org admin opens `/org/designs` → sees Normal/Keychain toggle + 5 template cards with Front+Back preview
-- Selects one → customization panel opens with color pickers, border options, line-by-line text styling (size/font/color/show-hide)
-- Sample member preview updates live
-- Save → success toast, design persisted
-- Any member's ID card page now renders with this design automatically — no member-side action needed
-- Telugu labels throughout, mobile-friendly (361px viewport works)
+---
 
-## Out of Scope (this round)
+## Deliverables (in order)
 
-- Drag-to-position elements (positions locked per template; only style/visibility editable)
-- Per-member design overrides
-- PDF export changes (existing PDF path keeps working with new renderer)
+1. Supabase migration — schema, RLS, GRANTs, RPCs, bucket.
+2. `src/lib/chit-math.ts` — pure calc module.
+3. `src/lib/auction.functions.ts` — new/updated server fns.
+4. `src/routes/_authenticated/org.auction.tsx` — admin + member rewrite.
+5. `src/components/ChitPrintSheet.tsx` — printable PDF layout.
+6. Verify via Playwright: create group → add members → place bids → live metrics update → 5-min toast → close → consent → payment upload → PDF print.
+
+Approve to proceed and I will execute in this order.
