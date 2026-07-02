@@ -23,7 +23,7 @@ import {
 import { useCurrency } from "@/lib/currency-context";
 import { listApprovedMembers } from "@/lib/members.functions";
 import { getMyRoles, getMyMembership, getMyOrg } from "@/lib/org.functions";
-import { getAuctionState, saveAuctionState, submitAuctionConsent, type AuctionStateDTO } from "@/lib/auction.functions";
+import { getAuctionState, saveAuctionState, submitAuctionConsent, deleteAuctionGroup, type AuctionStateDTO } from "@/lib/auction.functions";
 import { useSimRole } from "@/lib/rbac";
 import { RoleGate } from "@/components/RoleGate";
 import { supabase } from "@/integrations/supabase/client";
@@ -346,6 +346,7 @@ function AuctionRoom() {
   const loadState = useServerFn(getAuctionState);
   const saveState = useServerFn(saveAuctionState);
   const submitConsent = useServerFn(submitAuctionConsent);
+  const deleteGroupServer = useServerFn(deleteAuctionGroup);
 
   // Member's own bidding input
   const [myBidAmount, setMyBidAmount] = useState<number>(0);
@@ -854,24 +855,86 @@ function AuctionRoom() {
   };
 
   const deleteGroup = async (name: string) => {
+    if (!orgId) {
+      toast.error("Organization not found");
+      return;
+    }
     const g = groups.find((x) => x.name.toLowerCase() === name.toLowerCase());
-    setGroups((prev) => prev.filter((g) => g.name.toLowerCase() !== name.toLowerCase()));
+    // Resolve auctionId (via memory or DB lookup) before deleting.
+    let auctionId = g?.auctionId ?? null;
     try {
-      if (g?.auctionId) {
-        const { error } = await (supabase as any).from("auction_sessions").delete().eq("id", g.auctionId);
-        if (error) throw error;
-      } else if (orgId) {
-        const { error } = await (supabase as any)
+      if (!auctionId) {
+        const { data: row } = await (supabase as any)
+          .from("auction_sessions")
+          .select("id")
+          .eq("org_id", orgId)
+          .ilike("group_name", name)
+          .maybeSingle();
+        auctionId = row?.id ?? null;
+      }
+      if (!auctionId) {
+        // Nothing exists in DB — just clear it from local state.
+        setGroups((prev) => prev.filter((x) => x.name.toLowerCase() !== name.toLowerCase()));
+        toast.success(`Deleted group "${name}"`);
+        return;
+      }
+      // Hard DELETE via authenticated server fn (bypasses client RLS quirks
+      // and guarantees the row is removed from Supabase).
+      await deleteGroupServer({ data: { orgId, auctionId } });
+      // Verify the row is really gone.
+      const { data: check } = await (supabase as any)
+        .from("auction_sessions")
+        .select("id")
+        .eq("id", auctionId)
+        .maybeSingle();
+      if (check?.id) {
+        // Fallback: try client delete (in case server fn silently failed).
+        const { error: delErr } = await (supabase as any)
           .from("auction_sessions")
           .delete()
-          .eq("org_id", orgId)
-          .eq("group_name", name);
-        if (error) throw error;
+          .eq("id", auctionId)
+          .select("id");
+        if (delErr) throw delErr;
+        const { data: recheck } = await (supabase as any)
+          .from("auction_sessions")
+          .select("id")
+          .eq("id", auctionId)
+          .maybeSingle();
+        if (recheck?.id) throw new Error("Row still exists after delete (RLS?)");
       }
     } catch (e: any) {
       toast.error(e?.message || "Failed to delete group from database");
       return;
     }
+    // Refresh from DB so the dropdown reflects the actual server state.
+    try {
+      const { data: allRows } = await (supabase as any)
+        .from("auction_sessions")
+        .select("*")
+        .eq("org_id", orgId)
+        .order("updated_at", { ascending: false });
+      const mapped = ((allRows ?? []) as any[]).map((r) => ({
+        auctionId: r.id,
+        name: r.group_name,
+        memberIds: Array.isArray(r.participants) ? r.participants.map((p: any) => String(p.id ?? "")) : [],
+        memberCodes: Array.isArray(r.participants) ? r.participants.map((p: any) => p.member_code ?? null) : [],
+        memberNames: Array.isArray(r.participants) ? r.participants.map((p: any) => String(p.name ?? "")) : [],
+        totalMonths: r.total_months,
+        chitValue: Number(r.chit_value) || 0,
+        startDate: r.start_date,
+        savedAt: new Date(r.updated_at || r.created_at).getTime(),
+      }));
+      setGroups(mapped);
+      // If the deleted group was the live one, clear the live pointer.
+      if (liveGroupName && liveGroupName.toLowerCase() === name.toLowerCase()) {
+        setLiveGroupName("");
+        setActiveAuctionId(null);
+        activeAuctionIdRef.current = null;
+      }
+      if (selectedGroupName && selectedGroupName.toLowerCase() === name.toLowerCase()) {
+        setSelectedGroupName("");
+      }
+    } catch { /* refresh best-effort */ }
     toast.success(`Deleted group "${name}"`);
   };
 
