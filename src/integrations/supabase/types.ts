@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      auction_month_archives: {
+        Row: {
+          archived_by: string | null
+          auction_id: string
+          bids: Json
+          chit_value: number
+          closed_at: string
+          commission_pct: number
+          consents: Json
+          created_at: string
+          group_name: string
+          id: string
+          month_no: number
+          org_id: string
+          participants: Json
+          total_months: number
+          turn_end: string | null
+          turn_start: string | null
+          winner: Json | null
+        }
+        Insert: {
+          archived_by?: string | null
+          auction_id: string
+          bids?: Json
+          chit_value?: number
+          closed_at?: string
+          commission_pct?: number
+          consents?: Json
+          created_at?: string
+          group_name: string
+          id?: string
+          month_no: number
+          org_id: string
+          participants?: Json
+          total_months?: number
+          turn_end?: string | null
+          turn_start?: string | null
+          winner?: Json | null
+        }
+        Update: {
+          archived_by?: string | null
+          auction_id?: string
+          bids?: Json
+          chit_value?: number
+          closed_at?: string
+          commission_pct?: number
+          consents?: Json
+          created_at?: string
+          group_name?: string
+          id?: string
+          month_no?: number
+          org_id?: string
+          participants?: Json
+          total_months?: number
+          turn_end?: string | null
+          turn_start?: string | null
+          winner?: Json | null
+        }
+        Relationships: []
+      }
       auction_payments: {
         Row: {
           amount: number
