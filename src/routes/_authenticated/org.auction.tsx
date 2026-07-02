@@ -355,6 +355,15 @@ function AuctionRoom() {
   // print-area uses the live board state. When set, the PDF renders that
   // archived month exactly as it was closed.
   const [archivePrint, setArchivePrint] = useState<MonthArchiveDTO | null>(null);
+  const [archiveLoadingId, setArchiveLoadingId] = useState<string | null>(null);
+
+  const archivesQ = useQuery({
+    queryKey: ["auction-month-archives", orgId ?? ""],
+    queryFn: () => fetchArchives({ data: { orgId: orgId! } }),
+    enabled: !!orgId,
+    refetchInterval: 15000,
+  });
+  const allArchives: MonthArchiveDTO[] = archivesQ.data?.archives ?? [];
 
   // Member's own bidding input
   const [myBidAmount, setMyBidAmount] = useState<number>(0);
