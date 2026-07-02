@@ -1861,7 +1861,8 @@ function AuctionRoom() {
         </div>
         )}
 
-        {/* 4. Footer — పాస్ట్ డిటైల్స్ + Save + PDF */}
+        {/* 4. Footer — పాస్ట్ డిటైల్స్ + Save + PDF (only when a live group is loaded) */}
+        {liveGroupName && participants.length > 0 && (
         <Card className="p-4 md:p-5 space-y-3 bg-card">
           <div className="flex items-center gap-2">
             <Trophy className="size-4 text-amber-400" />
