@@ -347,6 +347,14 @@ function AuctionRoom() {
   const saveState = useServerFn(saveAuctionState);
   const submitConsent = useServerFn(submitAuctionConsent);
   const deleteGroupServer = useServerFn(deleteAuctionGroup);
+  const fetchArchives = useServerFn(listMonthArchives);
+  const fetchArchive = useServerFn(getMonthArchive);
+  const archiveResetServer = useServerFn(archiveAndResetMonth);
+
+  // Snapshot currently loaded into the printable PDF area. When null, the
+  // print-area uses the live board state. When set, the PDF renders that
+  // archived month exactly as it was closed.
+  const [archivePrint, setArchivePrint] = useState<MonthArchiveDTO | null>(null);
 
   // Member's own bidding input
   const [myBidAmount, setMyBidAmount] = useState<number>(0);
