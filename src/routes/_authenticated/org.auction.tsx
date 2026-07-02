@@ -131,6 +131,7 @@ function sessionGroup(row: AuctionSessionRow): NonNullable<AuctionStateDTO["grou
     totalMonths: row.total_months,
     chitValue: Number(row.chit_value) || 0,
     startDate: row.start_date,
+    terms: (row as any).terms ?? null,
     savedAt: new Date(row.created_at || row.updated_at).getTime(),
   };
 }
