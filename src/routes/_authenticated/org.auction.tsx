@@ -1113,7 +1113,10 @@ function AuctionRoom() {
   const printRef = useRef<HTMLDivElement>(null);
   const handlePrint = () => {
     if (typeof window === "undefined") return;
-    window.print();
+    // Close any open dialogs / popovers so they don't leak into the PDF
+    setWinnerOpen(false);
+    // Wait for Radix to unmount the portal before invoking the browser print dialog
+    setTimeout(() => window.print(), 120);
   };
 
   const orgName = org?.name || "Chitvel Help Line Society";
