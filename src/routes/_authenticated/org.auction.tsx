@@ -1122,6 +1122,11 @@ function AuctionRoom() {
   const orgEmail = org?.email || "";
   const orgPresident = org?.president_name || "";
 
+  // Member has no assigned group → show empty placeholder, hide any stale
+  // live-auction / bids / payments / history sections that could otherwise
+  // render from previously-hydrated state.
+  const memberHasNoGroup = !isAdmin && !!me && groups.filter((g) => g.memberIds.includes(myId)).length === 0;
+
   return (
     <div className="min-h-screen bg-[var(--app-bg,#0a0a0a)] text-foreground p-4 md:p-6">
       {/* Print-only styles */}
@@ -1240,6 +1245,16 @@ function AuctionRoom() {
                 </div>
               </Card>
 
+              {/* Empty state — member is not assigned to any group */}
+              {myGroups.length === 0 && (
+                <Card className="p-6 bg-card border-dashed text-center space-y-1">
+                  <p className="text-sm font-semibold">No active chit groups assigned</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    మీరు ఏ చిట్ గ్రూప్‌లోనూ నమోదు కాలేదు. అడ్మిన్ మిమ్మల్ని ఒక గ్రూప్‌కి కేటాయించిన తర్వాత ఇక్కడ లైవ్ ఆక్షన్ కనిపిస్తుంది.
+                  </p>
+                </Card>
+              )}
+
               {/* 3. Group Summary Card */}
               {activeGroup && (
                 <Card className="p-3 md:p-4 bg-card">
@@ -1259,6 +1274,7 @@ function AuctionRoom() {
                 </Card>
               )}
 
+              {myGroups.length > 0 && (<>
               {/* 4. LIVE Chit Auction Board strip (table below is shared) */}
               <Card className="p-3 md:p-4 bg-card border-red-500/30">
                 <div className="flex items-center gap-2 mb-2">
@@ -1375,7 +1391,9 @@ function AuctionRoom() {
                   </p>
                 </Card>
               )}
+              </>)}
             </div>
+
           );
         })()}
 
@@ -1872,7 +1890,7 @@ function AuctionRoom() {
 
         </>)}
 
-        {!isAdmin && (<>
+        {!isAdmin && !memberHasNoGroup && (<>
         {/* Members see a single, unified "Live Bids Activity" feed below —
             the per-member sequential board is admin-only to avoid a duplicate
             bidding surface on mobile screens. */}
@@ -2039,7 +2057,7 @@ function AuctionRoom() {
         )}
 
         {/* 7. Footer — Paid & Received History (member) + Print button */}
-        {!isAdmin && me && (() => {
+        {!isAdmin && me && !memberHasNoGroup && (() => {
           const myReceived = pastWinners
             .filter((w) => w.memberId === myId)
             .reduce((s, w) => s + w.net, 0);
@@ -2085,7 +2103,7 @@ function AuctionRoom() {
         })()}
 
         {/* Payments panel — receipts (member upload / admin verify) */}
-        {orgId && activeAuctionId && (
+        {orgId && activeAuctionId && !memberHasNoGroup && (
           <AuctionPaymentsPanel
             orgId={orgId}
             auctionId={activeAuctionId}
