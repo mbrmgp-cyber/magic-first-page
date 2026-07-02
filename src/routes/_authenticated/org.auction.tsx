@@ -2203,6 +2203,89 @@ function AuctionRoom() {
           />
         )}
 
+        {/* PAST MONTHS REPORTS ARCHIVE — visible to both Admin and Member */}
+        {orgId && (() => {
+          // For members without a group, still allow browsing archives for the
+          // groups they historically participated in.
+          const memberGroupNames = new Set(
+            groups.filter((g) => g.memberIds.includes(myId)).map((g) => g.name)
+          );
+          const visible = allArchives.filter((a) => {
+            if (isAdmin) return true;
+            // Member: only show archives from groups they were a participant in,
+            // or where their id appears in the archived participants list.
+            if (memberGroupNames.has(a.group_name)) return true;
+            return a.participants.some((p) => p.id === myId);
+          });
+          if (visible.length === 0 && !isAdmin) return null;
+          // Group by group_name for compact display
+          const byGroup: Record<string, MonthArchiveDTO[]> = {};
+          for (const a of visible) {
+            (byGroup[a.group_name] ||= []).push(a);
+          }
+          const groupNames = Object.keys(byGroup).sort();
+          return (
+            <Card className="p-4 md:p-5 space-y-3 bg-card">
+              <div className="flex items-center gap-2">
+                <Archive className="size-4 text-indigo-400" />
+                <h2 className="font-semibold">Past Months Reports Archive</h2>
+                <Badge variant="secondary" className="text-xs">{visible.length}</Badge>
+              </div>
+              {visible.length === 0 ? (
+                <p className="text-xs text-muted-foreground">
+                  No archived months yet. When "Reset / Next Month" is used, the finalized month will appear here.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {groupNames.map((gn) => (
+                    <div key={gn} className="rounded-md border border-border/60 p-2">
+                      <p className="text-xs font-semibold mb-2 text-muted-foreground">
+                        Group: <span className="text-foreground">{gn}</span>
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                        {byGroup[gn]
+                          .slice()
+                          .sort((a, b) => a.month_no - b.month_no)
+                          .map((a) => (
+                            <div
+                              key={a.id}
+                              className="flex items-center justify-between gap-2 rounded-md border border-border bg-background/40 px-2.5 py-2"
+                            >
+                              <div className="min-w-0">
+                                <p className="text-xs font-semibold truncate">
+                                  Month {a.month_no} Report
+                                </p>
+                                <p className="text-[10px] text-muted-foreground truncate">
+                                  {a.winner
+                                    ? <>Winner: {a.winner.memberName} · {fmt(a.winner.amount)}</>
+                                    : "No winner recorded"}
+                                </p>
+                                <p className="text-[10px] text-muted-foreground">
+                                  Closed {new Date(a.closed_at).toLocaleDateString()}
+                                </p>
+                              </div>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="gap-1 shrink-0"
+                                disabled={archiveLoadingId === a.id}
+                                onClick={() => openArchive(a.id)}
+                              >
+                                <Printer className="size-3.5" />
+                                {archiveLoadingId === a.id ? "…" : "PDF"}
+                              </Button>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+          );
+        })()}
+
+
         {/* Footer — Print button at the very bottom (member view; admin has its own PDF footer above) */}
         {!isAdmin && (
           <div className="pt-4 pb-6 border-t border-border">
