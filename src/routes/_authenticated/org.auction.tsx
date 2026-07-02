@@ -23,7 +23,7 @@ import {
 import { useCurrency } from "@/lib/currency-context";
 import { listApprovedMembers } from "@/lib/members.functions";
 import { getMyRoles, getMyMembership, getMyOrg } from "@/lib/org.functions";
-import { getAuctionState, saveAuctionState, submitAuctionConsent, deleteAuctionGroup, type AuctionStateDTO } from "@/lib/auction.functions";
+import { getAuctionState, saveAuctionState, submitAuctionConsent, deleteAuctionGroup, listMonthArchives, getMonthArchive, archiveAndResetMonth, type AuctionStateDTO, type MonthArchiveDTO } from "@/lib/auction.functions";
 import { useSimRole } from "@/lib/rbac";
 import { RoleGate } from "@/components/RoleGate";
 import { supabase } from "@/integrations/supabase/client";
