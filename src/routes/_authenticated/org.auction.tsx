@@ -784,11 +784,18 @@ function AuctionRoom() {
         status: "active",
         updated_at: new Date().toISOString(),
       };
-      const { data: row, error } = await (supabase as any)
+      const doUpsert = async () => await (supabase as any)
         .from("auction_sessions")
         .upsert(payload, { onConflict: "org_id,group_name" })
         .select("*")
         .maybeSingle();
+      let attempt = await doUpsert();
+      // Retry once on transient network failure ("Failed to fetch").
+      if (attempt.error && /failed to fetch|networkerror|fetch/i.test(String(attempt.error.message || ""))) {
+        await new Promise((r) => setTimeout(r, 400));
+        attempt = await doUpsert();
+      }
+      const { data: row, error } = attempt;
       if (error) throw error;
       // Refresh the groups list from DB so both Group A and Group B coexist.
       const { data: allRows } = await (supabase as any)
