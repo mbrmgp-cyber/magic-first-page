@@ -1410,6 +1410,49 @@ function AuctionRoom() {
             </div>
           )}
 
+          {/* Foreman / Terms / Close time */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 border-t border-border">
+            <div className="space-y-1.5">
+              <Label className="text-xs">Foreman Benefit · ఫోర్‌మ్యాన్</Label>
+              <Select value={foremanMode} onValueChange={(v) => setForemanMode(v as any)}>
+                <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="commission">Commission % per month</SelectItem>
+                  <SelectItem value="free_month">Free month (no bidding)</SelectItem>
+                </SelectContent>
+              </Select>
+              {foremanMode === "commission" ? (
+                <Input type="number" min={0} step={0.1} value={commissionPct}
+                  onChange={(e) => setCommissionPct(Number(e.target.value))}
+                  placeholder="Commission %" className="h-9 tabular-nums" />
+              ) : (
+                <Input type="number" min={1} max={totalMonths || 60}
+                  value={foremanFreeMonth ?? ""}
+                  onChange={(e) => setForemanFreeMonth(e.target.value ? Number(e.target.value) : null)}
+                  placeholder="Free month # (e.g. 1)" className="h-9 tabular-nums" />
+              )}
+              <label className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <input type="checkbox" checked={foremanIncluded} onChange={(e) => setForemanIncluded(e.target.checked)} />
+                Foreman included in member count
+              </label>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Auction Close Time · క్లోజ్</Label>
+              <Input type="datetime-local"
+                value={closeAt ? new Date(closeAt).toISOString().slice(0, 16) : ""}
+                onChange={(e) => setCloseAt(e.target.value ? new Date(e.target.value).toISOString() : "")}
+                className="h-10" />
+              <p className="text-[10px] text-muted-foreground">5-min warning auto-triggers.</p>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Terms · నిబంధనలు</Label>
+              <textarea value={terms} onChange={(e) => setTerms(e.target.value)}
+                rows={3} placeholder="Group rules, penalties, payment cycle…"
+                className="w-full text-xs rounded-md border border-border bg-background p-2" />
+            </div>
+          </div>
+
+
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3 pt-2 border-t border-border">
             <div className="rounded-md border border-border bg-black/30 p-2.5">
               <p className="text-[10px] uppercase text-muted-foreground">మొత్తం మెంబర్స్</p>
