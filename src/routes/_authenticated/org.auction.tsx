@@ -446,7 +446,12 @@ function AuctionRoom() {
             const entry = mapBidRows([row])[0];
             setBids((prev) => (prev.some((b) => b.id === entry.id) ? prev : [...prev, entry]));
           }
-          fetchAndApply(auctionId).catch((e) => console.error("Auction bids realtime failed:", e?.message || e));
+          // Only re-hydrate for the session the viewer is currently watching.
+          // Otherwise a bid in another group would flip the viewer's activeAuctionId
+          // and wipe out their view.
+          if (auctionId && auctionId === activeAuctionIdRef.current) {
+            fetchAndApply(auctionId).catch((e) => console.error("Auction bids realtime failed:", e?.message || e));
+          }
         },
       )
       .on(
@@ -454,7 +459,9 @@ function AuctionRoom() {
         { event: "DELETE", schema: "public", table: "bids", filter: `org_id=eq.${orgId}` },
         (payload: any) => {
           const auctionId = payload.old?.auction_id ?? activeAuctionIdRef.current;
-          fetchAndApply(auctionId).catch((e) => console.error("Auction bids realtime failed:", e?.message || e));
+          if (auctionId && auctionId === activeAuctionIdRef.current) {
+            fetchAndApply(auctionId).catch((e) => console.error("Auction bids realtime failed:", e?.message || e));
+          }
         },
       )
       .subscribe();
