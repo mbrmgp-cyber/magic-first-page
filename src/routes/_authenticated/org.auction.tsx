@@ -2057,7 +2057,7 @@ function AuctionRoom() {
         )}
 
         {/* 7. Footer — Paid & Received History (member) + Print button */}
-        {!isAdmin && me && (() => {
+        {!isAdmin && me && !memberHasNoGroup && (() => {
           const myReceived = pastWinners
             .filter((w) => w.memberId === myId)
             .reduce((s, w) => s + w.net, 0);
