@@ -2118,7 +2118,7 @@ function AuctionRoom() {
         })()}
 
         {/* Payments panel — receipts (member upload / admin verify) */}
-        {orgId && activeAuctionId && !memberHasNoGroup && (
+        {orgId && activeAuctionId && !memberHasNoGroup && (isAdmin ? (!!liveGroupName && participants.length > 0) : true) && (
           <AuctionPaymentsPanel
             orgId={orgId}
             auctionId={activeAuctionId}
