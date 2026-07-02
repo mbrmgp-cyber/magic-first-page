@@ -476,13 +476,35 @@ function AuctionRoom() {
     // Do not persist a half-built setup card before the admin clicks Save/Assign.
     if (!liveGroupName.trim() && !activeAuctionId && !turnStart && bids.length === 0 && !auctionClosed) return;
     if (skipNextPushRef.current) { skipNextPushRef.current = false; return; }
+    // Never let the setup card's local state (participants, chit_value,
+    // total_months, start_date, group_name) leak into a DIFFERENT group's row
+    // via the auto-save. Those setup fields belong to whichever saved group is
+    // currently live — look them up in `groups` when the setup card is showing
+    // a different group.
+    const liveKey = (liveGroupName || chitGroupName).toLowerCase();
+    const liveEntry = groups.find((g) => g.name.toLowerCase() === liveKey);
+    const setupMatchesLive = chitGroupName.trim().toLowerCase() === liveKey;
+    const liveParticipants = !setupMatchesLive && liveEntry
+      ? (liveEntry.memberIds || []).map((id, i) => ({
+          id,
+          name: liveEntry.memberNames?.[i] || "",
+          member_code: liveEntry.memberCodes?.[i] ?? null,
+        }))
+      : participants;
+    const liveTotalMonths = !setupMatchesLive && liveEntry?.totalMonths ? liveEntry.totalMonths : totalMonths;
+    const liveChitValue = !setupMatchesLive && typeof (liveEntry as any)?.chitValue === "number" ? (liveEntry as any).chitValue : chitValue;
+    const liveStartDate = !setupMatchesLive && typeof (liveEntry as any)?.startDate === "string" ? (liveEntry as any).startDate : chitStartDate;
     const snapshot: AuctionStateDTO = {
       activeAuctionId: activeAuctionId ?? undefined,
-      groupName: chitGroupName,
+      groupName: liveGroupName || chitGroupName,
       liveGroupName,
-      chitValue, totalMonths, currentMonth, commissionPct,
-      startDate: chitStartDate,
-      participants, bids, pastWinners, consents, groups,
+      chitValue: liveChitValue,
+      totalMonths: liveTotalMonths,
+      currentMonth,
+      commissionPct,
+      startDate: liveStartDate,
+      participants: liveParticipants,
+      bids, pastWinners, consents, groups,
       winner, auctionClosed, turnStart, turnEnd,
     };
     const js = JSON.stringify(snapshot);
@@ -762,11 +784,18 @@ function AuctionRoom() {
         status: "active",
         updated_at: new Date().toISOString(),
       };
-      const { data: row, error } = await (supabase as any)
+      const doUpsert = async () => await (supabase as any)
         .from("auction_sessions")
         .upsert(payload, { onConflict: "org_id,group_name" })
         .select("*")
         .maybeSingle();
+      let attempt = await doUpsert();
+      // Retry once on transient network failure ("Failed to fetch").
+      if (attempt.error && /failed to fetch|networkerror|fetch/i.test(String(attempt.error.message || ""))) {
+        await new Promise((r) => setTimeout(r, 400));
+        attempt = await doUpsert();
+      }
+      const { data: row, error } = attempt;
       if (error) throw error;
       // Refresh the groups list from DB so both Group A and Group B coexist.
       const { data: allRows } = await (supabase as any)
