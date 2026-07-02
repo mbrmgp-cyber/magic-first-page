@@ -638,8 +638,26 @@ function AuctionRoom() {
   const startTurn = async () => {
     const ts = Date.now();
     setTurnStart(ts);
+    // CRITICAL: Never wholesale-upsert the session for a turn state change —
+    // that risks blanking participants/total_months/chit_value from local
+    // state. Do a surgical UPDATE of only the turn fields on the live row.
     try {
-      await ensureCurrentSession({ turnStart: ts, turnEnd: null, auctionClosed: false });
+      let auctionId = activeAuctionIdRef.current;
+      if (!auctionId) {
+        auctionId = await ensureCurrentSession({ turnStart: ts, turnEnd: null, auctionClosed: false });
+      } else {
+        const { error } = await (supabase as any)
+          .from("auction_sessions")
+          .update({
+            turn_start: new Date(ts).toISOString(),
+            turn_end: null,
+            auction_closed: false,
+            status: "active",
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", auctionId);
+        if (error) throw error;
+      }
     } catch (e: any) {
       toast.error(e?.message || "Failed to start auction turn");
     }
