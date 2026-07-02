@@ -98,6 +98,12 @@ type AuctionSessionRow = {
   winner_dividend: number | null;
   past_winners: unknown;
   consents: unknown;
+  foreman_mode: string | null;
+  foreman_free_month: number | null;
+  foreman_included: boolean | null;
+  terms: string | null;
+  close_at: string | null;
+  total_members: number | null;
   created_at: string;
   updated_at: string;
 };
