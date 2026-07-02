@@ -1122,6 +1122,11 @@ function AuctionRoom() {
   const orgEmail = org?.email || "";
   const orgPresident = org?.president_name || "";
 
+  // Member has no assigned group → show empty placeholder, hide any stale
+  // live-auction / bids / payments / history sections that could otherwise
+  // render from previously-hydrated state.
+  const memberHasNoGroup = !isAdmin && !!me && groups.filter((g) => g.memberIds.includes(myId)).length === 0;
+
   return (
     <div className="min-h-screen bg-[var(--app-bg,#0a0a0a)] text-foreground p-4 md:p-6">
       {/* Print-only styles */}
