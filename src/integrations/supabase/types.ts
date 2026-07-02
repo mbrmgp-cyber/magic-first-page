@@ -14,14 +14,91 @@ export type Database = {
   }
   public: {
     Tables: {
+      auction_payments: {
+        Row: {
+          amount: number
+          auction_id: string
+          created_at: string
+          id: string
+          member_id: string
+          month_no: number
+          note: string | null
+          org_id: string
+          receipt_url: string | null
+          status: string
+          updated_at: string
+          uploaded_by: string | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          amount?: number
+          auction_id: string
+          created_at?: string
+          id?: string
+          member_id: string
+          month_no: number
+          note?: string | null
+          org_id: string
+          receipt_url?: string | null
+          status?: string
+          updated_at?: string
+          uploaded_by?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          amount?: number
+          auction_id?: string
+          created_at?: string
+          id?: string
+          member_id?: string
+          month_no?: number
+          note?: string | null
+          org_id?: string
+          receipt_url?: string | null
+          status?: string
+          updated_at?: string
+          uploaded_by?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auction_payments_auction_id_fkey"
+            columns: ["auction_id"]
+            isOneToOne: false
+            referencedRelation: "auction_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auction_payments_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auction_payments_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       auction_sessions: {
         Row: {
           auction_closed: boolean
           chit_value: number
+          close_at: string | null
           commission_pct: number
           consents: Json
           created_at: string
           current_month: number
+          foreman_free_month: number | null
+          foreman_included: boolean
+          foreman_mode: string
           group_name: string
           id: string
           live_group_name: string | null
@@ -30,6 +107,8 @@ export type Database = {
           past_winners: Json
           start_date: string | null
           status: string
+          terms: string | null
+          total_members: number | null
           total_months: number
           turn_end: string | null
           turn_start: string | null
@@ -46,10 +125,14 @@ export type Database = {
         Insert: {
           auction_closed?: boolean
           chit_value?: number
+          close_at?: string | null
           commission_pct?: number
           consents?: Json
           created_at?: string
           current_month?: number
+          foreman_free_month?: number | null
+          foreman_included?: boolean
+          foreman_mode?: string
           group_name: string
           id?: string
           live_group_name?: string | null
@@ -58,6 +141,8 @@ export type Database = {
           past_winners?: Json
           start_date?: string | null
           status?: string
+          terms?: string | null
+          total_members?: number | null
           total_months?: number
           turn_end?: string | null
           turn_start?: string | null
@@ -74,10 +159,14 @@ export type Database = {
         Update: {
           auction_closed?: boolean
           chit_value?: number
+          close_at?: string | null
           commission_pct?: number
           consents?: Json
           created_at?: string
           current_month?: number
+          foreman_free_month?: number | null
+          foreman_included?: boolean
+          foreman_mode?: string
           group_name?: string
           id?: string
           live_group_name?: string | null
@@ -86,6 +175,8 @@ export type Database = {
           past_winners?: Json
           start_date?: string | null
           status?: string
+          terms?: string | null
+          total_members?: number | null
           total_months?: number
           turn_end?: string | null
           turn_start?: string | null
@@ -1618,6 +1709,49 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      finalize_chit_auction: {
+        Args: { _auction_id: string; _org_id: string }
+        Returns: {
+          auction_closed: boolean
+          chit_value: number
+          close_at: string | null
+          commission_pct: number
+          consents: Json
+          created_at: string
+          current_month: number
+          foreman_free_month: number | null
+          foreman_included: boolean
+          foreman_mode: string
+          group_name: string
+          id: string
+          live_group_name: string | null
+          org_id: string
+          participants: Json
+          past_winners: Json
+          start_date: string | null
+          status: string
+          terms: string | null
+          total_members: number | null
+          total_months: number
+          turn_end: string | null
+          turn_start: string | null
+          updated_at: string
+          updated_by: string | null
+          winner_amount: number | null
+          winner_bid_id: string | null
+          winner_dividend: number | null
+          winner_member_code: string | null
+          winner_member_id: string | null
+          winner_member_name: string | null
+          winner_net: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "auction_sessions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_committee_role: {
         Args: { _org_id: string; _user_id: string }
         Returns: Database["public"]["Enums"]["committee_role"]
@@ -1708,6 +1842,49 @@ export type Database = {
           read_ct: number
         }[]
       }
+      reset_chit_month: {
+        Args: { _auction_id: string; _org_id: string }
+        Returns: {
+          auction_closed: boolean
+          chit_value: number
+          close_at: string | null
+          commission_pct: number
+          consents: Json
+          created_at: string
+          current_month: number
+          foreman_free_month: number | null
+          foreman_included: boolean
+          foreman_mode: string
+          group_name: string
+          id: string
+          live_group_name: string | null
+          org_id: string
+          participants: Json
+          past_winners: Json
+          start_date: string | null
+          status: string
+          terms: string | null
+          total_members: number | null
+          total_months: number
+          turn_end: string | null
+          turn_start: string | null
+          updated_at: string
+          updated_by: string | null
+          winner_amount: number | null
+          winner_bid_id: string | null
+          winner_dividend: number | null
+          winner_member_code: string | null
+          winner_member_id: string | null
+          winner_member_name: string | null
+          winner_net: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "auction_sessions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       submit_chit_bid: {
         Args: { _amount: number; _auction_id?: string; _org_id: string }
         Returns: Json
@@ -1717,10 +1894,14 @@ export type Database = {
         Returns: {
           auction_closed: boolean
           chit_value: number
+          close_at: string | null
           commission_pct: number
           consents: Json
           created_at: string
           current_month: number
+          foreman_free_month: number | null
+          foreman_included: boolean
+          foreman_mode: string
           group_name: string
           id: string
           live_group_name: string | null
@@ -1729,6 +1910,8 @@ export type Database = {
           past_winners: Json
           start_date: string | null
           status: string
+          terms: string | null
+          total_members: number | null
           total_months: number
           turn_end: string | null
           turn_start: string | null
