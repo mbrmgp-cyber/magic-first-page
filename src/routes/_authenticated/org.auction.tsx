@@ -1890,7 +1890,7 @@ function AuctionRoom() {
 
         </>)}
 
-        {!isAdmin && (<>
+        {!isAdmin && !memberHasNoGroup && (<>
         {/* Members see a single, unified "Live Bids Activity" feed below —
             the per-member sequential board is admin-only to avoid a duplicate
             bidding surface on mobile screens. */}
