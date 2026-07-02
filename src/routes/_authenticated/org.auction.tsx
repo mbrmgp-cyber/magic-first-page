@@ -2021,6 +2021,17 @@ function AuctionRoom() {
           );
         })()}
 
+        {/* Payments panel — receipts (member upload / admin verify) */}
+        {orgId && activeAuctionId && (
+          <AuctionPaymentsPanel
+            orgId={orgId}
+            auctionId={activeAuctionId}
+            monthNo={currentMonth}
+            amount={participants.length > 0 ? Math.round((chitValue || 0) / participants.length) : 0}
+            isAdmin={!!isAdmin}
+          />
+        )}
+
         {/* Footer — Print button at the very bottom (member view; admin has its own PDF footer above) */}
         {!isAdmin && (
           <div className="pt-4 pb-6 border-t border-border">
