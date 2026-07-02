@@ -378,6 +378,11 @@ function AuctionRoom() {
     if (Array.isArray(s.pastWinners)) setPastWinners(s.pastWinners);
     if (s.consents && typeof s.consents === "object") setConsents(s.consents as any);
     if (Array.isArray(s.groups)) setGroups(s.groups);
+    if (!freezeSetup && typeof (s as any).foremanMode === "string") setForemanMode((s as any).foremanMode);
+    if (!freezeSetup && "foremanFreeMonth" in s) setForemanFreeMonth((s as any).foremanFreeMonth ?? null);
+    if (!freezeSetup && typeof (s as any).foremanIncluded === "boolean") setForemanIncluded((s as any).foremanIncluded);
+    if (!freezeSetup && typeof (s as any).terms === "string") setTerms((s as any).terms ?? "");
+    if (!freezeSetup && "closeAt" in s) setCloseAt((s as any).closeAt ?? "");
     if (typeof s.auctionClosed === "boolean") setAuctionClosed(s.auctionClosed);
     setWinner(s.winner ?? null);
     setTurnStart(s.turnStart ?? null);
