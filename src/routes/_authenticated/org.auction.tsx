@@ -581,25 +581,47 @@ function AuctionRoom() {
     auctionClosed, turnStart, turnEnd, saveState, editingSetup,
   ]);
 
-  const buildSessionSnapshot = (overrides: Partial<AuctionStateDTO> = {}): AuctionStateDTO => ({
-    activeAuctionId: overrides.activeAuctionId ?? activeAuctionId ?? undefined,
-    groupName: overrides.groupName ?? chitGroupName,
-    liveGroupName: overrides.liveGroupName ?? liveGroupName,
-    chitValue: overrides.chitValue ?? chitValue,
-    totalMonths: overrides.totalMonths ?? totalMonths,
-    currentMonth: overrides.currentMonth ?? currentMonth,
-    commissionPct: overrides.commissionPct ?? commissionPct,
-    startDate: "startDate" in overrides ? overrides.startDate : chitStartDate,
-    participants: overrides.participants ?? participants,
-    bids: overrides.bids ?? bids,
-    pastWinners: overrides.pastWinners ?? pastWinners,
-    consents: overrides.consents ?? consents,
-    groups: overrides.groups ?? groups,
-    winner: "winner" in overrides ? overrides.winner : winner,
-    auctionClosed: overrides.auctionClosed ?? auctionClosed,
-    turnStart: overrides.turnStart === undefined ? turnStart : overrides.turnStart,
-    turnEnd: overrides.turnEnd === undefined ? turnEnd : overrides.turnEnd,
-  });
+  const buildSessionSnapshot = (overrides: Partial<AuctionStateDTO> = {}): AuctionStateDTO => {
+    // Mirror the auto-save's "live-group-canonical" logic so ad-hoc writes
+    // (startTurn, submitBid, clearBids, finalize, reset) never overwrite the
+    // live group's saved participants/chit fields with the setup card's local
+    // state. Without this, clicking Start Turn while the setup card is empty
+    // upserts participants=[] onto the live row and wipes members.
+    const liveName = (overrides.liveGroupName ?? liveGroupName) || chitGroupName;
+    const liveKey = liveName.toLowerCase();
+    const liveEntry = groups.find((g) => g.name.toLowerCase() === liveKey);
+    const setupMatchesLive = chitGroupName.trim().toLowerCase() === liveKey;
+    const liveParticipants = !setupMatchesLive && liveEntry
+      ? (liveEntry.memberIds || []).map((id, i) => ({
+          id,
+          name: liveEntry.memberNames?.[i] || "",
+          member_code: liveEntry.memberCodes?.[i] ?? null,
+        }))
+      : participants;
+    const liveTotalMonths = !setupMatchesLive && liveEntry?.totalMonths ? liveEntry.totalMonths : totalMonths;
+    const liveChitValue = !setupMatchesLive && typeof (liveEntry as any)?.chitValue === "number" ? (liveEntry as any).chitValue : chitValue;
+    const liveStartDate = !setupMatchesLive && typeof (liveEntry as any)?.startDate === "string" ? (liveEntry as any).startDate : chitStartDate;
+    return {
+      activeAuctionId: overrides.activeAuctionId ?? activeAuctionId ?? undefined,
+      groupName: overrides.groupName ?? liveName,
+      liveGroupName: overrides.liveGroupName ?? liveGroupName,
+      chitValue: overrides.chitValue ?? liveChitValue,
+      totalMonths: overrides.totalMonths ?? liveTotalMonths,
+      currentMonth: overrides.currentMonth ?? currentMonth,
+      commissionPct: overrides.commissionPct ?? commissionPct,
+      startDate: "startDate" in overrides ? overrides.startDate : liveStartDate,
+      participants: overrides.participants ?? liveParticipants,
+      bids: overrides.bids ?? bids,
+      pastWinners: overrides.pastWinners ?? pastWinners,
+      consents: overrides.consents ?? consents,
+      groups: overrides.groups ?? groups,
+      winner: "winner" in overrides ? overrides.winner : winner,
+      auctionClosed: overrides.auctionClosed ?? auctionClosed,
+      turnStart: overrides.turnStart === undefined ? turnStart : overrides.turnStart,
+      turnEnd: overrides.turnEnd === undefined ? turnEnd : overrides.turnEnd,
+    };
+  };
+
 
   const ensureCurrentSession = async (overrides: Partial<AuctionStateDTO> = {}) => {
     if (!orgId) throw new Error("Organization not found");
