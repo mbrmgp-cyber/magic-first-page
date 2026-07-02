@@ -1615,7 +1615,19 @@ function AuctionRoom() {
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={() => { setLiveGroupName(""); setParticipants([]); }}
+                  onClick={() => {
+                    setLiveGroupName("");
+                    setParticipants([]);
+                    setBids([]);
+                    setPastWinners([]);
+                    setTurnStart(null);
+                    setTurnEnd(null);
+                    setAuctionClosed(false);
+                    setWinner(null);
+                    setCurrentMonth(1);
+                    setActiveAuctionId(null);
+                    activeAuctionIdRef.current = null;
+                  }}
                   className="text-xs"
                 >
                   Clear
@@ -1849,7 +1861,8 @@ function AuctionRoom() {
         </div>
         )}
 
-        {/* 4. Footer — పాస్ట్ డిటైల్స్ + Save + PDF */}
+        {/* 4. Footer — పాస్ట్ డిటైల్స్ + Save + PDF (only when a live group is loaded) */}
+        {liveGroupName && participants.length > 0 && (
         <Card className="p-4 md:p-5 space-y-3 bg-card">
           <div className="flex items-center gap-2">
             <Trophy className="size-4 text-amber-400" />
@@ -1887,8 +1900,10 @@ function AuctionRoom() {
             </Button>
           </div>
         </Card>
+        )}
 
         </>)}
+
 
         {!isAdmin && !memberHasNoGroup && (<>
         {/* Members see a single, unified "Live Bids Activity" feed below —
@@ -2103,7 +2118,7 @@ function AuctionRoom() {
         })()}
 
         {/* Payments panel — receipts (member upload / admin verify) */}
-        {orgId && activeAuctionId && !memberHasNoGroup && (
+        {orgId && activeAuctionId && !memberHasNoGroup && (isAdmin ? (!!liveGroupName && participants.length > 0) : true) && (
           <AuctionPaymentsPanel
             orgId={orgId}
             auctionId={activeAuctionId}
