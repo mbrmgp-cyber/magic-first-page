@@ -1900,8 +1900,10 @@ function AuctionRoom() {
             </Button>
           </div>
         </Card>
+        )}
 
         </>)}
+
 
         {!isAdmin && !memberHasNoGroup && (<>
         {/* Members see a single, unified "Live Bids Activity" feed below —
