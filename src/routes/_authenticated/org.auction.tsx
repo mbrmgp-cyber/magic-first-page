@@ -927,12 +927,12 @@ function AuctionRoom() {
       setGroups(mapped);
       // If the deleted group was the live one, clear the live pointer.
       if (liveGroupName && liveGroupName.toLowerCase() === name.toLowerCase()) {
-        setLiveGroupName(null);
+        setLiveGroupName("");
         setActiveAuctionId(null);
         activeAuctionIdRef.current = null;
       }
       if (selectedGroupName && selectedGroupName.toLowerCase() === name.toLowerCase()) {
-        setSelectedGroupName(null);
+        setSelectedGroupName("");
       }
     } catch { /* refresh best-effort */ }
     toast.success(`Deleted group "${name}"`);
