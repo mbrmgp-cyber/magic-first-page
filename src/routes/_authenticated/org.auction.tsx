@@ -2103,7 +2103,7 @@ function AuctionRoom() {
         })()}
 
         {/* Payments panel — receipts (member upload / admin verify) */}
-        {orgId && activeAuctionId && (
+        {orgId && activeAuctionId && !memberHasNoGroup && (
           <AuctionPaymentsPanel
             orgId={orgId}
             auctionId={activeAuctionId}
