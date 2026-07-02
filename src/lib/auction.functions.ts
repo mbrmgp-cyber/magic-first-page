@@ -190,6 +190,12 @@ function sessionToState(row: AuctionSessionRow, bidRows: BidRow[], allRows: Auct
     auctionClosed: row.auction_closed || row.status === "closed",
     turnStart: ms(row.turn_start),
     turnEnd: ms(row.turn_end),
+    foremanMode: ((row.foreman_mode as any) || "commission") as "commission" | "free_month",
+    foremanFreeMonth: row.foreman_free_month ?? null,
+    foremanIncluded: row.foreman_included ?? true,
+    terms: row.terms ?? null,
+    closeAt: row.close_at ?? null,
+    totalMembers: row.total_members ?? null,
   };
 }
 
