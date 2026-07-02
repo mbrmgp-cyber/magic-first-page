@@ -1245,6 +1245,16 @@ function AuctionRoom() {
                 </div>
               </Card>
 
+              {/* Empty state — member is not assigned to any group */}
+              {myGroups.length === 0 && (
+                <Card className="p-6 bg-card border-dashed text-center space-y-1">
+                  <p className="text-sm font-semibold">No active chit groups assigned</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    మీరు ఏ చిట్ గ్రూప్‌లోనూ నమోదు కాలేదు. అడ్మిన్ మిమ్మల్ని ఒక గ్రూప్‌కి కేటాయించిన తర్వాత ఇక్కడ లైవ్ ఆక్షన్ కనిపిస్తుంది.
+                  </p>
+                </Card>
+              )}
+
               {/* 3. Group Summary Card */}
               {activeGroup && (
                 <Card className="p-3 md:p-4 bg-card">
