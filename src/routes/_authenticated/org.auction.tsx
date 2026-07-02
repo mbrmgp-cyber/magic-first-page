@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   ArrowLeft, Gavel, TrendingDown, Wallet, Percent, Users, Plus, X, Trophy,
-  Lock, RotateCcw, PartyPopper, Printer, CheckCircle2, ShieldCheck, Clock, Archive,
+  Lock, RotateCcw, PartyPopper, Printer, CheckCircle2, ShieldCheck, Clock, Archive, BookOpen,
 } from "lucide-react";
 import { useCurrency } from "@/lib/currency-context";
 import { listApprovedMembers } from "@/lib/members.functions";
@@ -1184,7 +1184,18 @@ function AuctionRoom() {
       <style>{`
         @media print {
           @page { size: A4; margin: 12mm; }
-          html, body { background: #fff !important; color: #000 !important; margin: 0 !important; padding: 0 !important; height: auto !important; min-height: 0 !important; }
+          html, body {
+            background: #fff !important; color: #000 !important;
+            margin: 0 !important; padding: 0 !important;
+            height: auto !important; min-height: 0 !important;
+            overflow: hidden !important;
+          }
+          /* Neutralize any full-viewport wrappers that would force a 2nd page */
+          body * {
+            min-height: 0 !important;
+            max-height: none !important;
+          }
+          .min-h-screen { min-height: 0 !important; }
           body * { visibility: hidden !important; }
           .print-area, .print-area * { visibility: visible !important; }
           .no-print { display: none !important; }
@@ -1205,12 +1216,25 @@ function AuctionRoom() {
             margin: 0 !important;
             min-height: 0 !important;
             height: auto !important;
+            max-height: none !important;
+            overflow: hidden !important;
             page-break-after: avoid !important;
             break-after: avoid !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
           }
-          .print-area > *:last-child { page-break-after: avoid !important; break-after: avoid !important; margin-bottom: 0 !important; padding-bottom: 0 !important; }
-          .print-page { page-break-after: auto; break-after: auto; }
-          .print-page:last-child { page-break-after: avoid !important; break-after: avoid !important; }
+          .print-area > *:last-child {
+            page-break-after: avoid !important;
+            break-after: avoid !important;
+            margin-bottom: 0 !important;
+            padding-bottom: 0 !important;
+          }
+          .print-page {
+            page-break-after: avoid !important;
+            break-after: avoid !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
         }
         @media screen { .print-only { display: none; } }
 
@@ -1345,6 +1369,19 @@ function AuctionRoom() {
                       value={chitStartDate ? new Date(chitStartDate).toLocaleDateString() : "—"}
                     />
                     <StatBox label="Closed Months" value={`${closedMonths} / ${totalMonths}`} />
+                  </div>
+                </Card>
+              )}
+
+              {/* Group Terms — read-only for members */}
+              {activeGroup && terms.trim().length > 0 && (
+                <Card className="p-3 md:p-4 bg-card border-amber-500/30">
+                  <div className="flex items-center gap-2 mb-2">
+                    <BookOpen className="size-4 text-amber-400" />
+                    <h2 className="font-semibold text-sm">Group Terms · నిబంధనలు</h2>
+                  </div>
+                  <div className="text-xs md:text-sm whitespace-pre-wrap leading-relaxed text-foreground/90">
+                    {terms}
                   </div>
                 </Card>
               )}
