@@ -1161,9 +1161,9 @@ function AuctionRoom() {
   const printRef = useRef<HTMLDivElement>(null);
   const handlePrint = () => {
     if (typeof window === "undefined") return;
-    // Close any open dialogs / popovers so they don't leak into the PDF
+    // Print the live board (clear any archive snapshot first).
+    setArchivePrint(null);
     setWinnerOpen(false);
-    // Wait for Radix to unmount the portal before invoking the browser print dialog
     setTimeout(() => window.print(), 120);
   };
 
