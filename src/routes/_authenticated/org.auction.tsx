@@ -1274,6 +1274,7 @@ function AuctionRoom() {
                 </Card>
               )}
 
+              {myGroups.length > 0 && (<>
               {/* 4. LIVE Chit Auction Board strip (table below is shared) */}
               <Card className="p-3 md:p-4 bg-card border-red-500/30">
                 <div className="flex items-center gap-2 mb-2">
