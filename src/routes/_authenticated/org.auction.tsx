@@ -849,27 +849,58 @@ function AuctionRoom() {
   };
 
   const resetAuction = async () => {
-    const nextMonth = currentMonth + 1;
-    setBids([]);
-    setWinner(null);
-    setAuctionClosed(false);
-    setBid(0);
-    setActiveBidder("");
-    setTurnStart(null);
-    setTurnEnd(null);
-    setCurrentMonth(nextMonth);
+    if (!orgId) {
+      toast.error("Organization not found");
+      return;
+    }
+    const auctionId = activeAuctionIdRef.current;
+    if (!auctionId) {
+      toast.error("No active auction session to archive");
+      return;
+    }
     try {
-      if (activeAuctionIdRef.current) {
-        const { error } = await (supabase as any).from("bids").delete().eq("auction_id", activeAuctionIdRef.current);
-        if (error) throw error;
-      }
-      await ensureCurrentSession({
-        bids: [], winner: null, auctionClosed: false, turnStart: null, turnEnd: null, currentMonth: nextMonth,
-      });
+      // Server-side: snapshots current month into auction_month_archives,
+      // then advances to next month (deletes live bids, clears winner).
+      await archiveResetServer({ data: { orgId, auctionId } });
+      // Local state mirror — realtime will overwrite anyway but this keeps
+      // the UI snappy.
+      setBids([]);
+      setWinner(null);
+      setAuctionClosed(false);
+      setBid(0);
+      setActiveBidder("");
+      setTurnStart(null);
+      setTurnEnd(null);
+      setCurrentMonth((m) => m + 1);
+      await archivesQ.refetch();
+      toast.success("Month archived · Advanced to next month");
     } catch (e: any) {
-      toast.error(e?.message || "Failed to reset auction");
+      toast.error(e?.message || "Failed to archive & reset auction");
     }
   };
+
+  const openArchive = async (archiveId: string) => {
+    if (!orgId) return;
+    setArchiveLoadingId(archiveId);
+    try {
+      const res = await fetchArchive({ data: { orgId, archiveId } });
+      if (!res?.archive) throw new Error("Archive not found");
+      setArchivePrint(res.archive);
+      // Give React a tick to render the archive into the print-area
+      setTimeout(() => {
+        setWinnerOpen(false);
+        window.print();
+        // Reset back to live after the print dialog closes so the live
+        // board resumes rendering into the PDF surface.
+        setTimeout(() => setArchivePrint(null), 800);
+      }, 150);
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to load archived month");
+    } finally {
+      setArchiveLoadingId(null);
+    }
+  };
+
 
   const deleteGroup = async (name: string) => {
     if (!orgId) {
