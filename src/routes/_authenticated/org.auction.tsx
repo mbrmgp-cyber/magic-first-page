@@ -28,6 +28,7 @@ import { useSimRole } from "@/lib/rbac";
 import { RoleGate } from "@/components/RoleGate";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { AuctionPaymentsPanel } from "@/components/auction/AuctionPaymentsPanel";
 
 export const Route = createFileRoute("/_authenticated/org/auction")({
   head: () => ({ meta: [{ title: "Live Chit Auction — MBR App" }] }),
