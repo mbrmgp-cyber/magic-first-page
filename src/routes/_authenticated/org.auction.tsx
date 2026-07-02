@@ -466,6 +466,55 @@ function AuctionRoom() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orgId]);
 
+  // Member-side: ensure the member is subscribed to THEIR visible group's
+  // auction session, not just whatever session was most-recently-updated
+  // org-wide. Without this, a member in Group B whose activeAuctionId points
+  // at Group A never renders Group B bids even though realtime delivers them.
+  useEffect(() => {
+    if (!orgId || isAdmin || !myId || groups.length === 0) return;
+    const myGroups = groups.filter((g) => g.memberIds.includes(myId));
+    if (myGroups.length === 0) return;
+    const visibleName = selectedGroupName || liveGroupName || myGroups[0].name;
+    const target = myGroups.find((g) => g.name === visibleName) || myGroups[0];
+    if (!target?.auctionId) return;
+    if (target.auctionId === activeAuctionIdRef.current) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data: session, error: sessionError } = await (supabase as any)
+          .from("auction_sessions")
+          .select("*")
+          .eq("id", target.auctionId)
+          .maybeSingle();
+        if (sessionError) throw sessionError;
+        if (!session || cancelled) return;
+        const { data: sessionRows } = await (supabase as any)
+          .from("auction_sessions")
+          .select("*")
+          .eq("org_id", orgId)
+          .order("updated_at", { ascending: false });
+        const { data: bidRows, error: bidError } = await (supabase as any)
+          .from("bids")
+          .select("id, member_id, member_name, member_code, amount, submitted_at")
+          .eq("auction_id", target.auctionId)
+          .order("submitted_at", { ascending: true });
+        if (bidError) throw bidError;
+        if (cancelled) return;
+        const nextState = sessionState(
+          session as AuctionSessionRow,
+          bidRows ?? [],
+          (sessionRows ?? []) as AuctionSessionRow[],
+        );
+        lastRemoteJsonRef.current = JSON.stringify(nextState);
+        applyRemote(nextState);
+      } catch (e: any) {
+        console.error("Member group session load failed:", e?.message || e);
+      }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orgId, isAdmin, myId, groups, selectedGroupName, liveGroupName]);
+
   // Admin writes: push state whenever it changes (debounced)
   useEffect(() => {
     if (!orgId || !isAdmin || !hydratedRef.current) return;
