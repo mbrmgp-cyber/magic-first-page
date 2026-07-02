@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   ArrowLeft, Gavel, TrendingDown, Wallet, Percent, Users, Plus, X, Trophy,
-  Lock, RotateCcw, PartyPopper, Printer, CheckCircle2, ShieldCheck, Clock, Archive,
+  Lock, RotateCcw, PartyPopper, Printer, CheckCircle2, ShieldCheck, Clock, Archive, BookOpen,
 } from "lucide-react";
 import { useCurrency } from "@/lib/currency-context";
 import { listApprovedMembers } from "@/lib/members.functions";
