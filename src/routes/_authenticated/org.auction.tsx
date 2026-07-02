@@ -1615,7 +1615,19 @@ function AuctionRoom() {
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={() => { setLiveGroupName(""); setParticipants([]); }}
+                  onClick={() => {
+                    setLiveGroupName("");
+                    setParticipants([]);
+                    setBids([]);
+                    setPastWinners([]);
+                    setTurnStart(null);
+                    setTurnEnd(null);
+                    setAuctionClosed(false);
+                    setWinner(null);
+                    setCurrentMonth(1);
+                    setActiveAuctionId(null);
+                    activeAuctionIdRef.current = null;
+                  }}
                   className="text-xs"
                 >
                   Clear
