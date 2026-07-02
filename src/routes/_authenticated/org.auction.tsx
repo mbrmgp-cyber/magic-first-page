@@ -391,6 +391,20 @@ function AuctionRoom() {
 
   useEffect(() => { activeAuctionIdRef.current = activeAuctionId; }, [activeAuctionId]);
 
+  // 5-minute warning toast before closeAt
+  useEffect(() => {
+    if (!closeAt || auctionClosed) return;
+    const closeMs = new Date(closeAt).getTime();
+    if (!Number.isFinite(closeMs)) return;
+    const warnAt = closeMs - 5 * 60 * 1000;
+    const now = Date.now();
+    if (warnAt <= now) return;
+    const timer = setTimeout(() => {
+      toast.warning("Hurry up! The chit auction will close in 5 minutes.", { duration: 10000 });
+    }, warnAt - now);
+    return () => clearTimeout(timer);
+  }, [closeAt, auctionClosed]);
+
   // Initial load + Supabase realtime subscriptions backed by auction_sessions + bids tables
   useEffect(() => {
     if (!orgId) return;
