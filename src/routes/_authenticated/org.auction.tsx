@@ -245,6 +245,12 @@ function AuctionRoom() {
   const [activeAuctionId, setActiveAuctionId] = useState<string | null>(null);
   const [selectedGroupName, setSelectedGroupName] = useState<string>("");
   const [chitStartDate, setChitStartDate] = useState<string>("");
+  // Foreman / terms / auction close config
+  const [foremanMode, setForemanMode] = useState<"commission" | "free_month">("commission");
+  const [foremanFreeMonth, setForemanFreeMonth] = useState<number | null>(null);
+  const [foremanIncluded, setForemanIncluded] = useState<boolean>(true);
+  const [terms, setTerms] = useState<string>("");
+  const [closeAt, setCloseAt] = useState<string>(""); // ISO string
   // Admin UX: collapse Group Setup card after save + which saved group is loaded into the Live board
   const [setupCollapsed, setSetupCollapsed] = useState<boolean>(false);
   const [liveGroupName, setLiveGroupName] = useState<string>("");
