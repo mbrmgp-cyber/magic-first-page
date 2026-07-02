@@ -633,6 +633,12 @@ function AuctionRoom() {
       auctionClosed: overrides.auctionClosed ?? auctionClosed,
       turnStart: overrides.turnStart === undefined ? turnStart : overrides.turnStart,
       turnEnd: overrides.turnEnd === undefined ? turnEnd : overrides.turnEnd,
+      foremanMode: (overrides as any).foremanMode ?? foremanMode,
+      foremanFreeMonth: (overrides as any).foremanFreeMonth ?? foremanFreeMonth,
+      foremanIncluded: (overrides as any).foremanIncluded ?? foremanIncluded,
+      terms: (overrides as any).terms ?? (terms || null),
+      closeAt: (overrides as any).closeAt ?? (closeAt || null),
+      totalMembers: (overrides as any).totalMembers ?? (participants.length || null),
     };
   };
 
