@@ -1364,29 +1364,35 @@ function AuctionRoom() {
                     <h2 className="font-semibold text-sm">{activeGroup.name} · Group Summary</h2>
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                    <StatBox
+                      label="Total Amount · మొత్తం అమౌంట్"
+                      value={fmt(Number((activeGroup as any).chitValue) || 0)}
+                      highlight
+                    />
                     <StatBox label="Total Members" value={String(activeGroup.memberIds.length)} />
-                    <StatBox label="Total Months" value={String(totalMonths)} />
+                    <StatBox label="Total Months" value={String((activeGroup as any).totalMonths ?? totalMonths)} />
                     <StatBox
                       label="Start Date"
-                      value={chitStartDate ? new Date(chitStartDate).toLocaleDateString() : "—"}
+                      value={(activeGroup as any).startDate ? new Date((activeGroup as any).startDate).toLocaleDateString() : (chitStartDate ? new Date(chitStartDate).toLocaleDateString() : "—")}
                     />
-                    <StatBox label="Closed Months" value={`${closedMonths} / ${totalMonths}`} />
+                    <StatBox label="Closed Months" value={`${closedMonths} / ${(activeGroup as any).totalMonths ?? totalMonths}`} />
                   </div>
                 </Card>
               )}
 
               {/* Group Terms — read-only for members */}
-              {activeGroup && terms.trim().length > 0 && (
+              {activeGroup && (((activeGroup as any).terms || terms) || "").toString().trim().length > 0 && (
                 <Card className="p-3 md:p-4 bg-card border-amber-500/30">
                   <div className="flex items-center gap-2 mb-2">
                     <BookOpen className="size-4 text-amber-400" />
                     <h2 className="font-semibold text-sm">Group Terms · నిబంధనలు</h2>
                   </div>
                   <div className="text-xs md:text-sm whitespace-pre-wrap leading-relaxed text-foreground/90">
-                    {terms}
+                    {((activeGroup as any).terms || terms || "").toString()}
                   </div>
                 </Card>
               )}
+
 
               {myGroups.length > 0 && (<>
               {/* 4. LIVE Chit Auction Board strip (table below is shared) */}
