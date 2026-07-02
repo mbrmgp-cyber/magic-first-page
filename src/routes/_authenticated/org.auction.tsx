@@ -1391,7 +1391,9 @@ function AuctionRoom() {
                   </p>
                 </Card>
               )}
+              </>)}
             </div>
+
           );
         })()}
 
