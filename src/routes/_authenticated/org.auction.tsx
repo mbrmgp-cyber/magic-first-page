@@ -346,6 +346,7 @@ function AuctionRoom() {
   const loadState = useServerFn(getAuctionState);
   const saveState = useServerFn(saveAuctionState);
   const submitConsent = useServerFn(submitAuctionConsent);
+  const deleteGroupServer = useServerFn(deleteAuctionGroup);
 
   // Member's own bidding input
   const [myBidAmount, setMyBidAmount] = useState<number>(0);
