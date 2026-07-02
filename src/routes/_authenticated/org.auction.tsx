@@ -2272,6 +2272,25 @@ function AuctionRoom() {
       </Dialog>
 
       {/* PRINTABLE OFFICIAL PDF VIEW */}
+      {(() => {
+        // Resolve print source: archived snapshot (if user clicked a past
+        // month) OR live board state.
+        const A = archivePrint;
+        const p_groupName = A ? A.group_name : chitGroupName;
+        const p_chitValue = A ? A.chit_value : chitValue;
+        const p_month = A ? A.month_no : currentMonth;
+        const p_totalMonths = A ? A.total_months : totalMonths;
+        const p_commissionPct = A ? A.commission_pct : commissionPct;
+        const p_turnStart = A ? A.turn_start : turnStart;
+        const p_turnEnd = A ? A.turn_end : turnEnd;
+        const p_participants = A ? A.participants : participants;
+        const p_bids = A ? A.bids : bids;
+        const p_consents = A ? A.consents : consents;
+        const p_winner = A ? A.winner : winner;
+        const p_winnerCalc = A && A.winner
+          ? { commission: A.winner.commission, net: A.winner.net, dividend: A.winner.dividend, others: Math.max(1, A.participants.length - 1) }
+          : winnerCalc;
+        return (
       <div ref={printRef} className="print-only print-area" style={{ display: "none" }}>
         <div style={{ fontFamily: "Georgia, serif" }}>
           {/* Letterhead */}
@@ -2289,23 +2308,28 @@ function AuctionRoom() {
             <h2 style={{ fontSize: 16, marginTop: 10, textDecoration: "underline" }}>
               OFFICIAL CHIT AUCTION REPORT
             </h2>
+            {A && (
+              <p style={{ fontSize: 11, margin: "4px 0 0", fontStyle: "italic" }}>
+                Archived copy · Closed on {new Date(A.closed_at).toLocaleString()}
+              </p>
+            )}
           </div>
 
           {/* Chit Group details */}
           <table style={{ width: "100%", fontSize: 12, marginBottom: 12 }}>
             <tbody>
               <tr>
-                <td><b>Chit Group:</b> {chitGroupName}</td>
-                <td><b>Chit Value:</b> {fmt(chitValue)}</td>
-                <td><b>Month:</b> {currentMonth} / {totalMonths}</td>
+                <td><b>Chit Group:</b> {p_groupName}</td>
+                <td><b>Chit Value:</b> {fmt(p_chitValue)}</td>
+                <td><b>Month:</b> {p_month} / {p_totalMonths}</td>
               </tr>
               <tr>
-                <td><b>Foreman Commission:</b> {commissionPct}%</td>
-                <td><b>Turn Started:</b> {turnStart ? new Date(turnStart).toLocaleString() : "—"}</td>
-                <td><b>Turn Closed:</b> {turnEnd ? new Date(turnEnd).toLocaleString() : "—"}</td>
+                <td><b>Foreman Commission:</b> {p_commissionPct}%</td>
+                <td><b>Turn Started:</b> {p_turnStart ? new Date(p_turnStart).toLocaleString() : "—"}</td>
+                <td><b>Turn Closed:</b> {p_turnEnd ? new Date(p_turnEnd).toLocaleString() : "—"}</td>
               </tr>
               <tr>
-                <td colSpan={3}><b>Participants:</b> {participants.length}</td>
+                <td colSpan={3}><b>Participants:</b> {p_participants.length}</td>
               </tr>
             </tbody>
           </table>
@@ -2323,7 +2347,7 @@ function AuctionRoom() {
               </tr>
             </thead>
             <tbody>
-              {[...bids].sort((a, b) => a.submittedAt - b.submittedAt).map((b, i) => (
+              {[...p_bids].sort((a, b) => a.submittedAt - b.submittedAt).map((b, i) => (
                 <tr key={b.id}>
                   <td style={tdStyle}>{i + 1}</td>
                   <td style={tdStyle}>{b.memberCode || "—"}</td>
@@ -2338,30 +2362,30 @@ function AuctionRoom() {
           </table>
 
           {/* Winner / Net Paid */}
-          {winner && winnerCalc && (
+          {p_winner && p_winnerCalc && (
             <div style={{ marginTop: 16, padding: 10, border: "1px solid #000" }}>
               <h3 style={{ fontSize: 13, margin: "0 0 6px" }}>Winner Declaration</h3>
               <p style={{ margin: "2px 0", fontSize: 12 }}>
-                <b>Winner ID:</b> {winner.memberCode || "—"} &nbsp;·&nbsp;
-                <b>Name:</b> {winner.memberName}
+                <b>Winner ID:</b> {p_winner.memberCode || "—"} &nbsp;·&nbsp;
+                <b>Name:</b> {p_winner.memberName}
               </p>
               <p style={{ margin: "2px 0", fontSize: 12 }}>
-                <b>Winning Bid:</b> {fmt(winner.amount)} &nbsp;·&nbsp;
-                <b>Foreman Commission:</b> {fmt(winnerCalc.commission)}
+                <b>Winning Bid:</b> {fmt(p_winner.amount)} &nbsp;·&nbsp;
+                <b>Foreman Commission:</b> {fmt(p_winnerCalc.commission)}
               </p>
               <p style={{ margin: "2px 0", fontSize: 12 }}>
-                <b>Net Paid to Winner:</b> {fmt(winnerCalc.net)} &nbsp;·&nbsp;
-                <b>Dividend / Member:</b> {fmt(winnerCalc.dividend)} (across {winnerCalc.others} members)
+                <b>Net Paid to Winner:</b> {fmt(p_winnerCalc.net)} &nbsp;·&nbsp;
+                <b>Dividend / Member:</b> {fmt(p_winnerCalc.dividend)} (across {p_winnerCalc.others} members)
               </p>
             </div>
           )}
 
           {/* Consents */}
-          {Object.keys(consents).length > 0 && (
+          {Object.keys(p_consents).length > 0 && (
             <div style={{ marginTop: 12 }}>
               <h3 style={{ fontSize: 13, margin: "0 0 4px" }}>Digital Consents</h3>
               <ul style={{ fontSize: 11, paddingLeft: 18, margin: 0 }}>
-                {Object.values(consents).map((c) => (
+                {Object.values(p_consents).map((c: any) => (
                   <li key={c.memberId}>
                     {c.memberName} — {new Date(c.signedAt).toLocaleString()} — <span style={{ fontFamily: "monospace" }}>{c.signatureTag}</span>
                   </li>
@@ -2386,6 +2410,9 @@ function AuctionRoom() {
           </div>
         </div>
       </div>
+        );
+      })()}
+
     </div>
   );
 }
