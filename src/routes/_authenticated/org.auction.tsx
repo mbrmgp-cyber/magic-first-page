@@ -85,6 +85,7 @@ type AuctionSessionRow = {
   winner_dividend: number | null;
   past_winners: unknown;
   consents: unknown;
+  terms?: string | null;
   created_at: string;
   updated_at: string;
 };
