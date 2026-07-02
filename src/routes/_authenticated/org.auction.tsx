@@ -356,7 +356,10 @@ function AuctionRoom() {
       setActiveAuctionId(s.activeAuctionId);
       activeAuctionIdRef.current = s.activeAuctionId;
     }
-    const freezeSetup = editingSetupRef.current || !setupCollapsedRef.current;
+    // On the very first hydration we always pull remote values in, so a saved
+    // custom `total_months` (e.g. 10 or 25) is not clobbered by the default 20
+    // just because the setup card happens to be expanded.
+    const freezeSetup = hydratedRef.current && (editingSetupRef.current || !setupCollapsedRef.current);
     if (!freezeSetup && typeof s.groupName === "string") setChitGroupName(s.groupName);
     if (typeof (s as any).liveGroupName === "string") setLiveGroupName((s as any).liveGroupName);
     if (!freezeSetup && typeof s.chitValue === "number") setChitValue(s.chitValue);
@@ -638,16 +641,43 @@ function AuctionRoom() {
   const startTurn = async () => {
     const ts = Date.now();
     setTurnStart(ts);
+    // CRITICAL: Never wholesale-upsert the session for a turn state change —
+    // that risks blanking participants/total_months/chit_value from local
+    // state. Do a surgical UPDATE of only the turn fields on the live row.
     try {
-      await ensureCurrentSession({ turnStart: ts, turnEnd: null, auctionClosed: false });
+      let auctionId = activeAuctionIdRef.current;
+      if (!auctionId) {
+        auctionId = await ensureCurrentSession({ turnStart: ts, turnEnd: null, auctionClosed: false });
+      } else {
+        const { error } = await (supabase as any)
+          .from("auction_sessions")
+          .update({
+            turn_start: new Date(ts).toISOString(),
+            turn_end: null,
+            auction_closed: false,
+            status: "active",
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", auctionId);
+        if (error) throw error;
+      }
     } catch (e: any) {
       toast.error(e?.message || "Failed to start auction turn");
     }
   };
 
+  // Highest bid from the live bids array — this drives Live Metrics so the
+  // interest / amount-per-member updates the moment any member (or admin) bids.
+  const topBidAmount = useMemo(
+    () => bids.reduce((m, b) => (b.amount > m ? b.amount : m), 0),
+    [bids],
+  );
+
   const calc = useMemo(() => {
     const cv = Math.max(0, Number(chitValue) || 0);
-    const b = Math.max(0, Number(bid) || 0);
+    // Prefer the live top bid; fall back to the admin's local input while no
+    // bids have been placed yet so the calculator still previews values.
+    const b = Math.max(0, Number(topBidAmount) || Number(bid) || 0);
     const commission = (cv * (Number(commissionPct) || 0)) / 100;
     const loss = b;
     const net = Math.max(0, cv - b - commission);
@@ -659,8 +689,9 @@ function AuctionRoom() {
     const annualPct = monthlyPct * 12;
     const maxBid = cv * 0.4;
     const overCap = b > maxBid;
-    return { commission, loss, net, remaining, monthlyPct, annualPct, maxBid, overCap };
-  }, [chitValue, bid, commissionPct, totalMonths, currentMonth]);
+    const perMember = participants.length > 0 ? Math.max(0, cv - b) / participants.length : 0;
+    return { commission, loss, net, remaining, monthlyPct, annualPct, maxBid, overCap, perMember, topBid: b };
+  }, [chitValue, bid, topBidAmount, commissionPct, totalMonths, currentMonth, participants.length]);
 
   const sortedBids = useMemo(
     () => [...bids].sort((a, b) => b.amount - a.amount || a.submittedAt - b.submittedAt),
@@ -1623,10 +1654,11 @@ function AuctionRoom() {
                 <p className="text-[9px] text-muted-foreground tabular-nums">{fmt(calc.commission)}</p>
               </div>
               <StatBox
-                label="సభ్యులు కట్టవలసిన"
-                value={fmt(participants.length > 0 ? chitValue / participants.length : 0)}
-                sub="per member"
+                label="Amount per member"
+                value={fmt(calc.perMember)}
+                sub={calc.topBid > 0 ? `(${fmt(chitValue)} − ${fmt(calc.topBid)}) / ${participants.length || 0}` : "per member"}
               />
+
             </div>
 
             {/* Winner box */}
