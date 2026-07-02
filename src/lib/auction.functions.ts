@@ -47,6 +47,13 @@ export type AuctionStateDTO = {
   auctionClosed?: boolean;
   turnStart?: number | null;
   turnEnd?: number | null;
+  // Foreman / group config
+  foremanMode?: "commission" | "free_month";
+  foremanFreeMonth?: number | null;
+  foremanIncluded?: boolean;
+  terms?: string | null;
+  closeAt?: string | null;
+  totalMembers?: number | null;
   groups?: Array<{
     auctionId?: string;
     name: string;
@@ -57,6 +64,13 @@ export type AuctionStateDTO = {
     chitValue?: number;
     startDate?: string | null;
     savedAt: number;
+    foremanMode?: "commission" | "free_month";
+    foremanFreeMonth?: number | null;
+    foremanIncluded?: boolean;
+    terms?: string | null;
+    closeAt?: string | null;
+    totalMembers?: number | null;
+    commissionPct?: number;
   }>;
 };
 
@@ -84,6 +98,12 @@ type AuctionSessionRow = {
   winner_dividend: number | null;
   past_winners: unknown;
   consents: unknown;
+  foreman_mode: string | null;
+  foreman_free_month: number | null;
+  foreman_included: boolean | null;
+  terms: string | null;
+  close_at: string | null;
+  total_members: number | null;
   created_at: string;
   updated_at: string;
 };
@@ -130,6 +150,13 @@ function sessionToGroup(row: AuctionSessionRow) {
     chitValue: Number(row.chit_value) || 0,
     startDate: row.start_date,
     savedAt: new Date(row.created_at || row.updated_at).getTime(),
+    foremanMode: ((row.foreman_mode as any) || "commission") as "commission" | "free_month",
+    foremanFreeMonth: row.foreman_free_month ?? null,
+    foremanIncluded: row.foreman_included ?? true,
+    terms: row.terms ?? null,
+    closeAt: row.close_at ?? null,
+    totalMembers: row.total_members ?? null,
+    commissionPct: Number(row.commission_pct) || 0,
   };
 }
 
@@ -163,6 +190,12 @@ function sessionToState(row: AuctionSessionRow, bidRows: BidRow[], allRows: Auct
     auctionClosed: row.auction_closed || row.status === "closed",
     turnStart: ms(row.turn_start),
     turnEnd: ms(row.turn_end),
+    foremanMode: ((row.foreman_mode as any) || "commission") as "commission" | "free_month",
+    foremanFreeMonth: row.foreman_free_month ?? null,
+    foremanIncluded: row.foreman_included ?? true,
+    terms: row.terms ?? null,
+    closeAt: row.close_at ?? null,
+    totalMembers: row.total_members ?? null,
   };
 }
 
@@ -228,6 +261,12 @@ export const saveAuctionState = createServerFn({ method: "POST" })
           winner_dividend: winnerDividend,
           past_winners: state.pastWinners ?? [],
           consents: state.consents ?? {},
+          foreman_mode: state.foremanMode ?? "commission",
+          foreman_free_month: state.foremanFreeMonth ?? null,
+          foreman_included: state.foremanIncluded ?? true,
+          terms: state.terms ?? null,
+          close_at: state.closeAt ?? null,
+          total_members: state.totalMembers ?? (state.participants?.length ?? null),
           updated_by: context.userId,
           updated_at: new Date().toISOString(),
         },
@@ -282,4 +321,152 @@ export const submitMemberBid = createServerFn({ method: "POST" })
     });
     if (error) throw new Error(error.message);
     return { result: row ?? null };
+  });
+
+export const deleteAuctionGroup = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { orgId: string; auctionId: string }) => d)
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+    const { error } = await sb.from("auction_sessions").delete().eq("id", data.auctionId).eq("org_id", data.orgId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const finalizeAuction = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { orgId: string; auctionId: string }) => d)
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+    const { data: row, error } = await sb.rpc("finalize_chit_auction", {
+      _org_id: data.orgId,
+      _auction_id: data.auctionId,
+    });
+    if (error) throw new Error(error.message);
+    return { session: row ?? null };
+  });
+
+export const resetChitMonth = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { orgId: string; auctionId: string }) => d)
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+    const { data: row, error } = await sb.rpc("reset_chit_month", {
+      _org_id: data.orgId,
+      _auction_id: data.auctionId,
+    });
+    if (error) throw new Error(error.message);
+    return { session: row ?? null };
+  });
+
+export type PaymentDTO = {
+  id: string;
+  auction_id: string;
+  org_id: string;
+  member_id: string;
+  month_no: number;
+  amount: number;
+  receipt_url: string | null;
+  status: "pending" | "verified" | "rejected";
+  note: string | null;
+  created_at: string;
+  updated_at: string;
+  member_name?: string | null;
+  member_code?: string | null;
+};
+
+export const listAuctionPayments = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { orgId: string; auctionId?: string | null; monthNo?: number | null }) => d)
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+    let q = sb.from("auction_payments").select("*").eq("org_id", data.orgId);
+    if (data.auctionId) q = q.eq("auction_id", data.auctionId);
+    if (data.monthNo != null) q = q.eq("month_no", data.monthNo);
+    const { data: rows, error } = await q.order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    const memberIds = Array.from(new Set((rows ?? []).map((r: any) => r.member_id)));
+    let names: Record<string, { name: string; member_code: string | null }> = {};
+    if (memberIds.length) {
+      const { data: ms } = await sb
+        .from("members")
+        .select("id, name, first_name, last_name, member_code")
+        .in("id", memberIds);
+      for (const m of ms ?? []) {
+        names[m.id] = {
+          name: m.name || [m.first_name, m.last_name].filter(Boolean).join(" ") || "Member",
+          member_code: m.member_code ?? null,
+        };
+      }
+    }
+    return {
+      payments: (rows ?? []).map((r: any) => ({
+        ...r,
+        member_name: names[r.member_id]?.name ?? null,
+        member_code: names[r.member_id]?.member_code ?? null,
+      })) as PaymentDTO[],
+    };
+  });
+
+export const uploadAuctionPayment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: {
+    orgId: string;
+    auctionId: string;
+    monthNo: number;
+    amount: number;
+    receiptUrl?: string | null;
+    note?: string | null;
+  }) => d)
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+    const { data: me, error: meErr } = await sb
+      .from("members").select("id").eq("user_id", context.userId).eq("org_id", data.orgId).eq("status", "approved").maybeSingle();
+    if (meErr) throw new Error(meErr.message);
+    if (!me?.id) throw new Error("Not an approved member of this organization");
+    const { data: row, error } = await sb
+      .from("auction_payments")
+      .insert({
+        auction_id: data.auctionId,
+        org_id: data.orgId,
+        member_id: me.id,
+        month_no: data.monthNo,
+        amount: data.amount,
+        receipt_url: data.receiptUrl ?? null,
+        note: data.note ?? null,
+        status: "pending",
+        uploaded_by: context.userId,
+      })
+      .select("*")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return { payment: row };
+  });
+
+export const verifyAuctionPayment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { orgId: string; paymentId: string; status: "verified" | "rejected" | "pending"; note?: string | null }) => d)
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+    const patch: any = { status: data.status, verified_by: context.userId, verified_at: new Date().toISOString() };
+    if (data.note !== undefined) patch.note = data.note;
+    const { data: row, error } = await sb
+      .from("auction_payments")
+      .update(patch)
+      .eq("id", data.paymentId)
+      .eq("org_id", data.orgId)
+      .select("*")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return { payment: row };
+  });
+
+export const getPaymentReceiptSignedUrl = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { path: string }) => d)
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+    const { data: signed, error } = await sb.storage.from("chit-receipts").createSignedUrl(data.path, 60 * 10);
+    if (error) throw new Error(error.message);
+    return { url: signed?.signedUrl ?? null };
   });

@@ -28,6 +28,7 @@ import { useSimRole } from "@/lib/rbac";
 import { RoleGate } from "@/components/RoleGate";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { AuctionPaymentsPanel } from "@/components/auction/AuctionPaymentsPanel";
 
 export const Route = createFileRoute("/_authenticated/org/auction")({
   head: () => ({ meta: [{ title: "Live Chit Auction — MBR App" }] }),
@@ -245,6 +246,12 @@ function AuctionRoom() {
   const [activeAuctionId, setActiveAuctionId] = useState<string | null>(null);
   const [selectedGroupName, setSelectedGroupName] = useState<string>("");
   const [chitStartDate, setChitStartDate] = useState<string>("");
+  // Foreman / terms / auction close config
+  const [foremanMode, setForemanMode] = useState<"commission" | "free_month">("commission");
+  const [foremanFreeMonth, setForemanFreeMonth] = useState<number | null>(null);
+  const [foremanIncluded, setForemanIncluded] = useState<boolean>(true);
+  const [terms, setTerms] = useState<string>("");
+  const [closeAt, setCloseAt] = useState<string>(""); // ISO string
   // Admin UX: collapse Group Setup card after save + which saved group is loaded into the Live board
   const [setupCollapsed, setSetupCollapsed] = useState<boolean>(false);
   const [liveGroupName, setLiveGroupName] = useState<string>("");
@@ -372,6 +379,11 @@ function AuctionRoom() {
     if (Array.isArray(s.pastWinners)) setPastWinners(s.pastWinners);
     if (s.consents && typeof s.consents === "object") setConsents(s.consents as any);
     if (Array.isArray(s.groups)) setGroups(s.groups);
+    if (!freezeSetup && typeof (s as any).foremanMode === "string") setForemanMode((s as any).foremanMode);
+    if (!freezeSetup && "foremanFreeMonth" in s) setForemanFreeMonth((s as any).foremanFreeMonth ?? null);
+    if (!freezeSetup && typeof (s as any).foremanIncluded === "boolean") setForemanIncluded((s as any).foremanIncluded);
+    if (!freezeSetup && typeof (s as any).terms === "string") setTerms((s as any).terms ?? "");
+    if (!freezeSetup && "closeAt" in s) setCloseAt((s as any).closeAt ?? "");
     if (typeof s.auctionClosed === "boolean") setAuctionClosed(s.auctionClosed);
     setWinner(s.winner ?? null);
     setTurnStart(s.turnStart ?? null);
@@ -379,6 +391,20 @@ function AuctionRoom() {
   };
 
   useEffect(() => { activeAuctionIdRef.current = activeAuctionId; }, [activeAuctionId]);
+
+  // 5-minute warning toast before closeAt
+  useEffect(() => {
+    if (!closeAt || auctionClosed) return;
+    const closeMs = new Date(closeAt).getTime();
+    if (!Number.isFinite(closeMs)) return;
+    const warnAt = closeMs - 5 * 60 * 1000;
+    const now = Date.now();
+    if (warnAt <= now) return;
+    const timer = setTimeout(() => {
+      toast.warning("Hurry up! The chit auction will close in 5 minutes.", { duration: 10000 });
+    }, warnAt - now);
+    return () => clearTimeout(timer);
+  }, [closeAt, auctionClosed]);
 
   // Initial load + Supabase realtime subscriptions backed by auction_sessions + bids tables
   useEffect(() => {
@@ -622,6 +648,12 @@ function AuctionRoom() {
       auctionClosed: overrides.auctionClosed ?? auctionClosed,
       turnStart: overrides.turnStart === undefined ? turnStart : overrides.turnStart,
       turnEnd: overrides.turnEnd === undefined ? turnEnd : overrides.turnEnd,
+      foremanMode: (overrides as any).foremanMode ?? foremanMode,
+      foremanFreeMonth: (overrides as any).foremanFreeMonth ?? foremanFreeMonth,
+      foremanIncluded: (overrides as any).foremanIncluded ?? foremanIncluded,
+      terms: (overrides as any).terms ?? (terms || null),
+      closeAt: (overrides as any).closeAt ?? (closeAt || null),
+      totalMembers: (overrides as any).totalMembers ?? (participants.length || null),
     };
   };
 
@@ -1393,6 +1425,49 @@ function AuctionRoom() {
             </div>
           )}
 
+          {/* Foreman / Terms / Close time */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 border-t border-border">
+            <div className="space-y-1.5">
+              <Label className="text-xs">Foreman Benefit · ఫోర్‌మ్యాన్</Label>
+              <Select value={foremanMode} onValueChange={(v) => setForemanMode(v as any)}>
+                <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="commission">Commission % per month</SelectItem>
+                  <SelectItem value="free_month">Free month (no bidding)</SelectItem>
+                </SelectContent>
+              </Select>
+              {foremanMode === "commission" ? (
+                <Input type="number" min={0} step={0.1} value={commissionPct}
+                  onChange={(e) => setCommissionPct(Number(e.target.value))}
+                  placeholder="Commission %" className="h-9 tabular-nums" />
+              ) : (
+                <Input type="number" min={1} max={totalMonths || 60}
+                  value={foremanFreeMonth ?? ""}
+                  onChange={(e) => setForemanFreeMonth(e.target.value ? Number(e.target.value) : null)}
+                  placeholder="Free month # (e.g. 1)" className="h-9 tabular-nums" />
+              )}
+              <label className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <input type="checkbox" checked={foremanIncluded} onChange={(e) => setForemanIncluded(e.target.checked)} />
+                Foreman included in member count
+              </label>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Auction Close Time · క్లోజ్</Label>
+              <Input type="datetime-local"
+                value={closeAt ? new Date(closeAt).toISOString().slice(0, 16) : ""}
+                onChange={(e) => setCloseAt(e.target.value ? new Date(e.target.value).toISOString() : "")}
+                className="h-10" />
+              <p className="text-[10px] text-muted-foreground">5-min warning auto-triggers.</p>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Terms · నిబంధనలు</Label>
+              <textarea value={terms} onChange={(e) => setTerms(e.target.value)}
+                rows={3} placeholder="Group rules, penalties, payment cycle…"
+                className="w-full text-xs rounded-md border border-border bg-background p-2" />
+            </div>
+          </div>
+
+
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3 pt-2 border-t border-border">
             <div className="rounded-md border border-border bg-black/30 p-2.5">
               <p className="text-[10px] uppercase text-muted-foreground">మొత్తం మెంబర్స్</p>
@@ -1945,6 +2020,17 @@ function AuctionRoom() {
             </Card>
           );
         })()}
+
+        {/* Payments panel — receipts (member upload / admin verify) */}
+        {orgId && activeAuctionId && (
+          <AuctionPaymentsPanel
+            orgId={orgId}
+            auctionId={activeAuctionId}
+            monthNo={currentMonth}
+            amount={participants.length > 0 ? Math.round((chitValue || 0) / participants.length) : 0}
+            isAdmin={!!isAdmin}
+          />
+        )}
 
         {/* Footer — Print button at the very bottom (member view; admin has its own PDF footer above) */}
         {!isAdmin && (
