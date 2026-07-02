@@ -1136,7 +1136,9 @@ function AuctionRoom() {
       <style>{`
         @media print {
           @page { size: A4; margin: 12mm; }
-          html, body { background: #fff !important; color: #000 !important; }
+          html, body { background: #fff !important; color: #000 !important; margin: 0 !important; padding: 0 !important; height: auto !important; min-height: 0 !important; }
+          body * { visibility: hidden !important; }
+          .print-area, .print-area * { visibility: visible !important; }
           .no-print { display: none !important; }
           /* Hide any Radix portal content (dialogs, popovers, tooltips, toasts) */
           [data-radix-portal],
@@ -1147,11 +1149,23 @@ function AuctionRoom() {
           [data-state="open"][data-radix-dialog-overlay] { display: none !important; }
           .print-only { display: block !important; }
           .print-area, .print-area * { color: #000 !important; }
-          .print-area { background: #fff !important; padding: 24px; }
-          .print-page { page-break-after: always; }
-          .print-page:last-child { page-break-after: auto; }
+          .print-area {
+            position: absolute !important;
+            top: 0 !important; left: 0 !important; right: 0 !important;
+            background: #fff !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            min-height: 0 !important;
+            height: auto !important;
+            page-break-after: avoid !important;
+            break-after: avoid !important;
+          }
+          .print-area > *:last-child { page-break-after: avoid !important; break-after: avoid !important; margin-bottom: 0 !important; padding-bottom: 0 !important; }
+          .print-page { page-break-after: auto; break-after: auto; }
+          .print-page:last-child { page-break-after: avoid !important; break-after: avoid !important; }
         }
         @media screen { .print-only { display: none; } }
+
       `}</style>
 
 
