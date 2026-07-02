@@ -470,3 +470,158 @@ export const getPaymentReceiptSignedUrl = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { url: signed?.signedUrl ?? null };
   });
+
+// ─────────────────────── Past Months Reports Archive ───────────────────────
+
+export type MonthArchiveDTO = {
+  id: string;
+  org_id: string;
+  auction_id: string;
+  group_name: string;
+  month_no: number;
+  chit_value: number;
+  total_months: number;
+  commission_pct: number;
+  participants: Array<{ id: string; name: string; member_code?: string | null }>;
+  bids: Array<{
+    id: string;
+    memberId: string;
+    memberName: string;
+    memberCode?: string | null;
+    amount: number;
+    submittedAt: number;
+  }>;
+  consents: Record<string, {
+    memberId: string;
+    memberName: string;
+    signatureTag: string;
+    signedAt: number;
+  }>;
+  winner: {
+    memberId: string;
+    memberName: string;
+    memberCode?: string | null;
+    amount: number;
+    net: number;
+    dividend: number;
+    commission: number;
+  } | null;
+  turn_start: string | null;
+  turn_end: string | null;
+  closed_at: string;
+  created_at: string;
+};
+
+export const listMonthArchives = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { orgId: string; auctionId?: string | null }) => d)
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+    let q = sb.from("auction_month_archives").select("*").eq("org_id", data.orgId);
+    if (data.auctionId) q = q.eq("auction_id", data.auctionId);
+    const { data: rows, error } = await q.order("month_no", { ascending: true });
+    if (error) throw new Error(error.message);
+    return { archives: (rows ?? []) as MonthArchiveDTO[] };
+  });
+
+export const getMonthArchive = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { orgId: string; archiveId: string }) => d)
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+    const { data: row, error } = await sb
+      .from("auction_month_archives")
+      .select("*")
+      .eq("id", data.archiveId)
+      .eq("org_id", data.orgId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return { archive: (row ?? null) as MonthArchiveDTO | null };
+  });
+
+/**
+ * Archives the current finalized month of an auction session into
+ * `auction_month_archives` (full bid history, consents, winner details),
+ * then advances the live session to the next month. Used by the Admin
+ * "Reset / Next Month" button so historical PDF reports are never lost.
+ */
+export const archiveAndResetMonth = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { orgId: string; auctionId: string }) => d)
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+
+    // 1. Load the current session + all bids for the month being archived.
+    const { data: session, error: sessErr } = await sb
+      .from("auction_sessions")
+      .select("*")
+      .eq("id", data.auctionId)
+      .eq("org_id", data.orgId)
+      .maybeSingle();
+    if (sessErr) throw new Error(sessErr.message);
+    if (!session) throw new Error("Auction session not found");
+
+    const { data: bidRows, error: bidErr } = await sb
+      .from("bids")
+      .select("id, member_id, member_name, member_code, amount, submitted_at")
+      .eq("auction_id", data.auctionId)
+      .order("submitted_at", { ascending: true });
+    if (bidErr) throw new Error(bidErr.message);
+
+    const chitValue = Number(session.chit_value) || 0;
+    const commissionPct = Number(session.commission_pct) || 0;
+    const commission = (chitValue * commissionPct) / 100;
+    const participants = normalizeParticipants(session.participants);
+
+    const winnerAmount = Number(session.winner_amount) || 0;
+    const net = Number(session.winner_net) || Math.max(0, chitValue - winnerAmount - commission);
+    const others = Math.max(1, participants.length - 1);
+    const dividend = Number(session.winner_dividend) ||
+      Math.max(0, (winnerAmount - commission)) / others;
+
+    const winner = session.winner_member_id ? {
+      memberId: session.winner_member_id,
+      memberName: session.winner_member_name ?? "Winner",
+      memberCode: session.winner_member_code ?? null,
+      amount: winnerAmount,
+      net,
+      dividend,
+      commission,
+    } : null;
+
+    // 2. Upsert the archive row (idempotent on (auction_id, month_no)).
+    const archivePayload = {
+      org_id: data.orgId,
+      auction_id: data.auctionId,
+      group_name: session.group_name,
+      month_no: session.current_month,
+      chit_value: chitValue,
+      total_months: Number(session.total_months) || 0,
+      commission_pct: commissionPct,
+      participants,
+      bids: normalizeBids(bidRows ?? []),
+      consents: (session.consents && typeof session.consents === "object" && !Array.isArray(session.consents))
+        ? session.consents : {},
+      winner,
+      turn_start: session.turn_start,
+      turn_end: session.turn_end ?? new Date().toISOString(),
+      closed_at: new Date().toISOString(),
+      archived_by: context.userId,
+    };
+
+    const { data: archiveRow, error: archiveErr } = await sb
+      .from("auction_month_archives")
+      .upsert(archivePayload, { onConflict: "auction_id,month_no" })
+      .select("*")
+      .maybeSingle();
+    if (archiveErr) throw new Error(archiveErr.message);
+
+    // 3. Now call the existing DB reset RPC (deletes live bids, advances month).
+    const { data: nextSession, error: resetErr } = await sb.rpc("reset_chit_month", {
+      _org_id: data.orgId,
+      _auction_id: data.auctionId,
+    });
+    if (resetErr) throw new Error(resetErr.message);
+
+    return { archive: archiveRow as MonthArchiveDTO, session: nextSession ?? null };
+  });

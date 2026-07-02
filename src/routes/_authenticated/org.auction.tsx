@@ -18,12 +18,12 @@ import {
 } from "@/components/ui/dialog";
 import {
   ArrowLeft, Gavel, TrendingDown, Wallet, Percent, Users, Plus, X, Trophy,
-  Lock, RotateCcw, PartyPopper, Printer, CheckCircle2, ShieldCheck, Clock,
+  Lock, RotateCcw, PartyPopper, Printer, CheckCircle2, ShieldCheck, Clock, Archive,
 } from "lucide-react";
 import { useCurrency } from "@/lib/currency-context";
 import { listApprovedMembers } from "@/lib/members.functions";
 import { getMyRoles, getMyMembership, getMyOrg } from "@/lib/org.functions";
-import { getAuctionState, saveAuctionState, submitAuctionConsent, deleteAuctionGroup, type AuctionStateDTO } from "@/lib/auction.functions";
+import { getAuctionState, saveAuctionState, submitAuctionConsent, deleteAuctionGroup, listMonthArchives, getMonthArchive, archiveAndResetMonth, type AuctionStateDTO, type MonthArchiveDTO } from "@/lib/auction.functions";
 import { useSimRole } from "@/lib/rbac";
 import { RoleGate } from "@/components/RoleGate";
 import { supabase } from "@/integrations/supabase/client";
@@ -347,6 +347,23 @@ function AuctionRoom() {
   const saveState = useServerFn(saveAuctionState);
   const submitConsent = useServerFn(submitAuctionConsent);
   const deleteGroupServer = useServerFn(deleteAuctionGroup);
+  const fetchArchives = useServerFn(listMonthArchives);
+  const fetchArchive = useServerFn(getMonthArchive);
+  const archiveResetServer = useServerFn(archiveAndResetMonth);
+
+  // Snapshot currently loaded into the printable PDF area. When null, the
+  // print-area uses the live board state. When set, the PDF renders that
+  // archived month exactly as it was closed.
+  const [archivePrint, setArchivePrint] = useState<MonthArchiveDTO | null>(null);
+  const [archiveLoadingId, setArchiveLoadingId] = useState<string | null>(null);
+
+  const archivesQ = useQuery({
+    queryKey: ["auction-month-archives", orgId ?? ""],
+    queryFn: () => fetchArchives({ data: { orgId: orgId! } }),
+    enabled: !!orgId,
+    refetchInterval: 15000,
+  });
+  const allArchives: MonthArchiveDTO[] = archivesQ.data?.archives ?? [];
 
   // Member's own bidding input
   const [myBidAmount, setMyBidAmount] = useState<number>(0);
@@ -832,27 +849,58 @@ function AuctionRoom() {
   };
 
   const resetAuction = async () => {
-    const nextMonth = currentMonth + 1;
-    setBids([]);
-    setWinner(null);
-    setAuctionClosed(false);
-    setBid(0);
-    setActiveBidder("");
-    setTurnStart(null);
-    setTurnEnd(null);
-    setCurrentMonth(nextMonth);
+    if (!orgId) {
+      toast.error("Organization not found");
+      return;
+    }
+    const auctionId = activeAuctionIdRef.current;
+    if (!auctionId) {
+      toast.error("No active auction session to archive");
+      return;
+    }
     try {
-      if (activeAuctionIdRef.current) {
-        const { error } = await (supabase as any).from("bids").delete().eq("auction_id", activeAuctionIdRef.current);
-        if (error) throw error;
-      }
-      await ensureCurrentSession({
-        bids: [], winner: null, auctionClosed: false, turnStart: null, turnEnd: null, currentMonth: nextMonth,
-      });
+      // Server-side: snapshots current month into auction_month_archives,
+      // then advances to next month (deletes live bids, clears winner).
+      await archiveResetServer({ data: { orgId, auctionId } });
+      // Local state mirror — realtime will overwrite anyway but this keeps
+      // the UI snappy.
+      setBids([]);
+      setWinner(null);
+      setAuctionClosed(false);
+      setBid(0);
+      setActiveBidder("");
+      setTurnStart(null);
+      setTurnEnd(null);
+      setCurrentMonth((m) => m + 1);
+      await archivesQ.refetch();
+      toast.success("Month archived · Advanced to next month");
     } catch (e: any) {
-      toast.error(e?.message || "Failed to reset auction");
+      toast.error(e?.message || "Failed to archive & reset auction");
     }
   };
+
+  const openArchive = async (archiveId: string) => {
+    if (!orgId) return;
+    setArchiveLoadingId(archiveId);
+    try {
+      const res = await fetchArchive({ data: { orgId, archiveId } });
+      if (!res?.archive) throw new Error("Archive not found");
+      setArchivePrint(res.archive);
+      // Give React a tick to render the archive into the print-area
+      setTimeout(() => {
+        setWinnerOpen(false);
+        window.print();
+        // Reset back to live after the print dialog closes so the live
+        // board resumes rendering into the PDF surface.
+        setTimeout(() => setArchivePrint(null), 800);
+      }, 150);
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to load archived month");
+    } finally {
+      setArchiveLoadingId(null);
+    }
+  };
+
 
   const deleteGroup = async (name: string) => {
     if (!orgId) {
@@ -1113,9 +1161,9 @@ function AuctionRoom() {
   const printRef = useRef<HTMLDivElement>(null);
   const handlePrint = () => {
     if (typeof window === "undefined") return;
-    // Close any open dialogs / popovers so they don't leak into the PDF
+    // Print the live board (clear any archive snapshot first).
+    setArchivePrint(null);
     setWinnerOpen(false);
-    // Wait for Radix to unmount the portal before invoking the browser print dialog
     setTimeout(() => window.print(), 120);
   };
 
@@ -2155,6 +2203,89 @@ function AuctionRoom() {
           />
         )}
 
+        {/* PAST MONTHS REPORTS ARCHIVE — visible to both Admin and Member */}
+        {orgId && (() => {
+          // For members without a group, still allow browsing archives for the
+          // groups they historically participated in.
+          const memberGroupNames = new Set(
+            groups.filter((g) => g.memberIds.includes(myId)).map((g) => g.name)
+          );
+          const visible = allArchives.filter((a) => {
+            if (isAdmin) return true;
+            // Member: only show archives from groups they were a participant in,
+            // or where their id appears in the archived participants list.
+            if (memberGroupNames.has(a.group_name)) return true;
+            return a.participants.some((p) => p.id === myId);
+          });
+          if (visible.length === 0 && !isAdmin) return null;
+          // Group by group_name for compact display
+          const byGroup: Record<string, MonthArchiveDTO[]> = {};
+          for (const a of visible) {
+            (byGroup[a.group_name] ||= []).push(a);
+          }
+          const groupNames = Object.keys(byGroup).sort();
+          return (
+            <Card className="p-4 md:p-5 space-y-3 bg-card">
+              <div className="flex items-center gap-2">
+                <Archive className="size-4 text-indigo-400" />
+                <h2 className="font-semibold">Past Months Reports Archive</h2>
+                <Badge variant="secondary" className="text-xs">{visible.length}</Badge>
+              </div>
+              {visible.length === 0 ? (
+                <p className="text-xs text-muted-foreground">
+                  No archived months yet. When "Reset / Next Month" is used, the finalized month will appear here.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {groupNames.map((gn) => (
+                    <div key={gn} className="rounded-md border border-border/60 p-2">
+                      <p className="text-xs font-semibold mb-2 text-muted-foreground">
+                        Group: <span className="text-foreground">{gn}</span>
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                        {byGroup[gn]
+                          .slice()
+                          .sort((a, b) => a.month_no - b.month_no)
+                          .map((a) => (
+                            <div
+                              key={a.id}
+                              className="flex items-center justify-between gap-2 rounded-md border border-border bg-background/40 px-2.5 py-2"
+                            >
+                              <div className="min-w-0">
+                                <p className="text-xs font-semibold truncate">
+                                  Month {a.month_no} Report
+                                </p>
+                                <p className="text-[10px] text-muted-foreground truncate">
+                                  {a.winner
+                                    ? <>Winner: {a.winner.memberName} · {fmt(a.winner.amount)}</>
+                                    : "No winner recorded"}
+                                </p>
+                                <p className="text-[10px] text-muted-foreground">
+                                  Closed {new Date(a.closed_at).toLocaleDateString()}
+                                </p>
+                              </div>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="gap-1 shrink-0"
+                                disabled={archiveLoadingId === a.id}
+                                onClick={() => openArchive(a.id)}
+                              >
+                                <Printer className="size-3.5" />
+                                {archiveLoadingId === a.id ? "…" : "PDF"}
+                              </Button>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+          );
+        })()}
+
+
         {/* Footer — Print button at the very bottom (member view; admin has its own PDF footer above) */}
         {!isAdmin && (
           <div className="pt-4 pb-6 border-t border-border">
@@ -2224,6 +2355,25 @@ function AuctionRoom() {
       </Dialog>
 
       {/* PRINTABLE OFFICIAL PDF VIEW */}
+      {(() => {
+        // Resolve print source: archived snapshot (if user clicked a past
+        // month) OR live board state.
+        const A = archivePrint;
+        const p_groupName = A ? A.group_name : chitGroupName;
+        const p_chitValue = A ? A.chit_value : chitValue;
+        const p_month = A ? A.month_no : currentMonth;
+        const p_totalMonths = A ? A.total_months : totalMonths;
+        const p_commissionPct = A ? A.commission_pct : commissionPct;
+        const p_turnStart = A ? A.turn_start : turnStart;
+        const p_turnEnd = A ? A.turn_end : turnEnd;
+        const p_participants = A ? A.participants : participants;
+        const p_bids = A ? A.bids : bids;
+        const p_consents = A ? A.consents : consents;
+        const p_winner = A ? A.winner : winner;
+        const p_winnerCalc = A && A.winner
+          ? { commission: A.winner.commission, net: A.winner.net, dividend: A.winner.dividend, others: Math.max(1, A.participants.length - 1) }
+          : winnerCalc;
+        return (
       <div ref={printRef} className="print-only print-area" style={{ display: "none" }}>
         <div style={{ fontFamily: "Georgia, serif" }}>
           {/* Letterhead */}
@@ -2241,23 +2391,28 @@ function AuctionRoom() {
             <h2 style={{ fontSize: 16, marginTop: 10, textDecoration: "underline" }}>
               OFFICIAL CHIT AUCTION REPORT
             </h2>
+            {A && (
+              <p style={{ fontSize: 11, margin: "4px 0 0", fontStyle: "italic" }}>
+                Archived copy · Closed on {new Date(A.closed_at).toLocaleString()}
+              </p>
+            )}
           </div>
 
           {/* Chit Group details */}
           <table style={{ width: "100%", fontSize: 12, marginBottom: 12 }}>
             <tbody>
               <tr>
-                <td><b>Chit Group:</b> {chitGroupName}</td>
-                <td><b>Chit Value:</b> {fmt(chitValue)}</td>
-                <td><b>Month:</b> {currentMonth} / {totalMonths}</td>
+                <td><b>Chit Group:</b> {p_groupName}</td>
+                <td><b>Chit Value:</b> {fmt(p_chitValue)}</td>
+                <td><b>Month:</b> {p_month} / {p_totalMonths}</td>
               </tr>
               <tr>
-                <td><b>Foreman Commission:</b> {commissionPct}%</td>
-                <td><b>Turn Started:</b> {turnStart ? new Date(turnStart).toLocaleString() : "—"}</td>
-                <td><b>Turn Closed:</b> {turnEnd ? new Date(turnEnd).toLocaleString() : "—"}</td>
+                <td><b>Foreman Commission:</b> {p_commissionPct}%</td>
+                <td><b>Turn Started:</b> {p_turnStart ? new Date(p_turnStart).toLocaleString() : "—"}</td>
+                <td><b>Turn Closed:</b> {p_turnEnd ? new Date(p_turnEnd).toLocaleString() : "—"}</td>
               </tr>
               <tr>
-                <td colSpan={3}><b>Participants:</b> {participants.length}</td>
+                <td colSpan={3}><b>Participants:</b> {p_participants.length}</td>
               </tr>
             </tbody>
           </table>
@@ -2275,7 +2430,7 @@ function AuctionRoom() {
               </tr>
             </thead>
             <tbody>
-              {[...bids].sort((a, b) => a.submittedAt - b.submittedAt).map((b, i) => (
+              {[...p_bids].sort((a, b) => a.submittedAt - b.submittedAt).map((b, i) => (
                 <tr key={b.id}>
                   <td style={tdStyle}>{i + 1}</td>
                   <td style={tdStyle}>{b.memberCode || "—"}</td>
@@ -2290,30 +2445,30 @@ function AuctionRoom() {
           </table>
 
           {/* Winner / Net Paid */}
-          {winner && winnerCalc && (
+          {p_winner && p_winnerCalc && (
             <div style={{ marginTop: 16, padding: 10, border: "1px solid #000" }}>
               <h3 style={{ fontSize: 13, margin: "0 0 6px" }}>Winner Declaration</h3>
               <p style={{ margin: "2px 0", fontSize: 12 }}>
-                <b>Winner ID:</b> {winner.memberCode || "—"} &nbsp;·&nbsp;
-                <b>Name:</b> {winner.memberName}
+                <b>Winner ID:</b> {p_winner.memberCode || "—"} &nbsp;·&nbsp;
+                <b>Name:</b> {p_winner.memberName}
               </p>
               <p style={{ margin: "2px 0", fontSize: 12 }}>
-                <b>Winning Bid:</b> {fmt(winner.amount)} &nbsp;·&nbsp;
-                <b>Foreman Commission:</b> {fmt(winnerCalc.commission)}
+                <b>Winning Bid:</b> {fmt(p_winner.amount)} &nbsp;·&nbsp;
+                <b>Foreman Commission:</b> {fmt(p_winnerCalc.commission)}
               </p>
               <p style={{ margin: "2px 0", fontSize: 12 }}>
-                <b>Net Paid to Winner:</b> {fmt(winnerCalc.net)} &nbsp;·&nbsp;
-                <b>Dividend / Member:</b> {fmt(winnerCalc.dividend)} (across {winnerCalc.others} members)
+                <b>Net Paid to Winner:</b> {fmt(p_winnerCalc.net)} &nbsp;·&nbsp;
+                <b>Dividend / Member:</b> {fmt(p_winnerCalc.dividend)} (across {p_winnerCalc.others} members)
               </p>
             </div>
           )}
 
           {/* Consents */}
-          {Object.keys(consents).length > 0 && (
+          {Object.keys(p_consents).length > 0 && (
             <div style={{ marginTop: 12 }}>
               <h3 style={{ fontSize: 13, margin: "0 0 4px" }}>Digital Consents</h3>
               <ul style={{ fontSize: 11, paddingLeft: 18, margin: 0 }}>
-                {Object.values(consents).map((c) => (
+                {Object.values(p_consents).map((c: any) => (
                   <li key={c.memberId}>
                     {c.memberName} — {new Date(c.signedAt).toLocaleString()} — <span style={{ fontFamily: "monospace" }}>{c.signatureTag}</span>
                   </li>
@@ -2338,6 +2493,9 @@ function AuctionRoom() {
           </div>
         </div>
       </div>
+        );
+      })()}
+
     </div>
   );
 }
