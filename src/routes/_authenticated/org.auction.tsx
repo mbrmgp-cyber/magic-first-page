@@ -663,9 +663,18 @@ function AuctionRoom() {
     }
   };
 
+  // Highest bid from the live bids array — this drives Live Metrics so the
+  // interest / amount-per-member updates the moment any member (or admin) bids.
+  const topBidAmount = useMemo(
+    () => bids.reduce((m, b) => (b.amount > m ? b.amount : m), 0),
+    [bids],
+  );
+
   const calc = useMemo(() => {
     const cv = Math.max(0, Number(chitValue) || 0);
-    const b = Math.max(0, Number(bid) || 0);
+    // Prefer the live top bid; fall back to the admin's local input while no
+    // bids have been placed yet so the calculator still previews values.
+    const b = Math.max(0, Number(topBidAmount) || Number(bid) || 0);
     const commission = (cv * (Number(commissionPct) || 0)) / 100;
     const loss = b;
     const net = Math.max(0, cv - b - commission);
@@ -677,8 +686,9 @@ function AuctionRoom() {
     const annualPct = monthlyPct * 12;
     const maxBid = cv * 0.4;
     const overCap = b > maxBid;
-    return { commission, loss, net, remaining, monthlyPct, annualPct, maxBid, overCap };
-  }, [chitValue, bid, commissionPct, totalMonths, currentMonth]);
+    const perMember = participants.length > 0 ? Math.max(0, cv - b) / participants.length : 0;
+    return { commission, loss, net, remaining, monthlyPct, annualPct, maxBid, overCap, perMember, topBid: b };
+  }, [chitValue, bid, topBidAmount, commissionPct, totalMonths, currentMonth, participants.length]);
 
   const sortedBids = useMemo(
     () => [...bids].sort((a, b) => b.amount - a.amount || a.submittedAt - b.submittedAt),
