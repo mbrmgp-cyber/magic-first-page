@@ -150,6 +150,13 @@ function sessionToGroup(row: AuctionSessionRow) {
     chitValue: Number(row.chit_value) || 0,
     startDate: row.start_date,
     savedAt: new Date(row.created_at || row.updated_at).getTime(),
+    foremanMode: ((row.foreman_mode as any) || "commission") as "commission" | "free_month",
+    foremanFreeMonth: row.foreman_free_month ?? null,
+    foremanIncluded: row.foreman_included ?? true,
+    terms: row.terms ?? null,
+    closeAt: row.close_at ?? null,
+    totalMembers: row.total_members ?? null,
+    commissionPct: Number(row.commission_pct) || 0,
   };
 }
 
