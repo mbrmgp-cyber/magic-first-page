@@ -1135,15 +1135,25 @@ function AuctionRoom() {
       {/* Print-only styles */}
       <style>{`
         @media print {
-          body { background: #fff !important; color: #000 !important; }
+          @page { size: A4; margin: 12mm; }
+          html, body { background: #fff !important; color: #000 !important; }
           .no-print { display: none !important; }
+          /* Hide any Radix portal content (dialogs, popovers, tooltips, toasts) */
+          [data-radix-portal],
+          [data-radix-popper-content-wrapper],
+          [role="dialog"],
+          [role="alertdialog"],
+          [data-sonner-toaster],
+          [data-state="open"][data-radix-dialog-overlay] { display: none !important; }
           .print-only { display: block !important; }
           .print-area, .print-area * { color: #000 !important; }
           .print-area { background: #fff !important; padding: 24px; }
           .print-page { page-break-after: always; }
+          .print-page:last-child { page-break-after: auto; }
         }
         @media screen { .print-only { display: none; } }
       `}</style>
+
 
       <div className="max-w-6xl mx-auto space-y-4 no-print">
         <div className="flex items-center justify-between">
