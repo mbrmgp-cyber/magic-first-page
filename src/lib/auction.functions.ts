@@ -47,6 +47,13 @@ export type AuctionStateDTO = {
   auctionClosed?: boolean;
   turnStart?: number | null;
   turnEnd?: number | null;
+  // Foreman / group config
+  foremanMode?: "commission" | "free_month";
+  foremanFreeMonth?: number | null;
+  foremanIncluded?: boolean;
+  terms?: string | null;
+  closeAt?: string | null;
+  totalMembers?: number | null;
   groups?: Array<{
     auctionId?: string;
     name: string;
@@ -57,6 +64,13 @@ export type AuctionStateDTO = {
     chitValue?: number;
     startDate?: string | null;
     savedAt: number;
+    foremanMode?: "commission" | "free_month";
+    foremanFreeMonth?: number | null;
+    foremanIncluded?: boolean;
+    terms?: string | null;
+    closeAt?: string | null;
+    totalMembers?: number | null;
+    commissionPct?: number;
   }>;
 };
 
