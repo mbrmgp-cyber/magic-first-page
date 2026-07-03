@@ -67,6 +67,7 @@ export const adminAddMember = createServerFn({ method: "POST" })
     introducer_id?: string | null;
     committee_fee_paid?: number | null;
     photo_url?: string | null;
+    membership_receipt_url?: string | null;
     is_active?: boolean;
     status?: "pending" | "approved";
   }) => d)
