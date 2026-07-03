@@ -525,6 +525,180 @@ export type Database = {
           },
         ]
       }
+      disciplinary_committee_members: {
+        Row: {
+          appointed_at: string
+          created_at: string
+          id: string
+          is_active: boolean
+          member_id: string
+          notes: string | null
+          org_id: string
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          appointed_at?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          member_id: string
+          notes?: string | null
+          org_id: string
+          role: string
+          updated_at?: string
+        }
+        Update: {
+          appointed_at?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          member_id?: string
+          notes?: string | null
+          org_id?: string
+          role?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disciplinary_committee_members_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disciplinary_committee_members_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      disciplinary_president_nominations: {
+        Row: {
+          candidate_member_id: string
+          created_at: string
+          decided_at: string | null
+          id: string
+          nominated_by: string | null
+          notes: string | null
+          org_id: string
+          status: string
+          updated_at: string
+          votes_against: number
+          votes_for: number
+        }
+        Insert: {
+          candidate_member_id: string
+          created_at?: string
+          decided_at?: string | null
+          id?: string
+          nominated_by?: string | null
+          notes?: string | null
+          org_id: string
+          status?: string
+          updated_at?: string
+          votes_against?: number
+          votes_for?: number
+        }
+        Update: {
+          candidate_member_id?: string
+          created_at?: string
+          decided_at?: string | null
+          id?: string
+          nominated_by?: string | null
+          notes?: string | null
+          org_id?: string
+          status?: string
+          updated_at?: string
+          votes_against?: number
+          votes_for?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disciplinary_president_nominations_candidate_member_id_fkey"
+            columns: ["candidate_member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disciplinary_president_nominations_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      disciplinary_suspensions: {
+        Row: {
+          category: string | null
+          created_at: string
+          effective_from: string
+          effective_until: string | null
+          id: string
+          issued_by: string | null
+          notes: string | null
+          org_id: string
+          reason: string
+          revoked_at: string | null
+          revoked_by: string | null
+          status: string
+          target_member_id: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          effective_from?: string
+          effective_until?: string | null
+          id?: string
+          issued_by?: string | null
+          notes?: string | null
+          org_id: string
+          reason: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          status?: string
+          target_member_id: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          effective_from?: string
+          effective_until?: string | null
+          id?: string
+          issued_by?: string | null
+          notes?: string | null
+          org_id?: string
+          reason?: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          status?: string
+          target_member_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disciplinary_suspensions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disciplinary_suspensions_target_member_id_fkey"
+            columns: ["target_member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -1536,6 +1710,7 @@ export type Database = {
           bank_ifsc: string | null
           committee_term_years: number
           created_at: string
+          election_mode_enabled: boolean
           email: string
           founders: Json
           gov_reg_number: string | null
@@ -1572,6 +1747,7 @@ export type Database = {
           bank_ifsc?: string | null
           committee_term_years?: number
           created_at?: string
+          election_mode_enabled?: boolean
           email: string
           founders?: Json
           gov_reg_number?: string | null
@@ -1608,6 +1784,7 @@ export type Database = {
           bank_ifsc?: string | null
           committee_term_years?: number
           created_at?: string
+          election_mode_enabled?: boolean
           email?: string
           founders?: Json
           gov_reg_number?: string | null
@@ -1853,6 +2030,7 @@ export type Database = {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
+      is_disciplinary_member: { Args: { _org_id: string }; Returns: boolean }
       is_org_admin: { Args: { _org_id: string }; Returns: boolean }
       is_org_committee: { Args: { _org_id: string }; Returns: boolean }
       is_org_member: { Args: { _org_id: string }; Returns: boolean }
