@@ -312,10 +312,20 @@ function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => voi
         if (upErr) toast.error("ఫోటో అప్‌లోడ్ విఫలమైంది: " + upErr.message);
         else await upd({ data: { member_id: r.id, photo_url: path } });
       }
+      // Upload receipt if picked
+      if (receiptFile && r.id && r.orgId) {
+        const ext = receiptFile.name.split(".").pop() || "bin";
+        const path = `admin/${r.orgId}/${r.id}/receipt-${Date.now()}.${ext}`;
+        const { error: rErr } = await supabase.storage.from("member-receipts")
+          .upload(path, receiptFile, { upsert: true, contentType: receiptFile.type });
+        if (rErr) toast.error("రసీదు అప్‌లోడ్ విఫలమైంది: " + rErr.message);
+        else await upd({ data: { member_id: r.id, membership_receipt_url: path } });
+      }
       toast.success("సభ్యుడు చేర్చబడ్డారు");
       setOpen(false);
       setF(initial);
       setPhotoFile(null); setPhotoPreview(null);
+      setReceiptFile(null);
       onAdded();
     } catch (e: any) { toast.error(e.message); }
     finally { setSaving(false); }
