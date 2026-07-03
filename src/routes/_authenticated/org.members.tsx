@@ -447,6 +447,8 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
           joined_date: f.joined_date || null,
           committee_fee_paid: Number(f.committee_fee_paid || 0),
           blood_group: f.blood_group || null,
+          introduced_by_name: f.introduced_by_name || null,
+          introducer_id: f.introducer_id || null,
           is_active: active,
           ...(photo_url ? { photo_url } : {}),
         },
