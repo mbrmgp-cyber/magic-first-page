@@ -544,6 +544,7 @@ export const submitMemberRequest = createServerFn({ method: "POST" })
         bank_ifsc: data.bank_ifsc ?? null,
         blood_group: data.blood_group ?? null,
         preferred_lang: data.preferred_lang ?? "te",
+        membership_receipt_url,
         status: "pending",
       } as any)
       .select()
