@@ -503,6 +503,22 @@ export const submitMemberRequest = createServerFn({ method: "POST" })
       photo_url = path;
     }
 
+    let membership_receipt_url: string | null = null;
+    if (data.receipt_data_url?.startsWith("data:")) {
+      const match = data.receipt_data_url.match(/^data:([a-zA-Z0-9.+/-]+);base64,(.+)$/);
+      if (!match) throw new Error("Invalid receipt file");
+      const contentType = match[1];
+      const bytes = Uint8Array.from(atob(match[2]), (c) => c.charCodeAt(0));
+      if (bytes.byteLength > 5 * 1024 * 1024) throw new Error("Receipt must be under 5MB");
+      const ext = (contentType.split("/")[1] || "bin").replace("jpeg", "jpg");
+      const path = `public-requests/${org.id}/${crypto.randomUUID()}.${ext}`;
+      const { error: rErr } = await supabaseAdmin.storage
+        .from("member-receipts")
+        .upload(path, bytes, { contentType, upsert: false });
+      if (rErr) throw new Error(rErr.message);
+      membership_receipt_url = path;
+    }
+
     const { data: member, error } = await supabaseAdmin
       .from("members")
       .insert({
