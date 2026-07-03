@@ -399,6 +399,8 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
     joined_date: member.joined_date ?? "",
     committee_fee_paid: String(member.committee_fee_paid ?? 0),
     blood_group: (member as any).blood_group ?? "",
+    introduced_by_name: (member as any).introduced_by_name ?? "",
+    introducer_id: (member as any).introducer_id ?? "",
   });
   const [active, setActive] = useState<boolean>(member.is_active !== false);
   const [saving, setSaving] = useState(false);
