@@ -245,6 +245,8 @@ function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => voi
           address: f.address || null,
           joined_date: f.joined_date || null,
           introducer_member_id: f.introducer_member_id || null,
+          introduced_by_name: f.introduced_by_name || null,
+          introducer_id: f.introducer_id || null,
           committee_fee_paid: Number(f.committee_fee_paid || 0),
           is_active: f.is_active,
           status: "approved",
