@@ -128,6 +128,8 @@ export const updateMemberProfile = createServerFn({ method: "POST" })
     phone?: string | null;
     joined_date?: string | null;
     introducer_member_id?: string | null;
+    introduced_by_name?: string | null;
+    introducer_id?: string | null;
     committee_fee_paid?: number | null;
     photo_url?: string | null;
     is_active?: boolean;
