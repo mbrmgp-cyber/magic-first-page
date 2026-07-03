@@ -205,9 +205,10 @@ export const voteNomination = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!row) throw new Error("Nomination not found");
     const next = ((row as any)[col] ?? 0) + 1;
+    const patch: any = { [col]: next };
     const { error } = await supabase
       .from("disciplinary_president_nominations")
-      .update({ [col]: next })
+      .update(patch)
       .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
