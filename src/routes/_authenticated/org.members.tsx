@@ -514,6 +514,15 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
         if (upErr) throw new Error("ఫోటో అప్‌లోడ్ విఫలం: " + upErr.message);
         photo_url = path;
       }
+      let membership_receipt_url: string | undefined;
+      if (receiptFile) {
+        const ext = receiptFile.name.split(".").pop() || "bin";
+        const path = `admin/${member.org_id}/${member.id}/receipt-${Date.now()}.${ext}`;
+        const { error: rErr } = await supabase.storage.from("member-receipts")
+          .upload(path, receiptFile, { upsert: true, contentType: receiptFile.type });
+        if (rErr) throw new Error("రసీదు అప్‌లోడ్ విఫలం: " + rErr.message);
+        membership_receipt_url = path;
+      }
       await upd({
         data: {
           member_id: member.id,
@@ -524,6 +533,11 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
           joined_date: f.joined_date || null,
           committee_fee_paid: Number(f.committee_fee_paid || 0),
           blood_group: f.blood_group || null,
+          introduced_by_name: f.introduced_by_name || null,
+          introducer_id: f.introducer_id || null,
+          is_active: active,
+          ...(photo_url ? { photo_url } : {}),
+          ...(membership_receipt_url ? { membership_receipt_url } : {}),
           introduced_by_name: f.introduced_by_name || null,
           introducer_id: f.introducer_id || null,
           is_active: active,
