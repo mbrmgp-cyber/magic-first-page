@@ -1072,6 +1072,8 @@ function AuctionRoom() {
         totalMonths: r.total_months,
         chitValue: Number(r.chit_value) || 0,
         startDate: r.start_date,
+        terms: r.terms ?? null,
+        closeAt: r.close_at ?? null,
         savedAt: new Date(r.updated_at || r.created_at).getTime(),
       }));
       setGroups(mapped);
