@@ -88,6 +88,7 @@ export const adminAddMember = createServerFn({ method: "POST" })
       introducer_id: data.introducer_id ?? null,
       committee_fee_paid: data.committee_fee_paid ?? 0,
       photo_url: data.photo_url ?? null,
+      membership_receipt_url: data.membership_receipt_url ?? null,
       is_active: data.is_active ?? true,
       status: data.status ?? "approved",
     } as any).select("id").single();
