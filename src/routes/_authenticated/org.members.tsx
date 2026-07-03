@@ -261,6 +261,7 @@ function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => voi
   const [f, setF] = useState(initial);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -273,6 +274,13 @@ function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => voi
     if (file.size > 5 * 1024 * 1024) { toast.error("ఫైల్ 5MB మించరాదు"); return; }
     setPhotoFile(file);
     setPhotoPreview(URL.createObjectURL(file));
+  }
+
+  function onPickReceipt(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("ఫైల్ 5MB మించరాదు"); return; }
+    setReceiptFile(file);
   }
 
   async function submit() {
