@@ -371,6 +371,11 @@ function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => voi
                 onChange={(e) => setF({ ...f, committee_fee_paid: e.target.value })} /></div>
           </div>
           <div>
+            <Label className="text-sm">Upload Membership Fee Receipt · సభ్యత్వం ఫీజు రసీదు అప్లోడ్ <span className="text-xs text-muted-foreground">(Optional · ₹5,000)</span></Label>
+            <Input type="file" accept="image/*,application/pdf" onChange={onPickReceipt} />
+            {receiptFile && <p className="text-xs text-emerald-700 mt-1">✓ {receiptFile.name}</p>}
+          </div>
+          <div>
             <Label>పరిచయం చేసిన సభ్యుడు</Label>
             <select className="w-full h-9 rounded-md border bg-background px-2 text-sm"
               value={f.introducer_member_id}
