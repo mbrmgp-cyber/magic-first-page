@@ -610,6 +610,21 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
           <Input value={f.introducer_id}
             onChange={(e) => setF({ ...f, introducer_id: e.target.value })} /></div>
       </div>
+      <div className="rounded-md border p-3 space-y-2">
+        <Label className="text-sm font-semibold">Upload Membership Fee Receipt · సభ్యత్వం ఫీజు రసీదు అప్లోడ్</Label>
+        <p className="text-xs text-muted-foreground">Optional · ₹5,000 receipt (image or PDF)</p>
+        <Input type="file" accept="image/*,application/pdf"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            if (file.size > 5 * 1024 * 1024) { toast.error("ఫైల్ 5MB మించరాదు"); return; }
+            setReceiptFile(file);
+          }} />
+        {receiptFile && <p className="text-xs text-emerald-700">✓ {receiptFile.name}</p>}
+        {!receiptFile && receiptUrl && (
+          <a href={receiptUrl} target="_blank" rel="noreferrer" className="text-xs text-blue-600 underline">View current receipt</a>
+        )}
+      </div>
       <Button onClick={save} disabled={saving} className="w-full">{saving ? "Saving…" : "Save"}</Button>
     </div>
   );
