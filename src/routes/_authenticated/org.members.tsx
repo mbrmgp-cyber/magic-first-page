@@ -206,6 +206,44 @@ function MemberCard({ member, orgId, org, onReview, onChange }:
   );
 }
 
+function DeleteMemberButton({ member, onChange }: { member: Member; onChange: () => void }) {
+  const del = useServerFn(adminDeleteMember);
+  const [busy, setBusy] = useState(false);
+  async function confirmDelete() {
+    setBusy(true);
+    try {
+      await del({ data: { member_id: member.id } });
+      toast.success("సభ్యుడు తొలగించబడ్డారు");
+      onChange();
+    } catch (e: any) { toast.error(e.message); }
+    finally { setBusy(false); }
+  }
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button size="sm" variant="destructive" className="bg-rose-600 hover:bg-rose-700">
+          <Trash2 className="w-4 h-4 mr-1" /> డిలీట్
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you sure you want to delete this member?</AlertDialogTitle>
+          <AlertDialogDescription>
+            {member.name} — ఈ చర్య శాశ్వతంగా రికార్డును తొలగిస్తుంది.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction disabled={busy} onClick={confirmDelete} className="bg-rose-600 hover:bg-rose-700">
+            {busy ? "Deleting…" : "Delete"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+
 function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => void }) {
   const add = useServerFn(adminAddMember);
   const upd = useServerFn(updateMemberProfile);
