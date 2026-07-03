@@ -538,10 +538,6 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
           is_active: active,
           ...(photo_url ? { photo_url } : {}),
           ...(membership_receipt_url ? { membership_receipt_url } : {}),
-          introduced_by_name: f.introduced_by_name || null,
-          introducer_id: f.introducer_id || null,
-          is_active: active,
-          ...(photo_url ? { photo_url } : {}),
         },
       });
       toast.success("Saved");
