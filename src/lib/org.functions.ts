@@ -475,6 +475,7 @@ export const submitMemberRequest = createServerFn({ method: "POST" })
     bank_ifsc?: string;
     blood_group?: string;
     preferred_lang?: string;
+    receipt_data_url?: string;
   }) => d)
   .handler(async ({ data }) => {
     const code = normalizeOrgCode(data.code);
