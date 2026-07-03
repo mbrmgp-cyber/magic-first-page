@@ -63,6 +63,8 @@ export const adminAddMember = createServerFn({ method: "POST" })
     address?: string | null;
     joined_date?: string | null;
     introducer_member_id?: string | null;
+    introduced_by_name?: string | null;
+    introducer_id?: string | null;
     committee_fee_paid?: number | null;
     photo_url?: string | null;
     is_active?: boolean;
@@ -81,11 +83,13 @@ export const adminAddMember = createServerFn({ method: "POST" })
       address: data.address ?? null,
       joined_date: data.joined_date ?? null,
       introducer_member_id: data.introducer_member_id ?? null,
+      introduced_by_name: data.introduced_by_name ?? null,
+      introducer_id: data.introducer_id ?? null,
       committee_fee_paid: data.committee_fee_paid ?? 0,
       photo_url: data.photo_url ?? null,
       is_active: data.is_active ?? true,
       status: data.status ?? "approved",
-    }).select("id").single();
+    } as any).select("id").single();
     if (error) throw new Error(error.message);
 
     // Send welcome / login link email to the new member (best-effort).
