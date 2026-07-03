@@ -385,6 +385,22 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
                 )}
               </div>
 
+              <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4 space-y-2">
+                <p className="text-sm font-semibold text-white">
+                  {lt("Upload Membership Fee Receipt", "సభ్యత్వం ఫీజు రసీదు అప్లోడ్")}
+                  <span className="ml-2 text-[11px] text-zinc-400">{lt("(Optional · ₹5,000)", "(ఐచ్ఛికం · ₹5,000)")}</span>
+                </p>
+                <Input type="file" accept="image/*,application/pdf"
+                  className="bg-zinc-900 border-zinc-700 text-white"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (!f) return;
+                    if (f.size > 5 * 1024 * 1024) { toast.error(lt("File must be under 5MB", "ఫైల్ 5MB లోపు ఉండాలి")); return; }
+                    setReceiptFile(f);
+                  }} />
+                {receiptFile && <p className="text-[11px] text-emerald-400">✓ {receiptFile.name}</p>}
+              </div>
+
               <Button type="submit" disabled={loading}
                 className="w-full bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white font-semibold shadow-[0_0_24px_rgba(255,140,40,0.45)]">
                 {loading ? <><RefreshCw className="h-4 w-4 animate-spin" /> {lt("Submitting…", "సమర్పిస్తున్నాం…")}</> : <><ShieldCheck className="h-4 w-4" /> {lt("Submit for Approval", "ఆమోదం కోసం సమర్పించండి")}</>}
