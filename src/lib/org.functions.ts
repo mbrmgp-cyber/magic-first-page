@@ -463,6 +463,8 @@ export const submitMemberRequest = createServerFn({ method: "POST" })
     father_name?: string; address?: string;
     joined_date?: string;
     introducer_member_id?: string;
+    introduced_by_name?: string;
+    introducer_id?: string;
     committee_fee_paid?: number;
     first_name?: string;
     last_name?: string;
