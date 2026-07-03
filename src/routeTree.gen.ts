@@ -26,6 +26,7 @@ import { Route as AuthenticatedOrgIncomeRouteImport } from './routes/_authentica
 import { Route as AuthenticatedOrgExpensesRouteImport } from './routes/_authenticated/org.expenses'
 import { Route as AuthenticatedOrgEventsRouteImport } from './routes/_authenticated/org.events'
 import { Route as AuthenticatedOrgElectionsRouteImport } from './routes/_authenticated/org.elections'
+import { Route as AuthenticatedOrgDisciplinaryRouteImport } from './routes/_authenticated/org.disciplinary'
 import { Route as AuthenticatedOrgDesignsRouteImport } from './routes/_authenticated/org.designs'
 import { Route as AuthenticatedOrgDashboardRouteImport } from './routes/_authenticated/org.dashboard'
 import { Route as AuthenticatedOrgCommitteeRouteImport } from './routes/_authenticated/org.committee'
@@ -129,6 +130,12 @@ const AuthenticatedOrgElectionsRoute =
   AuthenticatedOrgElectionsRouteImport.update({
     id: '/org/elections',
     path: '/org/elections',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOrgDisciplinaryRoute =
+  AuthenticatedOrgDisciplinaryRouteImport.update({
+    id: '/org/disciplinary',
+    path: '/org/disciplinary',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedOrgDesignsRoute = AuthenticatedOrgDesignsRouteImport.update({
@@ -244,6 +251,7 @@ export interface FileRoutesByFullPath {
   '/org/committee': typeof AuthenticatedOrgCommitteeRoute
   '/org/dashboard': typeof AuthenticatedOrgDashboardRoute
   '/org/designs': typeof AuthenticatedOrgDesignsRoute
+  '/org/disciplinary': typeof AuthenticatedOrgDisciplinaryRoute
   '/org/elections': typeof AuthenticatedOrgElectionsRoute
   '/org/events': typeof AuthenticatedOrgEventsRoute
   '/org/expenses': typeof AuthenticatedOrgExpensesRoute
@@ -278,6 +286,7 @@ export interface FileRoutesByTo {
   '/org/committee': typeof AuthenticatedOrgCommitteeRoute
   '/org/dashboard': typeof AuthenticatedOrgDashboardRoute
   '/org/designs': typeof AuthenticatedOrgDesignsRoute
+  '/org/disciplinary': typeof AuthenticatedOrgDisciplinaryRoute
   '/org/elections': typeof AuthenticatedOrgElectionsRoute
   '/org/events': typeof AuthenticatedOrgEventsRoute
   '/org/expenses': typeof AuthenticatedOrgExpensesRoute
@@ -314,6 +323,7 @@ export interface FileRoutesById {
   '/_authenticated/org/committee': typeof AuthenticatedOrgCommitteeRoute
   '/_authenticated/org/dashboard': typeof AuthenticatedOrgDashboardRoute
   '/_authenticated/org/designs': typeof AuthenticatedOrgDesignsRoute
+  '/_authenticated/org/disciplinary': typeof AuthenticatedOrgDisciplinaryRoute
   '/_authenticated/org/elections': typeof AuthenticatedOrgElectionsRoute
   '/_authenticated/org/events': typeof AuthenticatedOrgEventsRoute
   '/_authenticated/org/expenses': typeof AuthenticatedOrgExpensesRoute
@@ -350,6 +360,7 @@ export interface FileRouteTypes {
     | '/org/committee'
     | '/org/dashboard'
     | '/org/designs'
+    | '/org/disciplinary'
     | '/org/elections'
     | '/org/events'
     | '/org/expenses'
@@ -384,6 +395,7 @@ export interface FileRouteTypes {
     | '/org/committee'
     | '/org/dashboard'
     | '/org/designs'
+    | '/org/disciplinary'
     | '/org/elections'
     | '/org/events'
     | '/org/expenses'
@@ -419,6 +431,7 @@ export interface FileRouteTypes {
     | '/_authenticated/org/committee'
     | '/_authenticated/org/dashboard'
     | '/_authenticated/org/designs'
+    | '/_authenticated/org/disciplinary'
     | '/_authenticated/org/elections'
     | '/_authenticated/org/events'
     | '/_authenticated/org/expenses'
@@ -567,6 +580,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOrgElectionsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/org/disciplinary': {
+      id: '/_authenticated/org/disciplinary'
+      path: '/org/disciplinary'
+      fullPath: '/org/disciplinary'
+      preLoaderRoute: typeof AuthenticatedOrgDisciplinaryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/org/designs': {
       id: '/_authenticated/org/designs'
       path: '/org/designs'
@@ -697,6 +717,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedOrgCommitteeRoute: typeof AuthenticatedOrgCommitteeRoute
   AuthenticatedOrgDashboardRoute: typeof AuthenticatedOrgDashboardRoute
   AuthenticatedOrgDesignsRoute: typeof AuthenticatedOrgDesignsRoute
+  AuthenticatedOrgDisciplinaryRoute: typeof AuthenticatedOrgDisciplinaryRoute
   AuthenticatedOrgElectionsRoute: typeof AuthenticatedOrgElectionsRoute
   AuthenticatedOrgEventsRoute: typeof AuthenticatedOrgEventsRoute
   AuthenticatedOrgExpensesRoute: typeof AuthenticatedOrgExpensesRoute
@@ -723,6 +744,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedOrgCommitteeRoute: AuthenticatedOrgCommitteeRoute,
   AuthenticatedOrgDashboardRoute: AuthenticatedOrgDashboardRoute,
   AuthenticatedOrgDesignsRoute: AuthenticatedOrgDesignsRoute,
+  AuthenticatedOrgDisciplinaryRoute: AuthenticatedOrgDisciplinaryRoute,
   AuthenticatedOrgElectionsRoute: AuthenticatedOrgElectionsRoute,
   AuthenticatedOrgEventsRoute: AuthenticatedOrgEventsRoute,
   AuthenticatedOrgExpensesRoute: AuthenticatedOrgExpensesRoute,
