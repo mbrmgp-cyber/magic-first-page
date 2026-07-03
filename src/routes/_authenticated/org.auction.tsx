@@ -85,10 +85,49 @@ type AuctionSessionRow = {
   winner_dividend: number | null;
   past_winners: unknown;
   consents: unknown;
+  foreman_mode?: string | null;
+  foreman_free_month?: number | null;
+  foreman_included?: boolean | null;
   terms?: string | null;
+  close_at?: string | null;
+  total_members?: number | null;
   created_at: string;
   updated_at: string;
 };
+
+const AUCTION_SESSION_SELECT = [
+  "id",
+  "org_id",
+  "group_name",
+  "live_group_name",
+  "participants",
+  "chit_value",
+  "total_months",
+  "current_month",
+  "commission_pct",
+  "start_date",
+  "turn_start",
+  "turn_end",
+  "auction_closed",
+  "status",
+  "winner_bid_id",
+  "winner_member_id",
+  "winner_member_name",
+  "winner_member_code",
+  "winner_amount",
+  "winner_net",
+  "winner_dividend",
+  "past_winners",
+  "consents",
+  "foreman_mode",
+  "foreman_free_month",
+  "foreman_included",
+  "terms",
+  "close_at",
+  "total_members",
+  "created_at",
+  "updated_at",
+].join(",");
 
 type BidRow = {
   id: string;
@@ -162,6 +201,12 @@ function sessionState(row: AuctionSessionRow, bidRows: BidRow[], allRows: Auctio
     auctionClosed: row.auction_closed || row.status === "closed",
     turnStart: toMs(row.turn_start),
     turnEnd: toMs(row.turn_end),
+    foremanMode: ((row.foreman_mode as any) || "commission") as "commission" | "free_month",
+    foremanFreeMonth: row.foreman_free_month ?? null,
+    foremanIncluded: row.foreman_included ?? true,
+    terms: row.terms ?? null,
+    closeAt: row.close_at ?? null,
+    totalMembers: row.total_members ?? null,
   };
 }
 
@@ -247,6 +292,7 @@ function AuctionRoom() {
   const [groups, setGroups] = useState<NonNullable<AuctionStateDTO["groups"]>>([]);
   const [activeAuctionId, setActiveAuctionId] = useState<string | null>(null);
   const [selectedGroupName, setSelectedGroupName] = useState<string>("");
+  const [groupTermsByAuctionId, setGroupTermsByAuctionId] = useState<Record<string, string>>(Object.create(null));
   const [chitStartDate, setChitStartDate] = useState<string>("");
   // Foreman / terms / auction close config
   const [foremanMode, setForemanMode] = useState<"commission" | "free_month">("commission");
@@ -284,14 +330,14 @@ function AuctionRoom() {
       try {
         const { data: session, error: sessionError } = await (supabase as any)
           .from("auction_sessions")
-          .select("*")
+            .select(AUCTION_SESSION_SELECT)
           .eq("id", g.auctionId)
           .maybeSingle();
         if (sessionError) throw sessionError;
         if (session) {
           const { data: sessionRows } = await (supabase as any)
             .from("auction_sessions")
-            .select("*")
+            .select(AUCTION_SESSION_SELECT)
             .eq("org_id", orgId)
             .order("updated_at", { ascending: false });
           const { data: bidRows, error: bidError } = await (supabase as any)
@@ -433,7 +479,7 @@ function AuctionRoom() {
     const fetchAndApply = async (preferredAuctionId?: string | null) => {
       const { data: sessionRows, error: sessionError } = await (supabase as any)
         .from("auction_sessions")
-        .select("*")
+        .select(AUCTION_SESSION_SELECT)
         .eq("org_id", orgId)
         .order("updated_at", { ascending: false });
       if (sessionError) throw sessionError;
@@ -539,14 +585,14 @@ function AuctionRoom() {
       try {
         const { data: session, error: sessionError } = await (supabase as any)
           .from("auction_sessions")
-          .select("*")
+          .select(AUCTION_SESSION_SELECT)
           .eq("id", target.auctionId)
           .maybeSingle();
         if (sessionError) throw sessionError;
         if (!session || cancelled) return;
         const { data: sessionRows } = await (supabase as any)
           .from("auction_sessions")
-          .select("*")
+          .select(AUCTION_SESSION_SELECT)
           .eq("org_id", orgId)
           .order("updated_at", { ascending: false });
         const { data: bidRows, error: bidError } = await (supabase as any)
@@ -569,6 +615,39 @@ function AuctionRoom() {
     })();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orgId, isAdmin, myId, groups, selectedGroupName, liveGroupName]);
+
+  // Member terms loader: directly fetch only the selected group's `terms`
+  // column so the terms card never depends on delayed full-state hydration.
+  useEffect(() => {
+    if (!orgId || isAdmin || !myId || groups.length === 0) return;
+    const myGroups = groups.filter((g) => g.memberIds.includes(myId));
+    if (myGroups.length === 0) return;
+    const visibleName = selectedGroupName || liveGroupName || myGroups[0].name;
+    const target = myGroups.find((g) => g.name === visibleName) || myGroups[0];
+    if (!target?.auctionId) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data: row, error } = await (supabase as any)
+          .from("auction_sessions")
+          .select("id,terms")
+          .eq("id", target.auctionId)
+          .eq("org_id", orgId)
+          .maybeSingle();
+        if (error) throw error;
+        if (cancelled) return;
+        const nextTerms = typeof row?.terms === "string" ? row.terms : "";
+        setGroupTermsByAuctionId((prev) => (
+          prev[target.auctionId!] === nextTerms ? prev : { ...prev, [target.auctionId!]: nextTerms }
+        ));
+      } catch (e: any) {
+        console.error("Member group terms load failed:", e?.message || e);
+      }
+    })();
+
+    return () => { cancelled = true; };
   }, [orgId, isAdmin, myId, groups, selectedGroupName, liveGroupName]);
 
   // Admin writes: push state whenever it changes (debounced)
@@ -599,6 +678,11 @@ function AuctionRoom() {
     const liveTotalMonths = !setupMatchesLive && liveEntry?.totalMonths ? liveEntry.totalMonths : totalMonths;
     const liveChitValue = !setupMatchesLive && typeof (liveEntry as any)?.chitValue === "number" ? (liveEntry as any).chitValue : chitValue;
     const liveStartDate = !setupMatchesLive && typeof (liveEntry as any)?.startDate === "string" ? (liveEntry as any).startDate : chitStartDate;
+    const liveTerms = !setupMatchesLive && liveEntry ? ((liveEntry as any).terms ?? null) : (terms || null);
+    const liveCloseAt = !setupMatchesLive && liveEntry ? ((liveEntry as any).closeAt ?? null) : (closeAt || null);
+    const liveForemanMode = !setupMatchesLive && liveEntry ? ((liveEntry as any).foremanMode ?? foremanMode) : foremanMode;
+    const liveForemanFreeMonth = !setupMatchesLive && liveEntry ? ((liveEntry as any).foremanFreeMonth ?? null) : foremanFreeMonth;
+    const liveForemanIncluded = !setupMatchesLive && liveEntry ? ((liveEntry as any).foremanIncluded ?? true) : foremanIncluded;
     const snapshot: AuctionStateDTO = {
       activeAuctionId: activeAuctionId ?? undefined,
       groupName: liveGroupName || chitGroupName,
@@ -611,6 +695,12 @@ function AuctionRoom() {
       participants: liveParticipants,
       bids, pastWinners, consents, groups,
       winner, auctionClosed, turnStart, turnEnd,
+      foremanMode: liveForemanMode,
+      foremanFreeMonth: liveForemanFreeMonth,
+      foremanIncluded: liveForemanIncluded,
+      terms: liveTerms,
+      closeAt: liveCloseAt,
+      totalMembers: liveParticipants.length || null,
     };
     const js = JSON.stringify(snapshot);
     if (js === lastRemoteJsonRef.current) return;
@@ -650,6 +740,11 @@ function AuctionRoom() {
     const liveTotalMonths = !setupMatchesLive && liveEntry?.totalMonths ? liveEntry.totalMonths : totalMonths;
     const liveChitValue = !setupMatchesLive && typeof (liveEntry as any)?.chitValue === "number" ? (liveEntry as any).chitValue : chitValue;
     const liveStartDate = !setupMatchesLive && typeof (liveEntry as any)?.startDate === "string" ? (liveEntry as any).startDate : chitStartDate;
+    const liveTerms = !setupMatchesLive && liveEntry ? ((liveEntry as any).terms ?? null) : (terms || null);
+    const liveCloseAt = !setupMatchesLive && liveEntry ? ((liveEntry as any).closeAt ?? null) : (closeAt || null);
+    const liveForemanMode = !setupMatchesLive && liveEntry ? ((liveEntry as any).foremanMode ?? foremanMode) : foremanMode;
+    const liveForemanFreeMonth = !setupMatchesLive && liveEntry ? ((liveEntry as any).foremanFreeMonth ?? null) : foremanFreeMonth;
+    const liveForemanIncluded = !setupMatchesLive && liveEntry ? ((liveEntry as any).foremanIncluded ?? true) : foremanIncluded;
     return {
       activeAuctionId: overrides.activeAuctionId ?? activeAuctionId ?? undefined,
       groupName: overrides.groupName ?? liveName,
@@ -668,12 +763,12 @@ function AuctionRoom() {
       auctionClosed: overrides.auctionClosed ?? auctionClosed,
       turnStart: overrides.turnStart === undefined ? turnStart : overrides.turnStart,
       turnEnd: overrides.turnEnd === undefined ? turnEnd : overrides.turnEnd,
-      foremanMode: (overrides as any).foremanMode ?? foremanMode,
-      foremanFreeMonth: (overrides as any).foremanFreeMonth ?? foremanFreeMonth,
-      foremanIncluded: (overrides as any).foremanIncluded ?? foremanIncluded,
-      terms: (overrides as any).terms ?? (terms || null),
-      closeAt: (overrides as any).closeAt ?? (closeAt || null),
-      totalMembers: (overrides as any).totalMembers ?? (participants.length || null),
+      foremanMode: (overrides as any).foremanMode ?? liveForemanMode,
+      foremanFreeMonth: (overrides as any).foremanFreeMonth ?? liveForemanFreeMonth,
+      foremanIncluded: (overrides as any).foremanIncluded ?? liveForemanIncluded,
+      terms: (overrides as any).terms ?? liveTerms,
+      closeAt: (overrides as any).closeAt ?? liveCloseAt,
+      totalMembers: (overrides as any).totalMembers ?? (liveParticipants.length || null),
     };
   };
 
@@ -960,7 +1055,7 @@ function AuctionRoom() {
     try {
       const { data: allRows } = await (supabase as any)
         .from("auction_sessions")
-        .select("*")
+        .select(AUCTION_SESSION_SELECT)
         .eq("org_id", orgId)
         .order("updated_at", { ascending: false });
       const mapped = ((allRows ?? []) as any[]).map((r) => ({
@@ -972,6 +1067,11 @@ function AuctionRoom() {
         totalMonths: r.total_months,
         chitValue: Number(r.chit_value) || 0,
         startDate: r.start_date,
+        terms: r.terms ?? null,
+        closeAt: r.close_at ?? null,
+        foremanMode: r.foreman_mode ?? "commission",
+        foremanFreeMonth: r.foreman_free_month ?? null,
+        foremanIncluded: r.foreman_included ?? true,
         savedAt: new Date(r.updated_at || r.created_at).getTime(),
       }));
       setGroups(mapped);
@@ -1047,7 +1147,7 @@ function AuctionRoom() {
       const doUpsert = async () => await (supabase as any)
         .from("auction_sessions")
         .upsert(payload, { onConflict: "org_id,group_name" })
-        .select("*")
+        .select(AUCTION_SESSION_SELECT)
         .maybeSingle();
       let attempt = await doUpsert();
       // Retry once on transient network failure ("Failed to fetch").
@@ -1060,7 +1160,7 @@ function AuctionRoom() {
       // Refresh the groups list from DB so both Group A and Group B coexist.
       const { data: allRows } = await (supabase as any)
         .from("auction_sessions")
-        .select("*")
+        .select(AUCTION_SESSION_SELECT)
         .eq("org_id", orgId)
         .order("updated_at", { ascending: false });
       const mapped = ((allRows ?? []) as any[]).map((r) => ({
@@ -1074,6 +1174,9 @@ function AuctionRoom() {
         startDate: r.start_date,
         terms: r.terms ?? null,
         closeAt: r.close_at ?? null,
+        foremanMode: r.foreman_mode ?? "commission",
+        foremanFreeMonth: r.foreman_free_month ?? null,
+        foremanIncluded: r.foreman_included ?? true,
         savedAt: new Date(r.updated_at || r.created_at).getTime(),
       }));
       setGroups(mapped);
@@ -1306,6 +1409,11 @@ function AuctionRoom() {
           const visibleGroupName = selectedGroupName || liveGroupName || myGroups[0]?.name || "";
           const activeGroup =
             myGroups.find((g) => g.name === visibleGroupName) || myGroups[0] || null;
+          const activeGroupTerms = (
+            (activeGroup?.auctionId ? groupTermsByAuctionId[activeGroup.auctionId] : undefined) ??
+            (activeGroup as any)?.terms ??
+            ""
+          ).toString().trim();
           const closedMonths = pastWinners.length;
           const myBidsList = bids
             .filter((b) => b.memberId === myId)
@@ -1395,9 +1503,9 @@ function AuctionRoom() {
                     <BookOpen className="size-4 text-amber-400" />
                     <h2 className="font-semibold text-sm">Group Terms · నిబంధనలు</h2>
                   </div>
-                  {((activeGroup as any).terms || terms || "").toString().trim().length > 0 ? (
+                  {activeGroupTerms.length > 0 ? (
                     <div className="text-xs md:text-sm whitespace-pre-wrap leading-relaxed text-foreground/90">
-                      {((activeGroup as any).terms || terms || "").toString()}
+                      {activeGroupTerms}
                     </div>
                   ) : (
                     <div className="text-xs italic text-muted-foreground">

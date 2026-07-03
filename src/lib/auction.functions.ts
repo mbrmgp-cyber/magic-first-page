@@ -117,6 +117,40 @@ type BidRow = {
   submitted_at: string;
 };
 
+const AUCTION_SESSION_SELECT = [
+  "id",
+  "org_id",
+  "group_name",
+  "live_group_name",
+  "participants",
+  "chit_value",
+  "total_months",
+  "current_month",
+  "commission_pct",
+  "start_date",
+  "turn_start",
+  "turn_end",
+  "auction_closed",
+  "status",
+  "winner_bid_id",
+  "winner_member_id",
+  "winner_member_name",
+  "winner_member_code",
+  "winner_amount",
+  "winner_net",
+  "winner_dividend",
+  "past_winners",
+  "consents",
+  "foreman_mode",
+  "foreman_free_month",
+  "foreman_included",
+  "terms",
+  "close_at",
+  "total_members",
+  "created_at",
+  "updated_at",
+].join(",");
+
 const ms = (value?: string | null) => (value ? new Date(value).getTime() : null);
 
 function normalizeParticipants(value: unknown): NonNullable<AuctionStateDTO["participants"]> {
@@ -210,7 +244,7 @@ export const getAuctionState = createServerFn({ method: "GET" })
     const sb = context.supabase as any;
     const { data: rows, error } = await sb
       .from("auction_sessions")
-      .select("*")
+      .select(AUCTION_SESSION_SELECT)
       .eq("org_id", data.orgId)
       .order("updated_at", { ascending: false });
     if (error) throw new Error(error.message);
@@ -272,12 +306,12 @@ export const saveAuctionState = createServerFn({ method: "POST" })
         },
         { onConflict: "org_id,group_name" },
       )
-      .select("*")
+      .select(AUCTION_SESSION_SELECT)
       .maybeSingle();
     if (error) throw new Error(error.message);
     const { data: rows } = await sb
       .from("auction_sessions")
-      .select("*")
+      .select(AUCTION_SESSION_SELECT)
       .eq("org_id", data.orgId)
       .order("updated_at", { ascending: false });
     const { data: bidRows, error: bidError } = await sb
@@ -300,7 +334,7 @@ export const submitAuctionConsent = createServerFn({ method: "POST" })
     });
     if (error) throw new Error(error.message);
     const session = row as AuctionSessionRow;
-    const { data: rows } = await sb.from("auction_sessions").select("*").eq("org_id", data.orgId).order("updated_at", { ascending: false });
+    const { data: rows } = await sb.from("auction_sessions").select(AUCTION_SESSION_SELECT).eq("org_id", data.orgId).order("updated_at", { ascending: false });
     const { data: bidRows } = await sb
       .from("bids")
       .select("id, member_id, member_name, member_code, amount, submitted_at")
@@ -554,7 +588,7 @@ export const archiveAndResetMonth = createServerFn({ method: "POST" })
     // 1. Load the current session + all bids for the month being archived.
     const { data: session, error: sessErr } = await sb
       .from("auction_sessions")
-      .select("*")
+      .select(AUCTION_SESSION_SELECT)
       .eq("id", data.auctionId)
       .eq("org_id", data.orgId)
       .maybeSingle();
