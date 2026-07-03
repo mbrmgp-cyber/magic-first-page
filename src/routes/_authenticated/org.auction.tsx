@@ -286,6 +286,7 @@ function AuctionRoom() {
   const [groups, setGroups] = useState<NonNullable<AuctionStateDTO["groups"]>>([]);
   const [activeAuctionId, setActiveAuctionId] = useState<string | null>(null);
   const [selectedGroupName, setSelectedGroupName] = useState<string>("");
+  const [groupTermsByAuctionId, setGroupTermsByAuctionId] = useState<Record<string, string>>(Object.create(null));
   const [chitStartDate, setChitStartDate] = useState<string>("");
   // Foreman / terms / auction close config
   const [foremanMode, setForemanMode] = useState<"commission" | "free_month">("commission");
@@ -608,6 +609,39 @@ function AuctionRoom() {
     })();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orgId, isAdmin, myId, groups, selectedGroupName, liveGroupName]);
+
+  // Member terms loader: directly fetch only the selected group's `terms`
+  // column so the terms card never depends on delayed full-state hydration.
+  useEffect(() => {
+    if (!orgId || isAdmin || !myId || groups.length === 0) return;
+    const myGroups = groups.filter((g) => g.memberIds.includes(myId));
+    if (myGroups.length === 0) return;
+    const visibleName = selectedGroupName || liveGroupName || myGroups[0].name;
+    const target = myGroups.find((g) => g.name === visibleName) || myGroups[0];
+    if (!target?.auctionId) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data: row, error } = await (supabase as any)
+          .from("auction_sessions")
+          .select("id,terms")
+          .eq("id", target.auctionId)
+          .eq("org_id", orgId)
+          .maybeSingle();
+        if (error) throw error;
+        if (cancelled) return;
+        const nextTerms = typeof row?.terms === "string" ? row.terms : "";
+        setGroupTermsByAuctionId((prev) => (
+          prev[target.auctionId!] === nextTerms ? prev : { ...prev, [target.auctionId!]: nextTerms }
+        ));
+      } catch (e: any) {
+        console.error("Member group terms load failed:", e?.message || e);
+      }
+    })();
+
+    return () => { cancelled = true; };
   }, [orgId, isAdmin, myId, groups, selectedGroupName, liveGroupName]);
 
   // Admin writes: push state whenever it changes (debounced)
@@ -1359,6 +1393,11 @@ function AuctionRoom() {
           const visibleGroupName = selectedGroupName || liveGroupName || myGroups[0]?.name || "";
           const activeGroup =
             myGroups.find((g) => g.name === visibleGroupName) || myGroups[0] || null;
+          const activeGroupTerms = (
+            (activeGroup?.auctionId ? groupTermsByAuctionId[activeGroup.auctionId] : undefined) ??
+            (activeGroup as any)?.terms ??
+            ""
+          ).toString().trim();
           const closedMonths = pastWinners.length;
           const myBidsList = bids
             .filter((b) => b.memberId === myId)
@@ -1448,9 +1487,9 @@ function AuctionRoom() {
                     <BookOpen className="size-4 text-amber-400" />
                     <h2 className="font-semibold text-sm">Group Terms · నిబంధనలు</h2>
                   </div>
-                  {((activeGroup as any).terms || terms || "").toString().trim().length > 0 ? (
+                  {activeGroupTerms.length > 0 ? (
                     <div className="text-xs md:text-sm whitespace-pre-wrap leading-relaxed text-foreground/90">
-                      {((activeGroup as any).terms || terms || "").toString()}
+                      {activeGroupTerms}
                     </div>
                   ) : (
                     <div className="text-xs italic text-muted-foreground">
