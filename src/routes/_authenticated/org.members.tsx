@@ -200,6 +200,7 @@ function MemberCard({ member, orgId, org, onReview, onChange }:
             <MemberDetailsDialog member={member} orgId={orgId} onChange={onChange} />
           </>
         )}
+        <DeleteMemberButton member={member} onChange={onChange} />
       </div>
     </Card>
   );
