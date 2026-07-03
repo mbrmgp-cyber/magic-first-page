@@ -1036,6 +1036,12 @@ function AuctionRoom() {
         start_date: chitStartDate || null,
         auction_closed: false,
         status: "active",
+        foreman_mode: foremanMode,
+        foreman_free_month: foremanFreeMonth,
+        foreman_included: foremanIncluded,
+        terms: terms && terms.trim().length > 0 ? terms : null,
+        close_at: closeAt || null,
+        total_members: participants.length || null,
         updated_at: new Date().toISOString(),
       };
       const doUpsert = async () => await (supabase as any)
@@ -1066,6 +1072,8 @@ function AuctionRoom() {
         totalMonths: r.total_months,
         chitValue: Number(r.chit_value) || 0,
         startDate: r.start_date,
+        terms: r.terms ?? null,
+        closeAt: r.close_at ?? null,
         savedAt: new Date(r.updated_at || r.created_at).getTime(),
       }));
       setGroups(mapped);
