@@ -514,6 +514,15 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
         <div><Label>కమిటీ Fee (₹)</Label>
           <Input type="number" step="0.01" value={f.committee_fee_paid} onChange={(e) => setF({ ...f, committee_fee_paid: e.target.value })} /></div>
       </div>
+      <div className="rounded-md border p-3 space-y-2">
+        <Label className="text-sm font-semibold">Reference Details · పరిచయస్తుడి వివరాలు</Label>
+        <div><Label className="text-xs">Introduced By Name · పరిచయస్తుడు పేరు</Label>
+          <Input value={f.introduced_by_name}
+            onChange={(e) => setF({ ...f, introduced_by_name: e.target.value })} /></div>
+        <div><Label className="text-xs">Introducer ID · పరిచయం చేసిన వారి ఐడి నంబర్</Label>
+          <Input value={f.introducer_id}
+            onChange={(e) => setF({ ...f, introducer_id: e.target.value })} /></div>
+      </div>
       <Button onClick={save} disabled={saving} className="w-full">{saving ? "Saving…" : "Save"}</Button>
     </div>
   );
