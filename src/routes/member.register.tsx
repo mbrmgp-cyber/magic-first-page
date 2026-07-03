@@ -176,6 +176,7 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
     setLoading(true);
     try {
       const photo_data_url = photoFile ? await fileToDataUrl(photoFile) : undefined;
+      const receipt_data_url = receiptFile ? await fileToDataUrl(receiptFile) : undefined;
       await submit({
         data: {
           code,
@@ -183,6 +184,7 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
           email: form.email,
           phone: form.phone || undefined,
           photo_data_url,
+          receipt_data_url,
           father_name: form.father_name || undefined,
           address: [form.village, form.pin_code].filter(Boolean).join(", ") || undefined,
           first_name: form.first_name || undefined,
