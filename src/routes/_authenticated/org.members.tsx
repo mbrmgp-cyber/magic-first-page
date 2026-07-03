@@ -318,6 +318,15 @@ function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => voi
               {introducers.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
             </select>
           </div>
+          <div className="rounded-md border p-3 space-y-2">
+            <Label className="text-sm font-semibold">Reference Details · పరిచయస్తుడి వివరాలు</Label>
+            <div><Label className="text-xs">Introduced By Name · పరిచయస్తుడు పేరు</Label>
+              <Input value={f.introduced_by_name}
+                onChange={(e) => setF({ ...f, introduced_by_name: e.target.value })} /></div>
+            <div><Label className="text-xs">Introducer ID · పరిచయం చేసిన వారి ఐడి నంబర్</Label>
+              <Input value={f.introducer_id}
+                onChange={(e) => setF({ ...f, introducer_id: e.target.value })} /></div>
+          </div>
           <div className="flex items-center justify-between rounded-md border p-3">
             <div>
               <Label className="text-sm">సభ్యత్వం యాక్టివ్</Label>
