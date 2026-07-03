@@ -740,6 +740,11 @@ function AuctionRoom() {
     const liveTotalMonths = !setupMatchesLive && liveEntry?.totalMonths ? liveEntry.totalMonths : totalMonths;
     const liveChitValue = !setupMatchesLive && typeof (liveEntry as any)?.chitValue === "number" ? (liveEntry as any).chitValue : chitValue;
     const liveStartDate = !setupMatchesLive && typeof (liveEntry as any)?.startDate === "string" ? (liveEntry as any).startDate : chitStartDate;
+    const liveTerms = !setupMatchesLive && liveEntry ? ((liveEntry as any).terms ?? null) : (terms || null);
+    const liveCloseAt = !setupMatchesLive && liveEntry ? ((liveEntry as any).closeAt ?? null) : (closeAt || null);
+    const liveForemanMode = !setupMatchesLive && liveEntry ? ((liveEntry as any).foremanMode ?? foremanMode) : foremanMode;
+    const liveForemanFreeMonth = !setupMatchesLive && liveEntry ? ((liveEntry as any).foremanFreeMonth ?? null) : foremanFreeMonth;
+    const liveForemanIncluded = !setupMatchesLive && liveEntry ? ((liveEntry as any).foremanIncluded ?? true) : foremanIncluded;
     return {
       activeAuctionId: overrides.activeAuctionId ?? activeAuctionId ?? undefined,
       groupName: overrides.groupName ?? liveName,
@@ -758,12 +763,12 @@ function AuctionRoom() {
       auctionClosed: overrides.auctionClosed ?? auctionClosed,
       turnStart: overrides.turnStart === undefined ? turnStart : overrides.turnStart,
       turnEnd: overrides.turnEnd === undefined ? turnEnd : overrides.turnEnd,
-      foremanMode: (overrides as any).foremanMode ?? foremanMode,
-      foremanFreeMonth: (overrides as any).foremanFreeMonth ?? foremanFreeMonth,
-      foremanIncluded: (overrides as any).foremanIncluded ?? foremanIncluded,
-      terms: (overrides as any).terms ?? (terms || null),
-      closeAt: (overrides as any).closeAt ?? (closeAt || null),
-      totalMembers: (overrides as any).totalMembers ?? (participants.length || null),
+      foremanMode: (overrides as any).foremanMode ?? liveForemanMode,
+      foremanFreeMonth: (overrides as any).foremanFreeMonth ?? liveForemanFreeMonth,
+      foremanIncluded: (overrides as any).foremanIncluded ?? liveForemanIncluded,
+      terms: (overrides as any).terms ?? liveTerms,
+      closeAt: (overrides as any).closeAt ?? liveCloseAt,
+      totalMembers: (overrides as any).totalMembers ?? (liveParticipants.length || null),
     };
   };
 
