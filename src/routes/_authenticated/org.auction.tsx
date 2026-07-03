@@ -85,10 +85,49 @@ type AuctionSessionRow = {
   winner_dividend: number | null;
   past_winners: unknown;
   consents: unknown;
+  foreman_mode?: string | null;
+  foreman_free_month?: number | null;
+  foreman_included?: boolean | null;
   terms?: string | null;
+  close_at?: string | null;
+  total_members?: number | null;
   created_at: string;
   updated_at: string;
 };
+
+const AUCTION_SESSION_SELECT = [
+  "id",
+  "org_id",
+  "group_name",
+  "live_group_name",
+  "participants",
+  "chit_value",
+  "total_months",
+  "current_month",
+  "commission_pct",
+  "start_date",
+  "turn_start",
+  "turn_end",
+  "auction_closed",
+  "status",
+  "winner_bid_id",
+  "winner_member_id",
+  "winner_member_name",
+  "winner_member_code",
+  "winner_amount",
+  "winner_net",
+  "winner_dividend",
+  "past_winners",
+  "consents",
+  "foreman_mode",
+  "foreman_free_month",
+  "foreman_included",
+  "terms",
+  "close_at",
+  "total_members",
+  "created_at",
+  "updated_at",
+].join(",");
 
 type BidRow = {
   id: string;
@@ -284,14 +323,14 @@ function AuctionRoom() {
       try {
         const { data: session, error: sessionError } = await (supabase as any)
           .from("auction_sessions")
-          .select("*")
+            .select(AUCTION_SESSION_SELECT)
           .eq("id", g.auctionId)
           .maybeSingle();
         if (sessionError) throw sessionError;
         if (session) {
           const { data: sessionRows } = await (supabase as any)
             .from("auction_sessions")
-            .select("*")
+            .select(AUCTION_SESSION_SELECT)
             .eq("org_id", orgId)
             .order("updated_at", { ascending: false });
           const { data: bidRows, error: bidError } = await (supabase as any)
@@ -433,7 +472,7 @@ function AuctionRoom() {
     const fetchAndApply = async (preferredAuctionId?: string | null) => {
       const { data: sessionRows, error: sessionError } = await (supabase as any)
         .from("auction_sessions")
-        .select("*")
+        .select(AUCTION_SESSION_SELECT)
         .eq("org_id", orgId)
         .order("updated_at", { ascending: false });
       if (sessionError) throw sessionError;
@@ -539,14 +578,14 @@ function AuctionRoom() {
       try {
         const { data: session, error: sessionError } = await (supabase as any)
           .from("auction_sessions")
-          .select("*")
+          .select(AUCTION_SESSION_SELECT)
           .eq("id", target.auctionId)
           .maybeSingle();
         if (sessionError) throw sessionError;
         if (!session || cancelled) return;
         const { data: sessionRows } = await (supabase as any)
           .from("auction_sessions")
-          .select("*")
+          .select(AUCTION_SESSION_SELECT)
           .eq("org_id", orgId)
           .order("updated_at", { ascending: false });
         const { data: bidRows, error: bidError } = await (supabase as any)
@@ -599,6 +638,11 @@ function AuctionRoom() {
     const liveTotalMonths = !setupMatchesLive && liveEntry?.totalMonths ? liveEntry.totalMonths : totalMonths;
     const liveChitValue = !setupMatchesLive && typeof (liveEntry as any)?.chitValue === "number" ? (liveEntry as any).chitValue : chitValue;
     const liveStartDate = !setupMatchesLive && typeof (liveEntry as any)?.startDate === "string" ? (liveEntry as any).startDate : chitStartDate;
+    const liveTerms = !setupMatchesLive && liveEntry ? ((liveEntry as any).terms ?? null) : (terms || null);
+    const liveCloseAt = !setupMatchesLive && liveEntry ? ((liveEntry as any).closeAt ?? null) : (closeAt || null);
+    const liveForemanMode = !setupMatchesLive && liveEntry ? ((liveEntry as any).foremanMode ?? foremanMode) : foremanMode;
+    const liveForemanFreeMonth = !setupMatchesLive && liveEntry ? ((liveEntry as any).foremanFreeMonth ?? null) : foremanFreeMonth;
+    const liveForemanIncluded = !setupMatchesLive && liveEntry ? ((liveEntry as any).foremanIncluded ?? true) : foremanIncluded;
     const snapshot: AuctionStateDTO = {
       activeAuctionId: activeAuctionId ?? undefined,
       groupName: liveGroupName || chitGroupName,
@@ -611,6 +655,12 @@ function AuctionRoom() {
       participants: liveParticipants,
       bids, pastWinners, consents, groups,
       winner, auctionClosed, turnStart, turnEnd,
+      foremanMode: liveForemanMode,
+      foremanFreeMonth: liveForemanFreeMonth,
+      foremanIncluded: liveForemanIncluded,
+      terms: liveTerms,
+      closeAt: liveCloseAt,
+      totalMembers: liveParticipants.length || null,
     };
     const js = JSON.stringify(snapshot);
     if (js === lastRemoteJsonRef.current) return;
@@ -960,7 +1010,7 @@ function AuctionRoom() {
     try {
       const { data: allRows } = await (supabase as any)
         .from("auction_sessions")
-        .select("*")
+        .select(AUCTION_SESSION_SELECT)
         .eq("org_id", orgId)
         .order("updated_at", { ascending: false });
       const mapped = ((allRows ?? []) as any[]).map((r) => ({
@@ -1047,7 +1097,7 @@ function AuctionRoom() {
       const doUpsert = async () => await (supabase as any)
         .from("auction_sessions")
         .upsert(payload, { onConflict: "org_id,group_name" })
-        .select("*")
+        .select(AUCTION_SESSION_SELECT)
         .maybeSingle();
       let attempt = await doUpsert();
       // Retry once on transient network failure ("Failed to fetch").
@@ -1060,7 +1110,7 @@ function AuctionRoom() {
       // Refresh the groups list from DB so both Group A and Group B coexist.
       const { data: allRows } = await (supabase as any)
         .from("auction_sessions")
-        .select("*")
+        .select(AUCTION_SESSION_SELECT)
         .eq("org_id", orgId)
         .order("updated_at", { ascending: false });
       const mapped = ((allRows ?? []) as any[]).map((r) => ({
@@ -1074,6 +1124,9 @@ function AuctionRoom() {
         startDate: r.start_date,
         terms: r.terms ?? null,
         closeAt: r.close_at ?? null,
+        foremanMode: r.foreman_mode ?? "commission",
+        foremanFreeMonth: r.foreman_free_month ?? null,
+        foremanIncluded: r.foreman_included ?? true,
         savedAt: new Date(r.updated_at || r.created_at).getTime(),
       }));
       setGroups(mapped);
