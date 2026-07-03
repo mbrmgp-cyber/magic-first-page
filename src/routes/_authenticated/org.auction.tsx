@@ -1380,16 +1380,22 @@ function AuctionRoom() {
                 </Card>
               )}
 
-              {/* Group Terms — read-only for members */}
-              {activeGroup && (((activeGroup as any).terms || terms) || "").toString().trim().length > 0 && (
-                <Card className="p-3 md:p-4 bg-card border-amber-500/30">
+              {/* Group Terms — always render for members */}
+              {activeGroup && (
+                <Card className="p-3 md:p-4 bg-card border-amber-500/40">
                   <div className="flex items-center gap-2 mb-2">
                     <BookOpen className="size-4 text-amber-400" />
                     <h2 className="font-semibold text-sm">Group Terms · నిబంధనలు</h2>
                   </div>
-                  <div className="text-xs md:text-sm whitespace-pre-wrap leading-relaxed text-foreground/90">
-                    {((activeGroup as any).terms || terms || "").toString()}
-                  </div>
+                  {((activeGroup as any).terms || terms || "").toString().trim().length > 0 ? (
+                    <div className="text-xs md:text-sm whitespace-pre-wrap leading-relaxed text-foreground/90">
+                      {((activeGroup as any).terms || terms || "").toString()}
+                    </div>
+                  ) : (
+                    <div className="text-xs italic text-muted-foreground">
+                      No terms specified yet · నిబంధనలు ఇంకా జోడించలేదు.
+                    </div>
+                  )}
                 </Card>
               )}
 

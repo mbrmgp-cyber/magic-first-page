@@ -34,6 +34,7 @@ const MENU = [
   { to: "/org/chat", en: "Member Chat", te: "సభ్యులతో చాటింగ్", icon: MessageSquare },
   { to: "/org/elections", en: "Board Elections", te: "బోర్డు ఎన్నికలు", icon: Vote },
   { to: "/org/auction", en: "Live Chit Auction", te: "లైవ్ చిట్ ఆక్షన్", icon: Gavel },
+  { to: "/org/disciplinary", en: "Disciplinary Committee", te: "క్రమశిక్షణా కమిటీ", icon: ShieldAlert },
 ] as const;
 
 
