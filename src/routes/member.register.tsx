@@ -54,6 +54,7 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
   const qrHostId = useRef(`qr-file-${Math.random().toString(36).slice(2)}`);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [showBank, setShowBank] = useState(false);
   const [form, setForm] = useState({
     first_name: "",
