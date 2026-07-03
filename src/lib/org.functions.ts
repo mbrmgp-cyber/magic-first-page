@@ -463,6 +463,8 @@ export const submitMemberRequest = createServerFn({ method: "POST" })
     father_name?: string; address?: string;
     joined_date?: string;
     introducer_member_id?: string;
+    introduced_by_name?: string;
+    introducer_id?: string;
     committee_fee_paid?: number;
     first_name?: string;
     last_name?: string;
@@ -513,6 +515,8 @@ export const submitMemberRequest = createServerFn({ method: "POST" })
         address: data.address ?? null,
         joined_date: data.joined_date ?? null,
         introducer_member_id: data.introducer_member_id ?? null,
+        introduced_by_name: data.introduced_by_name ?? null,
+        introducer_id: data.introducer_id ?? null,
         committee_fee_paid: data.committee_fee_paid ?? 0,
         first_name: data.first_name ?? null,
         last_name: data.last_name ?? null,

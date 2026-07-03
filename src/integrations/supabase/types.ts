@@ -837,6 +837,8 @@ export type Database = {
           father_name: string | null
           first_name: string | null
           id: string
+          introduced_by_name: string | null
+          introducer_id: string | null
           introducer_member_id: string | null
           is_active: boolean
           is_committee: boolean
@@ -869,6 +871,8 @@ export type Database = {
           father_name?: string | null
           first_name?: string | null
           id?: string
+          introduced_by_name?: string | null
+          introducer_id?: string | null
           introducer_member_id?: string | null
           is_active?: boolean
           is_committee?: boolean
@@ -901,6 +905,8 @@ export type Database = {
           father_name?: string | null
           first_name?: string | null
           id?: string
+          introduced_by_name?: string | null
+          introducer_id?: string | null
           introducer_member_id?: string | null
           is_active?: boolean
           is_committee?: boolean
@@ -1728,6 +1734,8 @@ export type Database = {
           father_name: string | null
           first_name: string | null
           id: string
+          introduced_by_name: string | null
+          introducer_id: string | null
           introducer_member_id: string | null
           is_active: boolean
           is_committee: boolean
@@ -1867,6 +1875,8 @@ export type Database = {
           father_name: string | null
           first_name: string | null
           id: string
+          introduced_by_name: string | null
+          introducer_id: string | null
           introducer_member_id: string | null
           is_active: boolean
           is_committee: boolean

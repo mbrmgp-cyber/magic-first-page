@@ -64,6 +64,8 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
     email: "",
     phone: "",
     blood_group: "",
+    introduced_by_name: "",
+    introducer_id: "",
     bank_name: "",
     bank_account_number: "",
     bank_ifsc: "",
@@ -190,6 +192,8 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
           bank_account_number: showBank ? form.bank_account_number || undefined : undefined,
           bank_ifsc: showBank ? form.bank_ifsc || undefined : undefined,
           blood_group: form.blood_group || undefined,
+          introduced_by_name: form.introduced_by_name || undefined,
+          introducer_id: form.introducer_id || undefined,
           preferred_lang: lang,
         },
       });
@@ -325,6 +329,25 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
                   ))}
                 </select>
               </div>
+
+              <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4 space-y-3">
+                <p className="text-sm font-semibold text-white">
+                  {lt("Reference Details", "పరిచయస్తుడి వివరాలు")}
+                </p>
+                <div className="space-y-1.5">
+                  <BiLabel en="Introduced By Name" te="పరిచయస్తుడు పేరు" />
+                  <Input className="bg-zinc-900 border-zinc-700 text-white"
+                    value={form.introduced_by_name}
+                    onChange={(e) => setForm({ ...form, introduced_by_name: e.target.value })} />
+                </div>
+                <div className="space-y-1.5">
+                  <BiLabel en="Introducer ID Number" te="పరిచయం చేసిన వారి ఐడి నంబర్" />
+                  <Input className="bg-zinc-900 border-zinc-700 text-white"
+                    value={form.introducer_id}
+                    onChange={(e) => setForm({ ...form, introducer_id: e.target.value })} />
+                </div>
+              </div>
+
 
               <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4 space-y-3">
                 <button type="button" onClick={() => setShowBank((v) => !v)}

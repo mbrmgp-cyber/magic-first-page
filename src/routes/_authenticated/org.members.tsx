@@ -212,6 +212,7 @@ function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => voi
   const initial = {
     name: "", email: "", phone: "", father_name: "", address: "",
     joined_date: today, introducer_member_id: "", committee_fee_paid: "0",
+    introduced_by_name: "", introducer_id: "",
     is_active: true,
   };
   const [f, setF] = useState(initial);
@@ -244,6 +245,8 @@ function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => voi
           address: f.address || null,
           joined_date: f.joined_date || null,
           introducer_member_id: f.introducer_member_id || null,
+          introduced_by_name: f.introduced_by_name || null,
+          introducer_id: f.introducer_id || null,
           committee_fee_paid: Number(f.committee_fee_paid || 0),
           is_active: f.is_active,
           status: "approved",
@@ -314,6 +317,15 @@ function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => voi
               <option value="">— ఎవరూ లేరు —</option>
               {introducers.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
             </select>
+          </div>
+          <div className="rounded-md border p-3 space-y-2">
+            <Label className="text-sm font-semibold">Reference Details · పరిచయస్తుడి వివరాలు</Label>
+            <div><Label className="text-xs">Introduced By Name · పరిచయస్తుడు పేరు</Label>
+              <Input value={f.introduced_by_name}
+                onChange={(e) => setF({ ...f, introduced_by_name: e.target.value })} /></div>
+            <div><Label className="text-xs">Introducer ID · పరిచయం చేసిన వారి ఐడి నంబర్</Label>
+              <Input value={f.introducer_id}
+                onChange={(e) => setF({ ...f, introducer_id: e.target.value })} /></div>
           </div>
           <div className="flex items-center justify-between rounded-md border p-3">
             <div>
@@ -387,6 +399,8 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
     joined_date: member.joined_date ?? "",
     committee_fee_paid: String(member.committee_fee_paid ?? 0),
     blood_group: (member as any).blood_group ?? "",
+    introduced_by_name: (member as any).introduced_by_name ?? "",
+    introducer_id: (member as any).introducer_id ?? "",
   });
   const [active, setActive] = useState<boolean>(member.is_active !== false);
   const [saving, setSaving] = useState(false);
@@ -433,6 +447,8 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
           joined_date: f.joined_date || null,
           committee_fee_paid: Number(f.committee_fee_paid || 0),
           blood_group: f.blood_group || null,
+          introduced_by_name: f.introduced_by_name || null,
+          introducer_id: f.introducer_id || null,
           is_active: active,
           ...(photo_url ? { photo_url } : {}),
         },
@@ -497,6 +513,15 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
           <Input placeholder="A+ / B+ / O+ ..." value={f.blood_group} onChange={(e) => setF({ ...f, blood_group: e.target.value })} /></div>
         <div><Label>కమిటీ Fee (₹)</Label>
           <Input type="number" step="0.01" value={f.committee_fee_paid} onChange={(e) => setF({ ...f, committee_fee_paid: e.target.value })} /></div>
+      </div>
+      <div className="rounded-md border p-3 space-y-2">
+        <Label className="text-sm font-semibold">Reference Details · పరిచయస్తుడి వివరాలు</Label>
+        <div><Label className="text-xs">Introduced By Name · పరిచయస్తుడు పేరు</Label>
+          <Input value={f.introduced_by_name}
+            onChange={(e) => setF({ ...f, introduced_by_name: e.target.value })} /></div>
+        <div><Label className="text-xs">Introducer ID · పరిచయం చేసిన వారి ఐడి నంబర్</Label>
+          <Input value={f.introducer_id}
+            onChange={(e) => setF({ ...f, introducer_id: e.target.value })} /></div>
       </div>
       <Button onClick={save} disabled={saving} className="w-full">{saving ? "Saving…" : "Save"}</Button>
     </div>
