@@ -212,6 +212,7 @@ function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => voi
   const initial = {
     name: "", email: "", phone: "", father_name: "", address: "",
     joined_date: today, introducer_member_id: "", committee_fee_paid: "0",
+    introduced_by_name: "", introducer_id: "",
     is_active: true,
   };
   const [f, setF] = useState(initial);
