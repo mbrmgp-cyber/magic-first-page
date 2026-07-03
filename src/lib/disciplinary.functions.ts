@@ -1,0 +1,246 @@
+import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
+async function resolveOrgId(supabase: any, userId: string): Promise<string | null> {
+  const { data: ownOrg } = await supabase
+    .from("organizations")
+    .select("id")
+    .eq("admin_user_id", userId)
+    .maybeSingle();
+  if (ownOrg?.id) return ownOrg.id;
+  const { data: m } = await supabase
+    .from("members")
+    .select("org_id")
+    .eq("user_id", userId)
+    .eq("status", "approved")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return m?.org_id ?? null;
+}
+
+async function canManage(supabase: any, userId: string, orgId: string) {
+  const { data: org } = await supabase
+    .from("organizations")
+    .select("admin_user_id")
+    .eq("id", orgId)
+    .maybeSingle();
+  if (org?.admin_user_id === userId) return true;
+  const { data: me } = await supabase
+    .from("members")
+    .select("id")
+    .eq("org_id", orgId)
+    .eq("user_id", userId)
+    .eq("status", "approved")
+    .maybeSingle();
+  if (!me) return false;
+  const { data: dcm } = await supabase
+    .from("disciplinary_committee_members")
+    .select("id")
+    .eq("org_id", orgId)
+    .eq("member_id", me.id)
+    .eq("is_active", true)
+    .maybeSingle();
+  return !!dcm;
+}
+
+export const getDisciplinaryOverview = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const orgId = await resolveOrgId(supabase, userId);
+    if (!orgId) return { orgId: null, canManage: false, committee: [], suspensions: [], nominations: [], electionMode: false, members: [] };
+
+    const [committeeRes, suspRes, nomRes, orgRes, membersRes] = await Promise.all([
+      supabase
+        .from("disciplinary_committee_members")
+        .select("*, members(id, name, photo_url, member_code, email, phone)")
+        .eq("org_id", orgId)
+        .order("appointed_at", { ascending: true }),
+      supabase
+        .from("disciplinary_suspensions")
+        .select("*, members(id, name, member_code, photo_url)")
+        .eq("org_id", orgId)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("disciplinary_president_nominations")
+        .select("*, members(id, name, member_code, photo_url)")
+        .eq("org_id", orgId)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("organizations")
+        .select("election_mode_enabled")
+        .eq("id", orgId)
+        .maybeSingle(),
+      supabase
+        .from("members")
+        .select("id, name, member_code, photo_url")
+        .eq("org_id", orgId)
+        .eq("status", "approved")
+        .order("name", { ascending: true }),
+    ]);
+
+    return {
+      orgId,
+      canManage: await canManage(supabase, userId, orgId),
+      committee: committeeRes.data ?? [],
+      suspensions: suspRes.data ?? [],
+      nominations: nomRes.data ?? [],
+      electionMode: !!(orgRes.data as any)?.election_mode_enabled,
+      members: membersRes.data ?? [],
+    };
+  });
+
+export const appointDisciplinaryMember = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { member_id: string; role: "founder" | "former_president"; notes?: string }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const orgId = await resolveOrgId(supabase, userId);
+    if (!orgId) throw new Error("Org not found");
+    if (!(await canManage(supabase, userId, orgId))) throw new Error("Forbidden");
+    const { error } = await supabase.from("disciplinary_committee_members").insert({
+      org_id: orgId,
+      member_id: data.member_id,
+      role: data.role,
+      notes: data.notes ?? null,
+      is_active: true,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const removeDisciplinaryMember = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const orgId = await resolveOrgId(supabase, userId);
+    if (!orgId) throw new Error("Org not found");
+    if (!(await canManage(supabase, userId, orgId))) throw new Error("Forbidden");
+    const { error } = await supabase.from("disciplinary_committee_members").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const issueSuspension = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    (d: {
+      target_member_id: string;
+      reason: string;
+      category?: "rule_violation" | "misuse" | "reputation_damage" | "financial_loss" | "other";
+      effective_until?: string | null;
+      notes?: string;
+    }) => d,
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const orgId = await resolveOrgId(supabase, userId);
+    if (!orgId) throw new Error("Org not found");
+    if (!(await canManage(supabase, userId, orgId))) throw new Error("Forbidden");
+    if (!data.reason?.trim()) throw new Error("Reason is required");
+    const { error } = await supabase.from("disciplinary_suspensions").insert({
+      org_id: orgId,
+      target_member_id: data.target_member_id,
+      reason: data.reason.trim(),
+      category: data.category ?? "rule_violation",
+      effective_until: data.effective_until || null,
+      notes: data.notes?.trim() || null,
+      issued_by: userId,
+      status: "active",
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const revokeSuspension = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const orgId = await resolveOrgId(supabase, userId);
+    if (!orgId) throw new Error("Org not found");
+    if (!(await canManage(supabase, userId, orgId))) throw new Error("Forbidden");
+    const { error } = await supabase
+      .from("disciplinary_suspensions")
+      .update({ status: "revoked", revoked_by: userId, revoked_at: new Date().toISOString() })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const nominatePresident = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { candidate_member_id: string; notes?: string }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const orgId = await resolveOrgId(supabase, userId);
+    if (!orgId) throw new Error("Org not found");
+    if (!(await canManage(supabase, userId, orgId))) throw new Error("Forbidden");
+    const { error } = await supabase.from("disciplinary_president_nominations").insert({
+      org_id: orgId,
+      candidate_member_id: data.candidate_member_id,
+      nominated_by: userId,
+      notes: data.notes?.trim() || null,
+      status: "pending",
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const voteNomination = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; direction: "for" | "against" }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const orgId = await resolveOrgId(supabase, userId);
+    if (!orgId) throw new Error("Org not found");
+    if (!(await canManage(supabase, userId, orgId))) throw new Error("Forbidden");
+    const col = data.direction === "for" ? "votes_for" : "votes_against";
+    const { data: row } = await supabase
+      .from("disciplinary_president_nominations")
+      .select(col)
+      .eq("id", data.id)
+      .maybeSingle();
+    if (!row) throw new Error("Nomination not found");
+    const next = ((row as any)[col] ?? 0) + 1;
+    const { error } = await supabase
+      .from("disciplinary_president_nominations")
+      .update({ [col]: next })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const decideNomination = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; status: "approved" | "rejected" | "deadlocked" }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const orgId = await resolveOrgId(supabase, userId);
+    if (!orgId) throw new Error("Org not found");
+    if (!(await canManage(supabase, userId, orgId))) throw new Error("Forbidden");
+    const { error } = await supabase
+      .from("disciplinary_president_nominations")
+      .update({ status: data.status, decided_at: new Date().toISOString() })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const setElectionMode = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { enabled: boolean }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const orgId = await resolveOrgId(supabase, userId);
+    if (!orgId) throw new Error("Org not found");
+    if (!(await canManage(supabase, userId, orgId))) throw new Error("Forbidden");
+    const { error } = await supabase
+      .from("organizations")
+      .update({ election_mode_enabled: data.enabled })
+      .eq("id", orgId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
