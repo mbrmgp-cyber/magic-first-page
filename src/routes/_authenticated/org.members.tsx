@@ -10,6 +10,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { reviewMember } from "@/lib/org.functions";
@@ -196,10 +200,49 @@ function MemberCard({ member, orgId, org, onReview, onChange }:
             <MemberDetailsDialog member={member} orgId={orgId} onChange={onChange} />
           </>
         )}
+        <DeleteMemberButton member={member} onChange={onChange} />
       </div>
     </Card>
   );
 }
+
+function DeleteMemberButton({ member, onChange }: { member: Member; onChange: () => void }) {
+  const del = useServerFn(adminDeleteMember);
+  const [busy, setBusy] = useState(false);
+  async function confirmDelete() {
+    setBusy(true);
+    try {
+      await del({ data: { member_id: member.id } });
+      toast.success("సభ్యుడు తొలగించబడ్డారు");
+      onChange();
+    } catch (e: any) { toast.error(e.message); }
+    finally { setBusy(false); }
+  }
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button size="sm" variant="destructive" className="bg-rose-600 hover:bg-rose-700">
+          <Trash2 className="w-4 h-4 mr-1" /> డిలీట్
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you sure you want to delete this member?</AlertDialogTitle>
+          <AlertDialogDescription>
+            {member.name} — ఈ చర్య శాశ్వతంగా రికార్డును తొలగిస్తుంది.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction disabled={busy} onClick={confirmDelete} className="bg-rose-600 hover:bg-rose-700">
+            {busy ? "Deleting…" : "Delete"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
 
 function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => void }) {
   const add = useServerFn(adminAddMember);
@@ -218,6 +261,7 @@ function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => voi
   const [f, setF] = useState(initial);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -230,6 +274,13 @@ function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => voi
     if (file.size > 5 * 1024 * 1024) { toast.error("ఫైల్ 5MB మించరాదు"); return; }
     setPhotoFile(file);
     setPhotoPreview(URL.createObjectURL(file));
+  }
+
+  function onPickReceipt(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("ఫైల్ 5MB మించరాదు"); return; }
+    setReceiptFile(file);
   }
 
   async function submit() {
@@ -261,10 +312,20 @@ function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => voi
         if (upErr) toast.error("ఫోటో అప్‌లోడ్ విఫలమైంది: " + upErr.message);
         else await upd({ data: { member_id: r.id, photo_url: path } });
       }
+      // Upload receipt if picked
+      if (receiptFile && r.id && r.orgId) {
+        const ext = receiptFile.name.split(".").pop() || "bin";
+        const path = `admin/${r.orgId}/${r.id}/receipt-${Date.now()}.${ext}`;
+        const { error: rErr } = await supabase.storage.from("member-receipts")
+          .upload(path, receiptFile, { upsert: true, contentType: receiptFile.type });
+        if (rErr) toast.error("రసీదు అప్‌లోడ్ విఫలమైంది: " + rErr.message);
+        else await upd({ data: { member_id: r.id, membership_receipt_url: path } });
+      }
       toast.success("సభ్యుడు చేర్చబడ్డారు");
       setOpen(false);
       setF(initial);
       setPhotoFile(null); setPhotoPreview(null);
+      setReceiptFile(null);
       onAdded();
     } catch (e: any) { toast.error(e.message); }
     finally { setSaving(false); }
@@ -308,6 +369,11 @@ function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => voi
             <div><Label>కమిటీ Fee ₹</Label>
               <Input type="number" step="0.01" value={f.committee_fee_paid}
                 onChange={(e) => setF({ ...f, committee_fee_paid: e.target.value })} /></div>
+          </div>
+          <div>
+            <Label className="text-sm">Upload Membership Fee Receipt · సభ్యత్వం ఫీజు రసీదు అప్లోడ్ <span className="text-xs text-muted-foreground">(Optional · ₹5,000)</span></Label>
+            <Input type="file" accept="image/*,application/pdf" onChange={onPickReceipt} />
+            {receiptFile && <p className="text-xs text-emerald-700 mt-1">✓ {receiptFile.name}</p>}
           </div>
           <div>
             <Label>పరిచయం చేసిన సభ్యుడు</Label>
@@ -407,6 +473,17 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [currentPhotoUrl, setCurrentPhotoUrl] = useState<string | null>(null);
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [receiptUrl, setReceiptUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const p = (member as any).membership_receipt_url as string | null | undefined;
+    if (!p) return;
+    let cancelled = false;
+    supabase.storage.from("member-receipts").createSignedUrl(p, 3600)
+      .then(({ data }) => { if (!cancelled && data?.signedUrl) setReceiptUrl(data.signedUrl); });
+    return () => { cancelled = true; };
+  }, [(member as any).membership_receipt_url]);
 
   useEffect(() => {
     if (!member.photo_url) return;
@@ -437,6 +514,15 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
         if (upErr) throw new Error("ఫోటో అప్‌లోడ్ విఫలం: " + upErr.message);
         photo_url = path;
       }
+      let membership_receipt_url: string | undefined;
+      if (receiptFile) {
+        const ext = receiptFile.name.split(".").pop() || "bin";
+        const path = `admin/${member.org_id}/${member.id}/receipt-${Date.now()}.${ext}`;
+        const { error: rErr } = await supabase.storage.from("member-receipts")
+          .upload(path, receiptFile, { upsert: true, contentType: receiptFile.type });
+        if (rErr) throw new Error("రసీదు అప్‌లోడ్ విఫలం: " + rErr.message);
+        membership_receipt_url = path;
+      }
       await upd({
         data: {
           member_id: member.id,
@@ -451,6 +537,7 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
           introducer_id: f.introducer_id || null,
           is_active: active,
           ...(photo_url ? { photo_url } : {}),
+          ...(membership_receipt_url ? { membership_receipt_url } : {}),
         },
       });
       toast.success("Saved");
@@ -522,6 +609,21 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
         <div><Label className="text-xs">Introducer ID · పరిచయం చేసిన వారి ఐడి నంబర్</Label>
           <Input value={f.introducer_id}
             onChange={(e) => setF({ ...f, introducer_id: e.target.value })} /></div>
+      </div>
+      <div className="rounded-md border p-3 space-y-2">
+        <Label className="text-sm font-semibold">Upload Membership Fee Receipt · సభ్యత్వం ఫీజు రసీదు అప్లోడ్</Label>
+        <p className="text-xs text-muted-foreground">Optional · ₹5,000 receipt (image or PDF)</p>
+        <Input type="file" accept="image/*,application/pdf"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            if (file.size > 5 * 1024 * 1024) { toast.error("ఫైల్ 5MB మించరాదు"); return; }
+            setReceiptFile(file);
+          }} />
+        {receiptFile && <p className="text-xs text-emerald-700">✓ {receiptFile.name}</p>}
+        {!receiptFile && receiptUrl && (
+          <a href={receiptUrl} target="_blank" rel="noreferrer" className="text-xs text-blue-600 underline">View current receipt</a>
+        )}
       </div>
       <Button onClick={save} disabled={saving} className="w-full">{saving ? "Saving…" : "Save"}</Button>
     </div>

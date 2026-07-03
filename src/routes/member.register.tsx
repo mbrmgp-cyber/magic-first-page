@@ -54,6 +54,7 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
   const qrHostId = useRef(`qr-file-${Math.random().toString(36).slice(2)}`);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [showBank, setShowBank] = useState(false);
   const [form, setForm] = useState({
     first_name: "",
@@ -175,6 +176,7 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
     setLoading(true);
     try {
       const photo_data_url = photoFile ? await fileToDataUrl(photoFile) : undefined;
+      const receipt_data_url = receiptFile ? await fileToDataUrl(receiptFile) : undefined;
       await submit({
         data: {
           code,
@@ -182,6 +184,7 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
           email: form.email,
           phone: form.phone || undefined,
           photo_data_url,
+          receipt_data_url,
           father_name: form.father_name || undefined,
           address: [form.village, form.pin_code].filter(Boolean).join(", ") || undefined,
           first_name: form.first_name || undefined,
@@ -380,6 +383,22 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
                     </div>
                   </div>
                 )}
+              </div>
+
+              <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4 space-y-2">
+                <p className="text-sm font-semibold text-white">
+                  {lt("Upload Membership Fee Receipt", "సభ్యత్వం ఫీజు రసీదు అప్లోడ్")}
+                  <span className="ml-2 text-[11px] text-zinc-400">{lt("(Optional · ₹5,000)", "(ఐచ్ఛికం · ₹5,000)")}</span>
+                </p>
+                <Input type="file" accept="image/*,application/pdf"
+                  className="bg-zinc-900 border-zinc-700 text-white"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (!f) return;
+                    if (f.size > 5 * 1024 * 1024) { toast.error(lt("File must be under 5MB", "ఫైల్ 5MB లోపు ఉండాలి")); return; }
+                    setReceiptFile(f);
+                  }} />
+                {receiptFile && <p className="text-[11px] text-emerald-400">✓ {receiptFile.name}</p>}
               </div>
 
               <Button type="submit" disabled={loading}

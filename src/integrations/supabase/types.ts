@@ -846,6 +846,7 @@ export type Database = {
           last_name: string | null
           member_code: string | null
           member_code_locked: boolean
+          membership_receipt_url: string | null
           name: string
           org_id: string
           phone: string | null
@@ -880,6 +881,7 @@ export type Database = {
           last_name?: string | null
           member_code?: string | null
           member_code_locked?: boolean
+          membership_receipt_url?: string | null
           name: string
           org_id: string
           phone?: string | null
@@ -914,6 +916,7 @@ export type Database = {
           last_name?: string | null
           member_code?: string | null
           member_code_locked?: boolean
+          membership_receipt_url?: string | null
           name?: string
           org_id?: string
           phone?: string | null
@@ -1743,6 +1746,7 @@ export type Database = {
           last_name: string | null
           member_code: string | null
           member_code_locked: boolean
+          membership_receipt_url: string | null
           name: string
           org_id: string
           phone: string | null
@@ -1884,6 +1888,7 @@ export type Database = {
           last_name: string | null
           member_code: string | null
           member_code_locked: boolean
+          membership_receipt_url: string | null
           name: string
           org_id: string
           phone: string | null
