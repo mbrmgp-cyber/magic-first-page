@@ -473,6 +473,17 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [currentPhotoUrl, setCurrentPhotoUrl] = useState<string | null>(null);
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [receiptUrl, setReceiptUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const p = (member as any).membership_receipt_url as string | null | undefined;
+    if (!p) return;
+    let cancelled = false;
+    supabase.storage.from("member-receipts").createSignedUrl(p, 3600)
+      .then(({ data }) => { if (!cancelled && data?.signedUrl) setReceiptUrl(data.signedUrl); });
+    return () => { cancelled = true; };
+  }, [(member as any).membership_receipt_url]);
 
   useEffect(() => {
     if (!member.photo_url) return;
