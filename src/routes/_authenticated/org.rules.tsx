@@ -43,6 +43,7 @@ function RulesTab() {
   const [rules, setRules] = useState<Rule[]>([]);
   const [canEdit, setCanEdit] = useState(false);
   const [orgName, setOrgName] = useState<string>("");
+  const [orgLogoUrl, setOrgLogoUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [newText, setNewText] = useState("");
   const [newCat, setNewCat] = useState("");
@@ -56,6 +57,7 @@ function RulesTab() {
       setRules(r.rules as Rule[]);
       setCanEdit(r.canEdit);
       setOrgName((r as any).orgName ?? "");
+      setOrgLogoUrl((r as any).orgLogoUrl ?? null);
     } finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
@@ -103,6 +105,7 @@ function RulesTab() {
     printDocument({
       title: "సొసైటీ నియమాలు • Society Rules",
       orgName: orgName || "సొసైటీ",
+      logoUrl: orgLogoUrl,
       bodyHtml: sections,
     });
   };
@@ -183,6 +186,7 @@ function HistoryTab() {
   const [uploading, setUploading] = useState(false);
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
   const [orgName, setOrgName] = useState<string>("");
+  const [orgLogoUrl, setOrgLogoUrl] = useState<string | null>(null);
   const fileInputGalleryRef = useRef<HTMLInputElement | null>(null);
   const fileInputCameraRef = useRef<HTMLInputElement | null>(null);
   const [showPicker, setShowPicker] = useState(false);
@@ -201,6 +205,7 @@ function HistoryTab() {
       setItems(list);
       setCanEdit(r.canEdit);
       setOrgName((r as any).orgName ?? "");
+      setOrgLogoUrl((r as any).orgLogoUrl ?? null);
       const entries = await Promise.all(
         list
           .filter(m => m.photo_url && !/^https?:\/\//i.test(m.photo_url))
@@ -283,6 +288,7 @@ function HistoryTab() {
     printDocument({
       title: "సొసైటీ చరిత్ర • Society History",
       orgName: orgName || "సొసైటీ",
+      logoUrl: orgLogoUrl,
       bodyHtml: `<h2>చరిత్ర మైలురాళ్లు • History Milestones</h2>${body}`,
     });
   };

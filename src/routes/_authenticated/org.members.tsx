@@ -104,26 +104,29 @@ function MembersPage() {
           <Button size="sm" variant="outline" onClick={() => {
             const rows = filtered.map((m, i) => `
               <tr>
-                <td>${i + 1}</td>
+                <td style="text-align:center">${i + 1}</td>
                 <td>${escapeHtml(m.member_code ?? "-")}</td>
                 <td>${escapeHtml(m.name)}</td>
                 <td>${escapeHtml(m.father_name ?? "-")}</td>
                 <td>${escapeHtml(m.phone ?? "-")}</td>
-                <td>${escapeHtml(m.email ?? "-")}</td>
-                <td>${escapeHtml(m.status ?? "-")}</td>
-                <td>${escapeHtml(m.joined_date ? new Date(m.joined_date).toLocaleDateString() : "-")}</td>
+                <td style="text-transform:capitalize">${escapeHtml(m.status ?? "-")}</td>
               </tr>
             `).join("");
             printDocument({
               title: "సభ్యుల జాబితా • Member List",
               orgName: org?.name ?? "సొసైటీ",
               subtitle: `మొత్తం సభ్యులు / Total members: ${filtered.length}`,
+              logoUrl: org?.logo_url ?? null,
               bodyHtml: `
                 <table>
                   <thead>
                     <tr>
-                      <th>#</th><th>Code</th><th>Name</th><th>Father</th>
-                      <th>Phone</th><th>Email</th><th>Status</th><th>Joined</th>
+                      <th style="width:8%;text-align:center">Serial No</th>
+                      <th style="width:14%">Member Code</th>
+                      <th style="width:26%">Name</th>
+                      <th style="width:22%">Father's Name</th>
+                      <th style="width:18%">Phone</th>
+                      <th style="width:12%">Status</th>
                     </tr>
                   </thead>
                   <tbody>${rows}</tbody>
