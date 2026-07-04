@@ -182,6 +182,7 @@ function HistoryTab() {
   const [photoPreview, setPhotoPreview] = useState("");
   const [uploading, setUploading] = useState(false);
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
+  const [orgName, setOrgName] = useState<string>("");
   const fileInputGalleryRef = useRef<HTMLInputElement | null>(null);
   const fileInputCameraRef = useRef<HTMLInputElement | null>(null);
   const [showPicker, setShowPicker] = useState(false);
@@ -199,6 +200,7 @@ function HistoryTab() {
       const list = r.milestones as Milestone[];
       setItems(list);
       setCanEdit(r.canEdit);
+      setOrgName((r as any).orgName ?? "");
       const entries = await Promise.all(
         list
           .filter(m => m.photo_url && !/^https?:\/\//i.test(m.photo_url))
