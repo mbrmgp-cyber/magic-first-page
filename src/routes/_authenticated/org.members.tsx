@@ -26,7 +26,7 @@ import {
 } from "@/lib/members.functions";
 import { Switch } from "@/components/ui/switch";
 import { User, Plus, IndianRupee, CheckCircle2, XCircle, Trash2, Lock, UserPlus, Camera, Pencil, FileDown } from "lucide-react";
-import { printDocument, escapeHtml } from "@/lib/print-pdf";
+import { downloadMemberListPdf } from "@/lib/member-list-pdf";
 
 
 
@@ -45,6 +45,7 @@ function MembersPage() {
   const [orgId, setOrgId] = useState<string | null>(null);
   const [org, setOrg] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [pdfBusy, setPdfBusy] = useState(false);
   const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
 
   async function refresh() {
@@ -84,6 +85,24 @@ function MembersPage() {
     } catch (e: any) { toast.error(e.message); }
   }
 
+  async function downloadMembersPdf() {
+    if (filtered.length === 0) return;
+    setPdfBusy(true);
+    try {
+      await downloadMemberListPdf({
+        orgName: org?.name ?? "సొసైటీ",
+        logoUrl: org?.logo_url ?? null,
+        members: filtered,
+      });
+      toast.success("PDF డౌన్‌లోడ్ సిద్ధమైంది");
+    } catch (e) {
+      console.error(e);
+      toast.error("PDF తయారు చేయలేకపోయాం");
+    } finally {
+      setPdfBusy(false);
+    }
+  }
+
   return (
     <SectionShell title="సభ్యుల వివరాలు">
       <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -101,39 +120,8 @@ function MembersPage() {
         </div>
         {orgId && <AddMemberDialog orgId={orgId} onAdded={refresh} />}
         {filtered.length > 0 && (
-          <Button size="sm" variant="outline" onClick={() => {
-            const rows = filtered.map((m, i) => `
-              <tr>
-                <td style="text-align:center">${i + 1}</td>
-                <td>${escapeHtml(m.member_code ?? "-")}</td>
-                <td>${escapeHtml(m.name)}</td>
-                <td>${escapeHtml(m.father_name ?? "-")}</td>
-                <td>${escapeHtml(m.phone ?? "-")}</td>
-                <td style="text-transform:capitalize">${escapeHtml(m.status ?? "-")}</td>
-              </tr>
-            `).join("");
-            printDocument({
-              title: "సభ్యుల జాబితా • Member List",
-              orgName: org?.name ?? "సొసైటీ",
-              subtitle: `మొత్తం సభ్యులు / Total members: ${filtered.length}`,
-              logoUrl: org?.logo_url ?? null,
-              bodyHtml: `
-                <table>
-                  <thead>
-                    <tr>
-                      <th style="width:8%;text-align:center">Serial No</th>
-                      <th style="width:14%">Member Code</th>
-                      <th style="width:26%">Name</th>
-                      <th style="width:22%">Father's Name</th>
-                      <th style="width:18%">Phone</th>
-                      <th style="width:12%">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>${rows}</tbody>
-                </table>`,
-            });
-          }}>
-            <FileDown className="w-4 h-4 mr-1" /> PDF డౌన్‌లోడ్
+          <Button size="sm" variant="outline" disabled={pdfBusy} onClick={downloadMembersPdf}>
+            <FileDown className="w-4 h-4 mr-1" /> {pdfBusy ? "PDF తయారవుతోంది…" : "PDF డౌన్‌లోడ్"}
           </Button>
         )}
       </div>
