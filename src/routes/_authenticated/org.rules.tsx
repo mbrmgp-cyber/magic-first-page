@@ -250,7 +250,39 @@ function HistoryTab() {
           <Input type="date" value={date} onChange={e => setDate(e.target.value)} />
           <Input placeholder="శీర్షిక (ఉదా: సొసైటీ స్థాపన)" value={title} onChange={e => setTitle(e.target.value)} />
           <Textarea placeholder="వివరణ (ఐచ్ఛికం)" rows={3} value={desc} onChange={e => setDesc(e.target.value)} />
-          <Input placeholder="ఫోటో URL (ఐచ్ఛికం)" value={photo} onChange={e => setPhoto(e.target.value)} />
+          <div className="space-y-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={handleFileSelect}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="w-full"
+            >
+              {uploading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />}
+              {photo ? "ఇమేజ్ మార్చండి • Change Image" : "ఇమేజ్ అప్‌లోడ్ చేయండి • Upload Image"}
+            </Button>
+            {photoPreview && (
+              <div className="relative">
+                <img src={photoPreview} alt="preview" className="rounded-md max-h-48 object-cover w-full" />
+                <button
+                  type="button"
+                  onClick={() => { setPhoto(""); setPhotoPreview(""); }}
+                  className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1"
+                  aria-label="Remove image"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+          </div>
           <div className="flex gap-2">
             <Button onClick={handleSave} className="flex-1"><Check className="w-4 h-4 mr-1" />సేవ్ చేయండి</Button>
             <Button variant="outline" onClick={reset}><X className="w-4 h-4" /></Button>
