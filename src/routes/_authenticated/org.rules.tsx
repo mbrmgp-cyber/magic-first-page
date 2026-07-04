@@ -270,8 +270,30 @@ function HistoryTab() {
   }, {});
   const years = Object.keys(byYear).sort();
 
+  const handleDownloadPdf = () => {
+    if (items.length === 0) { toast.error("డౌన్‌లోడ్ చేయడానికి మైలురాళ్లు లేవు"); return; }
+    const sorted = [...items].sort((a, b) => a.event_date.localeCompare(b.event_date));
+    const body = sorted.map(m => `
+      <div class="milestone">
+        <div class="date">${escapeHtml(new Date(m.event_date).toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" }))}</div>
+        <div class="m-title">${escapeHtml(m.title)}</div>
+        ${m.description ? `<div class="desc">${escapeHtml(m.description)}</div>` : ""}
+      </div>
+    `).join("");
+    printDocument({
+      title: "సొసైటీ చరిత్ర • Society History",
+      orgName: orgName || "సొసైటీ",
+      bodyHtml: `<h2>చరిత్ర మైలురాళ్లు • History Milestones</h2>${body}`,
+    });
+  };
+
   return (
     <div className="space-y-4">
+      {items.length > 0 && (
+        <Button variant="outline" onClick={handleDownloadPdf} className="w-full">
+          <FileDown className="w-4 h-4 mr-1" /> PDF డౌన్‌లోడ్ • Download PDF
+        </Button>
+      )}
       {canEdit && !showForm && (
         <Button onClick={() => setShowForm(true)} className="w-full"><Plus className="w-4 h-4 mr-1" />మైలురాయి జోడించండి</Button>
       )}
