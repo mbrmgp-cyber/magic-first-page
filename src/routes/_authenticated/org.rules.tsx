@@ -153,14 +153,63 @@ function HistoryTab() {
   const [date, setDate] = useState("");
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
-  const [photo, setPhoto] = useState("");
+  const [photo, setPhoto] = useState(""); // stored value: storage path or http URL
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  const resolveSignedUrls = async (items: Milestone[]): Promise<Milestone[]> => {
+    const paths = items
+      .map(m => m.photo_url)
+      .filter((p): p is string => !!p && !/^https?:\/\//i.test(p));
+    if (paths.length === 0) return items;
+    const map = new Map<string, string>();
+    await Promise.all(paths.map(async (p) => {
+      const { data } = await supabase.storage.from("milestone-photos").createSignedUrl(p, 60 * 60 * 24 * 7);
+      if (data?.signedUrl) map.set(p, data.signedUrl);
+    }));
+    return items.map(m => (m.photo_url && map.has(m.photo_url) ? { ...m, photo_url: map.get(m.photo_url)! } : m));
+  };
 
   const load = async () => {
     setLoading(true);
-    try { const r = await fnList(); setItems(r.milestones as Milestone[]); setCanEdit(r.canEdit); }
+    try {
+      const r = await fnList();
+      const withUrls = await resolveSignedUrls(r.milestones as Milestone[]);
+      setItems(withUrls);
+      setCanEdit(r.canEdit);
+    }
     finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) { toast.error("File too large (max 10MB)"); return; }
+    setUploading(true);
+    try {
+      const { data: userRes } = await supabase.auth.getUser();
+      const uid = userRes.user?.id ?? "anon";
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `${uid}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error } = await supabase.storage.from("milestone-photos").upload(path, file, {
+        contentType: file.type || "image/jpeg",
+        upsert: false,
+      });
+      if (error) throw error;
+      setPhoto(path);
+      toast.success("ఇమేజ్ అప్‌లోడ్ అయింది");
+    } catch (err: any) {
+      toast.error(err.message || "Upload failed");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const previewUrl = photo && !/^https?:\/\//i.test(photo)
+    ? supabase.storage.from("milestone-photos").getPublicUrl(photo).data.publicUrl // fallback; signed below
+    : photo;
 
   const reset = () => { setShowForm(false); setEditId(null); setDate(""); setTitle(""); setDesc(""); setPhoto(""); };
   const handleSave = async () => {
