@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ArrowLeft, Plus, Pencil, Trash2, BookOpen, History, X, Check, Upload, Loader2 } from "lucide-react";
+import { ArrowLeft, Plus, Pencil, Trash2, BookOpen, History, X, Check, Upload, Loader2, Camera, Image as ImageIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -157,7 +157,9 @@ function HistoryTab() {
   const [photoPreview, setPhotoPreview] = useState("");
   const [uploading, setUploading] = useState(false);
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const fileInputGalleryRef = useRef<HTMLInputElement | null>(null);
+  const fileInputCameraRef = useRef<HTMLInputElement | null>(null);
+  const [showPicker, setShowPicker] = useState(false);
 
   const signUrl = async (pathOrUrl: string): Promise<string> => {
     if (!pathOrUrl || /^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
@@ -205,7 +207,8 @@ function HistoryTab() {
       toast.error(err.message || "Upload failed");
     } finally {
       setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      if (fileInputGalleryRef.current) fileInputGalleryRef.current.value = "";
+      if (fileInputCameraRef.current) fileInputCameraRef.current.value = "";
     }
   };
 
@@ -252,23 +255,59 @@ function HistoryTab() {
           <Textarea placeholder="వివరణ (ఐచ్ఛికం)" rows={3} value={desc} onChange={e => setDesc(e.target.value)} />
           <div className="space-y-2">
             <input
-              ref={fileInputRef}
+              ref={fileInputGalleryRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => { handleFileSelect(e); setShowPicker(false); }}
+            />
+            <input
+              ref={fileInputCameraRef}
               type="file"
               accept="image/*"
               capture="environment"
               className="hidden"
-              onChange={handleFileSelect}
+              onChange={(e) => { handleFileSelect(e); setShowPicker(false); }}
             />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              className="w-full"
-            >
-              {uploading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />}
-              {photo ? "ఇమేజ్ మార్చండి • Change Image" : "ఇమేజ్ అప్‌లోడ్ చేయండి • Upload Image"}
-            </Button>
+            {showPicker ? (
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => fileInputGalleryRef.current?.click()}
+                  disabled={uploading}
+                >
+                  <ImageIcon className="w-4 h-4 mr-1" />Gallery
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => fileInputCameraRef.current?.click()}
+                  disabled={uploading}
+                >
+                  <Camera className="w-4 h-4 mr-1" />Camera
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setShowPicker(false)}
+                  className="col-span-2"
+                >
+                  <X className="w-4 h-4 mr-1" />Cancel
+                </Button>
+              </div>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowPicker(true)}
+                disabled={uploading}
+                className="w-full"
+              >
+                {uploading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />}
+                {photo ? "ఇమేజ్ మార్చండి • Change Image" : "ఇమేజ్ అప్‌లోడ్ చేయండి • Upload Image"}
+              </Button>
+            )}
             {photoPreview && (
               <div className="relative">
                 <img src={photoPreview} alt="preview" className="rounded-md max-h-48 object-cover w-full" />
