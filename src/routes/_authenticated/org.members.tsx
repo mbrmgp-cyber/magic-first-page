@@ -25,7 +25,8 @@ import {
   orgUpdateMemberCode,
 } from "@/lib/members.functions";
 import { Switch } from "@/components/ui/switch";
-import { User, Plus, IndianRupee, CheckCircle2, XCircle, Trash2, Lock, UserPlus, Camera, Pencil } from "lucide-react";
+import { User, Plus, IndianRupee, CheckCircle2, XCircle, Trash2, Lock, UserPlus, Camera, Pencil, FileDown } from "lucide-react";
+import { printDocument, escapeHtml } from "@/lib/print-pdf";
 
 
 
