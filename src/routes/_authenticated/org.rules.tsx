@@ -57,6 +57,7 @@ function RulesTab() {
       setRules(r.rules as Rule[]);
       setCanEdit(r.canEdit);
       setOrgName((r as any).orgName ?? "");
+      setOrgLogoUrl((r as any).orgLogoUrl ?? null);
     } finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
