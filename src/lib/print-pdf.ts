@@ -128,59 +128,99 @@ function buildHtml({ title, orgName, subtitle, bodyHtml, logoUrl }: PrintDoc): s
 </html>`;
 }
 
+// Inline print approach: inject the print HTML into the CURRENT document
+// and use @media print to hide everything else. This avoids a mobile-browser
+// bug where changing the paper size in the native print dialog re-invokes
+// print() on the top-level (parent) document instead of the iframe — which
+// caused the dashboard to be printed on A4.
 export function printDocument(doc: PrintDoc) {
+  // Parse the standalone HTML we already build so we can reuse the exact
+  // markup and stylesheet inside the parent page.
   const html = buildHtml(doc);
+  const parser = new DOMParser();
+  const parsed = parser.parseFromString(html, "text/html");
 
-  const iframe = document.createElement("iframe");
-  iframe.setAttribute("aria-hidden", "true");
-  iframe.style.position = "fixed";
-  iframe.style.right = "0";
-  iframe.style.bottom = "0";
-  iframe.style.width = "0";
-  iframe.style.height = "0";
-  iframe.style.border = "0";
-  iframe.style.visibility = "hidden";
-  iframe.srcdoc = html;
+  const PRINT_ROOT_ID = "mbr-print-root";
+  const PRINT_STYLE_ID = "mbr-print-style";
+  const PRINT_SCOPE_ID = "mbr-print-scope";
+
+  // Remove any previous print artifacts.
+  document.getElementById(PRINT_ROOT_ID)?.remove();
+  document.getElementById(PRINT_STYLE_ID)?.remove();
+  document.getElementById(PRINT_SCOPE_ID)?.remove();
+
+  // Copy the print document's <style> tags into the parent, scoped by
+  // #mbr-print-root so selectors like `body`, `h2`, `table` only apply
+  // inside the print container.
+  const scopeStyle = document.createElement("style");
+  scopeStyle.id = PRINT_SCOPE_ID;
+  const styleTexts: string[] = [];
+  parsed.querySelectorAll("style").forEach((s) => {
+    // Rewrite `body { ... }` → `#mbr-print-root { ... }` so it applies inside our container.
+    let css = s.textContent || "";
+    css = css.replace(/(^|\})\s*body\s*\{/g, "$1 #mbr-print-root {");
+    css = css.replace(/(^|\})\s*html\s*,\s*body\s*\{/g, "$1 #mbr-print-root {");
+    styleTexts.push(css);
+  });
+  scopeStyle.textContent = styleTexts.join("\n");
+  document.head.appendChild(scopeStyle);
+
+  // Global print rules: hide the entire app; show only the print root.
+  // This ensures that even if the browser prints the parent document
+  // (e.g. after changing paper size on mobile Chrome), the output is our
+  // clean PDF layout — not the dashboard screenshot.
+  const printStyle = document.createElement("style");
+  printStyle.id = PRINT_STYLE_ID;
+  printStyle.textContent = `
+    @media print {
+      body > *:not(#${PRINT_ROOT_ID}) { display: none !important; }
+      #${PRINT_ROOT_ID} { display: block !important; }
+      html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+    }
+    @media screen {
+      #${PRINT_ROOT_ID} { display: none !important; }
+    }
+  `;
+  document.head.appendChild(printStyle);
+
+  // Build the print root from the parsed document body.
+  const printRoot = document.createElement("div");
+  printRoot.id = PRINT_ROOT_ID;
+  printRoot.innerHTML = parsed.body.innerHTML;
+  document.body.appendChild(printRoot);
 
   const cleanup = () => {
     setTimeout(() => {
-      try { iframe.remove(); } catch { /* noop */ }
-    }, 1000);
+      try { printRoot.remove(); } catch { /* noop */ }
+      try { printStyle.remove(); } catch { /* noop */ }
+      try { scopeStyle.remove(); } catch { /* noop */ }
+      window.removeEventListener("afterprint", onAfter);
+    }, 500);
   };
+  const onAfter = () => cleanup();
+  window.addEventListener("afterprint", onAfter);
 
-  iframe.onload = () => {
-    try {
-      const win = iframe.contentWindow;
-      const idoc = iframe.contentDocument;
-      if (!win || !idoc) { cleanup(); return; }
+  // Wait for the injected images (logo, MBR mark) to decode before printing.
+  const imgs = Array.from(printRoot.querySelectorAll("img"));
+  const waits = imgs.map((img) => {
+    if (img.complete) return Promise.resolve();
+    return new Promise<void>((res) => {
+      img.addEventListener("load", () => res(), { once: true });
+      img.addEventListener("error", () => res(), { once: true });
+    });
+  });
 
-      // Wait for images (header logo, footer MBR logo) to finish decoding so
-      // the print dialog doesn't capture missing/half-rendered assets.
-      const imgs = Array.from(idoc.images);
-      const waits = imgs.map((img) => {
-        if (img.complete) return Promise.resolve();
-        return new Promise<void>((res) => {
-          img.addEventListener("load", () => res(), { once: true });
-          img.addEventListener("error", () => res(), { once: true });
-        });
-      });
-
-      Promise.all(waits).then(() => {
-        setTimeout(() => {
-          try {
-            win.focus();
-            win.print();
-          } catch (e) {
-            console.error("print failed", e);
-          }
-          cleanup();
-        }, 200);
-      });
-    } catch (e) {
-      console.error("iframe print error", e);
-      cleanup();
-    }
-  };
-
-  document.body.appendChild(iframe);
+  Promise.all(waits).then(() => {
+    setTimeout(() => {
+      try {
+        window.focus();
+        window.print();
+      } catch (e) {
+        console.error("print failed", e);
+      }
+      // Fallback cleanup for browsers that don't fire afterprint.
+      setTimeout(cleanup, 2000);
+    }, 200);
+  });
 }
+
