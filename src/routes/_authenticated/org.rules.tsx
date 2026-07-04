@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ArrowLeft, Plus, Pencil, Trash2, BookOpen, History, X, Check, Upload, Loader2, Camera, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Plus, Pencil, Trash2, BookOpen, History, X, Check, Upload, Loader2, Camera, Image as ImageIcon, FileDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -13,6 +13,7 @@ import {
   listMilestones, addMilestone, updateMilestone, deleteMilestone,
 } from "@/lib/content.functions";
 import { toast } from "sonner";
+import { printDocument, escapeHtml } from "@/lib/print-pdf";
 
 type Rule = { id: string; text: string; category: string | null; position: number };
 type Milestone = { id: string; event_date: string; title: string; description: string | null; photo_url: string | null };
