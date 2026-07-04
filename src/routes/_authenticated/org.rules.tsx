@@ -314,7 +314,7 @@ function HistoryTab() {
                         <div className="text-[11px] text-muted-foreground">{new Date(m.event_date).toLocaleDateString("te-IN", { day: "numeric", month: "long", year: "numeric" })}</div>
                         <div className="font-semibold text-sm mt-0.5">{m.title}</div>
                         {m.description && <p className="text-xs text-foreground/80 mt-1 whitespace-pre-wrap">{m.description}</p>}
-                        {m.photo_url && <img src={m.photo_url} alt={m.title} className="mt-2 rounded-md max-h-40 object-cover w-full" />}
+                        {m.photo_url && <img src={/^https?:\/\//i.test(m.photo_url) ? m.photo_url : (signedUrls[m.photo_url] ?? "")} alt={m.title} className="mt-2 rounded-md max-h-40 object-cover w-full" />}
                       </div>
                       {canEdit && (
                         <div className="flex flex-col gap-1 shrink-0">
