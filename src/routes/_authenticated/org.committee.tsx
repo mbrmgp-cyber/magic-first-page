@@ -196,8 +196,8 @@ function CommitteePage() {
   const fnRemove = useServerFn(removeCommitteeMember);
   const fnTerm = useServerFn(updateTermYears);
 
-  const [data, setData] = useState<{ committee: CM[]; canManage: boolean; termYears: number; myRole: CommitteeRole | null; orgId: string | null }>({
-    committee: [], canManage: false, termYears: 2, myRole: null, orgId: null,
+  const [data, setData] = useState<{ committee: CM[]; canManage: boolean; termYears: number; myRole: CommitteeRole | null; orgId: string | null; orgName: string | null }>({
+    committee: [], canManage: false, termYears: 2, myRole: null, orgId: null, orgName: null,
   });
   const [loading, setLoading] = useState(true);
   const [eligibleMembers, setEligibleMembers] = useState<Array<{ id: string; name: string; photo_url: string | null }>>([]);
@@ -229,6 +229,7 @@ function CommitteePage() {
         termYears: r.termYears,
         myRole: r.myRole,
         orgId: r.orgId,
+        orgName: (r as any).orgName ?? null,
       });
       setTermYearsInput(r.termYears);
       if (r.canManage) {
