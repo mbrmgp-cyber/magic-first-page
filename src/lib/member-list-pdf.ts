@@ -42,18 +42,19 @@ function statusText(member: MemberListPdfMember) {
 }
 
 function el<K extends keyof HTMLElementTagNameMap>(
+  doc: Document,
   tag: K,
   className?: string,
   content?: string,
 ) {
-  const node = document.createElement(tag);
+  const node = doc.createElement(tag);
   if (className) node.className = className;
   if (content !== undefined) node.textContent = content;
   return node;
 }
 
-function image(src: string, className: string, alt: string) {
-  const img = document.createElement("img");
+function image(doc: Document, src: string, className: string, alt: string) {
+  const img = doc.createElement("img");
   img.className = className;
   img.alt = alt;
   img.crossOrigin = "anonymous";
@@ -68,8 +69,8 @@ function chunk<T>(items: T[], size: number) {
   return pages.length ? pages : [[]];
 }
 
-function injectStyles(root: HTMLElement) {
-  const style = document.createElement("style");
+function injectStyles(doc: Document) {
+  const style = doc.createElement("style");
   style.textContent = `
     .mbr-pdf-page {
       width: ${A4_WIDTH_PX}px;
@@ -162,38 +163,39 @@ function injectStyles(root: HTMLElement) {
       object-fit: contain;
     }
   `;
-  root.appendChild(style);
+  doc.head.appendChild(style);
 }
 
 function buildPage(
+  doc: Document,
   members: MemberListPdfMember[],
   pageIndex: number,
   totalPages: number,
   options: MemberListPdfOptions,
 ) {
-  const page = el("section", "mbr-pdf-page");
-  const header = el("header", "mbr-pdf-header");
+  const page = el(doc, "section", "mbr-pdf-page");
+  const header = el(doc, "header", "mbr-pdf-header");
   const societyLogo = toAbsolute(options.logoUrl) || toAbsolute(mbrLogo.url);
-  if (societyLogo) header.appendChild(image(societyLogo, "mbr-pdf-logo", "Society logo"));
-  header.appendChild(el("h1", "mbr-pdf-org", options.orgName || "Society"));
-  header.appendChild(el("div", "mbr-pdf-title", "సభ్యుల జాబితా • Member List"));
-  header.appendChild(el("div", "mbr-pdf-meta", `Total members: ${options.members.length} • Page ${pageIndex + 1} of ${totalPages}`));
+  if (societyLogo) header.appendChild(image(doc, societyLogo, "mbr-pdf-logo", "Society logo"));
+  header.appendChild(el(doc, "h1", "mbr-pdf-org", options.orgName || "Society"));
+  header.appendChild(el(doc, "div", "mbr-pdf-title", "సభ్యుల జాబితా • Member List"));
+  header.appendChild(el(doc, "div", "mbr-pdf-meta", `Total members: ${options.members.length} • Page ${pageIndex + 1} of ${totalPages}`));
   page.appendChild(header);
 
-  const tableWrap = el("div", "mbr-pdf-table-wrap");
-  const table = el("table", "mbr-pdf-table");
-  const colgroup = document.createElement("colgroup");
+  const tableWrap = el(doc, "div", "mbr-pdf-table-wrap");
+  const table = el(doc, "table", "mbr-pdf-table");
+  const colgroup = doc.createElement("colgroup");
   ["8%", "14%", "27%", "22%", "17%", "12%"].forEach((width) => {
-    const col = document.createElement("col");
+    const col = doc.createElement("col");
     col.style.width = width;
     colgroup.appendChild(col);
   });
   table.appendChild(colgroup);
 
-  const thead = document.createElement("thead");
-  const headerRow = document.createElement("tr");
+  const thead = doc.createElement("thead");
+  const headerRow = doc.createElement("tr");
   ["Serial No", "Member Code", "Name", "Father's Name", "Phone", "Status"].forEach((heading, index) => {
-    const th = document.createElement("th");
+    const th = doc.createElement("th");
     th.textContent = heading;
     if (index === 0) th.className = "center";
     headerRow.appendChild(th);
@@ -201,12 +203,12 @@ function buildPage(
   thead.appendChild(headerRow);
   table.appendChild(thead);
 
-  const tbody = document.createElement("tbody");
+  const tbody = doc.createElement("tbody");
   members.forEach((member, rowIndex) => {
-    const tr = document.createElement("tr");
+    const tr = doc.createElement("tr");
     const serial = pageIndex * ROWS_PER_PAGE + rowIndex + 1;
     [serial, member.member_code, member.name, member.father_name, member.phone, statusText(member)].forEach((value, index) => {
-      const td = document.createElement("td");
+      const td = doc.createElement("td");
       td.textContent = text(value);
       if (index === 0) td.className = "center";
       tr.appendChild(td);
@@ -217,12 +219,30 @@ function buildPage(
   tableWrap.appendChild(table);
   page.appendChild(tableWrap);
 
-  const footer = el("footer", "mbr-pdf-footer");
-  footer.appendChild(image(toAbsolute(mbrLogo.url), "", "MBR"));
-  footer.appendChild(el("span", "", "Download from MBR APP"));
+  const footer = el(doc, "footer", "mbr-pdf-footer");
+  footer.appendChild(image(doc, toAbsolute(mbrLogo.url), "", "MBR"));
+  footer.appendChild(el(doc, "span", "", "Download from MBR APP"));
   page.appendChild(footer);
 
   return page;
+}
+
+function createRenderFrame() {
+  const frame = document.createElement("iframe");
+  frame.setAttribute("aria-hidden", "true");
+  frame.style.position = "fixed";
+  frame.style.left = "-10000px";
+  frame.style.top = "0";
+  frame.style.width = `${A4_WIDTH_PX}px`;
+  frame.style.height = `${A4_HEIGHT_PX}px`;
+  frame.style.border = "0";
+  frame.style.opacity = "0";
+  frame.style.pointerEvents = "none";
+  frame.srcdoc = "<!doctype html><html><head><meta charset='utf-8'></head><body></body></html>";
+  document.body.appendChild(frame);
+  return new Promise<HTMLIFrameElement>((resolve) => {
+    frame.addEventListener("load", () => resolve(frame), { once: true });
+  });
 }
 
 function waitForImages(root: HTMLElement) {
@@ -242,22 +262,25 @@ export async function downloadMemberListPdf(options: MemberListPdfOptions) {
     import("jspdf"),
   ]);
 
-  const root = document.createElement("div");
+  const frame = await createRenderFrame();
+  const doc = frame.contentDocument;
+  if (!doc) throw new Error("PDF render document unavailable");
+  doc.body.style.margin = "0";
+  doc.body.style.padding = "0";
+  doc.body.style.background = "#ffffff";
+  injectStyles(doc);
+
+  const root = doc.createElement("div");
   root.setAttribute("aria-hidden", "true");
-  root.style.position = "fixed";
-  root.style.left = "-10000px";
-  root.style.top = "0";
   root.style.width = `${A4_WIDTH_PX}px`;
   root.style.background = "#ffffff";
-  root.style.zIndex = "-1";
-  injectStyles(root);
 
   const pages = chunk(options.members, ROWS_PER_PAGE);
   pages.forEach((pageMembers, pageIndex) => {
-    root.appendChild(buildPage(pageMembers, pageIndex, pages.length, options));
+    root.appendChild(buildPage(doc, pageMembers, pageIndex, pages.length, options));
   });
 
-  document.body.appendChild(root);
+  doc.body.appendChild(root);
 
   try {
     await waitForImages(root);
@@ -285,6 +308,6 @@ export async function downloadMemberListPdf(options: MemberListPdfOptions) {
 
     pdf.save(`member-list-${new Date().toISOString().slice(0, 10)}.pdf`);
   } finally {
-    root.remove();
+    frame.remove();
   }
 }
