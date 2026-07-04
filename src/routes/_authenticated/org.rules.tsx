@@ -288,6 +288,7 @@ function HistoryTab() {
     printDocument({
       title: "సొసైటీ చరిత్ర • Society History",
       orgName: orgName || "సొసైటీ",
+      logoUrl: orgLogoUrl,
       bodyHtml: `<h2>చరిత్ర మైలురాళ్లు • History Milestones</h2>${body}`,
     });
   };
