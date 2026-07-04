@@ -58,17 +58,25 @@ function RulesTab() {
   };
   useEffect(() => { load(); }, []);
 
-  const handleAdd = async () => {
+  const handleSubmit = async () => {
     if (!newText.trim()) return;
-    try { await fnAdd({ data: { text: newText, category: newCat || undefined } }); setNewText(""); setNewCat(""); await load(); toast.success("నియమం జోడించబడింది"); }
-    catch (e: any) { toast.error(e.message); }
+    try {
+      if (editId) {
+        await fnUpd({ data: { id: editId, text: newText, category: newCat || undefined } });
+        toast.success("నవీకరించబడింది");
+      } else {
+        await fnAdd({ data: { text: newText, category: newCat || undefined } });
+        toast.success("నియమం జోడించబడింది");
+      }
+      setEditId(null); setNewText(""); setNewCat("");
+      await load();
+    } catch (e: any) { toast.error(e.message); }
   };
-  const startEdit = (r: Rule) => { setEditId(r.id); setEditText(r.text); setEditCat(r.category ?? ""); };
-  const saveEdit = async () => {
-    if (!editId) return;
-    try { await fnUpd({ data: { id: editId, text: editText, category: editCat || undefined } }); setEditId(null); await load(); toast.success("నవీకరించబడింది"); }
-    catch (e: any) { toast.error(e.message); }
+  const startEdit = (r: Rule) => {
+    setEditId(r.id); setNewText(r.text); setNewCat(r.category ?? "");
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
   };
+  const cancelEdit = () => { setEditId(null); setNewText(""); setNewCat(""); };
   const handleDel = async (id: string) => {
     if (!confirm("ఈ నియమాన్ని తొలగించాలా?")) return;
     try { await fnDel({ data: { id } }); await load(); toast.success("తొలగించబడింది"); }
@@ -86,11 +94,19 @@ function RulesTab() {
     <div className="space-y-4">
       {canEdit && (
         <Card className="p-4 bg-white/95 backdrop-blur border-white space-y-2">
+          {editId && (
+            <div className="text-xs font-semibold text-orange-700">✏️ నియమాన్ని సవరిస్తున్నారు • Editing rule</div>
+          )}
           <Input placeholder="కేటగిరి (ఐచ్ఛికం) — ఉదా: సభ్యత్వం, విరాళాలు" value={newCat} onChange={e => setNewCat(e.target.value)} />
           <Textarea placeholder="కొత్త నియమం రాయండి..." rows={2} value={newText} onChange={e => setNewText(e.target.value)} />
-          <Button onClick={handleAdd} disabled={!newText.trim()} className="w-full">
-            <Plus className="w-4 h-4 mr-1" />నియమం జోడించండి
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={handleSubmit} disabled={!newText.trim()} className="flex-1">
+              {editId ? <><Check className="w-4 h-4 mr-1" />Update • నవీకరించండి</> : <><Plus className="w-4 h-4 mr-1" />నియమం జోడించండి</>}
+            </Button>
+            {editId && (
+              <Button variant="outline" onClick={cancelEdit}><X className="w-4 h-4" /></Button>
+            )}
+          </div>
         </Card>
       )}
 
@@ -102,33 +118,19 @@ function RulesTab() {
         </Card>
       ) : (
         Object.entries(grouped).map(([cat, items]) => (
-          <Card key={cat} className="p-4 bg-white/95 border-white">
-            <h3 className="font-semibold text-sm mb-3 pb-2 border-b" style={{
-              background: "linear-gradient(90deg,#B85C00,#0B5C06)",
-              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+          <Card key={cat} className="overflow-hidden bg-white/95 border-white">
+            <h3 className="font-bold text-sm px-4 py-2 text-white" style={{
+              background: "linear-gradient(90deg,#8B1A1A,#B22222)",
             }}>{cat}</h3>
-            <ol className="space-y-2 list-decimal list-inside">
+            <ol className="space-y-2 list-decimal list-inside p-4">
               {items.map(r => (
                 <li key={r.id} className="text-sm leading-relaxed">
-                  {editId === r.id ? (
-                    <div className="inline-block w-[calc(100%-1.5rem)] align-top space-y-2">
-                      <Input value={editCat} onChange={e => setEditCat(e.target.value)} placeholder="కేటగిరి" className="h-8 text-xs" />
-                      <Textarea value={editText} onChange={e => setEditText(e.target.value)} rows={2} />
-                      <div className="flex gap-2">
-                        <Button size="sm" onClick={saveEdit}><Check className="w-3 h-3 mr-1" />Save</Button>
-                        <Button size="sm" variant="outline" onClick={() => setEditId(null)}><X className="w-3 h-3 mr-1" />Cancel</Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <span>{r.text}</span>
-                      {canEdit && (
-                        <span className="ml-2 inline-flex gap-1">
-                          <button onClick={() => startEdit(r)} className="text-muted-foreground hover:text-foreground"><Pencil className="w-3.5 h-3.5 inline" /></button>
-                          <button onClick={() => handleDel(r.id)} className="text-destructive hover:opacity-70"><Trash2 className="w-3.5 h-3.5 inline" /></button>
-                        </span>
-                      )}
-                    </>
+                  <span>{r.text}</span>
+                  {canEdit && (
+                    <span className="ml-2 inline-flex gap-1">
+                      <button onClick={() => startEdit(r)} className="text-muted-foreground hover:text-foreground" aria-label="Edit"><Pencil className="w-3.5 h-3.5 inline" /></button>
+                      <button onClick={() => handleDel(r.id)} className="text-destructive hover:opacity-70" aria-label="Delete"><Trash2 className="w-3.5 h-3.5 inline" /></button>
+                    </span>
                   )}
                 </li>
               ))}
@@ -139,6 +141,7 @@ function RulesTab() {
     </div>
   );
 }
+
 
 function HistoryTab() {
   const fnList = useServerFn(listMilestones);
