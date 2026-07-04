@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ArrowLeft, Plus, Pencil, Trash2, BookOpen, History, X, Check } from "lucide-react";
+import { ArrowLeft, Plus, Pencil, Trash2, BookOpen, History, X, Check, Upload, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import {
   listRules, addRule, updateRule, deleteRule,
