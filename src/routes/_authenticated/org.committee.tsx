@@ -230,6 +230,7 @@ function CommitteePage() {
         myRole: r.myRole,
         orgId: r.orgId,
         orgName: (r as any).orgName ?? null,
+        orgLogoUrl: (r as any).orgLogoUrl ?? null,
       });
       setTermYearsInput(r.termYears);
       if (r.canManage) {
