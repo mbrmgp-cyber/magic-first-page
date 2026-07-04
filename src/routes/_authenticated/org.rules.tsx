@@ -105,6 +105,7 @@ function RulesTab() {
     printDocument({
       title: "సొసైటీ నియమాలు • Society Rules",
       orgName: orgName || "సొసైటీ",
+      logoUrl: orgLogoUrl,
       bodyHtml: sections,
     });
   };
