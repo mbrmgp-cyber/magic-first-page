@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ArrowLeft, Plus, Pencil, Trash2, BookOpen, History, X, Check, Upload, Loader2, Camera, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Plus, Pencil, Trash2, BookOpen, History, X, Check, Upload, Loader2, Camera, Image as ImageIcon, FileDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -13,6 +13,7 @@ import {
   listMilestones, addMilestone, updateMilestone, deleteMilestone,
 } from "@/lib/content.functions";
 import { toast } from "sonner";
+import { printDocument, escapeHtml } from "@/lib/print-pdf";
 
 type Rule = { id: string; text: string; category: string | null; position: number };
 type Milestone = { id: string; event_date: string; title: string; description: string | null; photo_url: string | null };
@@ -41,6 +42,7 @@ function RulesTab() {
   const fnDel = useServerFn(deleteRule);
   const [rules, setRules] = useState<Rule[]>([]);
   const [canEdit, setCanEdit] = useState(false);
+  const [orgName, setOrgName] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [newText, setNewText] = useState("");
   const [newCat, setNewCat] = useState("");
@@ -53,6 +55,7 @@ function RulesTab() {
       const r = await fnList();
       setRules(r.rules as Rule[]);
       setCanEdit(r.canEdit);
+      setOrgName((r as any).orgName ?? "");
     } finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
@@ -89,8 +92,28 @@ function RulesTab() {
     return acc;
   }, {});
 
+  const handleDownloadPdf = () => {
+    if (rules.length === 0) { toast.error("డౌన్‌లోడ్ చేయడానికి నియమాలు లేవు"); return; }
+    const sections = Object.entries(grouped).map(([cat, items]) => `
+      <h2>${escapeHtml(cat)}</h2>
+      <ol>
+        ${items.map(r => `<li>${escapeHtml(r.text)}</li>`).join("")}
+      </ol>
+    `).join("");
+    printDocument({
+      title: "సొసైటీ నియమాలు • Society Rules",
+      orgName: orgName || "సొసైటీ",
+      bodyHtml: sections,
+    });
+  };
+
   return (
     <div className="space-y-4">
+      {rules.length > 0 && (
+        <Button variant="outline" onClick={handleDownloadPdf} className="w-full">
+          <FileDown className="w-4 h-4 mr-1" /> PDF డౌన్‌లోడ్ • Download PDF
+        </Button>
+      )}
       {canEdit && (
         <Card className="p-4 bg-white/95 backdrop-blur border-white space-y-2">
           {editId && (
@@ -159,6 +182,7 @@ function HistoryTab() {
   const [photoPreview, setPhotoPreview] = useState("");
   const [uploading, setUploading] = useState(false);
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
+  const [orgName, setOrgName] = useState<string>("");
   const fileInputGalleryRef = useRef<HTMLInputElement | null>(null);
   const fileInputCameraRef = useRef<HTMLInputElement | null>(null);
   const [showPicker, setShowPicker] = useState(false);
@@ -176,6 +200,7 @@ function HistoryTab() {
       const list = r.milestones as Milestone[];
       setItems(list);
       setCanEdit(r.canEdit);
+      setOrgName((r as any).orgName ?? "");
       const entries = await Promise.all(
         list
           .filter(m => m.photo_url && !/^https?:\/\//i.test(m.photo_url))
@@ -245,8 +270,30 @@ function HistoryTab() {
   }, {});
   const years = Object.keys(byYear).sort();
 
+  const handleDownloadPdf = () => {
+    if (items.length === 0) { toast.error("డౌన్‌లోడ్ చేయడానికి మైలురాళ్లు లేవు"); return; }
+    const sorted = [...items].sort((a, b) => a.event_date.localeCompare(b.event_date));
+    const body = sorted.map(m => `
+      <div class="milestone">
+        <div class="date">${escapeHtml(new Date(m.event_date).toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" }))}</div>
+        <div class="m-title">${escapeHtml(m.title)}</div>
+        ${m.description ? `<div class="desc">${escapeHtml(m.description)}</div>` : ""}
+      </div>
+    `).join("");
+    printDocument({
+      title: "సొసైటీ చరిత్ర • Society History",
+      orgName: orgName || "సొసైటీ",
+      bodyHtml: `<h2>చరిత్ర మైలురాళ్లు • History Milestones</h2>${body}`,
+    });
+  };
+
   return (
     <div className="space-y-4">
+      {items.length > 0 && (
+        <Button variant="outline" onClick={handleDownloadPdf} className="w-full">
+          <FileDown className="w-4 h-4 mr-1" /> PDF డౌన్‌లోడ్ • Download PDF
+        </Button>
+      )}
       {canEdit && !showForm && (
         <Button onClick={() => setShowForm(true)} className="w-full"><Plus className="w-4 h-4 mr-1" />మైలురాయి జోడించండి</Button>
       )}

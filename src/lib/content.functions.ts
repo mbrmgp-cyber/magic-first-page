@@ -44,7 +44,7 @@ export const listRules = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
     const orgId = await resolveOrgId(supabase, userId);
-    if (!orgId) return { rules: [], canEdit: false, orgId: null };
+    if (!orgId) return { rules: [], canEdit: false, orgId: null, orgName: null as string | null };
     const { data } = await supabase
       .from("org_rules")
       .select("*")
@@ -52,7 +52,8 @@ export const listRules = createServerFn({ method: "GET" })
       .order("position", { ascending: true })
       .order("created_at", { ascending: true });
     const editable = await canEdit(supabase, userId, orgId);
-    return { rules: data ?? [], canEdit: editable, orgId };
+    const { data: org } = await supabase.from("organizations").select("name").eq("id", orgId).maybeSingle();
+    return { rules: data ?? [], canEdit: editable, orgId, orgName: (org?.name as string | null) ?? null };
   });
 
 export const addRule = createServerFn({ method: "POST" })
@@ -111,14 +112,15 @@ export const listMilestones = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
     const orgId = await resolveOrgId(supabase, userId);
-    if (!orgId) return { milestones: [], canEdit: false, orgId: null };
+    if (!orgId) return { milestones: [], canEdit: false, orgId: null, orgName: null as string | null };
     const { data } = await supabase
       .from("org_milestones")
       .select("*")
       .eq("org_id", orgId)
       .order("event_date", { ascending: true });
     const editable = await canEdit(supabase, userId, orgId);
-    return { milestones: data ?? [], canEdit: editable, orgId };
+    const { data: org } = await supabase.from("organizations").select("name").eq("id", orgId).maybeSingle();
+    return { milestones: data ?? [], canEdit: editable, orgId, orgName: (org?.name as string | null) ?? null };
   });
 
 export const addMilestone = createServerFn({ method: "POST" })

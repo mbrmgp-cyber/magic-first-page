@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Plus, Pencil, Trash2, X, Check, Crown, Users, Settings, Camera } from "lucide-react";
+import { ArrowLeft, Plus, Pencil, Trash2, X, Check, Crown, Users, Settings, Camera, FileDown } from "lucide-react";
+import { printDocument, escapeHtml } from "@/lib/print-pdf";
 import { toast } from "sonner";
 import {
   listCommittee, listEligibleMembers, appointCommitteeMember,
@@ -195,8 +196,8 @@ function CommitteePage() {
   const fnRemove = useServerFn(removeCommitteeMember);
   const fnTerm = useServerFn(updateTermYears);
 
-  const [data, setData] = useState<{ committee: CM[]; canManage: boolean; termYears: number; myRole: CommitteeRole | null; orgId: string | null }>({
-    committee: [], canManage: false, termYears: 2, myRole: null, orgId: null,
+  const [data, setData] = useState<{ committee: CM[]; canManage: boolean; termYears: number; myRole: CommitteeRole | null; orgId: string | null; orgName: string | null }>({
+    committee: [], canManage: false, termYears: 2, myRole: null, orgId: null, orgName: null,
   });
   const [loading, setLoading] = useState(true);
   const [eligibleMembers, setEligibleMembers] = useState<Array<{ id: string; name: string; photo_url: string | null }>>([]);
@@ -228,6 +229,7 @@ function CommitteePage() {
         termYears: r.termYears,
         myRole: r.myRole,
         orgId: r.orgId,
+        orgName: (r as any).orgName ?? null,
       });
       setTermYearsInput(r.termYears);
       if (r.canManage) {
@@ -325,6 +327,45 @@ function CommitteePage() {
             <Plus className="w-4 h-4 mr-1" /> సభ్యునిని నియమించండి
           </Button>
         )}
+
+        {totalCount > 0 && (
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => {
+              const sections = ROLE_ORDER.map(r => {
+                const arr = grouped[r];
+                if (!arr.length) return "";
+                const rows = arr.map((cm, i) => `
+                  <tr>
+                    <td>${i + 1}</td>
+                    <td>${escapeHtml(cm.members?.name ?? "-")}</td>
+                    <td>${escapeHtml(cm.members?.phone ?? "-")}</td>
+                    <td>${escapeHtml(cm.members?.email ?? "-")}</td>
+                    <td>${escapeHtml(new Date(cm.term_start_date).toLocaleDateString())} – ${escapeHtml(new Date(cm.term_end_date).toLocaleDateString())}</td>
+                    <td>${escapeHtml(cm.qualifications ?? "-")}</td>
+                  </tr>
+                `).join("");
+                return `
+                  <h2>${escapeHtml(ROLE_LABELS[r])}</h2>
+                  <table>
+                    <thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Email</th><th>Term</th><th>Qualifications</th></tr></thead>
+                    <tbody>${rows}</tbody>
+                  </table>`;
+              }).join("");
+              printDocument({
+                title: "కార్యవర్గ కమిటీ • Committee Directory",
+                orgName: data.orgName ?? "సొసైటీ",
+                subtitle: `మొత్తం: ${totalCount} • పదవీకాలం ${data.termYears} సం.`,
+                bodyHtml: sections,
+              });
+            }}
+          >
+            <FileDown className="w-4 h-4 mr-1" /> PDF డౌన్‌లోడ్ • Download PDF
+          </Button>
+        )}
+
+
 
 
         {loading ? (
