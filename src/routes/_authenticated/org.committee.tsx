@@ -357,6 +357,7 @@ function CommitteePage() {
               printDocument({
                 title: "కార్యవర్గ కమిటీ • Committee Directory",
                 orgName: data.orgName ?? "సొసైటీ",
+                logoUrl: data.orgLogoUrl,
                 subtitle: `మొత్తం: ${totalCount} • పదవీకాలం ${data.termYears} సం.`,
                 bodyHtml: sections,
               });
