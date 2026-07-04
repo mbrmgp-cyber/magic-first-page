@@ -112,15 +112,15 @@ export const listMilestones = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
     const orgId = await resolveOrgId(supabase, userId);
-    if (!orgId) return { milestones: [], canEdit: false, orgId: null, orgName: null as string | null };
+    if (!orgId) return { milestones: [], canEdit: false, orgId: null, orgName: null as string | null, orgLogoUrl: null as string | null };
     const { data } = await supabase
       .from("org_milestones")
       .select("*")
       .eq("org_id", orgId)
       .order("event_date", { ascending: true });
     const editable = await canEdit(supabase, userId, orgId);
-    const { data: org } = await supabase.from("organizations").select("name").eq("id", orgId).maybeSingle();
-    return { milestones: data ?? [], canEdit: editable, orgId, orgName: (org?.name as string | null) ?? null };
+    const { data: org } = await supabase.from("organizations").select("name, logo_url").eq("id", orgId).maybeSingle();
+    return { milestones: data ?? [], canEdit: editable, orgId, orgName: (org?.name as string | null) ?? null, orgLogoUrl: (org?.logo_url as string | null) ?? null };
   });
 
 export const addMilestone = createServerFn({ method: "POST" })
