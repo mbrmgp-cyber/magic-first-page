@@ -153,38 +153,39 @@ function HistoryTab() {
   const [date, setDate] = useState("");
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
-  const [photo, setPhoto] = useState(""); // stored value: storage path or http URL
+  const [photo, setPhoto] = useState(""); // storage path (private bucket) or full http URL
+  const [photoPreview, setPhotoPreview] = useState("");
   const [uploading, setUploading] = useState(false);
-  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const resolveSignedUrls = async (items: Milestone[]): Promise<Milestone[]> => {
-    const paths = items
-      .map(m => m.photo_url)
-      .filter((p): p is string => !!p && !/^https?:\/\//i.test(p));
-    if (paths.length === 0) return items;
-    const map = new Map<string, string>();
-    await Promise.all(paths.map(async (p) => {
-      const { data } = await supabase.storage.from("milestone-photos").createSignedUrl(p, 60 * 60 * 24 * 7);
-      if (data?.signedUrl) map.set(p, data.signedUrl);
-    }));
-    return items.map(m => (m.photo_url && map.has(m.photo_url) ? { ...m, photo_url: map.get(m.photo_url)! } : m));
+  const signUrl = async (pathOrUrl: string): Promise<string> => {
+    if (!pathOrUrl || /^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
+    const { data } = await supabase.storage.from("milestone-photos").createSignedUrl(pathOrUrl, 60 * 60 * 24 * 7);
+    return data?.signedUrl ?? "";
   };
 
   const load = async () => {
     setLoading(true);
     try {
       const r = await fnList();
-      const withUrls = await resolveSignedUrls(r.milestones as Milestone[]);
-      setItems(withUrls);
+      const list = r.milestones as Milestone[];
+      setItems(list);
       setCanEdit(r.canEdit);
-    }
-    finally { setLoading(false); }
+      const entries = await Promise.all(
+        list
+          .filter(m => m.photo_url && !/^https?:\/\//i.test(m.photo_url))
+          .map(async m => [m.photo_url!, await signUrl(m.photo_url!)] as const)
+      );
+      setSignedUrls(Object.fromEntries(entries));
+    } finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!file.type.startsWith("image/")) { toast.error("Please choose an image"); return; }
     if (file.size > 10 * 1024 * 1024) { toast.error("File too large (max 10MB)"); return; }
     setUploading(true);
     try {
@@ -198,6 +199,7 @@ function HistoryTab() {
       });
       if (error) throw error;
       setPhoto(path);
+      setPhotoPreview(await signUrl(path));
       toast.success("ఇమేజ్ అప్‌లోడ్ అయింది");
     } catch (err: any) {
       toast.error(err.message || "Upload failed");
@@ -207,9 +209,6 @@ function HistoryTab() {
     }
   };
 
-  const previewUrl = photo && !/^https?:\/\//i.test(photo)
-    ? supabase.storage.from("milestone-photos").getPublicUrl(photo).data.publicUrl // fallback; signed below
-    : photo;
 
   const reset = () => { setShowForm(false); setEditId(null); setDate(""); setTitle(""); setDesc(""); setPhoto(""); };
   const handleSave = async () => {
