@@ -72,7 +72,7 @@ export const listCommittee = createServerFn({ method: "GET" })
 
     const { data: org } = await supabase
       .from("organizations")
-      .select("committee_term_years")
+      .select("committee_term_years, name")
       .eq("id", orgId)
       .maybeSingle();
 
@@ -97,6 +97,7 @@ export const listCommittee = createServerFn({ method: "GET" })
       canManage: admin || president,
       orgId,
       termYears: org?.committee_term_years ?? 2,
+      orgName: (org?.name as string | null) ?? null,
       myRole,
     };
   });
