@@ -1,6 +1,7 @@
-// Lightweight client-side "PDF" export: opens a formatted print window
-// and triggers the standard browser print / "Save as PDF" dialog.
-// Works on mobile (Chrome / Safari) — user picks "Save as PDF" or a printer.
+// Client-side "PDF" export via a hidden same-origin iframe.
+// Works reliably on mobile (Chrome/Safari) where window.open('') + document.write
+// often results in a blank page. User picks "Save as PDF" or a printer from the
+// native print dialog.
 
 export function escapeHtml(s: unknown): string {
   return String(s ?? "")
@@ -12,23 +13,17 @@ export function escapeHtml(s: unknown): string {
 }
 
 export type PrintDoc = {
-  title: string;        // shown in <title> (used as PDF filename) & document header
-  orgName: string;      // society name shown at the top of every printed page
-  subtitle?: string;    // e.g. date / section subtitle
-  bodyHtml: string;     // pre-escaped HTML content
+  title: string;
+  orgName: string;
+  subtitle?: string;
+  bodyHtml: string;
 };
 
-export function printDocument({ title, orgName, subtitle, bodyHtml }: PrintDoc) {
-  const win = window.open("", "_blank", "noopener,noreferrer,width=900,height=1200");
-  if (!win) {
-    alert("దయచేసి pop-ups అనుమతించండి / Please allow pop-ups to download the PDF.");
-    return;
-  }
+function buildHtml({ title, orgName, subtitle, bodyHtml }: PrintDoc): string {
   const today = new Date().toLocaleDateString(undefined, {
     year: "numeric", month: "long", day: "numeric",
   });
-
-  const html = `<!doctype html>
+  return `<!doctype html>
 <html>
 <head>
 <meta charset="utf-8" />
@@ -71,10 +66,6 @@ export function printDocument({ title, orgName, subtitle, bodyHtml }: PrintDoc) 
   .milestone .m-title { font-weight: 700; margin-top: 2px; }
   .milestone .desc { white-space: pre-wrap; margin-top: 3px; }
   .footer { margin-top: 24px; padding-top: 8px; border-top: 1px solid #ddd; font-size: 10px; color: #666; text-align: center; }
-  @media print {
-    body { padding: 0; }
-    .no-print { display: none !important; }
-  }
 </style>
 </head>
 <body>
@@ -85,18 +76,52 @@ export function printDocument({ title, orgName, subtitle, bodyHtml }: PrintDoc) 
   </div>
   ${bodyHtml}
   <div class="footer">Generated on ${escapeHtml(today)}</div>
-  <script>
-    window.onload = function () {
-      setTimeout(function () {
-        window.focus();
-        window.print();
-      }, 250);
-    };
-  </script>
 </body>
 </html>`;
+}
 
-  win.document.open();
-  win.document.write(html);
-  win.document.close();
+export function printDocument(doc: PrintDoc) {
+  const html = buildHtml(doc);
+
+  // Hidden iframe strategy — works reliably on mobile Chrome/Safari where
+  // window.open('') + document.write renders blank.
+  const iframe = document.createElement("iframe");
+  iframe.setAttribute("aria-hidden", "true");
+  iframe.style.position = "fixed";
+  iframe.style.right = "0";
+  iframe.style.bottom = "0";
+  iframe.style.width = "0";
+  iframe.style.height = "0";
+  iframe.style.border = "0";
+  iframe.style.visibility = "hidden";
+  // srcdoc is well-supported and avoids blob URL cross-origin quirks.
+  iframe.srcdoc = html;
+
+  const cleanup = () => {
+    setTimeout(() => {
+      try { iframe.remove(); } catch { /* noop */ }
+    }, 1000);
+  };
+
+  iframe.onload = () => {
+    try {
+      const win = iframe.contentWindow;
+      if (!win) { cleanup(); return; }
+      // Give the browser a tick to lay out fonts before printing.
+      setTimeout(() => {
+        try {
+          win.focus();
+          win.print();
+        } catch (e) {
+          console.error("print failed", e);
+        }
+        cleanup();
+      }, 250);
+    } catch (e) {
+      console.error("iframe print error", e);
+      cleanup();
+    }
+  };
+
+  document.body.appendChild(iframe);
 }
