@@ -205,6 +205,7 @@ function HistoryTab() {
       setItems(list);
       setCanEdit(r.canEdit);
       setOrgName((r as any).orgName ?? "");
+      setOrgLogoUrl((r as any).orgLogoUrl ?? null);
       const entries = await Promise.all(
         list
           .filter(m => m.photo_url && !/^https?:\/\//i.test(m.photo_url))
