@@ -61,7 +61,7 @@ export const listCommittee = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
     const orgId = await resolveOrgId(supabase, userId);
-    if (!orgId) return { committee: [], canManage: false, orgId: null, termYears: 2, orgName: null as string | null, myRole: null as CommitteeRole | null };
+    if (!orgId) return { committee: [], canManage: false, orgId: null, termYears: 2, orgName: null as string | null, orgLogoUrl: null as string | null, myRole: null as CommitteeRole | null };
 
     const { data: cmRows } = await supabase
       .from("committee_members")
@@ -72,7 +72,7 @@ export const listCommittee = createServerFn({ method: "GET" })
 
     const { data: org } = await supabase
       .from("organizations")
-      .select("committee_term_years, name")
+      .select("committee_term_years, name, logo_url")
       .eq("id", orgId)
       .maybeSingle();
 
@@ -98,6 +98,7 @@ export const listCommittee = createServerFn({ method: "GET" })
       orgId,
       termYears: org?.committee_term_years ?? 2,
       orgName: (org?.name as string | null) ?? null,
+      orgLogoUrl: (org?.logo_url as string | null) ?? null,
       myRole,
     };
   });
