@@ -27,7 +27,7 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
       <div className="mt-8 text-center animate-[mbrFadeUp_900ms_ease-out_300ms_both]">
         <div className="text-white text-2xl sm:text-3xl font-semibold tracking-wide leading-tight">
           Management of{" "}
-          <span style={{ background: "linear-gradient(90deg,#FF9933,#138808)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Board</span>{" "}
+          <span style={{ color: "#FF8C28" }}>Board</span>{" "}
           Resources
         </div>
         <div className="mt-3 h-[3px] w-48 mx-auto rounded-full" style={{ background: "linear-gradient(90deg,#FF9933,#FFFFFF,#138808)" }} />
