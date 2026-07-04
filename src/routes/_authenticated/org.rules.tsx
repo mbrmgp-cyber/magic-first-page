@@ -186,6 +186,7 @@ function HistoryTab() {
   const [uploading, setUploading] = useState(false);
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
   const [orgName, setOrgName] = useState<string>("");
+  const [orgLogoUrl, setOrgLogoUrl] = useState<string | null>(null);
   const fileInputGalleryRef = useRef<HTMLInputElement | null>(null);
   const fileInputCameraRef = useRef<HTMLInputElement | null>(null);
   const [showPicker, setShowPicker] = useState(false);
