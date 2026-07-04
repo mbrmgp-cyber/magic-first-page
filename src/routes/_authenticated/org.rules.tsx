@@ -92,8 +92,28 @@ function RulesTab() {
     return acc;
   }, {});
 
+  const handleDownloadPdf = () => {
+    if (rules.length === 0) { toast.error("డౌన్‌లోడ్ చేయడానికి నియమాలు లేవు"); return; }
+    const sections = Object.entries(grouped).map(([cat, items]) => `
+      <h2>${escapeHtml(cat)}</h2>
+      <ol>
+        ${items.map(r => `<li>${escapeHtml(r.text)}</li>`).join("")}
+      </ol>
+    `).join("");
+    printDocument({
+      title: "సొసైటీ నియమాలు • Society Rules",
+      orgName: orgName || "సొసైటీ",
+      bodyHtml: sections,
+    });
+  };
+
   return (
     <div className="space-y-4">
+      {rules.length > 0 && (
+        <Button variant="outline" onClick={handleDownloadPdf} className="w-full">
+          <FileDown className="w-4 h-4 mr-1" /> PDF డౌన్‌లోడ్ • Download PDF
+        </Button>
+      )}
       {canEdit && (
         <Card className="p-4 bg-white/95 backdrop-blur border-white space-y-2">
           {editId && (
