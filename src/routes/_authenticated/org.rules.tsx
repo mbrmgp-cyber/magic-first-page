@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ArrowLeft, Plus, Pencil, Trash2, BookOpen, History, X, Check } from "lucide-react";
+import { ArrowLeft, Plus, Pencil, Trash2, BookOpen, History, X, Check, Upload, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import {
   listRules, addRule, updateRule, deleteRule,
@@ -152,16 +153,64 @@ function HistoryTab() {
   const [date, setDate] = useState("");
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
-  const [photo, setPhoto] = useState("");
+  const [photo, setPhoto] = useState(""); // storage path (private bucket) or full http URL
+  const [photoPreview, setPhotoPreview] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const signUrl = async (pathOrUrl: string): Promise<string> => {
+    if (!pathOrUrl || /^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
+    const { data } = await supabase.storage.from("milestone-photos").createSignedUrl(pathOrUrl, 60 * 60 * 24 * 7);
+    return data?.signedUrl ?? "";
+  };
 
   const load = async () => {
     setLoading(true);
-    try { const r = await fnList(); setItems(r.milestones as Milestone[]); setCanEdit(r.canEdit); }
-    finally { setLoading(false); }
+    try {
+      const r = await fnList();
+      const list = r.milestones as Milestone[];
+      setItems(list);
+      setCanEdit(r.canEdit);
+      const entries = await Promise.all(
+        list
+          .filter(m => m.photo_url && !/^https?:\/\//i.test(m.photo_url))
+          .map(async m => [m.photo_url!, await signUrl(m.photo_url!)] as const)
+      );
+      setSignedUrls(Object.fromEntries(entries));
+    } finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
 
-  const reset = () => { setShowForm(false); setEditId(null); setDate(""); setTitle(""); setDesc(""); setPhoto(""); };
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast.error("Please choose an image"); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error("File too large (max 10MB)"); return; }
+    setUploading(true);
+    try {
+      const { data: userRes } = await supabase.auth.getUser();
+      const uid = userRes.user?.id ?? "anon";
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `${uid}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error } = await supabase.storage.from("milestone-photos").upload(path, file, {
+        contentType: file.type || "image/jpeg",
+        upsert: false,
+      });
+      if (error) throw error;
+      setPhoto(path);
+      setPhotoPreview(await signUrl(path));
+      toast.success("ఇమేజ్ అప్‌లోడ్ అయింది");
+    } catch (err: any) {
+      toast.error(err.message || "Upload failed");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+
+  const reset = () => { setShowForm(false); setEditId(null); setDate(""); setTitle(""); setDesc(""); setPhoto(""); setPhotoPreview(""); };
   const handleSave = async () => {
     if (!date || !title.trim()) { toast.error("తేదీ మరియు శీర్షిక అవసరం"); return; }
     try {
@@ -170,9 +219,12 @@ function HistoryTab() {
       reset(); await load(); toast.success("సేవ్ అయింది");
     } catch (e: any) { toast.error(e.message); }
   };
-  const startEdit = (m: Milestone) => {
+  const startEdit = async (m: Milestone) => {
     setEditId(m.id); setDate(m.event_date); setTitle(m.title);
-    setDesc(m.description ?? ""); setPhoto(m.photo_url ?? ""); setShowForm(true);
+    setDesc(m.description ?? "");
+    setPhoto(m.photo_url ?? "");
+    setPhotoPreview(m.photo_url ? await signUrl(m.photo_url) : "");
+    setShowForm(true);
   };
   const handleDel = async (id: string) => {
     if (!confirm("ఈ మైలురాయిని తొలగించాలా?")) return;
@@ -198,7 +250,39 @@ function HistoryTab() {
           <Input type="date" value={date} onChange={e => setDate(e.target.value)} />
           <Input placeholder="శీర్షిక (ఉదా: సొసైటీ స్థాపన)" value={title} onChange={e => setTitle(e.target.value)} />
           <Textarea placeholder="వివరణ (ఐచ్ఛికం)" rows={3} value={desc} onChange={e => setDesc(e.target.value)} />
-          <Input placeholder="ఫోటో URL (ఐచ్ఛికం)" value={photo} onChange={e => setPhoto(e.target.value)} />
+          <div className="space-y-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={handleFileSelect}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="w-full"
+            >
+              {uploading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />}
+              {photo ? "ఇమేజ్ మార్చండి • Change Image" : "ఇమేజ్ అప్‌లోడ్ చేయండి • Upload Image"}
+            </Button>
+            {photoPreview && (
+              <div className="relative">
+                <img src={photoPreview} alt="preview" className="rounded-md max-h-48 object-cover w-full" />
+                <button
+                  type="button"
+                  onClick={() => { setPhoto(""); setPhotoPreview(""); }}
+                  className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1"
+                  aria-label="Remove image"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+          </div>
           <div className="flex gap-2">
             <Button onClick={handleSave} className="flex-1"><Check className="w-4 h-4 mr-1" />సేవ్ చేయండి</Button>
             <Button variant="outline" onClick={reset}><X className="w-4 h-4" /></Button>
@@ -230,7 +314,7 @@ function HistoryTab() {
                         <div className="text-[11px] text-muted-foreground">{new Date(m.event_date).toLocaleDateString("te-IN", { day: "numeric", month: "long", year: "numeric" })}</div>
                         <div className="font-semibold text-sm mt-0.5">{m.title}</div>
                         {m.description && <p className="text-xs text-foreground/80 mt-1 whitespace-pre-wrap">{m.description}</p>}
-                        {m.photo_url && <img src={m.photo_url} alt={m.title} className="mt-2 rounded-md max-h-40 object-cover w-full" />}
+                        {m.photo_url && <img src={/^https?:\/\//i.test(m.photo_url) ? m.photo_url : (signedUrls[m.photo_url] ?? "")} alt={m.title} className="mt-2 rounded-md max-h-40 object-cover w-full" />}
                       </div>
                       {canEdit && (
                         <div className="flex flex-col gap-1 shrink-0">
