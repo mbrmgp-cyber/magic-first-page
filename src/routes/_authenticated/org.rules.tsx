@@ -43,6 +43,7 @@ function RulesTab() {
   const [rules, setRules] = useState<Rule[]>([]);
   const [canEdit, setCanEdit] = useState(false);
   const [orgName, setOrgName] = useState<string>("");
+  const [orgLogoUrl, setOrgLogoUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [newText, setNewText] = useState("");
   const [newCat, setNewCat] = useState("");
