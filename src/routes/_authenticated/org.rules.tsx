@@ -42,6 +42,7 @@ function RulesTab() {
   const fnDel = useServerFn(deleteRule);
   const [rules, setRules] = useState<Rule[]>([]);
   const [canEdit, setCanEdit] = useState(false);
+  const [orgName, setOrgName] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [newText, setNewText] = useState("");
   const [newCat, setNewCat] = useState("");
@@ -54,6 +55,7 @@ function RulesTab() {
       const r = await fnList();
       setRules(r.rules as Rule[]);
       setCanEdit(r.canEdit);
+      setOrgName((r as any).orgName ?? "");
     } finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
