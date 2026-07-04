@@ -61,7 +61,7 @@ export const listCommittee = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
     const orgId = await resolveOrgId(supabase, userId);
-    if (!orgId) return { committee: [], canManage: false, orgId: null, termYears: 2, myRole: null as CommitteeRole | null };
+    if (!orgId) return { committee: [], canManage: false, orgId: null, termYears: 2, orgName: null as string | null, myRole: null as CommitteeRole | null };
 
     const { data: cmRows } = await supabase
       .from("committee_members")
