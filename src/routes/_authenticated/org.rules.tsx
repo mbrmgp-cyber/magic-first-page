@@ -45,8 +45,7 @@ function RulesTab() {
   const [newText, setNewText] = useState("");
   const [newCat, setNewCat] = useState("");
   const [editId, setEditId] = useState<string | null>(null);
-  const [editText, setEditText] = useState("");
-  const [editCat, setEditCat] = useState("");
+
 
   const load = async () => {
     setLoading(true);
