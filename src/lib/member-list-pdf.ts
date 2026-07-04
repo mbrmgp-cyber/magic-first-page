@@ -72,6 +72,23 @@ function chunk<T>(items: T[], size: number) {
 function injectStyles(doc: Document) {
   const style = doc.createElement("style");
   style.textContent = `
+    html,
+    body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: ${A4_WIDTH_PX}px !important;
+      background: #ffffff !important;
+      background-color: #ffffff !important;
+      color: #111111 !important;
+    }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box !important;
+      color: inherit;
+      box-shadow: none !important;
+      text-shadow: none !important;
+    }
     .mbr-pdf-page {
       width: ${A4_WIDTH_PX}px;
       height: ${A4_HEIGHT_PX}px;
@@ -129,6 +146,7 @@ function injectStyles(doc: Document) {
     .mbr-pdf-table th,
     .mbr-pdf-table td {
       border: 1px solid #cfcfcf;
+      border-color: #cfcfcf;
       padding: 7px 6px;
       text-align: left;
       vertical-align: middle;
@@ -268,6 +286,11 @@ export async function downloadMemberListPdf(options: MemberListPdfOptions) {
   doc.body.style.margin = "0";
   doc.body.style.padding = "0";
   doc.body.style.background = "#ffffff";
+  doc.body.style.backgroundColor = "#ffffff";
+  doc.body.style.color = "#111111";
+  doc.documentElement.style.background = "#ffffff";
+  doc.documentElement.style.backgroundColor = "#ffffff";
+  doc.documentElement.style.color = "#111111";
   injectStyles(doc);
 
   const root = doc.createElement("div");
