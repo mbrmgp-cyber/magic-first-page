@@ -328,6 +328,45 @@ function CommitteePage() {
           </Button>
         )}
 
+        {totalCount > 0 && (
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => {
+              const sections = ROLE_ORDER.map(r => {
+                const arr = grouped[r];
+                if (!arr.length) return "";
+                const rows = arr.map((cm, i) => `
+                  <tr>
+                    <td>${i + 1}</td>
+                    <td>${escapeHtml(cm.members?.name ?? "-")}</td>
+                    <td>${escapeHtml(cm.members?.phone ?? "-")}</td>
+                    <td>${escapeHtml(cm.members?.email ?? "-")}</td>
+                    <td>${escapeHtml(new Date(cm.term_start_date).toLocaleDateString())} – ${escapeHtml(new Date(cm.term_end_date).toLocaleDateString())}</td>
+                    <td>${escapeHtml(cm.qualifications ?? "-")}</td>
+                  </tr>
+                `).join("");
+                return `
+                  <h2>${escapeHtml(ROLE_LABELS[r])}</h2>
+                  <table>
+                    <thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Email</th><th>Term</th><th>Qualifications</th></tr></thead>
+                    <tbody>${rows}</tbody>
+                  </table>`;
+              }).join("");
+              printDocument({
+                title: "కార్యవర్గ కమిటీ • Committee Directory",
+                orgName: data.orgName ?? "సొసైటీ",
+                subtitle: `మొత్తం: ${totalCount} • పదవీకాలం ${data.termYears} సం.`,
+                bodyHtml: sections,
+              });
+            }}
+          >
+            <FileDown className="w-4 h-4 mr-1" /> PDF డౌన్‌లోడ్ • Download PDF
+          </Button>
+        )}
+
+
+
 
         {loading ? (
           <Card className="p-6 text-center text-muted-foreground bg-white/92 border-white">లోడ్ అవుతోంది...</Card>
