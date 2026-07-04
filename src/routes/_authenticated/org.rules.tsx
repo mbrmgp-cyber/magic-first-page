@@ -210,7 +210,7 @@ function HistoryTab() {
   };
 
 
-  const reset = () => { setShowForm(false); setEditId(null); setDate(""); setTitle(""); setDesc(""); setPhoto(""); };
+  const reset = () => { setShowForm(false); setEditId(null); setDate(""); setTitle(""); setDesc(""); setPhoto(""); setPhotoPreview(""); };
   const handleSave = async () => {
     if (!date || !title.trim()) { toast.error("తేదీ మరియు శీర్షిక అవసరం"); return; }
     try {
@@ -219,9 +219,12 @@ function HistoryTab() {
       reset(); await load(); toast.success("సేవ్ అయింది");
     } catch (e: any) { toast.error(e.message); }
   };
-  const startEdit = (m: Milestone) => {
+  const startEdit = async (m: Milestone) => {
     setEditId(m.id); setDate(m.event_date); setTitle(m.title);
-    setDesc(m.description ?? ""); setPhoto(m.photo_url ?? ""); setShowForm(true);
+    setDesc(m.description ?? "");
+    setPhoto(m.photo_url ?? "");
+    setPhotoPreview(m.photo_url ? await signUrl(m.photo_url) : "");
+    setShowForm(true);
   };
   const handleDel = async (id: string) => {
     if (!confirm("ఈ మైలురాయిని తొలగించాలా?")) return;
