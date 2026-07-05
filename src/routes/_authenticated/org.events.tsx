@@ -106,7 +106,8 @@ function EventsPage() {
               <button
                 key={t.k}
                 onClick={() => setTab(t.k)}
-                className={`mbr-theme-mini-box flex flex-col items-center gap-1 rounded-lg p-2 border text-xs transition ${active ? "bg-card border-primary text-foreground ring-1 ring-primary/60" : "bg-card border-border text-foreground hover:border-primary"}`}
+                aria-pressed={active}
+                className={`mbr-theme-mini-box relative flex flex-col items-center gap-1 rounded-lg p-2 border text-xs transition ${active ? "bg-primary text-primary-foreground border-primary shadow-md ring-2 ring-primary/50 border-b-4 border-b-primary-foreground/80" : "bg-card border-border text-foreground hover:border-primary"}`}
               >
                 <Ic className="w-4 h-4" />
                 <span className="font-semibold leading-tight">{t.te}</span>
