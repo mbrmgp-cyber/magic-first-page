@@ -69,8 +69,35 @@ function MemberDashboard() {
 
   const m: any = meQ.data?.membership;
   const org = m?.organizations;
+  const orgId: string | undefined = org?.id ?? m?.org_id;
   const brand = (org?.theme_color as string) || "#ff8c28";
   const fontFamily = (org?.theme_font as string) || "Inter";
+
+  const chatActivityQ = useQuery({
+    queryKey: ["chat-activity-latest", orgId],
+    enabled: !!orgId,
+    refetchInterval: 60_000,
+    queryFn: async () => {
+      if (!orgId) return 0;
+      const [{ data: ann }, { data: mtg }] = await Promise.all([
+        supabase.from("chat_announcements").select("created_at").eq("org_id", orgId).order("created_at", { ascending: false }).limit(1),
+        supabase.from("org_meetings").select("created_at").eq("org_id", orgId).order("created_at", { ascending: false }).limit(1),
+      ]);
+      const times = [ann?.[0]?.created_at, mtg?.[0]?.created_at]
+        .filter((t): t is string => !!t)
+        .map((t) => new Date(t).getTime());
+      return times.length ? Math.max(...times) : 0;
+    },
+  });
+  const [chatSeenAt, setChatSeenAt] = useState<number>(0);
+  useEffect(() => {
+    if (!orgId) return;
+    try {
+      const raw = localStorage.getItem(`chat.lastSeenAt.${orgId}`);
+      setChatSeenAt(raw ? new Date(raw).getTime() : 0);
+    } catch { setChatSeenAt(0); }
+  }, [orgId]);
+  const hasNewChat = !!chatActivityQ.data && chatActivityQ.data > chatSeenAt;
 
   useEffect(() => {
     if (!org) { setQrUrl(""); return; }
@@ -217,20 +244,26 @@ function MemberDashboard() {
             <p className="text-[10px] text-zinc-400 leading-tight">సభ్యుడి ఐడి కార్డ్</p>
           </button>
 
-          {MENU.map((it) => (
+          {MENU.map((it) => {
+            const showDot = it.to === "/org/chat" && hasNewChat;
+            return (
             <Link key={it.label} to={it.to as any}
-              className="rounded-xl bg-zinc-950 border border-zinc-800 p-4 flex flex-col items-center gap-2 text-center transition hover:-translate-y-0.5"
+              className="relative rounded-xl bg-zinc-950 border border-zinc-800 p-4 flex flex-col items-center gap-2 text-center transition hover:-translate-y-0.5"
               style={{ ["--brand" as any]: brand } as React.CSSProperties}
               onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${brand}99`; e.currentTarget.style.boxShadow = `0 0 20px ${brand}33`; }}
               onMouseLeave={(e) => { e.currentTarget.style.borderColor = ""; e.currentTarget.style.boxShadow = ""; }}>
-              <div className="h-11 w-11 rounded-full flex items-center justify-center"
+              <div className="h-11 w-11 rounded-full flex items-center justify-center relative"
                 style={{ backgroundColor: `${brand}26` }}>
                 <it.icon className="h-5 w-5" style={{ color: brand }} />
+                {showDot && (
+                  <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-red-500 border-2 border-black animate-pulse" aria-label="New message" />
+                )}
               </div>
               <p className="text-[13px] font-semibold text-white leading-tight">{it.label}</p>
               <p className="text-[10px] text-zinc-400 leading-tight">{it.te}</p>
             </Link>
-          ))}
+            );
+          })}
           <button onClick={logout}
             className="rounded-xl bg-zinc-950 border border-zinc-800 p-4 flex flex-col items-center gap-2 text-center hover:border-zinc-600 transition">
             <div className="h-11 w-11 rounded-full bg-zinc-900 flex items-center justify-center">

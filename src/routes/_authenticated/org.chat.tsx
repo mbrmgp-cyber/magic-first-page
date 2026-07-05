@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -82,8 +82,14 @@ function ChatHub() {
   const ctxQ = useQuery({ queryKey: ["chat-ctx"], queryFn: loadContext });
   const { pick } = useLangPick();
   const ctx = ctxQ.data;
-  const canBroadcast = !!ctx && (ctx.isAdmin || ctx.isCommittee);
-  const canReview = canBroadcast;
+  const canBroadcast = !!ctx && ctx.isAdmin; // Only Admin can post announcements
+  const canReview = !!ctx && (ctx.isAdmin || ctx.isCommittee);
+
+  useEffect(() => {
+    if (ctx?.orgId) {
+      try { localStorage.setItem(`chat.lastSeenAt.${ctx.orgId}`, new Date().toISOString()); } catch {}
+    }
+  }, [ctx?.orgId]);
 
   if (ctxQ.isLoading) {
     return <div className="min-h-screen bg-black text-white flex items-center justify-center"><Loader2 className="w-5 h-5 animate-spin" /></div>;
