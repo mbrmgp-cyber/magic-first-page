@@ -18,11 +18,19 @@ interface MagicLinkEmailProps {
 
 export const MagicLinkEmail = ({
   confirmationUrl,
-}: MagicLinkEmailProps) => (
+}: MagicLinkEmailProps) => {
+  const now = new Date()
+  const sentAt = now.toUTCString()
+  const uniqueId = `${now.getTime()}-${Math.random().toString(36).slice(2, 10)}`
+  return (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>MBR APP login link</Preview>
+    <Preview>MBR APP login link · {sentAt}</Preview>
     <Body style={main}>
+      {/* Hidden preheader to ensure unique content per email (prevents Gmail from collapsing repeated messages) */}
+      <span style={hidden}>
+        Login request generated {sentAt} · ref {uniqueId}
+      </span>
       <Container style={container}>
         <Text style={brand}>MBR APP</Text>
         <Heading style={h1}>Login Link / లాగిన్ లింక్</Heading>
@@ -32,14 +40,20 @@ export const MagicLinkEmail = ({
         <Button style={button} href={confirmationUrl}>
           Login / లాగిన్
         </Button>
+        <Text style={sentAtStyle}>
+          Sent at: {sentAt}
+        </Text>
         <Text style={footer}>
           If you did not request this link, please ignore this email.
           <br />— MBR APP Team
+          <br />
+          <span style={refStyle}>Ref: {uniqueId}</span>
         </Text>
       </Container>
     </Body>
   </Html>
-)
+  )
+}
 
 export default MagicLinkEmail
 
