@@ -893,18 +893,18 @@ function LoanCard({ loan, orgId, onChange, onClose, onDelete }:
         <Button size="sm" variant="ghost" onClick={onDelete}><Trash2 className="w-4 h-4 text-rose-600" /></Button>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 mt-2 text-center text-xs">
-        <div className="bg-blue-50 rounded p-2">
-          <div className="text-slate-600">Total Due</div>
-          <div className="font-semibold text-slate-900">₹{Number(s.total_due ?? loan.principal).toLocaleString("en-IN")}</div>
+      <div className="grid grid-cols-3 gap-2 mt-2 text-center text-xs" style={{ color: "inherit" }}>
+        <div className="rounded p-2" style={{ backgroundColor: "color-mix(in srgb, currentColor 10%, transparent)", color: "inherit" }}>
+          <div style={{ color: "inherit", opacity: 0.75 }}>Total Due</div>
+          <div className="font-semibold" style={{ color: "inherit" }}>₹{Number(s.total_due ?? loan.principal).toLocaleString("en-IN")}</div>
         </div>
-        <div className="bg-emerald-50 rounded p-2">
-          <div className="text-slate-600">Paid</div>
-          <div className="font-semibold text-slate-900">₹{Number(s.total_paid ?? 0).toLocaleString("en-IN")}</div>
+        <div className="rounded p-2" style={{ backgroundColor: "color-mix(in srgb, currentColor 10%, transparent)", color: "inherit" }}>
+          <div style={{ color: "inherit", opacity: 0.75 }}>Paid</div>
+          <div className="font-semibold" style={{ color: "inherit" }}>₹{Number(s.total_paid ?? 0).toLocaleString("en-IN")}</div>
         </div>
-        <div className="bg-rose-50 rounded p-2">
-          <div className="text-slate-600">Balance</div>
-          <div className="font-semibold text-slate-900">₹{Number(s.balance ?? 0).toLocaleString("en-IN")}</div>
+        <div className="rounded p-2" style={{ backgroundColor: "color-mix(in srgb, currentColor 10%, transparent)", color: "inherit" }}>
+          <div style={{ color: "inherit", opacity: 0.75 }}>Balance</div>
+          <div className="font-semibold" style={{ color: "inherit" }}>₹{Number(s.balance ?? 0).toLocaleString("en-IN")}</div>
         </div>
       </div>
       <p className="text-[10px] text-muted-foreground mt-1 text-center">
