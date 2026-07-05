@@ -69,8 +69,32 @@ function MemberDashboard() {
 
   const m: any = meQ.data?.membership;
   const org = m?.organizations;
+  const orgId: string | undefined = org?.id ?? m?.org_id;
   const brand = (org?.theme_color as string) || "#ff8c28";
   const fontFamily = (org?.theme_font as string) || "Inter";
+
+  const chatActivityQ = useQuery({
+    queryKey: ["chat-activity-latest", orgId],
+    enabled: !!orgId,
+    refetchInterval: 60_000,
+    queryFn: async () => {
+      const [{ data: ann }, { data: mtg }] = await Promise.all([
+        supabase.from("chat_announcements").select("created_at").eq("org_id", orgId).order("created_at", { ascending: false }).limit(1),
+        supabase.from("org_meetings").select("created_at").eq("org_id", orgId).order("created_at", { ascending: false }).limit(1),
+      ]);
+      const times = [ann?.[0]?.created_at, mtg?.[0]?.created_at].filter(Boolean).map((t: string) => new Date(t).getTime());
+      return times.length ? Math.max(...times) : 0;
+    },
+  });
+  const [chatSeenAt, setChatSeenAt] = useState<number>(0);
+  useEffect(() => {
+    if (!orgId) return;
+    try {
+      const raw = localStorage.getItem(`chat.lastSeenAt.${orgId}`);
+      setChatSeenAt(raw ? new Date(raw).getTime() : 0);
+    } catch { setChatSeenAt(0); }
+  }, [orgId]);
+  const hasNewChat = !!chatActivityQ.data && chatActivityQ.data > chatSeenAt;
 
   useEffect(() => {
     if (!org) { setQrUrl(""); return; }
