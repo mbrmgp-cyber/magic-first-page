@@ -244,20 +244,26 @@ function MemberDashboard() {
             <p className="text-[10px] text-zinc-400 leading-tight">సభ్యుడి ఐడి కార్డ్</p>
           </button>
 
-          {MENU.map((it) => (
+          {MENU.map((it) => {
+            const showDot = it.to === "/org/chat" && hasNewChat;
+            return (
             <Link key={it.label} to={it.to as any}
-              className="rounded-xl bg-zinc-950 border border-zinc-800 p-4 flex flex-col items-center gap-2 text-center transition hover:-translate-y-0.5"
+              className="relative rounded-xl bg-zinc-950 border border-zinc-800 p-4 flex flex-col items-center gap-2 text-center transition hover:-translate-y-0.5"
               style={{ ["--brand" as any]: brand } as React.CSSProperties}
               onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${brand}99`; e.currentTarget.style.boxShadow = `0 0 20px ${brand}33`; }}
               onMouseLeave={(e) => { e.currentTarget.style.borderColor = ""; e.currentTarget.style.boxShadow = ""; }}>
-              <div className="h-11 w-11 rounded-full flex items-center justify-center"
+              <div className="h-11 w-11 rounded-full flex items-center justify-center relative"
                 style={{ backgroundColor: `${brand}26` }}>
                 <it.icon className="h-5 w-5" style={{ color: brand }} />
+                {showDot && (
+                  <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-red-500 border-2 border-black animate-pulse" aria-label="New message" />
+                )}
               </div>
               <p className="text-[13px] font-semibold text-white leading-tight">{it.label}</p>
               <p className="text-[10px] text-zinc-400 leading-tight">{it.te}</p>
             </Link>
-          ))}
+            );
+          })}
           <button onClick={logout}
             className="rounded-xl bg-zinc-950 border border-zinc-800 p-4 flex flex-col items-center gap-2 text-center hover:border-zinc-600 transition">
             <div className="h-11 w-11 rounded-full bg-zinc-900 flex items-center justify-center">
