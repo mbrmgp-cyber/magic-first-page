@@ -162,6 +162,9 @@ export const updateMemberProfile = createServerFn({ method: "POST" })
       emailError = e instanceof Error ? e.message : String(e);
     }
     return { ok: true, emailSent, emailError };
+  });
+
+
 
 export const setMemberActive = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
