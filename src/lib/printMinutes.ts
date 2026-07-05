@@ -42,22 +42,32 @@ table.kv td.k { width:30%; color:#555; font-weight:600; }
 .footer-sigs { margin-top:36px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px; }
 .footer-sigs .slot { text-align:center; padding-top:50px; border-top:1px solid #111; font-size:11px; }
 .muted { color:#6b7280; font-size:11px; }
-.toolbar { position:fixed; top:0; left:0; right:0; background:#7c2d12; color:#fff; padding:10px 16px; display:flex; justify-content:space-between; align-items:center; z-index:9999; box-shadow:0 2px 8px rgba(0,0,0,.2); }
-.toolbar button { background:#fff; color:#7c2d12; border:none; padding:7px 14px; border-radius:6px; font-weight:700; cursor:pointer; font-size:13px; margin-left:8px; }
-.toolbar button.ghost { background:transparent; color:#fff; border:1px solid #fff; }
-.page { margin-top:60px; }
+.toolbar { position:fixed; top:0; left:0; right:0; background:#7c2d12; color:#fff; padding:10px 12px; display:flex; flex-wrap:wrap; gap:8px; justify-content:space-between; align-items:center; z-index:9999; box-shadow:0 2px 8px rgba(0,0,0,.2); }
+.toolbar .tb-title { font-weight:700; font-size:13px; }
+.toolbar .tb-actions { display:flex; gap:8px; flex-wrap:wrap; }
+.toolbar button { border:none; padding:10px 16px; border-radius:8px; font-weight:800; cursor:pointer; font-size:14px; min-height:44px; }
+.toolbar button.print-btn { background:#fff; color:#7c2d12; }
+.toolbar button.close-btn { background:#dc2626; color:#fff; border:2px solid #fff; padding:12px 20px; font-size:15px; box-shadow:0 2px 6px rgba(0,0,0,.35); }
+.toolbar button.close-btn:hover { background:#b91c1c; }
+@media (max-width: 520px) {
+  .toolbar { flex-direction:column; align-items:stretch; }
+  .toolbar .tb-title { text-align:center; }
+  .toolbar .tb-actions { justify-content:stretch; }
+  .toolbar .tb-actions button { flex:1; }
+}
+.page { margin-top:80px; }
 @media print { .toolbar { display:none !important; } .page { margin-top:0; } }
 `;
 
 const toolbar = `<div class="toolbar no-print">
-  <div style="font-weight:700;font-size:13px;">📄 Print Preview</div>
-  <div>
-    <button class="ghost" onclick="window.close()">✕ మూసివేయండి / Close</button>
-    <button onclick="window.print()">🖨 ప్రింట్ / Print</button>
+  <div class="tb-title">📄 Print Preview</div>
+  <div class="tb-actions">
+    <button type="button" class="close-btn" onclick="(function(){try{window.close();}catch(e){} setTimeout(function(){ if(!window.closed){ if(window.opener){ try{window.opener.focus();}catch(e){} } if(history.length>1){ history.back(); } else { window.location.href='about:blank'; } } },120);})()">✕ మూసివేయండి / Close</button>
+    <button type="button" class="print-btn" onclick="window.print()">🖨 ప్రింట్ / Print</button>
   </div>
 </div>`;
 
-type Org = { name?: string; logo_url?: string; gov_reg_number?: string; phone?: string; email?: string };
+type Org = { name?: string; logo_url?: string; gov_reg_number?: string; phone?: string; email?: string; president_name?: string };
 type Member = { id: string; name: string; member_code?: string | null };
 type Resolution = {
   id: string;
@@ -88,7 +98,26 @@ async function fetchOrg(orgId: string): Promise<Org> {
     .from("organizations")
     .select("name, logo_url, gov_reg_number, phone, email")
     .eq("id", orgId).maybeSingle();
-  return (data as any) ?? {};
+  const { data: pres } = await supabase
+    .from("committee_members")
+    .select("member_id, members:member_id(name)")
+    .eq("org_id", orgId)
+    .eq("role", "president")
+    .eq("is_active", true)
+    .maybeSingle();
+  const president_name = (pres as any)?.members?.name ?? undefined;
+  return { ...((data as any) ?? {}), president_name };
+}
+
+function presidentSlot(org: Org) {
+  return `<div class="slot">${org.president_name ? `<div style="font-weight:700;margin-bottom:2px;">${esc(org.president_name)}</div>` : ""}అధ్యక్షుడు<br/>President</div>`;
+}
+function sigRow(org: Org) {
+  return `<div class="footer-sigs">
+    ${presidentSlot(org)}
+    <div class="slot">కార్యదర్శి<br/>Secretary</div>
+    <div class="slot">కోశాధికారి<br/>Treasurer</div>
+  </div>`;
 }
 
 function header(org: Org) {
@@ -159,11 +188,7 @@ export async function printMeetingMinutes(opts: {
 
   ${meeting.notes ? `<h2>అదనపు గమనికలు</h2><div class="box">${esc(meeting.notes).replace(/\n/g, "<br/>")}</div>` : ""}
 
-  <div class="footer-sigs">
-    <div class="slot">అధ్యక్షుడు<br/>President</div>
-    <div class="slot">కార్యదర్శి<br/>Secretary</div>
-    <div class="slot">కోశాధికారి<br/>Treasurer</div>
-  </div>
+  ${sigRow(org)}
 
 
 
@@ -196,11 +221,7 @@ export async function printResolution(opts: {
     <div class="cell app"><b>ఆమోదించిన వారు (${r.approved_member_ids.length})</b>${namesList(r.approved_member_ids, members)}</div>
     <div class="cell opp"><b>వ్యతిరేకించిన వారు (${r.opposed_member_ids.length})</b>${namesList(r.opposed_member_ids, members)}</div>
   </div>
-  <div class="footer-sigs">
-    <div class="slot">అధ్యక్షుడు<br/>President</div>
-    <div class="slot">కార్యదర్శి<br/>Secretary</div>
-    <div class="slot">కోశాధికారి<br/>Treasurer</div>
-  </div>
+  ${sigRow(org)}
   </body></html>`;
   openPrint(html);
 }
@@ -244,11 +265,7 @@ export async function printActivity(opts: {
     <b>మిగులు / Variance:</b>
     <span style="color:${variance >= 0 ? "#065f46" : "#991b1b"};font-weight:700;"> ${inr(variance)}</span>
   </div>
-  <div class="footer-sigs">
-    <div class="slot">అధ్యక్షుడు<br/>President</div>
-    <div class="slot">కార్యదర్శి<br/>Secretary</div>
-    <div class="slot">కోశాధికారి<br/>Treasurer</div>
-  </div>
+  ${sigRow(org)}
   </body></html>`;
   openPrint(html);
 }
