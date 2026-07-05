@@ -42,7 +42,12 @@ async function findAuthUserIdByEmail(supabaseAdmin: any, email: string) {
   return null;
 }
 
-async function sendMagicLoginLinkEmail(supabaseAdmin: any, email: string, redirectTo: string) {
+async function sendMagicLoginLinkEmail(
+  supabaseAdmin: any,
+  email: string,
+  redirectTo: string,
+  opts?: { subject?: string; note?: string; label?: string }
+) {
   const [{ sendLovableEmail }, React, { render }, { MagicLinkEmail }] = await Promise.all([
     import("@lovable.dev/email-js"),
     import("react"),
@@ -61,7 +66,9 @@ async function sendMagicLoginLinkEmail(supabaseAdmin: any, email: string, redire
   if (!confirmationUrl) throw new Error("Could not generate login link");
 
   const siteName = "MBR APP";
-  const element = React.createElement(MagicLinkEmail, { siteName, confirmationUrl });
+  const subject = opts?.subject || "MBR APP — Login link";
+  const label = opts?.label || "magiclink";
+  const element = React.createElement(MagicLinkEmail, { siteName, confirmationUrl, note: opts?.note });
   const html = await render(element);
   const text = await render(element, { plainText: true });
   const messageId = crypto.randomUUID();
@@ -71,7 +78,7 @@ async function sendMagicLoginLinkEmail(supabaseAdmin: any, email: string, redire
   try {
     await supabaseAdmin.from("email_send_log").insert({
       message_id: messageId,
-      template_name: "magiclink",
+      template_name: label,
       recipient_email: email,
       status: "pending",
     });
@@ -81,11 +88,11 @@ async function sendMagicLoginLinkEmail(supabaseAdmin: any, email: string, redire
         to: email,
         from: `${siteName} <noreply@notify.mbrplatform.com>`,
         sender_domain: "notify.mbrplatform.com",
-        subject: "MBR APP — Login link",
+        subject,
         html,
         text,
         purpose: "transactional",
-        label: "magiclink",
+        label,
         message_id: messageId,
         idempotency_key: messageId,
         unsubscribe_token: `auth-${messageId}`,
@@ -95,7 +102,7 @@ async function sendMagicLoginLinkEmail(supabaseAdmin: any, email: string, redire
 
     await supabaseAdmin.from("email_send_log").insert({
       message_id: messageId,
-      template_name: "magiclink",
+      template_name: label,
       recipient_email: email,
       status: "sent",
     });
@@ -103,7 +110,7 @@ async function sendMagicLoginLinkEmail(supabaseAdmin: any, email: string, redire
     const message = error instanceof Error ? error.message : String(error);
     await supabaseAdmin.from("email_send_log").insert({
       message_id: messageId,
-      template_name: "magiclink",
+      template_name: label,
       recipient_email: email,
       status: "failed",
       error_message: message,
@@ -111,6 +118,35 @@ async function sendMagicLoginLinkEmail(supabaseAdmin: any, email: string, redire
     throw new Error(message);
   }
 }
+
+export const sendMemberProfileUpdatedEmail = createServerFn({ method: "POST" })
+  .inputValidator((d: { email: string; name?: string | null }) => d)
+  .handler(async ({ data }) => {
+    const email = (data.email || "").trim().toLowerCase();
+    if (!email) return { sent: false as const, reason: "missing_email" as const };
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Ensure the auth user exists so the magic link works.
+    let userId = await findAuthUserIdByEmail(supabaseAdmin, email);
+    if (!userId) {
+      const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password: `MBR-${crypto.randomUUID()}`,
+        email_confirm: true,
+        user_metadata: { role: "member" },
+      });
+      if (createError) throw new Error(createError.message);
+      userId = created.user?.id ?? null;
+    }
+    const redirectTo = `${PUBLIC_APP_ORIGIN}/auth?lang=te`;
+    const greetingName = data.name ? `${data.name}, ` : "";
+    const note = `${greetingName}Your profile details have been updated by the Admin. Please login to review the changes. మీ ప్రొఫైల్ వివరాలను అడ్మిన్ అప్‌డేట్ చేశారు. మార్పులను చూడటానికి దయచేసి లాగిన్ అవ్వండి.`;
+    await sendMagicLoginLinkEmail(supabaseAdmin, email, redirectTo, {
+      subject: "MBR APP — Your profile was updated by Admin",
+      note,
+      label: "profile_updated",
+    });
+    return { sent: true as const };
+  });
 
 export const sendLoginLink = createServerFn({ method: "POST" })
   .inputValidator((d: { email: string; lang?: string }) => d)
