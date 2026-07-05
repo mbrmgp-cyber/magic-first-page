@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { MemberIdCard } from "@/components/MemberIdCard";
 import {
   LogOut, IdCard, BookOpen, Wallet, Briefcase, MessageSquare, Vote, ShieldCheck, User, ScanLine,
-  Facebook, Youtube, Gavel,
+  Facebook, Youtube, Gavel, CalendarDays,
 } from "lucide-react";
 
 const SOCIAL_LINKS = [

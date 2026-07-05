@@ -39,6 +39,7 @@ import { Route as AuthenticatedMemberSuretyInboxRouteImport } from './routes/_au
 import { Route as AuthenticatedMemberPendingRouteImport } from './routes/_authenticated/member.pending'
 import { Route as AuthenticatedMemberLoanRequestRouteImport } from './routes/_authenticated/member.loan-request'
 import { Route as AuthenticatedMemberLedgerRouteImport } from './routes/_authenticated/member.ledger'
+import { Route as AuthenticatedMemberEventsRouteImport } from './routes/_authenticated/member.events'
 import { Route as AuthenticatedMemberDashboardRouteImport } from './routes/_authenticated/member.dashboard'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -207,6 +208,12 @@ const AuthenticatedMemberLedgerRoute =
     path: '/member/ledger',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedMemberEventsRoute =
+  AuthenticatedMemberEventsRouteImport.update({
+    id: '/member/events',
+    path: '/member/events',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMemberDashboardRoute =
   AuthenticatedMemberDashboardRouteImport.update({
     id: '/member/dashboard',
@@ -239,6 +246,7 @@ export interface FileRoutesByFullPath {
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
   '/member/dashboard': typeof AuthenticatedMemberDashboardRoute
+  '/member/events': typeof AuthenticatedMemberEventsRoute
   '/member/ledger': typeof AuthenticatedMemberLedgerRoute
   '/member/loan-request': typeof AuthenticatedMemberLoanRequestRoute
   '/member/pending': typeof AuthenticatedMemberPendingRoute
@@ -274,6 +282,7 @@ export interface FileRoutesByTo {
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
   '/member/dashboard': typeof AuthenticatedMemberDashboardRoute
+  '/member/events': typeof AuthenticatedMemberEventsRoute
   '/member/ledger': typeof AuthenticatedMemberLedgerRoute
   '/member/loan-request': typeof AuthenticatedMemberLoanRequestRoute
   '/member/pending': typeof AuthenticatedMemberPendingRoute
@@ -311,6 +320,7 @@ export interface FileRoutesById {
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
   '/_authenticated/member/dashboard': typeof AuthenticatedMemberDashboardRoute
+  '/_authenticated/member/events': typeof AuthenticatedMemberEventsRoute
   '/_authenticated/member/ledger': typeof AuthenticatedMemberLedgerRoute
   '/_authenticated/member/loan-request': typeof AuthenticatedMemberLoanRequestRoute
   '/_authenticated/member/pending': typeof AuthenticatedMemberPendingRoute
@@ -348,6 +358,7 @@ export interface FileRouteTypes {
     | '/member/register'
     | '/org/register'
     | '/member/dashboard'
+    | '/member/events'
     | '/member/ledger'
     | '/member/loan-request'
     | '/member/pending'
@@ -383,6 +394,7 @@ export interface FileRouteTypes {
     | '/member/register'
     | '/org/register'
     | '/member/dashboard'
+    | '/member/events'
     | '/member/ledger'
     | '/member/loan-request'
     | '/member/pending'
@@ -419,6 +431,7 @@ export interface FileRouteTypes {
     | '/member/register'
     | '/org/register'
     | '/_authenticated/member/dashboard'
+    | '/_authenticated/member/events'
     | '/_authenticated/member/ledger'
     | '/_authenticated/member/loan-request'
     | '/_authenticated/member/pending'
@@ -671,6 +684,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMemberLedgerRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/member/events': {
+      id: '/_authenticated/member/events'
+      path: '/member/events'
+      fullPath: '/member/events'
+      preLoaderRoute: typeof AuthenticatedMemberEventsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/member/dashboard': {
       id: '/_authenticated/member/dashboard'
       path: '/member/dashboard'
@@ -705,6 +725,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedMemberDashboardRoute: typeof AuthenticatedMemberDashboardRoute
+  AuthenticatedMemberEventsRoute: typeof AuthenticatedMemberEventsRoute
   AuthenticatedMemberLedgerRoute: typeof AuthenticatedMemberLedgerRoute
   AuthenticatedMemberLoanRequestRoute: typeof AuthenticatedMemberLoanRequestRoute
   AuthenticatedMemberPendingRoute: typeof AuthenticatedMemberPendingRoute
@@ -732,6 +753,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedMemberDashboardRoute: AuthenticatedMemberDashboardRoute,
+  AuthenticatedMemberEventsRoute: AuthenticatedMemberEventsRoute,
   AuthenticatedMemberLedgerRoute: AuthenticatedMemberLedgerRoute,
   AuthenticatedMemberLoanRequestRoute: AuthenticatedMemberLoanRequestRoute,
   AuthenticatedMemberPendingRoute: AuthenticatedMemberPendingRoute,
@@ -774,13 +796,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
