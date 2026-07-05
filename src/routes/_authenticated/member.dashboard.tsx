@@ -53,6 +53,7 @@ const MENU = [
   { label: "Live Chit Auction", te: "లైవ్ చిట్ ఆక్షన్", icon: Gavel, to: "/org/auction" },
   { label: "Committee Details", te: "కార్య వర్గ వివరాలు", icon: Briefcase, to: "/org/committee" },
   { label: "Chat", te: "చాటింగ్ / సందేశాలు", icon: MessageSquare, to: "/org/chat" },
+  { label: "Events & Decisions", te: "కార్యక్రమాలు & నిర్ణయాలు", icon: CalendarDays, to: "/member/events" },
   { label: "Elections", te: "ఎన్నికలు", icon: Vote, to: "/org/elections" },
 ] as const;
 
