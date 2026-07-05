@@ -87,3 +87,4 @@ const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
 const hidden = { display: 'none', overflow: 'hidden', lineHeight: '1px', opacity: 0, maxHeight: 0, maxWidth: 0, fontSize: '1px', color: '#ffffff' as const }
 const sentAtStyle = { fontSize: '11px', color: '#b0b0b0', margin: '18px 0 0' }
 const refStyle = { fontSize: '10px', color: '#cccccc' }
+const noteStyle = { fontSize: '14px', color: '#1f2937', lineHeight: '1.5', margin: '0 0 18px', padding: '10px 12px', backgroundColor: '#fff7ed', borderLeft: '3px solid #f97316', borderRadius: '4px' }
