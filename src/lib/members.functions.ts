@@ -143,8 +143,25 @@ export const updateMemberProfile = createServerFn({ method: "POST" })
     const { member_id, ...patch } = data;
     const { error } = await supabase.from("members").update(patch as any).eq("id", member_id);
     if (error) throw new Error(error.message);
-    return { ok: true };
-  });
+    // Best-effort: notify the member via a magic login link that their profile was updated.
+    let emailSent = false;
+    let emailError: string | null = null;
+    try {
+      const { data: m } = await supabase
+        .from("members")
+        .select("email, name, status")
+        .eq("id", member_id)
+        .maybeSingle();
+      const email = (m?.email || "").trim().toLowerCase();
+      if (email && m?.status === "approved") {
+        const { sendMemberProfileUpdatedEmail } = await import("@/lib/org.functions");
+        await sendMemberProfileUpdatedEmail({ data: { email, name: (patch as any).name ?? m?.name ?? null } });
+        emailSent = true;
+      }
+    } catch (e) {
+      emailError = e instanceof Error ? e.message : String(e);
+    }
+    return { ok: true, emailSent, emailError };
 
 export const setMemberActive = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
