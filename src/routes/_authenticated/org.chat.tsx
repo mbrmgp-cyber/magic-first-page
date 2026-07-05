@@ -82,8 +82,8 @@ function ChatHub() {
   const ctxQ = useQuery({ queryKey: ["chat-ctx"], queryFn: loadContext });
   const { pick } = useLangPick();
   const ctx = ctxQ.data;
-  const canBroadcast = !!ctx && (ctx.isAdmin || ctx.isCommittee);
-  const canReview = canBroadcast;
+  const canBroadcast = !!ctx && ctx.isAdmin; // Only Admin can post announcements
+  const canReview = !!ctx && (ctx.isAdmin || ctx.isCommittee);
 
   if (ctxQ.isLoading) {
     return <div className="min-h-screen bg-black text-white flex items-center justify-center"><Loader2 className="w-5 h-5 animate-spin" /></div>;
