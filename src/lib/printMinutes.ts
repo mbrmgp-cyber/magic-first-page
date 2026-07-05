@@ -98,7 +98,26 @@ async function fetchOrg(orgId: string): Promise<Org> {
     .from("organizations")
     .select("name, logo_url, gov_reg_number, phone, email")
     .eq("id", orgId).maybeSingle();
-  return (data as any) ?? {};
+  const { data: pres } = await supabase
+    .from("committee_members")
+    .select("member_id, members:member_id(name)")
+    .eq("org_id", orgId)
+    .eq("role", "president")
+    .eq("is_active", true)
+    .maybeSingle();
+  const president_name = (pres as any)?.members?.name ?? undefined;
+  return { ...((data as any) ?? {}), president_name };
+}
+
+function presidentSlot(org: Org) {
+  return `<div class="slot">${org.president_name ? `<div style="font-weight:700;margin-bottom:2px;">${esc(org.president_name)}</div>` : ""}అధ్యక్షుడు<br/>President</div>`;
+}
+function sigRow(org: Org) {
+  return `<div class="footer-sigs">
+    ${presidentSlot(org)}
+    <div class="slot">కార్యదర్శి<br/>Secretary</div>
+    <div class="slot">కోశాధికారి<br/>Treasurer</div>
+  </div>`;
 }
 
 function header(org: Org) {
