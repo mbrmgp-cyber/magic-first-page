@@ -51,10 +51,15 @@ export function GlobalThemeApplier() {
       "--mbr-theme-primary": t.buttonBg,
       "--mbr-theme-primary-fg": t.buttonText,
       "--mbr-theme-heading": t.headColor,
+      "--mbr-theme-sub": t.subColor,
       "--mbr-theme-muted": t.smallColor,
+      "--mbr-theme-small-size": `${t.smallSize}px`,
       "--mbr-theme-icon": t.icon,
       "--mbr-theme-input-bg": t.inputBg,
       "--mbr-theme-input-text": t.inputText,
+      "--mbr-theme-head-align": t.headAlign,
+      "--mbr-theme-head-font": t.headFont,
+      "--mbr-theme-sub-font": t.subFont,
       "--background": t.bg,
       "--foreground": t.headColor,
       "--card": t.miniBox,
@@ -430,8 +435,61 @@ export function GlobalThemeApplier() {
       html[data-mbr-theme="on"] [role="tab"][data-state="active"] * {
         color: var(--mbr-theme-primary-fg) !important;
       }
+
+      /* Header text alignment — applies to all main headings globally */
+      html[data-mbr-theme="on"] .mbr-themed-app h1,
+      html[data-mbr-theme="on"] .mbr-themed-app h2,
+      html[data-mbr-theme="on"] .mbr-themed-app h3,
+      html[data-mbr-theme="on"] .mbr-themed-app h4 {
+        text-align: ${t.headAlign} !important;
+      }
+      html[data-mbr-theme="on"] .mbr-themed-app h1,
+      html[data-mbr-theme="on"] .mbr-themed-app h2,
+      html[data-mbr-theme="on"] .mbr-themed-app h3 {
+        color: var(--mbr-theme-heading) !important;
+        font-family: ${JSON.stringify(t.headFont)}, "Noto Sans Telugu", "Noto Sans Devanagari", system-ui, sans-serif !important;
+      }
+      /* Sub-title styling (italic slogans, subtitles) */
+      html[data-mbr-theme="on"] .mbr-themed-app .italic,
+      html[data-mbr-theme="on"] .mbr-themed-app [data-theme-role="sub"] {
+        color: var(--mbr-theme-sub) !important;
+        font-family: ${JSON.stringify(t.subFont)}, "Noto Sans Telugu", "Noto Sans Devanagari", system-ui, sans-serif !important;
+      }
+      /* Small helper text */
+      html[data-mbr-theme="on"] .mbr-themed-app [data-theme-role="small"],
+      html[data-mbr-theme="on"] .mbr-themed-app .text-\\[11px\\],
+      html[data-mbr-theme="on"] .mbr-themed-app .text-\\[10px\\] {
+        color: var(--mbr-theme-muted) !important;
+        font-size: var(--mbr-theme-small-size) !important;
+      }
+
+      /* Strict print protections — ID cards, letter pads, receipts and any
+         printable surface marked .mbr-preserve-design or [data-print-safe]
+         must always render on white with high-contrast black text so the
+         admin theme never bleeds into printed output. */
+      html[data-mbr-theme="on"] .mbr-preserve-design,
+      html[data-mbr-theme="on"] .mbr-preserve-design *,
+      html[data-mbr-theme="on"] [data-print-safe],
+      html[data-mbr-theme="on"] [data-print-safe] * {
+        forced-color-adjust: none;
+      }
+      @media print {
+        html, body, .mbr-themed-app,
+        [data-print-safe], [data-print-safe] *,
+        .mbr-preserve-design, .mbr-preserve-design * {
+          background: #ffffff !important;
+          background-color: #ffffff !important;
+          background-image: none !important;
+          color: #000000 !important;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+          box-shadow: none !important;
+          text-shadow: none !important;
+        }
+      }
     `;
   }, [org]);
 
   return null;
 }
+
