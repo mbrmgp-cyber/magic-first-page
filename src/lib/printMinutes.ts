@@ -188,11 +188,7 @@ export async function printMeetingMinutes(opts: {
 
   ${meeting.notes ? `<h2>అదనపు గమనికలు</h2><div class="box">${esc(meeting.notes).replace(/\n/g, "<br/>")}</div>` : ""}
 
-  <div class="footer-sigs">
-    <div class="slot">అధ్యక్షుడు<br/>President</div>
-    <div class="slot">కార్యదర్శి<br/>Secretary</div>
-    <div class="slot">కోశాధికారి<br/>Treasurer</div>
-  </div>
+  ${sigRow(org)}
 
 
 
@@ -225,11 +221,7 @@ export async function printResolution(opts: {
     <div class="cell app"><b>ఆమోదించిన వారు (${r.approved_member_ids.length})</b>${namesList(r.approved_member_ids, members)}</div>
     <div class="cell opp"><b>వ్యతిరేకించిన వారు (${r.opposed_member_ids.length})</b>${namesList(r.opposed_member_ids, members)}</div>
   </div>
-  <div class="footer-sigs">
-    <div class="slot">అధ్యక్షుడు<br/>President</div>
-    <div class="slot">కార్యదర్శి<br/>Secretary</div>
-    <div class="slot">కోశాధికారి<br/>Treasurer</div>
-  </div>
+  ${sigRow(org)}
   </body></html>`;
   openPrint(html);
 }
@@ -273,11 +265,7 @@ export async function printActivity(opts: {
     <b>మిగులు / Variance:</b>
     <span style="color:${variance >= 0 ? "#065f46" : "#991b1b"};font-weight:700;"> ${inr(variance)}</span>
   </div>
-  <div class="footer-sigs">
-    <div class="slot">అధ్యక్షుడు<br/>President</div>
-    <div class="slot">కార్యదర్శి<br/>Secretary</div>
-    <div class="slot">కోశాధికారి<br/>Treasurer</div>
-  </div>
+  ${sigRow(org)}
   </body></html>`;
   openPrint(html);
 }
