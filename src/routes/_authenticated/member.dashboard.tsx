@@ -78,11 +78,14 @@ function MemberDashboard() {
     enabled: !!orgId,
     refetchInterval: 60_000,
     queryFn: async () => {
+      if (!orgId) return 0;
       const [{ data: ann }, { data: mtg }] = await Promise.all([
         supabase.from("chat_announcements").select("created_at").eq("org_id", orgId).order("created_at", { ascending: false }).limit(1),
         supabase.from("org_meetings").select("created_at").eq("org_id", orgId).order("created_at", { ascending: false }).limit(1),
       ]);
-      const times = [ann?.[0]?.created_at, mtg?.[0]?.created_at].filter(Boolean).map((t: string) => new Date(t).getTime());
+      const times = [ann?.[0]?.created_at, mtg?.[0]?.created_at]
+        .filter((t): t is string => !!t)
+        .map((t) => new Date(t).getTime());
       return times.length ? Math.max(...times) : 0;
     },
   });
