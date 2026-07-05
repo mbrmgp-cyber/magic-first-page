@@ -14,10 +14,12 @@ import {
 interface MagicLinkEmailProps {
   siteName: string
   confirmationUrl: string
+  note?: string
 }
 
 export const MagicLinkEmail = ({
   confirmationUrl,
+  note,
 }: MagicLinkEmailProps) => {
   const now = new Date()
   const sentAt = now.toUTCString()
@@ -34,6 +36,7 @@ export const MagicLinkEmail = ({
       <Container style={container}>
         <Text style={brand}>MBR APP</Text>
         <Heading style={h1}>Login Link / లాగిన్ లింక్</Heading>
+        {note ? <Text style={noteStyle}>{note}</Text> : null}
         <Text style={text}>
           Please click the button below to login to MBR APP. ఈ లింక్ కొద్దిసేపు మాత్రమే పనిచేస్తుంది.
         </Text>
