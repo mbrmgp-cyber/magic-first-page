@@ -309,3 +309,59 @@ function MemberDashboard() {
     </div>
   );
 }
+
+type AdBanner = { url: string; active?: boolean; label?: string | null };
+
+function AdBannerSlot({ orgId, banners, brand }: { orgId?: string; banners?: AdBanner[]; brand: string }) {
+  const active = (banners || []).filter((b) => b && b.url && b.active !== false);
+  const [signed, setSigned] = useState<string[]>([]);
+  const [idx, setIdx] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function resolve() {
+      const urls = await Promise.all(active.map(async (b) => {
+        if (/^https?:\/\//i.test(b.url) || b.url.startsWith("data:")) return b.url;
+        // storage path within org-ads bucket
+        const { data } = await supabase.storage.from("org-ads").createSignedUrl(b.url, 3600);
+        return data?.signedUrl || "";
+      }));
+      if (!cancelled) setSigned(urls.filter(Boolean));
+    }
+    if (active.length) resolve(); else setSigned([]);
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orgId, JSON.stringify(active.map((b) => b.url))]);
+
+  useEffect(() => {
+    if (signed.length <= 1) return;
+    const t = setInterval(() => setIdx((i) => (i + 1) % signed.length), 5000);
+    return () => clearInterval(t);
+  }, [signed.length]);
+
+  if (!signed.length) return null;
+  const current = signed[idx % signed.length];
+
+  return (
+    <div className="rounded-2xl overflow-hidden border relative"
+      style={{ borderColor: `${brand}4d`, boxShadow: `0 0 24px ${brand}22` }}>
+      <img
+        src={current}
+        alt="Society advertisement"
+        className="w-full h-auto max-h-64 object-cover block transition-opacity duration-500"
+      />
+      {signed.length > 1 && (
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+          {signed.map((_, i) => (
+            <span key={i} className="h-1.5 rounded-full transition-all"
+              style={{
+                width: i === idx ? 18 : 6,
+                background: i === idx ? brand : "rgba(255,255,255,0.6)",
+              }} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
