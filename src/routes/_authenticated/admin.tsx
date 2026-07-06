@@ -130,7 +130,10 @@ function AdminPanel() {
 
         <MemberIdUpdater />
 
+        <MbrGlobalAdsManager />
+
         <AllOrganizationsManager />
+
 
 
 
