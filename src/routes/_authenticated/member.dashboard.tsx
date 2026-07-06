@@ -379,7 +379,7 @@ function GlobalAdBar() {
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: true });
       if (error) return [] as { id: string; url: string; label: string | null }[];
-      return (data || []) as { id: string; url: string; label: string | null }[];
+      return ((data as unknown) || []) as { id: string; url: string; label: string | null }[];
     },
   });
 
