@@ -616,3 +616,134 @@ function AllOrganizationsManager() {
     </>
   );
 }
+
+type GlobalAd = { id: string; url: string; label: string | null; active: boolean; sort_order: number };
+
+function MbrGlobalAdsManager() {
+  const qc = useQueryClient();
+  const listQ = useQuery({
+    queryKey: ["mbr-global-ads-admin"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("mbr_global_ads" as any)
+        .select("id,url,label,active,sort_order")
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true });
+      if (error) throw new Error(error.message);
+      return ((data as unknown) || []) as GlobalAd[];
+    },
+  });
+
+  const [previews, setPreviews] = useState<Record<string, string>>({});
+  const [uploading, setUploading] = useState(false);
+
+  const ads = listQ.data || [];
+
+  useEffect(() => {
+    let cancel = false;
+    (async () => {
+      const map: Record<string, string> = {};
+      await Promise.all(ads.map(async (a) => {
+        if (!a.url) return;
+        if (/^https?:\/\//i.test(a.url) || a.url.startsWith("data:")) { map[a.url] = a.url; return; }
+        const { data } = await supabase.storage.from("mbr-global-ads").createSignedUrl(a.url, 3600);
+        if (data?.signedUrl) map[a.url] = data.signedUrl;
+      }));
+      if (!cancel) setPreviews(map);
+    })();
+    return () => { cancel = true; };
+  }, [JSON.stringify(ads.map((a) => a.url))]);
+
+  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || []);
+    e.target.value = "";
+    if (!files.length) return;
+    setUploading(true);
+    try {
+      for (const file of files) {
+        const ext = (file.name.split(".").pop() || "png").toLowerCase();
+        const path = `global/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const up = await supabase.storage.from("mbr-global-ads").upload(path, file, { contentType: file.type, upsert: false });
+        if (up.error) throw new Error(up.error.message);
+        const ins = await supabase.from("mbr_global_ads" as any).insert({ url: path, active: true, sort_order: ads.length });
+        if (ins.error) throw new Error(ins.error.message);
+      }
+      toast.success("Uploaded / అప్‌లోడ్ అయింది");
+      qc.invalidateQueries({ queryKey: ["mbr-global-ads-admin"] });
+      qc.invalidateQueries({ queryKey: ["mbr-global-ads-active"] });
+    } catch (err: any) {
+      toast.error(err.message ?? "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function toggleActive(a: GlobalAd) {
+    const { error } = await supabase.from("mbr_global_ads" as any).update({ active: !a.active }).eq("id", a.id);
+    if (error) { toast.error(error.message); return; }
+    qc.invalidateQueries({ queryKey: ["mbr-global-ads-admin"] });
+    qc.invalidateQueries({ queryKey: ["mbr-global-ads-active"] });
+  }
+
+  async function remove(a: GlobalAd) {
+    if (!confirm("Delete this banner?")) return;
+    if (a.url && !/^https?:\/\//i.test(a.url) && !a.url.startsWith("data:")) {
+      await supabase.storage.from("mbr-global-ads").remove([a.url]).catch(() => {});
+    }
+    const { error } = await supabase.from("mbr_global_ads" as any).delete().eq("id", a.id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Deleted");
+    qc.invalidateQueries({ queryKey: ["mbr-global-ads-admin"] });
+    qc.invalidateQueries({ queryKey: ["mbr-global-ads-active"] });
+  }
+
+  return (
+    <Card className="p-4 bg-white/95 backdrop-blur border-white shadow-md space-y-3">
+      <div className="flex items-center gap-2">
+        <ImageIcon className="h-5 w-5 text-[#FF9933]" />
+        <h2 className="font-bold">MBR APP Global Ad Banners (Super Admin only)</h2>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        ఈ ప్రకటనలు అన్ని సొసైటీల సభ్యుల డాష్‌బోర్డ్ కింద sticky bar లో కనిపిస్తాయి. Society admins దీన్ని edit చేయలేరు.
+      </p>
+      <div className="rounded-md border border-dashed border-orange-300 bg-orange-50 p-2 text-[11px] text-orange-900">
+        Recommended: <span className="font-mono">1200 × 128 px</span> (ratio ~9:1) — slim horizontal banner, max height 64px on mobile. JPG/PNG, &lt; 500KB.
+      </div>
+
+      <label className="flex items-center justify-center gap-2 rounded-lg border border-dashed border-zinc-300 bg-white py-4 cursor-pointer hover:border-[#FF9933] transition">
+        <ImageIcon className="h-4 w-4 text-[#FF9933]" />
+        <span className="text-sm">{uploading ? "Uploading…" : "Upload global banner image(s)"}</span>
+        <input type="file" accept="image/*" multiple className="hidden" onChange={handleUpload} disabled={uploading} />
+      </label>
+
+      {ads.length === 0 ? (
+        <p className="text-xs text-muted-foreground italic text-center py-2">No global banners yet.</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {ads.map((a) => {
+            const src = previews[a.url] || "";
+            return (
+              <div key={a.id} className="rounded-lg overflow-hidden border relative"
+                style={{ borderColor: a.active ? "#FF993388" : "#d4d4d8", opacity: a.active ? 1 : 0.55 }}>
+                {src
+                  ? <img src={src} alt="" className="w-full h-16 object-cover" />
+                  : <div className="w-full h-16 bg-zinc-100 animate-pulse" />}
+                <div className="flex items-center justify-between p-1.5 bg-white/95 border-t">
+                  <button type="button" onClick={() => toggleActive(a)}
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-zinc-700 hover:text-zinc-900">
+                    {a.active ? <><Eye className="h-3.5 w-3.5" /> Active</> : <><Ban className="h-3.5 w-3.5" /> Hidden</>}
+                  </button>
+                  <button type="button" onClick={() => remove(a)}
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-red-600 hover:text-red-700">
+                    <XCircle className="h-3.5 w-3.5" /> Delete
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </Card>
+  );
+}
+
