@@ -179,8 +179,9 @@ function MemberDashboard() {
               : <ShieldCheck className="h-7 w-7" style={{ color: brand }} />}
           </div>
           <div className="flex-1 min-w-0 text-center">
-            <p className="text-[11px] text-zinc-400">నమస్కారం 🙏</p>
-            <p className="text-sm font-semibold text-white truncate">{fullName}</p>
+            <p className="text-sm font-semibold text-white leading-tight">స్వాగతం గౌరవ సభ్యులకు 🙏</p>
+            <p className="text-[11px] text-zinc-400 mt-0.5">Welcome, Honorable Member</p>
+            <p className="text-sm font-semibold text-white truncate mt-1" style={{ color: brand }}>{fullName}</p>
           </div>
           <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-950 flex items-center justify-center overflow-hidden shrink-0"
             style={{ borderWidth: 1, borderStyle: "solid", borderColor: `${brand}4d` }}>
@@ -192,16 +193,9 @@ function MemberDashboard() {
           </div>
         </header>
 
-        {/* Sub-header — hardcoded society name */}
-        <Card className="bg-zinc-950 border-zinc-800 p-4 text-center"
-          style={{ boxShadow: `0 0 24px ${brand}1f` }}>
-          <p className="text-sm text-white leading-snug">
-            చిట్వేల్ హెల్ప్ లైన్ సొసైటీ యొక్క విలువైన సభ్యుడి వివరాలు
-          </p>
-          <p className="text-[11px] text-zinc-400 mt-0.5">
-            Valued Member Details of Chitvel Help Line Society
-          </p>
-        </Card>
+        {/* Society Advertisement Banner — auto-hides when no active banners */}
+        <AdBannerSlot orgId={orgId} banners={(org as any)?.ad_banners as any[] | undefined} brand={brand} />
+
 
         {/* Profile layout: photo + names */}
         <Card className="bg-zinc-950 border-zinc-800 p-4 flex items-center gap-4">
@@ -315,3 +309,59 @@ function MemberDashboard() {
     </div>
   );
 }
+
+type AdBanner = { url: string; active?: boolean; label?: string | null };
+
+function AdBannerSlot({ orgId, banners, brand }: { orgId?: string; banners?: AdBanner[]; brand: string }) {
+  const active = (banners || []).filter((b) => b && b.url && b.active !== false);
+  const [signed, setSigned] = useState<string[]>([]);
+  const [idx, setIdx] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function resolve() {
+      const urls = await Promise.all(active.map(async (b) => {
+        if (/^https?:\/\//i.test(b.url) || b.url.startsWith("data:")) return b.url;
+        // storage path within org-ads bucket
+        const { data } = await supabase.storage.from("org-ads").createSignedUrl(b.url, 3600);
+        return data?.signedUrl || "";
+      }));
+      if (!cancelled) setSigned(urls.filter(Boolean));
+    }
+    if (active.length) resolve(); else setSigned([]);
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orgId, JSON.stringify(active.map((b) => b.url))]);
+
+  useEffect(() => {
+    if (signed.length <= 1) return;
+    const t = setInterval(() => setIdx((i) => (i + 1) % signed.length), 5000);
+    return () => clearInterval(t);
+  }, [signed.length]);
+
+  if (!signed.length) return null;
+  const current = signed[idx % signed.length];
+
+  return (
+    <div className="rounded-2xl overflow-hidden border relative"
+      style={{ borderColor: `${brand}4d`, boxShadow: `0 0 24px ${brand}22` }}>
+      <img
+        src={current}
+        alt="Society advertisement"
+        className="w-full h-auto max-h-64 object-cover block transition-opacity duration-500"
+      />
+      {signed.length > 1 && (
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+          {signed.map((_, i) => (
+            <span key={i} className="h-1.5 rounded-full transition-all"
+              style={{
+                width: i === idx ? 18 : 6,
+                background: i === idx ? brand : "rgba(255,255,255,0.6)",
+              }} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+

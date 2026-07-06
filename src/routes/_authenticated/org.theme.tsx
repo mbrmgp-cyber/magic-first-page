@@ -2,7 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { getMyOrg, updateOrgTheme } from "@/lib/org.functions";
+import { getMyOrg, updateOrgTheme, updateOrgAdBanners } from "@/lib/org.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +11,7 @@ import { toast } from "sonner";
 import {
   ArrowLeft, Save, Palette, Square, Frame, Sparkles, MousePointerClick,
   Type, AlignLeft, BookOpen, Users, Briefcase, IdCard,
-  AlignCenter, AlignRight, Quote,
+  AlignCenter, AlignRight, Quote, Image as ImageIcon, Upload, Trash2, Eye, EyeOff,
 } from "lucide-react";
 import {
   DEFAULT_THEME, HEAD_FONTS, TEXT_ALIGNS, type TextAlign, type ThemeSettings, resolveTheme,
@@ -317,6 +318,11 @@ function OrgThemePage() {
           </p>
         </Card>
 
+        {/* Advertisement Banners — shown at top of member dashboards */}
+        <AdBannersCard orgId={org?.id} initial={(org as any)?.ad_banners as any} accent={t.icon} onSaved={() => qc.invalidateQueries({ queryKey: ["my-org"] })} />
+
+
+
         <Button onClick={save} disabled={busy}
           className="w-full font-semibold"
           style={{ background: t.buttonBg, color: t.buttonText, boxShadow: `0 0 24px ${t.buttonBg}66` }}>
@@ -327,3 +333,138 @@ function OrgThemePage() {
     </div>
   );
 }
+
+type AdBanner = { url: string; active?: boolean; label?: string | null };
+
+function AdBannersCard({ orgId, initial, accent, onSaved }: { orgId?: string; initial?: AdBanner[]; accent: string; onSaved: () => void }) {
+  const saveFn = useServerFn(updateOrgAdBanners);
+  const [banners, setBanners] = useState<AdBanner[]>([]);
+  const [previews, setPreviews] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    setBanners(Array.isArray(initial) ? initial : []);
+  }, [orgId, JSON.stringify(initial)]);
+
+  useEffect(() => {
+    let cancel = false;
+    (async () => {
+      const map: Record<string, string> = {};
+      await Promise.all(banners.map(async (b) => {
+        if (!b.url) return;
+        if (/^https?:\/\//i.test(b.url) || b.url.startsWith("data:")) { map[b.url] = b.url; return; }
+        const { data } = await supabase.storage.from("org-ads").createSignedUrl(b.url, 3600);
+        if (data?.signedUrl) map[b.url] = data.signedUrl;
+      }));
+      if (!cancel) setPreviews(map);
+    })();
+    return () => { cancel = true; };
+  }, [banners]);
+
+  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || []);
+    e.target.value = "";
+    if (!files.length || !orgId) return;
+    setUploading(true);
+    try {
+      const next: AdBanner[] = [...banners];
+      for (const file of files) {
+        const ext = (file.name.split(".").pop() || "png").toLowerCase();
+        const path = `${orgId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const { error } = await supabase.storage.from("org-ads").upload(path, file, { contentType: file.type, upsert: false });
+        if (error) throw new Error(error.message);
+        next.push({ url: path, active: true, label: null });
+      }
+      setBanners(next);
+      toast.success("Uploaded / అప్‌లోడ్ అయింది");
+    } catch (err: any) {
+      toast.error(err.message ?? "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  function toggle(i: number) {
+    setBanners((prev) => prev.map((b, idx) => idx === i ? { ...b, active: !(b.active !== false) } : b));
+  }
+
+  async function remove(i: number) {
+    const b = banners[i];
+    if (b && !/^https?:\/\//i.test(b.url) && !b.url.startsWith("data:")) {
+      await supabase.storage.from("org-ads").remove([b.url]).catch(() => {});
+    }
+    setBanners((prev) => prev.filter((_, idx) => idx !== i));
+  }
+
+  async function save() {
+    setBusy(true);
+    try {
+      await saveFn({ data: { ad_banners: banners } });
+      onSaved();
+      toast.success("Banners saved / బ్యానర్‌లు సేవ్ అయ్యాయి");
+    } catch (e: any) {
+      toast.error(e.message ?? "Failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Card className="bg-zinc-950 border-zinc-800 p-4 space-y-3">
+      <div className="flex items-center gap-2 text-sm font-semibold text-white">
+        <ImageIcon className="h-4 w-4" style={{ color: accent }} />
+        Member Dashboard Ads / సభ్యుల డాష్‌బోర్డ్ ప్రకటనలు
+      </div>
+      <p className="text-[11px] text-zinc-400">
+        Upload banners to display at the top of every member's dashboard. Toggle any banner off to hide it. When no banners are active, the slot auto-hides.
+      </p>
+
+      <label className="flex items-center justify-center gap-2 rounded-lg border border-dashed border-zinc-700 bg-zinc-900/60 py-4 cursor-pointer hover:border-zinc-500 transition">
+        <Upload className="h-4 w-4" style={{ color: accent }} />
+        <span className="text-sm text-white">{uploading ? "Uploading…" : "Upload banner image(s)"}</span>
+        <input type="file" accept="image/*" multiple className="hidden" onChange={handleUpload} disabled={uploading || !orgId} />
+      </label>
+
+      {banners.length === 0 ? (
+        <p className="text-[12px] text-zinc-500 italic text-center py-2">No banners yet — dashboards will show none.</p>
+      ) : (
+        <div className="grid grid-cols-2 gap-3">
+          {banners.map((b, i) => {
+            const active = b.active !== false;
+            const src = previews[b.url] || "";
+            return (
+              <div key={`${b.url}-${i}`} className="rounded-lg overflow-hidden border relative"
+                style={{ borderColor: active ? `${accent}66` : "#3f3f46", opacity: active ? 1 : 0.5 }}>
+                {src ? (
+                  <img src={src} alt="" className="w-full h-24 object-cover" />
+                ) : (
+                  <div className="w-full h-24 bg-zinc-900 animate-pulse" />
+                )}
+                <div className="flex items-center justify-between p-1.5 bg-zinc-900/90">
+                  <button type="button" onClick={() => toggle(i)}
+                    className="inline-flex items-center gap-1 text-[11px] text-white/90 hover:text-white">
+                    {active ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                    {active ? "Active" : "Hidden"}
+                  </button>
+                  <button type="button" onClick={() => remove(i)}
+                    className="inline-flex items-center gap-1 text-[11px] text-rose-300 hover:text-rose-200">
+                    <Trash2 className="h-3.5 w-3.5" /> Delete
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <Button onClick={save} disabled={busy}
+        className="w-full font-semibold"
+        style={{ background: accent, color: "#fff" }}>
+        <Save className="h-4 w-4 mr-2" />
+        {busy ? "Saving…" : "Save Banners / బ్యానర్‌లు సేవ్ చేయండి"}
+      </Button>
+    </Card>
+  );
+}
+

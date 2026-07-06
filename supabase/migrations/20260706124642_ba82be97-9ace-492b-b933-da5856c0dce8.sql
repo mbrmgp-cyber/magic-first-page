@@ -1,0 +1,1 @@
+ALTER TABLE public.organizations ADD COLUMN IF NOT EXISTS ad_banners jsonb NOT NULL DEFAULT '[]'::jsonb;

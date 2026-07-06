@@ -1697,6 +1697,7 @@ export type Database = {
       }
       organizations: {
         Row: {
+          ad_banners: Json
           address: string | null
           admin_aadhaar_url: string | null
           admin_designation: string | null
@@ -1734,6 +1735,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ad_banners?: Json
           address?: string | null
           admin_aadhaar_url?: string | null
           admin_designation?: string | null
@@ -1771,6 +1773,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ad_banners?: Json
           address?: string | null
           admin_aadhaar_url?: string | null
           admin_designation?: string | null

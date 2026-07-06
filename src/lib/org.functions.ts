@@ -414,6 +414,29 @@ export const updateOrgTheme = createServerFn({ method: "POST" })
     return { org };
   });
 
+export const updateOrgAdBanners = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { ad_banners: Array<{ url: string; active?: boolean; label?: string | null }> }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const cleaned = (data.ad_banners || [])
+      .filter((b) => b && typeof b.url === "string" && b.url.length > 0)
+      .slice(0, 20)
+      .map((b) => ({
+        url: String(b.url),
+        active: b.active !== false,
+        label: b.label ? String(b.label).slice(0, 120) : null,
+      }));
+    const { data: org, error } = await supabase
+      .from("organizations")
+      .update({ ad_banners: cleaned } as any)
+      .eq("admin_user_id", userId)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return { org };
+  });
+
 export const updateOrgIdDesign = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id_card_design: Record<string, any> }) => d)
@@ -595,7 +618,7 @@ export const getMyMembership = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
     const { data } = await supabase
       .from("members")
-      .select("*, organizations(id, name, admin_user_id, logo_url, slogan, letter_code, org_code, gov_reg_number, phone, email, president_name, president_signature_url, theme_color, theme_font, theme_settings, id_card_design)")
+      .select("*, organizations(id, name, admin_user_id, logo_url, slogan, letter_code, org_code, gov_reg_number, phone, email, president_name, president_signature_url, theme_color, theme_font, theme_settings, id_card_design, ad_banners)")
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(1)
