@@ -2,7 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { getMyOrg, updateOrgTheme } from "@/lib/org.functions";
+import { getMyOrg, updateOrgTheme, updateOrgAdBanners } from "@/lib/org.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +11,7 @@ import { toast } from "sonner";
 import {
   ArrowLeft, Save, Palette, Square, Frame, Sparkles, MousePointerClick,
   Type, AlignLeft, BookOpen, Users, Briefcase, IdCard,
-  AlignCenter, AlignRight, Quote,
+  AlignCenter, AlignRight, Quote, Image as ImageIcon, Upload, Trash2, Eye, EyeOff,
 } from "lucide-react";
 import {
   DEFAULT_THEME, HEAD_FONTS, TEXT_ALIGNS, type TextAlign, type ThemeSettings, resolveTheme,
