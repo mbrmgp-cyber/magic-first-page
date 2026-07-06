@@ -168,8 +168,9 @@ function MemberDashboard() {
   } as React.CSSProperties;
 
   return (
-    <div className="min-h-screen bg-black text-white pb-12" style={themeStyle}>
+    <div className="min-h-screen bg-black text-white pb-[110px]" style={themeStyle}>
       <div className="max-w-md mx-auto p-4 space-y-5">
+
         {/* Top header: society logo + welcome + society QR */}
         <header className="flex items-start justify-between gap-3">
           <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-950 overflow-hidden flex items-center justify-center shrink-0"
@@ -302,9 +303,13 @@ function MemberDashboard() {
           <MemberIdCard member={m} org={org} />
         </DialogContent>
       </Dialog>
+
+      {/* Global MBR APP advertisement — sticky bottom, controlled only by super admin */}
+      <GlobalAdBar />
     </div>
   );
 }
+
 
 type AdBanner = { url: string; active?: boolean; label?: string | null };
 
@@ -344,15 +349,15 @@ function AdBannerSlot({ orgId, banners, brand }: { orgId?: string; banners?: AdB
       <img
         src={current}
         alt="Society advertisement"
-        className="w-full h-[80px] object-cover block transition-opacity duration-500"
+        className="w-full h-[70px] object-cover block transition-opacity duration-500"
       />
 
       {signed.length > 1 && (
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+        <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-1.5">
           {signed.map((_, i) => (
             <span key={i} className="h-1.5 rounded-full transition-all"
               style={{
-                width: i === idx ? 18 : 6,
+                width: i === idx ? 16 : 5,
                 background: i === idx ? brand : "rgba(255,255,255,0.6)",
               }} />
           ))}
@@ -361,4 +366,68 @@ function AdBannerSlot({ orgId, banners, brand }: { orgId?: string; banners?: AdB
     </div>
   );
 }
+
+function GlobalAdBar() {
+  const q = useQuery({
+    queryKey: ["mbr-global-ads-active"],
+    refetchInterval: 5 * 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("mbr_global_ads" as any)
+        .select("id,url,label")
+        .eq("active", true)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true });
+      if (error) return [] as { id: string; url: string; label: string | null }[];
+      return (data || []) as { id: string; url: string; label: string | null }[];
+    },
+  });
+
+  const [signed, setSigned] = useState<string[]>([]);
+  const [idx, setIdx] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    const rows = q.data || [];
+    (async () => {
+      const urls = await Promise.all(rows.map(async (r) => {
+        if (/^https?:\/\//i.test(r.url) || r.url.startsWith("data:")) return r.url;
+        const { data } = await supabase.storage.from("mbr-global-ads").createSignedUrl(r.url, 3600);
+        return data?.signedUrl || "";
+      }));
+      if (!cancelled) setSigned(urls.filter(Boolean));
+    })();
+    return () => { cancelled = true; };
+  }, [JSON.stringify((q.data || []).map((r) => r.url))]);
+
+  useEffect(() => {
+    if (signed.length <= 1) return;
+    const t = setInterval(() => setIdx((i) => (i + 1) % signed.length), 6000);
+    return () => clearInterval(t);
+  }, [signed.length]);
+
+  if (!signed.length) return null;
+  const current = signed[idx % signed.length];
+
+  return (
+    <div
+      className="fixed inset-x-0 bottom-0 z-40 pointer-events-none"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+    >
+      <div className="mx-auto max-w-md px-3 pb-2 pointer-events-auto">
+        <div className="relative rounded-xl overflow-hidden border border-white/10 bg-black/80 backdrop-blur shadow-[0_-6px_24px_rgba(0,0,0,0.55)]">
+          <img
+            src={current}
+            alt="MBR platform advertisement"
+            className="w-full h-[64px] object-cover block"
+          />
+          <span className="absolute top-1 left-2 text-[9px] font-bold tracking-wider uppercase text-white/80 bg-black/50 px-1.5 py-0.5 rounded">
+            MBR APP
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
