@@ -20,6 +20,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
+  const { t } = useI18n();
   const { code } = Route.useSearch();
   const navigate = useNavigate();
   useEffect(() => {
@@ -28,7 +29,6 @@ function Home() {
     }
   }, [code, navigate]);
   if (code) return null;
-  const { t } = useI18n();
   return (
     <div className="min-h-screen relative flex flex-col items-center justify-center p-6 overflow-hidden bg-black">
       <div className="absolute top-4 left-4 z-10">
