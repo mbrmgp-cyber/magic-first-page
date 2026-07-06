@@ -414,6 +414,29 @@ export const updateOrgTheme = createServerFn({ method: "POST" })
     return { org };
   });
 
+export const updateOrgAdBanners = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { ad_banners: Array<{ url: string; active?: boolean; label?: string | null }> }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const cleaned = (data.ad_banners || [])
+      .filter((b) => b && typeof b.url === "string" && b.url.length > 0)
+      .slice(0, 20)
+      .map((b) => ({
+        url: String(b.url),
+        active: b.active !== false,
+        label: b.label ? String(b.label).slice(0, 120) : null,
+      }));
+    const { data: org, error } = await supabase
+      .from("organizations")
+      .update({ ad_banners: cleaned } as any)
+      .eq("admin_user_id", userId)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return { org };
+  });
+
 export const updateOrgIdDesign = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id_card_design: Record<string, any> }) => d)
