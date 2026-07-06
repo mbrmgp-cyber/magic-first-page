@@ -419,6 +419,19 @@ function AdBannersCard({ orgId, initial, accent, onSaved }: { orgId?: string; in
       <p className="text-[11px] text-zinc-400">
         Upload banners to display at the top of every member's dashboard. Toggle any banner off to hide it. When no banners are active, the slot auto-hides.
       </p>
+      <div className="rounded-lg border border-dashed p-2.5 text-[11px] leading-relaxed"
+        style={{ borderColor: `${accent}55`, background: `${accent}0f`, color: "#e4e4e7" }}>
+        <p className="font-semibold text-white mb-0.5">
+          Recommended Banner Size / సిఫార్సు చేయబడిన బ్యానర్ సైజ్
+        </p>
+        <p>
+          <span className="font-mono text-white">1200 × 160 px</span> (ratio 15:2) —
+          slim horizontal banner, max height <span className="font-mono">80px</span> on mobile.
+        </p>
+        <p className="text-zinc-400">
+          మొబైల్ స్క్రీన్ కోసం సన్నని అడ్డం బ్యానర్ — వెడల్పు 1200px, పొడవు 160px. JPG/PNG, 500KB లోపు.
+        </p>
+      </div>
 
       <label className="flex items-center justify-center gap-2 rounded-lg border border-dashed border-zinc-700 bg-zinc-900/60 py-4 cursor-pointer hover:border-zinc-500 transition">
         <Upload className="h-4 w-4" style={{ color: accent }} />
