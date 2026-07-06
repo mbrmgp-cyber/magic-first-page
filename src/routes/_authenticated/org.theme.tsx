@@ -318,6 +318,11 @@ function OrgThemePage() {
           </p>
         </Card>
 
+        {/* Advertisement Banners — shown at top of member dashboards */}
+        <AdBannersCard orgId={org?.id} initial={(org as any)?.ad_banners as any} accent={t.icon} onSaved={() => qc.invalidateQueries({ queryKey: ["my-org"] })} />
+
+
+
         <Button onClick={save} disabled={busy}
           className="w-full font-semibold"
           style={{ background: t.buttonBg, color: t.buttonText, boxShadow: `0 0 24px ${t.buttonBg}66` }}>
