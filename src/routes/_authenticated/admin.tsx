@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getMyRoles, claimMbrAdmin, listAllOrgsForAdmin, reviewOrganization, adminSearchMembers, adminUpdateMemberCode, setOrganizationStatus, getOrganizationDetails, setOrgSubscription } from "@/lib/org.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
