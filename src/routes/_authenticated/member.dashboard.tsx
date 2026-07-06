@@ -180,7 +180,6 @@ function MemberDashboard() {
           </div>
           <div className="flex-1 min-w-0 text-center">
             <p className="text-sm font-semibold text-white leading-tight">స్వాగతం గౌరవ సభ్యులకు 🙏</p>
-            <p className="text-[11px] text-zinc-400 mt-0.5">Welcome, Honorable Member</p>
             <p className="text-sm font-semibold text-white truncate mt-1" style={{ color: brand }}>{fullName}</p>
           </div>
           <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-950 flex items-center justify-center overflow-hidden shrink-0"
@@ -345,8 +344,9 @@ function AdBannerSlot({ orgId, banners, brand }: { orgId?: string; banners?: AdB
       <img
         src={current}
         alt="Society advertisement"
-        className="w-full h-auto max-h-64 object-cover block transition-opacity duration-500"
+        className="w-full h-[80px] object-cover block transition-opacity duration-500"
       />
+
       {signed.length > 1 && (
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
           {signed.map((_, i) => (
