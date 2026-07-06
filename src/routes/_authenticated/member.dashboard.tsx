@@ -226,7 +226,7 @@ function MemberDashboard() {
           <button
             type="button"
             onClick={() => setIdCardOpen(true)}
-            className="rounded-xl bg-zinc-950 border border-zinc-800 p-4 flex flex-col items-center gap-2 text-center transition hover:-translate-y-0.5"
+            className="rounded-xl bg-zinc-950 border border-zinc-800 p-4 flex flex-col items-center justify-center gap-2.5 text-center transition hover:-translate-y-0.5 min-h-[112px]"
             onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${brand}99`; e.currentTarget.style.boxShadow = `0 0 20px ${brand}33`; }}
             onMouseLeave={(e) => { e.currentTarget.style.borderColor = ""; e.currentTarget.style.boxShadow = ""; }}
           >
@@ -234,8 +234,7 @@ function MemberDashboard() {
               style={{ backgroundColor: `${brand}26` }}>
               <IdCard className="h-5 w-5" style={{ color: brand }} />
             </div>
-            <p className="text-[13px] font-semibold text-white leading-tight">ID Card</p>
-            <p className="text-[10px] text-zinc-400 leading-tight">సభ్యుడి ఐడి కార్డ్</p>
+            <p className="text-[14px] font-semibold text-white leading-tight">సభ్యుడి ఐడి కార్డ్</p>
           </button>
 
           {MENU.map((it) => {
