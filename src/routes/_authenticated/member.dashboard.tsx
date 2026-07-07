@@ -165,16 +165,15 @@ function MemberDashboard() {
   } as React.CSSProperties;
 
   return (
-    <div className="min-h-screen bg-black text-white pb-[110px]" style={themeStyle}>
+    <div className="min-h-screen bg-black text-white" style={themeStyle}>
       <div className="max-w-md mx-auto p-4 space-y-5">
 
         {/* Top header: society logo + welcome + society QR */}
         <header className="flex items-start justify-between gap-3">
-          <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-950 overflow-hidden flex items-center justify-center shrink-0"
-            style={{ borderWidth: 1, borderStyle: "solid", borderColor: `${brand}4d` }}>
+          <div className="h-14 w-14 rounded-xl bg-white overflow-hidden flex items-center justify-center shrink-0 border border-white/20">
             {org?.logo_url
-              ? <img src={org.logo_url} alt="" className="h-full w-full object-cover" />
-              : <ShieldCheck className="h-7 w-7" style={{ color: brand }} />}
+              ? <img src={org.logo_url} alt="" className="h-full w-full object-contain p-1" />
+              : <ShieldCheck className="h-7 w-7 text-black" />}
           </div>
           <div className="flex-1 min-w-0 text-center">
             <p className="text-sm font-semibold text-white leading-tight">స్వాగతం గౌరవ సభ్యులకు 🙏</p>
