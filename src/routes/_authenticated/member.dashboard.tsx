@@ -300,8 +300,6 @@ function MemberDashboard() {
         </DialogContent>
       </Dialog>
 
-      {/* Global MBR APP advertisement — sticky bottom, controlled only by super admin */}
-      <GlobalAdBar />
     </div>
   );
 }
