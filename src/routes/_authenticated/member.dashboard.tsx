@@ -268,7 +268,6 @@ function MemberDashboard() {
           style={{ boxShadow: `0 0 24px ${brand}1f` }}>
           <div className="text-center mb-3">
             <p className="text-sm font-semibold text-white">మాతో కనెక్ట్ అవ్వండి</p>
-            <p className="text-[11px] text-zinc-400">Connect with Us</p>
           </div>
           <div className="grid grid-cols-3 gap-3">
             {SOCIAL_LINKS.map((s) => (
