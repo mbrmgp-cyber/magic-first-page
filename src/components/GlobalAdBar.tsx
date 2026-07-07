@@ -1,0 +1,66 @@
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+
+export function GlobalAdBar() {
+  const q = useQuery({
+    queryKey: ["mbr-global-ads-active"],
+    refetchInterval: 5 * 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("mbr_global_ads" as any)
+        .select("id,url,label")
+        .eq("active", true)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true });
+      if (error) return [] as { id: string; url: string; label: string | null }[];
+      return ((data as unknown) || []) as { id: string; url: string; label: string | null }[];
+    },
+  });
+
+  const [signed, setSigned] = useState<string[]>([]);
+  const [idx, setIdx] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    const rows = q.data || [];
+    (async () => {
+      const urls = await Promise.all(rows.map(async (r) => {
+        if (/^https?:\/\//i.test(r.url) || r.url.startsWith("data:")) return r.url;
+        const { data } = await supabase.storage.from("mbr-global-ads").createSignedUrl(r.url, 3600);
+        return data?.signedUrl || "";
+      }));
+      if (!cancelled) setSigned(urls.filter(Boolean));
+    })();
+    return () => { cancelled = true; };
+  }, [JSON.stringify((q.data || []).map((r) => r.url))]);
+
+  useEffect(() => {
+    if (signed.length <= 1) return;
+    const t = setInterval(() => setIdx((i) => (i + 1) % signed.length), 6000);
+    return () => clearInterval(t);
+  }, [signed.length]);
+
+  if (!signed.length) return null;
+  const current = signed[idx % signed.length];
+
+  return (
+    <div
+      className="fixed inset-x-0 bottom-0 z-40 pointer-events-none"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+    >
+      <div className="mx-auto max-w-md px-3 pb-2 pointer-events-auto">
+        <div className="relative rounded-xl overflow-hidden border border-white/10 bg-black/80 backdrop-blur shadow-[0_-6px_24px_rgba(0,0,0,0.55)]">
+          <img
+            src={current}
+            alt="MBR platform advertisement"
+            className="w-full h-[64px] object-cover block"
+          />
+          <span className="absolute top-1 left-2 text-[9px] font-bold tracking-wider uppercase text-white/80 bg-black/50 px-1.5 py-0.5 rounded">
+            MBR APP
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
