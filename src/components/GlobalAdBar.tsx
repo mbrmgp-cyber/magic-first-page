@@ -54,11 +54,8 @@ export function GlobalAdBar() {
           <img
             src={current}
             alt="MBR platform advertisement"
-            className="w-full h-[64px] object-cover block"
+            className="w-full h-[64px] object-contain block"
           />
-          <span className="absolute top-1 left-2 text-[9px] font-bold tracking-wider uppercase text-white/80 bg-black/50 px-1.5 py-0.5 rounded">
-            MBR APP
-          </span>
         </div>
       </div>
     </div>
