@@ -283,8 +283,7 @@ function MemberDashboard() {
                 <span className="h-10 w-10 rounded-full bg-white/15 flex items-center justify-center">
                   {s.icon}
                 </span>
-                <p className="text-[12px] font-semibold leading-tight">{s.label}</p>
-                <p className="text-[10px] opacity-90 leading-tight">{s.te}</p>
+                <p className="text-[12px] font-semibold leading-tight">{s.te}</p>
               </a>
             ))}
           </div>
