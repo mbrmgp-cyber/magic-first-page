@@ -212,11 +212,9 @@ function MemberDashboard() {
               <User className="h-12 w-12 text-zinc-600" strokeWidth={1.5} />
             )}
           </div>
-          <div className="min-w-0">
-            <p className="text-[11px] text-zinc-400">First Name</p>
-            <p className="text-xl font-bold text-white truncate">{firstName || "—"}</p>
-            <p className="text-[11px] text-zinc-400 mt-2">Last Name</p>
-            <p className="text-xl font-bold text-white truncate">{lastName || "—"}</p>
+          <div className="min-w-0 flex-1 flex flex-col justify-center">
+            <p className="text-2xl font-bold text-white truncate leading-tight">{firstName || "—"}</p>
+            <p className="text-2xl font-bold text-white truncate leading-tight mt-1">{lastName || "—"}</p>
           </div>
         </Card>
 
@@ -270,7 +268,6 @@ function MemberDashboard() {
           style={{ boxShadow: `0 0 24px ${brand}1f` }}>
           <div className="text-center mb-3">
             <p className="text-sm font-semibold text-white">మాతో కనెక్ట్ అవ్వండి</p>
-            <p className="text-[11px] text-zinc-400">Connect with Us</p>
           </div>
           <div className="grid grid-cols-3 gap-3">
             {SOCIAL_LINKS.map((s) => (
@@ -286,8 +283,7 @@ function MemberDashboard() {
                 <span className="h-10 w-10 rounded-full bg-white/15 flex items-center justify-center">
                   {s.icon}
                 </span>
-                <p className="text-[12px] font-semibold leading-tight">{s.label}</p>
-                <p className="text-[10px] opacity-90 leading-tight">{s.te}</p>
+                <p className="text-[12px] font-semibold leading-tight">{s.te}</p>
               </a>
             ))}
           </div>
