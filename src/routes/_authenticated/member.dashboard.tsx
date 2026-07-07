@@ -273,14 +273,18 @@ function MemberDashboard() {
                 href={s.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-xl p-3 flex flex-col items-center gap-1.5 text-center text-white transition hover:-translate-y-0.5 hover:brightness-110"
-                style={{ backgroundColor: s.bg, boxShadow: `0 6px 18px ${s.bg}55` }}
+                className="rounded-xl p-3 flex flex-col items-center gap-1.5 text-center text-white transition hover:-translate-y-0.5 border"
+                style={{
+                  backgroundColor: "rgba(255,255,255,0.04)",
+                  borderColor: `${brand}4d`,
+                }}
                 aria-label={s.label}
               >
-                <span className="h-10 w-10 rounded-full bg-white/15 flex items-center justify-center">
+                <span className="h-10 w-10 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: `${brand}26`, color: brand }}>
                   {s.icon}
                 </span>
-                <p className="text-[12px] font-semibold leading-tight">{s.te}</p>
+                <p className="text-[12px] font-semibold leading-tight text-white">{s.te}</p>
               </a>
             ))}
           </div>
