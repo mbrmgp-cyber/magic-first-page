@@ -4,7 +4,7 @@ import { GlobalThemeApplier } from "@/components/GlobalThemeApplier";
 import { DynamicAppManifest } from "@/components/DynamicAppManifest";
 import { SubscriptionGate } from "@/components/SubscriptionGate";
 import { RbacProvider } from "@/lib/rbac";
-import { RoleSwitcher } from "@/components/RoleSwitcher";
+
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_authenticated")({
           <Outlet />
         </SubscriptionGate>
       </div>
-      <RoleSwitcher />
+      
     </RbacProvider>
   ),
 });
