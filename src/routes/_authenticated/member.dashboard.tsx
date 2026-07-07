@@ -212,11 +212,9 @@ function MemberDashboard() {
               <User className="h-12 w-12 text-zinc-600" strokeWidth={1.5} />
             )}
           </div>
-          <div className="min-w-0">
-            <p className="text-[11px] text-zinc-400">First Name</p>
-            <p className="text-xl font-bold text-white truncate">{firstName || "—"}</p>
-            <p className="text-[11px] text-zinc-400 mt-2">Last Name</p>
-            <p className="text-xl font-bold text-white truncate">{lastName || "—"}</p>
+          <div className="min-w-0 flex-1 flex flex-col justify-center">
+            <p className="text-2xl font-bold text-white truncate leading-tight">{firstName || "—"}</p>
+            <p className="text-2xl font-bold text-white truncate leading-tight mt-1">{lastName || "—"}</p>
           </div>
         </Card>
 
