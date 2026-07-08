@@ -22,15 +22,15 @@ export const Route = createFileRoute("/_authenticated/org/income")({
 });
 
 const INCOME_TYPES: { v: IncomeType; te: string; en: string }[] = [
-  { v: "registration_fee", te: "నమోదు రుసుము", en: "Registration Fee" },
-  { v: "donation", te: "విరాళం", en: "Donation" },
-  { v: "other", te: "ఇతరం", en: "Other" },
+  { v: "registration_fee", te: "నమోదు రుసుము", en: "నమోదు రుసుము" },
+  { v: "donation", te: "విరాళం", en: "విరాళం" },
+  { v: "other", te: "ఇతరం", en: "ఇతరం" },
 ];
 
 const WALLETS: { v: WalletType; label: string }[] = [
-  { v: "bank", label: "Bank Account" },
-  { v: "accountant", label: "Accountant / NPR" },
-  { v: "president", label: "President / PSR" },
+  { v: "bank", label: "బ్యాంక్ ఖాతా" },
+  { v: "accountant", label: "అకౌంటెంట్" },
+  { v: "president", label: "అధ్యక్షుడు" },
 ];
 
 function IncomePage() {
