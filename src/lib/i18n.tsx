@@ -207,13 +207,13 @@ function readUrlLang(): Lang | null {
 }
 
 function initialLang(): Lang {
-  if (typeof window === "undefined") return "te";
+  if (typeof window === "undefined") return "en";
   const urlLang = readUrlLang();
   if (urlLang) return urlLang;
   const saved = localStorage.getItem("mbr_lang");
   if (isValidLang(saved)) return saved;
   const browserLang = navigator.language?.split("-")[0] ?? "";
-  return isValidLang(browserLang) ? browserLang : "te";
+  return isValidLang(browserLang) ? browserLang : "en";
 }
 
 export function localizeText(entry: LocalizedEntry, lang: string): string {
