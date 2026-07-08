@@ -284,14 +284,14 @@ function IncomePage() {
         <Card className="bg-zinc-950 border-white/10 p-4">
           <h2 className="text-sm font-semibold mb-3 text-white">ఇటీవలి రసీదులు</h2>
           {rows.length === 0 ? (
-            <p className="text-xs text-white/50">No entries yet.</p>
+            <p className="text-xs text-white/60">నమోదులు లేవు.</p>
           ) : (
             <div className="space-y-2">
               {rows.map((r) => (
                 <div key={r.id} className="flex items-center justify-between gap-2 bg-zinc-900 border border-white/5 rounded-lg p-3">
                   <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{r.payer_name} • <span className="text-[#ff8c28]">₹{Number(r.amount).toLocaleString("en-IN")}</span></p>
-                    <p className="text-[11px] text-white/50">{r.receipt_no} • {r.entry_date} • {INCOME_TYPES.find(t => t.v === r.income_type)?.en}</p>
+                    <p className="text-sm font-medium truncate text-white">{r.payer_name} • <span className="text-[#ff8c28]">₹{Number(r.amount).toLocaleString("en-IN")}</span></p>
+                    <p className="text-[11px] text-white/60">{r.receipt_no} • {r.entry_date} • {INCOME_TYPES.find(t => t.v === r.income_type)?.te}</p>
                   </div>
                   <div className="flex gap-1 shrink-0">
                     <Button size="icon" variant="ghost" onClick={() => openReceipt(r)} title="Print / PDF">
