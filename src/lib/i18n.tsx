@@ -233,8 +233,8 @@ function toCleanEnglish(text: string, from: "telugu" | "devanagari"): string {
     s = s.replace(/[ḷḹ]/gi, "l").replace(/[ṛṝ]/gi, "r").replace(/ḥ/gi, "h").replace(/ṃ/gi, "m");
     // Sanscript uses "c" for చ/च — English readers expect "ch"
     s = s.replace(/c(?!h)/g, "ch").replace(/C(?!h|H)/g, "Ch");
-    // Title-case each word
-    s = s.replace(/\b([a-z])([a-z]*)/g, (_, a: string, b: string) => a.toUpperCase() + b.toLowerCase());
+    // Uppercase everything — English labels should render in ALL CAPS
+    s = s.toUpperCase();
     return s;
   } catch {
     return text;
