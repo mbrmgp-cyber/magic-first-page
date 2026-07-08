@@ -15,24 +15,24 @@ export const Route = createFileRoute("/_authenticated/org/cashflow")({
 });
 
 const INCOME_LABEL: Record<string, string> = {
-  registration_fee: "Registration Fees",
-  donation: "Donations",
-  loan_principal: "Loan Principal Collected",
-  loan_interest: "Loan Interest Collected",
-  other: "Other Income",
+  registration_fee: "నమోదు రుసుములు",
+  donation: "విరాళాలు",
+  loan_principal: "అసలు వసూలు",
+  loan_interest: "వడ్డీ వసూలు",
+  other: "ఇతర ఆదాయం",
 };
 const EXPENSE_LABEL: Record<string, string> = {
-  charity: "Financial Help / Charity",
-  office: "Office Expenses",
-  meeting: "Meeting Expenses",
-  misc: "Miscellaneous",
+  charity: "ఆర్థిక సహాయం / ధర్మం",
+  office: "ఆఫీసు ఖర్చులు",
+  meeting: "మీటింగ్ ఖర్చులు",
+  misc: "ఇతరములు",
 };
 
-const RANGES: { v: TimeRange; te: string; en: string }[] = [
-  { v: "this_month", te: "నెల పట్టిక", en: "This Month" },
-  { v: "3m", te: "3 నెలల పట్టిక", en: "3 Months" },
-  { v: "6m", te: "6 నెలల పట్టిక", en: "6 Months" },
-  { v: "yearly", te: "సంవత్సరాల పట్టిక", en: "Yearly" },
+const RANGES: { v: TimeRange; te: string }[] = [
+  { v: "this_month", te: "నెల పట్టిక" },
+  { v: "3m", te: "3 నెలల పట్టిక" },
+  { v: "6m", te: "6 నెలల పట్టిక" },
+  { v: "yearly", te: "సంవత్సర పట్టిక" },
 ];
 
 function CashFlowPage() {
