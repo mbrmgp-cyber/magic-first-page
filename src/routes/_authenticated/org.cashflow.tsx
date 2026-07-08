@@ -56,19 +56,19 @@ function CashFlowPage() {
               <ArrowLeft className="h-5 w-5" />
             </Link>
             <div>
-              <h1 className="text-lg font-bold">సొసైటీ నగదు ప్రవాహం</h1>
-              <p className="text-xs text-white/60">Society Cash Flow Statement</p>
+              <h1 className="text-lg font-bold text-white">సొసైటీ నగదు ప్రవాహం</h1>
+              <p className="text-xs text-white/70">నగదు ప్రవాహ నివేదిక</p>
             </div>
           </div>
           <div className="flex flex-wrap gap-2 items-center print:hidden">
             <Link to="/org/income">
-              <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">+ Income</Button>
+              <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">+ ఆదాయం</Button>
             </Link>
             <Link to="/org/expenses">
-              <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white">+ Expense</Button>
+              <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white">+ ఖర్చు</Button>
             </Link>
             <Button size="sm" variant="outline" onClick={() => window.print()} className="gap-1">
-              <Printer className="h-4 w-4" /> Print
+              <Printer className="h-4 w-4" /> ప్రింట్
             </Button>
           </div>
         </header>
@@ -78,9 +78,8 @@ function CashFlowPage() {
           <TabsList className="bg-zinc-900 border border-white/10 grid grid-cols-4 w-full h-auto p-1">
             {RANGES.map((r) => (
               <TabsTrigger key={r.v} value={r.v}
-                className="data-[state=active]:bg-[#ff8c28] data-[state=active]:text-white text-white/70 flex-col py-1.5 px-1 h-auto">
-                <span className="text-[10px] font-medium">{r.te}</span>
-                <span className="text-[10px] opacity-70">{r.en}</span>
+                className="data-[state=active]:bg-[#ff8c28] data-[state=active]:text-white text-white flex-col py-1.5 px-1 h-auto">
+                <span className="text-[11px] font-medium">{r.te}</span>
               </TabsTrigger>
             ))}
           </TabsList>
@@ -88,12 +87,12 @@ function CashFlowPage() {
 
         {currency !== BASE_CURRENCY && (
           <p className="text-[11px] text-amber-400/80 bg-amber-900/20 border border-amber-500/30 rounded px-3 py-1.5">
-            Displaying in {symbol} {currency}. Stored totals are converted to base currency (INR) for accounting.
+            {symbol} {currency}లో ప్రదర్శిస్తోంది. మొత్తాలు బేస్ కరెన్సీ (INR)కి మార్చబడతాయి.
           </p>
         )}
 
         {q.isLoading || !d ? (
-          <p className="text-sm text-white/60">Loading…</p>
+          <p className="text-sm text-white">లోడ్ అవుతోంది…</p>
         ) : (
           <>
             {/* Wallets */}
