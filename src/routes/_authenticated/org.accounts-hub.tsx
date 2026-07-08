@@ -58,10 +58,6 @@ function AccountsHub() {
                     <p className="text-sm font-semibold leading-tight text-white">{t.en}</p>
                   </div>
                 </div>
-                  <div>
-                    <p className="text-sm font-semibold leading-tight text-white">{t.te}</p>
-                  </div>
-                </div>
               </Card>
             </Link>
           ))}
