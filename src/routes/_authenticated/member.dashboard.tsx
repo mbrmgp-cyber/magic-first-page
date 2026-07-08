@@ -19,8 +19,8 @@ const SOCIAL_LINKS = [
     href: "https://chat.whatsapp.com/IvY1bPI92PxFU56iIXG7xD",
     color: "#25D366",
     icon: (
-      <svg viewBox="0 0 32 32" className="h-6 w-6" fill="currentColor" aria-hidden="true">
-        <path d="M19.11 17.21c-.29-.14-1.7-.84-1.96-.94-.26-.1-.46-.14-.65.15-.19.29-.74.94-.91 1.13-.17.19-.34.22-.62.07-.29-.14-1.21-.45-2.31-1.43-.85-.76-1.43-1.7-1.6-1.99-.17-.29-.02-.45.13-.59.13-.13.29-.34.43-.51.15-.17.19-.29.29-.48.1-.19.05-.36-.02-.51-.07-.14-.65-1.57-.89-2.15-.24-.57-.48-.49-.65-.5-.17-.01-.36-.01-.55-.01-.19 0-.51.07-.77.36-.26.29-1.01.99-1.01 2.41 0 1.42 1.04 2.8 1.18 2.99.14.19 2.04 3.12 4.94 4.37.69.3 1.23.48 1.65.61.69.22 1.32.19 1.81.12.55-.08 1.7-.69 1.94-1.36.24-.67.24-1.24.17-1.36-.07-.12-.26-.19-.55-.33zM16 4C9.37 4 4 9.37 4 16c0 2.11.55 4.16 1.6 5.97L4 28l6.18-1.62A11.94 11.94 0 0016 28c6.63 0 12-5.37 12-12S22.63 4 16 4z" />
+      <svg viewBox="0 0 32 32" className="h-6 w-6" fill="#25D366" color="#25D366" aria-hidden="true">
+        <path fill="#25D366" d="M19.11 17.21c-.29-.14-1.7-.84-1.96-.94-.26-.1-.46-.14-.65.15-.19.29-.74.94-.91 1.13-.17.19-.34.22-.62.07-.29-.14-1.21-.45-2.31-1.43-.85-.76-1.43-1.7-1.6-1.99-.17-.29-.02-.45.13-.59.13-.13.29-.34.43-.51.15-.17.19-.29.29-.48.1-.19.05-.36-.02-.51-.07-.14-.65-1.57-.89-2.15-.24-.57-.48-.49-.65-.5-.17-.01-.36-.01-.55-.01-.19 0-.51.07-.77.36-.26.29-1.01.99-1.01 2.41 0 1.42 1.04 2.8 1.18 2.99.14.19 2.04 3.12 4.94 4.37.69.3 1.23.48 1.65.61.69.22 1.32.19 1.81.12.55-.08 1.7-.69 1.94-1.36.24-.67.24-1.24.17-1.36-.07-.12-.26-.19-.55-.33zM16 4C9.37 4 4 9.37 4 16c0 2.11.55 4.16 1.6 5.97L4 28l6.18-1.62A11.94 11.94 0 0016 28c6.63 0 12-5.37 12-12S22.63 4 16 4z" />
       </svg>
     ),
   },
@@ -29,14 +29,14 @@ const SOCIAL_LINKS = [
     te: "ఫేస్‌బుక్",
     href: "https://www.facebook.com/share/1EjpbZiniJ/",
     color: "#1877F2",
-    icon: <Facebook className="h-6 w-6" fill="currentColor" strokeWidth={0} />,
+    icon: <Facebook className="h-6 w-6" style={{ color: "#1877F2", fill: "#1877F2", stroke: "#1877F2" }} fill="#1877F2" strokeWidth={0} />,
   },
   {
     label: "YouTube",
     te: "యూట్యూబ్",
     href: "https://youtube.com/@chitvelhelplinesociety",
     color: "#FF0000",
-    icon: <Youtube className="h-6 w-6" fill="currentColor" strokeWidth={0} />,
+    icon: <Youtube className="h-6 w-6" style={{ color: "#FF0000", fill: "#FF0000", stroke: "#FF0000" }} fill="#FF0000" strokeWidth={0} />,
   },
 ] as const;
 import QRCode from "qrcode";
@@ -278,7 +278,7 @@ function MemberDashboard() {
                 className="rounded-xl p-3 flex flex-col items-center gap-1.5 text-center text-white transition hover:-translate-y-0.5 border"
                 style={{
                   backgroundColor: "rgba(255,255,255,0.04)",
-                  borderColor: `${brand}4d`,
+                  borderColor: `${s.color}66`,
                 }}
                 aria-label={s.label}
               >
