@@ -21,8 +21,15 @@ function useLt() {
   return (en: string, te: string) => localizeText({ en, te }, lang);
 }
 
-type Rule = { id: string; text: string; category: string | null; position: number };
-type Milestone = { id: string; event_date: string; title: string; description: string | null; photo_url: string | null };
+// Pick English if user is on English mode and English text exists; otherwise Telugu.
+function pickLang(lang: string, te: string | null | undefined, en: string | null | undefined): string {
+  if (lang === "en" && en && en.trim()) return en;
+  return te ?? "";
+}
+
+type Rule = { id: string; text: string; category: string | null; position: number; text_en: string | null; category_en: string | null };
+type Milestone = { id: string; event_date: string; title: string; description: string | null; photo_url: string | null; title_en: string | null; description_en: string | null };
+
 
 function Shell({ children }: { children: React.ReactNode }) {
   const lt = useLt();
@@ -44,6 +51,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 
 function RulesTab() {
   const lt = useLt();
+  const { lang } = useI18n();
   const fnList = useServerFn(listRules);
   const fnAdd = useServerFn(addRule);
   const fnUpd = useServerFn(updateRule);
@@ -55,6 +63,8 @@ function RulesTab() {
   const [loading, setLoading] = useState(true);
   const [newText, setNewText] = useState("");
   const [newCat, setNewCat] = useState("");
+  const [newTextEn, setNewTextEn] = useState("");
+  const [newCatEn, setNewCatEn] = useState("");
   const [editId, setEditId] = useState<string | null>(null);
 
 
@@ -74,33 +84,37 @@ function RulesTab() {
     if (!newText.trim()) return;
     try {
       if (editId) {
-        await fnUpd({ data: { id: editId, text: newText, category: newCat || undefined } });
-        toast.success("నవీకరించబడింది");
+        await fnUpd({ data: { id: editId, text: newText, category: newCat || undefined, text_en: newTextEn || undefined, category_en: newCatEn || undefined } });
+        toast.success(lt("Updated", "నవీకరించబడింది"));
       } else {
-        await fnAdd({ data: { text: newText, category: newCat || undefined } });
-        toast.success("నియమం జోడించబడింది");
+        await fnAdd({ data: { text: newText, category: newCat || undefined, text_en: newTextEn || undefined, category_en: newCatEn || undefined } });
+        toast.success(lt("Rule added", "నియమం జోడించబడింది"));
       }
-      setEditId(null); setNewText(""); setNewCat("");
+      setEditId(null); setNewText(""); setNewCat(""); setNewTextEn(""); setNewCatEn("");
       await load();
     } catch (e: any) { toast.error(e.message); }
   };
   const startEdit = (r: Rule) => {
     setEditId(r.id); setNewText(r.text); setNewCat(r.category ?? "");
+    setNewTextEn(r.text_en ?? ""); setNewCatEn(r.category_en ?? "");
     if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
   };
-  const cancelEdit = () => { setEditId(null); setNewText(""); setNewCat(""); };
+  const cancelEdit = () => { setEditId(null); setNewText(""); setNewCat(""); setNewTextEn(""); setNewCatEn(""); };
   const handleDel = async (id: string) => {
-    if (!confirm("ఈ నియమాన్ని తొలగించాలా?")) return;
-    try { await fnDel({ data: { id } }); await load(); toast.success("తొలగించబడింది"); }
+    if (!confirm(lt("Delete this rule?", "ఈ నియమాన్ని తొలగించాలా?"))) return;
+    try { await fnDel({ data: { id } }); await load(); toast.success(lt("Deleted", "తొలగించబడింది")); }
     catch (e: any) { toast.error(e.message); }
   };
 
-  // Group by category
+  // Group by category (localized)
   const grouped = rules.reduce<Record<string, Rule[]>>((acc, r) => {
-    const k = r.category || "సాధారణ నియమాలు";
+    const catTe = r.category || "సాధారణ నియమాలు";
+    const catEn = r.category_en || "General Rules";
+    const k = pickLang(lang, catTe, catEn);
     (acc[k] ||= []).push(r);
     return acc;
   }, {});
+
 
   const handleDownloadPdf = () => {
     if (rules.length === 0) { toast.error("డౌన్‌లోడ్ చేయడానికి నియమాలు లేవు"); return; }
@@ -130,8 +144,12 @@ function RulesTab() {
           {editId && (
             <div className="text-xs font-semibold text-orange-700">✏️ {lt("Editing rule", "నియమాన్ని సవరిస్తున్నారు")}</div>
           )}
-          <Input placeholder={lt("Category (optional) — e.g. Membership, Donations", "కేటగిరి (ఐచ్ఛికం) — ఉదా: సభ్యత్వం, విరాళాలు")} value={newCat} onChange={e => setNewCat(e.target.value)} />
-          <Textarea placeholder={lt("Write a new rule...", "కొత్త నియమం రాయండి...")} rows={2} value={newText} onChange={e => setNewText(e.target.value)} />
+          <div className="text-[11px] font-semibold text-muted-foreground">తెలుగు</div>
+          <Input placeholder="కేటగిరి (ఐచ్ఛికం) — ఉదా: సభ్యత్వం, విరాళాలు" value={newCat} onChange={e => setNewCat(e.target.value)} />
+          <Textarea placeholder="కొత్త నియమం రాయండి..." rows={2} value={newText} onChange={e => setNewText(e.target.value)} />
+          <div className="text-[11px] font-semibold text-muted-foreground pt-1">English</div>
+          <Input placeholder="Category (optional) — e.g. Membership, Donations" value={newCatEn} onChange={e => setNewCatEn(e.target.value)} />
+          <Textarea placeholder="Write the same rule in English..." rows={2} value={newTextEn} onChange={e => setNewTextEn(e.target.value)} />
           <div className="flex gap-2">
             <Button onClick={handleSubmit} disabled={!newText.trim()} className="flex-1">
               {editId ? <><Check className="w-4 h-4 mr-1" />{lt("Update", "నవీకరించండి")}</> : <><Plus className="w-4 h-4 mr-1" />{lt("Add rule", "నియమం జోడించండి")}</>}
@@ -142,6 +160,7 @@ function RulesTab() {
           </div>
         </Card>
       )}
+
 
       {loading ? (
         <Card className="p-6 text-center text-muted-foreground bg-white/92 border-white">{lt("Loading...", "లోడ్ అవుతోంది...")}</Card>
@@ -158,7 +177,8 @@ function RulesTab() {
             <ol className="space-y-2 list-decimal list-inside p-4">
               {items.map(r => (
                 <li key={r.id} className="text-sm leading-relaxed">
-                  <span>{r.text}</span>
+                  <span>{pickLang(lang, r.text, r.text_en)}</span>
+
                   {canEdit && (
                     <span className="ml-2 inline-flex gap-1">
                       <button onClick={() => startEdit(r)} className="text-muted-foreground hover:text-foreground" aria-label="Edit"><Pencil className="w-3.5 h-3.5 inline" /></button>
@@ -178,6 +198,7 @@ function RulesTab() {
 
 function HistoryTab() {
   const lt = useLt();
+  const { lang } = useI18n();
   const fnList = useServerFn(listMilestones);
   const fnAdd = useServerFn(addMilestone);
   const fnUpd = useServerFn(updateMilestone);
@@ -190,6 +211,8 @@ function HistoryTab() {
   const [date, setDate] = useState("");
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
+  const [titleEn, setTitleEn] = useState("");
+  const [descEn, setDescEn] = useState("");
   const [photo, setPhoto] = useState(""); // storage path (private bucket) or full http URL
   const [photoPreview, setPhotoPreview] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -243,7 +266,7 @@ function HistoryTab() {
       if (error) throw error;
       setPhoto(path);
       setPhotoPreview(await signUrl(path));
-      toast.success("ఇమేజ్ అప్‌లోడ్ అయింది");
+      toast.success(lt("Image uploaded", "ఇమేజ్ అప్‌లోడ్ అయింది"));
     } catch (err: any) {
       toast.error(err.message || "Upload failed");
     } finally {
@@ -254,20 +277,23 @@ function HistoryTab() {
   };
 
 
-  const reset = () => { setShowForm(false); setEditId(null); setDate(""); setTitle(""); setDesc(""); setPhoto(""); setPhotoPreview(""); };
+  const reset = () => { setShowForm(false); setEditId(null); setDate(""); setTitle(""); setDesc(""); setTitleEn(""); setDescEn(""); setPhoto(""); setPhotoPreview(""); };
   const handleSave = async () => {
-    if (!date || !title.trim()) { toast.error("తేదీ మరియు శీర్షిక అవసరం"); return; }
+    if (!date || !title.trim()) { toast.error(lt("Date and title required", "తేదీ మరియు శీర్షిక అవసరం")); return; }
     try {
-      if (editId) await fnUpd({ data: { id: editId, event_date: date, title, description: desc || undefined, photo_url: photo || undefined } });
-      else await fnAdd({ data: { event_date: date, title, description: desc || undefined, photo_url: photo || undefined } });
-      reset(); await load(); toast.success("సేవ్ అయింది");
+      if (editId) await fnUpd({ data: { id: editId, event_date: date, title, description: desc || undefined, title_en: titleEn || undefined, description_en: descEn || undefined, photo_url: photo || undefined } });
+      else await fnAdd({ data: { event_date: date, title, description: desc || undefined, title_en: titleEn || undefined, description_en: descEn || undefined, photo_url: photo || undefined } });
+      reset(); await load(); toast.success(lt("Saved", "సేవ్ అయింది"));
     } catch (e: any) { toast.error(e.message); }
   };
   const startEdit = async (m: Milestone) => {
     setEditId(m.id); setDate(m.event_date); setTitle(m.title);
     setDesc(m.description ?? "");
+    setTitleEn(m.title_en ?? "");
+    setDescEn(m.description_en ?? "");
     setPhoto(m.photo_url ?? "");
     setPhotoPreview(m.photo_url ? await signUrl(m.photo_url) : "");
+
     setShowForm(true);
   };
   const handleDel = async (id: string) => {
@@ -315,8 +341,13 @@ function HistoryTab() {
       {canEdit && showForm && (
         <Card className="p-4 bg-white/95 border-white space-y-2">
           <Input type="date" value={date} onChange={e => setDate(e.target.value)} />
-          <Input placeholder={lt("Title (e.g. Society founded)", "శీర్షిక (ఉదా: సొసైటీ స్థాపన)")} value={title} onChange={e => setTitle(e.target.value)} />
-          <Textarea placeholder={lt("Description (optional)", "వివరణ (ఐచ్ఛికం)")} rows={3} value={desc} onChange={e => setDesc(e.target.value)} />
+          <div className="text-[11px] font-semibold text-muted-foreground">తెలుగు</div>
+          <Input placeholder="శీర్షిక (ఉదా: సొసైటీ స్థాపన)" value={title} onChange={e => setTitle(e.target.value)} />
+          <Textarea placeholder="వివరణ (ఐచ్ఛికం)" rows={3} value={desc} onChange={e => setDesc(e.target.value)} />
+          <div className="text-[11px] font-semibold text-muted-foreground pt-1">English</div>
+          <Input placeholder="Title (e.g. Society founded)" value={titleEn} onChange={e => setTitleEn(e.target.value)} />
+          <Textarea placeholder="Description (optional)" rows={3} value={descEn} onChange={e => setDescEn(e.target.value)} />
+
           <div className="space-y-2">
             <input
               ref={fileInputGalleryRef}
@@ -414,9 +445,10 @@ function HistoryTab() {
                     <div className="absolute -left-[1.4rem] top-4 w-3 h-3 rounded-full bg-white border-2 shadow" style={{ borderColor: "#FF9933" }} />
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
-                        <div className="text-[11px] text-muted-foreground">{new Date(m.event_date).toLocaleDateString("te-IN", { day: "numeric", month: "long", year: "numeric" })}</div>
-                        <div className="font-semibold text-sm mt-0.5">{m.title}</div>
-                        {m.description && <p className="text-xs text-foreground/80 mt-1 whitespace-pre-wrap">{m.description}</p>}
+                        <div className="text-[11px] text-muted-foreground">{new Date(m.event_date).toLocaleDateString(lang === "en" ? "en-IN" : "te-IN", { day: "numeric", month: "long", year: "numeric" })}</div>
+                        <div className="font-semibold text-sm mt-0.5">{pickLang(lang, m.title, m.title_en)}</div>
+                        {(m.description || m.description_en) && <p className="text-xs text-foreground/80 mt-1 whitespace-pre-wrap">{pickLang(lang, m.description ?? "", m.description_en)}</p>}
+
                         {m.photo_url && <img src={/^https?:\/\//i.test(m.photo_url) ? m.photo_url : (signedUrls[m.photo_url] ?? "")} alt={m.title} className="mt-2 rounded-md max-h-40 object-cover w-full" />}
                       </div>
                       {canEdit && (

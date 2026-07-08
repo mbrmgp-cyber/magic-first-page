@@ -1,0 +1,2 @@
+ALTER TABLE public.org_rules ADD COLUMN IF NOT EXISTS text_en text, ADD COLUMN IF NOT EXISTS category_en text;
+ALTER TABLE public.org_milestones ADD COLUMN IF NOT EXISTS title_en text, ADD COLUMN IF NOT EXISTS description_en text;
