@@ -229,6 +229,8 @@ export function localizeText(entry: LocalizedEntry, lang: string): string {
 // on the original text) to the intended English spelling.
 const EN_LOANWORDS: Record<string, string> = {
   // Telugu
+  "తండ్రి పేరు": "S/O",
+  "తండ్రి": "S/O",
   "సొసైటీ": "SOCIETY",
   "సొసైటి": "SOCIETY",
   "సొసైట": "SOCIETY",
