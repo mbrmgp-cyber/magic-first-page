@@ -198,6 +198,7 @@ function RulesTab() {
 
 function HistoryTab() {
   const lt = useLt();
+  const { lang } = useI18n();
   const fnList = useServerFn(listMilestones);
   const fnAdd = useServerFn(addMilestone);
   const fnUpd = useServerFn(updateMilestone);
@@ -210,6 +211,8 @@ function HistoryTab() {
   const [date, setDate] = useState("");
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
+  const [titleEn, setTitleEn] = useState("");
+  const [descEn, setDescEn] = useState("");
   const [photo, setPhoto] = useState(""); // storage path (private bucket) or full http URL
   const [photoPreview, setPhotoPreview] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -263,7 +266,7 @@ function HistoryTab() {
       if (error) throw error;
       setPhoto(path);
       setPhotoPreview(await signUrl(path));
-      toast.success("ఇమేజ్ అప్‌లోడ్ అయింది");
+      toast.success(lt("Image uploaded", "ఇమేజ్ అప్‌లోడ్ అయింది"));
     } catch (err: any) {
       toast.error(err.message || "Upload failed");
     } finally {
@@ -274,20 +277,23 @@ function HistoryTab() {
   };
 
 
-  const reset = () => { setShowForm(false); setEditId(null); setDate(""); setTitle(""); setDesc(""); setPhoto(""); setPhotoPreview(""); };
+  const reset = () => { setShowForm(false); setEditId(null); setDate(""); setTitle(""); setDesc(""); setTitleEn(""); setDescEn(""); setPhoto(""); setPhotoPreview(""); };
   const handleSave = async () => {
-    if (!date || !title.trim()) { toast.error("తేదీ మరియు శీర్షిక అవసరం"); return; }
+    if (!date || !title.trim()) { toast.error(lt("Date and title required", "తేదీ మరియు శీర్షిక అవసరం")); return; }
     try {
-      if (editId) await fnUpd({ data: { id: editId, event_date: date, title, description: desc || undefined, photo_url: photo || undefined } });
-      else await fnAdd({ data: { event_date: date, title, description: desc || undefined, photo_url: photo || undefined } });
-      reset(); await load(); toast.success("సేవ్ అయింది");
+      if (editId) await fnUpd({ data: { id: editId, event_date: date, title, description: desc || undefined, title_en: titleEn || undefined, description_en: descEn || undefined, photo_url: photo || undefined } });
+      else await fnAdd({ data: { event_date: date, title, description: desc || undefined, title_en: titleEn || undefined, description_en: descEn || undefined, photo_url: photo || undefined } });
+      reset(); await load(); toast.success(lt("Saved", "సేవ్ అయింది"));
     } catch (e: any) { toast.error(e.message); }
   };
   const startEdit = async (m: Milestone) => {
     setEditId(m.id); setDate(m.event_date); setTitle(m.title);
     setDesc(m.description ?? "");
+    setTitleEn(m.title_en ?? "");
+    setDescEn(m.description_en ?? "");
     setPhoto(m.photo_url ?? "");
     setPhotoPreview(m.photo_url ? await signUrl(m.photo_url) : "");
+
     setShowForm(true);
   };
   const handleDel = async (id: string) => {
