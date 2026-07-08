@@ -369,7 +369,7 @@ function HistoryTab() {
                 className="w-full"
               >
                 {uploading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />}
-                {photo ? "ఇమేజ్ మార్చండి • Change Image" : "ఇమేజ్ అప్‌లోడ్ చేయండి • Upload Image"}
+                {photo ? lt("Change Image", "ఇమేజ్ మార్చండి") : lt("Upload Image", "ఇమేజ్ అప్‌లోడ్ చేయండి")}
               </Button>
             )}
             {photoPreview && (
