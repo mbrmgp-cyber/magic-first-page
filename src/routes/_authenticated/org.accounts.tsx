@@ -161,7 +161,7 @@ function AccountsPage() {
     <div className="min-h-screen bg-tricolor p-3 md:p-6">
       <div className="max-w-3xl mx-auto space-y-4">
         <Link to="/org/accounts-hub" className="inline-flex items-center gap-1 text-sm text-foreground/80 hover:text-foreground">
-          <ArrowLeft className="w-4 h-4" /> Accounts Hub
+          <ArrowLeft className="w-4 h-4" /> ఖాతాల కేంద్రం
         </Link>
 
         {/* Header with logo + currency */}
@@ -170,7 +170,7 @@ function AccountsPage() {
             <div className="flex items-center gap-3">
               <button type="button" onClick={() => fileRef.current?.click()}
                 className="relative h-14 w-14 rounded-xl bg-gradient-to-br from-orange-100 to-green-100 flex items-center justify-center overflow-hidden border-2 border-orange-200 hover:border-orange-400 transition group"
-                title="Upload logo">
+                title="లోగో అప్‌లోడ్">
                 {orgQ.data?.org?.logo_url ? (
                   <img src={orgQ.data.org.logo_url} alt="Society logo" className="h-full w-full object-cover" />
                 ) : (
@@ -178,25 +178,25 @@ function AccountsPage() {
                 )}
                 {uploading && <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
                   <RefreshCw className="h-4 w-4 animate-spin" /></div>}
-                <div className="absolute inset-x-0 bottom-0 bg-black/60 text-white text-[8px] py-0.5 opacity-0 group-hover:opacity-100">EDIT</div>
+                <div className="absolute inset-x-0 bottom-0 bg-black/60 text-white text-[8px] py-0.5 opacity-0 group-hover:opacity-100">సవరించు</div>
               </button>
               <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onLogoPicked} />
               <div className="leading-tight">
-                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Society</p>
+                <p className="text-[11px] tracking-wide text-muted-foreground">సొసైటీ</p>
                 <p className="font-bold text-foreground">{orgQ.data?.org?.name ?? "చిట్వేల్ హెల్ప్ లైన్ సొసైటీ"}</p>
               </div>
             </div>
             <div className="flex flex-col gap-1 text-right">
-              <span className="text-[10px] uppercase tracking-wide text-muted-foreground">Base currency set in Accounts Hub</span>
+              <span className="text-[10px] tracking-wide text-muted-foreground">బేస్ కరెన్సీ ఖాతాల కేంద్రంలో సెట్ చేయబడింది</span>
             </div>
           </div>
           <h1 className="mt-3 text-lg md:text-2xl font-bold text-orange-700">
-            కమిటీ అకౌంట్స్ – నెలవారీ అప్పు వివరాల నమోదు
+            కమిటీ ఖాతాలు – నెలవారీ అప్పు నమోదు
           </h1>
           <div className="flex items-center justify-between flex-wrap gap-2">
-            <p className="text-xs text-muted-foreground">Committee Accounts – Monthly Loan Entry</p>
+            <p className="text-xs text-muted-foreground">సభ్యుల చెల్లింపులు మరియు కొత్త అప్పులు</p>
             <Link to="/org/master-ledger" className="inline-flex items-center gap-1 text-xs text-green-700 hover:text-green-900 font-semibold">
-              <BookOpen className="h-3 w-3" /> View Master Ledger →
+              <BookOpen className="h-3 w-3" /> మాస్టర్ లెడ్జర్ చూడండి →
             </Link>
           </div>
         </Card>
