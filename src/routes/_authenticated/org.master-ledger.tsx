@@ -124,7 +124,7 @@ function MasterLedgerPage() {
               </tbody>
               <tfoot>
                 <tr className="bg-green-100 font-bold">
-                  <td colSpan={2} className="px-3 py-2.5 text-right">GRAND TOTAL</td>
+                  <td colSpan={2} className="px-3 py-2.5 text-right">మొత్తం</td>
                   <td className="px-3 py-2.5 text-right">{fmt(totals.outstanding)}</td>
                   <td className="px-3 py-2.5 text-right">{fmt(totals.principal)}</td>
                   <td className="px-3 py-2.5 text-right">{fmt(totals.interest)}</td>
