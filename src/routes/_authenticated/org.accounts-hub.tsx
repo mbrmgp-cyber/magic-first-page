@@ -27,8 +27,8 @@ function AccountsHub() {
             <Link to="/org/dashboard" className="p-2 rounded-lg hover:bg-white/10">
               <ArrowLeft className="h-5 w-5" />
             </Link>
-            <div>
-              <h1 className="text-lg font-bold">అకౌంట్స్ బాక్స్</h1>
+            <div data-notranslit>
+              <h1 className="text-lg font-bold text-white">Accounts Hub</h1>
               <p className="text-xs text-white/60">Accounts Hub — central navigation for all financial tasks</p>
             </div>
           </div>
