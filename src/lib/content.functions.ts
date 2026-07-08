@@ -58,7 +58,7 @@ export const listRules = createServerFn({ method: "GET" })
 
 export const addRule = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { text: string; category?: string }) => d)
+  .inputValidator((d: { text: string; category?: string; text_en?: string; category_en?: string }) => d)
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const orgId = await resolveOrgId(supabase, userId);
@@ -75,6 +75,8 @@ export const addRule = createServerFn({ method: "POST" })
       org_id: orgId,
       text: data.text.trim(),
       category: data.category?.trim() || null,
+      text_en: data.text_en?.trim() || null,
+      category_en: data.category_en?.trim() || null,
       position: nextPos,
       created_by: userId,
     });
@@ -84,16 +86,22 @@ export const addRule = createServerFn({ method: "POST" })
 
 export const updateRule = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id: string; text: string; category?: string }) => d)
+  .inputValidator((d: { id: string; text: string; category?: string; text_en?: string; category_en?: string }) => d)
   .handler(async ({ data, context }) => {
     const { supabase } = context;
     const { error } = await supabase
       .from("org_rules")
-      .update({ text: data.text.trim(), category: data.category?.trim() || null })
+      .update({
+        text: data.text.trim(),
+        category: data.category?.trim() || null,
+        text_en: data.text_en?.trim() || null,
+        category_en: data.category_en?.trim() || null,
+      })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
 
 export const deleteRule = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
