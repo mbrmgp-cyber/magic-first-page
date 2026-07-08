@@ -27,7 +27,7 @@ function MasterLedgerPage() {
     for (const r of rows) {
       lines.push([r.member_id, `"${r.member_name}"`, r.old_balance, r.principal_collected, r.interest_collected, r.new_loan, r.net_balance].join(","));
     }
-    lines.push(["TOTAL", "", totals.outstanding, totals.principal, totals.interest, totals.newLoan, totals.net].join(","));
+    lines.push(["మొత్తం", "", totals.outstanding, totals.principal, totals.interest, totals.newLoan, totals.net].join(","));
     const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
