@@ -144,8 +144,12 @@ function RulesTab() {
           {editId && (
             <div className="text-xs font-semibold text-orange-700">✏️ {lt("Editing rule", "నియమాన్ని సవరిస్తున్నారు")}</div>
           )}
-          <Input placeholder={lt("Category (optional) — e.g. Membership, Donations", "కేటగిరి (ఐచ్ఛికం) — ఉదా: సభ్యత్వం, విరాళాలు")} value={newCat} onChange={e => setNewCat(e.target.value)} />
-          <Textarea placeholder={lt("Write a new rule...", "కొత్త నియమం రాయండి...")} rows={2} value={newText} onChange={e => setNewText(e.target.value)} />
+          <div className="text-[11px] font-semibold text-muted-foreground">తెలుగు</div>
+          <Input placeholder="కేటగిరి (ఐచ్ఛికం) — ఉదా: సభ్యత్వం, విరాళాలు" value={newCat} onChange={e => setNewCat(e.target.value)} />
+          <Textarea placeholder="కొత్త నియమం రాయండి..." rows={2} value={newText} onChange={e => setNewText(e.target.value)} />
+          <div className="text-[11px] font-semibold text-muted-foreground pt-1">English</div>
+          <Input placeholder="Category (optional) — e.g. Membership, Donations" value={newCatEn} onChange={e => setNewCatEn(e.target.value)} />
+          <Textarea placeholder="Write the same rule in English..." rows={2} value={newTextEn} onChange={e => setNewTextEn(e.target.value)} />
           <div className="flex gap-2">
             <Button onClick={handleSubmit} disabled={!newText.trim()} className="flex-1">
               {editId ? <><Check className="w-4 h-4 mr-1" />{lt("Update", "నవీకరించండి")}</> : <><Plus className="w-4 h-4 mr-1" />{lt("Add rule", "నియమం జోడించండి")}</>}
@@ -156,6 +160,7 @@ function RulesTab() {
           </div>
         </Card>
       )}
+
 
       {loading ? (
         <Card className="p-6 text-center text-muted-foreground bg-white/92 border-white">{lt("Loading...", "లోడ్ అవుతోంది...")}</Card>
