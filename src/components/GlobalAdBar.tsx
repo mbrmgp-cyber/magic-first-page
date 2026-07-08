@@ -50,7 +50,7 @@ export function GlobalAdBar() {
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <div className="w-screen max-w-none pointer-events-auto m-0 p-0">
-        <div className="relative overflow-hidden bg-black shadow-[0_-6px_24px_rgba(0,0,0,0.55)] w-screen max-w-none h-[110px] m-0 p-0">
+        <div className="relative overflow-hidden bg-black shadow-[0_-6px_24px_rgba(0,0,0,0.55)] w-screen max-w-none h-[70px] m-0 p-0">
           <img
             src={current}
             alt="MBR platform advertisement"
