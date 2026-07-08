@@ -277,7 +277,7 @@ function Dashboard() {
             )}
           </button>
           <div className="flex items-center gap-2">
-            <LanguageToggle />
+            <GoogleTranslate />
             <Button variant="ghost" size="sm" onClick={() => setSettingsOpen(true)} className="text-zinc-200 hover:bg-zinc-900 hover:text-white" aria-label="Settings">
               <Settings className="h-4 w-4" />
             </Button>
