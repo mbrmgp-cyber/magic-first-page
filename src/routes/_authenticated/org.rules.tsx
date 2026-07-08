@@ -21,8 +21,15 @@ function useLt() {
   return (en: string, te: string) => localizeText({ en, te }, lang);
 }
 
-type Rule = { id: string; text: string; category: string | null; position: number };
-type Milestone = { id: string; event_date: string; title: string; description: string | null; photo_url: string | null };
+// Pick English if user is on English mode and English text exists; otherwise Telugu.
+function pickLang(lang: string, te: string | null | undefined, en: string | null | undefined): string {
+  if (lang === "en" && en && en.trim()) return en;
+  return te ?? "";
+}
+
+type Rule = { id: string; text: string; category: string | null; position: number; text_en: string | null; category_en: string | null };
+type Milestone = { id: string; event_date: string; title: string; description: string | null; photo_url: string | null; title_en: string | null; description_en: string | null };
+
 
 function Shell({ children }: { children: React.ReactNode }) {
   const lt = useLt();
