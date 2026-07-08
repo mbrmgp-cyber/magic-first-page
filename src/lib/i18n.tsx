@@ -224,9 +224,64 @@ export function localizeText(entry: LocalizedEntry, lang: string): string {
   return translit(entry.te, script);
 }
 
+// Dictionary of common English loanwords written in Telugu/Devanagari.
+// Maps the *source* Indic word (lowercased key form is not used; we match
+// on the original text) to the intended English spelling.
+const EN_LOANWORDS: Record<string, string> = {
+  // Telugu
+  "సొసైటీ": "SOCIETY",
+  "సొసైటి": "SOCIETY",
+  "సొసైట": "SOCIETY",
+  "హెల్ప్‌లైన్": "HELPLINE",
+  "హెల్ప్ లైన్": "HELP LINE",
+  "హెల్ప్": "HELP",
+  "లైన్": "LINE",
+  "రిజిస్టర్": "REGISTER",
+  "రిజిస్ట్రేషన్": "REGISTRATION",
+  "లాగిన్": "LOGIN",
+  "లాగౌట్": "LOGOUT",
+  "ఇమెయిల్": "EMAIL",
+  "ఈమెయిల్": "EMAIL",
+  "పాస్‌వర్డ్": "PASSWORD",
+  "పాస్వర్డ్": "PASSWORD",
+  "అడ్మిన్": "ADMIN",
+  "సూపర్": "SUPER",
+  "మెంబర్": "MEMBER",
+  "మెంబర్స్": "MEMBERS",
+  "కమిటీ": "COMMITTEE",
+  "ఆఫీస్": "OFFICE",
+  "ఫోన్": "PHONE",
+  "మొబైల్": "MOBILE",
+  "ఆధార్": "AADHAAR",
+  "పాన్": "PAN",
+  "బ్యాంక్": "BANK",
+  "అకౌంట్": "ACCOUNT",
+  "ఐడి": "ID",
+  "ఐడీ": "ID",
+  "కార్డ్": "CARD",
+  "క్యూఆర్": "QR",
+  "కోడ్": "CODE",
+};
+
+function applyLoanwordSubstitutions(text: string): string {
+  let out = text;
+  // Sort by length descending so multi-word phrases (HELPLINE) match before HELP.
+  const keys = Object.keys(EN_LOANWORDS).sort((a, b) => b.length - a.length);
+  for (const k of keys) {
+    if (out.includes(k)) out = out.split(k).join(EN_LOANWORDS[k]);
+  }
+  return out;
+}
+
 function toCleanEnglish(text: string, from: "telugu" | "devanagari"): string {
   try {
-    const iast = Sanscript.t(text, from, "iast");
+    // First, replace known English loanwords with their real English spelling.
+    const preprocessed = applyLoanwordSubstitutions(text);
+    // If nothing Indic remains, return uppercased as-is.
+    if (!/[\u0C00-\u0C7F\u0900-\u097F]/.test(preprocessed)) {
+      return preprocessed.toUpperCase();
+    }
+    const iast = Sanscript.t(preprocessed, from, "iast");
     // Strip combining diacritics (ā→a, ṭ→t, ṇ→n, ḥ→h, etc.)
     let s = iast.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     // Common leftover characters from IAST that NFD didn't decompose cleanly
