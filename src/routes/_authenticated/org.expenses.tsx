@@ -21,16 +21,16 @@ export const Route = createFileRoute("/_authenticated/org/expenses")({
 });
 
 const EXPENSE_TYPES: { v: ExpenseType; te: string; en: string }[] = [
-  { v: "charity", te: "ఆర్థిక సహాయం / ధర్మం", en: "Financial Help / Charity" },
-  { v: "office", te: "ఆఫీసు ఖర్చులు", en: "Office Expenses" },
-  { v: "meeting", te: "మీటింగ్ ఖర్చులు", en: "Meeting Expenses" },
-  { v: "misc", te: "ఇతరములు", en: "Miscellaneous" },
+  { v: "charity", te: "ఆర్థిక సహాయం / ధర్మం", en: "ఆర్థిక సహాయం / ధర్మం" },
+  { v: "office", te: "ఆఫీసు ఖర్చులు", en: "ఆఫీసు ఖర్చులు" },
+  { v: "meeting", te: "మీటింగ్ ఖర్చులు", en: "మీటింగ్ ఖర్చులు" },
+  { v: "misc", te: "ఇతరములు", en: "ఇతరములు" },
 ];
 
 const WALLETS: { v: WalletType; label: string }[] = [
-  { v: "bank", label: "Bank Account" },
-  { v: "accountant", label: "Accountant / NPR" },
-  { v: "president", label: "President / PSR" },
+  { v: "bank", label: "బ్యాంక్ ఖాతా" },
+  { v: "accountant", label: "అకౌంటెంట్" },
+  { v: "president", label: "అధ్యక్షుడు" },
 ];
 
 function ExpensesPage() {
