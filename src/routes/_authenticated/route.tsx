@@ -5,6 +5,7 @@ import { DynamicAppManifest } from "@/components/DynamicAppManifest";
 import { SubscriptionGate } from "@/components/SubscriptionGate";
 import { RbacProvider } from "@/lib/rbac";
 import { GlobalAdBar } from "@/components/GlobalAdBar";
+import { AutoTransliterate } from "@/components/AutoTransliterate";
 
 
 export const Route = createFileRoute("/_authenticated")({
