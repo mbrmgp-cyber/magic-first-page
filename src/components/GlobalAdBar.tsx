@@ -46,15 +46,16 @@ export function GlobalAdBar() {
 
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-40 pointer-events-none"
+      className="fixed left-0 right-0 bottom-0 z-40 pointer-events-none w-screen m-0 p-0 overflow-hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <div className="w-full pointer-events-auto">
-        <div className="relative overflow-hidden bg-black shadow-[0_-6px_24px_rgba(0,0,0,0.55)]">
+      <div className="w-screen max-w-none pointer-events-auto m-0 p-0">
+        <div className="relative overflow-hidden bg-black shadow-[0_-6px_24px_rgba(0,0,0,0.55)] w-screen max-w-none h-[64px] m-0 p-0">
           <img
             src={current}
             alt="MBR platform advertisement"
-            className="block w-full h-[64px] object-cover"
+            className="block w-full h-full max-w-none m-0 p-0"
+            style={{ width: "100%", height: "100%", objectFit: "fill", display: "block" }}
           />
         </div>
       </div>
