@@ -387,17 +387,17 @@ function HistoryTab() {
             )}
           </div>
           <div className="flex gap-2">
-            <Button onClick={handleSave} className="flex-1"><Check className="w-4 h-4 mr-1" />సేవ్ చేయండి</Button>
+            <Button onClick={handleSave} className="flex-1"><Check className="w-4 h-4 mr-1" />{lt("Save", "సేవ్ చేయండి")}</Button>
             <Button variant="outline" onClick={reset}><X className="w-4 h-4" /></Button>
           </div>
         </Card>
       )}
 
       {loading ? (
-        <Card className="p-6 text-center text-muted-foreground bg-white/92 border-white">లోడ్ అవుతోంది...</Card>
+        <Card className="p-6 text-center text-muted-foreground bg-white/92 border-white">{lt("Loading...", "లోడ్ అవుతోంది...")}</Card>
       ) : items.length === 0 ? (
         <Card className="p-6 text-center text-muted-foreground bg-white/92 border-white">
-          ఇంకా చరిత్ర మైలురాళ్లు లేవు.
+          {lt("No history milestones yet.", "ఇంకా చరిత్ర మైలురాళ్లు లేవు.")}
         </Card>
       ) : (
         <div className="relative pl-6">
