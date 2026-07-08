@@ -21,6 +21,7 @@ export function LanguageToggle({ className = "" }: { className?: string }) {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
+        data-notranslit
         className="min-w-[12rem] max-h-[70vh] overflow-y-auto"
       >
         {LANG_OPTIONS.map((o) => (
@@ -29,7 +30,7 @@ export function LanguageToggle({ className = "" }: { className?: string }) {
             onClick={() => setLang(o.code)}
             className="cursor-pointer flex items-center justify-between"
           >
-            <span>{o.label}</span>
+            <span data-notranslit>{o.label}</span>
             {lang === o.code && <Check className="h-4 w-4 text-[#ff8c28]" />}
           </DropdownMenuItem>
         ))}
