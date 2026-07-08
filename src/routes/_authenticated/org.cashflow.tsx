@@ -15,24 +15,24 @@ export const Route = createFileRoute("/_authenticated/org/cashflow")({
 });
 
 const INCOME_LABEL: Record<string, string> = {
-  registration_fee: "Registration Fees",
-  donation: "Donations",
-  loan_principal: "Loan Principal Collected",
-  loan_interest: "Loan Interest Collected",
-  other: "Other Income",
+  registration_fee: "నమోదు రుసుములు",
+  donation: "విరాళాలు",
+  loan_principal: "అసలు వసూలు",
+  loan_interest: "వడ్డీ వసూలు",
+  other: "ఇతర ఆదాయం",
 };
 const EXPENSE_LABEL: Record<string, string> = {
-  charity: "Financial Help / Charity",
-  office: "Office Expenses",
-  meeting: "Meeting Expenses",
-  misc: "Miscellaneous",
+  charity: "ఆర్థిక సహాయం / ధర్మం",
+  office: "ఆఫీసు ఖర్చులు",
+  meeting: "మీటింగ్ ఖర్చులు",
+  misc: "ఇతరములు",
 };
 
-const RANGES: { v: TimeRange; te: string; en: string }[] = [
-  { v: "this_month", te: "నెల పట్టిక", en: "This Month" },
-  { v: "3m", te: "3 నెలల పట్టిక", en: "3 Months" },
-  { v: "6m", te: "6 నెలల పట్టిక", en: "6 Months" },
-  { v: "yearly", te: "సంవత్సరాల పట్టిక", en: "Yearly" },
+const RANGES: { v: TimeRange; te: string }[] = [
+  { v: "this_month", te: "నెల పట్టిక" },
+  { v: "3m", te: "3 నెలల పట్టిక" },
+  { v: "6m", te: "6 నెలల పట్టిక" },
+  { v: "yearly", te: "సంవత్సర పట్టిక" },
 ];
 
 function CashFlowPage() {
@@ -56,19 +56,19 @@ function CashFlowPage() {
               <ArrowLeft className="h-5 w-5" />
             </Link>
             <div>
-              <h1 className="text-lg font-bold">సొసైటీ నగదు ప్రవాహం</h1>
-              <p className="text-xs text-white/60">Society Cash Flow Statement</p>
+              <h1 className="text-lg font-bold text-white">సొసైటీ నగదు ప్రవాహం</h1>
+              <p className="text-xs text-white/70">నగదు ప్రవాహ నివేదిక</p>
             </div>
           </div>
           <div className="flex flex-wrap gap-2 items-center print:hidden">
             <Link to="/org/income">
-              <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">+ Income</Button>
+              <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">+ ఆదాయం</Button>
             </Link>
             <Link to="/org/expenses">
-              <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white">+ Expense</Button>
+              <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white">+ ఖర్చు</Button>
             </Link>
             <Button size="sm" variant="outline" onClick={() => window.print()} className="gap-1">
-              <Printer className="h-4 w-4" /> Print
+              <Printer className="h-4 w-4" /> ప్రింట్
             </Button>
           </div>
         </header>
@@ -78,9 +78,8 @@ function CashFlowPage() {
           <TabsList className="bg-zinc-900 border border-white/10 grid grid-cols-4 w-full h-auto p-1">
             {RANGES.map((r) => (
               <TabsTrigger key={r.v} value={r.v}
-                className="data-[state=active]:bg-[#ff8c28] data-[state=active]:text-white text-white/70 flex-col py-1.5 px-1 h-auto">
-                <span className="text-[10px] font-medium">{r.te}</span>
-                <span className="text-[10px] opacity-70">{r.en}</span>
+                className="data-[state=active]:bg-[#ff8c28] data-[state=active]:text-white text-white flex-col py-1.5 px-1 h-auto">
+                <span className="text-[11px] font-medium">{r.te}</span>
               </TabsTrigger>
             ))}
           </TabsList>
@@ -88,28 +87,28 @@ function CashFlowPage() {
 
         {currency !== BASE_CURRENCY && (
           <p className="text-[11px] text-amber-400/80 bg-amber-900/20 border border-amber-500/30 rounded px-3 py-1.5">
-            Displaying in {symbol} {currency}. Stored totals are converted to base currency (INR) for accounting.
+            {symbol} {currency}లో ప్రదర్శిస్తోంది. మొత్తాలు బేస్ కరెన్సీ (INR)కి మార్చబడతాయి.
           </p>
         )}
 
         {q.isLoading || !d ? (
-          <p className="text-sm text-white/60">Loading…</p>
+          <p className="text-sm text-white">లోడ్ అవుతోంది…</p>
         ) : (
           <>
             {/* Wallets */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <WalletCard fmt={fmt} icon={<Building2 className="h-5 w-5" />} label="Bank (బ్యాంకులో)" value={d.wallets.bank} accent="from-blue-500/30" />
-              <WalletCard fmt={fmt} icon={<Briefcase className="h-5 w-5" />} label="Accountant / Petty Cash" value={d.wallets.accountant} accent="from-amber-500/30" />
-              <WalletCard fmt={fmt} icon={<User className="h-5 w-5" />} label="President / PSR" value={d.wallets.president} accent="from-purple-500/30" />
+              <WalletCard fmt={fmt} icon={<Building2 className="h-5 w-5" />} label="బ్యాంకులో" value={d.wallets.bank} accent="from-blue-500/30" />
+              <WalletCard fmt={fmt} icon={<Briefcase className="h-5 w-5" />} label="అకౌంటెంట్ / చిల్లర" value={d.wallets.accountant} accent="from-amber-500/30" />
+              <WalletCard fmt={fmt} icon={<User className="h-5 w-5" />} label="అధ్యక్షుడు" value={d.wallets.president} accent="from-purple-500/30" />
             </div>
 
             {/* Members holdings + pending interest */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <WalletCard fmt={fmt} icon={<Users className="h-5 w-5" />}
-                label="With Members (సభ్యుల వద్ద ఉన్న మొత్తం)"
+                label="సభ్యుల వద్ద ఉన్న మొత్తం"
                 value={d.membersOutstanding ?? 0} accent="from-orange-500/30" />
               <WalletCard fmt={fmt} icon={<AlarmClock className="h-5 w-5" />}
-                label="Pending Interest (పెండింగ్ వడ్డీ)"
+                label="పెండింగ్ వడ్డీ"
                 value={d.pendingInterest ?? 0} accent="from-rose-500/30" />
             </div>
 
@@ -117,15 +116,15 @@ function CashFlowPage() {
             <Card className="bg-zinc-950 border-white/10 p-4">
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div>
-                  <p className="text-[11px] uppercase text-green-400 flex items-center justify-center gap-1"><TrendingUp className="h-3 w-3" />Total Income (వచ్చినది)</p>
+                  <p className="text-[11px] text-green-400 flex items-center justify-center gap-1"><TrendingUp className="h-3 w-3" />వచ్చినది</p>
                   <p className="text-lg font-bold text-green-400">{fmt(d.totalIncome)}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] uppercase text-red-400 flex items-center justify-center gap-1"><TrendingDown className="h-3 w-3" />Total Expense (పోయినది)</p>
+                  <p className="text-[11px] text-red-400 flex items-center justify-center gap-1"><TrendingDown className="h-3 w-3" />పోయినది</p>
                   <p className="text-lg font-bold text-red-400">{fmt(d.totalExpense)}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] uppercase text-[#ff8c28] flex items-center justify-center gap-1"><Wallet className="h-3 w-3" />Closing Balance</p>
+                  <p className="text-[11px] text-[#ff8c28] flex items-center justify-center gap-1"><Wallet className="h-3 w-3" />మిగులు</p>
                   <p className="text-lg font-bold text-[#ff8c28]">{fmt(d.closingBalance)}</p>
                 </div>
               </div>
@@ -134,30 +133,30 @@ function CashFlowPage() {
             {/* Breakdown */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Card className="bg-zinc-950 border-white/10 p-4">
-                <h3 className="text-sm font-semibold text-green-400 mb-2">Income Breakdown</h3>
+                <h3 className="text-sm font-semibold text-green-400 mb-2">ఆదాయ వివరాలు</h3>
                 {Object.keys(d.incomeByType).length === 0 ? (
-                  <p className="text-xs text-white/40">No income in this period.</p>
+                  <p className="text-xs text-white/60">ఈ కాలంలో ఆదాయం లేదు.</p>
                 ) : (
                   <ul className="space-y-1.5 text-sm">
                     {Object.entries(d.incomeByType).map(([k, v]) => (
                       <li key={k} className="flex justify-between border-b border-white/5 pb-1">
-                        <span className="text-white/70">{INCOME_LABEL[k] ?? k}</span>
-                        <span className="font-medium">{fmt(v as number)}</span>
+                        <span className="text-white">{INCOME_LABEL[k] ?? k}</span>
+                        <span className="font-medium text-white">{fmt(v as number)}</span>
                       </li>
                     ))}
                   </ul>
                 )}
               </Card>
               <Card className="bg-zinc-950 border-white/10 p-4">
-                <h3 className="text-sm font-semibold text-red-400 mb-2">Expense Breakdown</h3>
+                <h3 className="text-sm font-semibold text-red-400 mb-2">ఖర్చు వివరాలు</h3>
                 {Object.keys(d.expenseByType).length === 0 ? (
-                  <p className="text-xs text-white/40">No expenses in this period.</p>
+                  <p className="text-xs text-white/60">ఈ కాలంలో ఖర్చులు లేవు.</p>
                 ) : (
                   <ul className="space-y-1.5 text-sm">
                     {Object.entries(d.expenseByType).map(([k, v]) => (
                       <li key={k} className="flex justify-between border-b border-white/5 pb-1">
-                        <span className="text-white/70">{EXPENSE_LABEL[k] ?? k}</span>
-                        <span className="font-medium">{fmt(v as number)}</span>
+                        <span className="text-white">{EXPENSE_LABEL[k] ?? k}</span>
+                        <span className="font-medium text-white">{fmt(v as number)}</span>
                       </li>
                     ))}
                   </ul>
@@ -174,10 +173,10 @@ function CashFlowPage() {
 function WalletCard({ icon, label, value, accent, fmt }: { icon: React.ReactNode; label: string; value: number; accent: string; fmt: (n: number) => string }) {
   return (
     <Card className={`bg-gradient-to-br ${accent} to-zinc-950 border-white/10 p-4`}>
-      <div className="flex items-center gap-2 text-white/70 text-xs uppercase tracking-wide">
+      <div className="flex items-center gap-2 text-white text-xs tracking-wide">
         {icon}<span>{label}</span>
       </div>
-      <p className="mt-2 text-xl font-bold">{fmt(value)}</p>
+      <p className="mt-2 text-xl font-bold text-white">{fmt(value)}</p>
     </Card>
   );
 }

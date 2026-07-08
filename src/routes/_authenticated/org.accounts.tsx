@@ -13,7 +13,7 @@ import { getMyOrg, updateOrgLogo } from "@/lib/org.functions";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/org/accounts")({
-  head: () => ({ meta: [{ title: "Committee Accounts — Monthly Loan Entry" }] }),
+  head: () => ({ meta: [{ title: "కమిటీ ఖాతాలు — నెలవారీ అప్పు నమోదు" }] }),
   component: AccountsPage,
 });
 
@@ -161,7 +161,7 @@ function AccountsPage() {
     <div className="min-h-screen bg-tricolor p-3 md:p-6">
       <div className="max-w-3xl mx-auto space-y-4">
         <Link to="/org/accounts-hub" className="inline-flex items-center gap-1 text-sm text-foreground/80 hover:text-foreground">
-          <ArrowLeft className="w-4 h-4" /> Accounts Hub
+          <ArrowLeft className="w-4 h-4" /> ఖాతాల కేంద్రం
         </Link>
 
         {/* Header with logo + currency */}
@@ -170,7 +170,7 @@ function AccountsPage() {
             <div className="flex items-center gap-3">
               <button type="button" onClick={() => fileRef.current?.click()}
                 className="relative h-14 w-14 rounded-xl bg-gradient-to-br from-orange-100 to-green-100 flex items-center justify-center overflow-hidden border-2 border-orange-200 hover:border-orange-400 transition group"
-                title="Upload logo">
+                title="లోగో అప్‌లోడ్">
                 {orgQ.data?.org?.logo_url ? (
                   <img src={orgQ.data.org.logo_url} alt="Society logo" className="h-full w-full object-cover" />
                 ) : (
@@ -178,25 +178,25 @@ function AccountsPage() {
                 )}
                 {uploading && <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
                   <RefreshCw className="h-4 w-4 animate-spin" /></div>}
-                <div className="absolute inset-x-0 bottom-0 bg-black/60 text-white text-[8px] py-0.5 opacity-0 group-hover:opacity-100">EDIT</div>
+                <div className="absolute inset-x-0 bottom-0 bg-black/60 text-white text-[8px] py-0.5 opacity-0 group-hover:opacity-100">సవరించు</div>
               </button>
               <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onLogoPicked} />
               <div className="leading-tight">
-                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Society</p>
+                <p className="text-[11px] tracking-wide text-muted-foreground">సొసైటీ</p>
                 <p className="font-bold text-foreground">{orgQ.data?.org?.name ?? "చిట్వేల్ హెల్ప్ లైన్ సొసైటీ"}</p>
               </div>
             </div>
             <div className="flex flex-col gap-1 text-right">
-              <span className="text-[10px] uppercase tracking-wide text-muted-foreground">Base currency set in Accounts Hub</span>
+              <span className="text-[10px] tracking-wide text-muted-foreground">బేస్ కరెన్సీ ఖాతాల కేంద్రంలో సెట్ చేయబడింది</span>
             </div>
           </div>
           <h1 className="mt-3 text-lg md:text-2xl font-bold text-orange-700">
-            కమిటీ అకౌంట్స్ – నెలవారీ అప్పు వివరాల నమోదు
+            కమిటీ ఖాతాలు – నెలవారీ అప్పు నమోదు
           </h1>
           <div className="flex items-center justify-between flex-wrap gap-2">
-            <p className="text-xs text-muted-foreground">Committee Accounts – Monthly Loan Entry</p>
+            <p className="text-xs text-muted-foreground">సభ్యుల చెల్లింపులు మరియు కొత్త అప్పులు</p>
             <Link to="/org/master-ledger" className="inline-flex items-center gap-1 text-xs text-green-700 hover:text-green-900 font-semibold">
-              <BookOpen className="h-3 w-3" /> View Master Ledger →
+              <BookOpen className="h-3 w-3" /> మాస్టర్ లెడ్జర్ చూడండి →
             </Link>
           </div>
         </Card>
@@ -205,28 +205,28 @@ function AccountsPage() {
         <Card className="p-4 bg-white/95 border-white shadow-xl space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div className="space-y-1.5">
-              <Label>ID NO</Label>
+              <Label>సభ్యుని ID</Label>
               <div className="flex gap-2">
                 <Input value={idNo} onChange={(e) => setIdNo(e.target.value.toUpperCase())}
-                  placeholder="e.g. A/0001" disabled={locked} />
+                  placeholder="ఉదా. A/0001" disabled={locked} />
                 <Button type="button" onClick={() => doLookup(idNo)} disabled={busy || locked}>
                   {busy ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
                 </Button>
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label>DATE / తేది</Label>
+              <Label>తేదీ</Label>
               <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={locked} />
             </div>
             <div className="space-y-1.5">
-              <Label>REMARKS / గమనికలు</Label>
+              <Label>గమనికలు</Label>
               <Input value={remarks} onChange={(e) => setRemarks(e.target.value)} disabled={locked} placeholder="—" />
             </div>
           </div>
 
           {/* Member name banner */}
           <div className="rounded-lg border bg-orange-50/60 p-3">
-            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">అప్పు తీసుకున్న వారి పేరు</p>
+            <p className="text-[11px] tracking-wide text-muted-foreground">అప్పు తీసుకున్న వారి పేరు</p>
             <p className="text-lg font-bold text-foreground">{info?.member.name ?? "—"}</p>
           </div>
 
@@ -234,22 +234,22 @@ function AccountsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {/* OLD LOAN */}
             <div className="rounded-lg border-2 border-orange-200 bg-orange-50/40 p-3 space-y-3">
-              <p className="text-xs font-bold text-red-600 tracking-wide">OLD LOAN</p>
+              <p className="text-xs font-bold text-red-600 tracking-wide">పాత అప్పు</p>
               <div>
-                <p className="text-[11px] text-muted-foreground">అప్పు మొత్తం (OUTSTANDING)</p>
+                <p className="text-[11px] text-muted-foreground">అప్పు మొత్తం (బాకీ)</p>
                 <p className="font-bold text-lg">{sym} {info ? info.totalOutstanding.toLocaleString("en-IN") : "0"}</p>
               </div>
               <div>
-                <p className="text-[11px] text-muted-foreground">వడ్డీ మొత్తం (MONTHLY)</p>
+                <p className="text-[11px] text-muted-foreground">నెలవారీ వడ్డీ</p>
                 <p className="font-bold text-lg">{sym} {info ? info.monthlyInterest.toLocaleString("en-IN") : "0"}</p>
               </div>
               <div className="space-y-1.5 pt-2 border-t border-orange-200">
-                <Label className="text-xs">అసలు జమ (Principal Paid)</Label>
+                <Label className="text-xs">అసలు జమ</Label>
                 <Input inputMode="decimal" value={principal} disabled={locked}
                   onChange={(e) => setPrincipal(e.target.value.replace(/[^\d.]/g, ""))} placeholder="0" />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">వడ్డీ జమ (Interest Paid)</Label>
+                <Label className="text-xs">వడ్డీ జమ</Label>
                 <Input inputMode="decimal" value={interest} disabled={locked}
                   onChange={(e) => setInterest(e.target.value.replace(/[^\d.]/g, ""))} placeholder="0" />
               </div>
@@ -257,14 +257,14 @@ function AccountsPage() {
 
             {/* TODAY NEW LOAN */}
             <div className="rounded-lg border-2 border-red-300 bg-red-50/40 p-3 space-y-3">
-              <p className="text-xs font-bold text-red-600 tracking-wide">TODAY NEW LOAN</p>
+              <p className="text-xs font-bold text-red-600 tracking-wide">ఈ రోజు కొత్త అప్పు</p>
               <div className="space-y-1.5">
-                <Label className="text-xs text-green-700 font-semibold">LOAN (కొత్త అప్పు)</Label>
+                <Label className="text-xs text-green-700 font-semibold">కొత్త అప్పు మొత్తం</Label>
                 <Input inputMode="decimal" value={newLoan} disabled={locked}
                   onChange={(e) => setNewLoan(e.target.value.replace(/[^\d.]/g, ""))} placeholder="0" />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs text-green-700 font-semibold">Interest Rate (% monthly)</Label>
+                <Label className="text-xs text-green-700 font-semibold">వడ్డీ రేటు (% నెలవారీ)</Label>
                 <Input inputMode="decimal" value={newLoanRate} disabled={locked}
                   onChange={(e) => setNewLoanRate(e.target.value.replace(/[^\d.]/g, ""))} placeholder="2.0" />
               </div>
@@ -286,29 +286,29 @@ function AccountsPage() {
 
           {saved && (
             <div className="rounded-md border border-green-300 bg-green-50 p-3 text-sm text-green-900 space-y-1">
-              <div>✅ Saved. Updated balance: <b>{sym} {saved.balance.toLocaleString("en-IN")}</b></div>
-              {saved.collected > 0 && <div>Collected today: <b>{sym} {saved.collected.toLocaleString("en-IN")}</b></div>}
-              {saved.disbursed > 0 && <div>New loan disbursed: <b>{sym} {saved.disbursed.toLocaleString("en-IN")}</b></div>}
-              {saved.emailed_to && <div>Receipt emailed to <b>{saved.emailed_to}</b></div>}
+              <div>✅ సేవ్ అయింది. మొత్తం బాకీ: <b>{sym} {saved.balance.toLocaleString("en-IN")}</b></div>
+              {saved.collected > 0 && <div>ఈ రోజు వసూలు: <b>{sym} {saved.collected.toLocaleString("en-IN")}</b></div>}
+              {saved.disbursed > 0 && <div>కొత్త అప్పు: <b>{sym} {saved.disbursed.toLocaleString("en-IN")}</b></div>}
+              {saved.emailed_to && <div>రసీదు <b>{saved.emailed_to}</b>కు పంపబడింది</div>}
             </div>
           )}
 
           {/* Action row */}
           <div className="flex flex-wrap gap-2 pt-2 border-t">
             <Button onClick={onSave} disabled={busy || locked} className="bg-orange-600 hover:bg-orange-700">
-              <Save className="h-4 w-4" /> Save / సేవ్
+              <Save className="h-4 w-4" /> సేవ్ చేయండి
             </Button>
-            <Button variant="outline" onClick={() => comingSoon("Send File")} disabled={busy}>
-              <Send className="h-4 w-4" /> Send File
+            <Button variant="outline" onClick={() => comingSoon("ఫైల్ పంపండి")} disabled={busy}>
+              <Send className="h-4 w-4" /> ఫైల్ పంపండి
             </Button>
             <Button variant="outline" onClick={onEdit} disabled={!locked}>
-              <Pencil className="h-4 w-4" /> Edit
+              <Pencil className="h-4 w-4" /> సవరించు
             </Button>
-            <Button variant="outline" onClick={() => comingSoon("Personal File PDF")} disabled={busy}>
-              <FileText className="h-4 w-4" /> Personal File PDF
+            <Button variant="outline" onClick={() => comingSoon("వ్యక్తిగత ఫైల్ PDF")} disabled={busy}>
+              <FileText className="h-4 w-4" /> వ్యక్తిగత పిడిఎఫ్
             </Button>
-            <Button variant="outline" onClick={() => comingSoon("Total File PDF")} disabled={busy}>
-              <FileSpreadsheet className="h-4 w-4" /> Total File PDF
+            <Button variant="outline" onClick={() => comingSoon("మొత్తం ఫైల్ PDF")} disabled={busy}>
+              <FileSpreadsheet className="h-4 w-4" /> మొత్తం పిడిఎఫ్
             </Button>
           </div>
         </Card>

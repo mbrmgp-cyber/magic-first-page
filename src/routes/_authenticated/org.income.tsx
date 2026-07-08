@@ -22,15 +22,15 @@ export const Route = createFileRoute("/_authenticated/org/income")({
 });
 
 const INCOME_TYPES: { v: IncomeType; te: string; en: string }[] = [
-  { v: "registration_fee", te: "నమోదు రుసుము", en: "Registration Fee" },
-  { v: "donation", te: "విరాళం", en: "Donation" },
-  { v: "other", te: "ఇతరం", en: "Other" },
+  { v: "registration_fee", te: "నమోదు రుసుము", en: "నమోదు రుసుము" },
+  { v: "donation", te: "విరాళం", en: "విరాళం" },
+  { v: "other", te: "ఇతరం", en: "ఇతరం" },
 ];
 
 const WALLETS: { v: WalletType; label: string }[] = [
-  { v: "bank", label: "Bank Account" },
-  { v: "accountant", label: "Accountant / NPR" },
-  { v: "president", label: "President / PSR" },
+  { v: "bank", label: "బ్యాంక్ ఖాతా" },
+  { v: "accountant", label: "అకౌంటెంట్" },
+  { v: "president", label: "అధ్యక్షుడు" },
 ];
 
 function IncomePage() {
@@ -183,51 +183,51 @@ function IncomePage() {
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div>
-            <h1 className="text-lg font-bold">ఆదాయం మరియు విరాళాల నమోదు</h1>
-            <p className="text-xs text-white/60">Income & Donation Receipt</p>
+            <h1 className="text-lg font-bold text-white">ఆదాయం మరియు విరాళాల నమోదు</h1>
+            <p className="text-xs text-white/70">రసీదులు జారీ చేయండి</p>
           </div>
         </header>
 
         <Card className="bg-zinc-950 border-white/10 p-4">
           <form onSubmit={onSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-white/80">Date / తేదీ</Label>
+              <Label className="text-white">తేదీ</Label>
               <Input type="date" value={date} onChange={(e) => setDate(e.target.value)}
                 className="bg-zinc-900 border-white/10 text-white" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-white/80">Amount * ({CURRENCIES.find(c => c.code === txCurrency)?.symbol})</Label>
+              <Label className="text-white">మొత్తం ({CURRENCIES.find(c => c.code === txCurrency)?.symbol})</Label>
               <Input type="number" min="1" step="0.01" required value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 className="bg-zinc-900 border-white/10 text-white" />
             </div>
             <div className="space-y-1.5 sm:col-span-2">
-              <Label className="text-white/80">Payer Name / చెల్లించినవారు *</Label>
+              <Label className="text-white">చెల్లించినవారి పేరు</Label>
               <Input required value={payer} onChange={(e) => setPayer(e.target.value)}
                 className="bg-zinc-900 border-white/10 text-white" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-white/80">Phone Number</Label>
+              <Label className="text-white">ఫోన్ నంబర్</Label>
               <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)}
                 placeholder="+91…" className="bg-zinc-900 border-white/10 text-white" />
             </div>
             <div className="space-y-1.5 sm:col-span-2">
-              <Label className="text-white/80">Email Address * <span className="text-[10px] text-white/50">(receipt will be emailed)</span></Label>
+              <Label className="text-white">ఇమెయిల్ చిరునామా <span className="text-[10px] text-white/60">(రసీదు పంపబడుతుంది)</span></Label>
               <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com" className="bg-zinc-900 border-white/10 text-white" />
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-white/80">Income Type</Label>
+              <Label className="text-white">ఆదాయ రకం</Label>
               <Select value={incType} onValueChange={(v) => setIncType(v as IncomeType)}>
                 <SelectTrigger className="bg-zinc-900 border-white/10 text-white"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {INCOME_TYPES.map((t) => <SelectItem key={t.v} value={t.v}>{t.en} / {t.te}</SelectItem>)}
+                  {INCOME_TYPES.map((t) => <SelectItem key={t.v} value={t.v}>{t.te}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-white/80">Transaction Currency</Label>
+              <Label className="text-white">కరెన్సీ</Label>
               <Select value={txCurrency} onValueChange={(v) => { setTxCurrency(v as CurrencyCode); if (v === BASE_CURRENCY) setExchangeRate("1"); }}>
                 <SelectTrigger className="bg-zinc-900 border-white/10 text-white"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -237,23 +237,23 @@ function IncomePage() {
             </div>
             {txCurrency !== BASE_CURRENCY && (
               <div className="space-y-1.5 sm:col-span-2">
-                <Label className="text-white/80">Exchange Rate (1 {txCurrency} = ? INR) *</Label>
+                <Label className="text-white">మార్పిడి రేటు (1 {txCurrency} = ? INR)</Label>
                 <Input type="number" min="0" step="0.0001" required value={exchangeRate}
                   onChange={(e) => setExchangeRate(e.target.value)}
                   className="bg-zinc-900 border-white/10 text-white" />
                 {Number(amount) > 0 && Number(exchangeRate) > 0 && (
                   <p className="text-[11px] text-amber-400">
-                    ≈ ₹ {(Number(amount) * Number(exchangeRate)).toLocaleString("en-IN", { minimumFractionDigits: 2 })} (base)
+                    ≈ ₹ {(Number(amount) * Number(exchangeRate)).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
                   </p>
                 )}
               </div>
             )}
             <div className="space-y-1.5 sm:col-span-2">
-              <Label className="text-white/80">Wallet Account (Deposit To)</Label>
+              <Label className="text-white">ఖాతా (జమ చేయబడేది)</Label>
               <Select value={walletAccountId || "__legacy__"} onValueChange={(v) => setWalletAccountId(v === "__legacy__" ? "" : v)}>
                 <SelectTrigger className="bg-zinc-900 border-white/10 text-white"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__legacy__">— Use general wallet —</SelectItem>
+                  <SelectItem value="__legacy__">— సాధారణ ఖాతా —</SelectItem>
                   {(walletsQ.data?.rows ?? []).map((a: any) => (
                     <SelectItem key={a.id} value={a.id}>{a.name} ({a.currency})</SelectItem>
                   ))}
@@ -262,12 +262,12 @@ function IncomePage() {
               <Select value={wallet} onValueChange={(v) => setWallet(v as WalletType)}>
                 <SelectTrigger className="bg-zinc-900 border-white/10 text-white"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {WALLETS.map((w) => <SelectItem key={w.v} value={w.v}>{w.label} (category)</SelectItem>)}
+                  {WALLETS.map((w) => <SelectItem key={w.v} value={w.v}>{w.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5 sm:col-span-2">
-              <Label className="text-white/80">Remarks</Label>
+              <Label className="text-white">గమనికలు</Label>
               <Textarea value={remarks} onChange={(e) => setRemarks(e.target.value)}
                 className="bg-zinc-900 border-white/10 text-white" rows={2} />
             </div>
@@ -275,23 +275,23 @@ function IncomePage() {
               <Button type="submit" disabled={busy}
                 className="w-full bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white">
                 <ReceiptText className="h-4 w-4 mr-2" />
-                {busy ? "Saving…" : "Save & Generate Receipt"}
+                {busy ? "సేవ్ అవుతోంది…" : "రసీదును సేవ్ చేయండి"}
               </Button>
             </div>
           </form>
         </Card>
 
         <Card className="bg-zinc-950 border-white/10 p-4">
-          <h2 className="text-sm font-semibold mb-3 text-white/80">Recent Receipts</h2>
+          <h2 className="text-sm font-semibold mb-3 text-white">ఇటీవలి రసీదులు</h2>
           {rows.length === 0 ? (
-            <p className="text-xs text-white/50">No entries yet.</p>
+            <p className="text-xs text-white/60">నమోదులు లేవు.</p>
           ) : (
             <div className="space-y-2">
               {rows.map((r) => (
                 <div key={r.id} className="flex items-center justify-between gap-2 bg-zinc-900 border border-white/5 rounded-lg p-3">
                   <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{r.payer_name} • <span className="text-[#ff8c28]">₹{Number(r.amount).toLocaleString("en-IN")}</span></p>
-                    <p className="text-[11px] text-white/50">{r.receipt_no} • {r.entry_date} • {INCOME_TYPES.find(t => t.v === r.income_type)?.en}</p>
+                    <p className="text-sm font-medium truncate text-white">{r.payer_name} • <span className="text-[#ff8c28]">₹{Number(r.amount).toLocaleString("en-IN")}</span></p>
+                    <p className="text-[11px] text-white/60">{r.receipt_no} • {r.entry_date} • {INCOME_TYPES.find(t => t.v === r.income_type)?.te}</p>
                   </div>
                   <div className="flex gap-1 shrink-0">
                     <Button size="icon" variant="ghost" onClick={() => openReceipt(r)} title="Print / PDF">
