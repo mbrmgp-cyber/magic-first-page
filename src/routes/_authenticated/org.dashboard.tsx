@@ -16,6 +16,7 @@ import {
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 import { localizeText, transliterateText, useI18n } from "@/lib/i18n";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { GoogleTranslate } from "@/components/GoogleTranslate";
 import { resolveTheme } from "@/lib/theme";
 import { memberRegistrationUrl } from "@/lib/public-url";
 import { useSimRole, canAccess, ROUTE_ACCESS, ROLE_LABELS } from "@/lib/rbac";
