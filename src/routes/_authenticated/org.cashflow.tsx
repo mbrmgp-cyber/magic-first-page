@@ -173,10 +173,10 @@ function CashFlowPage() {
 function WalletCard({ icon, label, value, accent, fmt }: { icon: React.ReactNode; label: string; value: number; accent: string; fmt: (n: number) => string }) {
   return (
     <Card className={`bg-gradient-to-br ${accent} to-zinc-950 border-white/10 p-4`}>
-      <div className="flex items-center gap-2 text-white/70 text-xs uppercase tracking-wide">
+      <div className="flex items-center gap-2 text-white text-xs tracking-wide">
         {icon}<span>{label}</span>
       </div>
-      <p className="mt-2 text-xl font-bold">{fmt(value)}</p>
+      <p className="mt-2 text-xl font-bold text-white">{fmt(value)}</p>
     </Card>
   );
 }
