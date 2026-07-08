@@ -42,20 +42,26 @@ function injectGoogleTranslate() {
   const style = document.createElement("style");
   style.textContent = `
     .goog-te-banner-frame, .skiptranslate iframe.goog-te-banner-frame { display: none !important; }
-    body { top: 0 !important; }
-    .goog-logo-link, .goog-te-gadget span { display: none !important; }
-    .goog-te-gadget { color: transparent !important; font-size: 0 !important; }
+    body { top: 0 !important; position: static !important; }
+    .goog-logo-link { display: none !important; }
+    /* Hide the "Powered by" text but keep the select visible */
+    .goog-te-gadget { font-size: 0 !important; line-height: 0 !important; color: transparent !important; }
+    .goog-te-gadget > span > a { display: none !important; }
     .goog-te-gadget .goog-te-combo {
-      color: #fff;
-      background: rgba(0,0,0,0.4);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 9999px;
-      padding: 4px 10px;
-      font-size: 12px;
-      cursor: pointer;
-      outline: none;
+      display: inline-block !important;
+      color: #fff !important;
+      background: rgba(0,0,0,0.4) !important;
+      border: 1px solid rgba(255,255,255,0.15) !important;
+      border-radius: 9999px !important;
+      padding: 4px 10px !important;
+      font-size: 12px !important;
+      line-height: 1.2 !important;
+      cursor: pointer !important;
+      outline: none !important;
+      margin: 0 !important;
+      height: auto !important;
     }
-    .goog-te-gadget .goog-te-combo option { color: #000; background: #fff; }
+    .goog-te-gadget .goog-te-combo option { color: #000; background: #fff; font-size: 12px; }
     #goog-gt-tt, .goog-tooltip, .goog-tooltip:hover { display: none !important; }
     body { -webkit-text-size-adjust: 100% !important; }
   `;
