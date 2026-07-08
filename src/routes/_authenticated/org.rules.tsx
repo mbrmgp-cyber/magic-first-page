@@ -306,17 +306,17 @@ function HistoryTab() {
     <div className="space-y-4">
       {items.length > 0 && (
         <Button variant="outline" onClick={handleDownloadPdf} className="w-full">
-          <FileDown className="w-4 h-4 mr-1" /> PDF డౌన్‌లోడ్ • Download PDF
+          <FileDown className="w-4 h-4 mr-1" /> {lt("Download PDF", "PDF డౌన్‌లోడ్")}
         </Button>
       )}
       {canEdit && !showForm && (
-        <Button onClick={() => setShowForm(true)} className="w-full"><Plus className="w-4 h-4 mr-1" />మైలురాయి జోడించండి</Button>
+        <Button onClick={() => setShowForm(true)} className="w-full"><Plus className="w-4 h-4 mr-1" />{lt("Add milestone", "మైలురాయి జోడించండి")}</Button>
       )}
       {canEdit && showForm && (
         <Card className="p-4 bg-white/95 border-white space-y-2">
           <Input type="date" value={date} onChange={e => setDate(e.target.value)} />
-          <Input placeholder="శీర్షిక (ఉదా: సొసైటీ స్థాపన)" value={title} onChange={e => setTitle(e.target.value)} />
-          <Textarea placeholder="వివరణ (ఐచ్ఛికం)" rows={3} value={desc} onChange={e => setDesc(e.target.value)} />
+          <Input placeholder={lt("Title (e.g. Society founded)", "శీర్షిక (ఉదా: సొసైటీ స్థాపన)")} value={title} onChange={e => setTitle(e.target.value)} />
+          <Textarea placeholder={lt("Description (optional)", "వివరణ (ఐచ్ఛికం)")} rows={3} value={desc} onChange={e => setDesc(e.target.value)} />
           <div className="space-y-2">
             <input
               ref={fileInputGalleryRef}
