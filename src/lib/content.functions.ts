@@ -133,7 +133,7 @@ export const listMilestones = createServerFn({ method: "GET" })
 
 export const addMilestone = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { event_date: string; title: string; description?: string; photo_url?: string }) => d)
+  .inputValidator((d: { event_date: string; title: string; description?: string; photo_url?: string; title_en?: string; description_en?: string }) => d)
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const orgId = await resolveOrgId(supabase, userId);
@@ -143,6 +143,8 @@ export const addMilestone = createServerFn({ method: "POST" })
       event_date: data.event_date,
       title: data.title.trim(),
       description: data.description?.trim() || null,
+      title_en: data.title_en?.trim() || null,
+      description_en: data.description_en?.trim() || null,
       photo_url: data.photo_url || null,
       created_by: userId,
     });
@@ -152,7 +154,7 @@ export const addMilestone = createServerFn({ method: "POST" })
 
 export const updateMilestone = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id: string; event_date: string; title: string; description?: string; photo_url?: string }) => d)
+  .inputValidator((d: { id: string; event_date: string; title: string; description?: string; photo_url?: string; title_en?: string; description_en?: string }) => d)
   .handler(async ({ data, context }) => {
     const { supabase } = context;
     const { error } = await supabase
@@ -161,12 +163,15 @@ export const updateMilestone = createServerFn({ method: "POST" })
         event_date: data.event_date,
         title: data.title.trim(),
         description: data.description?.trim() || null,
+        title_en: data.title_en?.trim() || null,
+        description_en: data.description_en?.trim() || null,
         photo_url: data.photo_url || null,
       })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
 
 export const deleteMilestone = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
