@@ -54,8 +54,7 @@ export function GlobalAdBar() {
           <img
             src={current}
             alt="MBR platform advertisement"
-            className="block w-full h-full max-w-none m-0 p-0"
-            style={{ width: "100%", height: "100%", objectFit: "fill", display: "block" }}
+            className="w-full h-[70px] object-cover block"
           />
         </div>
       </div>
