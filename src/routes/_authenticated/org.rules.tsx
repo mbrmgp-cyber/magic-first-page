@@ -177,7 +177,8 @@ function RulesTab() {
             <ol className="space-y-2 list-decimal list-inside p-4">
               {items.map(r => (
                 <li key={r.id} className="text-sm leading-relaxed">
-                  <span>{r.text}</span>
+                  <span>{pickLang(lang, r.text, r.text_en)}</span>
+
                   {canEdit && (
                     <span className="ml-2 inline-flex gap-1">
                       <button onClick={() => startEdit(r)} className="text-muted-foreground hover:text-foreground" aria-label="Edit"><Pencil className="w-3.5 h-3.5 inline" /></button>
