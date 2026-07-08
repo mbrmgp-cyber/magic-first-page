@@ -51,6 +51,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 
 function RulesTab() {
   const lt = useLt();
+  const { lang } = useI18n();
   const fnList = useServerFn(listRules);
   const fnAdd = useServerFn(addRule);
   const fnUpd = useServerFn(updateRule);
@@ -62,6 +63,8 @@ function RulesTab() {
   const [loading, setLoading] = useState(true);
   const [newText, setNewText] = useState("");
   const [newCat, setNewCat] = useState("");
+  const [newTextEn, setNewTextEn] = useState("");
+  const [newCatEn, setNewCatEn] = useState("");
   const [editId, setEditId] = useState<string | null>(null);
 
 
@@ -81,33 +84,37 @@ function RulesTab() {
     if (!newText.trim()) return;
     try {
       if (editId) {
-        await fnUpd({ data: { id: editId, text: newText, category: newCat || undefined } });
-        toast.success("నవీకరించబడింది");
+        await fnUpd({ data: { id: editId, text: newText, category: newCat || undefined, text_en: newTextEn || undefined, category_en: newCatEn || undefined } });
+        toast.success(lt("Updated", "నవీకరించబడింది"));
       } else {
-        await fnAdd({ data: { text: newText, category: newCat || undefined } });
-        toast.success("నియమం జోడించబడింది");
+        await fnAdd({ data: { text: newText, category: newCat || undefined, text_en: newTextEn || undefined, category_en: newCatEn || undefined } });
+        toast.success(lt("Rule added", "నియమం జోడించబడింది"));
       }
-      setEditId(null); setNewText(""); setNewCat("");
+      setEditId(null); setNewText(""); setNewCat(""); setNewTextEn(""); setNewCatEn("");
       await load();
     } catch (e: any) { toast.error(e.message); }
   };
   const startEdit = (r: Rule) => {
     setEditId(r.id); setNewText(r.text); setNewCat(r.category ?? "");
+    setNewTextEn(r.text_en ?? ""); setNewCatEn(r.category_en ?? "");
     if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
   };
-  const cancelEdit = () => { setEditId(null); setNewText(""); setNewCat(""); };
+  const cancelEdit = () => { setEditId(null); setNewText(""); setNewCat(""); setNewTextEn(""); setNewCatEn(""); };
   const handleDel = async (id: string) => {
-    if (!confirm("ఈ నియమాన్ని తొలగించాలా?")) return;
-    try { await fnDel({ data: { id } }); await load(); toast.success("తొలగించబడింది"); }
+    if (!confirm(lt("Delete this rule?", "ఈ నియమాన్ని తొలగించాలా?"))) return;
+    try { await fnDel({ data: { id } }); await load(); toast.success(lt("Deleted", "తొలగించబడింది")); }
     catch (e: any) { toast.error(e.message); }
   };
 
-  // Group by category
+  // Group by category (localized)
   const grouped = rules.reduce<Record<string, Rule[]>>((acc, r) => {
-    const k = r.category || "సాధారణ నియమాలు";
+    const catTe = r.category || "సాధారణ నియమాలు";
+    const catEn = r.category_en || "General Rules";
+    const k = pickLang(lang, catTe, catEn);
     (acc[k] ||= []).push(r);
     return acc;
   }, {});
+
 
   const handleDownloadPdf = () => {
     if (rules.length === 0) { toast.error("డౌన్‌లోడ్ చేయడానికి నియమాలు లేవు"); return; }
