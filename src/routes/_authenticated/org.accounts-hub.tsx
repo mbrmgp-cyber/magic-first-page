@@ -47,13 +47,17 @@ function AccountsHub() {
                 onMouseEnter={(e) => { e.currentTarget.style.boxShadow = `0 0 24px ${t.color}40`; }}
                 onMouseLeave={(e) => { e.currentTarget.style.boxShadow = ``; }}
               >
-                <div className="flex flex-col items-center text-center gap-2 py-2">
+                <div className="flex flex-col items-center text-center gap-2 py-2" data-notranslit>
                   <div
                     className="w-12 h-12 rounded-xl flex items-center justify-center border"
                     style={{ background: `${t.color}1f`, borderColor: `${t.color}66` }}
                   >
                     <t.icon className="w-6 h-6" style={{ color: t.color }} />
                   </div>
+                  <div>
+                    <p className="text-sm font-semibold leading-tight text-white">{t.en}</p>
+                  </div>
+                </div>
                   <div>
                     <p className="text-sm font-semibold leading-tight text-white">{t.te}</p>
                   </div>
