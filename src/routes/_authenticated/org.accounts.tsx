@@ -257,14 +257,14 @@ function AccountsPage() {
 
             {/* TODAY NEW LOAN */}
             <div className="rounded-lg border-2 border-red-300 bg-red-50/40 p-3 space-y-3">
-              <p className="text-xs font-bold text-red-600 tracking-wide">TODAY NEW LOAN</p>
+              <p className="text-xs font-bold text-red-600 tracking-wide">ఈ రోజు కొత్త అప్పు</p>
               <div className="space-y-1.5">
-                <Label className="text-xs text-green-700 font-semibold">LOAN (కొత్త అప్పు)</Label>
+                <Label className="text-xs text-green-700 font-semibold">కొత్త అప్పు మొత్తం</Label>
                 <Input inputMode="decimal" value={newLoan} disabled={locked}
                   onChange={(e) => setNewLoan(e.target.value.replace(/[^\d.]/g, ""))} placeholder="0" />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs text-green-700 font-semibold">Interest Rate (% monthly)</Label>
+                <Label className="text-xs text-green-700 font-semibold">వడ్డీ రేటు (% నెలవారీ)</Label>
                 <Input inputMode="decimal" value={newLoanRate} disabled={locked}
                   onChange={(e) => setNewLoanRate(e.target.value.replace(/[^\d.]/g, ""))} placeholder="2.0" />
               </div>
@@ -286,29 +286,29 @@ function AccountsPage() {
 
           {saved && (
             <div className="rounded-md border border-green-300 bg-green-50 p-3 text-sm text-green-900 space-y-1">
-              <div>✅ Saved. Updated balance: <b>{sym} {saved.balance.toLocaleString("en-IN")}</b></div>
-              {saved.collected > 0 && <div>Collected today: <b>{sym} {saved.collected.toLocaleString("en-IN")}</b></div>}
-              {saved.disbursed > 0 && <div>New loan disbursed: <b>{sym} {saved.disbursed.toLocaleString("en-IN")}</b></div>}
-              {saved.emailed_to && <div>Receipt emailed to <b>{saved.emailed_to}</b></div>}
+              <div>✅ సేవ్ అయింది. మొత్తం బాకీ: <b>{sym} {saved.balance.toLocaleString("en-IN")}</b></div>
+              {saved.collected > 0 && <div>ఈ రోజు వసూలు: <b>{sym} {saved.collected.toLocaleString("en-IN")}</b></div>}
+              {saved.disbursed > 0 && <div>కొత్త అప్పు: <b>{sym} {saved.disbursed.toLocaleString("en-IN")}</b></div>}
+              {saved.emailed_to && <div>రసీదు <b>{saved.emailed_to}</b>కు పంపబడింది</div>}
             </div>
           )}
 
           {/* Action row */}
           <div className="flex flex-wrap gap-2 pt-2 border-t">
             <Button onClick={onSave} disabled={busy || locked} className="bg-orange-600 hover:bg-orange-700">
-              <Save className="h-4 w-4" /> Save / సేవ్
+              <Save className="h-4 w-4" /> సేవ్ చేయండి
             </Button>
-            <Button variant="outline" onClick={() => comingSoon("Send File")} disabled={busy}>
-              <Send className="h-4 w-4" /> Send File
+            <Button variant="outline" onClick={() => comingSoon("ఫైల్ పంపండి")} disabled={busy}>
+              <Send className="h-4 w-4" /> ఫైల్ పంపండి
             </Button>
             <Button variant="outline" onClick={onEdit} disabled={!locked}>
-              <Pencil className="h-4 w-4" /> Edit
+              <Pencil className="h-4 w-4" /> సవరించు
             </Button>
-            <Button variant="outline" onClick={() => comingSoon("Personal File PDF")} disabled={busy}>
-              <FileText className="h-4 w-4" /> Personal File PDF
+            <Button variant="outline" onClick={() => comingSoon("వ్యక్తిగత ఫైల్ PDF")} disabled={busy}>
+              <FileText className="h-4 w-4" /> వ్యక్తిగత పిడిఎఫ్
             </Button>
-            <Button variant="outline" onClick={() => comingSoon("Total File PDF")} disabled={busy}>
-              <FileSpreadsheet className="h-4 w-4" /> Total File PDF
+            <Button variant="outline" onClick={() => comingSoon("మొత్తం ఫైల్ PDF")} disabled={busy}>
+              <FileSpreadsheet className="h-4 w-4" /> మొత్తం పిడిఎఫ్
             </Button>
           </div>
         </Card>
