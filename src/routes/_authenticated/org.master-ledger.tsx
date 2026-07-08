@@ -73,18 +73,18 @@ function MasterLedgerPage() {
         <Card className="p-4 bg-white/95 shadow-xl">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h1 className="text-lg md:text-2xl font-bold text-orange-700">Admin Master Ledger / మాస్టర్ లెడ్జర్</h1>
-              <p className="text-xs text-muted-foreground">Live aggregated entries from Committee Accounts</p>
+              <h1 className="text-lg md:text-2xl font-bold text-orange-700">మాస్టర్ లెడ్జర్</h1>
+              <p className="text-xs text-muted-foreground">కమిటీ ఖాతాల నుండి ప్రత్యక్ష నమోదులు</p>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button variant="outline" size="sm" onClick={() => q.refetch()}>
                 <RefreshCw className={`h-4 w-4 ${q.isFetching ? "animate-spin" : ""}`} />
               </Button>
               <Button size="sm" onClick={exportExcel} className="bg-green-600 hover:bg-green-700">
-                <FileSpreadsheet className="h-4 w-4" /> Export Excel
+                <FileSpreadsheet className="h-4 w-4" /> ఎక్సెల్ డౌన్‌లోడ్
               </Button>
               <Button size="sm" onClick={exportPDF} variant="outline">
-                <FileText className="h-4 w-4" /> Download PDF
+                <FileText className="h-4 w-4" /> పిడిఎఫ్ డౌన్‌లోడ్
               </Button>
             </div>
           </div>
