@@ -8,7 +8,7 @@ import { getMasterLedger } from "@/lib/accounts.functions";
 import { useCurrency } from "@/lib/currency-context";
 
 export const Route = createFileRoute("/_authenticated/org/master-ledger")({
-  head: () => ({ meta: [{ title: "Admin Master Ledger" }] }),
+  head: () => ({ meta: [{ title: "మాస్టర్ లెడ్జర్" }] }),
   component: MasterLedgerPage,
 });
 
