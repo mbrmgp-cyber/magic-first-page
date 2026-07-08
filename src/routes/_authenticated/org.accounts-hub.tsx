@@ -55,8 +55,7 @@ function AccountsHub() {
                     <t.icon className="w-6 h-6" style={{ color: t.color }} />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold leading-tight">{t.te}</p>
-                    <p className="text-[11px] text-white/50 leading-tight mt-0.5">{t.en}</p>
+                    <p className="text-sm font-semibold leading-tight text-white">{t.te}</p>
                   </div>
                 </div>
               </Card>
