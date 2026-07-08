@@ -49,12 +49,12 @@ export function GlobalAdBar() {
       className="fixed inset-x-0 bottom-0 z-40 pointer-events-none"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <div className="mx-auto max-w-md px-3 pb-2 pointer-events-auto">
-        <div className="relative rounded-xl overflow-hidden border border-white/10 bg-black/80 backdrop-blur shadow-[0_-6px_24px_rgba(0,0,0,0.55)]">
+      <div className="w-full pointer-events-auto">
+        <div className="relative overflow-hidden bg-black shadow-[0_-6px_24px_rgba(0,0,0,0.55)]">
           <img
             src={current}
             alt="MBR platform advertisement"
-            className="w-full h-[64px] object-contain block"
+            className="block w-full h-[64px] object-cover"
           />
         </div>
       </div>
