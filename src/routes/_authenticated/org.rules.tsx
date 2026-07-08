@@ -122,19 +122,19 @@ function RulesTab() {
     <div className="space-y-4">
       {rules.length > 0 && (
         <Button variant="outline" onClick={handleDownloadPdf} className="w-full">
-          <FileDown className="w-4 h-4 mr-1" /> PDF డౌన్‌లోడ్ • Download PDF
+          <FileDown className="w-4 h-4 mr-1" /> {lt("Download PDF", "PDF డౌన్‌లోడ్")}
         </Button>
       )}
       {canEdit && (
         <Card className="p-4 bg-white/95 backdrop-blur border-white space-y-2">
           {editId && (
-            <div className="text-xs font-semibold text-orange-700">✏️ నియమాన్ని సవరిస్తున్నారు • Editing rule</div>
+            <div className="text-xs font-semibold text-orange-700">✏️ {lt("Editing rule", "నియమాన్ని సవరిస్తున్నారు")}</div>
           )}
-          <Input placeholder="కేటగిరి (ఐచ్ఛికం) — ఉదా: సభ్యత్వం, విరాళాలు" value={newCat} onChange={e => setNewCat(e.target.value)} />
-          <Textarea placeholder="కొత్త నియమం రాయండి..." rows={2} value={newText} onChange={e => setNewText(e.target.value)} />
+          <Input placeholder={lt("Category (optional) — e.g. Membership, Donations", "కేటగిరి (ఐచ్ఛికం) — ఉదా: సభ్యత్వం, విరాళాలు")} value={newCat} onChange={e => setNewCat(e.target.value)} />
+          <Textarea placeholder={lt("Write a new rule...", "కొత్త నియమం రాయండి...")} rows={2} value={newText} onChange={e => setNewText(e.target.value)} />
           <div className="flex gap-2">
             <Button onClick={handleSubmit} disabled={!newText.trim()} className="flex-1">
-              {editId ? <><Check className="w-4 h-4 mr-1" />Update • నవీకరించండి</> : <><Plus className="w-4 h-4 mr-1" />నియమం జోడించండి</>}
+              {editId ? <><Check className="w-4 h-4 mr-1" />{lt("Update", "నవీకరించండి")}</> : <><Plus className="w-4 h-4 mr-1" />{lt("Add rule", "నియమం జోడించండి")}</>}
             </Button>
             {editId && (
               <Button variant="outline" onClick={cancelEdit}><X className="w-4 h-4" /></Button>
@@ -144,10 +144,10 @@ function RulesTab() {
       )}
 
       {loading ? (
-        <Card className="p-6 text-center text-muted-foreground bg-white/92 border-white">లోడ్ అవుతోంది...</Card>
+        <Card className="p-6 text-center text-muted-foreground bg-white/92 border-white">{lt("Loading...", "లోడ్ అవుతోంది...")}</Card>
       ) : rules.length === 0 ? (
         <Card className="p-6 text-center text-muted-foreground bg-white/92 border-white">
-          ఇంకా నియమాలు జోడించలేదు.
+          {lt("No rules added yet.", "ఇంకా నియమాలు జోడించలేదు.")}
         </Card>
       ) : (
         Object.entries(grouped).map(([cat, items]) => (
