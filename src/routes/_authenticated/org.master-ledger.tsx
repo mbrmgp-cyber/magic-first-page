@@ -22,7 +22,7 @@ function MasterLedgerPage() {
   const totals = q.data?.totals ?? { outstanding: 0, principal: 0, interest: 0, newLoan: 0, net: 0 };
 
   function exportExcel() {
-    const headers = ["Member ID", "Member Name", "Old Loan Balance", "Principal Collection", "Interest Collection", "Today's New Loan", "Updated Net Balance"];
+    const headers = ["సభ్యుని ID", "సభ్యుని పేరు", "పాత అప్పు బాకీ", "అసలు జమ", "వడ్డీ జమ", "ఈ రోజు కొత్త అప్పు", "నవీకరించిన మొత్తం"];
     const lines = [headers.join(",")];
     for (const r of rows) {
       lines.push([r.member_id, `"${r.member_name}"`, r.old_balance, r.principal_collected, r.interest_collected, r.new_loan, r.net_balance].join(","));
