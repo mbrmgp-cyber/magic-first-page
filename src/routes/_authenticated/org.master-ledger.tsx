@@ -49,11 +49,11 @@ function MasterLedgerPage() {
     table{width:100%;border-collapse:collapse;font-size:12px;margin-top:12px}
     th,td{border:1px solid #ddd;padding:6px 8px}th{background:#fff7ed;color:#9a3412}
     tfoot td{background:#dcfce7;font-weight:bold}</style></head><body>
-    <h1>Chitvel Help Line Society — Master Ledger</h1>
+    <h1>చిట్వేల్ హెల్ప్ లైన్ సొసైటీ — మాస్టర్ లెడ్జర్</h1>
     <div style="font-size:11px;color:#666">${new Date().toLocaleString()}</div>
-    <table><thead><tr><th>Member ID</th><th>Name</th><th>Old Balance</th><th>Principal</th><th>Interest</th><th>New Loan</th><th>Net Balance</th></tr></thead>
+    <table><thead><tr><th>సభ్యుని ID</th><th>పేరు</th><th>పాత బాకీ</th><th>అసలు జమ</th><th>వడ్డీ జమ</th><th>కొత్త అప్పు</th><th>మొత్తం</th></tr></thead>
     <tbody>${rowsHtml}</tbody>
-    <tfoot><tr><td colspan="2">GRAND TOTAL</td>
+    <tfoot><tr><td colspan="2">మొత్తం</td>
     <td style="text-align:right">${fmt(totals.outstanding)}</td>
     <td style="text-align:right">${fmt(totals.principal)}</td>
     <td style="text-align:right">${fmt(totals.interest)}</td>
