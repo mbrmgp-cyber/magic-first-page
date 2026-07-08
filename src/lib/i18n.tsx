@@ -227,9 +227,16 @@ export function localizeText(entry: LocalizedEntry, lang: string): string {
 export function transliterateText(text: string | null | undefined, lang: string): string {
   if (!text) return "";
   const script = scriptForLang(lang);
-  if (script === "en") return text;
   if (script === "te") return text;
-  return translit(text, script === "hi" ? "devanagari" : script);
+  const hasTelu = /[\u0C00-\u0C7F]/.test(text);
+  const hasDeva = /[\u0900-\u097F]/.test(text);
+  if (!hasTelu && !hasDeva) return text;
+  const from = hasTelu ? "telugu" : "devanagari";
+  if (script === "en") {
+    try { return Sanscript.t(text, from, "iast"); } catch { return text; }
+  }
+  const target = script === "hi" ? "devanagari" : script;
+  try { return Sanscript.t(text, from, target); } catch { return text; }
 }
 
 function resolve(entry: Entry | undefined, lang: string): string {
