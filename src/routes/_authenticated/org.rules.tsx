@@ -341,8 +341,13 @@ function HistoryTab() {
       {canEdit && showForm && (
         <Card className="p-4 bg-white/95 border-white space-y-2">
           <Input type="date" value={date} onChange={e => setDate(e.target.value)} />
-          <Input placeholder={lt("Title (e.g. Society founded)", "శీర్షిక (ఉదా: సొసైటీ స్థాపన)")} value={title} onChange={e => setTitle(e.target.value)} />
-          <Textarea placeholder={lt("Description (optional)", "వివరణ (ఐచ్ఛికం)")} rows={3} value={desc} onChange={e => setDesc(e.target.value)} />
+          <div className="text-[11px] font-semibold text-muted-foreground">తెలుగు</div>
+          <Input placeholder="శీర్షిక (ఉదా: సొసైటీ స్థాపన)" value={title} onChange={e => setTitle(e.target.value)} />
+          <Textarea placeholder="వివరణ (ఐచ్ఛికం)" rows={3} value={desc} onChange={e => setDesc(e.target.value)} />
+          <div className="text-[11px] font-semibold text-muted-foreground pt-1">English</div>
+          <Input placeholder="Title (e.g. Society founded)" value={titleEn} onChange={e => setTitleEn(e.target.value)} />
+          <Textarea placeholder="Description (optional)" rows={3} value={descEn} onChange={e => setDescEn(e.target.value)} />
+
           <div className="space-y-2">
             <input
               ref={fileInputGalleryRef}
