@@ -19,6 +19,7 @@ export const Route = createFileRoute("/_authenticated")({
     <RbacProvider>
       <GlobalThemeApplier />
       <DynamicAppManifest />
+      <AutoTransliterate />
       <div className="mbr-themed-app min-h-screen bg-background text-foreground pb-[90px]">
         <SubscriptionGate>
           <Outlet />
