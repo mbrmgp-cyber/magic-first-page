@@ -356,7 +356,7 @@ function Dashboard() {
         <div className="text-center text-[11px] -mt-1">
           <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 border" style={{ borderColor: theme.border, background: theme.miniBox, color: theme.subColor }}>
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: theme.icon }} />
-            {lt("Logged in as", "ప్రస్తుత పాత్ర")}: <span className="font-semibold" style={{ color: theme.headColor }}>{lt(ROLE_LABELS[simRole].en, ROLE_LABELS[simRole].te)}</span>
+            {lt("Logged in as", "లాగిన్ అయిన వారు")}: <span className="font-semibold" style={{ color: theme.headColor }}>{lt(ROLE_LABELS[simRole].en, ROLE_LABELS[simRole].te)}</span>
           </span>
         </div>
 
