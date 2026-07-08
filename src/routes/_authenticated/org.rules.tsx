@@ -445,9 +445,10 @@ function HistoryTab() {
                     <div className="absolute -left-[1.4rem] top-4 w-3 h-3 rounded-full bg-white border-2 shadow" style={{ borderColor: "#FF9933" }} />
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
-                        <div className="text-[11px] text-muted-foreground">{new Date(m.event_date).toLocaleDateString("te-IN", { day: "numeric", month: "long", year: "numeric" })}</div>
-                        <div className="font-semibold text-sm mt-0.5">{m.title}</div>
-                        {m.description && <p className="text-xs text-foreground/80 mt-1 whitespace-pre-wrap">{m.description}</p>}
+                        <div className="text-[11px] text-muted-foreground">{new Date(m.event_date).toLocaleDateString(lang === "en" ? "en-IN" : "te-IN", { day: "numeric", month: "long", year: "numeric" })}</div>
+                        <div className="font-semibold text-sm mt-0.5">{pickLang(lang, m.title, m.title_en)}</div>
+                        {(m.description || m.description_en) && <p className="text-xs text-foreground/80 mt-1 whitespace-pre-wrap">{pickLang(lang, m.description ?? "", m.description_en)}</p>}
+
                         {m.photo_url && <img src={/^https?:\/\//i.test(m.photo_url) ? m.photo_url : (signedUrls[m.photo_url] ?? "")} alt={m.title} className="mt-2 rounded-md max-h-40 object-cover w-full" />}
                       </div>
                       {canEdit && (
