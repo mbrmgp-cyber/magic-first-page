@@ -13,7 +13,7 @@ import { getMyOrg, updateOrgLogo } from "@/lib/org.functions";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/org/accounts")({
-  head: () => ({ meta: [{ title: "Committee Accounts — Monthly Loan Entry" }] }),
+  head: () => ({ meta: [{ title: "కమిటీ ఖాతాలు — నెలవారీ అప్పు నమోదు" }] }),
   component: AccountsPage,
 });
 
