@@ -205,28 +205,28 @@ function AccountsPage() {
         <Card className="p-4 bg-white/95 border-white shadow-xl space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div className="space-y-1.5">
-              <Label>ID NO</Label>
+              <Label>సభ్యుని ID</Label>
               <div className="flex gap-2">
                 <Input value={idNo} onChange={(e) => setIdNo(e.target.value.toUpperCase())}
-                  placeholder="e.g. A/0001" disabled={locked} />
+                  placeholder="ఉదా. A/0001" disabled={locked} />
                 <Button type="button" onClick={() => doLookup(idNo)} disabled={busy || locked}>
                   {busy ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
                 </Button>
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label>DATE / తేది</Label>
+              <Label>తేదీ</Label>
               <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={locked} />
             </div>
             <div className="space-y-1.5">
-              <Label>REMARKS / గమనికలు</Label>
+              <Label>గమనికలు</Label>
               <Input value={remarks} onChange={(e) => setRemarks(e.target.value)} disabled={locked} placeholder="—" />
             </div>
           </div>
 
           {/* Member name banner */}
           <div className="rounded-lg border bg-orange-50/60 p-3">
-            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">అప్పు తీసుకున్న వారి పేరు</p>
+            <p className="text-[11px] tracking-wide text-muted-foreground">అప్పు తీసుకున్న వారి పేరు</p>
             <p className="text-lg font-bold text-foreground">{info?.member.name ?? "—"}</p>
           </div>
 
@@ -234,22 +234,22 @@ function AccountsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {/* OLD LOAN */}
             <div className="rounded-lg border-2 border-orange-200 bg-orange-50/40 p-3 space-y-3">
-              <p className="text-xs font-bold text-red-600 tracking-wide">OLD LOAN</p>
+              <p className="text-xs font-bold text-red-600 tracking-wide">పాత అప్పు</p>
               <div>
-                <p className="text-[11px] text-muted-foreground">అప్పు మొత్తం (OUTSTANDING)</p>
+                <p className="text-[11px] text-muted-foreground">అప్పు మొత్తం (బాకీ)</p>
                 <p className="font-bold text-lg">{sym} {info ? info.totalOutstanding.toLocaleString("en-IN") : "0"}</p>
               </div>
               <div>
-                <p className="text-[11px] text-muted-foreground">వడ్డీ మొత్తం (MONTHLY)</p>
+                <p className="text-[11px] text-muted-foreground">నెలవారీ వడ్డీ</p>
                 <p className="font-bold text-lg">{sym} {info ? info.monthlyInterest.toLocaleString("en-IN") : "0"}</p>
               </div>
               <div className="space-y-1.5 pt-2 border-t border-orange-200">
-                <Label className="text-xs">అసలు జమ (Principal Paid)</Label>
+                <Label className="text-xs">అసలు జమ</Label>
                 <Input inputMode="decimal" value={principal} disabled={locked}
                   onChange={(e) => setPrincipal(e.target.value.replace(/[^\d.]/g, ""))} placeholder="0" />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">వడ్డీ జమ (Interest Paid)</Label>
+                <Label className="text-xs">వడ్డీ జమ</Label>
                 <Input inputMode="decimal" value={interest} disabled={locked}
                   onChange={(e) => setInterest(e.target.value.replace(/[^\d.]/g, ""))} placeholder="0" />
               </div>
