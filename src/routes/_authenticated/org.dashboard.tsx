@@ -16,7 +16,6 @@ import {
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 import { localizeText, transliterateText, useI18n } from "@/lib/i18n";
 import { LanguageToggle } from "@/components/LanguageToggle";
-import { GoogleTranslate } from "@/components/GoogleTranslate";
 import { resolveTheme } from "@/lib/theme";
 import { memberRegistrationUrl } from "@/lib/public-url";
 import { useSimRole, canAccess, ROUTE_ACCESS, ROLE_LABELS } from "@/lib/rbac";
@@ -27,10 +26,10 @@ export const Route = createFileRoute("/_authenticated/org/dashboard")({
 });
 
 const MENU = [
-  { to: "/org/rules", en: "Society Rules & History", te: "సొసైటీ రూల్స్ & హిస్టరీ", icon: BookOpen },
-  { to: "/org/members", en: "Members & Registration", te: "సభ్యుల వివరాలు & నమోదు", icon: Users },
-  { to: "/org/committee", en: "Executive Committee", te: "కార్యవర్గ కమిటీ వివరాలు", icon: Briefcase },
-  { to: "/org/events", en: "Events, Meetings, Decisions", te: "కార్యక్రమాలు, సమావేశాలు, నిర్ణయాలు", icon: Calendar },
+  { to: "/org/rules", en: "Society Rules & History", te: "సొసైటీ నియమావళి & చరిత్ర", icon: BookOpen },
+  { to: "/org/members", en: "Members & Registration", te: "సభ్యులు & నమోదు", icon: Users },
+  { to: "/org/committee", en: "Executive Committee", te: "కార్యనిర్వాహక కమిటీ", icon: Briefcase },
+  { to: "/org/events", en: "Events, Meetings, Decisions", te: "సమావేశాలు & నిర్ణయాలు", icon: Calendar },
   { to: "/org/designs", en: "ID Cards, Mementos, Letterhead, Stamp Design", te: "ID కార్డులు, మెమెంటోలు, లెటర్‌ప్యాడ్, స్టాంప్ డిజైన్", icon: IdCard },
   { to: "/org/accounts-hub", en: "Accounts Hub", te: "అకౌంట్స్ బాక్స్", icon: Wallet },
   { to: "/org/chat", en: "Member Chat", te: "సభ్యులతో చాటింగ్", icon: MessageSquare },
@@ -278,7 +277,7 @@ function Dashboard() {
             )}
           </button>
           <div className="flex items-center gap-2">
-            <GoogleTranslate />
+            <LanguageToggle />
             <Button variant="ghost" size="sm" onClick={() => setSettingsOpen(true)} className="text-zinc-200 hover:bg-zinc-900 hover:text-white" aria-label="Settings">
               <Settings className="h-4 w-4" />
             </Button>
@@ -357,7 +356,7 @@ function Dashboard() {
         <div className="text-center text-[11px] -mt-1">
           <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 border" style={{ borderColor: theme.border, background: theme.miniBox, color: theme.subColor }}>
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: theme.icon }} />
-            {lt("Logged in as", "ప్రస్తుత పాత్ర")}: <span className="font-semibold" style={{ color: theme.headColor }}>{lt(ROLE_LABELS[simRole].en, ROLE_LABELS[simRole].te)}</span>
+            {lt("Logged in as", "లాగిన్ అయిన వారు")}: <span className="font-semibold" style={{ color: theme.headColor }}>{lt(ROLE_LABELS[simRole].en, ROLE_LABELS[simRole].te)}</span>
           </span>
         </div>
 
