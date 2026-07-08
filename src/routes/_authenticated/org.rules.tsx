@@ -14,20 +14,27 @@ import {
 } from "@/lib/content.functions";
 import { toast } from "sonner";
 import { printDocument, escapeHtml } from "@/lib/print-pdf";
+import { localizeText, useI18n } from "@/lib/i18n";
+
+function useLt() {
+  const { lang } = useI18n();
+  return (en: string, te: string) => localizeText({ en, te }, lang);
+}
 
 type Rule = { id: string; text: string; category: string | null; position: number };
 type Milestone = { id: string; event_date: string; title: string; description: string | null; photo_url: string | null };
 
 function Shell({ children }: { children: React.ReactNode }) {
+  const lt = useLt();
   return (
     <div className="min-h-screen bg-background text-foreground p-3 md:p-6">
       <div className="max-w-3xl mx-auto space-y-4">
         <button type="button" onClick={() => window.history.back()} className="inline-flex items-center gap-1 text-sm text-foreground/80 hover:text-foreground">
-          <ArrowLeft className="w-4 h-4" /> Back / వెనుకకు
+          <ArrowLeft className="w-4 h-4" /> {lt("Back", "వెనుకకు")}
         </button>
         <Card className="p-5 bg-card backdrop-blur-xl shadow-xl border-border">
-          <h1 className="text-xl md:text-2xl font-bold text-foreground">సొసైటీ నియమాలు & చరిత్ర</h1>
-          <p className="text-xs text-muted-foreground mt-1">Admin / కమిటీ సభ్యులు మాత్రమే మార్పులు చేయగలరు</p>
+          <h1 className="text-xl md:text-2xl font-bold text-foreground">{lt("Society Rules & History", "సొసైటీ నియమాలు & చరిత్ర")}</h1>
+          <p className="text-xs text-muted-foreground mt-1">{lt("Only Admin / committee members can make changes", "Admin / కమిటీ సభ్యులు మాత్రమే మార్పులు చేయగలరు")}</p>
         </Card>
         {children}
       </div>
@@ -36,6 +43,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 }
 
 function RulesTab() {
+  const lt = useLt();
   const fnList = useServerFn(listRules);
   const fnAdd = useServerFn(addRule);
   const fnUpd = useServerFn(updateRule);
@@ -114,19 +122,19 @@ function RulesTab() {
     <div className="space-y-4">
       {rules.length > 0 && (
         <Button variant="outline" onClick={handleDownloadPdf} className="w-full">
-          <FileDown className="w-4 h-4 mr-1" /> PDF డౌన్‌లోడ్ • Download PDF
+          <FileDown className="w-4 h-4 mr-1" /> {lt("Download PDF", "PDF డౌన్‌లోడ్")}
         </Button>
       )}
       {canEdit && (
         <Card className="p-4 bg-white/95 backdrop-blur border-white space-y-2">
           {editId && (
-            <div className="text-xs font-semibold text-orange-700">✏️ నియమాన్ని సవరిస్తున్నారు • Editing rule</div>
+            <div className="text-xs font-semibold text-orange-700">✏️ {lt("Editing rule", "నియమాన్ని సవరిస్తున్నారు")}</div>
           )}
-          <Input placeholder="కేటగిరి (ఐచ్ఛికం) — ఉదా: సభ్యత్వం, విరాళాలు" value={newCat} onChange={e => setNewCat(e.target.value)} />
-          <Textarea placeholder="కొత్త నియమం రాయండి..." rows={2} value={newText} onChange={e => setNewText(e.target.value)} />
+          <Input placeholder={lt("Category (optional) — e.g. Membership, Donations", "కేటగిరి (ఐచ్ఛికం) — ఉదా: సభ్యత్వం, విరాళాలు")} value={newCat} onChange={e => setNewCat(e.target.value)} />
+          <Textarea placeholder={lt("Write a new rule...", "కొత్త నియమం రాయండి...")} rows={2} value={newText} onChange={e => setNewText(e.target.value)} />
           <div className="flex gap-2">
             <Button onClick={handleSubmit} disabled={!newText.trim()} className="flex-1">
-              {editId ? <><Check className="w-4 h-4 mr-1" />Update • నవీకరించండి</> : <><Plus className="w-4 h-4 mr-1" />నియమం జోడించండి</>}
+              {editId ? <><Check className="w-4 h-4 mr-1" />{lt("Update", "నవీకరించండి")}</> : <><Plus className="w-4 h-4 mr-1" />{lt("Add rule", "నియమం జోడించండి")}</>}
             </Button>
             {editId && (
               <Button variant="outline" onClick={cancelEdit}><X className="w-4 h-4" /></Button>
@@ -136,10 +144,10 @@ function RulesTab() {
       )}
 
       {loading ? (
-        <Card className="p-6 text-center text-muted-foreground bg-white/92 border-white">లోడ్ అవుతోంది...</Card>
+        <Card className="p-6 text-center text-muted-foreground bg-white/92 border-white">{lt("Loading...", "లోడ్ అవుతోంది...")}</Card>
       ) : rules.length === 0 ? (
         <Card className="p-6 text-center text-muted-foreground bg-white/92 border-white">
-          ఇంకా నియమాలు జోడించలేదు.
+          {lt("No rules added yet.", "ఇంకా నియమాలు జోడించలేదు.")}
         </Card>
       ) : (
         Object.entries(grouped).map(([cat, items]) => (
@@ -169,6 +177,7 @@ function RulesTab() {
 
 
 function HistoryTab() {
+  const lt = useLt();
   const fnList = useServerFn(listMilestones);
   const fnAdd = useServerFn(addMilestone);
   const fnUpd = useServerFn(updateMilestone);
@@ -297,17 +306,17 @@ function HistoryTab() {
     <div className="space-y-4">
       {items.length > 0 && (
         <Button variant="outline" onClick={handleDownloadPdf} className="w-full">
-          <FileDown className="w-4 h-4 mr-1" /> PDF డౌన్‌లోడ్ • Download PDF
+          <FileDown className="w-4 h-4 mr-1" /> {lt("Download PDF", "PDF డౌన్‌లోడ్")}
         </Button>
       )}
       {canEdit && !showForm && (
-        <Button onClick={() => setShowForm(true)} className="w-full"><Plus className="w-4 h-4 mr-1" />మైలురాయి జోడించండి</Button>
+        <Button onClick={() => setShowForm(true)} className="w-full"><Plus className="w-4 h-4 mr-1" />{lt("Add milestone", "మైలురాయి జోడించండి")}</Button>
       )}
       {canEdit && showForm && (
         <Card className="p-4 bg-white/95 border-white space-y-2">
           <Input type="date" value={date} onChange={e => setDate(e.target.value)} />
-          <Input placeholder="శీర్షిక (ఉదా: సొసైటీ స్థాపన)" value={title} onChange={e => setTitle(e.target.value)} />
-          <Textarea placeholder="వివరణ (ఐచ్ఛికం)" rows={3} value={desc} onChange={e => setDesc(e.target.value)} />
+          <Input placeholder={lt("Title (e.g. Society founded)", "శీర్షిక (ఉదా: సొసైటీ స్థాపన)")} value={title} onChange={e => setTitle(e.target.value)} />
+          <Textarea placeholder={lt("Description (optional)", "వివరణ (ఐచ్ఛికం)")} rows={3} value={desc} onChange={e => setDesc(e.target.value)} />
           <div className="space-y-2">
             <input
               ref={fileInputGalleryRef}
@@ -360,7 +369,7 @@ function HistoryTab() {
                 className="w-full"
               >
                 {uploading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />}
-                {photo ? "ఇమేజ్ మార్చండి • Change Image" : "ఇమేజ్ అప్‌లోడ్ చేయండి • Upload Image"}
+                {photo ? lt("Change Image", "ఇమేజ్ మార్చండి") : lt("Upload Image", "ఇమేజ్ అప్‌లోడ్ చేయండి")}
               </Button>
             )}
             {photoPreview && (
@@ -378,17 +387,17 @@ function HistoryTab() {
             )}
           </div>
           <div className="flex gap-2">
-            <Button onClick={handleSave} className="flex-1"><Check className="w-4 h-4 mr-1" />సేవ్ చేయండి</Button>
+            <Button onClick={handleSave} className="flex-1"><Check className="w-4 h-4 mr-1" />{lt("Save", "సేవ్ చేయండి")}</Button>
             <Button variant="outline" onClick={reset}><X className="w-4 h-4" /></Button>
           </div>
         </Card>
       )}
 
       {loading ? (
-        <Card className="p-6 text-center text-muted-foreground bg-white/92 border-white">లోడ్ అవుతోంది...</Card>
+        <Card className="p-6 text-center text-muted-foreground bg-white/92 border-white">{lt("Loading...", "లోడ్ అవుతోంది...")}</Card>
       ) : items.length === 0 ? (
         <Card className="p-6 text-center text-muted-foreground bg-white/92 border-white">
-          ఇంకా చరిత్ర మైలురాళ్లు లేవు.
+          {lt("No history milestones yet.", "ఇంకా చరిత్ర మైలురాళ్లు లేవు.")}
         </Card>
       ) : (
         <div className="relative pl-6">
@@ -429,12 +438,13 @@ function HistoryTab() {
 }
 
 function Page() {
+  const lt = useLt();
   return (
     <Shell>
       <Tabs defaultValue="rules">
         <TabsList className="grid w-full grid-cols-2 bg-white/80 backdrop-blur">
-          <TabsTrigger value="rules"><BookOpen className="w-4 h-4 mr-1" />నియమాలు</TabsTrigger>
-          <TabsTrigger value="history"><History className="w-4 h-4 mr-1" />చరిత్ర</TabsTrigger>
+          <TabsTrigger value="rules"><BookOpen className="w-4 h-4 mr-1" />{lt("Rules", "నియమాలు")}</TabsTrigger>
+          <TabsTrigger value="history"><History className="w-4 h-4 mr-1" />{lt("History", "చరిత్ర")}</TabsTrigger>
         </TabsList>
         <TabsContent value="rules" className="mt-4"><RulesTab /></TabsContent>
         <TabsContent value="history" className="mt-4"><HistoryTab /></TabsContent>
