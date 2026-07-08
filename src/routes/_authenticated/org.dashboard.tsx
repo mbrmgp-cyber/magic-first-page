@@ -27,10 +27,10 @@ export const Route = createFileRoute("/_authenticated/org/dashboard")({
 });
 
 const MENU = [
-  { to: "/org/rules", en: "Society Rules & History", te: "సొసైటీ రూల్స్ & హిస్టరీ", icon: BookOpen },
-  { to: "/org/members", en: "Members & Registration", te: "సభ్యుల వివరాలు & నమోదు", icon: Users },
-  { to: "/org/committee", en: "Executive Committee", te: "కార్యవర్గ కమిటీ వివరాలు", icon: Briefcase },
-  { to: "/org/events", en: "Events, Meetings, Decisions", te: "కార్యక్రమాలు, సమావేశాలు, నిర్ణయాలు", icon: Calendar },
+  { to: "/org/rules", en: "Society Rules & History", te: "సొసైటీ నియమావళి & చరిత్ర", icon: BookOpen },
+  { to: "/org/members", en: "Members & Registration", te: "సభ్యులు & నమోదు", icon: Users },
+  { to: "/org/committee", en: "Executive Committee", te: "కార్యనిర్వాహక కమిటీ", icon: Briefcase },
+  { to: "/org/events", en: "Events, Meetings, Decisions", te: "సమావేశాలు & నిర్ణయాలు", icon: Calendar },
   { to: "/org/designs", en: "ID Cards, Mementos, Letterhead, Stamp Design", te: "ID కార్డులు, మెమెంటోలు, లెటర్‌ప్యాడ్, స్టాంప్ డిజైన్", icon: IdCard },
   { to: "/org/accounts-hub", en: "Accounts Hub", te: "అకౌంట్స్ బాక్స్", icon: Wallet },
   { to: "/org/chat", en: "Member Chat", te: "సభ్యులతో చాటింగ్", icon: MessageSquare },
