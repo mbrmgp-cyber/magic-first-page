@@ -283,7 +283,7 @@ function MemberDashboard() {
                 aria-label={s.label}
               >
                 <span className="h-10 w-10 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: `${brand}26`, color: brand }}>
+                  style={{ backgroundColor: `${s.color}22`, color: s.color }}>
                   {s.icon}
                 </span>
                 <p className="text-[12px] font-semibold leading-tight text-white">{s.te}</p>
