@@ -224,6 +224,23 @@ export function localizeText(entry: LocalizedEntry, lang: string): string {
   return translit(entry.te, script);
 }
 
+function toCleanEnglish(text: string, from: "telugu" | "devanagari"): string {
+  try {
+    const iast = Sanscript.t(text, from, "iast");
+    // Strip combining diacritics (ā→a, ṭ→t, ṇ→n, ḥ→h, etc.)
+    let s = iast.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    // Common leftover characters from IAST that NFD didn't decompose cleanly
+    s = s.replace(/[ḷḹ]/gi, "l").replace(/[ṛṝ]/gi, "r").replace(/ḥ/gi, "h").replace(/ṃ/gi, "m");
+    // Sanscript uses "c" for చ/च — English readers expect "ch"
+    s = s.replace(/c(?!h)/g, "ch").replace(/C(?!h|H)/g, "Ch");
+    // Title-case each word
+    s = s.replace(/\b([a-z])([a-z]*)/g, (_, a: string, b: string) => a.toUpperCase() + b.toLowerCase());
+    return s;
+  } catch {
+    return text;
+  }
+}
+
 export function transliterateText(text: string | null | undefined, lang: string): string {
   if (!text) return "";
   const script = scriptForLang(lang);
@@ -232,9 +249,7 @@ export function transliterateText(text: string | null | undefined, lang: string)
   const hasDeva = /[\u0900-\u097F]/.test(text);
   if (!hasTelu && !hasDeva) return text;
   const from = hasTelu ? "telugu" : "devanagari";
-  if (script === "en") {
-    try { return Sanscript.t(text, from, "iast"); } catch { return text; }
-  }
+  if (script === "en") return toCleanEnglish(text, from);
   const target = script === "hi" ? "devanagari" : script;
   try { return Sanscript.t(text, from, target); } catch { return text; }
 }
