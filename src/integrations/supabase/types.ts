@@ -1585,33 +1585,39 @@ export type Database = {
           created_at: string
           created_by: string | null
           description: string | null
+          description_en: string | null
           event_date: string
           id: string
           org_id: string
           photo_url: string | null
           title: string
+          title_en: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          description_en?: string | null
           event_date: string
           id?: string
           org_id: string
           photo_url?: string | null
           title: string
+          title_en?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          description_en?: string | null
           event_date?: string
           id?: string
           org_id?: string
           photo_url?: string | null
           title?: string
+          title_en?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -1690,32 +1696,38 @@ export type Database = {
       org_rules: {
         Row: {
           category: string | null
+          category_en: string | null
           created_at: string
           created_by: string | null
           id: string
           org_id: string
           position: number
           text: string
+          text_en: string | null
           updated_at: string
         }
         Insert: {
           category?: string | null
+          category_en?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
           org_id: string
           position?: number
           text: string
+          text_en?: string | null
           updated_at?: string
         }
         Update: {
           category?: string | null
+          category_en?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
           org_id?: string
           position?: number
           text?: string
+          text_en?: string | null
           updated_at?: string
         }
         Relationships: [
