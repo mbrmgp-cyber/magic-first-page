@@ -43,6 +43,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 }
 
 function RulesTab() {
+  const lt = useLt();
   const fnList = useServerFn(listRules);
   const fnAdd = useServerFn(addRule);
   const fnUpd = useServerFn(updateRule);
