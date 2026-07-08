@@ -438,12 +438,13 @@ function HistoryTab() {
 }
 
 function Page() {
+  const lt = useLt();
   return (
     <Shell>
       <Tabs defaultValue="rules">
         <TabsList className="grid w-full grid-cols-2 bg-white/80 backdrop-blur">
-          <TabsTrigger value="rules"><BookOpen className="w-4 h-4 mr-1" />నియమాలు</TabsTrigger>
-          <TabsTrigger value="history"><History className="w-4 h-4 mr-1" />చరిత్ర</TabsTrigger>
+          <TabsTrigger value="rules"><BookOpen className="w-4 h-4 mr-1" />{lt("Rules", "నియమాలు")}</TabsTrigger>
+          <TabsTrigger value="history"><History className="w-4 h-4 mr-1" />{lt("History", "చరిత్ర")}</TabsTrigger>
         </TabsList>
         <TabsContent value="rules" className="mt-4"><RulesTab /></TabsContent>
         <TabsContent value="history" className="mt-4"><HistoryTab /></TabsContent>
