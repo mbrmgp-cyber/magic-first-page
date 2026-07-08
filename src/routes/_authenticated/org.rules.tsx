@@ -177,6 +177,7 @@ function RulesTab() {
 
 
 function HistoryTab() {
+  const lt = useLt();
   const fnList = useServerFn(listMilestones);
   const fnAdd = useServerFn(addMilestone);
   const fnUpd = useServerFn(updateMilestone);
