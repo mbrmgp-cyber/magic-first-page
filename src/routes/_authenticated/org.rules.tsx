@@ -14,6 +14,12 @@ import {
 } from "@/lib/content.functions";
 import { toast } from "sonner";
 import { printDocument, escapeHtml } from "@/lib/print-pdf";
+import { localizeText, useI18n } from "@/lib/i18n";
+
+function useLt() {
+  const { lang } = useI18n();
+  return (en: string, te: string) => localizeText({ en, te }, lang);
+}
 
 type Rule = { id: string; text: string; category: string | null; position: number };
 type Milestone = { id: string; event_date: string; title: string; description: string | null; photo_url: string | null };
