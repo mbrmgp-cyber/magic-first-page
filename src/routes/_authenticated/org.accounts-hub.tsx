@@ -27,8 +27,8 @@ function AccountsHub() {
             <Link to="/org/dashboard" className="p-2 rounded-lg hover:bg-white/10">
               <ArrowLeft className="h-5 w-5" />
             </Link>
-            <div>
-              <h1 className="text-lg font-bold">అకౌంట్స్ బాక్స్</h1>
+            <div data-notranslit>
+              <h1 className="text-lg font-bold text-white">Accounts Hub</h1>
               <p className="text-xs text-white/60">Accounts Hub — central navigation for all financial tasks</p>
             </div>
           </div>
@@ -47,7 +47,7 @@ function AccountsHub() {
                 onMouseEnter={(e) => { e.currentTarget.style.boxShadow = `0 0 24px ${t.color}40`; }}
                 onMouseLeave={(e) => { e.currentTarget.style.boxShadow = ``; }}
               >
-                <div className="flex flex-col items-center text-center gap-2 py-2">
+                <div className="flex flex-col items-center text-center gap-2 py-2" data-notranslit>
                   <div
                     className="w-12 h-12 rounded-xl flex items-center justify-center border"
                     style={{ background: `${t.color}1f`, borderColor: `${t.color}66` }}
@@ -55,7 +55,7 @@ function AccountsHub() {
                     <t.icon className="w-6 h-6" style={{ color: t.color }} />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold leading-tight text-white">{t.te}</p>
+                    <p className="text-sm font-semibold leading-tight text-white">{t.en}</p>
                   </div>
                 </div>
               </Card>
