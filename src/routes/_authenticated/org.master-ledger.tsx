@@ -94,20 +94,20 @@ function MasterLedgerPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm border-collapse">
               <thead>
-                <tr className="bg-orange-50 text-orange-900 text-xs uppercase tracking-wide">
-                  <th className="px-3 py-2 text-left border-b">Member ID</th>
-                  <th className="px-3 py-2 text-left border-b">Name</th>
-                  <th className="px-3 py-2 text-right border-b">Old Balance</th>
+                <tr className="bg-orange-50 text-orange-900 text-xs tracking-wide">
+                  <th className="px-3 py-2 text-left border-b">సభ్యుని ID</th>
+                  <th className="px-3 py-2 text-left border-b">పేరు</th>
+                  <th className="px-3 py-2 text-right border-b">పాత బాకీ</th>
                   <th className="px-3 py-2 text-right border-b">అసలు జమ</th>
                   <th className="px-3 py-2 text-right border-b">వడ్డీ జమ</th>
-                  <th className="px-3 py-2 text-right border-b">New Loan</th>
-                  <th className="px-3 py-2 text-right border-b">Net Balance</th>
+                  <th className="px-3 py-2 text-right border-b">కొత్త అప్పు</th>
+                  <th className="px-3 py-2 text-right border-b">మొత్తం బాకీ</th>
                 </tr>
               </thead>
               <tbody>
                 {rows.length === 0 && (
                   <tr><td colSpan={7} className="text-center py-8 text-muted-foreground">
-                    {q.isLoading ? "Loading…" : "No members yet"}
+                    {q.isLoading ? "లోడ్ అవుతోంది…" : "సభ్యులు లేరు"}
                   </td></tr>
                 )}
                 {rows.map((r, i) => (
