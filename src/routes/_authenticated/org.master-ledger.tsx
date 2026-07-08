@@ -67,7 +67,7 @@ function MasterLedgerPage() {
     <div className="min-h-screen bg-tricolor p-3 md:p-6">
       <div className="max-w-6xl mx-auto space-y-4">
         <Link to="/org/accounts-hub" className="inline-flex items-center gap-1 text-sm text-foreground/80 hover:text-foreground">
-          <ArrowLeft className="w-4 h-4" /> Accounts Hub
+          <ArrowLeft className="w-4 h-4" /> ఖాతాల కేంద్రం
         </Link>
 
         <Card className="p-4 bg-white/95 shadow-xl">
