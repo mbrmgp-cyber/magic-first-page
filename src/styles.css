@@ -179,7 +179,7 @@
 @font-face {
   font-family: "Noto Sans Telugu";
   src: url("/fonts/NotoSansTelugu-Bold.ttf") format("truetype");
-  font-weight: 700 800;
+  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
