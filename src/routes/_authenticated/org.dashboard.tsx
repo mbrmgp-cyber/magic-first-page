@@ -302,7 +302,7 @@ function Dashboard() {
                 <img src={org.logo_url} alt={`${org.name} logo`} className="w-full h-full object-cover" />
               ) : (
                 <span className="text-2xl font-bold" style={{ color: theme.smallColor }}>
-                  {org.name.split(" ").map(w => w[0]).join("").slice(0, 3).toUpperCase()}
+                  {((lang === "en" && org.name_en) ? org.name_en : org.name).split(" ").map((w: string) => w[0]).join("").slice(0, 3).toUpperCase()}
                 </span>
               )}
               <span className="absolute inset-0 bg-black/60 text-white text-[10px] flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition">
@@ -311,7 +311,7 @@ function Dashboard() {
             </button>
             <div className="min-w-0 flex-1" style={{ textAlign: theme.headAlign }}>
               <h1 className="font-extrabold leading-tight tracking-tight" style={{ fontSize: "clamp(0.95rem, 4.6vw, 1.6rem)", color: theme.headColor, fontFamily: `${theme.headFont}, system-ui, sans-serif` }}>
-                {transliterateText(org.name, lang)}
+                {lang === "en" && org.name_en ? org.name_en : transliterateText(org.name, lang)}
               </h1>
               {org.slogan && <p className="mt-1 italic" style={{ color: theme.subColor, fontFamily: `${theme.subFont}, system-ui, sans-serif` }}>{transliterateText(org.slogan, lang)}</p>}
               {org.gov_reg_number && (
