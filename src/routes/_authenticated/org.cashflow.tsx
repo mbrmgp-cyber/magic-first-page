@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { ArrowLeft, Wallet, TrendingUp, TrendingDown, Building2, User, Briefcase, Users, AlarmClock, Printer } from "lucide-react";
+import { ArrowLeft, Wallet, TrendingUp, TrendingDown, Building2, User, Briefcase, Users, AlarmClock, FileDown } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -41,6 +41,7 @@ function CashFlowPage() {
   const lt = (en: string, te: string) => lang === "te" ? te : en;
   const fetchFn = useServerFn(getCashFlowSummary);
   const [range, setRange] = useState<TimeRange>("this_month");
+  const [pdfBusy, setPdfBusy] = useState(false);
   const q = useQuery({
     queryKey: ["cashflow", range],
     queryFn: () => fetchFn({ data: { range } }),
@@ -49,6 +50,172 @@ function CashFlowPage() {
   const { currency, fmt: fmtRaw, symbol } = useCurrency();
   // Stored totals are in INR (base). Show note when viewing in a non-base currency.
   const fmt = (n: number) => fmtRaw(n);
+
+  async function downloadCashFlowPdf() {
+    if (!d || pdfBusy) return;
+    setPdfBusy(true);
+    try {
+      const { jsPDF } = await import("jspdf");
+      await document.fonts?.ready;
+
+      const pageWidth = 1240;
+      const pageHeight = 1754;
+      const margin = 80;
+      const canvas = document.createElement("canvas");
+      canvas.width = pageWidth;
+      canvas.height = pageHeight;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("PDF canvas is not available");
+
+      const fontFamily = '"Noto Sans Telugu", "Noto Sans", "Segoe UI", Arial, sans-serif';
+      const setFont = (size: number, weight: number | string = 400) => {
+        ctx.font = `${weight} ${size}px ${fontFamily}`;
+      };
+      const drawText = (
+        text: string,
+        x: number,
+        y: number,
+        maxWidth: number,
+        size: number,
+        color = "#111827",
+        weight: number | string = 400,
+        align: CanvasTextAlign = "left",
+      ) => {
+        const safe = String(text ?? "");
+        let fittedSize = size;
+        setFont(fittedSize, weight);
+        while (fittedSize > 13 && ctx.measureText(safe).width > maxWidth) {
+          fittedSize -= 1;
+          setFont(fittedSize, weight);
+        }
+        ctx.fillStyle = color;
+        ctx.textAlign = align;
+        ctx.textBaseline = "middle";
+        const drawX = align === "right" ? x + maxWidth : align === "center" ? x + maxWidth / 2 : x;
+        ctx.fillText(safe, drawX, y);
+      };
+      const roundedRect = (x: number, y: number, w: number, h: number, r = 14) => {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+      };
+      const drawCard = (x: number, y: number, w: number, h: number, label: string, value: string, accent: string) => {
+        ctx.fillStyle = "#ffffff";
+        roundedRect(x, y, w, h, 16);
+        ctx.fill();
+        ctx.strokeStyle = "#d1d5db";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.fillStyle = accent;
+        roundedRect(x, y, 10, h, 12);
+        ctx.fill();
+        drawText(label, x + 28, y + 34, w - 56, 20, "#374151", 700);
+        drawText(value, x + 28, y + 78, w - 56, 30, "#111827", 800);
+      };
+
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, pageWidth, pageHeight);
+      ctx.fillStyle = "#ff8c28";
+      ctx.fillRect(0, 0, pageWidth, 14);
+
+      const rangeLabel = RANGES.find((r) => r.v === range);
+      drawText(lt("Society Cash Flow", "సొసైటీ నగదు ప్రవాహం"), margin, 84, pageWidth - margin * 2, 34, "#111827", 800);
+      drawText(
+        `${lt("Cash Flow Statement", "నగదు ప్రవాహ నివేదిక")} • ${rangeLabel ? lt(rangeLabel.en, rangeLabel.te) : range}`,
+        margin,
+        126,
+        pageWidth - margin * 2,
+        22,
+        "#4b5563",
+        500,
+      );
+      drawText(new Date().toLocaleDateString("en-IN"), margin, 126, pageWidth - margin * 2, 20, "#6b7280", 500, "right");
+
+      let y = 190;
+      const gap = 24;
+      const cardW = (pageWidth - margin * 2 - gap * 2) / 3;
+      drawCard(margin, y, cardW, 118, lt("In Bank", "బ్యాంకులో"), fmt(d.wallets.bank), "#2563eb");
+      drawCard(margin + cardW + gap, y, cardW, 118, lt("Cashier / Petty Cash", "అకౌంటెంట్ / చిల్లర"), fmt(d.wallets.accountant), "#d97706");
+      drawCard(margin + (cardW + gap) * 2, y, cardW, 118, lt("President", "అధ్యక్షుడు"), fmt(d.wallets.president), "#7c3aed");
+
+      y += 148;
+      const halfW = (pageWidth - margin * 2 - gap) / 2;
+      drawCard(margin, y, halfW, 118, lt("With Members", "సభ్యుల వద్ద ఉన్న మొత్తం"), fmt(d.membersOutstanding ?? 0), "#ea580c");
+      drawCard(margin + halfW + gap, y, halfW, 118, lt("Pending Interest", "పెండింగ్ వడ్డీ"), fmt(d.pendingInterest ?? 0), "#e11d48");
+
+      y += 162;
+      ctx.fillStyle = "#f9fafb";
+      roundedRect(margin, y, pageWidth - margin * 2, 132, 18);
+      ctx.fill();
+      ctx.strokeStyle = "#d1d5db";
+      ctx.stroke();
+      const totalW = (pageWidth - margin * 2) / 3;
+      drawText(lt("Income", "వచ్చినది"), margin, y + 38, totalW, 22, "#15803d", 800, "center");
+      drawText(fmt(d.totalIncome), margin, y + 84, totalW, 30, "#15803d", 800, "center");
+      drawText(lt("Expense", "పోయినది"), margin + totalW, y + 38, totalW, 22, "#b91c1c", 800, "center");
+      drawText(fmt(d.totalExpense), margin + totalW, y + 84, totalW, 30, "#b91c1c", 800, "center");
+      drawText(lt("Balance", "మిగులు"), margin + totalW * 2, y + 38, totalW, 22, "#c2410c", 800, "center");
+      drawText(fmt(d.closingBalance), margin + totalW * 2, y + 84, totalW, 30, "#c2410c", 800, "center");
+
+      const drawBreakdown = (x: number, startY: number, w: number, title: string, rows: [string, number][], color: string) => {
+        ctx.fillStyle = "#ffffff";
+        roundedRect(x, startY, w, 470, 16);
+        ctx.fill();
+        ctx.strokeStyle = "#d1d5db";
+        ctx.stroke();
+        drawText(title, x + 28, startY + 44, w - 56, 24, color, 800);
+        let rowY = startY + 92;
+        if (!rows.length) {
+          drawText(lt("No entries in this period.", "ఈ కాలంలో ఎంట్రీలు లేవు."), x + 28, rowY, w - 56, 20, "#6b7280", 500);
+          return;
+        }
+        rows.slice(0, 10).forEach(([label, amount]) => {
+          drawText(label, x + 28, rowY, w - 220, 20, "#374151", 600);
+          drawText(fmt(amount), x + 28, rowY, w - 56, 20, "#111827", 700, "right");
+          ctx.strokeStyle = "#e5e7eb";
+          ctx.beginPath();
+          ctx.moveTo(x + 28, rowY + 24);
+          ctx.lineTo(x + w - 28, rowY + 24);
+          ctx.stroke();
+          rowY += 48;
+        });
+      };
+
+      y += 172;
+      drawBreakdown(
+        margin,
+        y,
+        halfW,
+        lt("Income Details", "ఆదాయ వివరాలు"),
+        Object.entries(d.incomeByType).map(([k, v]) => [INCOME_LABEL[k] ? lt(INCOME_LABEL[k].en, INCOME_LABEL[k].te) : k, Number(v)]),
+        "#15803d",
+      );
+      drawBreakdown(
+        margin + halfW + gap,
+        y,
+        halfW,
+        lt("Expense Details", "ఖర్చు వివరాలు"),
+        Object.entries(d.expenseByType).map(([k, v]) => [EXPENSE_LABEL[k] ? lt(EXPENSE_LABEL[k].en, EXPENSE_LABEL[k].te) : k, Number(v)]),
+        "#b91c1c",
+      );
+
+      drawText("Download from MBR APP", margin, pageHeight - 78, pageWidth - margin * 2, 16, "#6b7280", 500, "center");
+
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, 210, 297, undefined, "FAST");
+      pdf.save(`cash-flow-${range}-${new Date().toISOString().slice(0, 10)}.pdf`);
+    } finally {
+      setPdfBusy(false);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-black text-white pb-16">
@@ -70,8 +237,8 @@ function CashFlowPage() {
             <Link to="/org/expenses">
               <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white">{lt("+ Expense", "+ ఖర్చు")}</Button>
             </Link>
-            <Button size="sm" variant="outline" onClick={() => window.print()} className="gap-1">
-              <Printer className="h-4 w-4" /> {lt("Print", "ప్రింట్")}
+            <Button size="sm" variant="outline" onClick={downloadCashFlowPdf} disabled={!d || q.isLoading || pdfBusy} className="gap-1">
+              <FileDown className="h-4 w-4" /> {pdfBusy ? lt("Creating…", "తయారవుతోంది…") : lt("PDF", "పిడిఎఫ్")}
             </Button>
           </div>
         </header>
