@@ -384,6 +384,7 @@ function toLocalInput(iso: string) {
 
 /* ============ Resolutions Tab ============ */
 function ResolutionsTab({ orgId, resolutions, meetings, members, onChange }: any) {
+  const { lang } = useI18n();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   return (
