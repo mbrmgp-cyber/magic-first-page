@@ -92,8 +92,9 @@ function EventsPage() {
         </div>
 
         <Card className="mbr-theme-big-box border p-4 mb-4">
-          <h1 className="text-xl font-bold text-foreground">కార్యక్రమాలు, సమావేశాలు, నిర్ణయాలు</h1>
-          <p className="text-xs text-muted-foreground mt-1">Events, Meetings & Decisions Hub</p>
+          <h1 className="text-xl font-bold text-foreground">
+            {lang === "te" ? "కార్యక్రమాలు, సమావేశాలు, నిర్ణయాలు" : "Events, Meetings & Decisions Hub"}
+          </h1>
         </Card>
 
         <div className="grid grid-cols-3 gap-2 mb-4">
@@ -112,8 +113,7 @@ function EventsPage() {
                 className={`mbr-theme-mini-box relative flex flex-col items-center gap-1 rounded-lg p-2 border text-xs transition ${active ? "bg-primary text-primary-foreground border-primary shadow-md ring-2 ring-primary/50 border-b-4 border-b-primary-foreground/80" : "bg-card border-border text-foreground hover:border-primary"}`}
               >
                 <Ic className="w-4 h-4" />
-                <span className="font-semibold leading-tight">{t.te}</span>
-                <span className="text-[10px] opacity-70">{t.en}</span>
+                <span className="font-semibold leading-tight">{lang === "te" ? t.te : t.en}</span>
               </button>
             );
           })}
