@@ -71,8 +71,11 @@ const ROLE_GRADIENT: Record<CommitteeRole, string> = {
   worker: "linear-gradient(135deg,#1A6D8E,#4FB3D9)",
 };
 
-function fmtDate(d: string) {
-  try { return new Date(d).toLocaleDateString("te-IN", { day: "numeric", month: "short", year: "numeric" }); }
+function fmtDate(d: string, lang: string) {
+  try {
+    const locale = lang === "en" ? "en-IN" : lang === "hi" ? "hi-IN" : "te-IN";
+    return new Date(d).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" });
+  }
   catch { return d; }
 }
 
@@ -83,6 +86,9 @@ function MemberCard({
   onEdit: () => void; onDelete: () => void; onView: () => void; isMe: boolean;
   onReload: () => void;
 }) {
+  const lt = useLt();
+  const { lang } = useI18n();
+  const roleLabel = lang === "en" ? ROLE_LABELS_EN[cm.role] : ROLE_LABELS[cm.role];
   const m = cm.members;
   const initials = (m?.name ?? "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
   const [imgBroken, setImgBroken] = useState(false);
