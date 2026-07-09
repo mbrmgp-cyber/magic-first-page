@@ -18,6 +18,7 @@ export const Route = createFileRoute("/_authenticated/org/accounts")({
 });
 
 import { useCurrency } from "@/lib/currency-context";
+import { useI18n } from "@/lib/i18n";
 
 type Lookup = Awaited<ReturnType<typeof lookupMemberByCode>>;
 
