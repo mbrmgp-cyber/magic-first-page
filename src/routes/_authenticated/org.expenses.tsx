@@ -14,6 +14,7 @@ import {
 import { toast } from "sonner";
 import { recordExpense, listExpenses, listWalletAccounts, type ExpenseType, type WalletType } from "@/lib/cashflow.functions";
 import { CURRENCIES, BASE_CURRENCY, type CurrencyCode } from "@/lib/currency-context";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/org/expenses")({
   head: () => ({ meta: [{ title: "ఖర్చులు / Expenses" }] }),
@@ -21,19 +22,21 @@ export const Route = createFileRoute("/_authenticated/org/expenses")({
 });
 
 const EXPENSE_TYPES: { v: ExpenseType; te: string; en: string }[] = [
-  { v: "charity", te: "ఆర్థిక సహాయం / ధర్మం", en: "ఆర్థిక సహాయం / ధర్మం" },
-  { v: "office", te: "ఆఫీసు ఖర్చులు", en: "ఆఫీసు ఖర్చులు" },
-  { v: "meeting", te: "మీటింగ్ ఖర్చులు", en: "మీటింగ్ ఖర్చులు" },
-  { v: "misc", te: "ఇతరములు", en: "ఇతరములు" },
+  { v: "charity", te: "ఆర్థిక సహాయం / ధర్మం", en: "Financial Aid / Charity" },
+  { v: "office", te: "ఆఫీసు ఖర్చులు", en: "Office Expenses" },
+  { v: "meeting", te: "మీటింగ్ ఖర్చులు", en: "Meeting Expenses" },
+  { v: "misc", te: "ఇతరములు", en: "Miscellaneous" },
 ];
 
-const WALLETS: { v: WalletType; label: string }[] = [
-  { v: "bank", label: "బ్యాంక్ ఖాతా" },
-  { v: "accountant", label: "అకౌంటెంట్" },
-  { v: "president", label: "అధ్యక్షుడు" },
+const WALLETS: { v: WalletType; te: string; en: string }[] = [
+  { v: "bank", te: "బ్యాంక్ ఖాతా", en: "Bank Account" },
+  { v: "accountant", te: "అకౌంటెంట్", en: "Cashier" },
+  { v: "president", te: "అధ్యక్షుడు", en: "President" },
 ];
 
 function ExpensesPage() {
+  const { lang } = useI18n();
+  const lt = (en: string, te: string) => lang === "te" ? te : en;
   const qc = useQueryClient();
   const save = useServerFn(recordExpense);
   const listFn = useServerFn(listExpenses);
@@ -56,9 +59,9 @@ function ExpensesPage() {
     e.preventDefault();
     const a = Number(amount);
     const rate = Number(exchangeRate);
-    if (!recipient.trim()) { toast.error("Recipient required"); return; }
-    if (!(a > 0)) { toast.error("Valid amount required"); return; }
-    if (txCurrency !== BASE_CURRENCY && !(rate > 0)) { toast.error("Exchange rate required for foreign currency"); return; }
+    if (!recipient.trim()) { toast.error(lt("Recipient required", "గ్రహీత పేరు అవసరం")); return; }
+    if (!(a > 0)) { toast.error(lt("Valid amount required", "సరైన మొత్తం అవసరం")); return; }
+    if (txCurrency !== BASE_CURRENCY && !(rate > 0)) { toast.error(lt("Exchange rate required for foreign currency", "విదేశీ కరెన్సీకి మార్పిడి రేటు అవసరం")); return; }
     setBusy(true);
     try {
       await save({ data: {
@@ -70,7 +73,7 @@ function ExpensesPage() {
         remarks: remarks || undefined,
       }});
       const baseAmt = a * (txCurrency === BASE_CURRENCY ? 1 : rate);
-      toast.success(`₹${baseAmt.toLocaleString("en-IN")} expense recorded`);
+      toast.success(lt(`₹${baseAmt.toLocaleString("en-IN")} expense recorded`, `₹${baseAmt.toLocaleString("en-IN")} ఖర్చు నమోదు అయింది`));
       setRecipient(""); setAmount(""); setRemarks("");
       setTxCurrency(BASE_CURRENCY); setExchangeRate("1"); setWalletAccountId("");
       qc.invalidateQueries({ queryKey: ["org-expenses"] });
@@ -90,40 +93,40 @@ function ExpensesPage() {
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div>
-            <h1 className="text-lg font-bold text-white">ఖర్చులు మరియు ఆర్థిక సహాయం నమోదు</h1>
-            <p className="text-xs text-white/70">చెల్లింపులు నమోదు చేయండి</p>
+            <h1 className="text-lg font-bold text-white">{lt("Record Expenses & Aid", "ఖర్చులు మరియు ఆర్థిక సహాయం నమోదు")}</h1>
+            <p className="text-xs text-white/70">{lt("Record payments", "చెల్లింపులు నమోదు చేయండి")}</p>
           </div>
         </header>
 
         <Card className="bg-zinc-950 border-white/10 p-4">
           <form onSubmit={onSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-white">తేదీ</Label>
+              <Label className="text-white">{lt("Date", "తేదీ")}</Label>
               <Input type="date" value={date} onChange={(e) => setDate(e.target.value)}
                 className="bg-zinc-900 border-white/10 text-white" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-white">మొత్తం ({CURRENCIES.find(c => c.code === txCurrency)?.symbol})</Label>
+              <Label className="text-white">{lt("Amount", "మొత్తం")} ({CURRENCIES.find(c => c.code === txCurrency)?.symbol})</Label>
               <Input type="number" min="1" step="0.01" required value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 className="bg-zinc-900 border-white/10 text-white" />
             </div>
             <div className="space-y-1.5 sm:col-span-2">
-              <Label className="text-white">గ్రహీత పేరు</Label>
+              <Label className="text-white">{lt("Recipient Name", "గ్రహీత పేరు")}</Label>
               <Input required value={recipient} onChange={(e) => setRecipient(e.target.value)}
                 className="bg-zinc-900 border-white/10 text-white" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-white">ఖర్చు రకం</Label>
+              <Label className="text-white">{lt("Expense Type", "ఖర్చు రకం")}</Label>
               <Select value={expType} onValueChange={(v) => setExpType(v as ExpenseType)}>
                 <SelectTrigger className="bg-zinc-900 border-white/10 text-white"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {EXPENSE_TYPES.map((t) => <SelectItem key={t.v} value={t.v}>{t.te}</SelectItem>)}
+                  {EXPENSE_TYPES.map((t) => <SelectItem key={t.v} value={t.v}>{lt(t.en, t.te)}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-white">కరెన్సీ</Label>
+              <Label className="text-white">{lt("Currency", "కరెన్సీ")}</Label>
               <Select value={txCurrency} onValueChange={(v) => { setTxCurrency(v as CurrencyCode); if (v === BASE_CURRENCY) setExchangeRate("1"); }}>
                 <SelectTrigger className="bg-zinc-900 border-white/10 text-white"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -133,7 +136,7 @@ function ExpensesPage() {
             </div>
             {txCurrency !== BASE_CURRENCY && (
               <div className="space-y-1.5 sm:col-span-2">
-                <Label className="text-white">మార్పిడి రేటు (1 {txCurrency} = ? INR)</Label>
+                <Label className="text-white">{lt("Exchange rate", "మార్పిడి రేటు")} (1 {txCurrency} = ? INR)</Label>
                 <Input type="number" min="0" step="0.0001" required value={exchangeRate}
                   onChange={(e) => setExchangeRate(e.target.value)}
                   className="bg-zinc-900 border-white/10 text-white" />
@@ -145,11 +148,11 @@ function ExpensesPage() {
               </div>
             )}
             <div className="space-y-1.5 sm:col-span-2">
-              <Label className="text-white">ఖాతా (చెల్లించబడేది)</Label>
+              <Label className="text-white">{lt("Account (paid from)", "ఖాతా (చెల్లించబడేది)")}</Label>
               <Select value={walletAccountId || "__legacy__"} onValueChange={(v) => setWalletAccountId(v === "__legacy__" ? "" : v)}>
                 <SelectTrigger className="bg-zinc-900 border-white/10 text-white"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__legacy__">— సాధారణ ఖాతా —</SelectItem>
+                  <SelectItem value="__legacy__">{lt("— General Account —", "— సాధారణ ఖాతా —")}</SelectItem>
                   {(walletsQ.data?.rows ?? []).map((a: any) => (
                     <SelectItem key={a.id} value={a.id}>{a.name} ({a.currency})</SelectItem>
                   ))}
@@ -158,12 +161,12 @@ function ExpensesPage() {
               <Select value={wallet} onValueChange={(v) => setWallet(v as WalletType)}>
                 <SelectTrigger className="bg-zinc-900 border-white/10 text-white"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {WALLETS.map((w) => <SelectItem key={w.v} value={w.v}>{w.label}</SelectItem>)}
+                  {WALLETS.map((w) => <SelectItem key={w.v} value={w.v}>{lt(w.en, w.te)}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5 sm:col-span-2">
-              <Label className="text-white">కారణం / గమనికలు</Label>
+              <Label className="text-white">{lt("Reason / Notes", "కారణం / గమనికలు")}</Label>
               <Textarea value={remarks} onChange={(e) => setRemarks(e.target.value)}
                 className="bg-zinc-900 border-white/10 text-white" rows={2} />
             </div>
@@ -171,23 +174,23 @@ function ExpensesPage() {
               <Button type="submit" disabled={busy}
                 className="w-full bg-red-600 hover:bg-red-700 text-white">
                 <TrendingDown className="h-4 w-4 mr-2" />
-                {busy ? "సేవ్ అవుతోంది…" : "ఖర్చును సేవ్ చేయండి"}
+                {busy ? lt("Saving…", "సేవ్ అవుతోంది…") : lt("Save Expense", "ఖర్చును సేవ్ చేయండి")}
               </Button>
             </div>
           </form>
         </Card>
 
         <Card className="bg-zinc-950 border-white/10 p-4">
-          <h2 className="text-sm font-semibold mb-3 text-white">ఇటీవలి ఖర్చులు</h2>
+          <h2 className="text-sm font-semibold mb-3 text-white">{lt("Recent Expenses", "ఇటీవలి ఖర్చులు")}</h2>
           {rows.length === 0 ? (
-            <p className="text-xs text-white/60">నమోదులు లేవు.</p>
+            <p className="text-xs text-white/60">{lt("No entries yet.", "నమోదులు లేవు.")}</p>
           ) : (
             <div className="space-y-2">
               {rows.map((r) => (
                 <div key={r.id} className="flex items-center justify-between gap-2 bg-zinc-900 border border-white/5 rounded-lg p-3">
                   <div className="min-w-0">
                     <p className="text-sm font-medium truncate text-white">{r.recipient_name} • <span className="text-red-400">₹{Number(r.amount).toLocaleString("en-IN")}</span></p>
-                    <p className="text-[11px] text-white/60">{r.entry_date} • {EXPENSE_TYPES.find(t => t.v === r.expense_type)?.te} • {WALLETS.find(w => w.v === r.wallet)?.label}</p>
+                    <p className="text-[11px] text-white/60">{r.entry_date} • {(() => { const t = EXPENSE_TYPES.find(x => x.v === r.expense_type); return t ? lt(t.en, t.te) : r.expense_type; })()} • {(() => { const w = WALLETS.find(x => x.v === r.wallet); return w ? lt(w.en, w.te) : r.wallet; })()}</p>
                     {r.remarks && <p className="text-[11px] text-white/50 mt-0.5">{r.remarks}</p>}
                   </div>
                 </div>
