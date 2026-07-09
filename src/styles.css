@@ -169,10 +169,41 @@
 }
 
 @media print {
+  html.mbr-printing .mbr-global-ad-bar,
+  body.mbr-printing .mbr-global-ad-bar,
   .mbr-global-ad-bar,
+  .mbr-global-ad-bar *,
   .no-print {
     display: none !important;
     visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    max-width: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    transform: scale(0) !important;
   }
+}
+
+html.mbr-printing .mbr-global-ad-bar,
+html.mbr-printing .mbr-global-ad-bar *,
+body.mbr-printing .mbr-global-ad-bar,
+body.mbr-printing .mbr-global-ad-bar * {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  max-width: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: scale(0) !important;
 }
 
