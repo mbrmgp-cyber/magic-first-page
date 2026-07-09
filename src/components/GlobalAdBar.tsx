@@ -51,8 +51,10 @@ export function GlobalAdBar() {
 
     const win = window as PrintWindow;
     let restoreTimer: number | undefined;
+    let lastPrintStartedAt = 0;
 
     const suppressAdBarForPrint = () => {
+      lastPrintStartedAt = Date.now();
       document.documentElement.classList.add("mbr-printing");
       document.body.classList.add("mbr-printing");
       document.querySelectorAll<HTMLElement>(".mbr-global-ad-bar").forEach((el) => {
@@ -88,10 +90,17 @@ export function GlobalAdBar() {
     };
 
     const onBeforePrint = () => suppressAdBarForPrint();
-    const onAfterPrint = () => scheduleRestore(3_000);
+    const onAfterPrint = () => {
+      const elapsed = Date.now() - lastPrintStartedAt;
+      scheduleRestore(elapsed < 5_000 ? 60_000 : 1_000);
+    };
+    const onFocus = () => {
+      if (document.documentElement.classList.contains("mbr-printing")) scheduleRestore(1_000);
+    };
 
     window.addEventListener("beforeprint", onBeforePrint);
     window.addEventListener("afterprint", onAfterPrint);
+    window.addEventListener("focus", onFocus);
 
     if (!win.__mbrCleanPrintInstalled) {
       win.__mbrCleanPrintInstalled = true;
@@ -111,6 +120,7 @@ export function GlobalAdBar() {
     return () => {
       window.removeEventListener("beforeprint", onBeforePrint);
       window.removeEventListener("afterprint", onAfterPrint);
+      window.removeEventListener("focus", onFocus);
       if (restoreTimer) window.clearTimeout(restoreTimer);
       if (win.__mbrCleanPrintInstalled && win.__mbrNativePrint) {
         window.print = win.__mbrNativePrint;
