@@ -20,6 +20,22 @@ import {
 import { getMyOrg, updateOrgPresident } from "@/lib/org.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useI18n } from "@/lib/i18n";
+
+// Bilingual UI helper — picks EN when script is english, else TE.
+function useLt() {
+  const { lang } = useI18n();
+  return (en: string, te: string) => (lang === "en" ? en : te);
+}
+
+const ROLE_LABELS_EN: Record<CommitteeRole, string> = {
+  president: "President",
+  vice_president: "Vice President",
+  advisor: "Advisor",
+  treasurer: "Treasurer",
+  executive: "Executive",
+  worker: "Worker",
+};
 
 type CM = {
   id: string;
@@ -55,8 +71,11 @@ const ROLE_GRADIENT: Record<CommitteeRole, string> = {
   worker: "linear-gradient(135deg,#1A6D8E,#4FB3D9)",
 };
 
-function fmtDate(d: string) {
-  try { return new Date(d).toLocaleDateString("te-IN", { day: "numeric", month: "short", year: "numeric" }); }
+function fmtDate(d: string, lang: string) {
+  try {
+    const locale = lang === "en" ? "en-IN" : lang === "hi" ? "hi-IN" : "te-IN";
+    return new Date(d).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" });
+  }
   catch { return d; }
 }
 
@@ -67,6 +86,9 @@ function MemberCard({
   onEdit: () => void; onDelete: () => void; onView: () => void; isMe: boolean;
   onReload: () => void;
 }) {
+  const lt = useLt();
+  const { lang } = useI18n();
+  const roleLabel = lang === "en" ? ROLE_LABELS_EN[cm.role] : ROLE_LABELS[cm.role];
   const m = cm.members;
   const initials = (m?.name ?? "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
   const [imgBroken, setImgBroken] = useState(false);
@@ -155,10 +177,10 @@ function MemberCard({
         <div className={`min-w-0 ${large ? "" : "flex-1"}`}>
           <div className={`font-semibold leading-tight ${large ? "text-lg" : "text-sm"} truncate`}>{m?.name ?? "—"}</div>
           <Badge variant="secondary" className="mt-1 text-[10px]" style={{ background: ROLE_GRADIENT[cm.role], color: "white" }}>
-            {ROLE_LABELS[cm.role]}
+            {roleLabel}
           </Badge>
           <div className="text-[10px] text-muted-foreground mt-1">
-            {fmtDate(cm.term_start_date)} → {fmtDate(cm.term_end_date)}
+            {fmtDate(cm.term_start_date, lang)} → {fmtDate(cm.term_end_date, lang)}
           </div>
         </div>
       </div>
@@ -166,12 +188,12 @@ function MemberCard({
       {/* Per-member signature */}
       <div className="mt-3 pt-3 border-t border-muted/40" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between gap-2">
-          <span className="text-[11px] font-medium text-muted-foreground">సంతకం</span>
+          <span className="text-[11px] font-medium text-muted-foreground">{lt("Signature", "సంతకం")}</span>
           {canManage && (
             <>
               <input ref={sigInp} type="file" accept="image/png,image/jpeg" className="hidden" onChange={onPickSig} />
               <Button size="sm" variant="outline" className="h-7 text-[11px]" disabled={sigBusy} onClick={() => sigInp.current?.click()}>
-                <Camera className="w-3 h-3 mr-1" /> {sigUrl ? "మార్చండి" : "అప్‌లోడ్"}
+                <Camera className="w-3 h-3 mr-1" /> {sigUrl ? lt("Change", "మార్చండి") : lt("Upload", "అప్‌లోడ్")}
               </Button>
             </>
           )}
@@ -180,7 +202,7 @@ function MemberCard({
           {sigUrl ? (
             <img src={sigUrl} alt="signature" className="h-full w-full object-contain" />
           ) : (
-            <span className="text-[10px] text-muted-foreground">సంతకం లేదు</span>
+            <span className="text-[10px] text-muted-foreground">{lt("No signature", "సంతకం లేదు")}</span>
           )}
         </div>
       </div>
@@ -189,6 +211,9 @@ function MemberCard({
 }
 
 function CommitteePage() {
+  const lt = useLt();
+  const { lang } = useI18n();
+  const roleLbl = (r: CommitteeRole) => (lang === "en" ? ROLE_LABELS_EN[r] : ROLE_LABELS[r]);
   const fnList = useServerFn(listCommittee);
   const fnMembers = useServerFn(listEligibleMembers);
   const fnAppoint = useServerFn(appointCommitteeMember);
@@ -311,9 +336,9 @@ function CommitteePage() {
         {/* Compact title row */}
         <div className="flex items-center justify-between gap-2">
           <h1 className="text-lg md:text-xl font-bold flex items-center gap-2 text-foreground">
-            <Crown className="w-5 h-5 text-amber-500" /> మా కార్యవర్గం
+            <Crown className="w-5 h-5 text-amber-500" /> {lt("Our Committee", "మా కార్యవర్గం")}
             <span className="text-xs font-normal text-muted-foreground">
-              ({totalCount} మంది · {data.termYears} సం.)
+              ({totalCount} {lt("members", "మంది")} · {data.termYears} {lt("yr", "సం.")})
             </span>
           </h1>
           {data.canManage && (
@@ -325,7 +350,7 @@ function CommitteePage() {
 
         {data.canManage && (
           <Button onClick={openAdd} className="w-full" style={{ background: "linear-gradient(90deg,#B85C00,#0B5C06)" }}>
-            <Plus className="w-4 h-4 mr-1" /> సభ్యునిని నియమించండి
+            <Plus className="w-4 h-4 mr-1" /> {lt("Appoint a Member", "సభ్యునిని నియమించండి")}
           </Button>
         )}
 
@@ -371,19 +396,19 @@ function CommitteePage() {
 
 
         {loading ? (
-          <Card className="p-6 text-center text-muted-foreground bg-white/92 border-white">లోడ్ అవుతోంది...</Card>
+          <Card className="p-6 text-center text-muted-foreground bg-white/92 border-white">{lt("Loading...", "లోడ్ అవుతోంది...")}</Card>
         ) : totalCount === 0 ? (
           <Card className="p-6 text-center text-muted-foreground bg-white/92 border-white">
             <Crown className="w-10 h-10 mx-auto mb-2 text-amber-400" />
-            <p>ఇంకా కార్యవర్గం నియమించలేదు.</p>
-            {data.canManage && <p className="text-xs mt-2">పైన "సభ్యునిని నియమించండి" నొక్కండి.</p>}
+            <p>{lt("No committee members appointed yet.", "ఇంకా కార్యవర్గం నియమించలేదు.")}</p>
+            {data.canManage && <p className="text-xs mt-2">{lt("Tap \"Appoint a Member\" above.", "పైన \"సభ్యునిని నియమించండి\" నొక్కండి.")}</p>}
           </Card>
         ) : (
           <div className="space-y-5">
             {/* President - large centered */}
             {presidentRow && (
               <div>
-                <h3 className="text-sm font-semibold mb-2 text-foreground/80">అధ్యక్షుడు</h3>
+                <h3 className="text-sm font-semibold mb-2 text-foreground/80">{roleLbl("president")}</h3>
                 <div className="max-w-xs mx-auto">
                   <MemberCard
                     cm={presidentRow}
@@ -403,7 +428,7 @@ function CommitteePage() {
             {ROLE_ORDER.slice(1).map(r => grouped[r].length > 0 && (
               <div key={r}>
                 <h3 className="text-sm font-semibold mb-2 text-foreground/80">
-                  {ROLE_LABELS[r]} ({grouped[r].length})
+                  {roleLbl(r)} ({grouped[r].length})
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {grouped[r].map(cm => (
@@ -429,17 +454,17 @@ function CommitteePage() {
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editId ? "వివరాలు మార్చండి" : "కార్యవర్గ సభ్యుని నియమించండి"}</DialogTitle>
+            <DialogTitle>{editId ? lt("Edit details", "వివరాలు మార్చండి") : lt("Appoint Committee Member", "కార్యవర్గ సభ్యుని నియమించండి")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             {!editId && (
               <div>
-                <label className="text-xs font-medium">సభ్యుడు</label>
+                <label className="text-xs font-medium">{lt("Member", "సభ్యుడు")}</label>
                 <Select value={memberId} onValueChange={setMemberId}>
-                  <SelectTrigger><SelectValue placeholder="సభ్యునిని ఎంచుకోండి" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={lt("Select a member", "సభ్యునిని ఎంచుకోండి")} /></SelectTrigger>
                   <SelectContent>
                     {selectableMembers.length === 0 ? (
-                      <div className="p-3 text-sm text-muted-foreground">అందుబాటులో సభ్యులు లేరు</div>
+                      <div className="p-3 text-sm text-muted-foreground">{lt("No members available", "అందుబాటులో సభ్యులు లేరు")}</div>
                     ) : selectableMembers.map(m => (
                       <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
                     ))}
@@ -448,36 +473,36 @@ function CommitteePage() {
               </div>
             )}
             <div>
-              <label className="text-xs font-medium">పదవి</label>
+              <label className="text-xs font-medium">{lt("Position", "పదవి")}</label>
               <Select value={role} onValueChange={v => setRole(v as CommitteeRole)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {ROLE_ORDER.map(r => (
-                    <SelectItem key={r} value={r}>{ROLE_LABELS[r]}</SelectItem>
+                    <SelectItem key={r} value={r}>{roleLbl(r)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-xs font-medium">పదవీకాలం ప్రారంభం</label>
+                <label className="text-xs font-medium">{lt("Term start", "పదవీకాలం ప్రారంభం")}</label>
                 <Input type="date" value={termStart} onChange={e => setTermStart(e.target.value)} />
               </div>
               <div>
-                <label className="text-xs font-medium">పదవీకాలం ముగింపు</label>
+                <label className="text-xs font-medium">{lt("Term end", "పదవీకాలం ముగింపు")}</label>
                 <Input type="date" value={termEnd} onChange={e => setTermEnd(e.target.value)} />
               </div>
             </div>
             <div>
-              <label className="text-xs font-medium">అర్హతలు (ఐచ్ఛికం)</label>
-              <Textarea rows={2} value={qual} onChange={e => setQual(e.target.value)} placeholder="ఉదా: B.A, 10 సం. సామాజిక సేవ" />
+              <label className="text-xs font-medium">{lt("Qualifications (optional)", "అర్హతలు (ఐచ్ఛికం)")}</label>
+              <Textarea rows={2} value={qual} onChange={e => setQual(e.target.value)} placeholder={lt("e.g., B.A, 10 yrs of social service", "ఉదా: B.A, 10 సం. సామాజిక సేవ")} />
             </div>
             <div>
-              <label className="text-xs font-medium">బాధ్యతలు (ఐచ్ఛికం)</label>
-              <Textarea rows={3} value={resp} onChange={e => setResp(e.target.value)} placeholder="ఈ పదవి బాధ్యతలు రాయండి..." />
+              <label className="text-xs font-medium">{lt("Responsibilities (optional)", "బాధ్యతలు (ఐచ్ఛికం)")}</label>
+              <Textarea rows={3} value={resp} onChange={e => setResp(e.target.value)} placeholder={lt("Describe responsibilities of this role...", "ఈ పదవి బాధ్యతలు రాయండి...")} />
             </div>
             <div className="flex gap-2 pt-2">
-              <Button onClick={save} className="flex-1"><Check className="w-4 h-4 mr-1" />సేవ్ చేయండి</Button>
+              <Button onClick={save} className="flex-1"><Check className="w-4 h-4 mr-1" />{lt("Save", "సేవ్ చేయండి")}</Button>
               <Button variant="outline" onClick={() => setFormOpen(false)}><X className="w-4 h-4" /></Button>
             </div>
           </div>
@@ -487,14 +512,14 @@ function CommitteePage() {
       {/* Settings dialog */}
       <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
         <DialogContent className="max-w-sm">
-          <DialogHeader><DialogTitle>పదవీకాలం settings</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{lt("Term settings", "పదవీకాలం settings")}</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div>
-              <label className="text-xs font-medium">డిఫాల్ట్ పదవీకాలం (సంవత్సరాలు)</label>
+              <label className="text-xs font-medium">{lt("Default term (years)", "డిఫాల్ట్ పదవీకాలం (సంవత్సరాలు)")}</label>
               <Input type="number" min={1} max={10} value={termYearsInput} onChange={e => setTermYearsInput(Number(e.target.value))} />
-              <p className="text-[11px] text-muted-foreground mt-1">కొత్త నియామకాలకు ఇది వర్తిస్తుంది.</p>
+              <p className="text-[11px] text-muted-foreground mt-1">{lt("Applies to new appointments.", "కొత్త నియామకాలకు ఇది వర్తిస్తుంది.")}</p>
             </div>
-            <Button onClick={saveTermYears} className="w-full">సేవ్ చేయండి</Button>
+            <Button onClick={saveTermYears} className="w-full">{lt("Save", "సేవ్ చేయండి")}</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -517,10 +542,10 @@ function CommitteePage() {
                   </div>
                   <div>
                     <Badge style={{ background: ROLE_GRADIENT[viewing.role], color: "white" }}>
-                      {ROLE_LABELS[viewing.role]}
+                      {roleLbl(viewing.role)}
                     </Badge>
                     <div className="text-xs text-muted-foreground mt-2">
-                      పదవీకాలం: {fmtDate(viewing.term_start_date)} → {fmtDate(viewing.term_end_date)}
+                      {lt("Term", "పదవీకాలం")}: {fmtDate(viewing.term_start_date, lang)} → {fmtDate(viewing.term_end_date, lang)}
                     </div>
                     {viewing.members?.phone && <div className="text-xs mt-1">📞 {viewing.members.phone}</div>}
                     {viewing.members?.email && <div className="text-xs truncate">✉ {viewing.members.email}</div>}
@@ -528,13 +553,13 @@ function CommitteePage() {
                 </div>
                 {viewing.qualifications && (
                   <div>
-                    <div className="text-xs font-semibold text-foreground/70 mb-1">అర్హతలు</div>
+                    <div className="text-xs font-semibold text-foreground/70 mb-1">{lt("Qualifications", "అర్హతలు")}</div>
                     <p className="text-sm whitespace-pre-wrap">{viewing.qualifications}</p>
                   </div>
                 )}
                 {viewing.responsibilities && (
                   <div>
-                    <div className="text-xs font-semibold text-foreground/70 mb-1">బాధ్యతలు</div>
+                    <div className="text-xs font-semibold text-foreground/70 mb-1">{lt("Responsibilities", "బాధ్యతలు")}</div>
                     <p className="text-sm whitespace-pre-wrap">{viewing.responsibilities}</p>
                   </div>
                 )}
