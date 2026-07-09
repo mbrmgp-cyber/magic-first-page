@@ -202,6 +202,23 @@ function OrgThemePage() {
           </div>
         </Card>
 
+        {/* English organization name for language switch */}
+        <Card className="p-4 space-y-2 border bg-zinc-950 border-zinc-800">
+          <p className="text-sm font-semibold text-white">
+            English Society Name / సొసైటీ ఇంగ్లీష్ పేరు
+          </p>
+          <p className="text-[11px] text-zinc-400">
+            లాంగ్వేజ్ English అయినప్పుడు హెడర్‌లో ఈ పేరు కనిపిస్తుంది. ఖాళీగా ఉంచితే తెలుగు పేరు ఆటోగా చూపబడుతుంది.
+          </p>
+          <Input
+            value={nameEn}
+            onChange={(e) => setNameEn(e.target.value)}
+            placeholder="e.g. Chitvel Helpline Society"
+            className="bg-zinc-900 border-zinc-700 text-white"
+            maxLength={200}
+          />
+        </Card>
+
         {/* Text alignment */}
         <Card className="bg-zinc-950 border-zinc-800 p-4 space-y-3">
           <div className="flex items-center gap-2 text-sm font-semibold text-white">
