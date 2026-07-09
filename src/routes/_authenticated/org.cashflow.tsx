@@ -50,6 +50,19 @@ function CashFlowPage() {
   const { currency, fmt: fmtRaw, symbol } = useCurrency();
   // Stored totals are in INR (base). Show note when viewing in a non-base currency.
   const fmt = (n: number) => fmtRaw(n);
+  const rangeLabel = RANGES.find((r) => r.v === range);
+  const rangeText = rangeLabel ? lt(rangeLabel.en, rangeLabel.te) : range;
+  const reportDate = new Date().toLocaleDateString(lang === "te" ? "te-IN" : "en-IN", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  const incomeRows: [string, number][] = d
+    ? Object.entries(d.incomeByType).map(([k, v]) => [INCOME_LABEL[k] ? lt(INCOME_LABEL[k].en, INCOME_LABEL[k].te) : k, Number(v)])
+    : [];
+  const expenseRows: [string, number][] = d
+    ? Object.entries(d.expenseByType).map(([k, v]) => [EXPENSE_LABEL[k] ? lt(EXPENSE_LABEL[k].en, EXPENSE_LABEL[k].te) : k, Number(v)])
+    : [];
 
   async function downloadCashFlowPdf() {
     if (!d || pdfBusy) return;
@@ -58,21 +71,21 @@ function CashFlowPage() {
       const { jsPDF } = await import("jspdf");
       await document.fonts?.ready;
       const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-      const toBinaryString = (buffer: ArrayBuffer) => {
+      const toBase64 = (buffer: ArrayBuffer) => {
         const bytes = new Uint8Array(buffer);
         let binary = "";
         const chunkSize = 8192;
         for (let i = 0; i < bytes.length; i += chunkSize) {
           binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
         }
-        return binary;
+        return window.btoa(binary);
       };
       const [regularFont, boldFont] = await Promise.all([
         fetch("/fonts/NotoSansTelugu-Regular.ttf").then((r) => r.arrayBuffer()),
         fetch("/fonts/NotoSansTelugu-Bold.ttf").then((r) => r.arrayBuffer()),
       ]);
-      pdf.addFileToVFS("NotoSansTelugu-Regular.ttf", toBinaryString(regularFont));
-      pdf.addFileToVFS("NotoSansTelugu-Bold.ttf", toBinaryString(boldFont));
+      pdf.addFileToVFS("NotoSansTelugu-Regular.ttf", toBase64(regularFont));
+      pdf.addFileToVFS("NotoSansTelugu-Bold.ttf", toBase64(boldFont));
       pdf.addFont("NotoSansTelugu-Regular.ttf", "NotoSansTelugu", "normal");
       pdf.addFont("NotoSansTelugu-Bold.ttf", "NotoSansTelugu", "bold");
 
@@ -123,10 +136,9 @@ function CashFlowPage() {
       setFill("#ff8c28");
       pdf.rect(0, 0, pageWidth, 3, "F");
 
-      const rangeLabel = RANGES.find((r) => r.v === range);
       drawText(lt("Society Cash Flow", "సొసైటీ నగదు ప్రవాహం"), margin, 16, pageWidth - margin * 2, 16, "#111827", "bold");
       drawText(
-        `${lt("Cash Flow Statement", "నగదు ప్రవాహ నివేదిక")} • ${rangeLabel ? lt(rangeLabel.en, rangeLabel.te) : range}`,
+        `${lt("Cash Flow Statement", "నగదు ప్రవాహ నివేదిక")} • ${rangeText}`,
         margin,
         25,
         pageWidth - margin * 2,
@@ -184,7 +196,7 @@ function CashFlowPage() {
         y,
         halfW,
         lt("Income Details", "ఆదాయ వివరాలు"),
-        Object.entries(d.incomeByType).map(([k, v]) => [INCOME_LABEL[k] ? lt(INCOME_LABEL[k].en, INCOME_LABEL[k].te) : k, Number(v)]),
+        incomeRows,
         "#15803d",
       );
       drawBreakdown(
@@ -192,7 +204,7 @@ function CashFlowPage() {
         y,
         halfW,
         lt("Expense Details", "ఖర్చు వివరాలు"),
-        Object.entries(d.expenseByType).map(([k, v]) => [EXPENSE_LABEL[k] ? lt(EXPENSE_LABEL[k].en, EXPENSE_LABEL[k].te) : k, Number(v)]),
+        expenseRows,
         "#b91c1c",
       );
 
@@ -204,7 +216,8 @@ function CashFlowPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white pb-16">
+    <>
+    <div className="cashflow-screen min-h-screen bg-black text-white pb-16">
       <div className="max-w-3xl mx-auto p-4 space-y-5">
         <header className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -322,6 +335,145 @@ function CashFlowPage() {
           </>
         )}
       </div>
+    </div>
+    {d && (
+      <CashFlowPrintSheet
+        title={lt("Society Cash Flow", "సొసైటీ నగదు ప్రవాహం")}
+        subtitle={`${lt("Cash Flow Statement", "నగదు ప్రవాహ నివేదిక")} • ${rangeText}`}
+        dateText={reportDate}
+        fmt={fmt}
+        labels={{
+          bank: lt("In Bank", "బ్యాంకులో"),
+          accountant: lt("Cashier / Petty Cash", "అకౌంటెంట్ / చిల్లర"),
+          president: lt("President", "అధ్యక్షుడు"),
+          members: lt("With Members", "సభ్యుల వద్ద ఉన్న మొత్తం"),
+          pendingInterest: lt("Pending Interest", "పెండింగ్ వడ్డీ"),
+          income: lt("Income", "వచ్చినది"),
+          expense: lt("Expense", "పోయినది"),
+          balance: lt("Balance", "మిగులు"),
+          incomeDetails: lt("Income Details", "ఆదాయ వివరాలు"),
+          expenseDetails: lt("Expense Details", "ఖర్చు వివరాలు"),
+          noEntries: lt("No entries in this period.", "ఈ కాలంలో ఎంట్రీలు లేవు."),
+        }}
+        data={d}
+        incomeRows={incomeRows}
+        expenseRows={expenseRows}
+      />
+    )}
+    </>
+  );
+}
+
+type CashFlowSummaryView = {
+  wallets: Record<"bank" | "accountant" | "president", number>;
+  membersOutstanding?: number;
+  pendingInterest?: number;
+  totalIncome: number;
+  totalExpense: number;
+  closingBalance: number;
+};
+
+type PrintLabels = {
+  bank: string;
+  accountant: string;
+  president: string;
+  members: string;
+  pendingInterest: string;
+  income: string;
+  expense: string;
+  balance: string;
+  incomeDetails: string;
+  expenseDetails: string;
+  noEntries: string;
+};
+
+function CashFlowPrintSheet({
+  title,
+  subtitle,
+  dateText,
+  fmt,
+  labels,
+  data,
+  incomeRows,
+  expenseRows,
+}: {
+  title: string;
+  subtitle: string;
+  dateText: string;
+  fmt: (n: number) => string;
+  labels: PrintLabels;
+  data: CashFlowSummaryView;
+  incomeRows: [string, number][];
+  expenseRows: [string, number][];
+}) {
+  return (
+    <section className="cashflow-print-sheet" aria-label={title}>
+      <header className="cashflow-print-header">
+        <h1>{title}</h1>
+        <p>{subtitle}</p>
+        <span>{dateText}</span>
+      </header>
+
+      <div className="cashflow-print-metrics cashflow-print-metrics-five">
+        <PrintMetric label={labels.bank} value={fmt(data.wallets.bank)} accent="blue" />
+        <PrintMetric label={labels.accountant} value={fmt(data.wallets.accountant)} accent="amber" />
+        <PrintMetric label={labels.president} value={fmt(data.wallets.president)} accent="violet" />
+        <PrintMetric label={labels.members} value={fmt(data.membersOutstanding ?? 0)} accent="orange" />
+        <PrintMetric label={labels.pendingInterest} value={fmt(data.pendingInterest ?? 0)} accent="rose" />
+      </div>
+
+      <div className="cashflow-print-total-row">
+        <PrintTotal label={labels.income} value={fmt(data.totalIncome)} tone="green" />
+        <PrintTotal label={labels.expense} value={fmt(data.totalExpense)} tone="red" />
+        <PrintTotal label={labels.balance} value={fmt(data.closingBalance)} tone="orange" />
+      </div>
+
+      <div className="cashflow-print-breakdowns">
+        <PrintBreakdown title={labels.incomeDetails} rows={incomeRows} fmt={fmt} emptyText={labels.noEntries} tone="green" />
+        <PrintBreakdown title={labels.expenseDetails} rows={expenseRows} fmt={fmt} emptyText={labels.noEntries} tone="red" />
+      </div>
+
+      <footer>Download from MBR APP</footer>
+    </section>
+  );
+}
+
+function PrintMetric({ label, value, accent }: { label: string; value: string; accent: "blue" | "amber" | "violet" | "orange" | "rose" }) {
+  return (
+    <div className={`cashflow-print-metric cashflow-print-accent-${accent}`}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+function PrintTotal({ label, value, tone }: { label: string; value: string; tone: "green" | "red" | "orange" }) {
+  return (
+    <div className={`cashflow-print-total cashflow-print-tone-${tone}`}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+function PrintBreakdown({ title, rows, fmt, emptyText, tone }: { title: string; rows: [string, number][]; fmt: (n: number) => string; emptyText: string; tone: "green" | "red" }) {
+  return (
+    <div className={`cashflow-print-breakdown cashflow-print-tone-${tone}`}>
+      <h2>{title}</h2>
+      {rows.length === 0 ? (
+        <p>{emptyText}</p>
+      ) : (
+        <table>
+          <tbody>
+            {rows.map(([label, amount]) => (
+              <tr key={label}>
+                <td>{label}</td>
+                <td>{fmt(amount)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }

@@ -217,6 +217,225 @@
   .min-h-screen {
     min-height: 0 !important;
   }
+
+  .cashflow-screen {
+    display: none !important;
+  }
+
+  .cashflow-print-sheet {
+    display: block !important;
+  }
+}
+
+.cashflow-print-sheet {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  .mbr-themed-app {
+    background: #ffffff !important;
+    color: #111827 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+  }
+
+  .cashflow-print-sheet {
+    width: 190mm;
+    min-height: 277mm;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #111827 !important;
+    font-family: "Noto Sans Telugu", "Noto Sans", Arial, sans-serif;
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  .cashflow-print-header {
+    border-top: 3mm solid #ff8c28;
+    padding: 8mm 0 6mm;
+    text-align: center;
+  }
+
+  .cashflow-print-header h1 {
+    margin: 0;
+    color: #111827 !important;
+    font-size: 18pt;
+    line-height: 1.2;
+    font-weight: 800;
+  }
+
+  .cashflow-print-header p {
+    margin: 2mm 0 0;
+    color: #4b5563 !important;
+    font-size: 10pt;
+    line-height: 1.35;
+  }
+
+  .cashflow-print-header span {
+    display: block;
+    margin-top: 1.5mm;
+    color: #6b7280 !important;
+    font-size: 9pt;
+  }
+
+  .cashflow-print-metrics {
+    display: grid;
+    gap: 4mm;
+  }
+
+  .cashflow-print-metrics-five {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  .cashflow-print-metrics-five .cashflow-print-metric:nth-child(1),
+  .cashflow-print-metrics-five .cashflow-print-metric:nth-child(2),
+  .cashflow-print-metrics-five .cashflow-print-metric:nth-child(3) {
+    grid-column: span 2;
+  }
+
+  .cashflow-print-metrics-five .cashflow-print-metric:nth-child(4),
+  .cashflow-print-metrics-five .cashflow-print-metric:nth-child(5) {
+    grid-column: span 3;
+  }
+
+  .cashflow-print-metric {
+    min-height: 24mm;
+    border: 0.35mm solid #d1d5db;
+    border-radius: 2mm;
+    padding: 4mm 4mm 4mm 6mm;
+    position: relative;
+    background: #ffffff !important;
+    overflow: hidden;
+  }
+
+  .cashflow-print-metric::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 2mm;
+    background: #2563eb;
+  }
+
+  .cashflow-print-accent-amber::before { background: #d97706; }
+  .cashflow-print-accent-violet::before { background: #7c3aed; }
+  .cashflow-print-accent-orange::before { background: #ea580c; }
+  .cashflow-print-accent-rose::before { background: #e11d48; }
+
+  .cashflow-print-metric span,
+  .cashflow-print-total span {
+    display: block;
+    color: #374151 !important;
+    font-size: 8.5pt;
+    line-height: 1.25;
+    font-weight: 700;
+  }
+
+  .cashflow-print-metric strong,
+  .cashflow-print-total strong {
+    display: block;
+    margin-top: 3mm;
+    color: #111827 !important;
+    font-size: 11pt;
+    line-height: 1.15;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+  }
+
+  .cashflow-print-total-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3mm;
+    margin-top: 6mm;
+    border: 0.35mm solid #d1d5db;
+    border-radius: 2mm;
+    padding: 4mm;
+    background: #f9fafb !important;
+  }
+
+  .cashflow-print-total {
+    text-align: center;
+  }
+
+  .cashflow-print-tone-green span,
+  .cashflow-print-tone-green strong,
+  .cashflow-print-tone-green h2 { color: #15803d !important; }
+
+  .cashflow-print-tone-red span,
+  .cashflow-print-tone-red strong,
+  .cashflow-print-tone-red h2 { color: #b91c1c !important; }
+
+  .cashflow-print-tone-orange span,
+  .cashflow-print-tone-orange strong { color: #c2410c !important; }
+
+  .cashflow-print-breakdowns {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4mm;
+    margin-top: 7mm;
+  }
+
+  .cashflow-print-breakdown {
+    min-height: 80mm;
+    border: 0.35mm solid #d1d5db;
+    border-radius: 2mm;
+    padding: 4mm;
+    background: #ffffff !important;
+  }
+
+  .cashflow-print-breakdown h2 {
+    margin: 0 0 4mm;
+    background: transparent !important;
+    padding: 0 !important;
+    font-size: 11pt;
+    line-height: 1.25;
+    font-weight: 800;
+  }
+
+  .cashflow-print-breakdown p {
+    color: #6b7280 !important;
+    font-size: 9pt;
+    margin: 0;
+  }
+
+  .cashflow-print-breakdown table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+  }
+
+  .cashflow-print-breakdown td {
+    border: 0;
+    border-bottom: 0.25mm solid #e5e7eb;
+    padding: 2.2mm 0;
+    color: #111827 !important;
+    font-size: 8.5pt;
+    line-height: 1.25;
+  }
+
+  .cashflow-print-breakdown td:last-child {
+    text-align: right;
+    font-weight: 800;
+    white-space: nowrap;
+    padding-left: 3mm;
+  }
+
+  .cashflow-print-sheet footer {
+    position: fixed;
+    left: 10mm;
+    right: 10mm;
+    bottom: 7mm;
+    border-top: 0.25mm solid #d1d5db;
+    padding-top: 2.5mm;
+    color: #6b7280 !important;
+    text-align: center;
+    font-size: 8pt;
+  }
 }
 
 
