@@ -57,19 +57,36 @@ function CashFlowPage() {
     try {
       const { jsPDF } = await import("jspdf");
       await document.fonts?.ready;
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      const toBinaryString = (buffer: ArrayBuffer) => {
+        const bytes = new Uint8Array(buffer);
+        let binary = "";
+        const chunkSize = 8192;
+        for (let i = 0; i < bytes.length; i += chunkSize) {
+          binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+        }
+        return binary;
+      };
+      const [regularFont, boldFont] = await Promise.all([
+        fetch("/fonts/NotoSansTelugu-Regular.ttf").then((r) => r.arrayBuffer()),
+        fetch("/fonts/NotoSansTelugu-Bold.ttf").then((r) => r.arrayBuffer()),
+      ]);
+      pdf.addFileToVFS("NotoSansTelugu-Regular.ttf", toBinaryString(regularFont));
+      pdf.addFileToVFS("NotoSansTelugu-Bold.ttf", toBinaryString(boldFont));
+      pdf.addFont("NotoSansTelugu-Regular.ttf", "NotoSansTelugu", "normal");
+      pdf.addFont("NotoSansTelugu-Bold.ttf", "NotoSansTelugu", "bold");
 
-      const pageWidth = 1240;
-      const pageHeight = 1754;
-      const margin = 80;
-      const canvas = document.createElement("canvas");
-      canvas.width = pageWidth;
-      canvas.height = pageHeight;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) throw new Error("PDF canvas is not available");
-
-      const fontFamily = '"Noto Sans Telugu", "Noto Sans", "Segoe UI", Arial, sans-serif';
-      const setFont = (size: number, weight: number | string = 400) => {
-        ctx.font = `${weight} ${size}px ${fontFamily}`;
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const margin = 13;
+      const gap = 4;
+      const setColor = (hex: string) => {
+        const clean = hex.replace("#", "");
+        pdf.setTextColor(parseInt(clean.slice(0, 2), 16), parseInt(clean.slice(2, 4), 16), parseInt(clean.slice(4, 6), 16));
+      };
+      const setFill = (hex: string) => {
+        const clean = hex.replace("#", "");
+        pdf.setFillColor(parseInt(clean.slice(0, 2), 16), parseInt(clean.slice(2, 4), 16), parseInt(clean.slice(4, 6), 16));
       };
       const drawText = (
         text: string,
@@ -78,118 +95,90 @@ function CashFlowPage() {
         maxWidth: number,
         size: number,
         color = "#111827",
-        weight: number | string = 400,
-        align: CanvasTextAlign = "left",
+        style: "normal" | "bold" = "normal",
+        align: "left" | "center" | "right" = "left",
       ) => {
-        const safe = String(text ?? "");
         let fittedSize = size;
-        setFont(fittedSize, weight);
-        while (fittedSize > 13 && ctx.measureText(safe).width > maxWidth) {
-          fittedSize -= 1;
-          setFont(fittedSize, weight);
+        pdf.setFont("NotoSansTelugu", style);
+        pdf.setFontSize(fittedSize);
+        while (fittedSize > 6 && pdf.getTextWidth(String(text ?? "")) > maxWidth) {
+          fittedSize -= 0.5;
+          pdf.setFontSize(fittedSize);
         }
-        ctx.fillStyle = color;
-        ctx.textAlign = align;
-        ctx.textBaseline = "middle";
-        const drawX = align === "right" ? x + maxWidth : align === "center" ? x + maxWidth / 2 : x;
-        ctx.fillText(safe, drawX, y);
-      };
-      const roundedRect = (x: number, y: number, w: number, h: number, r = 14) => {
-        ctx.beginPath();
-        ctx.moveTo(x + r, y);
-        ctx.lineTo(x + w - r, y);
-        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-        ctx.lineTo(x + w, y + h - r);
-        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-        ctx.lineTo(x + r, y + h);
-        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-        ctx.lineTo(x, y + r);
-        ctx.quadraticCurveTo(x, y, x + r, y);
-        ctx.closePath();
+        setColor(color);
+        pdf.text(String(text ?? ""), x, y, { align, maxWidth });
       };
       const drawCard = (x: number, y: number, w: number, h: number, label: string, value: string, accent: string) => {
-        ctx.fillStyle = "#ffffff";
-        roundedRect(x, y, w, h, 16);
-        ctx.fill();
-        ctx.strokeStyle = "#d1d5db";
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        ctx.fillStyle = accent;
-        roundedRect(x, y, 10, h, 12);
-        ctx.fill();
-        drawText(label, x + 28, y + 34, w - 56, 20, "#374151", 700);
-        drawText(value, x + 28, y + 78, w - 56, 30, "#111827", 800);
+        setFill("#ffffff");
+        pdf.setDrawColor(209, 213, 219);
+        pdf.roundedRect(x, y, w, h, 2.5, 2.5, "FD");
+        setFill(accent);
+        pdf.roundedRect(x, y, 2.2, h, 1.2, 1.2, "F");
+        drawText(label, x + 5, y + 8, w - 10, 7, "#374151", "bold");
+        drawText(value, x + 5, y + 18, w - 10, 10, "#111827", "bold");
       };
 
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, pageWidth, pageHeight);
-      ctx.fillStyle = "#ff8c28";
-      ctx.fillRect(0, 0, pageWidth, 14);
+      setFill("#ffffff");
+      pdf.rect(0, 0, pageWidth, pageHeight, "F");
+      setFill("#ff8c28");
+      pdf.rect(0, 0, pageWidth, 3, "F");
 
       const rangeLabel = RANGES.find((r) => r.v === range);
-      drawText(lt("Society Cash Flow", "సొసైటీ నగదు ప్రవాహం"), margin, 84, pageWidth - margin * 2, 34, "#111827", 800);
+      drawText(lt("Society Cash Flow", "సొసైటీ నగదు ప్రవాహం"), margin, 16, pageWidth - margin * 2, 16, "#111827", "bold");
       drawText(
         `${lt("Cash Flow Statement", "నగదు ప్రవాహ నివేదిక")} • ${rangeLabel ? lt(rangeLabel.en, rangeLabel.te) : range}`,
         margin,
-        126,
+        25,
         pageWidth - margin * 2,
-        22,
+        9,
         "#4b5563",
-        500,
+        "normal",
       );
-      drawText(new Date().toLocaleDateString("en-IN"), margin, 126, pageWidth - margin * 2, 20, "#6b7280", 500, "right");
+      drawText(new Date().toLocaleDateString("en-IN"), margin, 25, pageWidth - margin * 2, 8, "#6b7280", "normal", "right");
 
-      let y = 190;
-      const gap = 24;
+      let y = 38;
       const cardW = (pageWidth - margin * 2 - gap * 2) / 3;
-      drawCard(margin, y, cardW, 118, lt("In Bank", "బ్యాంకులో"), fmt(d.wallets.bank), "#2563eb");
-      drawCard(margin + cardW + gap, y, cardW, 118, lt("Cashier / Petty Cash", "అకౌంటెంట్ / చిల్లర"), fmt(d.wallets.accountant), "#d97706");
-      drawCard(margin + (cardW + gap) * 2, y, cardW, 118, lt("President", "అధ్యక్షుడు"), fmt(d.wallets.president), "#7c3aed");
+      drawCard(margin, y, cardW, 25, lt("In Bank", "బ్యాంకులో"), fmt(d.wallets.bank), "#2563eb");
+      drawCard(margin + cardW + gap, y, cardW, 25, lt("Cashier / Petty Cash", "అకౌంటెంట్ / చిల్లర"), fmt(d.wallets.accountant), "#d97706");
+      drawCard(margin + (cardW + gap) * 2, y, cardW, 25, lt("President", "అధ్యక్షుడు"), fmt(d.wallets.president), "#7c3aed");
 
-      y += 148;
+      y += 31;
       const halfW = (pageWidth - margin * 2 - gap) / 2;
-      drawCard(margin, y, halfW, 118, lt("With Members", "సభ్యుల వద్ద ఉన్న మొత్తం"), fmt(d.membersOutstanding ?? 0), "#ea580c");
-      drawCard(margin + halfW + gap, y, halfW, 118, lt("Pending Interest", "పెండింగ్ వడ్డీ"), fmt(d.pendingInterest ?? 0), "#e11d48");
+      drawCard(margin, y, halfW, 25, lt("With Members", "సభ్యుల వద్ద ఉన్న మొత్తం"), fmt(d.membersOutstanding ?? 0), "#ea580c");
+      drawCard(margin + halfW + gap, y, halfW, 25, lt("Pending Interest", "పెండింగ్ వడ్డీ"), fmt(d.pendingInterest ?? 0), "#e11d48");
 
-      y += 162;
-      ctx.fillStyle = "#f9fafb";
-      roundedRect(margin, y, pageWidth - margin * 2, 132, 18);
-      ctx.fill();
-      ctx.strokeStyle = "#d1d5db";
-      ctx.stroke();
+      y += 34;
+      setFill("#f9fafb");
+      pdf.setDrawColor(209, 213, 219);
+      pdf.roundedRect(margin, y, pageWidth - margin * 2, 29, 2.5, 2.5, "FD");
       const totalW = (pageWidth - margin * 2) / 3;
-      drawText(lt("Income", "వచ్చినది"), margin, y + 38, totalW, 22, "#15803d", 800, "center");
-      drawText(fmt(d.totalIncome), margin, y + 84, totalW, 30, "#15803d", 800, "center");
-      drawText(lt("Expense", "పోయినది"), margin + totalW, y + 38, totalW, 22, "#b91c1c", 800, "center");
-      drawText(fmt(d.totalExpense), margin + totalW, y + 84, totalW, 30, "#b91c1c", 800, "center");
-      drawText(lt("Balance", "మిగులు"), margin + totalW * 2, y + 38, totalW, 22, "#c2410c", 800, "center");
-      drawText(fmt(d.closingBalance), margin + totalW * 2, y + 84, totalW, 30, "#c2410c", 800, "center");
+      drawText(lt("Income", "వచ్చినది"), margin, y + 10, totalW, 8, "#15803d", "bold", "center");
+      drawText(fmt(d.totalIncome), margin, y + 22, totalW, 10, "#15803d", "bold", "center");
+      drawText(lt("Expense", "పోయినది"), margin + totalW, y + 10, totalW, 8, "#b91c1c", "bold", "center");
+      drawText(fmt(d.totalExpense), margin + totalW, y + 22, totalW, 10, "#b91c1c", "bold", "center");
+      drawText(lt("Balance", "మిగులు"), margin + totalW * 2, y + 10, totalW, 8, "#c2410c", "bold", "center");
+      drawText(fmt(d.closingBalance), margin + totalW * 2, y + 22, totalW, 10, "#c2410c", "bold", "center");
 
       const drawBreakdown = (x: number, startY: number, w: number, title: string, rows: [string, number][], color: string) => {
-        ctx.fillStyle = "#ffffff";
-        roundedRect(x, startY, w, 470, 16);
-        ctx.fill();
-        ctx.strokeStyle = "#d1d5db";
-        ctx.stroke();
-        drawText(title, x + 28, startY + 44, w - 56, 24, color, 800);
-        let rowY = startY + 92;
+        setFill("#ffffff");
+        pdf.setDrawColor(209, 213, 219);
+        pdf.roundedRect(x, startY, w, 83, 2.5, 2.5, "FD");
+        drawText(title, x + 5, startY + 9, w - 10, 8, color, "bold");
+        let rowY = startY + 20;
         if (!rows.length) {
-          drawText(lt("No entries in this period.", "ఈ కాలంలో ఎంట్రీలు లేవు."), x + 28, rowY, w - 56, 20, "#6b7280", 500);
+          drawText(lt("No entries in this period.", "ఈ కాలంలో ఎంట్రీలు లేవు."), x + 5, rowY, w - 10, 7, "#6b7280");
           return;
         }
-        rows.slice(0, 10).forEach(([label, amount]) => {
-          drawText(label, x + 28, rowY, w - 220, 20, "#374151", 600);
-          drawText(fmt(amount), x + 28, rowY, w - 56, 20, "#111827", 700, "right");
-          ctx.strokeStyle = "#e5e7eb";
-          ctx.beginPath();
-          ctx.moveTo(x + 28, rowY + 24);
-          ctx.lineTo(x + w - 28, rowY + 24);
-          ctx.stroke();
-          rowY += 48;
+        rows.forEach(([label, amount]) => {
+          drawText(label, x + 5, rowY, w - 38, 7, "#374151", "normal");
+          drawText(fmt(amount), x + 5, rowY, w - 10, 7, "#111827", "bold", "right");
+          pdf.setDrawColor(229, 231, 235);
+          pdf.line(x + 5, rowY + 3.5, x + w - 5, rowY + 3.5);
+          rowY += 10;
         });
       };
 
-      y += 172;
+      y += 38;
       drawBreakdown(
         margin,
         y,
@@ -207,10 +196,7 @@ function CashFlowPage() {
         "#b91c1c",
       );
 
-      drawText("Download from MBR APP", margin, pageHeight - 78, pageWidth - margin * 2, 16, "#6b7280", 500, "center");
-
-      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-      pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, 210, 297, undefined, "FAST");
+      drawText("Download from MBR APP", margin, pageHeight - 12, pageWidth - margin * 2, 7, "#6b7280", "normal", "center");
       pdf.save(`cash-flow-${range}-${new Date().toISOString().slice(0, 10)}.pdf`);
     } finally {
       setPdfBusy(false);
