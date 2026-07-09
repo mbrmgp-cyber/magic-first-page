@@ -213,6 +213,7 @@ export function printDocument(doc: PrintDoc) {
   let printStartedAt = 0;
   let cleanupTimer: number | undefined;
   let cleaned = false;
+  let leftPrintPreview = false;
 
   const cleanup = (delay = 500) => {
     if (cleanupTimer) window.clearTimeout(cleanupTimer);
@@ -226,6 +227,7 @@ export function printDocument(doc: PrintDoc) {
       document.documentElement.classList.remove("mbr-printing");
       document.body.classList.remove("mbr-printing");
       window.removeEventListener("afterprint", onAfter);
+      window.removeEventListener("blur", onLeaveForPreview);
       window.removeEventListener("focus", onReturnFromPreview);
       window.removeEventListener("pagehide", onPageHide);
       document.removeEventListener("visibilitychange", onVisibilityChange);
@@ -235,12 +237,19 @@ export function printDocument(doc: PrintDoc) {
     const elapsed = Date.now() - printStartedAt;
     cleanup(elapsed < 5_000 ? 60_000 : 500);
   };
-  const onReturnFromPreview = () => cleanup(250);
+  const onLeaveForPreview = () => {
+    if (printStartedAt > 0) leftPrintPreview = true;
+  };
+  const onReturnFromPreview = () => {
+    if (leftPrintPreview) cleanup(250);
+  };
   const onVisibilityChange = () => {
+    if (document.visibilityState === "hidden") onLeaveForPreview();
     if (document.visibilityState === "visible") cleanup(250);
   };
-  const onPageHide = () => cleanup(0);
+  const onPageHide = () => onLeaveForPreview();
   window.addEventListener("afterprint", onAfter);
+  window.addEventListener("blur", onLeaveForPreview);
   window.addEventListener("focus", onReturnFromPreview);
   window.addEventListener("pagehide", onPageHide);
   document.addEventListener("visibilitychange", onVisibilityChange);
