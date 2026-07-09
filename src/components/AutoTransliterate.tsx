@@ -227,6 +227,9 @@ Object.assign(EN_TE, {
   All: "అన్నీ",
   Active: "యాక్టివ్",
   Inactive: "ఇనాక్టివ్",
+  pending: "పెండింగ్",
+  approved: "ఆమోదించబడింది",
+  rejected: "తిరస్కరించబడింది",
   "Record Expenses & Aid": "ఖర్చులు మరియు ఆర్థిక సహాయం నమోదు",
   "Record payments": "చెల్లింపులు నమోదు చేయండి",
   Date: "తేదీ",
@@ -315,7 +318,28 @@ function translateValue(value: string, lang: string): string {
   const trimmed = value.trim();
   if (!trimmed) return value;
   const hit = lookupPhrase(trimmed, lang);
-  if (!hit) return value;
+  if (!hit) {
+    if (lang === "en") {
+      const colon = /^(.+?)([:：])\s*(.*)$/.exec(trimmed);
+      if (colon && TE_EN[colon[1]]) {
+        const lead = value.match(/^\s*/)?.[0] ?? "";
+        const tail = value.match(/\s*$/)?.[0] ?? "";
+        return `${lead}${TE_EN[colon[1]]}${colon[2]} ${colon[3]}${tail}`;
+      }
+      if (trimmed.startsWith("చేరిన తేదీ:")) return value.replace("చేరిన తేదీ:", "Joined Date:");
+      if (trimmed.startsWith("తండ్రి:")) return value.replace("తండ్రి:", "Father:");
+      if (trimmed.startsWith("పరిచయం:")) return value.replace("పరిచయం:", "Introduced By:");
+      if (trimmed.startsWith("కమిటీ Fee:")) return value.replace("కమిటీ Fee:", "Committee Fee:");
+    }
+    if (lang === "te") {
+      if (trimmed.startsWith("Father:")) return value.replace("Father:", "తండ్రి:");
+      if (trimmed.startsWith("Joined Date:")) return value.replace("Joined Date:", "చేరిన తేదీ:");
+      if (trimmed.startsWith("Committee Fee:")) return value.replace("Committee Fee:", "కమిటీ ఫీ:");
+      if (trimmed === "● Active") return value.replace("Active", "యాక్టివ్");
+      if (trimmed === "● Inactive") return value.replace("Inactive", "ఇనాక్టివ్");
+    }
+    return value;
+  }
   const lead = value.match(/^\s*/)?.[0] ?? "";
   const tail = value.match(/\s*$/)?.[0] ?? "";
   return lead + hit + tail;
