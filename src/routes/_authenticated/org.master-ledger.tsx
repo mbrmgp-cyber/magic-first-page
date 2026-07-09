@@ -267,11 +267,11 @@ async function downloadMasterLedgerPdf({
     ctx.fillRect(0, 0, pageWidth, pageHeight);
 
     ctx.fillStyle = "#8b1a1a";
-    drawFittedText(ctx, orgName, 0, 78, pageWidth, 540, 28, "center", 800);
+    drawFittedText(ctx, orgName, (pageWidth - 540) / 2, 78, 540, 28, "center", 800);
     ctx.fillStyle = "#111111";
-    drawFittedText(ctx, title, 0, 116, pageWidth, 540, 20, "center", 700);
+    drawFittedText(ctx, title, (pageWidth - 540) / 2, 116, 540, 20, "center", 700);
     ctx.fillStyle = "#555555";
-    drawFittedText(ctx, dateText, 0, 146, pageWidth, 540, 14, "center", 400);
+    drawFittedText(ctx, dateText, (pageWidth - 540) / 2, 146, 540, 14, "center", 400);
 
     const lineY = 176;
     const lineX = marginX;
@@ -341,7 +341,7 @@ async function downloadMasterLedgerPdf({
     ctx.lineTo(marginX + tableWidth, footerY - 18);
     ctx.stroke();
     ctx.fillStyle = "#666666";
-    drawFittedText(ctx, `Download from MBR APP · ${pageIndex + 1}/${pageCount}`, 0, footerY, pageWidth, 520, 12, "center", 400);
+    drawFittedText(ctx, `Download from MBR APP · ${pageIndex + 1}/${pageCount}`, (pageWidth - 520) / 2, footerY, 520, 12, "center", 400);
 
     return canvas;
   };
