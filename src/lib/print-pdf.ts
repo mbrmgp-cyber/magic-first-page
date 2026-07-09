@@ -211,9 +211,14 @@ export function printDocument(doc: PrintDoc) {
   detachNonPrintSiblings();
 
   let printStartedAt = 0;
+  let cleanupTimer: number | undefined;
+  let cleaned = false;
 
-  const cleanup = () => {
-    setTimeout(() => {
+  const cleanup = (delay = 500) => {
+    if (cleanupTimer) window.clearTimeout(cleanupTimer);
+    cleanupTimer = window.setTimeout(() => {
+      if (cleaned) return;
+      cleaned = true;
       try { printRoot.remove(); } catch { /* noop */ }
       try { printStyle.remove(); } catch { /* noop */ }
       try { scopeStyle.remove(); } catch { /* noop */ }
@@ -221,13 +226,24 @@ export function printDocument(doc: PrintDoc) {
       document.documentElement.classList.remove("mbr-printing");
       document.body.classList.remove("mbr-printing");
       window.removeEventListener("afterprint", onAfter);
-    }, 500);
+      window.removeEventListener("focus", onReturnFromPreview);
+      window.removeEventListener("pagehide", onPageHide);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    }, delay);
   };
   const onAfter = () => {
     const elapsed = Date.now() - printStartedAt;
-    window.setTimeout(cleanup, elapsed < 5_000 ? 60_000 : 0);
+    cleanup(elapsed < 5_000 ? 60_000 : 500);
   };
+  const onReturnFromPreview = () => cleanup(250);
+  const onVisibilityChange = () => {
+    if (document.visibilityState === "visible") cleanup(250);
+  };
+  const onPageHide = () => cleanup(0);
   window.addEventListener("afterprint", onAfter);
+  window.addEventListener("focus", onReturnFromPreview);
+  window.addEventListener("pagehide", onPageHide);
+  document.addEventListener("visibilitychange", onVisibilityChange);
 
   // Wait for the injected images (logo, MBR mark) to decode before printing.
   const imgs = Array.from(printRoot.querySelectorAll("img"));
@@ -251,7 +267,7 @@ export function printDocument(doc: PrintDoc) {
       // Mobile print previews can rebuild the PDF after paper-size changes.
       // Keep the clean print DOM in place long enough so Android/Chromium
       // never snapshots the underlying app/ad bar during that preview.
-      setTimeout(cleanup, 60_000);
+      cleanup(60_000);
     }, 200);
   });
 }
