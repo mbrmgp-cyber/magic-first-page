@@ -40,6 +40,9 @@ function AccountsPage() {
   const [newLoan, setNewLoan] = useState("");
   const [newLoanRate, setNewLoanRate] = useState("2");
   const { symbol: sym } = useCurrency();
+  const { lang } = useI18n();
+  const lt = (en: string, te: string) => (lang === "te" ? te : en);
+  const fetchMaster = useServerFn(getMasterLedger);
   const [info, setInfo] = useState<Extract<Lookup, { found: true }> | null>(null);
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState<{ balance: number; emailed_to: string | null; collected: number; disbursed: number } | null>(null);
