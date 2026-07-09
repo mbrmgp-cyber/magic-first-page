@@ -111,6 +111,7 @@ function OrgThemePage() {
         theme_color: t.icon,
         theme_font: t.headFont,
         theme_settings: t,
+        name_en: nameEn.trim() || null,
       }});
       await qc.invalidateQueries({ queryKey: ["my-org"] });
       await qc.invalidateQueries({ queryKey: ["my-membership"] });
