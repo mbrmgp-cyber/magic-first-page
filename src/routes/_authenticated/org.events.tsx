@@ -25,6 +25,7 @@ type Tab = "meetings" | "resolutions" | "activities";
 
 function EventsPage() {
   const qc = useQueryClient();
+  const { lang } = useI18n();
   const [tab, setTab] = useState<Tab>("meetings");
   const [orgId, setOrgId] = useState<string | null>(null);
 
