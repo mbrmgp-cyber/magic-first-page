@@ -157,7 +157,6 @@ const TE_EN: Record<string, string> = {
   "సభ్యుల చెల్లింపులు మరియు కొత్త అప్పులు": "Member payments and new loans",
   "సభ్యుని ID": "Member ID",
   "ఉదా. A/0001": "e.g. A/0001",
-  "గమనికలు": "Notes",
   "అప్పు తీసుకున్న వారి పేరు": "Borrower Name",
   "పాత అప్పు": "Old Loan",
   "అప్పు మొత్తం (బాకీ)": "Loan Amount (Due)",
