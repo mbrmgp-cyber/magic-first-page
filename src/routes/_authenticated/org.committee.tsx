@@ -396,19 +396,19 @@ function CommitteePage() {
 
 
         {loading ? (
-          <Card className="p-6 text-center text-muted-foreground bg-white/92 border-white">లోడ్ అవుతోంది...</Card>
+          <Card className="p-6 text-center text-muted-foreground bg-white/92 border-white">{lt("Loading...", "లోడ్ అవుతోంది...")}</Card>
         ) : totalCount === 0 ? (
           <Card className="p-6 text-center text-muted-foreground bg-white/92 border-white">
             <Crown className="w-10 h-10 mx-auto mb-2 text-amber-400" />
-            <p>ఇంకా కార్యవర్గం నియమించలేదు.</p>
-            {data.canManage && <p className="text-xs mt-2">పైన "సభ్యునిని నియమించండి" నొక్కండి.</p>}
+            <p>{lt("No committee members appointed yet.", "ఇంకా కార్యవర్గం నియమించలేదు.")}</p>
+            {data.canManage && <p className="text-xs mt-2">{lt("Tap \"Appoint a Member\" above.", "పైన \"సభ్యునిని నియమించండి\" నొక్కండి.")}</p>}
           </Card>
         ) : (
           <div className="space-y-5">
             {/* President - large centered */}
             {presidentRow && (
               <div>
-                <h3 className="text-sm font-semibold mb-2 text-foreground/80">అధ్యక్షుడు</h3>
+                <h3 className="text-sm font-semibold mb-2 text-foreground/80">{roleLbl("president")}</h3>
                 <div className="max-w-xs mx-auto">
                   <MemberCard
                     cm={presidentRow}
@@ -428,7 +428,7 @@ function CommitteePage() {
             {ROLE_ORDER.slice(1).map(r => grouped[r].length > 0 && (
               <div key={r}>
                 <h3 className="text-sm font-semibold mb-2 text-foreground/80">
-                  {ROLE_LABELS[r]} ({grouped[r].length})
+                  {roleLbl(r)} ({grouped[r].length})
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {grouped[r].map(cm => (
