@@ -371,7 +371,7 @@ export const updateOrgPresident = createServerFn({ method: "POST" })
 
 export const updateOrgTheme = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { theme_color?: string; theme_font?: string; theme_settings?: Record<string, any> }) => d)
+  .inputValidator((d: { theme_color?: string; theme_font?: string; theme_settings?: Record<string, any>; name_en?: string | null }) => d)
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const patch: Record<string, any> = {};
@@ -403,6 +403,10 @@ export const updateOrgTheme = createServerFn({ method: "POST" })
         throw new Error("Invalid headAlign");
       }
       patch.theme_settings = s;
+    }
+    if (data.name_en !== undefined) {
+      const v = typeof data.name_en === "string" ? data.name_en.trim().slice(0, 200) : "";
+      patch.name_en = v ? v : null;
     }
     const { data: org, error } = await supabase
       .from("organizations")
