@@ -1766,6 +1766,7 @@ export type Database = {
           letter_code: string | null
           logo_url: string | null
           name: string
+          name_en: string | null
           org_code: string
           pan_card_url: string | null
           phone: string | null
@@ -1804,6 +1805,7 @@ export type Database = {
           letter_code?: string | null
           logo_url?: string | null
           name: string
+          name_en?: string | null
           org_code: string
           pan_card_url?: string | null
           phone?: string | null
@@ -1842,6 +1844,7 @@ export type Database = {
           letter_code?: string | null
           logo_url?: string | null
           name?: string
+          name_en?: string | null
           org_code?: string
           pan_card_url?: string | null
           phone?: string | null
