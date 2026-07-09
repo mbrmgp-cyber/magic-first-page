@@ -8,34 +8,37 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getCashFlowSummary, type TimeRange } from "@/lib/cashflow.functions";
 import { useCurrency, BASE_CURRENCY } from "@/lib/currency-context";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/org/cashflow")({
   head: () => ({ meta: [{ title: "Society Cash Flow Statement" }] }),
   component: CashFlowPage,
 });
 
-const INCOME_LABEL: Record<string, string> = {
-  registration_fee: "నమోదు రుసుములు",
-  donation: "విరాళాలు",
-  loan_principal: "అసలు వసూలు",
-  loan_interest: "వడ్డీ వసూలు",
-  other: "ఇతర ఆదాయం",
+const INCOME_LABEL: Record<string, { te: string; en: string }> = {
+  registration_fee: { te: "నమోదు రుసుములు", en: "Registration Fees" },
+  donation: { te: "విరాళాలు", en: "Donations" },
+  loan_principal: { te: "అసలు వసూలు", en: "Principal Collected" },
+  loan_interest: { te: "వడ్డీ వసూలు", en: "Interest Collected" },
+  other: { te: "ఇతర ఆదాయం", en: "Other Income" },
 };
-const EXPENSE_LABEL: Record<string, string> = {
-  charity: "ఆర్థిక సహాయం / ధర్మం",
-  office: "ఆఫీసు ఖర్చులు",
-  meeting: "మీటింగ్ ఖర్చులు",
-  misc: "ఇతరములు",
+const EXPENSE_LABEL: Record<string, { te: string; en: string }> = {
+  charity: { te: "ఆర్థిక సహాయం / ధర్మం", en: "Financial Aid / Charity" },
+  office: { te: "ఆఫీసు ఖర్చులు", en: "Office Expenses" },
+  meeting: { te: "మీటింగ్ ఖర్చులు", en: "Meeting Expenses" },
+  misc: { te: "ఇతరములు", en: "Miscellaneous" },
 };
 
-const RANGES: { v: TimeRange; te: string }[] = [
-  { v: "this_month", te: "నెల పట్టిక" },
-  { v: "3m", te: "3 నెలల పట్టిక" },
-  { v: "6m", te: "6 నెలల పట్టిక" },
-  { v: "yearly", te: "సంవత్సర పట్టిక" },
+const RANGES: { v: TimeRange; te: string; en: string }[] = [
+  { v: "this_month", te: "నెల పట్టిక", en: "This Month" },
+  { v: "3m", te: "3 నెలల పట్టిక", en: "3 Months" },
+  { v: "6m", te: "6 నెలల పట్టిక", en: "6 Months" },
+  { v: "yearly", te: "సంవత్సర పట్టిక", en: "Yearly" },
 ];
 
 function CashFlowPage() {
+  const { lang } = useI18n();
+  const lt = (en: string, te: string) => lang === "te" ? te : en;
   const fetchFn = useServerFn(getCashFlowSummary);
   const [range, setRange] = useState<TimeRange>("this_month");
   const q = useQuery({
@@ -56,19 +59,19 @@ function CashFlowPage() {
               <ArrowLeft className="h-5 w-5" />
             </Link>
             <div>
-              <h1 className="text-lg font-bold text-white">సొసైటీ నగదు ప్రవాహం</h1>
-              <p className="text-xs text-white/70">నగదు ప్రవాహ నివేదిక</p>
+              <h1 className="text-lg font-bold text-white">{lt("Society Cash Flow", "సొసైటీ నగదు ప్రవాహం")}</h1>
+              <p className="text-xs text-white/70">{lt("Cash Flow Statement", "నగదు ప్రవాహ నివేదిక")}</p>
             </div>
           </div>
           <div className="flex flex-wrap gap-2 items-center print:hidden">
             <Link to="/org/income">
-              <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">+ ఆదాయం</Button>
+              <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">{lt("+ Income", "+ ఆదాయం")}</Button>
             </Link>
             <Link to="/org/expenses">
-              <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white">+ ఖర్చు</Button>
+              <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white">{lt("+ Expense", "+ ఖర్చు")}</Button>
             </Link>
             <Button size="sm" variant="outline" onClick={() => window.print()} className="gap-1">
-              <Printer className="h-4 w-4" /> ప్రింట్
+              <Printer className="h-4 w-4" /> {lt("Print", "ప్రింట్")}
             </Button>
           </div>
         </header>
@@ -79,7 +82,7 @@ function CashFlowPage() {
             {RANGES.map((r) => (
               <TabsTrigger key={r.v} value={r.v}
                 className="data-[state=active]:bg-[#ff8c28] data-[state=active]:text-white text-white flex-col py-1.5 px-1 h-auto">
-                <span className="text-[11px] font-medium">{r.te}</span>
+                <span className="text-[11px] font-medium">{lt(r.en, r.te)}</span>
               </TabsTrigger>
             ))}
           </TabsList>
@@ -87,28 +90,28 @@ function CashFlowPage() {
 
         {currency !== BASE_CURRENCY && (
           <p className="text-[11px] text-amber-400/80 bg-amber-900/20 border border-amber-500/30 rounded px-3 py-1.5">
-            {symbol} {currency}లో ప్రదర్శిస్తోంది. మొత్తాలు బేస్ కరెన్సీ (INR)కి మార్చబడతాయి.
+            {lt(`Showing in ${symbol} ${currency}. Amounts are converted from base currency (INR).`, `${symbol} ${currency}లో ప్రదర్శిస్తోంది. మొత్తాలు బేస్ కరెన్సీ (INR)కి మార్చబడతాయి.`)}
           </p>
         )}
 
         {q.isLoading || !d ? (
-          <p className="text-sm text-white">లోడ్ అవుతోంది…</p>
+          <p className="text-sm text-white">{lt("Loading…", "లోడ్ అవుతోంది…")}</p>
         ) : (
           <>
             {/* Wallets */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <WalletCard fmt={fmt} icon={<Building2 className="h-5 w-5" />} label="బ్యాంకులో" value={d.wallets.bank} accent="from-blue-500/30" />
-              <WalletCard fmt={fmt} icon={<Briefcase className="h-5 w-5" />} label="అకౌంటెంట్ / చిల్లర" value={d.wallets.accountant} accent="from-amber-500/30" />
-              <WalletCard fmt={fmt} icon={<User className="h-5 w-5" />} label="అధ్యక్షుడు" value={d.wallets.president} accent="from-purple-500/30" />
+              <WalletCard fmt={fmt} icon={<Building2 className="h-5 w-5" />} label={lt("In Bank", "బ్యాంకులో")} value={d.wallets.bank} accent="from-blue-500/30" />
+              <WalletCard fmt={fmt} icon={<Briefcase className="h-5 w-5" />} label={lt("Cashier / Petty Cash", "అకౌంటెంట్ / చిల్లర")} value={d.wallets.accountant} accent="from-amber-500/30" />
+              <WalletCard fmt={fmt} icon={<User className="h-5 w-5" />} label={lt("President", "అధ్యక్షుడు")} value={d.wallets.president} accent="from-purple-500/30" />
             </div>
 
             {/* Members holdings + pending interest */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <WalletCard fmt={fmt} icon={<Users className="h-5 w-5" />}
-                label="సభ్యుల వద్ద ఉన్న మొత్తం"
+                label={lt("With Members", "సభ్యుల వద్ద ఉన్న మొత్తం")}
                 value={d.membersOutstanding ?? 0} accent="from-orange-500/30" />
               <WalletCard fmt={fmt} icon={<AlarmClock className="h-5 w-5" />}
-                label="పెండింగ్ వడ్డీ"
+                label={lt("Pending Interest", "పెండింగ్ వడ్డీ")}
                 value={d.pendingInterest ?? 0} accent="from-rose-500/30" />
             </div>
 
@@ -116,15 +119,15 @@ function CashFlowPage() {
             <Card className="bg-zinc-950 border-white/10 p-4">
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div>
-                  <p className="text-[11px] text-green-400 flex items-center justify-center gap-1"><TrendingUp className="h-3 w-3" />వచ్చినది</p>
+                  <p className="text-[11px] text-green-400 flex items-center justify-center gap-1"><TrendingUp className="h-3 w-3" />{lt("Income", "వచ్చినది")}</p>
                   <p className="text-lg font-bold text-green-400">{fmt(d.totalIncome)}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] text-red-400 flex items-center justify-center gap-1"><TrendingDown className="h-3 w-3" />పోయినది</p>
+                  <p className="text-[11px] text-red-400 flex items-center justify-center gap-1"><TrendingDown className="h-3 w-3" />{lt("Expense", "పోయినది")}</p>
                   <p className="text-lg font-bold text-red-400">{fmt(d.totalExpense)}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] text-[#ff8c28] flex items-center justify-center gap-1"><Wallet className="h-3 w-3" />మిగులు</p>
+                  <p className="text-[11px] text-[#ff8c28] flex items-center justify-center gap-1"><Wallet className="h-3 w-3" />{lt("Balance", "మిగులు")}</p>
                   <p className="text-lg font-bold text-[#ff8c28]">{fmt(d.closingBalance)}</p>
                 </div>
               </div>
@@ -133,14 +136,14 @@ function CashFlowPage() {
             {/* Breakdown */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Card className="bg-zinc-950 border-white/10 p-4">
-                <h3 className="text-sm font-semibold text-green-400 mb-2">ఆదాయ వివరాలు</h3>
+                <h3 className="text-sm font-semibold text-green-400 mb-2">{lt("Income Details", "ఆదాయ వివరాలు")}</h3>
                 {Object.keys(d.incomeByType).length === 0 ? (
-                  <p className="text-xs text-white/60">ఈ కాలంలో ఆదాయం లేదు.</p>
+                  <p className="text-xs text-white/60">{lt("No income in this period.", "ఈ కాలంలో ఆదాయం లేదు.")}</p>
                 ) : (
                   <ul className="space-y-1.5 text-sm">
                     {Object.entries(d.incomeByType).map(([k, v]) => (
                       <li key={k} className="flex justify-between border-b border-white/5 pb-1">
-                        <span className="text-white">{INCOME_LABEL[k] ?? k}</span>
+                        <span className="text-white">{INCOME_LABEL[k] ? lt(INCOME_LABEL[k].en, INCOME_LABEL[k].te) : k}</span>
                         <span className="font-medium text-white">{fmt(v as number)}</span>
                       </li>
                     ))}
@@ -148,14 +151,14 @@ function CashFlowPage() {
                 )}
               </Card>
               <Card className="bg-zinc-950 border-white/10 p-4">
-                <h3 className="text-sm font-semibold text-red-400 mb-2">ఖర్చు వివరాలు</h3>
+                <h3 className="text-sm font-semibold text-red-400 mb-2">{lt("Expense Details", "ఖర్చు వివరాలు")}</h3>
                 {Object.keys(d.expenseByType).length === 0 ? (
-                  <p className="text-xs text-white/60">ఈ కాలంలో ఖర్చులు లేవు.</p>
+                  <p className="text-xs text-white/60">{lt("No expenses in this period.", "ఈ కాలంలో ఖర్చులు లేవు.")}</p>
                 ) : (
                   <ul className="space-y-1.5 text-sm">
                     {Object.entries(d.expenseByType).map(([k, v]) => (
                       <li key={k} className="flex justify-between border-b border-white/5 pb-1">
-                        <span className="text-white">{EXPENSE_LABEL[k] ?? k}</span>
+                        <span className="text-white">{EXPENSE_LABEL[k] ? lt(EXPENSE_LABEL[k].en, EXPENSE_LABEL[k].te) : k}</span>
                         <span className="font-medium text-white">{fmt(v as number)}</span>
                       </li>
                     ))}
