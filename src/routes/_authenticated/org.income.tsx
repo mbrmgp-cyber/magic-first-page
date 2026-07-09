@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { recordIncome, listIncome, listWalletAccounts, type IncomeType, type WalletType } from "@/lib/cashflow.functions";
 import { getMyOrg } from "@/lib/org.functions";
 import { CURRENCIES, BASE_CURRENCY, type CurrencyCode } from "@/lib/currency-context";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/org/income")({
   head: () => ({ meta: [{ title: "ఆదాయం / Income Receipts" }] }),
@@ -22,18 +23,20 @@ export const Route = createFileRoute("/_authenticated/org/income")({
 });
 
 const INCOME_TYPES: { v: IncomeType; te: string; en: string }[] = [
-  { v: "registration_fee", te: "నమోదు రుసుము", en: "నమోదు రుసుము" },
-  { v: "donation", te: "విరాళం", en: "విరాళం" },
-  { v: "other", te: "ఇతరం", en: "ఇతరం" },
+  { v: "registration_fee", te: "నమోదు రుసుము", en: "Registration Fee" },
+  { v: "donation", te: "విరాళం", en: "Donation" },
+  { v: "other", te: "ఇతరం", en: "Other" },
 ];
 
-const WALLETS: { v: WalletType; label: string }[] = [
-  { v: "bank", label: "బ్యాంక్ ఖాతా" },
-  { v: "accountant", label: "అకౌంటెంట్" },
-  { v: "president", label: "అధ్యక్షుడు" },
+const WALLETS: { v: WalletType; te: string; en: string }[] = [
+  { v: "bank", te: "బ్యాంక్ ఖాతా", en: "Bank Account" },
+  { v: "accountant", te: "అకౌంటెంట్", en: "Cashier" },
+  { v: "president", te: "అధ్యక్షుడు", en: "President" },
 ];
 
 function IncomePage() {
+  const { lang } = useI18n();
+  const lt = (en: string, te: string) => lang === "te" ? te : en;
   const qc = useQueryClient();
   const save = useServerFn(recordIncome);
   const listFn = useServerFn(listIncome);
@@ -61,7 +64,8 @@ function IncomePage() {
   function generateReceiptHTML(entry: any) {
     const org = orgQ.data?.org;
     const typeLabel = INCOME_TYPES.find((t) => t.v === entry.income_type)?.en ?? entry.income_type;
-    const walletLabel = WALLETS.find((w) => w.v === entry.wallet)?.label ?? entry.wallet;
+    const w = WALLETS.find((x) => x.v === entry.wallet);
+    const walletLabel = w ? lt(w.en, w.te) : entry.wallet;
     return `<!doctype html><html><head><meta charset="utf-8"><title>${entry.receipt_no}</title>
 <style>
   body{font-family:'Helvetica',Arial,sans-serif;margin:0;padding:24px;color:#111}
@@ -114,7 +118,7 @@ function IncomePage() {
 
   function openReceipt(entry: any) {
     const w = window.open("", "_blank", "width=720,height=900");
-    if (!w) { toast.error("Popup blocked"); return; }
+    if (!w) { toast.error(lt("Popup blocked", "పాప్‌అప్ బ్లాక్ అయింది")); return; }
     w.document.write(generateReceiptHTML(entry));
     w.document.close();
   }
@@ -145,10 +149,10 @@ function IncomePage() {
     e.preventDefault();
     const a = Number(amount);
     const rate = Number(exchangeRate);
-    if (!payer.trim()) { toast.error("Payer name required"); return; }
-    if (!email.trim() || !/^\S+@\S+\.\S+$/.test(email)) { toast.error("Valid email address required"); return; }
-    if (!(a > 0)) { toast.error("Valid amount required"); return; }
-    if (txCurrency !== BASE_CURRENCY && !(rate > 0)) { toast.error("Exchange rate required for foreign currency"); return; }
+    if (!payer.trim()) { toast.error(lt("Payer name required", "చెల్లించినవారి పేరు అవసరం")); return; }
+    if (!email.trim() || !/^\S+@\S+\.\S+$/.test(email)) { toast.error(lt("Valid email address required", "సరైన ఈమెయిల్ చిరునామా అవసరం")); return; }
+    if (!(a > 0)) { toast.error(lt("Valid amount required", "సరైన మొత్తం అవసరం")); return; }
+    if (txCurrency !== BASE_CURRENCY && !(rate > 0)) { toast.error(lt("Exchange rate required for foreign currency", "విదేశీ కరెన్సీకి మార్పిడి రేటు అవసరం")); return; }
     setBusy(true);
     try {
       const res = await save({ data: {
@@ -160,7 +164,7 @@ function IncomePage() {
         exchange_rate: txCurrency === BASE_CURRENCY ? 1 : rate,
         remarks: remarks || undefined,
       }});
-      toast.success(`Receipt ${res.entry.receipt_no} saved — opening email…`);
+      toast.success(lt(`Receipt ${res.entry.receipt_no} saved — opening email…`, `రసీదు ${res.entry.receipt_no} సేవ్ అయింది — ఈమెయిల్ తెరుస్తోంది…`));
       openReceipt(res.entry);
       setTimeout(() => emailReceipt(res.entry), 400);
       setPayer(""); setPhone(""); setEmail(""); setAmount(""); setRemarks("");
@@ -183,51 +187,51 @@ function IncomePage() {
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div>
-            <h1 className="text-lg font-bold text-white">ఆదాయం మరియు విరాళాల నమోదు</h1>
-            <p className="text-xs text-white/70">రసీదులు జారీ చేయండి</p>
+            <h1 className="text-lg font-bold text-white">{lt("Record Income & Donations", "ఆదాయం మరియు విరాళాల నమోదు")}</h1>
+            <p className="text-xs text-white/70">{lt("Issue receipts", "రసీదులు జారీ చేయండి")}</p>
           </div>
         </header>
 
         <Card className="bg-zinc-950 border-white/10 p-4">
           <form onSubmit={onSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-white">తేదీ</Label>
+              <Label className="text-white">{lt("Date", "తేదీ")}</Label>
               <Input type="date" value={date} onChange={(e) => setDate(e.target.value)}
                 className="bg-zinc-900 border-white/10 text-white" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-white">మొత్తం ({CURRENCIES.find(c => c.code === txCurrency)?.symbol})</Label>
+              <Label className="text-white">{lt("Amount", "మొత్తం")} ({CURRENCIES.find(c => c.code === txCurrency)?.symbol})</Label>
               <Input type="number" min="1" step="0.01" required value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 className="bg-zinc-900 border-white/10 text-white" />
             </div>
             <div className="space-y-1.5 sm:col-span-2">
-              <Label className="text-white">చెల్లించినవారి పేరు</Label>
+              <Label className="text-white">{lt("Payer Name", "చెల్లించినవారి పేరు")}</Label>
               <Input required value={payer} onChange={(e) => setPayer(e.target.value)}
                 className="bg-zinc-900 border-white/10 text-white" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-white">ఫోన్ నంబర్</Label>
+              <Label className="text-white">{lt("Phone Number", "ఫోన్ నంబర్")}</Label>
               <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)}
                 placeholder="+91…" className="bg-zinc-900 border-white/10 text-white" />
             </div>
             <div className="space-y-1.5 sm:col-span-2">
-              <Label className="text-white">ఇమెయిల్ చిరునామా <span className="text-[10px] text-white/60">(రసీదు పంపబడుతుంది)</span></Label>
+              <Label className="text-white">{lt("Email Address", "ఇమెయిల్ చిరునామా")} <span className="text-[10px] text-white/60">{lt("(receipt will be sent)", "(రసీదు పంపబడుతుంది)")}</span></Label>
               <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com" className="bg-zinc-900 border-white/10 text-white" />
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-white">ఆదాయ రకం</Label>
+              <Label className="text-white">{lt("Income Type", "ఆదాయ రకం")}</Label>
               <Select value={incType} onValueChange={(v) => setIncType(v as IncomeType)}>
                 <SelectTrigger className="bg-zinc-900 border-white/10 text-white"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {INCOME_TYPES.map((t) => <SelectItem key={t.v} value={t.v}>{t.te}</SelectItem>)}
+                  {INCOME_TYPES.map((t) => <SelectItem key={t.v} value={t.v}>{lt(t.en, t.te)}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-white">కరెన్సీ</Label>
+              <Label className="text-white">{lt("Currency", "కరెన్సీ")}</Label>
               <Select value={txCurrency} onValueChange={(v) => { setTxCurrency(v as CurrencyCode); if (v === BASE_CURRENCY) setExchangeRate("1"); }}>
                 <SelectTrigger className="bg-zinc-900 border-white/10 text-white"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -237,7 +241,7 @@ function IncomePage() {
             </div>
             {txCurrency !== BASE_CURRENCY && (
               <div className="space-y-1.5 sm:col-span-2">
-                <Label className="text-white">మార్పిడి రేటు (1 {txCurrency} = ? INR)</Label>
+                <Label className="text-white">{lt("Exchange rate", "మార్పిడి రేటు")} (1 {txCurrency} = ? INR)</Label>
                 <Input type="number" min="0" step="0.0001" required value={exchangeRate}
                   onChange={(e) => setExchangeRate(e.target.value)}
                   className="bg-zinc-900 border-white/10 text-white" />
@@ -249,11 +253,11 @@ function IncomePage() {
               </div>
             )}
             <div className="space-y-1.5 sm:col-span-2">
-              <Label className="text-white">ఖాతా (జమ చేయబడేది)</Label>
+              <Label className="text-white">{lt("Account (credited to)", "ఖాతా (జమ చేయబడేది)")}</Label>
               <Select value={walletAccountId || "__legacy__"} onValueChange={(v) => setWalletAccountId(v === "__legacy__" ? "" : v)}>
                 <SelectTrigger className="bg-zinc-900 border-white/10 text-white"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__legacy__">— సాధారణ ఖాతా —</SelectItem>
+                  <SelectItem value="__legacy__">{lt("— General Account —", "— సాధారణ ఖాతా —")}</SelectItem>
                   {(walletsQ.data?.rows ?? []).map((a: any) => (
                     <SelectItem key={a.id} value={a.id}>{a.name} ({a.currency})</SelectItem>
                   ))}
@@ -262,12 +266,12 @@ function IncomePage() {
               <Select value={wallet} onValueChange={(v) => setWallet(v as WalletType)}>
                 <SelectTrigger className="bg-zinc-900 border-white/10 text-white"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {WALLETS.map((w) => <SelectItem key={w.v} value={w.v}>{w.label}</SelectItem>)}
+                  {WALLETS.map((w) => <SelectItem key={w.v} value={w.v}>{lt(w.en, w.te)}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5 sm:col-span-2">
-              <Label className="text-white">గమనికలు</Label>
+              <Label className="text-white">{lt("Notes", "గమనికలు")}</Label>
               <Textarea value={remarks} onChange={(e) => setRemarks(e.target.value)}
                 className="bg-zinc-900 border-white/10 text-white" rows={2} />
             </div>
@@ -275,23 +279,23 @@ function IncomePage() {
               <Button type="submit" disabled={busy}
                 className="w-full bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white">
                 <ReceiptText className="h-4 w-4 mr-2" />
-                {busy ? "సేవ్ అవుతోంది…" : "రసీదును సేవ్ చేయండి"}
+                {busy ? lt("Saving…", "సేవ్ అవుతోంది…") : lt("Save Receipt", "రసీదును సేవ్ చేయండి")}
               </Button>
             </div>
           </form>
         </Card>
 
         <Card className="bg-zinc-950 border-white/10 p-4">
-          <h2 className="text-sm font-semibold mb-3 text-white">ఇటీవలి రసీదులు</h2>
+          <h2 className="text-sm font-semibold mb-3 text-white">{lt("Recent Receipts", "ఇటీవలి రసీదులు")}</h2>
           {rows.length === 0 ? (
-            <p className="text-xs text-white/60">నమోదులు లేవు.</p>
+            <p className="text-xs text-white/60">{lt("No entries yet.", "నమోదులు లేవు.")}</p>
           ) : (
             <div className="space-y-2">
               {rows.map((r) => (
                 <div key={r.id} className="flex items-center justify-between gap-2 bg-zinc-900 border border-white/5 rounded-lg p-3">
                   <div className="min-w-0">
                     <p className="text-sm font-medium truncate text-white">{r.payer_name} • <span className="text-[#ff8c28]">₹{Number(r.amount).toLocaleString("en-IN")}</span></p>
-                    <p className="text-[11px] text-white/60">{r.receipt_no} • {r.entry_date} • {INCOME_TYPES.find(t => t.v === r.income_type)?.te}</p>
+                    <p className="text-[11px] text-white/60">{r.receipt_no} • {r.entry_date} • {(() => { const t = INCOME_TYPES.find(x => x.v === r.income_type); return t ? lt(t.en, t.te) : r.income_type; })()}</p>
                   </div>
                   <div className="flex gap-1 shrink-0">
                     <Button size="icon" variant="ghost" onClick={() => openReceipt(r)} title="Print / PDF">
