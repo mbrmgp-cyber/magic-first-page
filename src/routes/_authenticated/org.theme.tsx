@@ -124,7 +124,8 @@ function OrgThemePage() {
     }
   }
 
-  const orgName = org?.name || "Chitvel Help Line Society";
+  const { lang } = useI18n();
+  const orgName = (lang === "en" && (nameEn.trim() || org?.name_en)) ? (nameEn.trim() || org?.name_en) : (org?.name || "Chitvel Help Line Society");
   const orgSlogan = org?.slogan || "॥ మానవసేవే మాధవసేవ ॥";
   const orgReg = org?.gov_reg_number || "235/16";
 
