@@ -76,6 +76,12 @@ const TE_EN: Record<string, string> = {
   "నమోదు రుసుము": "Registration Fee",
   "ఇతరం": "Other",
   "కరెన్సీ": "Currency",
+  "ఖాతా (జమ చేయబడేది)": "Account (credited to)",
+  "రసీదును సేవ్ చేయండి": "Save Receipt",
+  "ఇటీవలి రసీదులు": "Recent Receipts",
+  "గమనికలు": "Notes",
+  "చెల్లించినవారి పేరు అవసరం": "Payer name required",
+  "సరైన ఈమెయిల్ చిరునామా అవసరం": "Valid email address required",
 
   // Expenses
   "ఖర్చులు / Expenses": "Expenses",
@@ -124,6 +130,19 @@ const TE_EN: Record<string, string> = {
   "అకౌంటెంట్": "Cashier",
   "అధ్యక్షుడు": "President",
   "సభ్యుల వద్ద ఉన్న మొత్తం": "With Members",
+  "పెండింగ్ వడ్డీ": "Pending Interest",
+  "వచ్చినది": "Income",
+  "పోయినది": "Expense",
+  "మిగులు": "Balance",
+  "ఆదాయ వివరాలు": "Income Details",
+  "ఖర్చు వివరాలు": "Expense Details",
+  "ఈ కాలంలో ఆదాయం లేదు.": "No income in this period.",
+  "ఈ కాలంలో ఖర్చులు లేవు.": "No expenses in this period.",
+  "నమోదు రుసుములు": "Registration Fees",
+  "విరాళాలు": "Donations",
+  "అసలు వసూలు": "Principal Collected",
+  "వడ్డీ వసూలు": "Interest Collected",
+  "ఇతర ఆదాయం": "Other Income",
   "+ ఆదాయం": "+ Income",
   "+ ఖర్చు": "+ Expense",
   "ఆదాయం": "Income",
@@ -213,6 +232,22 @@ const TE_EN: Record<string, string> = {
   "సభ్యుడిని ఎంచుకోండి (ID / పేరు)": "Select a member to add (ID / Name)",
   "Select a member to add (ID / Name)": "Select a member to add (ID / Name)",
   "Minimize / తగ్గించు": "Minimize",
+  "Total Amount · మొత్తం అమౌంట్": "Total Amount",
+  "Group Terms · నిబంధనలు": "Group Terms",
+  "No terms specified yet · నిబంధనలు ఇంకా జోడించలేదు.": "No terms specified yet.",
+  "My Calculator · నా లెక్క": "My Calculator",
+  "Winner · విజేత": "Winner",
+  "Foreman Benefit · ఫోర్‌మ్యాన్": "Foreman Benefit",
+  "Auction Close Time · క్లోజ్": "Auction Close Time",
+  "Terms · నిబంధనలు": "Terms",
+  "లైవ్ చీటీ · Live Auction": "Live Auction",
+  "క్లోజ్ · Finalize": "Finalize",
+  "Start · స్టార్ట్": "Start",
+  "Close · క్లోజ్": "Close",
+  "Interest · ఇన్ట్రెస్ట్": "Interest",
+  "విజేత ఎవరు · Winner": "Winner",
+  "పాస్ట్ డిటైల్స్ · Past History": "Past History",
+  "Payments · చెల్లింపులు": "Payments",
   "సభ్యులు": "members",
 
   // Board Elections
@@ -232,8 +267,24 @@ const TE_EN: Record<string, string> = {
   "సృష్టించు": "Create",
   "ఇంకా ఏ ఎన్నిక షెడ్యూల్ చేయలేదు.": "No elections scheduled yet.",
   "ఇంకా ఏ ఎన్నిక షెడ్యూల్ చేయలేదు": "No elections scheduled yet",
+  "ఎన్నిక": "Election",
+  "నామినేషన్ వేయండి": "Nominate",
+  "నామినేషన్లు": "Nominations",
+  "ఓటు వేయండి": "Vote",
+  "ఫలితాలు": "Results",
+  "నామినేషన్లు ప్రస్తుతం తెరువబడలేదు.": "Nominations are not open right now.",
+  "ఇంకా నామినేషన్లు లేవు.": "No nominations yet.",
+  "ఓటింగ్ ప్రస్తుతం తెరువబడలేదు.": "Voting is not open right now.",
+  "కార్యవర్గ సభ్యులు మాత్రమే ఓటు వేయగలరు.": "Only committee members can vote.",
+  "అభ్యర్థులు లేరు.": "No candidates.",
+  "మీ ఓటు నమోదైంది": "Your vote has been recorded",
+  "ప్రాథమిక ఫలితాలు — ఎన్నిక ఇంకా పూర్తి కాలేదు.": "Preliminary results — election is not completed yet.",
 
   // Designs Studio
+  "డిజైన్స్ స్టూడియో": "Designs Studio",
+  "లెటర్ ప్యాడ్ టెంప్లేట్‌ను ఎంచుకోండి": "Choose a Letter Pad Template",
+  "రసీదు టెంప్లేట్‌ను ఎంచుకోండి": "Choose a Receipt Template",
+  "వివరాలు నింపండి — ప్రివ్యూ లైవ్": "Fill details — live preview",
   "STEP 1 • కార్డ్ టైప్ ఎంచుకోండి": "STEP 1 • Choose Card Type",
   "కార్డ్ టైప్ ఎంచుకోండి": "Choose Card Type",
   "Normal ID Card / నార్మల్": "Normal ID Card",
@@ -251,6 +302,19 @@ const TE_EN: Record<string, string> = {
   "ప్రెసిడెంట్ పేరు": "President Name",
   "ప్రెసిడెంట్ సంతకం": "President Signature",
   "సంతకం": "Signature",
+  "లోగో": "Logo",
+  "సంస్థ పేరు": "Organization Name",
+  "స్లోగన్": "Slogan",
+  "రిజిస్ట్రేషన్ నెం": "Registration No.",
+  "సభ్యుడి ఫోటో": "Member Photo",
+  "సభ్యుడి పేరు": "Member Name",
+  "సభ్యత్వ నెం": "Member ID",
+  "పదవి": "Designation",
+  "గ్రామం": "Village",
+  "పిన్ కోడ్": "Pincode",
+  "వెనుక మేటర్": "Back Side Text",
+  "ప్రమాణం": "Oath",
+  "చిన్న లోగో": "Small Logo",
 };
 
 const TE_ONLY: Record<string, string> = {
@@ -269,6 +333,9 @@ const TE_ONLY: Record<string, string> = {
   "Reference Details · పరిచయస్తుడి వివరాలు": "పరిచయస్తుడి వివరాలు",
   "Introduced By Name · పరిచయస్తుడు పేరు": "పరిచయస్తుడు పేరు",
   "Introducer ID · పరిచయం చేసిన వారి ఐడి నంబర్": "పరిచయం చేసిన వారి ఐడి నంబర్",
+  "Email Address (రసీదు పంపబడుతుంది)": "ఇమెయిల్ చిరునామా (రసీదు పంపబడుతుంది)",
+  "Payer Name / పేరు": "చెల్లించినవారి పేరు",
+  "Save Design — Apply to All Members / అందరికీ అప్లై": "డిజైన్ సేవ్ చేయండి — అందరికీ అప్లై చేయండి",
 };
 
 const EN_TE: Record<string, string> = Object.entries(TE_EN).reduce((acc, [te, en]) => {
@@ -339,6 +406,96 @@ Object.assign(EN_TE, {
   "Tap any tile to open the detailed module.": "వివరమైన మాడ్యూల్ తెరవడానికి ఏదైనా టైల్ నొక్కండి.",
   "Accounts Hub": "ఖాతాల కేంద్రం",
   "Loan Requests — Admin": "అప్పు అభ్యర్థనలు — అడ్మిన్",
+  "Record Income & Donations": "ఆదాయం మరియు విరాళాల నమోదు",
+  "Issue receipts": "రసీదులు జారీ చేయండి",
+  "Payer Name": "చెల్లించినవారి పేరు",
+  "Phone Number": "ఫోన్ నంబర్",
+  "Email Address": "ఇమెయిల్ చిరునామా",
+  "Income Type": "ఆదాయ రకం",
+  Donation: "విరాళం",
+  "Registration Fee": "నమోదు రుసుము",
+  Other: "ఇతరం",
+  "Account (credited to)": "ఖాతా (జమ చేయబడేది)",
+  Notes: "గమనికలు",
+  "Save Receipt": "రసీదును సేవ్ చేయండి",
+  "Recent Receipts": "ఇటీవలి రసీదులు",
+  "Society Cash Flow": "సొసైటీ నగదు ప్రవాహం",
+  "Cash Flow Statement": "నగదు ప్రవాహ నివేదిక",
+  "This Month": "నెల పట్టిక",
+  "3 Months": "3 నెలల పట్టిక",
+  "6 Months": "6 నెలల పట్టిక",
+  Yearly: "సంవత్సర పట్టిక",
+  "In Bank": "బ్యాంకులో",
+  "Cashier / Petty Cash": "అకౌంటెంట్ / చిల్లర",
+  "With Members": "సభ్యుల వద్ద ఉన్న మొత్తం",
+  "Pending Interest": "పెండింగ్ వడ్డీ",
+  Balance: "మిగులు",
+  "Income Details": "ఆదాయ వివరాలు",
+  "Expense Details": "ఖర్చు వివరాలు",
+  "Registration Fees": "నమోదు రుసుములు",
+  Donations: "విరాళాలు",
+  "Principal Collected": "అసలు వసూలు",
+  "Interest Collected": "వడ్డీ వసూలు",
+  "Other Income": "ఇతర ఆదాయం",
+  "Office Expenses": "ఆఫీసు ఖర్చులు",
+  "Meeting Expenses": "మీటింగ్ ఖర్చులు",
+  Miscellaneous: "ఇతరములు",
+  "Designs Studio": "డిజైన్స్ స్టూడియో",
+  "ID Card": "ఐడి కార్డ్",
+  "Letter Pad": "లెటర్ ప్యాడ్",
+  "Receipt Card": "రసీదు కార్డ్",
+  "ID Card • Letter Pad • Receipt — Modular Templates": "ఐడి కార్డ్ • లెటర్ ప్యాడ్ • రసీదు — మాడ్యులర్ టెంప్లేట్లు",
+  "Choose a Letter Pad Template": "లెటర్ ప్యాడ్ టెంప్లేట్‌ను ఎంచుకోండి",
+  "Choose a Receipt Template": "రసీదు టెంప్లేట్‌ను ఎంచుకోండి",
+  "Standard Header": "స్టాండర్డ్ హెడర్",
+  "Watermark Centered": "వాటర్‌మార్క్ సెంటర్",
+  "Left Sidebar Modern": "లెఫ్ట్ సైడ్‌బార్ మోడర్న్",
+  "Classic Receipt": "క్లాసిక్ రసీదు",
+  "Saffron Strip": "సాఫ్రాన్ స్ట్రిప్",
+  "Minimal Line": "మినిమల్ లైన్",
+  "Choose Card Type": "కార్డ్ టైప్ ఎంచుకోండి",
+  "Normal ID Card": "నార్మల్ ఐడి కార్డ్",
+  "Keychain Type": "కీ చైన్ టైప్",
+  "Print Dimensions": "ప్రింట్ సైజ్",
+  "Change template": "టెంప్లేట్ మార్చండి",
+  Front: "ముందు",
+  Back: "వెనుక",
+  "Save Design — Apply to All Members": "డిజైన్ సేవ్ చేయండి — అందరికీ అప్లై చేయండి",
+  "Selected:": "ఎంచుకున్నది:",
+  "Legacy Saffron": "లెగసీ సాఫ్రాన్",
+  "Logo": "లోగో",
+  "Organization Name": "సంస్థ పేరు",
+  "Slogan": "స్లోగన్",
+  "Registration No.": "రిజిస్ట్రేషన్ నెం",
+  "Member Photo": "సభ్యుడి ఫోటో",
+  "Member Name (Big)": "సభ్యుడి పేరు",
+  "Father's Name": "తండ్రి పేరు",
+  "Designation": "పదవి",
+  "Village": "గ్రామం",
+  "Pincode": "పిన్ కోడ్",
+  "Back Side Text": "వెనుక మేటర్",
+  "Oath": "ప్రమాణం",
+  Show: "చూపించు",
+  Hidden: "దాచబడింది",
+  Upload: "అప్‌లోడ్",
+  Change: "మార్చండి",
+  Clear: "క్లియర్",
+  "Board Elections": "బోర్డు ఎన్నికలు",
+  "Schedule New Election": "కొత్త ఎన్నిక షెడ్యూల్",
+  Title: "శీర్షిక",
+  "Description (Optional)": "వివరణ (ఐచ్ఛికం)",
+  "Positions (comma separated)": "పదవులు (కామాతో వేరు చేయండి)",
+  "Nomination Deadline": "నామినేషన్ గడువు",
+  "Election Date & Time": "ఎన్నిక తేదీ & సమయం",
+  Create: "సృష్టించు",
+  "President, Secretary, Treasurer": "అధ్యక్షుడు, కార్యదర్శి, కోశాధికారి",
+  "Live Chit Auction Room": "లైవ్ చిట్ ఆక్షన్ రూమ్",
+  "Group Setup": "గ్రూప్ సెటప్",
+  "Total Months": "మొత్తం నెలలు",
+  "Once a month": "నెలకు ఒకసారి",
+  Minimize: "తగ్గించు",
+  "Select a member to add (ID / Name)": "సభ్యుడిని ఎంచుకోండి (ID / పేరు)",
+  "Pick — e.g., A / 0003": "ఎంచుకోండి — ఉదా., A / 0003",
 });
 
 const SKIP_TAGS = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEXTAREA", "INPUT", "SELECT", "OPTION", "CODE", "PRE"]);
@@ -376,6 +533,8 @@ function translateValue(value: string, lang: string): string {
   if (!trimmed) return value;
   const hit = lookupPhrase(trimmed, lang);
   if (!hit) {
+    const mixed = translateMixedValue(value, lang);
+    if (mixed !== undefined) return mixed;
     if (lang === "en") {
       const colon = /^(.+?)([:：])\s*(.*)$/.exec(trimmed);
       if (colon && TE_EN[colon[1]]) {
@@ -400,6 +559,51 @@ function translateValue(value: string, lang: string): string {
   const lead = value.match(/^\s*/)?.[0] ?? "";
   const tail = value.match(/\s*$/)?.[0] ?? "";
   return lead + hit + tail;
+}
+
+const TELUGU_RE = /[\u0C00-\u0C7F]/;
+const LATIN_RE = /[A-Za-z]/;
+
+function cleanSeparators(s: string): string {
+  return s
+    .replace(/\s*([/·•])\s*([/·•])\s*/g, " $1 ")
+    .replace(/^\s*[/·•—-]+\s*/g, "")
+    .replace(/\s*[/·•—-]+\s*$/g, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
+function translateMixedValue(value: string, lang: string): string | undefined {
+  const trimmed = value.trim();
+  if (!TELUGU_RE.test(trimmed) || !LATIN_RE.test(trimmed)) return undefined;
+  const lead = value.match(/^\s*/)?.[0] ?? "";
+  const tail = value.match(/\s*$/)?.[0] ?? "";
+
+  if (lang === "en") {
+    let out = trimmed.replace(/\s*[([{][^()[\]{}]*[\u0C00-\u0C7F][^()[\]{}]*[)\]}]/g, "");
+    out = out.split(/(\s*[/·•]\s*)/).map((part) => {
+      const exact = TE_EN[part.trim()];
+      return exact ? part.replace(part.trim(), exact) : part;
+    }).join("");
+    if (TELUGU_RE.test(out)) {
+      const pieces = out.split(/[/·•]/).map((p) => p.trim()).filter(Boolean);
+      const englishPieces = pieces.filter((p) => LATIN_RE.test(p) && !TELUGU_RE.test(p));
+      if (englishPieces.length) out = englishPieces.join(" · ");
+    }
+    out = cleanSeparators(out);
+    return out ? lead + out + tail : undefined;
+  }
+
+  if (lang === "te") {
+    let out = trimmed.replace(/\s*[([{][^()[\]{}]*[A-Za-z][^()[\]{}]*[)\]}]/g, "");
+    const pieces = out.split(/[/·•]/).map((p) => p.trim()).filter(Boolean);
+    const teluguPieces = pieces.filter((p) => TELUGU_RE.test(p));
+    if (teluguPieces.length) out = teluguPieces.join(" / ");
+    out = cleanSeparators(out);
+    return out ? lead + out + tail : undefined;
+  }
+
+  return undefined;
 }
 
 function translateNode(node: Text, lang: string) {
