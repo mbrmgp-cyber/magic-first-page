@@ -14,6 +14,7 @@ import { printMeetingMinutes, printResolution, printActivity } from "@/lib/print
 import { useServerFn } from "@tanstack/react-start";
 import { sendMeetingInvites } from "@/lib/org.functions";
 import { Mail, Send } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/org/events")({
   head: () => ({ meta: [{ title: "Events, Meetings, Decisions" }] }),
