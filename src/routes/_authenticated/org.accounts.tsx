@@ -161,6 +161,108 @@ function AccountsPage() {
   function onEdit() { setLocked(false); }
   function comingSoon(label: string) { toast(`${label} — coming soon`); }
 
+  async function downloadPersonalPdf() {
+    if (!info) { toast.error(lt("Look up a member first", "మొదట సభ్యుని వెతకండి")); return; }
+    setBusy(true);
+    try {
+      const { jsPDF } = await import("jspdf");
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      const orgName = orgQ.data?.org?.name ?? "Society";
+      let y = 15;
+      pdf.setFont("helvetica", "bold"); pdf.setFontSize(16);
+      pdf.text(orgName, 105, y, { align: "center" }); y += 7;
+      pdf.setFontSize(12);
+      pdf.text(lt("Personal Loan Statement", "వ్యక్తిగత రుణ వివరాలు"), 105, y, { align: "center" }); y += 10;
+      pdf.setFont("helvetica", "normal"); pdf.setFontSize(11);
+      const line = (k: string, v: string) => { pdf.text(`${k}: ${v}`, 15, y); y += 7; };
+      line(lt("Member", "సభ్యుడు"), `${info.member.name} (${info.member.member_code ?? idNo})`);
+      line(lt("Date", "తేదీ"), date);
+      if (info.member.phone) line(lt("Phone", "ఫోన్"), info.member.phone);
+      if (info.member.email) line(lt("Email", "ఇమెయిల్"), info.member.email);
+      y += 3;
+      pdf.setFont("helvetica", "bold"); pdf.text(lt("Old Loan", "పాత అప్పు"), 15, y); y += 6;
+      pdf.setFont("helvetica", "normal");
+      line(lt("Outstanding Balance", "మొత్తం బాకీ"), `${sym} ${info.totalOutstanding.toLocaleString("en-IN")}`);
+      line(lt("Monthly Interest", "నెలవారీ వడ్డీ"), `${sym} ${info.monthlyInterest.toLocaleString("en-IN")}`);
+      y += 2;
+      pdf.setFont("helvetica", "bold"); pdf.text(lt("Today's Entry", "ఈ రోజు నమోదు"), 15, y); y += 6;
+      pdf.setFont("helvetica", "normal");
+      line(lt("Principal Paid", "అసలు జమ"), `${sym} ${Number(principal || 0).toLocaleString("en-IN")}`);
+      line(lt("Interest Paid", "వడ్డీ జమ"), `${sym} ${Number(interest || 0).toLocaleString("en-IN")}`);
+      line(lt("New Loan", "కొత్త అప్పు"), `${sym} ${Number(newLoan || 0).toLocaleString("en-IN")}`);
+      line(lt("New Loan Rate", "వడ్డీ రేటు"), `${newLoanRate}%`);
+      if (remarks) line(lt("Remarks", "గమనికలు"), remarks);
+      if (saved) { y += 2; pdf.setFont("helvetica", "bold");
+        line(lt("Updated Balance", "నవీకరించిన బాకీ"), `${sym} ${saved.balance.toLocaleString("en-IN")}`);
+      }
+      pdf.save(`member-${idNo || "statement"}-${date}.pdf`);
+      toast.success(lt("PDF downloaded", "పిడిఎఫ్ డౌన్‌లోడ్ అయింది"));
+    } catch (e: any) {
+      toast.error(e?.message ?? "PDF failed");
+    } finally { setBusy(false); }
+  }
+
+  async function downloadFullPdf() {
+    setBusy(true);
+    try {
+      const { jsPDF } = await import("jspdf");
+      const res = await fetchMaster();
+      const rows = res?.rows ?? [];
+      const totals = res?.totals ?? { outstanding: 0, principal: 0, interest: 0, newLoan: 0, net: 0 };
+      const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+      const orgName = orgQ.data?.org?.name ?? "Society";
+      let y = 12;
+      pdf.setFont("helvetica", "bold"); pdf.setFontSize(15);
+      pdf.text(orgName, 148, y, { align: "center" }); y += 6;
+      pdf.setFontSize(11);
+      pdf.text(lt("Master Ledger", "మాస్టర్ లెడ్జర్") + ` — ${new Date().toISOString().slice(0, 10)}`, 148, y, { align: "center" }); y += 8;
+
+      const headers = ["ID", lt("Name", "పేరు"), lt("Old Bal", "పాత బాకీ"), lt("Principal", "అసలు"), lt("Interest", "వడ్డీ"), lt("New Loan", "కొత్త అప్పు"), lt("Total", "మొత్తం")];
+      const colX = [10, 30, 90, 125, 155, 185, 220];
+      const colW = [20, 60, 35, 30, 30, 35, 65];
+      pdf.setFontSize(9); pdf.setFont("helvetica", "bold");
+      headers.forEach((h, i) => pdf.text(h, colX[i], y));
+      y += 2; pdf.line(10, y, 285, y); y += 4;
+      pdf.setFont("helvetica", "normal");
+
+      const drawRow = (cells: string[]) => {
+        cells.forEach((c, i) => {
+          const align = i >= 2 ? "right" : "left";
+          const x = align === "right" ? colX[i] + colW[i] - 2 : colX[i];
+          pdf.text(String(c), x, y, { align: align as any });
+        });
+        y += 5;
+        if (y > 195) { pdf.addPage(); y = 15; }
+      };
+
+      for (const r of rows) {
+        drawRow([
+          r.member_id,
+          r.member_name.slice(0, 30),
+          `${sym} ${r.old_balance.toLocaleString("en-IN")}`,
+          `${sym} ${r.principal_collected.toLocaleString("en-IN")}`,
+          `${sym} ${r.interest_collected.toLocaleString("en-IN")}`,
+          `${sym} ${r.new_loan.toLocaleString("en-IN")}`,
+          `${sym} ${r.net_balance.toLocaleString("en-IN")}`,
+        ]);
+      }
+      y += 2; pdf.line(10, y, 285, y); y += 5;
+      pdf.setFont("helvetica", "bold");
+      drawRow([
+        lt("Total", "మొత్తం"), "",
+        `${sym} ${totals.outstanding.toLocaleString("en-IN")}`,
+        `${sym} ${totals.principal.toLocaleString("en-IN")}`,
+        `${sym} ${totals.interest.toLocaleString("en-IN")}`,
+        `${sym} ${totals.newLoan.toLocaleString("en-IN")}`,
+        `${sym} ${totals.net.toLocaleString("en-IN")}`,
+      ]);
+      pdf.save(`master-ledger-${new Date().toISOString().slice(0, 10)}.pdf`);
+      toast.success(lt("PDF downloaded", "పిడిఎఫ్ డౌన్‌లోడ్ అయింది"));
+    } catch (e: any) {
+      toast.error(e?.message ?? "PDF failed");
+    } finally { setBusy(false); }
+  }
+
   return (
     <div className="min-h-screen bg-tricolor p-3 md:p-6">
       <div className="max-w-3xl mx-auto space-y-4">
