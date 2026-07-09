@@ -72,10 +72,14 @@ function OrgThemePage() {
   const org: any = orgQ.data?.org;
 
   const [t, setT] = useState<Required<ThemeSettings>>(DEFAULT_THEME);
+  const [nameEn, setNameEn] = useState<string>("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (org) setT(resolveTheme(org));
+    if (org) {
+      setT(resolveTheme(org));
+      setNameEn(org.name_en || "");
+    }
   }, [org?.id]);
 
   function set<K extends keyof ThemeSettings>(k: K, v: any) {
