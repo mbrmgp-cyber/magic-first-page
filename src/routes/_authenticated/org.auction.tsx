@@ -29,6 +29,7 @@ import { RoleGate } from "@/components/RoleGate";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { AuctionPaymentsPanel } from "@/components/auction/AuctionPaymentsPanel";
+import { localizeText, useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/org/auction")({
   head: () => ({ meta: [{ title: "Live Chit Auction — MBR App" }] }),
@@ -211,6 +212,8 @@ function sessionState(row: AuctionSessionRow, bidRows: BidRow[], allRows: Auctio
 }
 
 function AuctionRoom() {
+  const { lang } = useI18n();
+  const lt = (en: string, te: string) => localizeText({ en, te }, lang);
   const { fmt, symbol } = useCurrency();
   const fetchMembers = useServerFn(listApprovedMembers);
   const fetchRoles = useServerFn(getMyRoles);
@@ -1097,7 +1100,7 @@ function AuctionRoom() {
       toast.error(e?.message || "Failed to close entry");
       return;
     }
-    toast.info("Entry closed · ఎంట్రీ క్లోజ్");
+    toast.info(lt("Entry closed", "ఎంట్రీ క్లోజ్"));
   };
 
   const saveGroup = async () => {
@@ -1262,7 +1265,7 @@ function AuctionRoom() {
         setConsents(res.state.consents as any);
         lastRemoteJsonRef.current = JSON.stringify({ ...res.state });
       }
-      toast.success("నాకు సమ్మతము — Consent recorded");
+      toast.success(lt("Consent recorded", "సమ్మతి నమోదైంది"));
     } catch (e: any) {
       toast.error(e?.message || "Failed to submit consent");
     }
@@ -1372,7 +1375,7 @@ function AuctionRoom() {
           <div className="flex-1">
             <h1 className="text-xl md:text-2xl font-bold">C H S Live Online Chit Auction</h1>
             <p className="text-xs text-amber-300/90 font-medium">Welcome to C.H.S Chits</p>
-            <p className="text-[11px] text-muted-foreground">లైవ్ చిట్ ఆక్షన్ రూమ్</p>
+            <p className="text-[11px] text-muted-foreground">{lt("Live Chit Auction Room", "లైవ్ చిట్ ఆక్షన్ రూమ్")}</p>
           </div>
         </div>
 
@@ -1383,7 +1386,7 @@ function AuctionRoom() {
               {myCode || "—"}
             </Badge>
             <span className="font-semibold text-sm">{myName || "Admin"}</span>
-            <span className="text-[11px] text-muted-foreground">Logged-in · లాగిన్</span>
+            <span className="text-[11px] text-muted-foreground">{lt("Logged-in", "లాగిన్")}</span>
             <div className="ml-auto flex items-center gap-1.5 text-[11px] text-muted-foreground">
               <span className="opacity-80">Chit Filters:</span>
               {(["ALL", ...availableLetters]).map((l) => (
@@ -1477,21 +1480,21 @@ function AuctionRoom() {
                 <Card className="p-3 md:p-4 bg-card">
                   <div className="flex items-center gap-2 mb-2">
                     <Users className="size-4 text-amber-400" />
-                    <h2 className="font-semibold text-sm">{activeGroup.name} · Group Summary</h2>
+              <h2 className="font-semibold text-sm">{activeGroup.name} · {lt("Group Summary", "గ్రూప్ సారాంశం")}</h2>
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
                     <StatBox
-                      label="Total Amount · మొత్తం అమౌంట్"
+                      label={lt("Total Amount", "మొత్తం అమౌంట్")}
                       value={fmt(Number((activeGroup as any).chitValue) || 0)}
                       highlight
                     />
-                    <StatBox label="Total Members" value={String(activeGroup.memberIds.length)} />
-                    <StatBox label="Total Months" value={String((activeGroup as any).totalMonths ?? totalMonths)} />
+                    <StatBox label={lt("Total Members", "మొత్తం సభ్యులు")} value={String(activeGroup.memberIds.length)} />
+                    <StatBox label={lt("Total Months", "మొత్తం నెలలు")} value={String((activeGroup as any).totalMonths ?? totalMonths)} />
                     <StatBox
-                      label="Start Date"
+                      label={lt("Start Date", "ప్రారంభ తేదీ")}
                       value={(activeGroup as any).startDate ? new Date((activeGroup as any).startDate).toLocaleDateString() : (chitStartDate ? new Date(chitStartDate).toLocaleDateString() : "—")}
                     />
-                    <StatBox label="Closed Months" value={`${closedMonths} / ${(activeGroup as any).totalMonths ?? totalMonths}`} />
+                    <StatBox label={lt("Closed Months", "ముగిసిన నెలలు")} value={`${closedMonths} / ${(activeGroup as any).totalMonths ?? totalMonths}`} />
                   </div>
                 </Card>
               )}
@@ -1501,7 +1504,7 @@ function AuctionRoom() {
                 <Card className="p-3 md:p-4 bg-card border-amber-500/40">
                   <div className="flex items-center gap-2 mb-2">
                     <BookOpen className="size-4 text-amber-400" />
-                    <h2 className="font-semibold text-sm">Group Terms · నిబంధనలు</h2>
+                    <h2 className="font-semibold text-sm">{lt("Group Terms", "నిబంధనలు")}</h2>
                   </div>
                   {activeGroupTerms.length > 0 ? (
                     <div className="text-xs md:text-sm whitespace-pre-wrap leading-relaxed text-foreground/90">
@@ -1509,7 +1512,7 @@ function AuctionRoom() {
                     </div>
                   ) : (
                     <div className="text-xs italic text-muted-foreground">
-                      No terms specified yet · నిబంధనలు ఇంకా జోడించలేదు.
+                      {lt("No terms specified yet.", "నిబంధనలు ఇంకా జోడించలేదు.")}
                     </div>
                   )}
                 </Card>
@@ -1521,20 +1524,20 @@ function AuctionRoom() {
               <Card className="p-3 md:p-4 bg-card border-red-500/30">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="inline-flex h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-                  <h2 className="font-semibold text-sm text-red-300">LIVE Chit Auction Board</h2>
+                  <h2 className="font-semibold text-sm text-red-300">{lt("LIVE Chit Auction Board", "లైవ్ చిట్ ఆక్షన్ బోర్డ్")}</h2>
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-center">
                   <StatBox
-                    label="Start Time"
+                    label={lt("Start Time", "ప్రారంభ సమయం")}
                     value={turnStart ? new Date(turnStart).toLocaleTimeString() : "—"}
                   />
                   <StatBox
-                    label="Running Month"
+                    label={lt("Running Month", "నడుస్తున్న నెల")}
                     value={`${currentMonth} / ${totalMonths}`}
                     highlight
                   />
                   <StatBox
-                    label="Close Time"
+                    label={lt("Close Time", "ముగింపు సమయం")}
                     value={turnEnd ? new Date(turnEnd).toLocaleTimeString() : "—"}
                   />
                 </div>
@@ -1544,27 +1547,27 @@ function AuctionRoom() {
               <Card className="p-3 md:p-4 bg-card">
                 <div className="flex items-center gap-2 mb-2">
                   <Percent className="size-4 text-amber-400" />
-                  <h2 className="font-semibold text-sm">My Calculator · నా లెక్క</h2>
+                  <h2 className="font-semibold text-sm">{lt("My Calculator", "నా లెక్క")}</h2>
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-center">
                   <StatBox
-                    label="Commission %"
+                    label={lt("Commission %", "కమిషన్ %")}
                     value={`${commissionPct}%`}
                     sub={fmt((chitValue * commissionPct) / 100)}
                   />
                   <StatBox
-                    label="Interest"
+                    label={lt("Interest", "వడ్డీ")}
                     value={`${calc.monthlyPct.toFixed(2)}%`}
                     sub={`≈ ${calc.annualPct.toFixed(1)}% /yr`}
                   />
                   <StatBox
-                    label="Total"
+                    label={lt("Total", "మొత్తం")}
                     value={fmt(
                       (chitValue * commissionPct) / 100 +
                         (myBidAmount || 0) +
                         (winner && winner.memberId !== myId ? winnerCalc?.dividend || 0 : 0),
                     )}
-                    sub="Commission + Bid + Share"
+                    sub={lt("Commission + Bid + Share", "కమిషన్ + బిడ్ + వాటా")}
                   />
                 </div>
               </Card>
@@ -1614,7 +1617,7 @@ function AuctionRoom() {
                 <Card className="p-3 md:p-4 bg-card border-emerald-500/40">
                   <div className="flex items-center gap-2 mb-1">
                     <Trophy className="size-4 text-emerald-400" />
-                    <h2 className="font-semibold text-sm text-emerald-300">Winner · విజేత</h2>
+                    <h2 className="font-semibold text-sm text-emerald-300">{lt("Winner", "విజేత")}</h2>
                   </div>
                   <p className="text-sm">
                     <span className="font-mono text-xs opacity-80 mr-2">
@@ -1647,8 +1650,8 @@ function AuctionRoom() {
         <Card className="p-4 md:p-5 space-y-3 bg-card">
           <div className="flex items-center gap-2 flex-wrap">
             <Users className="size-4 text-amber-400" />
-            <h2 className="font-semibold">Group Setup · గ్రూప్ సెటప్</h2>
-            <Badge variant="secondary" className="text-xs">{participants.length} members</Badge>
+            <h2 className="font-semibold">{lt("Group Setup", "గ్రూప్ సెటప్")}</h2>
+            <Badge variant="secondary" className="text-xs">{participants.length} {lt("members", "సభ్యులు")}</Badge>
             {setupCollapsed && liveGroupName && (
               <Badge className="bg-emerald-500/15 text-emerald-300 border border-emerald-500/40 text-xs">
                 Saved: {liveGroupName}
@@ -1658,15 +1661,15 @@ function AuctionRoom() {
               {setupCollapsed ? (
                 <>
                   <Button size="sm" variant="outline" onClick={() => setSetupCollapsed(false)} className="gap-1.5 text-xs">
-                    Edit
+                    {lt("Edit", "సవరించు")}
                   </Button>
                   <Button size="sm" onClick={startNewGroup} className="gap-1.5 text-xs bg-amber-500 hover:bg-amber-600 text-black font-bold">
-                    <Plus className="size-3.5" /> Setup Next Group
+                    <Plus className="size-3.5" /> {lt("Setup Next Group", "తదుపరి గ్రూప్ సెటప్")}
                   </Button>
                 </>
               ) : (
                 <Button size="sm" variant="ghost" onClick={() => setSetupCollapsed(true)} className="gap-1.5 text-xs">
-                  Minimize
+                  {lt("Minimize", "తగ్గించు")}
                 </Button>
               )}
             </div>
@@ -1675,7 +1678,7 @@ function AuctionRoom() {
           {!setupCollapsed && (<>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-xs">Group + · గ్రూప్</Label>
+              <Label className="text-xs">{lt("Group", "గ్రూప్")}</Label>
               <Input
                 value={chitGroupName}
                 onChange={(e) => setChitGroupName(e.target.value)}
@@ -1684,11 +1687,11 @@ function AuctionRoom() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">Select a member to add (ID / Name)</Label>
+              <Label className="text-xs">{lt("Select a member to add (ID / Name)", "సభ్యుడిని ఎంచుకోండి (ID / పేరు)")}</Label>
               <div className="flex gap-1.5">
                 <Select value={pickerValue} onValueChange={setPickerValue}>
                   <SelectTrigger className="flex-1 h-10">
-                    <SelectValue placeholder="Pick — e.g., A / 0003" />
+                    <SelectValue placeholder={lt("Pick — e.g., A / 0003", "ఎంచుకోండి — ఉదా., A / 0003")} />
                   </SelectTrigger>
                   <SelectContent>
                     {allMembers
@@ -1704,7 +1707,7 @@ function AuctionRoom() {
                         </SelectItem>
                       ))}
                     {allMembers.length === 0 && (
-                      <div className="px-2 py-3 text-xs text-muted-foreground">No approved members.</div>
+                      <div className="px-2 py-3 text-xs text-muted-foreground">{lt("No approved members.", "ఆమోదించిన సభ్యులు లేరు.")}</div>
                     )}
                   </SelectContent>
                 </Select>
@@ -1714,11 +1717,11 @@ function AuctionRoom() {
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">బిగినింగ్ Date · Start</Label>
+              <Label className="text-xs">{lt("Start Date", "ప్రారంభ తేదీ")}</Label>
               <Input type="date" value={chitStartDate} onChange={(e) => setChitStartDate(e.target.value)} className="h-10" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">Total Months · మొత్తం నెలలు</Label>
+              <Label className="text-xs">{lt("Total Months", "మొత్తం నెలలు")}</Label>
               <Input
                 type="number"
                 inputMode="numeric"
@@ -1728,7 +1731,7 @@ function AuctionRoom() {
                 placeholder="e.g., 10 or 20"
                 className="h-10 font-bold tabular-nums"
               />
-              <p className="text-[10px] text-muted-foreground">Once a month · నెలకు ఒకసారి</p>
+              <p className="text-[10px] text-muted-foreground">{lt("Once a month", "నెలకు ఒకసారి")}</p>
             </div>
           </div>
 
@@ -1751,7 +1754,7 @@ function AuctionRoom() {
           {/* Foreman / Terms / Close time */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 border-t border-border">
             <div className="space-y-1.5">
-              <Label className="text-xs">Foreman Benefit · ఫోర్‌మ్యాన్</Label>
+              <Label className="text-xs">{lt("Foreman Benefit", "ఫోర్‌మ్యాన్ ప్రయోజనం")}</Label>
               <Select value={foremanMode} onValueChange={(v) => setForemanMode(v as any)}>
                 <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -1775,7 +1778,7 @@ function AuctionRoom() {
               </label>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">Auction Close Time · క్లోజ్</Label>
+              <Label className="text-xs">{lt("Auction Close Time", "ఆక్షన్ ముగింపు సమయం")}</Label>
               <Input type="datetime-local"
                 value={closeAt ? new Date(closeAt).toISOString().slice(0, 16) : ""}
                 onChange={(e) => setCloseAt(e.target.value ? new Date(e.target.value).toISOString() : "")}
@@ -1783,7 +1786,7 @@ function AuctionRoom() {
               <p className="text-[10px] text-muted-foreground">5-min warning auto-triggers.</p>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">Terms · నిబంధనలు</Label>
+              <Label className="text-xs">{lt("Terms", "నిబంధనలు")}</Label>
               <textarea value={terms} onChange={(e) => setTerms(e.target.value)}
                 rows={3} placeholder="Group rules, penalties, payment cycle…"
                 className="w-full text-xs rounded-md border border-border bg-background p-2" />
@@ -1793,11 +1796,11 @@ function AuctionRoom() {
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3 pt-2 border-t border-border">
             <div className="rounded-md border border-border bg-black/30 p-2.5">
-              <p className="text-[10px] uppercase text-muted-foreground">మొత్తం మెంబర్స్</p>
+              <p className="text-[10px] uppercase text-muted-foreground">{lt("Total Members", "మొత్తం సభ్యులు")}</p>
               <p className="text-lg font-bold tabular-nums">{participants.length}</p>
             </div>
             <div className="rounded-md border border-border bg-black/30 p-2.5">
-              <p className="text-[10px] uppercase text-muted-foreground">Total అమౌంటు</p>
+              <p className="text-[10px] uppercase text-muted-foreground">{lt("Total Amount", "మొత్తం అమౌంట్")}</p>
               <Input
                 type="number" inputMode="decimal" value={chitValue}
                 onChange={(e) => setChitValue(Number(e.target.value))}
@@ -1809,7 +1812,7 @@ function AuctionRoom() {
               disabled={participants.length === 0 || !chitGroupName.trim() || !totalMonths}
               className="h-full bg-amber-500 hover:bg-amber-600 text-black font-bold gap-1.5"
             >
-              <CheckCircle2 className="size-4" /> సేవ్ / ఎడిట్
+              <CheckCircle2 className="size-4" /> {lt("Save / Edit", "సేవ్ / ఎడిట్")}
             </Button>
             <Button
               onClick={() => deleteGroup(chitGroupName)}
@@ -1817,11 +1820,11 @@ function AuctionRoom() {
               variant="destructive"
               className="h-full font-bold gap-1.5"
             >
-              <X className="size-4" /> డిలీట్
+              <X className="size-4" /> {lt("Delete", "డిలీట్")}
             </Button>
           </div>
 
-          <p className="text-[11px] text-amber-300/80 italic">(సభ్యులు అందరూ అప్రూవల్ చేయాలి)</p>
+          <p className="text-[11px] text-amber-300/80 italic">{lt("All members must approve", "సభ్యులు అందరూ అప్రూవల్ చేయాలి")}</p>
 
           {groups.length > 0 && (
             <div className="text-[11px] text-muted-foreground pt-1 border-t border-border">
@@ -1835,7 +1838,7 @@ function AuctionRoom() {
         <Card className="p-3 md:p-4 bg-card border-amber-500/30">
           <div className="flex items-center gap-2 flex-wrap">
             <Gavel className="size-4 text-amber-400" />
-            <h2 className="font-semibold text-sm">Select Group for Live Auction</h2>
+            <h2 className="font-semibold text-sm">{lt("Select Group for Live Auction", "లైవ్ ఆక్షన్ కోసం గ్రూప్ ఎంచుకోండి")}</h2>
             <div className="ml-auto flex items-center gap-2 flex-1 md:flex-none md:min-w-[240px]">
               <Select
                 value={liveGroupName}
@@ -1843,7 +1846,7 @@ function AuctionRoom() {
                 disabled={groups.length === 0}
               >
                 <SelectTrigger className="h-9">
-                  <SelectValue placeholder={groups.length ? "— Choose a saved group —" : "Save a group first"} />
+                  <SelectValue placeholder={groups.length ? lt("— Choose a saved group —", "— సేవ్ చేసిన గ్రూప్ ఎంచుకోండి —") : lt("Save a group first", "ముందుగా గ్రూప్ సేవ్ చేయండి")} />
                 </SelectTrigger>
                 <SelectContent>
                   {groups.map((g) => (
@@ -1872,14 +1875,14 @@ function AuctionRoom() {
                   }}
                   className="text-xs"
                 >
-                  Clear
+                  {lt("Clear", "క్లియర్")}
                 </Button>
               )}
             </div>
           </div>
           {!liveGroupName && (
             <p className="text-[11px] text-muted-foreground italic mt-2">
-              Live members and metrics load only after you select a saved group.
+              {lt("Live members and metrics load only after you select a saved group.", "సేవ్ చేసిన గ్రూప్ ఎంచుకున్న తర్వాత మాత్రమే లైవ్ సభ్యులు మరియు మెట్రిక్స్ లోడ్ అవుతాయి.")}
             </p>
           )}
         </Card>
@@ -1893,19 +1896,19 @@ function AuctionRoom() {
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <div className="flex items-center gap-2">
                 <span className="inline-flex h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-                <h2 className="font-bold text-red-300">లైవ్ చీటీ · Live Auction</h2>
-                <Badge variant="secondary" className="text-xs">Month {currentMonth}/{totalMonths}</Badge>
+                <h2 className="font-bold text-red-300">{lt("Live Auction", "లైవ్ చీటీ")}</h2>
+                <Badge variant="secondary" className="text-xs">{lt("Month", "నెల")} {currentMonth}/{totalMonths}</Badge>
               </div>
               {!turnStart && !auctionClosed && (
                 <Button size="sm" variant="outline" onClick={startTurn} className="gap-1 text-xs">
-                  <Clock className="size-3.5" /> Start Turn
+                  <Clock className="size-3.5" /> {lt("Start Turn", "టర్న్ ప్రారంభించండి")}
                 </Button>
               )}
             </div>
 
             {participants.length === 0 ? (
               <div className="text-center py-8 text-sm text-muted-foreground">
-                Add chit group members above to see the live board.
+                {lt("Add chit group members above to see the live board.", "లైవ్ బోర్డ్ చూడటానికి పైగా చిట్ గ్రూప్ సభ్యులను జోడించండి.")}
               </div>
             ) : (
               <div className="space-y-1.5">
@@ -1924,7 +1927,7 @@ function AuctionRoom() {
                       {/* Wide horizontal bid capsule */}
                       <div className="flex-1 flex items-center gap-1 overflow-x-auto rounded-full bg-black/50 border border-border px-2 py-1 min-h-[28px]">
                         {list.length === 0 ? (
-                          <span className="text-[10px] text-muted-foreground italic px-1">— no bids —</span>
+                          <span className="text-[10px] text-muted-foreground italic px-1">— {lt("no bids", "బిడ్‌లు లేవు")} —</span>
                         ) : (
                           list.map((b, i) => (
                             <span
@@ -1952,10 +1955,10 @@ function AuctionRoom() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                 {/* సవాలు సెట్ */}
                 <div className="md:col-span-1 space-y-1">
-                  <Label className="text-[11px] text-amber-300">సవాలు సెట్</Label>
+                  <Label className="text-[11px] text-amber-300">{lt("Set Bid", "సవాలు సెట్")}</Label>
                   <Select value={activeBidder} onValueChange={setActiveBidder}>
                     <SelectTrigger className="h-9">
-                      <SelectValue placeholder={participants.length ? "Bidder" : "Add members"} />
+                      <SelectValue placeholder={participants.length ? lt("Bidder", "బిడ్డర్") : lt("Add members", "సభ్యులను జోడించండి")} />
                     </SelectTrigger>
                     <SelectContent>
                       {participants.map((p) => (
@@ -1967,7 +1970,7 @@ function AuctionRoom() {
                   </Select>
                 </div>
                 <div className="md:col-span-1 space-y-1">
-                  <Label className="text-[11px] text-amber-300">Bid Amount</Label>
+                  <Label className="text-[11px] text-amber-300">{lt("Bid Amount", "బిడ్ మొత్తం")}</Label>
                   <Input
                     type="number" inputMode="decimal" value={bid || ""}
                     onChange={(e) => setBid(Number(e.target.value))}
@@ -1983,7 +1986,7 @@ function AuctionRoom() {
                     disabled={auctionClosed || !bid || calc.overCap || !activeBidder}
                     className="w-full h-9 font-bold"
                   >
-                    సవాలు సెట్
+                    {lt("Set Bid", "సవాలు సెట్")}
                   </Button>
                 </div>
               </div>
@@ -1999,14 +2002,14 @@ function AuctionRoom() {
                   variant="outline"
                   className="gap-1.5 font-semibold"
                 >
-                  <Lock className="size-3.5" /> ఎంట్రీ క్లోజ్
+                  <Lock className="size-3.5" /> {lt("Entry Close", "ఎంట్రీ క్లోజ్")}
                 </Button>
                 <Button
                   onClick={finalizeAuction}
                   disabled={auctionClosed || sortedBids.length === 0}
                   className="gap-1.5 font-bold bg-emerald-600 hover:bg-emerald-700 text-white"
                 >
-                  <Trophy className="size-3.5" /> క్లోజ్ · Finalize
+                  <Trophy className="size-3.5" /> {lt("Finalize", "క్లోజ్")}
                 </Button>
               </div>
 
@@ -2025,28 +2028,28 @@ function AuctionRoom() {
           <Card className="lg:col-span-1 p-3 md:p-4 space-y-2 bg-gradient-to-b from-zinc-900 to-black border-amber-500/30">
             <div className="flex items-center gap-2">
               <Percent className="size-4 text-amber-400" />
-              <h2 className="font-bold text-amber-400 text-sm">Live Metrics</h2>
+              <h2 className="font-bold text-amber-400 text-sm">{lt("Live Metrics", "లైవ్ మెట్రిక్స్")}</h2>
             </div>
 
             {/* Start / Close time */}
             <div className="grid grid-cols-2 gap-2">
-              <StatBox label="Start · స్టార్ట్" value={turnStart ? new Date(turnStart).toLocaleTimeString() : "—"} />
-              <StatBox label="Close · క్లోజ్" value={turnEnd ? new Date(turnEnd).toLocaleTimeString() : "—"} />
+              <StatBox label={lt("Start", "స్టార్ట్")} value={turnStart ? new Date(turnStart).toLocaleTimeString() : "—"} />
+              <StatBox label={lt("Close", "క్లోజ్")} value={turnEnd ? new Date(turnEnd).toLocaleTimeString() : "—"} />
             </div>
 
             {/* Current Month / Interest */}
             <div className="grid grid-cols-2 gap-2">
               <div className="rounded-md border border-border bg-black/30 p-2">
-                <p className="text-[10px] uppercase text-muted-foreground">కరెంటు నెల</p>
+                <p className="text-[10px] uppercase text-muted-foreground">{lt("Current Month", "కరెంటు నెల")}</p>
                 <Input
                   type="number" inputMode="numeric" value={currentMonth}
                   onChange={(e) => setCurrentMonth(Number(e.target.value))}
                   className="h-7 text-base font-bold p-1 tabular-nums border-0 bg-transparent focus-visible:ring-0"
                 />
-                <p className="text-[9px] text-muted-foreground">of {totalMonths}</p>
+                <p className="text-[9px] text-muted-foreground">{lt("of", "లో")} {totalMonths}</p>
               </div>
               <StatBox
-                label="Interest · ఇన్ట్రెస్ట్"
+                label={lt("Interest", "వడ్డీ")}
                 value={`${calc.monthlyPct.toFixed(2)}%`}
                 sub={`≈ ${calc.annualPct.toFixed(1)}%/yr`}
               />
@@ -2055,7 +2058,7 @@ function AuctionRoom() {
             {/* Commission / Members must pay */}
             <div className="grid grid-cols-2 gap-2">
               <div className="rounded-md border border-border bg-black/30 p-2">
-                <p className="text-[10px] uppercase text-muted-foreground">కమిషన్ %</p>
+                <p className="text-[10px] uppercase text-muted-foreground">{lt("Commission %", "కమిషన్ %")}</p>
                 <Input
                   type="number" inputMode="decimal" value={commissionPct}
                   onChange={(e) => setCommissionPct(Number(e.target.value))}
@@ -2064,38 +2067,38 @@ function AuctionRoom() {
                 <p className="text-[9px] text-muted-foreground tabular-nums">{fmt(calc.commission)}</p>
               </div>
               <StatBox
-                label="Amount per member"
+                label={lt("Amount per member", "ఒక్కో సభ్యుడి మొత్తం")}
                 value={fmt(calc.perMember)}
-                sub={calc.topBid > 0 ? `(${fmt(chitValue)} − ${fmt(calc.topBid)}) / ${participants.length || 0}` : "per member"}
+                sub={calc.topBid > 0 ? `(${fmt(chitValue)} − ${fmt(calc.topBid)}) / ${participants.length || 0}` : lt("per member", "ఒక్కో సభ్యుడు")}
               />
 
             </div>
 
             {/* Winner box */}
             <div className={`rounded-md border p-2.5 ${winner ? "border-emerald-500/50 bg-emerald-500/10" : "border-border bg-black/30"}`}>
-              <p className="text-[10px] uppercase text-muted-foreground">విజేత ఎవరు · Winner</p>
+              <p className="text-[10px] uppercase text-muted-foreground">{lt("Winner", "విజేత")}</p>
               {winner ? (
                 <>
                   <p className="text-sm font-bold text-emerald-300 truncate">
                     <span className="font-mono opacity-80 mr-1">{winner.memberCode || "—"}</span>
                     {winner.memberName}
                   </p>
-                  <p className="text-[10px] text-muted-foreground tabular-nums">Bid {fmt(winner.amount)}</p>
+                  <p className="text-[10px] text-muted-foreground tabular-nums">{lt("Bid", "బిడ్")} {fmt(winner.amount)}</p>
                 </>
               ) : (
-                <p className="text-sm italic text-muted-foreground">— pending —</p>
+                <p className="text-sm italic text-muted-foreground">— {lt("pending", "పెండింగ్")} —</p>
               )}
             </div>
 
             {/* Amount handed over */}
             <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-2.5">
-              <p className="text-[10px] uppercase text-amber-200/80">అతనికి అందజేసే మొత్తం</p>
+              <p className="text-[10px] uppercase text-amber-200/80">{lt("Amount handed over", "అతనికి అందజేసే మొత్తం")}</p>
               <p className="text-lg font-bold text-amber-300 tabular-nums">
                 {winnerCalc ? fmt(winnerCalc.net) : fmt(Math.max(0, chitValue - bid - calc.commission))}
               </p>
               {winnerCalc && (
                 <p className="text-[10px] text-muted-foreground tabular-nums">
-                  Dividend: {fmt(winnerCalc.dividend)}
+                  {lt("Dividend", "డివిడెండ్")}: {fmt(winnerCalc.dividend)}
                 </p>
               )}
             </div>
@@ -2108,12 +2111,12 @@ function AuctionRoom() {
         <Card className="p-4 md:p-5 space-y-3 bg-card">
           <div className="flex items-center gap-2">
             <Trophy className="size-4 text-amber-400" />
-            <h2 className="font-semibold">పాస్ట్ డిటైల్స్ · Past History</h2>
+            <h2 className="font-semibold">{lt("Past History", "గత చరిత్ర")}</h2>
             <Badge variant="secondary" className="text-xs">{pastWinners.length}</Badge>
           </div>
 
           {pastWinners.length === 0 ? (
-            <p className="text-xs text-muted-foreground italic text-center py-3">No past auctions yet.</p>
+            <p className="text-xs text-muted-foreground italic text-center py-3">{lt("No past auctions yet.", "ఇంకా గత ఆక్షన్‌లు లేవు.")}</p>
           ) : (
             <ul className="space-y-1.5 text-sm">
               {[...pastWinners].sort((a, b) => a.month - b.month).map((w) => (
@@ -2135,7 +2138,7 @@ function AuctionRoom() {
               disabled={participants.length === 0 || !chitGroupName.trim()}
               className="gap-1.5 bg-amber-500 hover:bg-amber-600 text-black font-bold"
             >
-              <CheckCircle2 className="size-4" /> సేవ్
+              <CheckCircle2 className="size-4" /> {lt("Save", "సేవ్")}
             </Button>
             <Button onClick={handlePrint} variant="outline" className="gap-1.5 font-semibold">
               <Printer className="size-4" /> PDF
@@ -2157,7 +2160,7 @@ function AuctionRoom() {
           <Card className="p-4 md:p-5 space-y-2 bg-card">
             <div className="flex items-center gap-2">
               <Trophy className="size-4 text-amber-400" />
-              <h2 className="font-semibold">Past Month Winners · గత నెల విజేతలు</h2>
+            <h2 className="font-semibold">{lt("Past Month Winners", "గత నెల విజేతలు")}</h2>
             </div>
             <ul className="space-y-1.5 text-sm">
               {[...pastWinners].sort((a, b) => a.month - b.month).map((w) => (
@@ -2180,18 +2183,18 @@ function AuctionRoom() {
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2">
               <Trophy className="size-4 text-amber-400" />
-              <h2 className="font-semibold">Live Bids Activity</h2>
+              <h2 className="font-semibold">{lt("Live Bids Activity", "లైవ్ బిడ్‌ల క్రియాశీలత")}</h2>
               <Badge variant="secondary" className="text-xs">{bids.length}</Badge>
               {auctionClosed && (
                 <Badge className="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                  Finalized
+                  {lt("Finalized", "పూర్తయింది")}
                 </Badge>
               )}
             </div>
             <div className="flex items-center gap-2">
               {bids.length > 0 && !auctionClosed && (
                 <Button variant="ghost" size="sm" onClick={clearBids} className="text-xs">
-                  Clear All
+                  {lt("Clear All", "అన్నీ క్లియర్")}
                 </Button>
               )}
               {isAdmin && !auctionClosed && (
@@ -2201,7 +2204,7 @@ function AuctionRoom() {
                   disabled={sortedBids.length === 0}
                   className="text-xs gap-1 bg-emerald-600 hover:bg-emerald-700 text-white"
                 >
-                  <Lock className="size-3.5" /> End Auction & Finalize Winner
+                  <Lock className="size-3.5" /> {lt("End Auction & Finalize Winner", "ఆక్షన్ ముగించి విజేతను ఖరారు చేయండి")}
                 </Button>
               )}
               {isAdmin && auctionClosed && (
@@ -2211,7 +2214,7 @@ function AuctionRoom() {
                   onClick={resetAuction}
                   className="text-xs gap-1"
                 >
-                  <RotateCcw className="size-3.5" /> Reset / Schedule Next Month
+                  <RotateCcw className="size-3.5" /> {lt("Reset / Schedule Next Month", "రీసెట్ / తదుపరి నెల షెడ్యూల్")}
                 </Button>
               )}
             </div>
@@ -2219,16 +2222,16 @@ function AuctionRoom() {
 
           {sortedBids.length === 0 ? (
             <div className="text-center py-8 text-sm text-muted-foreground">
-              No bids yet. Submit the first bid to start the auction.
+              {lt("No bids yet. Submit the first bid to start the auction.", "ఇంకా బిడ్‌లు లేవు. ఆక్షన్ ప్రారంభించడానికి మొదటి బిడ్ సమర్పించండి.")}
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-12">#</TableHead>
-                  <TableHead>Member</TableHead>
-                  <TableHead className="text-right">Bid Amount</TableHead>
-                  <TableHead className="text-right">Time</TableHead>
+                  <TableHead>{lt("Member", "సభ్యుడు")}</TableHead>
+                  <TableHead className="text-right">{lt("Bid Amount", "బిడ్ మొత్తం")}</TableHead>
+                  <TableHead className="text-right">{lt("Time", "సమయం")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -2292,7 +2295,7 @@ function AuctionRoom() {
             {myConsent ? (
               <div className="rounded-md bg-emerald-500/10 border border-emerald-500/40 p-3 text-sm">
                 <p className="font-semibold text-emerald-300">
-                  ✓ నాకు సమ్మతము — Consent recorded
+                  ✓ {lt("Consent recorded", "సమ్మతి నమోదైంది")}
                 </p>
                 <p className="text-[11px] text-muted-foreground mt-1">
                   Signed at {new Date(myConsent.signedAt).toLocaleString()} ·{" "}
@@ -2301,7 +2304,7 @@ function AuctionRoom() {
               </div>
             ) : (
               <Button onClick={giveConsent} className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2">
-                <CheckCircle2 className="size-4" /> నాకు సమ్మతము (I Agree / Consent)
+                <CheckCircle2 className="size-4" /> {lt("I Agree / Consent", "నాకు సమ్మతము")}
               </Button>
             )}
 
@@ -2326,13 +2329,13 @@ function AuctionRoom() {
             <Card className="p-3 md:p-4 bg-card">
               <div className="flex items-center gap-2 mb-2">
                 <Wallet className="size-4 text-amber-400" />
-                <h2 className="font-semibold text-sm">
-                  Paid & Received History · చెల్లింపు వివరాలు
-                </h2>
+                  <h2 className="font-semibold text-sm">
+                    {lt("Paid & Received History", "చెల్లింపు వివరాలు")}
+                  </h2>
               </div>
               <div className="grid grid-cols-2 gap-2 mb-2">
-                <StatBox label="Total Received" value={fmt(myReceived)} highlight />
-                <StatBox label="Total Paid (Dividends)" value={fmt(myPaid)} />
+                <StatBox label={lt("Total Received", "మొత్తం అందుకున్నది")} value={fmt(myReceived)} highlight />
+                <StatBox label={lt("Total Paid (Dividends)", "మొత్తం చెల్లించినది (డివిడెండ్లు)")} value={fmt(myPaid)} />
               </div>
               {myWins.length > 0 ? (
                 <ul className="space-y-1 text-xs">
@@ -2342,7 +2345,7 @@ function AuctionRoom() {
                       className="flex items-center justify-between rounded border border-border bg-black/30 px-2 py-1.5"
                     >
                       <span>
-                        <b>{ordinal(w.month)}</b> Month · You won
+                        <b>{ordinal(w.month)}</b> {lt("Month", "నెల")} · {lt("You won", "మీరు గెలిచారు")}
                       </span>
                       <span className="text-amber-400 font-bold tabular-nums">
                         {fmt(w.net)}
@@ -2352,7 +2355,7 @@ function AuctionRoom() {
                 </ul>
               ) : (
                 <p className="text-[11px] text-muted-foreground">
-                  No wins yet. Keep participating!
+                  {lt("No wins yet. Keep participating!", "ఇంకా గెలుపులు లేవు. పాల్గొనడం కొనసాగించండి!")}
                 </p>
               )}
             </Card>
@@ -2395,19 +2398,19 @@ function AuctionRoom() {
             <Card className="p-4 md:p-5 space-y-3 bg-card">
               <div className="flex items-center gap-2">
                 <Archive className="size-4 text-indigo-400" />
-                <h2 className="font-semibold">Past Months Reports Archive</h2>
+                <h2 className="font-semibold">{lt("Past Months Reports Archive", "గత నెలల రిపోర్టుల ఆర్కైవ్")}</h2>
                 <Badge variant="secondary" className="text-xs">{visible.length}</Badge>
               </div>
               {visible.length === 0 ? (
                 <p className="text-xs text-muted-foreground">
-                  No archived months yet. When "Reset / Next Month" is used, the finalized month will appear here.
+                  {lt('No archived months yet. When "Reset / Next Month" is used, the finalized month will appear here.', 'ఇంకా ఆర్కైవ్ చేసిన నెలలు లేవు. "రీసెట్ / తదుపరి నెల" వాడినప్పుడు పూర్తయిన నెల ఇక్కడ కనిపిస్తుంది.')}
                 </p>
               ) : (
                 <div className="space-y-3">
                   {groupNames.map((gn) => (
                     <div key={gn} className="rounded-md border border-border/60 p-2">
                       <p className="text-xs font-semibold mb-2 text-muted-foreground">
-                        Group: <span className="text-foreground">{gn}</span>
+                         {lt("Group", "గ్రూప్")}: <span className="text-foreground">{gn}</span>
                       </p>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                         {byGroup[gn]
@@ -2420,15 +2423,15 @@ function AuctionRoom() {
                             >
                               <div className="min-w-0">
                                 <p className="text-xs font-semibold truncate">
-                                  Month {a.month_no} Report
+                                  {lt("Month", "నెల")} {a.month_no} {lt("Report", "రిపోర్ట్")}
                                 </p>
                                 <p className="text-[10px] text-muted-foreground truncate">
                                   {a.winner
-                                    ? <>Winner: {a.winner.memberName} · {fmt(a.winner.amount)}</>
-                                    : "No winner recorded"}
+                                    ? <>{lt("Winner", "విజేత")}: {a.winner.memberName} · {fmt(a.winner.amount)}</>
+                                    : lt("No winner recorded", "విజేత నమోదు కాలేదు")}
                                 </p>
                                 <p className="text-[10px] text-muted-foreground">
-                                  Closed {new Date(a.closed_at).toLocaleDateString()}
+                                  {lt("Closed", "ముగిసింది")} {new Date(a.closed_at).toLocaleDateString()}
                                 </p>
                               </div>
                               <Button
@@ -2462,7 +2465,7 @@ function AuctionRoom() {
                 {orgRegNo && <> · Reg {orgRegNo}</>}
               </p>
               <Button onClick={handlePrint} variant="outline" size="sm" className="gap-1.5 w-full sm:w-auto">
-                <Printer className="size-4" /> Print Official Auction PDF
+                <Printer className="size-4" /> {lt("Print Official Auction PDF", "అధికారిక ఆక్షన్ PDF ప్రింట్")}
               </Button>
             </div>
           </div>
@@ -2504,7 +2507,7 @@ function AuctionRoom() {
                 </div>
                 <div className="rounded-lg border border-border bg-black/40 p-3 col-span-2">
                   <p className="text-[10px] uppercase text-zinc-400">
-                    Dividend per Member · డివిడెండ్ ({winnerCalc.others} సభ్యులకు)
+                    {lt("Dividend per Member", "డివిడెండ్")} ({winnerCalc.others} {lt("members", "సభ్యులు")})
                   </p>
                   <p className="text-lg font-bold text-amber-400 tabular-nums">{fmt(winnerCalc.dividend)}</p>
                 </div>

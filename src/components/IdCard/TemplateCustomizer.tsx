@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Eye, EyeOff } from "lucide-react";
 import type { IdCardDesign, ElementKey } from "@/lib/idCardTemplates";
 import { ELEMENT_LABELS, FONT_OPTIONS } from "@/lib/idCardTemplates";
+import { localizeText, useI18n } from "@/lib/i18n";
 
 type Props = {
   design: IdCardDesign;
@@ -19,7 +20,11 @@ const TEXT_SUB = "var(--design-muted, var(--mbr-theme-muted, #a1a1aa))";
 const INPUT_BG = "var(--design-input-bg, var(--mbr-theme-input-bg, #0a0a0a))";
 const INPUT_TEXT = "var(--design-input-text, var(--mbr-theme-input-text, #ffffff))";
 
+const makeLt = (lang: string) => (en: string, te: string) => localizeText({ en, te }, lang);
+
 export function TemplateCustomizer({ design, onChange }: Props) {
+  const { lang } = useI18n();
+  const lt = makeLt(lang);
   function setGlobal<K extends keyof IdCardDesign["global"]>(key: K, value: IdCardDesign["global"][K]) {
     onChange({ ...design, global: { ...design.global, [key]: value } });
   }
@@ -35,32 +40,32 @@ export function TemplateCustomizer({ design, onChange }: Props) {
   return (
     <div className="space-y-4">
       {/* GLOBAL */}
-      <Section title="Card Background / Border  •  బార్డర్ & బ్యాగ్రౌండ్">
+      <Section title={lt("Card Background / Border", "బార్డర్ & బ్యాగ్రౌండ్")}>
         <div className="grid grid-cols-2 gap-3">
-          <ColorField label="Background" value={design.global.backgroundColor} onChange={(v) => setGlobal("backgroundColor", v)} />
-          <ColorField label="Border Color" value={design.global.borderColor} onChange={(v) => setGlobal("borderColor", v)} />
-          <ColorField label="Accent / Header" value={design.global.accentColor} onChange={(v) => setGlobal("accentColor", v)} />
-          <NumberField label="Border Width (px)" value={design.global.borderWidth} min={0} max={8} onChange={(v) => setGlobal("borderWidth", v)} />
-          <NumberField label="Corner Radius" value={design.global.cornerRadius} min={0} max={32} onChange={(v) => setGlobal("cornerRadius", v)} />
+          <ColorField label={lt("Background", "బ్యాక్‌గ్రౌండ్")} value={design.global.backgroundColor} onChange={(v) => setGlobal("backgroundColor", v)} />
+          <ColorField label={lt("Border Color", "బార్డర్ రంగు")} value={design.global.borderColor} onChange={(v) => setGlobal("borderColor", v)} />
+          <ColorField label={lt("Accent / Header", "హెడర్ రంగు")} value={design.global.accentColor} onChange={(v) => setGlobal("accentColor", v)} />
+          <NumberField label={lt("Border Width (px)", "బార్డర్ వెడల్పు (px)")} value={design.global.borderWidth} min={0} max={8} onChange={(v) => setGlobal("borderWidth", v)} />
+          <NumberField label={lt("Corner Radius", "కార్నర్ రేడియస్")} value={design.global.cornerRadius} min={0} max={32} onChange={(v) => setGlobal("cornerRadius", v)} />
           <div className="space-y-1">
-            <Label className="text-[11px]" style={{ color: TEXT_SUB }}>Border Style</Label>
+            <Label className="text-[11px]" style={{ color: TEXT_SUB }}>{lt("Border Style", "బార్డర్ స్టైల్")}</Label>
             <Select value={design.global.borderStyle} onValueChange={(v) => setGlobal("borderStyle", v as any)}>
               <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="solid">Solid</SelectItem>
-                <SelectItem value="dashed">Dashed</SelectItem>
-                <SelectItem value="none">None</SelectItem>
+                <SelectItem value="solid">{lt("Solid", "సాలిడ్")}</SelectItem>
+                <SelectItem value="dashed">{lt("Dashed", "డాష్డ్")}</SelectItem>
+                <SelectItem value="none">{lt("None", "ఏదీ లేదు")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-1">
-            <Label className="text-[11px]" style={{ color: TEXT_SUB }}>Header Align / హెడ్డర్ అలైన్</Label>
+            <Label className="text-[11px]" style={{ color: TEXT_SUB }}>{lt("Header Align", "హెడర్ అలైన్")}</Label>
             <Select value={design.global.headerAlign || "left"} onValueChange={(v) => setGlobal("headerAlign", v as any)}>
               <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="left">← Left / ఎడమ</SelectItem>
-                <SelectItem value="center">↔ Center / మధ్య</SelectItem>
-                <SelectItem value="right">→ Right / కుడి</SelectItem>
+                <SelectItem value="left">← {lt("Left", "ఎడమ")}</SelectItem>
+                <SelectItem value="center">↔ {lt("Center", "మధ్య")}</SelectItem>
+                <SelectItem value="right">→ {lt("Right", "కుడి")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -70,7 +75,7 @@ export function TemplateCustomizer({ design, onChange }: Props) {
         <div className="grid grid-cols-2 gap-3 pt-2">
           <div className="space-y-1">
             <Label className="text-[11px]" style={{ color: TEXT_SUB }}>
-              Logo X-Offset / లోగో అలైన్ — {(design.global.headerLogoOffsetX ?? 0)}px
+              {lt("Logo X-Offset", "లోగో అలైన్")} — {(design.global.headerLogoOffsetX ?? 0)}px
             </Label>
             <input
               type="range" min={-40} max={40} step={1}
@@ -81,7 +86,7 @@ export function TemplateCustomizer({ design, onChange }: Props) {
           </div>
           <div className="space-y-1">
             <Label className="text-[11px]" style={{ color: TEXT_SUB }}>
-              Active Badge X-Offset / బ్యాడ్జ్ అలైన్ — {(design.global.headerBadgeOffsetX ?? 0)}px
+              {lt("Active Badge X-Offset", "బ్యాడ్జ్ అలైన్")} — {(design.global.headerBadgeOffsetX ?? 0)}px
             </Label>
             <input
               type="range" min={-40} max={40} step={1}
@@ -98,13 +103,13 @@ export function TemplateCustomizer({ design, onChange }: Props) {
         {/* Independent Footer & ID Badge controls */}
         <div className="grid grid-cols-2 gap-3 pt-2">
           <ColorField
-            label="Contact Footer BG / ఫుటర్ రంగు"
+            label={lt("Contact Footer BG", "ఫుటర్ రంగు")}
             value={design.global.contactFooterBg || design.global.accentColor}
             onChange={(v) => setGlobal("contactFooterBg", v)}
           />
           <div className="space-y-1">
             <Label className="text-[11px]" style={{ color: TEXT_SUB }}>
-              Footer Text Size / ఫుటర్ సైజ్ — {(design.global.contactFooterTextSize ?? 8)}px
+              {lt("Footer Text Size", "ఫుటర్ సైజ్")} — {(design.global.contactFooterTextSize ?? 8)}px
             </Label>
             <input
               type="range" min={6} max={14} step={1}
@@ -114,7 +119,7 @@ export function TemplateCustomizer({ design, onChange }: Props) {
             />
           </div>
           <ColorField
-            label="ID Badge BG (A/0001) / ఐడీ రంగు"
+            label={lt("ID Badge BG (A/0001)", "ఐడీ రంగు")}
             value={design.global.memberCodeBadgeBg || design.global.accentColor}
             onChange={(v) => setGlobal("memberCodeBadgeBg", v)}
           />
@@ -123,12 +128,12 @@ export function TemplateCustomizer({ design, onChange }: Props) {
         {/* Background image uploads — front & back */}
         <div className="grid grid-cols-2 gap-3 pt-2">
           <BgImageField
-            label="Front BG Image / ముందు బ్యాగ్రౌండ్"
+            label={lt("Front BG Image", "ముందు బ్యాగ్రౌండ్")}
             value={design.global.frontBgImage}
             onChange={(v) => setGlobal("frontBgImage", v as any)}
           />
           <BgImageField
-            label="Back BG Image / వెనుక బ్యాగ్రౌండ్"
+            label={lt("Back BG Image", "వెనుక బ్యాగ్రౌండ్")}
             value={design.global.backBgImage}
             onChange={(v) => setGlobal("backBgImage", v as any)}
           />
@@ -136,12 +141,12 @@ export function TemplateCustomizer({ design, onChange }: Props) {
       </Section>
 
       {/* FRONT ELEMENTS */}
-      <Section title="Front Side — Lines & Elements  •  ఫ్రంట్ లైన్స్">
+      <Section title={lt("Front Side — Lines & Elements", "ఫ్రంట్ లైన్స్")}>
         {frontKeys.map((k) => <ElementRow key={k} k={k} design={design} setElement={setElement} />)}
       </Section>
 
       {/* BACK MATTER TEXT */}
-      <Section title="Back Side Text  •  వెనుక మేటర్ (ఎడిట్ చేయండి)">
+      <Section title={lt("Back Side Text", "వెనుక మేటర్ (ఎడిట్ చేయండి)")}>
         <Textarea
           value={design.backMatter || ""}
           onChange={(e) => onChange({ ...design, backMatter: e.target.value })}
@@ -151,7 +156,7 @@ export function TemplateCustomizer({ design, onChange }: Props) {
         />
         <div className="space-y-1">
           <Label className="text-[11px]" style={{ color: TEXT_SUB }}>
-            Line Height / లైన్ గ్యాప్ — {(design.elements.backMatter.lineHeight ?? 1.4).toFixed(2)}
+            {lt("Line Height", "లైన్ గ్యాప్")} — {(design.elements.backMatter.lineHeight ?? 1.4).toFixed(2)}
           </Label>
           <input
             type="range" min={1} max={2.2} step={0.05}
@@ -163,7 +168,7 @@ export function TemplateCustomizer({ design, onChange }: Props) {
       </Section>
 
       {/* OATH / ప్రమాణం */}
-      <Section title="Oath / ప్రమాణం (Hidden by default — Show/Hide using toggle below)">
+      <Section title={lt("Oath (Hidden by default — use Show/Hidden toggle below)", "ప్రమాణం (కింద ఉన్న బటన్‌తో చూపించండి/దాచండి)")}>
         <Textarea
           value={design.oathText || ""}
           onChange={(e) => onChange({ ...design, oathText: e.target.value })}
@@ -172,13 +177,13 @@ export function TemplateCustomizer({ design, onChange }: Props) {
           className="text-xs"
         />
         <p className="text-[10px]" style={{ color: TEXT_SUB }}>
-          Tip: <code>{"{name}"}</code> లేదా <code>(సభ్యుడి పేరు)</code> — auto-replaces with member's name.
+          {lt("Tip", "సూచన")}: <code>{"{name}"}</code> {lt("auto-replaces with member's name", "సభ్యుడి పేరుతో ఆటోమేటిక్‌గా మారుతుంది")}.
         </p>
       </Section>
 
 
       {/* BACK ELEMENTS */}
-      <Section title="Back Side — Lines & Elements  •  బ్యాక్ లైన్స్">
+      <Section title={lt("Back Side — Lines & Elements", "బ్యాక్ లైన్స్")}>
         {backKeys.map((k) => <ElementRow key={k} k={k} design={design} setElement={setElement} />)}
       </Section>
     </div>
@@ -242,16 +247,18 @@ function BgImageField({ label, value, onChange }: { label: string; value: string
 }
 
 function ElementRow({ k, design, setElement }: { k: ElementKey; design: IdCardDesign; setElement: (k: ElementKey, p: any) => void }) {
+  const { lang } = useI18n();
+  const lt = makeLt(lang);
   const meta = ELEMENT_LABELS[k];
   const el = design.elements[k];
   const isImage = k === "logo" || k === "photo" || k === "qrCode" || k === "presidentSignature" || k === "mbrQrCode" || k === "mbrLogo";
+  const label = localizeText(meta, lang);
 
   return (
     <div className="rounded-md p-2 border space-y-2" data-theme-surface="mini-box" style={{ borderColor: PANEL_BORDER, background: MINI_BG }}>
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0">
-          <div className="text-[12px] font-semibold truncate" style={{ color: TEXT_HEAD }}>{meta.en}</div>
-          <div className="text-[10px] truncate" style={{ color: TEXT_SUB }}>{meta.te}</div>
+          <div className="text-[12px] font-semibold truncate" style={{ color: TEXT_HEAD }}>{label}</div>
         </div>
         <button
           type="button"
@@ -259,24 +266,24 @@ function ElementRow({ k, design, setElement }: { k: ElementKey; design: IdCardDe
           className="flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded"
           style={{ background: el.visible ? "var(--mbr-theme-primary, #138808)" : MINI_BG, border: `1px solid ${PANEL_BORDER}`, color: el.visible ? "var(--mbr-theme-primary-fg, #ffffff)" : TEXT_SUB }}
         >
-          {el.visible ? <><Eye className="h-3 w-3" /> Show</> : <><EyeOff className="h-3 w-3" /> Hidden</>}
+          {el.visible ? <><Eye className="h-3 w-3" /> {lt("Show", "చూపించు")}</> : <><EyeOff className="h-3 w-3" /> {lt("Hidden", "దాచబడింది")}</>}
         </button>
       </div>
 
       {el.visible && (
         isImage ? (
           <div className="grid grid-cols-2 gap-2">
-            <NumberField label="Size (px)" value={el.imgSize ?? 60} min={20} max={140} onChange={(v) => setElement(k, { imgSize: v })} />
+            <NumberField label={lt("Size (px)", "సైజ్ (px)")} value={el.imgSize ?? 60} min={20} max={140} onChange={(v) => setElement(k, { imgSize: v })} />
             {(k === "qrCode" || k === "mbrLogo") && (
               <div className="space-y-1">
-                <Label className="text-[10px]" style={{ color: TEXT_SUB }}>Corner / మూల</Label>
+                <Label className="text-[10px]" style={{ color: TEXT_SUB }}>{lt("Corner", "మూల")}</Label>
                 <Select value={el.corner || "br"} onValueChange={(v) => setElement(k, { corner: v })}>
                   <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="tl">↖ Top Left</SelectItem>
-                    <SelectItem value="tr">↗ Top Right</SelectItem>
-                    <SelectItem value="bl">↙ Bottom Left</SelectItem>
-                    <SelectItem value="br">↘ Bottom Right</SelectItem>
+                    <SelectItem value="tl">↖ {lt("Top Left", "పై ఎడమ")}</SelectItem>
+                    <SelectItem value="tr">↗ {lt("Top Right", "పై కుడి")}</SelectItem>
+                    <SelectItem value="bl">↙ {lt("Bottom Left", "కింద ఎడమ")}</SelectItem>
+                    <SelectItem value="br">↘ {lt("Bottom Right", "కింద కుడి")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -286,7 +293,7 @@ function ElementRow({ k, design, setElement }: { k: ElementKey; design: IdCardDe
 
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
-              <Label className="text-[10px]" style={{ color: TEXT_SUB }}>Font</Label>
+              <Label className="text-[10px]" style={{ color: TEXT_SUB }}>{lt("Font", "ఫాంట్")}</Label>
               <Select value={el.font || "Inter"} onValueChange={(v) => setElement(k, { font: v })}>
                 <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -294,9 +301,9 @@ function ElementRow({ k, design, setElement }: { k: ElementKey; design: IdCardDe
                 </SelectContent>
               </Select>
             </div>
-            <NumberField label="Size (px)" value={el.size ?? 12} min={6} max={28} onChange={(v) => setElement(k, { size: v })} />
+            <NumberField label={lt("Size (px)", "సైజ్ (px)")} value={el.size ?? 12} min={6} max={28} onChange={(v) => setElement(k, { size: v })} />
             <div className="space-y-1">
-              <Label className="text-[10px]" style={{ color: TEXT_SUB }}>Weight</Label>
+              <Label className="text-[10px]" style={{ color: TEXT_SUB }}>{lt("Weight", "బరువు")}</Label>
               <Select value={String(el.weight ?? 500)} onValueChange={(v) => setElement(k, { weight: Number(v) })}>
                 <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -304,7 +311,7 @@ function ElementRow({ k, design, setElement }: { k: ElementKey; design: IdCardDe
                 </SelectContent>
               </Select>
             </div>
-            <ColorField label="Color" value={el.color || "#111111"} onChange={(v) => setElement(k, { color: v })} />
+            <ColorField label={lt("Color", "రంగు")} value={el.color || "#111111"} onChange={(v) => setElement(k, { color: v })} />
           </div>
         )
       )}

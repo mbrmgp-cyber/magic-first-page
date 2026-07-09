@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, XCircle, Clock, Upload, FileText } from "lucide-react";
 import { toast } from "sonner";
+import { localizeText, useI18n } from "@/lib/i18n";
 import {
   listAuctionPayments,
   uploadAuctionPayment,
@@ -24,6 +25,8 @@ type Props = {
 };
 
 export function AuctionPaymentsPanel({ orgId, auctionId, monthNo, amount, isAdmin }: Props) {
+  const { lang } = useI18n();
+  const lt = (en: string, te: string) => localizeText({ en, te }, lang);
   const listFn = useServerFn(listAuctionPayments);
   const uploadFn = useServerFn(uploadAuctionPayment);
   const verifyFn = useServerFn(verifyAuctionPayment);
@@ -68,7 +71,7 @@ export function AuctionPaymentsPanel({ orgId, auctionId, monthNo, amount, isAdmi
         receiptUrl = path;
       }
       await uploadFn({ data: { orgId, auctionId, monthNo, amount, receiptUrl, note: note || null } });
-      toast.success("Receipt submitted for verification");
+      toast.success(lt("Receipt submitted for verification", "రసీదు ధృవీకరణకు పంపబడింది"));
       setNote("");
       if (fileRef.current) fileRef.current.value = "";
       refresh();
@@ -103,40 +106,40 @@ export function AuctionPaymentsPanel({ orgId, auctionId, monthNo, amount, isAdmi
     <Card className="p-4 space-y-3 bg-card">
       <div className="flex items-center gap-2">
         <FileText className="size-4 text-amber-400" />
-        <h3 className="font-semibold text-sm">Payments · చెల్లింపులు (Month {monthNo})</h3>
-        <Badge variant="secondary" className="ml-auto text-[10px]">{payments.length} entries</Badge>
+        <h3 className="font-semibold text-sm">{lt("Payments", "చెల్లింపులు")} ({lt("Month", "నెల")} {monthNo})</h3>
+        <Badge variant="secondary" className="ml-auto text-[10px]">{payments.length} {lt("entries", "నమోదులు")}</Badge>
       </div>
 
       {!isAdmin && (
         <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-2">
           <Input ref={fileRef} type="file" accept="image/*,application/pdf" className="h-9 text-xs" />
-          <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note (txn id, mode)" className="h-9 text-xs" />
+          <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder={lt("Note (txn id, mode)", "గమనిక (ట్రాన్సాక్షన్ ఐడి, విధానం)")} className="h-9 text-xs" />
           <Button onClick={doUpload} disabled={uploading} size="sm" className="gap-1.5">
-            <Upload className="size-3.5" /> Submit
+            <Upload className="size-3.5" /> {lt("Submit", "సమర్పించండి")}
           </Button>
         </div>
       )}
 
       <div className="space-y-1.5 max-h-80 overflow-auto">
         {payments.length === 0 && (
-          <p className="text-xs text-muted-foreground italic">No receipts yet.</p>
+          <p className="text-xs text-muted-foreground italic">{lt("No receipts yet.", "ఇంకా రసీదులు లేవు.")}</p>
         )}
         {payments.map((p) => (
           <div key={p.id} className="flex items-center gap-2 rounded-md border border-border bg-background/50 p-2 text-xs">
             <span className="font-mono opacity-70 w-16 truncate">{p.member_code || "—"}</span>
             <span className="flex-1 truncate">{p.member_name || "Member"}</span>
             <span className="tabular-nums font-semibold">₹{Number(p.amount).toLocaleString("en-IN")}</span>
-            {p.status === "verified" && <Badge className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/40 gap-1"><CheckCircle2 className="size-3" />Verified</Badge>}
-            {p.status === "rejected" && <Badge className="bg-red-500/15 text-red-400 border border-red-500/40 gap-1"><XCircle className="size-3" />Rejected</Badge>}
-            {p.status === "pending" && <Badge className="bg-yellow-500/15 text-yellow-400 border border-yellow-500/40 gap-1"><Clock className="size-3" />Pending</Badge>}
+            {p.status === "verified" && <Badge className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/40 gap-1"><CheckCircle2 className="size-3" />{lt("Verified", "ధృవీకరించబడింది")}</Badge>}
+            {p.status === "rejected" && <Badge className="bg-red-500/15 text-red-400 border border-red-500/40 gap-1"><XCircle className="size-3" />{lt("Rejected", "తిరస్కరించబడింది")}</Badge>}
+            {p.status === "pending" && <Badge className="bg-yellow-500/15 text-yellow-400 border border-yellow-500/40 gap-1"><Clock className="size-3" />{lt("Pending", "పెండింగ్")}</Badge>}
             {p.receipt_url && (
-              <Button size="sm" variant="ghost" onClick={() => openReceipt(p)} className="h-7 px-2 text-[11px]">View</Button>
+              <Button size="sm" variant="ghost" onClick={() => openReceipt(p)} className="h-7 px-2 text-[11px]">{lt("View", "చూడండి")}</Button>
             )}
             {isAdmin && p.status !== "verified" && (
-              <Button size="sm" onClick={() => setStatus(p, "verified")} className="h-7 px-2 text-[11px] bg-emerald-600 hover:bg-emerald-700">Verify</Button>
+              <Button size="sm" onClick={() => setStatus(p, "verified")} className="h-7 px-2 text-[11px] bg-emerald-600 hover:bg-emerald-700">{lt("Verify", "ధృవీకరించండి")}</Button>
             )}
             {isAdmin && p.status !== "rejected" && (
-              <Button size="sm" variant="destructive" onClick={() => setStatus(p, "rejected")} className="h-7 px-2 text-[11px]">Reject</Button>
+              <Button size="sm" variant="destructive" onClick={() => setStatus(p, "rejected")} className="h-7 px-2 text-[11px]">{lt("Reject", "తిరస్కరించండి")}</Button>
             )}
           </div>
         ))}
