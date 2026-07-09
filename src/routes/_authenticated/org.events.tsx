@@ -171,6 +171,7 @@ function MeetingsTab({ orgId, meetings, resolutions, members, onChange }: any) {
 }
 
 function MeetingCard({ m, resolutions, members, orgId, onEdit, onChange }: any) {
+  const { lang } = useI18n();
   const linkedRes = resolutions.filter((r: any) => r.meeting_id === m.id);
   async function del() {
     if (!confirm("Delete this meeting?")) return;
@@ -383,6 +384,7 @@ function toLocalInput(iso: string) {
 
 /* ============ Resolutions Tab ============ */
 function ResolutionsTab({ orgId, resolutions, meetings, members, onChange }: any) {
+  const { lang } = useI18n();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   return (
@@ -531,6 +533,7 @@ function blankResolution() {
 
 /* ============ Activities Tab ============ */
 function ActivitiesTab({ orgId, activities, onChange }: any) {
+  const { lang } = useI18n();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   return (
