@@ -168,3 +168,11 @@
   filter: brightness(1.05);
 }
 
+@media print {
+  .mbr-global-ad-bar,
+  .no-print {
+    display: none !important;
+    visibility: hidden !important;
+  }
+}
+
