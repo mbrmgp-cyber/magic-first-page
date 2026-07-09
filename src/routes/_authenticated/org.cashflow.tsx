@@ -67,151 +67,29 @@ function CashFlowPage() {
   async function downloadCashFlowPdf() {
     if (!d || pdfBusy) return;
     setPdfBusy(true);
-    try {
-      const { jsPDF } = await import("jspdf");
-      await document.fonts?.ready;
-      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-      const toBase64 = (buffer: ArrayBuffer) => {
-        const bytes = new Uint8Array(buffer);
-        let binary = "";
-        const chunkSize = 8192;
-        for (let i = 0; i < bytes.length; i += chunkSize) {
-          binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
-        }
-        return window.btoa(binary);
-      };
-      const [regularFont, boldFont] = await Promise.all([
-        fetch("/fonts/NotoSansTelugu-Regular.ttf").then((r) => r.arrayBuffer()),
-        fetch("/fonts/NotoSansTelugu-Bold.ttf").then((r) => r.arrayBuffer()),
-      ]);
-      pdf.addFileToVFS("NotoSansTelugu-Regular.ttf", toBase64(regularFont));
-      pdf.addFileToVFS("NotoSansTelugu-Bold.ttf", toBase64(boldFont));
-      pdf.addFont("NotoSansTelugu-Regular.ttf", "NotoSansTelugu", "normal");
-      pdf.addFont("NotoSansTelugu-Bold.ttf", "NotoSansTelugu", "bold");
-
-      const pageWidth = 210;
-      const pageHeight = 297;
-      const margin = 13;
-      const gap = 4;
-      const setColor = (hex: string) => {
-        const clean = hex.replace("#", "");
-        pdf.setTextColor(parseInt(clean.slice(0, 2), 16), parseInt(clean.slice(2, 4), 16), parseInt(clean.slice(4, 6), 16));
-      };
-      const setFill = (hex: string) => {
-        const clean = hex.replace("#", "");
-        pdf.setFillColor(parseInt(clean.slice(0, 2), 16), parseInt(clean.slice(2, 4), 16), parseInt(clean.slice(4, 6), 16));
-      };
-      const drawText = (
-        text: string,
-        x: number,
-        y: number,
-        maxWidth: number,
-        size: number,
-        color = "#111827",
-        style: "normal" | "bold" = "normal",
-        align: "left" | "center" | "right" = "left",
-      ) => {
-        let fittedSize = size;
-        pdf.setFont("NotoSansTelugu", style);
-        pdf.setFontSize(fittedSize);
-        while (fittedSize > 6 && pdf.getTextWidth(String(text ?? "")) > maxWidth) {
-          fittedSize -= 0.5;
-          pdf.setFontSize(fittedSize);
-        }
-        setColor(color);
-        pdf.text(String(text ?? ""), x, y, { align, maxWidth });
-      };
-      const drawCard = (x: number, y: number, w: number, h: number, label: string, value: string, accent: string) => {
-        setFill("#ffffff");
-        pdf.setDrawColor(209, 213, 219);
-        pdf.roundedRect(x, y, w, h, 2.5, 2.5, "FD");
-        setFill(accent);
-        pdf.roundedRect(x, y, 2.2, h, 1.2, 1.2, "F");
-        drawText(label, x + 5, y + 8, w - 10, 7, "#374151", "bold");
-        drawText(value, x + 5, y + 18, w - 10, 10, "#111827", "bold");
-      };
-
-      setFill("#ffffff");
-      pdf.rect(0, 0, pageWidth, pageHeight, "F");
-      setFill("#ff8c28");
-      pdf.rect(0, 0, pageWidth, 3, "F");
-
-      drawText(lt("Society Cash Flow", "సొసైటీ నగదు ప్రవాహం"), margin, 16, pageWidth - margin * 2, 16, "#111827", "bold");
-      drawText(
-        `${lt("Cash Flow Statement", "నగదు ప్రవాహ నివేదిక")} • ${rangeText}`,
-        margin,
-        25,
-        pageWidth - margin * 2,
-        9,
-        "#4b5563",
-        "normal",
-      );
-      drawText(new Date().toLocaleDateString("en-IN"), margin, 25, pageWidth - margin * 2, 8, "#6b7280", "normal", "right");
-
-      let y = 38;
-      const cardW = (pageWidth - margin * 2 - gap * 2) / 3;
-      drawCard(margin, y, cardW, 25, lt("In Bank", "బ్యాంకులో"), fmt(d.wallets.bank), "#2563eb");
-      drawCard(margin + cardW + gap, y, cardW, 25, lt("Cashier / Petty Cash", "అకౌంటెంట్ / చిల్లర"), fmt(d.wallets.accountant), "#d97706");
-      drawCard(margin + (cardW + gap) * 2, y, cardW, 25, lt("President", "అధ్యక్షుడు"), fmt(d.wallets.president), "#7c3aed");
-
-      y += 31;
-      const halfW = (pageWidth - margin * 2 - gap) / 2;
-      drawCard(margin, y, halfW, 25, lt("With Members", "సభ్యుల వద్ద ఉన్న మొత్తం"), fmt(d.membersOutstanding ?? 0), "#ea580c");
-      drawCard(margin + halfW + gap, y, halfW, 25, lt("Pending Interest", "పెండింగ్ వడ్డీ"), fmt(d.pendingInterest ?? 0), "#e11d48");
-
-      y += 34;
-      setFill("#f9fafb");
-      pdf.setDrawColor(209, 213, 219);
-      pdf.roundedRect(margin, y, pageWidth - margin * 2, 29, 2.5, 2.5, "FD");
-      const totalW = (pageWidth - margin * 2) / 3;
-      drawText(lt("Income", "వచ్చినది"), margin, y + 10, totalW, 8, "#15803d", "bold", "center");
-      drawText(fmt(d.totalIncome), margin, y + 22, totalW, 10, "#15803d", "bold", "center");
-      drawText(lt("Expense", "పోయినది"), margin + totalW, y + 10, totalW, 8, "#b91c1c", "bold", "center");
-      drawText(fmt(d.totalExpense), margin + totalW, y + 22, totalW, 10, "#b91c1c", "bold", "center");
-      drawText(lt("Balance", "మిగులు"), margin + totalW * 2, y + 10, totalW, 8, "#c2410c", "bold", "center");
-      drawText(fmt(d.closingBalance), margin + totalW * 2, y + 22, totalW, 10, "#c2410c", "bold", "center");
-
-      const drawBreakdown = (x: number, startY: number, w: number, title: string, rows: [string, number][], color: string) => {
-        setFill("#ffffff");
-        pdf.setDrawColor(209, 213, 219);
-        pdf.roundedRect(x, startY, w, 83, 2.5, 2.5, "FD");
-        drawText(title, x + 5, startY + 9, w - 10, 8, color, "bold");
-        let rowY = startY + 20;
-        if (!rows.length) {
-          drawText(lt("No entries in this period.", "ఈ కాలంలో ఎంట్రీలు లేవు."), x + 5, rowY, w - 10, 7, "#6b7280");
-          return;
-        }
-        rows.forEach(([label, amount]) => {
-          drawText(label, x + 5, rowY, w - 38, 7, "#374151", "normal");
-          drawText(fmt(amount), x + 5, rowY, w - 10, 7, "#111827", "bold", "right");
-          pdf.setDrawColor(229, 231, 235);
-          pdf.line(x + 5, rowY + 3.5, x + w - 5, rowY + 3.5);
-          rowY += 10;
-        });
-      };
-
-      y += 38;
-      drawBreakdown(
-        margin,
-        y,
-        halfW,
-        lt("Income Details", "ఆదాయ వివరాలు"),
-        incomeRows,
-        "#15803d",
-      );
-      drawBreakdown(
-        margin + halfW + gap,
-        y,
-        halfW,
-        lt("Expense Details", "ఖర్చు వివరాలు"),
-        expenseRows,
-        "#b91c1c",
-      );
-
-      drawText("Download from MBR APP", margin, pageHeight - 12, pageWidth - margin * 2, 7, "#6b7280", "normal", "center");
-      pdf.save(`cash-flow-${range}-${new Date().toISOString().slice(0, 10)}.pdf`);
-    } finally {
+    const previousTitle = document.title;
+    const cleanup = () => {
+      document.documentElement.classList.remove("mbr-printing-cashflow");
+      document.body.classList.remove("mbr-printing-cashflow");
+      document.title = previousTitle;
+      window.removeEventListener("afterprint", cleanup);
       setPdfBusy(false);
+    };
+
+    try {
+      document.title = `cash-flow-${range}-${new Date().toISOString().slice(0, 10)}`;
+      document.documentElement.classList.add("mbr-printing-cashflow");
+      document.body.classList.add("mbr-printing-cashflow");
+      await document.fonts?.load('400 12pt "Noto Sans Telugu"');
+      await document.fonts?.load('700 16pt "Noto Sans Telugu"');
+      await document.fonts?.ready;
+      window.addEventListener("afterprint", cleanup, { once: true });
+      setTimeout(() => {
+        window.print();
+        setTimeout(cleanup, 120000);
+      }, 100);
+    } catch {
+      cleanup();
     }
   }
 
