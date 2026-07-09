@@ -410,11 +410,11 @@ function AccountsPage() {
             <Button variant="outline" onClick={onEdit} disabled={!locked}>
               <Pencil className="h-4 w-4" /> సవరించు
             </Button>
-            <Button variant="outline" onClick={() => comingSoon("వ్యక్తిగత ఫైల్ PDF")} disabled={busy}>
-              <FileText className="h-4 w-4" /> వ్యక్తిగత పిడిఎఫ్
+            <Button variant="outline" onClick={downloadPersonalPdf} disabled={busy}>
+              <FileText className="h-4 w-4" /> {lt("Personal PDF", "వ్యక్తిగత పిడిఎఫ్")}
             </Button>
-            <Button variant="outline" onClick={() => comingSoon("మొత్తం ఫైల్ PDF")} disabled={busy}>
-              <FileSpreadsheet className="h-4 w-4" /> మొత్తం పిడిఎఫ్
+            <Button variant="outline" onClick={downloadFullPdf} disabled={busy}>
+              <FileSpreadsheet className="h-4 w-4" /> {lt("Full PDF", "మొత్తం పిడిఎఫ్")}
             </Button>
           </div>
         </Card>
