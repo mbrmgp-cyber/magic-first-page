@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { lookupMemberByCode, recordMonthlyPayment } from "@/lib/accounts.functions";
+import { lookupMemberByCode, recordMonthlyPayment, getMasterLedger } from "@/lib/accounts.functions";
 import { getMyOrg, updateOrgLogo } from "@/lib/org.functions";
 import { supabase } from "@/integrations/supabase/client";
 
