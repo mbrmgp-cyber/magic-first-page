@@ -177,10 +177,10 @@ function MemberCard({
         <div className={`min-w-0 ${large ? "" : "flex-1"}`}>
           <div className={`font-semibold leading-tight ${large ? "text-lg" : "text-sm"} truncate`}>{m?.name ?? "—"}</div>
           <Badge variant="secondary" className="mt-1 text-[10px]" style={{ background: ROLE_GRADIENT[cm.role], color: "white" }}>
-            {ROLE_LABELS[cm.role]}
+            {roleLabel}
           </Badge>
           <div className="text-[10px] text-muted-foreground mt-1">
-            {fmtDate(cm.term_start_date)} → {fmtDate(cm.term_end_date)}
+            {fmtDate(cm.term_start_date, lang)} → {fmtDate(cm.term_end_date, lang)}
           </div>
         </div>
       </div>
@@ -188,12 +188,12 @@ function MemberCard({
       {/* Per-member signature */}
       <div className="mt-3 pt-3 border-t border-muted/40" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between gap-2">
-          <span className="text-[11px] font-medium text-muted-foreground">సంతకం</span>
+          <span className="text-[11px] font-medium text-muted-foreground">{lt("Signature", "సంతకం")}</span>
           {canManage && (
             <>
               <input ref={sigInp} type="file" accept="image/png,image/jpeg" className="hidden" onChange={onPickSig} />
               <Button size="sm" variant="outline" className="h-7 text-[11px]" disabled={sigBusy} onClick={() => sigInp.current?.click()}>
-                <Camera className="w-3 h-3 mr-1" /> {sigUrl ? "మార్చండి" : "అప్‌లోడ్"}
+                <Camera className="w-3 h-3 mr-1" /> {sigUrl ? lt("Change", "మార్చండి") : lt("Upload", "అప్‌లోడ్")}
               </Button>
             </>
           )}
@@ -202,7 +202,7 @@ function MemberCard({
           {sigUrl ? (
             <img src={sigUrl} alt="signature" className="h-full w-full object-contain" />
           ) : (
-            <span className="text-[10px] text-muted-foreground">సంతకం లేదు</span>
+            <span className="text-[10px] text-muted-foreground">{lt("No signature", "సంతకం లేదు")}</span>
           )}
         </div>
       </div>
