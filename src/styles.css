@@ -187,7 +187,38 @@
     box-shadow: none !important;
     transform: scale(0) !important;
   }
+
+  @page { margin: 10mm; size: auto; }
+
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  /* Neutralise dark app backgrounds so printed pages aren't black */
+  .bg-black,
+  .bg-zinc-900,
+  .bg-zinc-950,
+  [class*="bg-black"],
+  [class*="bg-zinc-9"] {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .text-white,
+  .text-white\/70,
+  [class*="text-white"] {
+    color: #000000 !important;
+  }
+
+  .min-h-screen {
+    min-height: 0 !important;
+  }
 }
+
 
 html.mbr-printing .mbr-global-ad-bar,
 html.mbr-printing .mbr-global-ad-bar *,
