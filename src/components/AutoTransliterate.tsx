@@ -173,20 +173,28 @@ export function AutoTransliterate() {
   useEffect(() => {
     if (typeof document === "undefined") return;
     const toEnglish = lang === "en";
-    walk(document.body, toEnglish);
+    let applying = false;
+    const apply = (fn: () => void) => {
+      applying = true;
+      try { fn(); } finally { applying = false; }
+    };
+    apply(() => walk(document.body, toEnglish));
 
     const obs = new MutationObserver((muts) => {
-      for (const m of muts) {
-        m.addedNodes.forEach((n) => {
-          if (n.nodeType === 1) walk(n, toEnglish);
-          else if (n.nodeType === 3 && !shouldSkip(n)) translateNode(n as Text, toEnglish);
-        });
-        if (m.type === "characterData" && m.target.nodeType === 3 && !shouldSkip(m.target)) {
-          // Reset cache so we re-read the new value
-          delete (m.target as any)[ORIG_ATTR];
-          translateNode(m.target as Text, toEnglish);
+      if (applying) return;
+      apply(() => {
+        for (const m of muts) {
+          m.addedNodes.forEach((n) => {
+            if (n.nodeType === 1) walk(n, toEnglish);
+            else if (n.nodeType === 3 && !shouldSkip(n)) translateNode(n as Text, toEnglish);
+          });
+          if (m.type === "characterData" && m.target.nodeType === 3 && !shouldSkip(m.target)) {
+            // App re-rendered this text node: reset cached original then re-translate.
+            delete (m.target as any)[ORIG_ATTR];
+            translateNode(m.target as Text, toEnglish);
+          }
         }
-      }
+      });
     });
     obs.observe(document.body, { childList: true, subtree: true, characterData: true });
     return () => obs.disconnect();
