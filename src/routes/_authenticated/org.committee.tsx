@@ -20,6 +20,22 @@ import {
 import { getMyOrg, updateOrgPresident } from "@/lib/org.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useI18n } from "@/lib/i18n";
+
+// Bilingual UI helper — picks EN when script is english, else TE.
+function useLt() {
+  const { lang } = useI18n();
+  return (en: string, te: string) => (lang === "en" ? en : te);
+}
+
+const ROLE_LABELS_EN: Record<CommitteeRole, string> = {
+  president: "President",
+  vice_president: "Vice President",
+  advisor: "Advisor",
+  treasurer: "Treasurer",
+  executive: "Executive",
+  worker: "Worker",
+};
 
 type CM = {
   id: string;
