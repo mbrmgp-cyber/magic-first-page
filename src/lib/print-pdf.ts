@@ -210,6 +210,8 @@ export function printDocument(doc: PrintDoc) {
   document.body.classList.add("mbr-printing");
   detachNonPrintSiblings();
 
+  let printStartedAt = 0;
+
   const cleanup = () => {
     setTimeout(() => {
       try { printRoot.remove(); } catch { /* noop */ }
@@ -221,7 +223,10 @@ export function printDocument(doc: PrintDoc) {
       window.removeEventListener("afterprint", onAfter);
     }, 500);
   };
-  const onAfter = () => cleanup();
+  const onAfter = () => {
+    const elapsed = Date.now() - printStartedAt;
+    window.setTimeout(cleanup, elapsed < 5_000 ? 60_000 : 0);
+  };
   window.addEventListener("afterprint", onAfter);
 
   // Wait for the injected images (logo, MBR mark) to decode before printing.
@@ -238,6 +243,7 @@ export function printDocument(doc: PrintDoc) {
     setTimeout(() => {
       try {
         window.focus();
+        printStartedAt = Date.now();
         window.print();
       } catch (e) {
         console.error("print failed", e);
