@@ -416,9 +416,13 @@ export function AutoTransliterate() {
   useEffect(() => {
     if (typeof document === "undefined") return;
     let applying = false;
+    let applyTimer: number | undefined;
     const apply = (fn: () => void) => {
       applying = true;
-      try { fn(); } finally { applying = false; }
+      try { fn(); } finally {
+        if (applyTimer) window.clearTimeout(applyTimer);
+        applyTimer = window.setTimeout(() => { applying = false; }, 0);
+      }
     };
     apply(() => {
       translateDocumentTitle(lang);
@@ -443,7 +447,10 @@ export function AutoTransliterate() {
       });
     });
     obs.observe(document.body, { childList: true, subtree: true, characterData: true });
-    return () => obs.disconnect();
+    return () => {
+      obs.disconnect();
+      if (applyTimer) window.clearTimeout(applyTimer);
+    };
   }, [lang]);
   return null;
 }
