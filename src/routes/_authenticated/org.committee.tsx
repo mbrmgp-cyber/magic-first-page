@@ -211,6 +211,9 @@ function MemberCard({
 }
 
 function CommitteePage() {
+  const lt = useLt();
+  const { lang } = useI18n();
+  const roleLbl = (r: CommitteeRole) => (lang === "en" ? ROLE_LABELS_EN[r] : ROLE_LABELS[r]);
   const fnList = useServerFn(listCommittee);
   const fnMembers = useServerFn(listEligibleMembers);
   const fnAppoint = useServerFn(appointCommitteeMember);
