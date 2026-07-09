@@ -27,7 +27,6 @@ const TE_EN: Record<string, string> = {
   "మాస్టర్ లెడ్జర్ చూడండి →": "View Master Ledger →",
   "మాస్టర్ లెడ్జర్ చూడండి": "View Master Ledger",
   "వెనుకకు": "Back",
-  "లోడ్ అవుతోంది…": "Loading…",
   "లోడ్ అవుతోంది": "Loading",
   "సేవ్ అవుతోంది…": "Saving…",
   "సేవ్ చేయండి": "Save",
@@ -38,7 +37,6 @@ const TE_EN: Record<string, string> = {
   "అందరూ": "All",
   "ఆమోదం": "Approved",
   "తిరస్కరించబడింది": "Rejected",
-  "సభ్యులు లేరు": "No members",
 
   // Events / Meetings hub
   "కార్యక్రమాలు, సమావేశాలు, నిర్ణయాలు": "Events, Meetings & Decisions",
@@ -141,8 +139,6 @@ const TE_EN: Record<string, string> = {
   "పాత అప్పు": "Old Loan",
   "అప్పు మొత్తం (బాకీ)": "Loan Amount (Due)",
   "నెలవారీ వడ్డీ": "Monthly Interest",
-  "అసలు జమ": "Principal Paid",
-  "వడ్డీ జమ": "Interest Paid",
   "ఈ రోజు కొత్త అప్పు": "Today's New Loan",
   "కొత్త అప్పు మొత్తం": "New Loan Amount",
   "వడ్డీ రేటు (% నెలవారీ)": "Interest Rate (% monthly)",
@@ -244,7 +240,6 @@ Object.assign(EN_TE, {
   "Loan Requests": "అప్పు అభ్యర్థనలు",
   "No requests in this view.": "ఈ వీక్షణలో అభ్యర్థనలు లేవు.",
   "Approve Loan": "అప్పు ఆమోదించండి",
-  Amount: "మొత్తం",
   "Payment Date": "చెల్లింపు తేదీ",
   "Interest %/month": "వడ్డీ %/నెల",
   Cancel: "రద్దు",
