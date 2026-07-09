@@ -189,15 +189,44 @@ export function printDocument(doc: PrintDoc) {
   printRoot.innerHTML = parsed.body.innerHTML;
   document.body.appendChild(printRoot);
 
+  const removedSiblings: Array<{ node: Element; marker: Comment }> = [];
+  const detachNonPrintSiblings = () => {
+    Array.from(document.body.children).forEach((node) => {
+      if (node === printRoot) return;
+      const marker = document.createComment("mbr-print-placeholder");
+      node.parentNode?.insertBefore(marker, node);
+      node.remove();
+      removedSiblings.push({ node, marker });
+    });
+  };
+  const restoreNonPrintSiblings = () => {
+    removedSiblings.splice(0).forEach(({ node, marker }) => {
+      marker.parentNode?.insertBefore(node, marker);
+      marker.remove();
+    });
+  };
+
+  document.documentElement.classList.add("mbr-printing");
+  document.body.classList.add("mbr-printing");
+  detachNonPrintSiblings();
+
+  let printStartedAt = 0;
+
   const cleanup = () => {
     setTimeout(() => {
       try { printRoot.remove(); } catch { /* noop */ }
       try { printStyle.remove(); } catch { /* noop */ }
       try { scopeStyle.remove(); } catch { /* noop */ }
+      try { restoreNonPrintSiblings(); } catch { /* noop */ }
+      document.documentElement.classList.remove("mbr-printing");
+      document.body.classList.remove("mbr-printing");
       window.removeEventListener("afterprint", onAfter);
     }, 500);
   };
-  const onAfter = () => cleanup();
+  const onAfter = () => {
+    const elapsed = Date.now() - printStartedAt;
+    window.setTimeout(cleanup, elapsed < 5_000 ? 60_000 : 0);
+  };
   window.addEventListener("afterprint", onAfter);
 
   // Wait for the injected images (logo, MBR mark) to decode before printing.
@@ -214,12 +243,15 @@ export function printDocument(doc: PrintDoc) {
     setTimeout(() => {
       try {
         window.focus();
+        printStartedAt = Date.now();
         window.print();
       } catch (e) {
         console.error("print failed", e);
       }
-      // Fallback cleanup for browsers that don't fire afterprint.
-      setTimeout(cleanup, 2000);
+      // Mobile print previews can rebuild the PDF after paper-size changes.
+      // Keep the clean print DOM in place long enough so Android/Chromium
+      // never snapshots the underlying app/ad bar during that preview.
+      setTimeout(cleanup, 60_000);
     }, 200);
   });
 }
