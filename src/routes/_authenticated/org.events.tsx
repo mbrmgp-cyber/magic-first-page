@@ -171,6 +171,7 @@ function MeetingsTab({ orgId, meetings, resolutions, members, onChange }: any) {
 }
 
 function MeetingCard({ m, resolutions, members, orgId, onEdit, onChange }: any) {
+  const { lang } = useI18n();
   const linkedRes = resolutions.filter((r: any) => r.meeting_id === m.id);
   async function del() {
     if (!confirm("Delete this meeting?")) return;
