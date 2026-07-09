@@ -16,6 +16,7 @@ import {
 import {
   DEFAULT_THEME, HEAD_FONTS, TEXT_ALIGNS, type TextAlign, type ThemeSettings, resolveTheme,
 } from "@/lib/theme";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/org/theme")({
   head: () => ({ meta: [{ title: "Theme & Design Customizer — MBR App" }] }),
@@ -123,7 +124,8 @@ function OrgThemePage() {
     }
   }
 
-  const orgName = org?.name || "Chitvel Help Line Society";
+  const { lang } = useI18n();
+  const orgName = (lang === "en" && (nameEn.trim() || org?.name_en)) ? (nameEn.trim() || org?.name_en) : (org?.name || "Chitvel Help Line Society");
   const orgSlogan = org?.slogan || "॥ మానవసేవే మాధవసేవ ॥";
   const orgReg = org?.gov_reg_number || "235/16";
 
