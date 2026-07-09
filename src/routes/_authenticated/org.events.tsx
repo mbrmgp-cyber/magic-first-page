@@ -533,6 +533,7 @@ function blankResolution() {
 
 /* ============ Activities Tab ============ */
 function ActivitiesTab({ orgId, activities, onChange }: any) {
+  const { lang } = useI18n();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   return (
