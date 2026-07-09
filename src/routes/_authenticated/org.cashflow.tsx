@@ -115,7 +115,7 @@ function CashFlowPage() {
               <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white">{lt("+ Expense", "+ ఖర్చు")}</Button>
             </Link>
             <Button size="sm" variant="outline" onClick={downloadCashFlowPdf} disabled={!d || q.isLoading || pdfBusy} className="gap-1">
-              <FileDown className="h-4 w-4" /> {pdfBusy ? lt("Creating…", "తయారవుతోంది…") : lt("PDF", "పిడిఎఫ్")}
+              <FileDown className="h-4 w-4" /> {pdfBusy ? lt("Creating…", "తయారవుతోంది…") : lt("Save PDF", "PDF సేవ్")}
             </Button>
           </div>
         </header>
