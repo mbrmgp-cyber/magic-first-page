@@ -23,6 +23,7 @@ const TE_EN: Record<string, string> = {
   "సభ్యుని చేర్చు": "Add Member",
   "కొత్త సభ్యుడు": "New Member",
   "ఖాతాల కేంద్రం": "Accounts Hub",
+  "Accounts Hub / అకౌంట్స్ బాక్స్": "Accounts Hub",
   "మాస్టర్ లెడ్జర్": "Master Ledger",
   "మాస్టర్ లెడ్జర్ చూడండి →": "View Master Ledger →",
   "మాస్టర్ లెడ్జర్ చూడండి": "View Master Ledger",
@@ -99,6 +100,7 @@ const TE_EN: Record<string, string> = {
 
   // Loan requests
   "Loan Requests · అప్పు అభ్యర్థనలు": "Loan Requests",
+  "Loan Requests — Admin": "Loan Requests — Admin",
   "Loan Requests ...": "Loan Requests",
   "అప్పు అభ్యర్థనలు": "Loan Requests",
   "అభ్యర్థనలు": "Requests",
@@ -195,9 +197,11 @@ const TE_EN: Record<string, string> = {
 
 const TE_ONLY: Record<string, string> = {
   "కొత్త సమావేశం / New Meeting": "కొత్త సమావేశం",
+  "Accounts Hub / అకౌంట్స్ బాక్స్": "ఖాతాల కేంద్రం",
   "ప్రింట్ / PDF": "ప్రింట్ / పిడిఎఫ్",
   "ఆర్థిక సహాయం / ధర్మం": "ఆర్థిక సహాయం / ధర్మం",
   "Loan Requests · అప్పు అభ్యర్థనలు": "అప్పు అభ్యర్థనలు",
+  "Loan Requests — Admin": "అప్పు అభ్యర్థనలు — అడ్మిన్",
   "ఖర్చులు / Expenses": "ఖర్చులు",
   "సంతకం / Signature": "సంతకం",
   "ప్రూఫ్ / Proof": "ప్రూఫ్",
@@ -270,6 +274,8 @@ Object.assign(EN_TE, {
   "Current status:": "ప్రస్తుత స్థితి:",
   "View current receipt": "ప్రస్తుత రసీదు చూడండి",
   "Tap any tile to open the detailed module.": "వివరమైన మాడ్యూల్ తెరవడానికి ఏదైనా టైల్ నొక్కండి.",
+  "Accounts Hub": "ఖాతాల కేంద్రం",
+  "Loan Requests — Admin": "అప్పు అభ్యర్థనలు — అడ్మిన్",
 });
 
 const SKIP_TAGS = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEXTAREA", "INPUT", "SELECT", "OPTION", "CODE", "PRE"]);
@@ -333,6 +339,21 @@ function translateAttrs(el: Element, lang: string) {
   }
 }
 
+function translateDocumentTitle(lang: string) {
+  const el = document.documentElement;
+  const key = "data-mbr-title-orig";
+  const stored = el.getAttribute(key);
+  const current = document.title;
+  const storedEn = stored ? translateValue(stored, "en") : "";
+  const storedTe = stored ? translateValue(stored, "te") : "";
+  const orig = !stored || (current !== stored && current !== storedEn && current !== storedTe)
+    ? current
+    : stored;
+  if (stored !== orig) el.setAttribute(key, orig);
+  const next = translateValue(orig, lang);
+  if (document.title !== next) document.title = next;
+}
+
 function walk(root: Node, lang: string) {
   if (root.nodeType === 1) translateAttrs(root as Element, lang);
 
@@ -369,11 +390,15 @@ export function AutoTransliterate() {
       applying = true;
       try { fn(); } finally { applying = false; }
     };
-    apply(() => walk(document.body, lang));
+    apply(() => {
+      translateDocumentTitle(lang);
+      walk(document.body, lang);
+    });
 
     const obs = new MutationObserver((muts) => {
       if (applying) return;
       apply(() => {
+        translateDocumentTitle(lang);
         for (const m of muts) {
           m.addedNodes.forEach((n) => {
             if (n.nodeType === 1) walk(n, lang);
