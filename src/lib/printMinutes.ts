@@ -1,16 +1,19 @@
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
+type Lang = "en" | "te" | string;
+
 const esc = (s: any) => String(s ?? "").replace(/[&<>"']/g, (c) =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 
-const fmtDate = (d?: string | null) =>
-  d ? new Date(d).toLocaleString("en-IN", { dateStyle: "long", timeStyle: "short" }) : "—";
+const fmtDate = (d?: string | null, lang: Lang = "en") =>
+  d ? new Date(d).toLocaleString(lang === "te" ? "te-IN" : "en-IN", { dateStyle: "long", timeStyle: "short" }) : "—";
+
+const L = (lang: Lang, en: string, te: string) => (lang === "te" ? te : en);
 
 function openPrint(html: string) {
   const w = window.open("", "_blank", "width=900,height=1100");
   if (!w) { toast.error("Popup blocked. Allow popups to print."); return; }
-  // inject toolbar after <body>
   const withToolbar = html.replace(/<body[^>]*>/, (m) => `${m}${toolbar}<div class="page">`).replace("</body>", "</div></body>");
   w.document.open(); w.document.write(withToolbar); w.document.close();
 }
@@ -62,8 +65,8 @@ table.kv td.k { width:30%; color:#555; font-weight:600; }
 const toolbar = `<div class="toolbar no-print">
   <div class="tb-title">📄 Print Preview</div>
   <div class="tb-actions">
-    <button type="button" class="close-btn" onclick="(function(){try{window.close();}catch(e){} setTimeout(function(){ if(!window.closed){ if(window.opener){ try{window.opener.focus();}catch(e){} } if(history.length>1){ history.back(); } else { window.location.href='about:blank'; } } },120);})()">✕ మూసివేయండి / Close</button>
-    <button type="button" class="print-btn" onclick="window.print()">🖨 ప్రింట్ / Print</button>
+    <button type="button" class="close-btn" onclick="(function(){try{window.close();}catch(e){} setTimeout(function(){ if(!window.closed){ if(window.opener){ try{window.opener.focus();}catch(e){} } if(history.length>1){ history.back(); } else { window.location.href='about:blank'; } } },120);})()">✕</button>
+    <button type="button" class="print-btn" onclick="window.print()">🖨 Print</button>
   </div>
 </div>`;
 
@@ -109,24 +112,24 @@ async function fetchOrg(orgId: string): Promise<Org> {
   return { ...((data as any) ?? {}), president_name };
 }
 
-function presidentSlot(org: Org) {
-  return `<div class="slot">${org.president_name ? `<div style="font-weight:700;margin-bottom:2px;">${esc(org.president_name)}</div>` : ""}అధ్యక్షుడు<br/>President</div>`;
+function presidentSlot(org: Org, lang: Lang) {
+  return `<div class="slot">${org.president_name ? `<div style="font-weight:700;margin-bottom:2px;">${esc(org.president_name)}</div>` : ""}${L(lang, "President", "అధ్యక్షుడు")}</div>`;
 }
-function sigRow(org: Org) {
+function sigRow(org: Org, lang: Lang) {
   return `<div class="footer-sigs">
-    ${presidentSlot(org)}
-    <div class="slot">కార్యదర్శి<br/>Secretary</div>
-    <div class="slot">కోశాధికారి<br/>Treasurer</div>
+    ${presidentSlot(org, lang)}
+    <div class="slot">${L(lang, "Secretary", "కార్యదర్శి")}</div>
+    <div class="slot">${L(lang, "Treasurer", "కోశాధికారి")}</div>
   </div>`;
 }
 
-function header(org: Org) {
+function header(org: Org, lang: Lang) {
   return `<div class="header">
     ${org.logo_url ? `<img src="${esc(org.logo_url)}" />` : ""}
     <div>
-      <h1>${esc(org.name || "Organization")}</h1>
+      <h1>${esc(org.name || (lang === "te" ? "సంస్థ" : "Organization"))}</h1>
       <div class="meta">
-        ${org.gov_reg_number ? `Reg No: ${esc(org.gov_reg_number)}` : ""}
+        ${org.gov_reg_number ? `${L(lang, "Reg No", "నమోదు సంఖ్య")}: ${esc(org.gov_reg_number)}` : ""}
         ${org.phone ? ` · ☎ ${esc(org.phone)}` : ""}
         ${org.email ? ` · ✉ ${esc(org.email)}` : ""}
       </div>
@@ -134,8 +137,8 @@ function header(org: Org) {
   </div>`;
 }
 
-function namesList(ids: string[], members: Member[]) {
-  if (!ids?.length) return `<span class="muted">— ఎవరూ లేరు —</span>`;
+function namesList(ids: string[], members: Member[], lang: Lang) {
+  if (!ids?.length) return `<span class="muted">— ${L(lang, "None", "ఎవరూ లేరు")} —</span>`;
   return ids.map((id) => {
     const m = members.find((x) => x.id === id);
     if (!m) return null;
@@ -148,49 +151,57 @@ export async function printMeetingMinutes(opts: {
   meeting: Meeting;
   resolutions: Resolution[];
   members: Member[];
+  lang?: Lang;
 }) {
+  const lang: Lang = opts.lang ?? "en";
   const org = await fetchOrg(opts.orgId);
   const { meeting, resolutions, members } = opts;
 
+  const statusTxt = (s: string) => {
+    if (lang !== "te") return s;
+    if (s === "completed") return "పూర్తయింది";
+    if (s === "scheduled") return "నిర్ధారితమైంది";
+    if (s === "cancelled") return "రద్దు";
+    return s;
+  };
+
   const html = `<!doctype html><html><head><meta charset="utf-8" />
-  <title>సమావేశ నివేదిక - ${esc(meeting.title)}</title>
+  <title>${L(lang, "Meeting Minutes", "సమావేశ నివేదిక")} - ${esc(meeting.title)}</title>
   <style>${styles}</style></head><body>
-  ${header(org)}
-  <div class="doc-title">సమావేశ నివేదిక / Meeting Minutes</div>
+  ${header(org, lang)}
+  <div class="doc-title">${L(lang, "Meeting Minutes", "సమావేశ నివేదిక")}</div>
 
   <table class="kv">
-    <tr><td class="k">సమావేశం శీర్షిక</td><td>${esc(meeting.title)}</td></tr>
-    <tr><td class="k">తేదీ / సమయం</td><td>${esc(fmtDate(meeting.scheduled_at))}</td></tr>
-    <tr><td class="k">విధానం</td><td>${meeting.meeting_type === "online" ? "ఆన్‌లైన్" : "ఆఫ్‌లైన్"}</td></tr>
-    ${meeting.location ? `<tr><td class="k">వేదిక</td><td>${esc(meeting.location)}</td></tr>` : ""}
-    ${meeting.meeting_link ? `<tr><td class="k">లింక్</td><td>${esc(meeting.meeting_link)}</td></tr>` : ""}
-    <tr><td class="k">స్థితి</td><td>${esc(meeting.status)}</td></tr>
+    <tr><td class="k">${L(lang, "Title", "శీర్షిక")}</td><td>${esc(meeting.title)}</td></tr>
+    <tr><td class="k">${L(lang, "Date / Time", "తేదీ / సమయం")}</td><td>${esc(fmtDate(meeting.scheduled_at, lang))}</td></tr>
+    <tr><td class="k">${L(lang, "Mode", "విధానం")}</td><td>${meeting.meeting_type === "online" ? L(lang, "Online", "ఆన్‌లైన్") : L(lang, "Offline", "ఆఫ్‌లైన్")}</td></tr>
+    ${meeting.location ? `<tr><td class="k">${L(lang, "Venue", "వేదిక")}</td><td>${esc(meeting.location)}</td></tr>` : ""}
+    ${meeting.meeting_link ? `<tr><td class="k">${L(lang, "Link", "లింక్")}</td><td>${esc(meeting.meeting_link)}</td></tr>` : ""}
+    <tr><td class="k">${L(lang, "Status", "స్థితి")}</td><td>${esc(statusTxt(meeting.status))}</td></tr>
   </table>
 
-  ${meeting.agenda ? `<h2>అజెండా / Agenda</h2><div class="box">${esc(meeting.agenda).replace(/\n/g, "<br/>")}</div>` : ""}
+  ${meeting.agenda ? `<h2>${L(lang, "Agenda", "అజెండా")}</h2><div class="box">${esc(meeting.agenda).replace(/\n/g, "<br/>")}</div>` : ""}
 
-  <h2>హాజరైన వారు / Attended (${meeting.attended_member_ids.length})</h2>
-  <div class="box">${namesList(meeting.attended_member_ids, members)}</div>
+  <h2>${L(lang, "Attended", "హాజరైన వారు")} (${meeting.attended_member_ids.length})</h2>
+  <div class="box">${namesList(meeting.attended_member_ids, members, lang)}</div>
 
-  <h2>గైర్హాజరైన వారు / Absent (${meeting.absent_member_ids.length})</h2>
-  <div class="absent">${namesList(meeting.absent_member_ids, members)}</div>
+  <h2>${L(lang, "Absent", "గైర్హాజరైన వారు")} (${meeting.absent_member_ids.length})</h2>
+  <div class="absent">${namesList(meeting.absent_member_ids, members, lang)}</div>
 
-  ${resolutions.length ? `<h2>నిర్ణయాలు / Resolutions</h2>
+  ${resolutions.length ? `<h2>${L(lang, "Resolutions", "నిర్ణయాలు")}</h2>
     ${resolutions.map((r) => `
       <div class="res">
         <div><span class="rno">${esc(r.resolution_no)}</span><span class="topic">${esc(r.topic)}</span></div>
         ${r.description ? `<div class="desc">${esc(r.description)}</div>` : ""}
         <div class="vote">
-          <div class="cell app"><b>ఆమోదించిన వారు (${r.approved_member_ids.length})</b>${namesList(r.approved_member_ids, members)}</div>
-          <div class="cell opp"><b>వ్యతిరేకించిన వారు (${r.opposed_member_ids.length})</b>${namesList(r.opposed_member_ids, members)}</div>
+          <div class="cell app"><b>${L(lang, "Approved", "ఆమోదించిన వారు")} (${r.approved_member_ids.length})</b>${namesList(r.approved_member_ids, members, lang)}</div>
+          <div class="cell opp"><b>${L(lang, "Opposed", "వ్యతిరేకించిన వారు")} (${r.opposed_member_ids.length})</b>${namesList(r.opposed_member_ids, members, lang)}</div>
         </div>
       </div>`).join("")}` : ""}
 
-  ${meeting.notes ? `<h2>అదనపు గమనికలు</h2><div class="box">${esc(meeting.notes).replace(/\n/g, "<br/>")}</div>` : ""}
+  ${meeting.notes ? `<h2>${L(lang, "Additional Notes", "అదనపు గమనికలు")}</h2><div class="box">${esc(meeting.notes).replace(/\n/g, "<br/>")}</div>` : ""}
 
-  ${sigRow(org)}
-
-
+  ${sigRow(org, lang)}
 
   </body></html>`;
 
@@ -201,27 +212,34 @@ export async function printResolution(opts: {
   orgId: string;
   resolution: Resolution;
   members: Member[];
+  lang?: Lang;
 }) {
+  const lang: Lang = opts.lang ?? "en";
   const org = await fetchOrg(opts.orgId);
   const { resolution: r, members } = opts;
+  const statusTxt = r.status === "passed"
+    ? L(lang, "Passed", "ఆమోదించబడింది")
+    : r.status === "rejected"
+      ? L(lang, "Rejected", "తిరస్కరించబడింది")
+      : L(lang, "Pending", "పెండింగ్‌లో");
   const html = `<!doctype html><html><head><meta charset="utf-8" />
-  <title>నిర్ణయం ${esc(r.resolution_no)}</title>
+  <title>${L(lang, "Resolution", "నిర్ణయం")} ${esc(r.resolution_no)}</title>
   <style>${styles}</style></head><body>
-  ${header(org)}
-  <div class="doc-title">అధికారిక నిర్ణయం / Official Resolution</div>
+  ${header(org, lang)}
+  <div class="doc-title">${L(lang, "Official Resolution", "అధికారిక నిర్ణయం")}</div>
   <table class="kv">
-    <tr><td class="k">నిర్ణయ సంఖ్య</td><td>${esc(r.resolution_no)}</td></tr>
-    <tr><td class="k">తేదీ</td><td>${esc(new Date(r.decision_date).toLocaleDateString("en-IN", { dateStyle: "long" }))}</td></tr>
-    <tr><td class="k">శీర్షిక</td><td>${esc(r.topic)}</td></tr>
-    <tr><td class="k">స్థితి</td><td>${r.status === "passed" ? "ఆమోదించబడింది" : r.status === "rejected" ? "తిరస్కరించబడింది" : "పెండింగ్‌లో"}</td></tr>
+    <tr><td class="k">${L(lang, "Resolution No", "నిర్ణయ సంఖ్య")}</td><td>${esc(r.resolution_no)}</td></tr>
+    <tr><td class="k">${L(lang, "Date", "తేదీ")}</td><td>${esc(new Date(r.decision_date).toLocaleDateString(lang === "te" ? "te-IN" : "en-IN", { dateStyle: "long" }))}</td></tr>
+    <tr><td class="k">${L(lang, "Title", "శీర్షిక")}</td><td>${esc(r.topic)}</td></tr>
+    <tr><td class="k">${L(lang, "Status", "స్థితి")}</td><td>${statusTxt}</td></tr>
   </table>
-  ${r.description ? `<h2>వివరణ</h2><div class="box">${esc(r.description).replace(/\n/g, "<br/>")}</div>` : ""}
-  <h2>ఓటింగ్ వివరాలు</h2>
+  ${r.description ? `<h2>${L(lang, "Description", "వివరణ")}</h2><div class="box">${esc(r.description).replace(/\n/g, "<br/>")}</div>` : ""}
+  <h2>${L(lang, "Voting Details", "ఓటింగ్ వివరాలు")}</h2>
   <div class="vote">
-    <div class="cell app"><b>ఆమోదించిన వారు (${r.approved_member_ids.length})</b>${namesList(r.approved_member_ids, members)}</div>
-    <div class="cell opp"><b>వ్యతిరేకించిన వారు (${r.opposed_member_ids.length})</b>${namesList(r.opposed_member_ids, members)}</div>
+    <div class="cell app"><b>${L(lang, "Approved", "ఆమోదించిన వారు")} (${r.approved_member_ids.length})</b>${namesList(r.approved_member_ids, members, lang)}</div>
+    <div class="cell opp"><b>${L(lang, "Opposed", "వ్యతిరేకించిన వారు")} (${r.opposed_member_ids.length})</b>${namesList(r.opposed_member_ids, members, lang)}</div>
   </div>
-  ${sigRow(org)}
+  ${sigRow(org, lang)}
   </body></html>`;
   openPrint(html);
 }
@@ -237,36 +255,41 @@ export async function printActivity(opts: {
     actual_expense: number | string;
     status: string;
   };
+  lang?: Lang;
 }) {
+  const lang: Lang = opts.lang ?? "en";
   const org = await fetchOrg(opts.orgId);
   const a = opts.activity;
   const budget = Number(a.allocated_budget) || 0;
   const expense = Number(a.actual_expense) || 0;
   const variance = budget - expense;
   const inr = (n: number) => `₹${n.toLocaleString("en-IN")}`;
-  const statusTel = a.status === "completed" ? "పూర్తయింది" : a.status === "ongoing" ? "జరుగుతోంది" : a.status === "cancelled" ? "రద్దు" : "ప్రణాళిక";
+  const statusTxt =
+    a.status === "completed" ? L(lang, "Completed", "పూర్తయింది") :
+    a.status === "ongoing" ? L(lang, "Ongoing", "జరుగుతోంది") :
+    a.status === "cancelled" ? L(lang, "Cancelled", "రద్దు") :
+    L(lang, "Planned", "ప్రణాళిక");
   const html = `<!doctype html><html><head><meta charset="utf-8" />
-  <title>కార్యక్రమం - ${esc(a.event_name)}</title>
+  <title>${L(lang, "Activity", "కార్యక్రమం")} - ${esc(a.event_name)}</title>
   <style>${styles}</style></head><body>
-  ${header(org)}
-  <div class="doc-title">కార్యక్రమ నివేదిక / Activity Report</div>
+  ${header(org, lang)}
+  <div class="doc-title">${L(lang, "Activity Report", "కార్యక్రమ నివేదిక")}</div>
   <table class="kv">
-    <tr><td class="k">పేరు / Event</td><td>${esc(a.event_name)}</td></tr>
-    <tr><td class="k">తేదీ</td><td>${esc(new Date(a.event_date).toLocaleDateString("en-IN", { dateStyle: "long" }))}</td></tr>
-    <tr><td class="k">స్థితి</td><td>${statusTel}</td></tr>
+    <tr><td class="k">${L(lang, "Event", "పేరు")}</td><td>${esc(a.event_name)}</td></tr>
+    <tr><td class="k">${L(lang, "Date", "తేదీ")}</td><td>${esc(new Date(a.event_date).toLocaleDateString(lang === "te" ? "te-IN" : "en-IN", { dateStyle: "long" }))}</td></tr>
+    <tr><td class="k">${L(lang, "Status", "స్థితి")}</td><td>${statusTxt}</td></tr>
   </table>
-  ${a.description ? `<h2>వివరణ / Description</h2><div class="box">${esc(a.description).replace(/\n/g, "<br/>")}</div>` : ""}
-  <h2>ఆర్థిక సారాంశం / Financial Summary</h2>
+  ${a.description ? `<h2>${L(lang, "Description", "వివరణ")}</h2><div class="box">${esc(a.description).replace(/\n/g, "<br/>")}</div>` : ""}
+  <h2>${L(lang, "Financial Summary", "ఆర్థిక సారాంశం")}</h2>
   <div class="vote">
-    <div class="cell app"><b>కేటాయించిన బడ్జెట్</b>${inr(budget)}</div>
-    <div class="cell opp"><b>వాస్తవిక ఖర్చు</b>${inr(expense)}</div>
+    <div class="cell app"><b>${L(lang, "Allocated Budget", "కేటాయించిన బడ్జెట్")}</b>${inr(budget)}</div>
+    <div class="cell opp"><b>${L(lang, "Actual Expense", "వాస్తవిక ఖర్చు")}</b>${inr(expense)}</div>
   </div>
   <div class="box" style="margin-top:10px;">
-    <b>మిగులు / Variance:</b>
+    <b>${L(lang, "Variance", "మిగులు")}:</b>
     <span style="color:${variance >= 0 ? "#065f46" : "#991b1b"};font-weight:700;"> ${inr(variance)}</span>
   </div>
-  ${sigRow(org)}
+  ${sigRow(org, lang)}
   </body></html>`;
   openPrint(html);
 }
-

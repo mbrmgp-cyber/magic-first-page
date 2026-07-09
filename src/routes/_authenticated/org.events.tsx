@@ -14,6 +14,7 @@ import { printMeetingMinutes, printResolution, printActivity } from "@/lib/print
 import { useServerFn } from "@tanstack/react-start";
 import { sendMeetingInvites } from "@/lib/org.functions";
 import { Mail, Send } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/org/events")({
   head: () => ({ meta: [{ title: "Events, Meetings, Decisions" }] }),
@@ -24,6 +25,7 @@ type Tab = "meetings" | "resolutions" | "activities";
 
 function EventsPage() {
   const qc = useQueryClient();
+  const { lang } = useI18n();
   const [tab, setTab] = useState<Tab>("meetings");
   const [orgId, setOrgId] = useState<string | null>(null);
 
@@ -196,7 +198,7 @@ function MeetingCard({ m, resolutions, members, orgId, onEdit, onChange }: any) 
         </div>
       </div>
       <div className="flex gap-2 mt-3 flex-wrap">
-        <Button size="sm" variant="secondary" onClick={() => printMeetingMinutes({ orgId, meeting: m, resolutions: linkedRes, members })} className="text-xs h-8">
+        <Button size="sm" variant="secondary" onClick={() => printMeetingMinutes({ orgId, meeting: m, resolutions: linkedRes, members, lang })} className="text-xs h-8">
           <Printer className="w-3 h-3 mr-1" /> ప్రింట్ / PDF
         </Button>
         <Button size="sm" variant="ghost" onClick={onEdit} className="text-xs h-8 text-foreground"><Pencil className="w-3 h-3 mr-1" /> సవరించు</Button>
@@ -409,7 +411,7 @@ function ResolutionsTab({ orgId, resolutions, meetings, members, onChange }: any
               </div>
             </div>
             <div className="flex gap-2 mt-2 flex-wrap">
-              <Button size="sm" variant="secondary" onClick={() => printResolution({ orgId, resolution: r, members })} className="text-xs h-8">
+              <Button size="sm" variant="secondary" onClick={() => printResolution({ orgId, resolution: r, members, lang })} className="text-xs h-8">
                 <Printer className="w-3 h-3 mr-1" /> ప్రింట్
               </Button>
               <Button size="sm" variant="ghost" onClick={() => { setEditing(r); setOpen(true); }} className="text-xs h-8 text-foreground"><Pencil className="w-3 h-3 mr-1" /> సవరించు</Button>
@@ -557,7 +559,7 @@ function ActivitiesTab({ orgId, activities, onChange }: any) {
                 </div>
               </div>
               <div className="flex gap-2 mt-2 flex-wrap">
-                <Button size="sm" variant="secondary" onClick={() => printActivity({ orgId, activity: a })} className="text-xs h-8">
+                <Button size="sm" variant="secondary" onClick={() => printActivity({ orgId, activity: a, lang })} className="text-xs h-8">
                   <Printer className="w-3 h-3 mr-1" /> ప్రింట్
                 </Button>
                 <Button size="sm" variant="ghost" onClick={() => { setEditing(a); setOpen(true); }} className="text-xs h-8 text-foreground"><Pencil className="w-3 h-3 mr-1" /> సవరించు</Button>
