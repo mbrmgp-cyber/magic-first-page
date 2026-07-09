@@ -336,9 +336,9 @@ function CommitteePage() {
         {/* Compact title row */}
         <div className="flex items-center justify-between gap-2">
           <h1 className="text-lg md:text-xl font-bold flex items-center gap-2 text-foreground">
-            <Crown className="w-5 h-5 text-amber-500" /> మా కార్యవర్గం
+            <Crown className="w-5 h-5 text-amber-500" /> {lt("Our Committee", "మా కార్యవర్గం")}
             <span className="text-xs font-normal text-muted-foreground">
-              ({totalCount} మంది · {data.termYears} సం.)
+              ({totalCount} {lt("members", "మంది")} · {data.termYears} {lt("yr", "సం.")})
             </span>
           </h1>
           {data.canManage && (
@@ -350,7 +350,7 @@ function CommitteePage() {
 
         {data.canManage && (
           <Button onClick={openAdd} className="w-full" style={{ background: "linear-gradient(90deg,#B85C00,#0B5C06)" }}>
-            <Plus className="w-4 h-4 mr-1" /> సభ్యునిని నియమించండి
+            <Plus className="w-4 h-4 mr-1" /> {lt("Appoint a Member", "సభ్యునిని నియమించండి")}
           </Button>
         )}
 
