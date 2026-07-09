@@ -25,6 +25,7 @@ import { resolveTheme, type ThemeSettings, DEFAULT_THEME } from "@/lib/theme";
 import { memberRegistrationUrl } from "@/lib/public-url";
 import { CustomIdBuilder } from "@/components/CustomIdBuilder";
 import { Wand2 } from "lucide-react";
+import { localizeText, useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/org/designs")({
   head: () => ({ meta: [{ title: "Designs Studio — MBR App" }] }),
@@ -184,6 +185,8 @@ function applyOrgThemeToIdDesign(base: IdCardDesign, theme: Required<ThemeSettin
 
 function DesignsPage() {
   const navigate = useNavigate();
+  const { lang } = useI18n();
+  const lt = (en: string, te: string) => localizeText({ en, te }, lang);
   const fetchOrg = useServerFn(getMyOrg);
   const orgQ = useQuery({ queryKey: ["my-org"], queryFn: () => fetchOrg() });
   const org: any = orgQ.data?.org;
@@ -363,10 +366,10 @@ function DesignsPage() {
           <div className="text-center">
             <h1 className="text-base md:text-lg font-extrabold leading-tight"
               style={{ color: PAGE_HEAD, fontFamily: `${theme.headFont}, system-ui` }}>
-              Designs Studio
+              {lt("Designs Studio", "డిజైన్స్ స్టూడియో")}
             </h1>
             <p className="text-[11px]" style={{ color: PAGE_SUB }}>
-              ID Card • Letter Pad • Receipt — Modular Templates
+              {lt("ID Card • Letter Pad • Receipt — Modular Templates", "ఐడి కార్డ్ • లెటర్ ప్యాడ్ • రసీదు — మాడ్యులర్ టెంప్లేట్లు")}
             </p>
           </div>
           <div className="w-20" />
@@ -376,13 +379,13 @@ function DesignsPage() {
         <Tabs value={tab} onValueChange={(v) => setTab(v as any)} className="w-full">
           <TabsList className="grid grid-cols-3 w-full h-11" data-theme-surface="big-box" style={{ background: PAGE_PANEL, border: `1px solid ${PAGE_BORDER}` }}>
             <TabsTrigger value="id" className="gap-2 text-xs sm:text-sm">
-              <IdCard className="h-4 w-4" /> ID Card
+              <IdCard className="h-4 w-4" /> {lt("ID Card", "ఐడి కార్డ్")}
             </TabsTrigger>
             <TabsTrigger value="letter" className="gap-2 text-xs sm:text-sm">
-              <FileText className="h-4 w-4" /> Letter Pad
+              <FileText className="h-4 w-4" /> {lt("Letter Pad", "లెటర్ ప్యాడ్")}
             </TabsTrigger>
             <TabsTrigger value="receipt" className="gap-2 text-xs sm:text-sm">
-              <Receipt className="h-4 w-4" /> Receipt Card
+              <Receipt className="h-4 w-4" /> {lt("Receipt Card", "రసీదు కార్డ్")}
             </TabsTrigger>
           </TabsList>
 
@@ -401,8 +404,8 @@ function DesignsPage() {
             {letterPick === null ? (
               <Section
                 icon={<FileText className="h-5 w-5" style={{ color: theme.icon }} />}
-                title="Choose a Letter Pad Template"
-                subtitle="లెటర్ ప్యాడ్ టెంప్లేట్‌ను ఎంచుకోండి"
+                title={lt("Choose a Letter Pad Template", "లెటర్ ప్యాడ్ టెంప్లేట్‌ను ఎంచుకోండి")}
+                subtitle={lt("Choose a Letter Pad Template", "లెటర్ ప్యాడ్ టెంప్లేట్‌ను ఎంచుకోండి")}
                 theme={theme}
               >
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -420,8 +423,7 @@ function DesignsPage() {
                       </div>
                       <div className="px-2 py-1.5 flex items-center justify-between gap-1">
                         <div className="min-w-0">
-                          <p className="text-[11px] font-semibold truncate" style={{ color: PAGE_HEAD }}>{tpl.en}</p>
-                          <p className="text-[10px] truncate" style={{ color: PAGE_SUB }}>{tpl.te}</p>
+                          <p className="text-[11px] font-semibold truncate" style={{ color: PAGE_HEAD }}>{localizeText(tpl, lang)}</p>
                         </div>
                         <EditIcon className="h-3 w-3" style={{ color: theme.icon }} />
                       </div>
@@ -432,49 +434,49 @@ function DesignsPage() {
             ) : (
               <Section
                 icon={<EditIcon className="h-5 w-5" style={{ color: theme.icon }} />}
-                title="Edit Mode — Letter Pad"
-                subtitle="వివరాలు నింపండి — ప్రివ్యూ లైవ్"
+                title={lt("Edit Mode — Letter Pad", "ఎడిట్ మోడ్ — లెటర్ ప్యాడ్")}
+                subtitle={lt("Fill details — live preview", "వివరాలు నింపండి — లైవ్ ప్రివ్యూ")}
                 theme={theme}
                 right={
                   <Button size="sm" variant="ghost" onClick={() => setLetterPick(null)} style={{ color: PAGE_SUB }}>
-                    <ChevronLeft className="h-4 w-4 mr-1" /> Back to gallery
+                    <ChevronLeft className="h-4 w-4 mr-1" /> {lt("Back to gallery", "గ్యాలరీకి వెనక్కి")}
                   </Button>
                 }
               >
                 <Tabs value={letterMode} onValueChange={(v) => setLetterMode(v as "rich" | "blank")} className="w-full">
                   <TabsList className="grid grid-cols-2 w-full" style={{ background: PAGE_BG, border: `1px solid ${PAGE_BORDER}` }}>
-                    <TabsTrigger value="rich" className="gap-2"><Pencil className="h-3.5 w-3.5" /> Rich Text / టైప్</TabsTrigger>
-                    <TabsTrigger value="blank" className="gap-2"><FileX className="h-3.5 w-3.5" /> Blank / ఖాళీ</TabsTrigger>
+                    <TabsTrigger value="rich" className="gap-2"><Pencil className="h-3.5 w-3.5" /> {lt("Rich Text", "టైప్")}</TabsTrigger>
+                    <TabsTrigger value="blank" className="gap-2"><FileX className="h-3.5 w-3.5" /> {lt("Blank", "ఖాళీ")}</TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="rich" className="space-y-3 mt-3">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div className="space-y-1">
-                        <Label className="text-[11px]" style={{ color: PAGE_SUB }}>To / గ్రహీత</Label>
+                        <Label className="text-[11px]" style={{ color: PAGE_SUB }}>{lt("To", "గ్రహీత")}</Label>
                         <Textarea rows={2} value={letterTo} onChange={(e) => setLetterTo(e.target.value)} placeholder="Recipient name & address" />
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-[11px]" style={{ color: PAGE_SUB }}>Date / తేదీ</Label>
+                        <Label className="text-[11px]" style={{ color: PAGE_SUB }}>{lt("Date", "తేదీ")}</Label>
                         <Input type="date" value={letterDate} onChange={(e) => setLetterDate(e.target.value)} />
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-[11px]" style={{ color: PAGE_SUB }}>Letter Heading / లేఖ శీర్షిక</Label>
+                      <Label className="text-[11px]" style={{ color: PAGE_SUB }}>{lt("Letter Heading", "లేఖ శీర్షిక")}</Label>
                       <Input value={letterHeading} onChange={(e) => setLetterHeading(e.target.value)} placeholder="Letter Heading" />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-[11px]" style={{ color: PAGE_SUB }}>Subject / విషయం</Label>
+                      <Label className="text-[11px]" style={{ color: PAGE_SUB }}>{lt("Subject", "విషయం")}</Label>
                       <Input value={letterSubject} onChange={(e) => setLetterSubject(e.target.value)} placeholder="Regarding..." />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-[11px]" style={{ color: PAGE_SUB }}>Body / లేఖ విషయం</Label>
+                      <Label className="text-[11px]" style={{ color: PAGE_SUB }}>{lt("Body", "లేఖ విషయం")}</Label>
                       <Textarea rows={8} value={letterBody} onChange={(e) => setLetterBody(e.target.value)} placeholder="Type your letter body here..." />
                     </div>
                   </TabsContent>
 
                   <TabsContent value="blank" className="mt-3">
                     <div className="rounded-lg border p-3 text-[12px]" data-theme-surface="mini-box" style={{ background: PAGE_MINI, borderColor: PAGE_BORDER, color: PAGE_SUB }}>
-                      Blank template — header &amp; footer only. Download as PDF, print, and write content by hand.
+                      {lt("Blank template — header & footer only. Download as PDF, print, and write content by hand.", "ఖాళీ టెంప్లేట్ — హెడర్ & ఫుటర్ మాత్రమే. PDFగా డౌన్‌లోడ్ చేసి ప్రింట్ చేయండి.")}
                     </div>
                   </TabsContent>
                 </Tabs>
@@ -490,31 +492,31 @@ function DesignsPage() {
                 {/* Logo & Title size sliders */}
                 <div className="rounded-lg p-3 border space-y-3" data-theme-surface="big-box" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
                   <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: PAGE_HEAD }}>
-                    Logo &amp; Title Size / లోగో &amp; టైటిల్ సైజ్
+                    {lt("Logo & Title Size", "లోగో & టైటిల్ సైజ్")}
                   </p>
                   <div className="space-y-1">
-                    <Label className="text-[10px]" style={{ color: PAGE_SUB }}>Logo Size — {letterLogoSize}px</Label>
+                    <Label className="text-[10px]" style={{ color: PAGE_SUB }}>{lt("Logo Size", "లోగో సైజ్")} — {letterLogoSize}px</Label>
                     <input type="range" min={32} max={96} step={2} value={letterLogoSize}
                       onChange={(e) => setLetterLogoSize(Number(e.target.value))} className="w-full" />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-[10px]" style={{ color: PAGE_SUB }}>Title Size — {letterTitleSize}px</Label>
+                    <Label className="text-[10px]" style={{ color: PAGE_SUB }}>{lt("Title Size", "టైటిల్ సైజ్")} — {letterTitleSize}px</Label>
                     <input type="range" min={12} max={28} step={1} value={letterTitleSize}
                       onChange={(e) => setLetterTitleSize(Number(e.target.value))} className="w-full" />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-[10px]" style={{ color: PAGE_SUB }}>Reg No Size — {letterRegSize}px</Label>
+                    <Label className="text-[10px]" style={{ color: PAGE_SUB }}>{lt("Reg No Size", "రిజి నెం సైజ్")} — {letterRegSize}px</Label>
                     <input type="range" min={7} max={18} step={1} value={letterRegSize}
                       onChange={(e) => setLetterRegSize(Number(e.target.value))} className="w-full" />
                   </div>
                   <div className="grid grid-cols-3 gap-2 pt-1">
-                    <LineColor label="Title / టైటిల్" value={letterTitleColor ?? effectiveAccent} onChange={setLetterTitleColor} />
-                    <LineColor label="Slogan / స్లోగన్" value={letterSloganColor ?? "#555555"} onChange={setLetterSloganColor} />
-                    <LineColor label="Reg No / రిజి" value={letterRegColor ?? "#666666"} onChange={setLetterRegColor} />
+                    <LineColor label={lt("Title", "టైటిల్")} value={letterTitleColor ?? effectiveAccent} onChange={setLetterTitleColor} />
+                    <LineColor label={lt("Slogan", "స్లోగన్")} value={letterSloganColor ?? "#555555"} onChange={setLetterSloganColor} />
+                    <LineColor label={lt("Reg No", "రిజి నెం")} value={letterRegColor ?? "#666666"} onChange={setLetterRegColor} />
                   </div>
                 </div>
 
-                <LivePreview title="Letter Pad Live Preview" theme={customTheme}>
+                <LivePreview title={lt("Letter Pad Live Preview", "లెటర్ ప్యాడ్ లైవ్ ప్రివ్యూ")} theme={customTheme}>
                   <LetterPreview
                     layout={letterPick}
                     theme={customTheme}
@@ -541,7 +543,7 @@ function DesignsPage() {
                 <Button onClick={printLetterhead} className="w-full font-semibold h-11"
                   style={{ background: customTheme.buttonBg, color: customTheme.buttonText }}>
                   <Printer className="h-4 w-4 mr-2" />
-                  {letterMode === "rich" ? "Preview & Download Letter PDF" : "Download Blank Letterhead PDF"}
+                  {letterMode === "rich" ? lt("Preview & Download Letter PDF", "లెటర్ PDF ప్రివ్యూ & డౌన్‌లోడ్") : lt("Download Blank Letterhead PDF", "ఖాళీ లెటర్‌హెడ్ PDF డౌన్‌లోడ్")}
                 </Button>
               </Section>
             )}
@@ -553,8 +555,8 @@ function DesignsPage() {
             {receiptPick === null ? (
               <Section
                 icon={<Receipt className="h-5 w-5" style={{ color: theme.icon }} />}
-                title="Choose a Receipt Template"
-                subtitle="రసీదు టెంప్లేట్‌ను ఎంచుకోండి"
+                title={lt("Choose a Receipt Template", "రసీదు టెంప్లేట్‌ను ఎంచుకోండి")}
+                subtitle={lt("Choose a Receipt Template", "రసీదు టెంప్లేట్‌ను ఎంచుకోండి")}
                 theme={theme}
               >
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -572,8 +574,7 @@ function DesignsPage() {
                       </div>
                       <div className="px-2 py-1.5 flex items-center justify-between">
                         <div>
-                          <p className="text-[11px] font-semibold" style={{ color: PAGE_HEAD }}>{tpl.en}</p>
-                          <p className="text-[10px]" style={{ color: PAGE_SUB }}>{tpl.te}</p>
+                          <p className="text-[11px] font-semibold" style={{ color: PAGE_HEAD }}>{localizeText(tpl, lang)}</p>
                         </div>
                         <EditIcon className="h-3 w-3" style={{ color: theme.icon }} />
                       </div>
@@ -584,24 +585,24 @@ function DesignsPage() {
             ) : (
               <Section
                 icon={<EditIcon className="h-5 w-5" style={{ color: theme.icon }} />}
-                title="Edit Mode — Receipt"
-                subtitle="వివరాలు నింపండి — ప్రివ్యూ లైవ్"
+                title={lt("Edit Mode — Receipt", "ఎడిట్ మోడ్ — రసీదు")}
+                subtitle={lt("Fill details — live preview", "వివరాలు నింపండి — లైవ్ ప్రివ్యూ")}
                 theme={theme}
                 right={
                   <Button size="sm" variant="ghost" onClick={() => setReceiptPick(null)} style={{ color: PAGE_SUB }}>
-                    <ChevronLeft className="h-4 w-4 mr-1" /> Back to gallery
+                    <ChevronLeft className="h-4 w-4 mr-1" /> {lt("Back to gallery", "గ్యాలరీకి వెనక్కి")}
                   </Button>
                 }
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-3 rounded-lg p-3 border" data-theme-surface="mini-box" style={{ background: PAGE_MINI, borderColor: PAGE_BORDER }}>
                     <div className="grid grid-cols-2 gap-2">
-                      <Field label="Receipt No" value={receipt.receiptNo} onChange={(v) => setReceipt({ ...receipt, receiptNo: v })} />
-                      <Field label="Date" value={receipt.date} onChange={(v) => setReceipt({ ...receipt, date: v })} type="date" />
-                      <Field label="Payer Name / పేరు" value={receipt.payerName} onChange={(v) => setReceipt({ ...receipt, payerName: v })} />
-                      <Field label="Amount (₹)" value={receipt.amount} onChange={(v) => setReceipt({ ...receipt, amount: v })} />
-                      <Field label="Purpose" value={receipt.purpose} onChange={(v) => setReceipt({ ...receipt, purpose: v })} />
-                      <Field label="Mode" value={receipt.mode} onChange={(v) => setReceipt({ ...receipt, mode: v })} />
+                      <Field label={lt("Receipt No", "రసీదు నెం")} value={receipt.receiptNo} onChange={(v) => setReceipt({ ...receipt, receiptNo: v })} />
+                      <Field label={lt("Date", "తేదీ")} value={receipt.date} onChange={(v) => setReceipt({ ...receipt, date: v })} type="date" />
+                      <Field label={lt("Payer Name", "చెల్లించినవారి పేరు")} value={receipt.payerName} onChange={(v) => setReceipt({ ...receipt, payerName: v })} />
+                      <Field label={lt("Amount (₹)", "మొత్తం (₹)")} value={receipt.amount} onChange={(v) => setReceipt({ ...receipt, amount: v })} />
+                      <Field label={lt("Purpose", "ఉద్దేశం")} value={receipt.purpose} onChange={(v) => setReceipt({ ...receipt, purpose: v })} />
+                      <Field label={lt("Mode", "విధానం")} value={receipt.mode} onChange={(v) => setReceipt({ ...receipt, mode: v })} />
                     </div>
 
                     <LogoUploader logoUrl={effectiveReceiptLogo} onChange={setReceiptLogo} />
@@ -617,7 +618,7 @@ function DesignsPage() {
                       className="w-full font-semibold h-10"
                       style={{ background: customTheme.buttonBg, color: customTheme.buttonText }}
                     >
-                      <Download className="h-4 w-4 mr-2" /> Save & Download Receipt
+                      <Download className="h-4 w-4 mr-2" /> {lt("Save & Download Receipt", "రసీదు సేవ్ చేసి డౌన్‌లోడ్ చేయండి")}
                     </Button>
                   </div>
                   <div className="rounded-lg p-3 border flex items-center justify-center" data-theme-surface="mini-box" style={{ background: PAGE_MINI, borderColor: PAGE_BORDER, minHeight: 260 }}>
@@ -661,12 +662,14 @@ function Section({
 function LivePreview({
   title, theme, children,
 }: { title: string; theme: Required<ThemeSettings>; children: React.ReactNode }) {
+  const { lang } = useI18n();
+  const lt = (en: string, te: string) => localizeText({ en, te }, lang);
   return (
     <div className="rounded-xl p-3 border" data-theme-surface="mini-box" style={{ background: PAGE_MINI, borderColor: PAGE_BORDER }}>
       <div className="flex items-center gap-2 mb-2">
         <Sparkles className="h-3.5 w-3.5" style={{ color: theme.icon }} />
         <p className="text-[11px] uppercase tracking-wide font-semibold" style={{ color: PAGE_HEAD }}>
-          {title} / లైవ్ ప్రివ్యూ
+          {title || lt("Live Preview", "లైవ్ ప్రివ్యూ")}
         </p>
       </div>
       <div className="flex justify-center">{children}</div>
@@ -696,17 +699,19 @@ function StyleControls({
   accent: string; setAccent: (v: string) => void;
   font: string; setFont: (v: string) => void;
 }) {
+  const { lang } = useI18n();
+  const lt = (en: string, te: string) => localizeText({ en, te }, lang);
   return (
     <div className="rounded-lg p-3 border space-y-3" data-theme-surface="big-box" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
       <div className="flex items-center gap-2">
         <Palette className="h-3.5 w-3.5" style={{ color: accent }} />
         <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: PAGE_HEAD }}>
-          Design Customization / డిజైన్
+          {lt("Design Customization", "డిజైన్ కస్టమైజేషన్")}
         </p>
       </div>
       <div className="grid grid-cols-2 gap-2">
         <div className="space-y-1">
-          <Label className="text-[10px]" style={{ color: PAGE_SUB }}>Card Background</Label>
+          <Label className="text-[10px]" style={{ color: PAGE_SUB }}>{lt("Card Background", "కార్డ్ బ్యాక్‌గ్రౌండ్")}</Label>
           <div className="flex items-center gap-2">
             <input type="color" value={cardBg} onChange={(e) => setCardBg(e.target.value)}
               className="h-9 w-12 rounded border cursor-pointer" style={{ borderColor: PAGE_BORDER, background: "transparent" }} />
@@ -716,7 +721,7 @@ function StyleControls({
           </div>
         </div>
         <div className="space-y-1">
-          <Label className="text-[10px]" style={{ color: PAGE_SUB }}>Accent / Strip Color</Label>
+          <Label className="text-[10px]" style={{ color: PAGE_SUB }}>{lt("Accent / Strip Color", "స్ట్రిప్ రంగు")}</Label>
           <div className="flex items-center gap-2">
             <input type="color" value={accent} onChange={(e) => setAccent(e.target.value)}
               className="h-9 w-12 rounded border cursor-pointer" style={{ borderColor: PAGE_BORDER, background: "transparent" }} />
@@ -728,7 +733,7 @@ function StyleControls({
       </div>
       <div className="space-y-1">
         <Label className="text-[10px] flex items-center gap-1" style={{ color: PAGE_SUB }}>
-          <TypeIcon className="h-3 w-3" /> Font Style / ఫాంట్
+          <TypeIcon className="h-3 w-3" /> {lt("Font Style", "ఫాంట్ స్టైల్")}
         </Label>
         <Select value={font} onValueChange={setFont}>
           <SelectTrigger className="h-9 text-[12px]" style={{ background: PAGE_INPUT_BG, borderColor: PAGE_BORDER, color: PAGE_INPUT_TEXT }}>
@@ -746,18 +751,20 @@ function StyleControls({
 }
 
 function LogoUploader({ logoUrl, onChange }: { logoUrl: string; onChange: (url: string) => void }) {
+  const { lang } = useI18n();
+  const lt = (en: string, te: string) => localizeText({ en, te }, lang);
   return (
     <div className="rounded-lg p-3 border flex items-center gap-3" data-theme-surface="big-box" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
       <div style={{ width: 44, height: 44, borderRadius: 6, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", padding: 4, border: `1px solid ${PAGE_BORDER}` }}>
         {logoUrl ? <img src={logoUrl} alt="Logo" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} /> : null}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[11px] font-semibold" style={{ color: PAGE_HEAD }}>Society Logo / లోగో</p>
-        <p className="text-[10px]" style={{ color: PAGE_SUB }}>Shown in the receipt header</p>
+        <p className="text-[11px] font-semibold" style={{ color: PAGE_HEAD }}>{lt("Society Logo", "సొసైటీ లోగో")}</p>
+        <p className="text-[10px]" style={{ color: PAGE_SUB }}>{lt("Shown in the receipt header", "రసీదు హెడర్‌లో చూపబడుతుంది")}</p>
       </div>
       <label className="inline-flex items-center gap-1 px-3 h-8 rounded-md text-[11px] cursor-pointer border"
         style={{ background: PAGE_INPUT_BG, borderColor: PAGE_BORDER, color: PAGE_INPUT_TEXT }}>
-        <Upload className="h-3 w-3" /> Upload
+        <Upload className="h-3 w-3" /> {lt("Upload", "అప్‌లోడ్")}
         <input type="file" accept="image/*" className="hidden" onChange={(e) => {
           const f = e.target.files?.[0]; if (!f) return;
           const url = URL.createObjectURL(f); onChange(url);
@@ -1148,6 +1155,8 @@ function IdCardPreview({
   orgName: string; slogan: string; reg: string; member: MemberData;
   cardBg?: string;
 }) {
+  const { lang } = useI18n();
+  const lt = (en: string, te: string) => localizeText({ en, te }, lang);
   if (layout === "official-saffron") {
     return <OfficialSaffronPreview theme={theme} orgName={orgName} slogan={slogan} reg={reg} member={member} cardBg={cardBg} />;
   }
@@ -1159,11 +1168,11 @@ function IdCardPreview({
   return (
     <div style={{ display: "flex", flexWrap: "wrap", gap: 14, justifyContent: "center" }}>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: PAGE_SUB, letterSpacing: 1 }}>FRONT / ముందు</div>
+        <div style={{ fontSize: 10, fontWeight: 700, color: PAGE_SUB, letterSpacing: 1 }}>{lt("FRONT", "ముందు")}</div>
         {front}
       </div>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: PAGE_SUB, letterSpacing: 1 }}>BACK / వెనుక</div>
+        <div style={{ fontSize: 10, fontWeight: 700, color: PAGE_SUB, letterSpacing: 1 }}>{lt("BACK", "వెనుక")}</div>
         <StandardBackPreview theme={theme} memberName={member.name} cardBg={cardBg} />
       </div>
     </div>
@@ -1175,6 +1184,8 @@ function KeychainPreview({
 }: {
   theme: Required<ThemeSettings>; orgName: string; member: MemberData; cardBg: string;
 }) {
+  const { lang } = useI18n();
+  const lt = (en: string, te: string) => localizeText({ en, te }, lang);
   const headFF = `${theme.headFont}, "Noto Sans Telugu", system-ui, sans-serif`;
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
@@ -1202,7 +1213,7 @@ function KeychainPreview({
           </div>
         </div>
       </div>
-      <div style={{ fontSize: 9, color: PAGE_SUB, letterSpacing: 1 }}>KEYCHAIN / కీ చైన్</div>
+      <div style={{ fontSize: 9, color: PAGE_SUB, letterSpacing: 1 }}>{lt("KEYCHAIN", "కీ చైన్")}</div>
     </div>
   );
 }
@@ -1706,6 +1717,8 @@ function ReceiptPreview({
   orgName: string; slogan: string; reg: string; data: ReceiptData;
   cardBg?: string; logoUrl?: string;
 }) {
+  const { lang } = useI18n();
+  const lt = (en: string, te: string) => localizeText({ en, te }, lang);
   const headFF = `${theme.headFont}, "Noto Sans Telugu", system-ui, sans-serif`;
   const accent = theme.icon;
   const W = 360, H = 220;
@@ -1780,7 +1793,7 @@ function ReceiptPreview({
         <div style={{ flex: 1, textAlign: Logo ? "left" : "center" }}>
           <div style={{ fontWeight: 900, color: accent, fontSize: 16 }}>{orgName}</div>
           <div style={{ fontSize: 10, color: "#666" }}>{slogan} · Reg: {reg}</div>
-          <div style={{ fontWeight: 800, color: "#111", marginTop: 4 }}>RECEIPT / రసీదు</div>
+          <div style={{ fontWeight: 800, color: "#111", marginTop: 4 }}>{lt("RECEIPT", "రసీదు")}</div>
         </div>
       </div>
       {rows}
@@ -1801,6 +1814,8 @@ function OfficialSaffronPreview({
   orgName: string; slogan: string; reg: string; member: MemberData;
   cardBg?: string;
 }) {
+  const { lang } = useI18n();
+  const lt = (en: string, te: string) => localizeText({ en, te }, lang);
   const accent = theme.icon || "#FF9933";
   const green = "#138808";
   const navy = "#000080";
@@ -1830,7 +1845,7 @@ function OfficialSaffronPreview({
           <div style={{ fontFamily: subFF, fontSize: 8, fontStyle: "italic", color: navy, fontWeight: 700 }}>{slogan}</div>
           <div style={{ fontSize: 7, color: navy, opacity: 0.85 }}>Reg: {reg}</div>
         </div>
-        <div style={{ fontSize: 8, background: navy, color: "#fff", padding: "2px 6px", borderRadius: 3, fontWeight: 800, flexShrink: 0 }}>సభ్యుడు</div>
+          <div style={{ fontSize: 8, background: navy, color: "#fff", padding: "2px 6px", borderRadius: 3, fontWeight: 800, flexShrink: 0 }}>{lt("Member", "సభ్యుడు")}</div>
       </div>
 
       <div style={{ flex: 1, display: "flex", gap: 8, padding: "6px 10px 4px", position: "relative" }}>
@@ -1844,7 +1859,7 @@ function OfficialSaffronPreview({
           <div style={{
             marginTop: 4, fontSize: 7, fontWeight: 800, color: "#fff",
             background: green, textAlign: "center", padding: "2px 3px", borderRadius: 2, lineHeight: 1.1,
-          }}>● యాక్టివ్ సభ్యుడు</div>
+          }}>● {lt("Active Member", "యాక్టివ్ సభ్యుడు")}</div>
         </div>
 
         <div style={{ flex: 1, minWidth: 0, fontSize: 9, lineHeight: 1.3, color: "#222", display: "flex", flexDirection: "column" }}>
@@ -1852,12 +1867,12 @@ function OfficialSaffronPreview({
             ID: {member.memberId}
           </div>
           <div style={{ fontSize: 12, fontWeight: 800, marginTop: 2, color: navy, lineHeight: 1.2 }}>{member.name}</div>
-          <div><span style={{ color: "#666" }}>తండ్రి:</span> <span style={{ fontWeight: 600 }}>{member.fatherName}</span></div>
-          <div><span style={{ color: "#666" }}>గ్రామం:</span> <span style={{ fontWeight: 600 }}>{member.village}</span></div>
-          <div><span style={{ color: "#666" }}>మండలం:</span> <span style={{ fontWeight: 600 }}>{member.mandal}</span></div>
-          <div><span style={{ color: "#666" }}>ఫోన్:</span> <span style={{ fontWeight: 600 }}>{member.phone}</span></div>
+          <div><span style={{ color: "#666" }}>{lt("Father", "తండ్రి")}:</span> <span style={{ fontWeight: 600 }}>{member.fatherName}</span></div>
+          <div><span style={{ color: "#666" }}>{lt("Village", "గ్రామం")}:</span> <span style={{ fontWeight: 600 }}>{member.village}</span></div>
+          <div><span style={{ color: "#666" }}>{lt("Mandal", "మండలం")}:</span> <span style={{ fontWeight: 600 }}>{member.mandal}</span></div>
+          <div><span style={{ color: "#666" }}>{lt("Phone", "ఫోన్")}:</span> <span style={{ fontWeight: 600 }}>{member.phone}</span></div>
           <div style={{ display: "flex", gap: 5, marginTop: 2, alignItems: "center" }}>
-            <div style={{ fontSize: 8 }}><span style={{ color: "#666" }}>చేరిన: </span><span style={{ fontWeight: 600 }}>{member.joinDate}</span></div>
+            <div style={{ fontSize: 8 }}><span style={{ color: "#666" }}>{lt("Joined", "చేరిన")}: </span><span style={{ fontWeight: 600 }}>{member.joinDate}</span></div>
             <div style={{ fontSize: 8, background: "#C8102E", color: "#fff", padding: "1px 5px", borderRadius: 2, fontWeight: 800 }}>🩸 {member.bloodGroup}</div>
           </div>
         </div>
@@ -1888,11 +1903,11 @@ function OfficialSaffronPreview({
   return (
     <div style={{ display: "flex", flexWrap: "wrap", gap: 14, justifyContent: "center" }}>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: PAGE_SUB, letterSpacing: 1 }}>FRONT / ముందు</div>
+        <div style={{ fontSize: 10, fontWeight: 700, color: PAGE_SUB, letterSpacing: 1 }}>{lt("FRONT", "ముందు")}</div>
         {Front}
       </div>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: PAGE_SUB, letterSpacing: 1 }}>BACK / వెనుక</div>
+        <div style={{ fontSize: 10, fontWeight: 700, color: PAGE_SUB, letterSpacing: 1 }}>{lt("BACK", "వెనుక")}</div>
         <StandardBackPreview theme={theme} memberName={member.name} cardBg={cardBg} />
       </div>
     </div>
@@ -1904,6 +1919,8 @@ function OfficialSaffronPreview({
  * =================================================================== */
 
 function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme: Required<ThemeSettings> }) {
+  const { lang } = useI18n();
+  const lt = (en: string, te: string) => localizeText({ en, te }, lang);
   const saveDesign = useServerFn(updateOrgIdDesign);
   const initial: IdCardDesign = applyOrgThemeToIdDesign((org?.id_card_design as IdCardDesign) || defaultDesign("classic", "normal"), theme);
   const [design, setDesign] = useState<IdCardDesign>(initial);
@@ -1976,7 +1993,7 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
       {/* Step 1: Card Type + Print Dimensions */}
       <div className="rounded-xl p-3 border space-y-3" data-theme-surface="big-box" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
         <div className="text-[11px] font-bold uppercase tracking-wider" style={{ color: PAGE_SUB }}>
-          Step 1 • కార్డ్ టైప్ ఎంచుకోండి
+          {lt("Step 1 • Choose Card Type", "దశ 1 • కార్డ్ టైప్ ఎంచుకోండి")}
         </div>
         <div className="grid grid-cols-2 gap-2">
           {(["normal", "keychain"] as CardType[]).map((t) => (
@@ -1987,20 +2004,20 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
                 color: design.cardType === t ? theme.buttonText : PAGE_SUB,
                 border: `1px solid ${design.cardType === t ? theme.buttonBg : PAGE_BORDER}`,
               }}>
-              {t === "normal" ? "🪪 Normal ID Card / నార్మల్" : "🔑 Keychain Type / కీ చైన్"}
+              {t === "normal" ? `🪪 ${lt("Normal ID Card", "నార్మల్ ఐడి కార్డ్")}` : `🔑 ${lt("Keychain Type", "కీ చైన్ టైప్")}`}
             </button>
           ))}
         </div>
         <div className="space-y-1">
-          <Label className="text-[10px]" style={{ color: PAGE_SUB }}>Print Dimensions / ప్రింట్ సైజ్</Label>
+          <Label className="text-[10px]" style={{ color: PAGE_SUB }}>{lt("Print Dimensions", "ప్రింట్ సైజ్")}</Label>
           <Select
             value={design.cardType === "keychain" ? "cr80-v" : "cr80-h"}
             onValueChange={(v) => setCardType(v === "cr80-v" ? "keychain" : "normal")}
           >
             <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="cr80-h">CR-80 Horizontal — 85.6 × 54 mm (Normal)</SelectItem>
-              <SelectItem value="cr80-v">CR-80 Vertical — 54 × 85.6 mm (Keychain / Lanyard)</SelectItem>
+              <SelectItem value="cr80-h">CR-80 {lt("Horizontal", "అడ్డం")} — 85.6 × 54 mm ({lt("Normal", "నార్మల్")})</SelectItem>
+              <SelectItem value="cr80-v">CR-80 {lt("Vertical", "నిలువు")} — 54 × 85.6 mm ({lt("Keychain / Lanyard", "కీ చైన్ / లాన్యార్డ్")})</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -2011,7 +2028,7 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
       {step === "pick" && (
         <div className="rounded-xl p-3 border" data-theme-surface="big-box" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
           <div className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: PAGE_SUB }}>
-            Step 2 • టెంప్లేట్ ఎంచుకోండి (5 రెడీమేడ్ డిజైన్స్)
+            {lt("Step 2 • Choose Template (ready-made designs)", "దశ 2 • టెంప్లేట్ ఎంచుకోండి (రెడీమేడ్ డిజైన్స్)")}
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {(Object.keys(TEMPLATE_META) as TemplateId[]).map((id) => {
@@ -2026,8 +2043,7 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
                     <IdCardRenderer design={tplDesign} org={orgCtx} member={sampleMember} side="front" scale={0.55} />
                   </div>
                   <div>
-                    <div className="text-sm font-bold" style={{ color: PAGE_HEAD }}>{meta.en}</div>
-                    <div className="text-[11px]" style={{ color: PAGE_SUB }}>{meta.te}</div>
+                    <div className="text-sm font-bold" style={{ color: PAGE_HEAD }}>{localizeText(meta, lang)}</div>
                     <div className="text-[10px] mt-1" style={{ color: PAGE_SUB }}>{meta.description}</div>
                   </div>
                 </button>
@@ -2042,10 +2058,10 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <Button size="sm" variant="ghost" onClick={() => setStep("pick")} style={{ color: PAGE_SUB }}>
-              <ChevronLeft className="h-4 w-4 mr-1" /> Change template / టెంప్లేట్ మార్చండి
+              <ChevronLeft className="h-4 w-4 mr-1" /> {lt("Change template", "టెంప్లేట్ మార్చండి")}
             </Button>
             <div className="text-[11px]" style={{ color: PAGE_SUB }}>
-              Selected: <span className="font-bold" style={{ color: PAGE_HEAD }}>{TEMPLATE_META[design.templateId].en}</span>
+              {lt("Selected", "ఎంచుకున్నది")}: <span className="font-bold" style={{ color: PAGE_HEAD }}>{localizeText(TEMPLATE_META[design.templateId], lang)}</span>
             </div>
           </div>
 
@@ -2060,7 +2076,7 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
                     color: side === s ? theme.buttonText : PAGE_SUB,
                     border: `1px solid ${side === s ? theme.buttonBg : PAGE_BORDER}`,
                   }}>
-                  {s === "front" ? "ముందు / Front" : "వెనుక / Back"}
+                  {s === "front" ? lt("Front", "ముందు") : lt("Back", "వెనుక")}
                 </button>
               ))}
             </div>
@@ -2092,10 +2108,10 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
               className="w-full h-12 text-sm font-bold"
               style={{ background: theme.buttonBg, color: theme.buttonText }}>
               <Check className="h-4 w-4 mr-2" />
-              {saving ? "Saving..." : "Save Design — Apply to All Members / అందరికీ అప్లై"}
+              {saving ? lt("Saving...", "సేవ్ అవుతోంది...") : lt("Save Design — Apply to All Members", "డిజైన్ సేవ్ చేయండి — అందరికీ అప్లై చేయండి")}
             </Button>
             <p className="text-[10px] text-center mt-2" style={{ color: PAGE_SUB }}>
-              ఈ డిజైన్ సేవ్ చేస్తే ఆర్గనైజేషన్ లోని సభ్యులందరికీ ఇదే ఐడి కార్డ్ ఆటోమేటిక్ గా తయారు అవుతుంది.
+              {lt("Saving this design will automatically apply the same ID card to all members in the organization.", "ఈ డిజైన్ సేవ్ చేస్తే ఆర్గనైజేషన్ లోని సభ్యులందరికీ ఇదే ఐడి కార్డ్ ఆటోమేటిక్‌గా తయారు అవుతుంది.")}
             </p>
           </div>
         </div>

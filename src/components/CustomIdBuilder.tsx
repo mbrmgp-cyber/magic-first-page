@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import QRCode from "qrcode";
+import { localizeText, useI18n } from "@/lib/i18n";
 
 type BuiltinKey = "photo" | "name" | "designation" | "qr";
 type ElementKey = BuiltinKey | string; // custom fields use cf-<id>
@@ -59,6 +60,8 @@ export function CustomIdBuilder({ defaultName = "Member Name", defaultDesignatio
   defaultName?: string;
   defaultDesignation?: string;
 }) {
+  const { lang } = useI18n();
+  const lt = (en: string, te: string) => localizeText({ en, te }, lang);
   const [size, setSize] = useState<CardSize>("landscape");
   const { w: CANVAS_W, h: CANVAS_H } = SIZES[size];
 
@@ -314,68 +317,68 @@ export function CustomIdBuilder({ defaultName = "Member Name", defaultDesignatio
             })}
           </div>
           <p className="text-[10px] mt-2 text-center" style={{ color: SUB }}>
-            Tap an element to select • drag to move or use position sliders below
+            {lt("Tap an element to select • drag to move or use position sliders below", "ఎలిమెంట్ ఎంచుకోవడానికి ట్యాప్ చేయండి • కదిలించడానికి డ్రాగ్ చేయండి")}
           </p>
         </div>
 
         <Button onClick={exportPDF} disabled={exporting} className="w-full h-10 font-semibold" style={{ background: ACCENT, color: "#fff" }}>
-          <Download className="h-4 w-4 mr-2" /> {exporting ? "Preparing PDF..." : "Download High-Quality PDF"}
+          <Download className="h-4 w-4 mr-2" /> {exporting ? lt("Preparing PDF...", "PDF సిద్ధమవుతోంది...") : lt("Download High-Quality PDF", "హై-క్వాలిటీ PDF డౌన్‌లోడ్")}
         </Button>
       </div>
 
       {/* Side panel */}
       <div className="space-y-3">
-        <Panel title="1 · Background / బ్యాక్‌గ్రౌండ్">
+        <Panel title={`1 · ${lt("Background", "బ్యాక్‌గ్రౌండ్")}`}>
           <UploadButton
-            label={bg ? "Replace Background" : "Upload Custom Background"}
-            sub="JPG / PNG · కస్టమ్ బ్యాక్‌గ్రౌండ్"
+            label={bg ? lt("Replace Background", "బ్యాక్‌గ్రౌండ్ మార్చండి") : lt("Upload Custom Background", "కస్టమ్ బ్యాక్‌గ్రౌండ్ అప్‌లోడ్")}
+            sub={`JPG / PNG · ${lt("Custom Background", "కస్టమ్ బ్యాక్‌గ్రౌండ్")}`}
             onFile={(f) => uploadFile(f, setBg)}
           />
           {bg && (
             <Button variant="ghost" size="sm" onClick={() => setBg(null)} className="w-full h-8 text-xs" style={{ color: "#ef4444" }}>
-              <Trash2 className="h-3 w-3 mr-1" /> Remove
+              <Trash2 className="h-3 w-3 mr-1" /> {lt("Remove", "తొలగించు")}
             </Button>
           )}
         </Panel>
 
-        <Panel title="2 · Elements / ఎలిమెంట్స్">
-          <ToggleRow icon={<User className="h-3.5 w-3.5" />} label="Photo / ఫోటో" on={els.photo?.enabled} onChange={(v) => patch("photo", { enabled: v })} />
-          <ToggleRow icon={<TypeIcon className="h-3.5 w-3.5" />} label="Name / పేరు" on={els.name?.enabled} onChange={(v) => patch("name", { enabled: v })} />
-          <ToggleRow icon={<Briefcase className="h-3.5 w-3.5" />} label="Designation / పదవి" on={els.designation?.enabled} onChange={(v) => patch("designation", { enabled: v })} />
-          <ToggleRow icon={<QrCode className="h-3.5 w-3.5" />} label="QR Code / క్యూఆర్" on={els.qr?.enabled} onChange={(v) => patch("qr", { enabled: v })} />
+        <Panel title={`2 · ${lt("Elements", "ఎలిమెంట్స్")}`}>
+          <ToggleRow icon={<User className="h-3.5 w-3.5" />} label={lt("Photo", "ఫోటో")} on={els.photo?.enabled} onChange={(v) => patch("photo", { enabled: v })} />
+          <ToggleRow icon={<TypeIcon className="h-3.5 w-3.5" />} label={lt("Name", "పేరు")} on={els.name?.enabled} onChange={(v) => patch("name", { enabled: v })} />
+          <ToggleRow icon={<Briefcase className="h-3.5 w-3.5" />} label={lt("Designation", "పదవి")} on={els.designation?.enabled} onChange={(v) => patch("designation", { enabled: v })} />
+          <ToggleRow icon={<QrCode className="h-3.5 w-3.5" />} label={lt("QR Code", "క్యూఆర్ కోడ్")} on={els.qr?.enabled} onChange={(v) => patch("qr", { enabled: v })} />
         </Panel>
 
         {els.photo?.enabled && (
-          <Panel title="3 · Photo">
-            <UploadButton label={photo ? "Replace Photo" : "Upload Photo"} sub="మెంబర్ ఫోటో" onFile={(f) => uploadFile(f, setPhoto)} />
+          <Panel title={`3 · ${lt("Photo", "ఫోటో")}`}>
+            <UploadButton label={photo ? lt("Replace Photo", "ఫోటో మార్చండి") : lt("Upload Photo", "ఫోటో అప్‌లోడ్")} sub={lt("Member Photo", "మెంబర్ ఫోటో")} onFile={(f) => uploadFile(f, setPhoto)} />
             <PositionSliders state={els.photo} cw={CANVAS_W} ch={CANVAS_H} onChange={(p) => patch("photo", p)} />
             <SizeSliders state={els.photo} cw={CANVAS_W} ch={CANVAS_H} onChange={(p) => patch("photo", p)} />
           </Panel>
         )}
 
         {els.name?.enabled && (
-          <Panel title="4 · Name Text">
-            <LabeledInput label="Name" value={name} onChange={setName} />
+          <Panel title={`4 · ${lt("Name Text", "పేరు టెక్స్ట్")}`}>
+            <LabeledInput label={lt("Name", "పేరు")} value={name} onChange={setName} />
             <FontSizeSlider value={els.name.fontSize || 22} onChange={(v) => patch("name", { fontSize: v })} />
-            <ColorPickerRow label="Text Color / టెక్స్ట్ కలర్" value={els.name.color || "#111111"} onChange={(c) => patch("name", { color: c })} />
+            <ColorPickerRow label={lt("Text Color", "టెక్స్ట్ కలర్")} value={els.name.color || "#111111"} onChange={(c) => patch("name", { color: c })} />
             <PositionSliders state={els.name} cw={CANVAS_W} ch={CANVAS_H} onChange={(p) => patch("name", p)} />
             <SizeSliders state={els.name} cw={CANVAS_W} ch={CANVAS_H} onChange={(p) => patch("name", p)} />
           </Panel>
         )}
 
         {els.designation?.enabled && (
-          <Panel title="5 · Designation">
-            <LabeledInput label="Designation" value={designation} onChange={setDesignation} />
+          <Panel title={`5 · ${lt("Designation", "పదవి")}`}>
+            <LabeledInput label={lt("Designation", "పదవి")} value={designation} onChange={setDesignation} />
             <FontSizeSlider value={els.designation.fontSize || 16} onChange={(v) => patch("designation", { fontSize: v })} />
-            <ColorPickerRow label="Text Color / టెక్స్ట్ కలర్" value={els.designation.color || "#374151"} onChange={(c) => patch("designation", { color: c })} />
+            <ColorPickerRow label={lt("Text Color", "టెక్స్ట్ కలర్")} value={els.designation.color || "#374151"} onChange={(c) => patch("designation", { color: c })} />
             <PositionSliders state={els.designation} cw={CANVAS_W} ch={CANVAS_H} onChange={(p) => patch("designation", p)} />
             <SizeSliders state={els.designation} cw={CANVAS_W} ch={CANVAS_H} onChange={(p) => patch("designation", p)} />
           </Panel>
         )}
 
         {els.qr?.enabled && (
-          <Panel title="6 · QR Code">
-            <LabeledInput label="QR Value (URL / ID)" value={qrValue} onChange={setQrValue} />
+          <Panel title={`6 · ${lt("QR Code", "క్యూఆర్ కోడ్")}`}>
+            <LabeledInput label={lt("QR Value (URL / ID)", "క్యూఆర్ విలువ (URL / ID)")} value={qrValue} onChange={setQrValue} />
             <PositionSliders state={els.qr} cw={CANVAS_W} ch={CANVAS_H} onChange={(p) => patch("qr", p)} />
             <SizeSliders state={els.qr} cw={CANVAS_W} ch={CANVAS_H} onChange={(p) => patch("qr", p)} square />
           </Panel>
@@ -388,15 +391,15 @@ export function CustomIdBuilder({ defaultName = "Member Name", defaultDesignatio
           return (
             <Panel key={f.id} title={`7.${i + 1} · ${f.label}`}>
               <div className="flex items-center justify-between">
-                <ToggleRow icon={<TypeIcon className="h-3.5 w-3.5" />} label="Visible" on={e.enabled} onChange={(v) => patch(f.id, { enabled: v })} />
+                <ToggleRow icon={<TypeIcon className="h-3.5 w-3.5" />} label={lt("Visible", "కనిపించాలి")} on={e.enabled} onChange={(v) => patch(f.id, { enabled: v })} />
                 <Button variant="ghost" size="sm" onClick={() => removeCustomField(f.id)} className="h-7 px-2" style={{ color: "#ef4444" }}>
                   <Trash2 className="h-3 w-3" />
                 </Button>
               </div>
-              <LabeledInput label="Label" value={f.label} onChange={(v) => updateCustomField(f.id, { label: v })} />
-              <LabeledInput label="Text" value={f.value} onChange={(v) => updateCustomField(f.id, { value: v })} />
+              <LabeledInput label={lt("Label", "లేబుల్")} value={f.label} onChange={(v) => updateCustomField(f.id, { label: v })} />
+              <LabeledInput label={lt("Text", "టెక్స్ట్")} value={f.value} onChange={(v) => updateCustomField(f.id, { value: v })} />
               <FontSizeSlider value={e.fontSize || 14} onChange={(v) => patch(f.id, { fontSize: v })} />
-              <ColorPickerRow label="Text Color" value={e.color || "#111111"} onChange={(c) => patch(f.id, { color: c })} />
+              <ColorPickerRow label={lt("Text Color", "టెక్స్ట్ కలర్")} value={e.color || "#111111"} onChange={(c) => patch(f.id, { color: c })} />
               <PositionSliders state={e} cw={CANVAS_W} ch={CANVAS_H} onChange={(p) => patch(f.id, p)} />
               <SizeSliders state={e} cw={CANVAS_W} ch={CANVAS_H} onChange={(p) => patch(f.id, p)} />
             </Panel>
@@ -404,7 +407,7 @@ export function CustomIdBuilder({ defaultName = "Member Name", defaultDesignatio
         })}
 
         <Button onClick={addCustomField} variant="outline" className="w-full h-9 text-xs" style={{ borderColor: ACCENT, color: ACCENT, background: "transparent" }}>
-          <Plus className="h-4 w-4 mr-1" /> Add Custom Field
+          <Plus className="h-4 w-4 mr-1" /> {lt("Add Custom Field", "కస్టమ్ ఫీల్డ్ జోడించండి")}
         </Button>
       </div>
     </div>
