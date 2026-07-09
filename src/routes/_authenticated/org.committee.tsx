@@ -454,17 +454,17 @@ function CommitteePage() {
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editId ? "వివరాలు మార్చండి" : "కార్యవర్గ సభ్యుని నియమించండి"}</DialogTitle>
+            <DialogTitle>{editId ? lt("Edit details", "వివరాలు మార్చండి") : lt("Appoint Committee Member", "కార్యవర్గ సభ్యుని నియమించండి")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             {!editId && (
               <div>
-                <label className="text-xs font-medium">సభ్యుడు</label>
+                <label className="text-xs font-medium">{lt("Member", "సభ్యుడు")}</label>
                 <Select value={memberId} onValueChange={setMemberId}>
-                  <SelectTrigger><SelectValue placeholder="సభ్యునిని ఎంచుకోండి" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={lt("Select a member", "సభ్యునిని ఎంచుకోండి")} /></SelectTrigger>
                   <SelectContent>
                     {selectableMembers.length === 0 ? (
-                      <div className="p-3 text-sm text-muted-foreground">అందుబాటులో సభ్యులు లేరు</div>
+                      <div className="p-3 text-sm text-muted-foreground">{lt("No members available", "అందుబాటులో సభ్యులు లేరు")}</div>
                     ) : selectableMembers.map(m => (
                       <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
                     ))}
@@ -473,36 +473,36 @@ function CommitteePage() {
               </div>
             )}
             <div>
-              <label className="text-xs font-medium">పదవి</label>
+              <label className="text-xs font-medium">{lt("Position", "పదవి")}</label>
               <Select value={role} onValueChange={v => setRole(v as CommitteeRole)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {ROLE_ORDER.map(r => (
-                    <SelectItem key={r} value={r}>{ROLE_LABELS[r]}</SelectItem>
+                    <SelectItem key={r} value={r}>{roleLbl(r)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-xs font-medium">పదవీకాలం ప్రారంభం</label>
+                <label className="text-xs font-medium">{lt("Term start", "పదవీకాలం ప్రారంభం")}</label>
                 <Input type="date" value={termStart} onChange={e => setTermStart(e.target.value)} />
               </div>
               <div>
-                <label className="text-xs font-medium">పదవీకాలం ముగింపు</label>
+                <label className="text-xs font-medium">{lt("Term end", "పదవీకాలం ముగింపు")}</label>
                 <Input type="date" value={termEnd} onChange={e => setTermEnd(e.target.value)} />
               </div>
             </div>
             <div>
-              <label className="text-xs font-medium">అర్హతలు (ఐచ్ఛికం)</label>
-              <Textarea rows={2} value={qual} onChange={e => setQual(e.target.value)} placeholder="ఉదా: B.A, 10 సం. సామాజిక సేవ" />
+              <label className="text-xs font-medium">{lt("Qualifications (optional)", "అర్హతలు (ఐచ్ఛికం)")}</label>
+              <Textarea rows={2} value={qual} onChange={e => setQual(e.target.value)} placeholder={lt("e.g., B.A, 10 yrs of social service", "ఉదా: B.A, 10 సం. సామాజిక సేవ")} />
             </div>
             <div>
-              <label className="text-xs font-medium">బాధ్యతలు (ఐచ్ఛికం)</label>
-              <Textarea rows={3} value={resp} onChange={e => setResp(e.target.value)} placeholder="ఈ పదవి బాధ్యతలు రాయండి..." />
+              <label className="text-xs font-medium">{lt("Responsibilities (optional)", "బాధ్యతలు (ఐచ్ఛికం)")}</label>
+              <Textarea rows={3} value={resp} onChange={e => setResp(e.target.value)} placeholder={lt("Describe responsibilities of this role...", "ఈ పదవి బాధ్యతలు రాయండి...")} />
             </div>
             <div className="flex gap-2 pt-2">
-              <Button onClick={save} className="flex-1"><Check className="w-4 h-4 mr-1" />సేవ్ చేయండి</Button>
+              <Button onClick={save} className="flex-1"><Check className="w-4 h-4 mr-1" />{lt("Save", "సేవ్ చేయండి")}</Button>
               <Button variant="outline" onClick={() => setFormOpen(false)}><X className="w-4 h-4" /></Button>
             </div>
           </div>
@@ -512,14 +512,14 @@ function CommitteePage() {
       {/* Settings dialog */}
       <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
         <DialogContent className="max-w-sm">
-          <DialogHeader><DialogTitle>పదవీకాలం settings</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{lt("Term settings", "పదవీకాలం settings")}</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div>
-              <label className="text-xs font-medium">డిఫాల్ట్ పదవీకాలం (సంవత్సరాలు)</label>
+              <label className="text-xs font-medium">{lt("Default term (years)", "డిఫాల్ట్ పదవీకాలం (సంవత్సరాలు)")}</label>
               <Input type="number" min={1} max={10} value={termYearsInput} onChange={e => setTermYearsInput(Number(e.target.value))} />
-              <p className="text-[11px] text-muted-foreground mt-1">కొత్త నియామకాలకు ఇది వర్తిస్తుంది.</p>
+              <p className="text-[11px] text-muted-foreground mt-1">{lt("Applies to new appointments.", "కొత్త నియామకాలకు ఇది వర్తిస్తుంది.")}</p>
             </div>
-            <Button onClick={saveTermYears} className="w-full">సేవ్ చేయండి</Button>
+            <Button onClick={saveTermYears} className="w-full">{lt("Save", "సేవ్ చేయండి")}</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -542,10 +542,10 @@ function CommitteePage() {
                   </div>
                   <div>
                     <Badge style={{ background: ROLE_GRADIENT[viewing.role], color: "white" }}>
-                      {ROLE_LABELS[viewing.role]}
+                      {roleLbl(viewing.role)}
                     </Badge>
                     <div className="text-xs text-muted-foreground mt-2">
-                      పదవీకాలం: {fmtDate(viewing.term_start_date)} → {fmtDate(viewing.term_end_date)}
+                      {lt("Term", "పదవీకాలం")}: {fmtDate(viewing.term_start_date, lang)} → {fmtDate(viewing.term_end_date, lang)}
                     </div>
                     {viewing.members?.phone && <div className="text-xs mt-1">📞 {viewing.members.phone}</div>}
                     {viewing.members?.email && <div className="text-xs truncate">✉ {viewing.members.email}</div>}
@@ -553,13 +553,13 @@ function CommitteePage() {
                 </div>
                 {viewing.qualifications && (
                   <div>
-                    <div className="text-xs font-semibold text-foreground/70 mb-1">అర్హతలు</div>
+                    <div className="text-xs font-semibold text-foreground/70 mb-1">{lt("Qualifications", "అర్హతలు")}</div>
                     <p className="text-sm whitespace-pre-wrap">{viewing.qualifications}</p>
                   </div>
                 )}
                 {viewing.responsibilities && (
                   <div>
-                    <div className="text-xs font-semibold text-foreground/70 mb-1">బాధ్యతలు</div>
+                    <div className="text-xs font-semibold text-foreground/70 mb-1">{lt("Responsibilities", "బాధ్యతలు")}</div>
                     <p className="text-sm whitespace-pre-wrap">{viewing.responsibilities}</p>
                   </div>
                 )}
