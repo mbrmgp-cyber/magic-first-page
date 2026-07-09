@@ -587,7 +587,10 @@ function translateMixedValue(value: string, lang: string): string | undefined {
     if (TELUGU_RE.test(out)) {
       const pieces = out.split(/[/·•]/).map((p) => p.trim()).filter(Boolean);
       const englishPieces = pieces.filter((p) => LATIN_RE.test(p) && !TELUGU_RE.test(p));
-      if (englishPieces.length) out = englishPieces.join(" · ");
+      if (englishPieces.length) {
+        const suffix = trimmed.match(/[\u0C00-\u0C7F][^—–-]*([—–-]\s*[^/·•]+)$/)?.[1] ?? "";
+        out = englishPieces.join(" · ") + suffix;
+      }
     }
     out = cleanSeparators(out);
     return out ? lead + out + tail : undefined;
