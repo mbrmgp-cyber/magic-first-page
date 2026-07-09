@@ -16,6 +16,7 @@ import {
 import {
   DEFAULT_THEME, HEAD_FONTS, TEXT_ALIGNS, type TextAlign, type ThemeSettings, resolveTheme,
 } from "@/lib/theme";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/org/theme")({
   head: () => ({ meta: [{ title: "Theme & Design Customizer — MBR App" }] }),
