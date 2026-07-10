@@ -279,10 +279,10 @@ function Dashboard() {
             </button>
             <LanguageToggle />
           </div>
+          <Button variant="ghost" size="icon" onClick={() => setSettingsOpen(true)} className="text-zinc-200 hover:bg-zinc-900 hover:text-white h-9 w-9 p-0 rounded-md border border-zinc-700 inline-flex items-center justify-center shrink-0 [&_svg]:mx-auto" aria-label="Settings">
+            <Settings className="h-4 w-4" />
+          </Button>
           <div className="flex items-center gap-1 flex-nowrap justify-end min-w-0">
-            <Button variant="ghost" size="icon" onClick={() => setSettingsOpen(true)} className="text-zinc-200 hover:bg-zinc-900 hover:text-white h-9 w-9 p-0 mr-1 rounded-md border border-zinc-700 inline-flex items-center justify-center shrink-0 [&_svg]:mx-auto" aria-label="Settings">
-              <Settings className="h-4 w-4" />
-            </Button>
             <Button variant="ghost" size="sm" onClick={logout} className="text-zinc-200 hover:bg-zinc-900 hover:text-white px-2 h-9 rounded-md border border-zinc-700 shrink-0">
               <LogOut className="h-4 w-4 mr-1" />{lt("Logout", "లాగ్ అవుట్")}
             </Button>
