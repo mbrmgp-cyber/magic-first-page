@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MemberIdCard } from "@/components/MemberIdCard";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { useI18n, transliterateText } from "@/lib/i18n";
 import {
   LogOut, IdCard, BookOpen, Wallet, Briefcase, MessageSquare, Vote, ShieldCheck, User, ScanLine,
   Facebook, Youtube, Gavel, CalendarDays,
