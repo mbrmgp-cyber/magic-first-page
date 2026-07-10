@@ -178,9 +178,9 @@ function MemberDashboard() {
               ? <img src={org.logo_url} alt="" className="h-full w-full object-contain p-1" />
               : <ShieldCheck className="h-7 w-7 text-black" />}
           </div>
-          <div className="flex-1 min-w-0 text-center">
-            <p className="text-sm font-semibold text-white leading-tight">స్వాగతం గౌరవ సభ్యులకు 🙏</p>
-            <p className="text-sm font-semibold text-white truncate mt-1" style={{ color: brand }}>{fullName}</p>
+          <div className="flex-1 min-w-0 flex flex-col items-center justify-center gap-2">
+            <p className="text-sm font-semibold text-white leading-tight text-center">స్వాగతం గౌరవ సభ్యులకు 🙏</p>
+            <LanguageToggle />
           </div>
           <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-950 flex items-center justify-center overflow-hidden shrink-0"
             style={{ borderWidth: 1, borderStyle: "solid", borderColor: `${brand}4d` }}>
