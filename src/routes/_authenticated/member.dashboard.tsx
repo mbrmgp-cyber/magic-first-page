@@ -263,7 +263,7 @@ function MemberDashboard() {
             <div className="h-11 w-11 rounded-full bg-zinc-900 flex items-center justify-center">
               <LogOut className="h-5 w-5 text-zinc-400" />
             </div>
-            <p className="text-[14px] font-semibold text-white">లాగ్ అవుట్</p>
+            <p className="text-[14px] font-semibold text-white">{tr("లాగ్ అవుట్")}</p>
           </button>
         </div>
 
