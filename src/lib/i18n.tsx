@@ -331,6 +331,16 @@ export function transliterateText(text: string | null | undefined, lang: string)
   try { return Sanscript.t(text, from, target); } catch { return text; }
 }
 
+// Bilingual helper: returns Telugu, English, or transliterated Telugu based on lang.
+// Use for hardcoded "Telugu / English" dual-language strings so the UI respects
+// the user's language selection instead of always showing both.
+export function bi(te: string, en: string, lang: string): string {
+  const script = scriptForLang(lang);
+  if (script === "en") return en;
+  if (script === "te") return te;
+  return transliterateText(te, lang);
+}
+
 function resolve(entry: Entry | undefined, lang: string): string {
   if (!entry) return "";
   return localizeText(entry, lang);

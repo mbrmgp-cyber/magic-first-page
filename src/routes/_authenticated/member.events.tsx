@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, Calendar, Gavel, Activity, Users, CheckCircle2, XCircle, MapPin, Link as LinkIcon, FileText, Eye } from "lucide-react";
+import { useI18n, bi } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/member/events")({
   head: () => ({ meta: [{ title: "Events & Decisions — Member View" }] }),
@@ -13,6 +14,8 @@ export const Route = createFileRoute("/_authenticated/member/events")({
 type Tab = "meetings" | "resolutions" | "activities";
 
 function MemberEventsPage() {
+  const { lang } = useI18n();
+  const b = (te: string, en: string) => bi(te, en, lang);
   const [tab, setTab] = useState<Tab>("meetings");
   const [orgId, setOrgId] = useState<string | null>(null);
 
@@ -67,22 +70,22 @@ function MemberEventsPage() {
   }, [membersQ.data]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground" translate="no">
       <div className="mx-auto max-w-3xl px-3 py-4">
         <div className="flex items-center gap-2 mb-3">
           <Link to="/member/dashboard" className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground text-sm">
-            <ArrowLeft className="w-4 h-4" /> డాష్‌బోర్డ్ / Dashboard
+            <ArrowLeft className="w-4 h-4" /> {b("డాష్‌బోర్డ్", "Dashboard")}
           </Link>
         </div>
 
         <Card className="mbr-theme-big-box border p-4 mb-4">
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold text-foreground">కార్యక్రమాలు & నిర్ణయాలు</h1>
+            <h1 className="text-xl font-bold text-foreground">{b("కార్యక్రమాలు & నిర్ణయాలు", "Events & Decisions")}</h1>
             <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/30 font-semibold">
-              <Eye className="w-3 h-3" /> View Only
+              <Eye className="w-3 h-3" /> {b("వీక్షణ మాత్రమే", "View Only")}
             </span>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">Events, Meetings & Decisions — Member View</p>
+          <p className="text-xs text-muted-foreground mt-1">{b("సమావేశాలు, నిర్ణయాలు మరియు కార్యక్రమాలు", "Events, Meetings & Decisions")}</p>
         </Card>
 
         <div className="grid grid-cols-3 gap-2 mb-4">
@@ -101,20 +104,19 @@ function MemberEventsPage() {
                 className={`mbr-theme-mini-box relative flex flex-col items-center gap-1 rounded-lg p-2 border text-xs transition ${active ? "bg-primary text-primary-foreground border-primary shadow-md ring-2 ring-primary/50 border-b-4 border-b-primary-foreground/80" : "bg-card border-border text-foreground hover:border-primary"}`}
               >
                 <Ic className="w-4 h-4" />
-                <span className="font-semibold leading-tight">{t.te}</span>
-                <span className="text-[10px] opacity-70">{t.en}</span>
+                <span className="font-semibold leading-tight">{b(t.te, t.en)}</span>
               </button>
             );
           })}
         </div>
 
         {!orgId ? (
-          <p className="text-muted-foreground text-sm">లోడ్ అవుతోంది…</p>
+          <p className="text-muted-foreground text-sm">{b("లోడ్ అవుతోంది…", "Loading…")}</p>
         ) : (
           <>
-            {tab === "meetings" && <MeetingsView meetings={meetingsQ.data ?? []} resolutions={resolutionsQ.data ?? []} memberMap={memberMap} />}
-            {tab === "resolutions" && <ResolutionsView resolutions={resolutionsQ.data ?? []} meetings={meetingsQ.data ?? []} memberMap={memberMap} />}
-            {tab === "activities" && <ActivitiesView activities={activitiesQ.data ?? []} />}
+            {tab === "meetings" && <MeetingsView b={b} meetings={meetingsQ.data ?? []} resolutions={resolutionsQ.data ?? []} memberMap={memberMap} />}
+            {tab === "resolutions" && <ResolutionsView b={b} resolutions={resolutionsQ.data ?? []} meetings={meetingsQ.data ?? []} memberMap={memberMap} />}
+            {tab === "activities" && <ActivitiesView b={b} activities={activitiesQ.data ?? []} />}
           </>
         )}
       </div>
@@ -150,7 +152,7 @@ function NameList({ ids, memberMap, tone, emptyLabel }: { ids: string[]; memberM
 }
 
 /* ============ Meetings (View-Only) ============ */
-function MeetingsView({ meetings, resolutions, memberMap }: any) {
+function MeetingsView({ b, meetings, resolutions, memberMap }: any) {
   const now = Date.now();
   const upcoming = meetings.filter((m: any) => new Date(m.scheduled_at).getTime() >= now);
   const past = meetings.filter((m: any) => new Date(m.scheduled_at).getTime() < now);
@@ -159,30 +161,31 @@ function MeetingsView({ meetings, resolutions, memberMap }: any) {
     <div className="space-y-4">
       {upcoming.length > 0 && (
         <section>
-          <h3 className="text-foreground font-semibold text-sm mb-2">రాబోయే సమావేశాలు / Upcoming ({upcoming.length})</h3>
+          <h3 className="text-foreground font-semibold text-sm mb-2">{b("రాబోయే సమావేశాలు", "Upcoming")} ({upcoming.length})</h3>
           <div className="space-y-2">
-            {upcoming.map((m: any) => <MeetingViewCard key={m.id} m={m} linkedRes={resolutions.filter((r: any) => r.meeting_id === m.id)} memberMap={memberMap} />)}
+            {upcoming.map((m: any) => <MeetingViewCard key={m.id} b={b} m={m} linkedRes={resolutions.filter((r: any) => r.meeting_id === m.id)} memberMap={memberMap} />)}
           </div>
         </section>
       )}
       <section>
-        <h3 className="text-muted-foreground font-semibold text-sm mb-2">గత సమావేశాలు / Past ({past.length})</h3>
+        <h3 className="text-muted-foreground font-semibold text-sm mb-2">{b("గత సమావేశాలు", "Past")} ({past.length})</h3>
         {past.length === 0
-          ? <p className="text-muted-foreground text-xs">ఇంకా రికార్డ్ లేదు. / No records yet.</p>
-          : <div className="space-y-2">{past.map((m: any) => <MeetingViewCard key={m.id} m={m} linkedRes={resolutions.filter((r: any) => r.meeting_id === m.id)} memberMap={memberMap} />)}</div>}
+          ? <p className="text-muted-foreground text-xs">{b("ఇంకా రికార్డ్ లేదు.", "No records yet.")}</p>
+          : <div className="space-y-2">{past.map((m: any) => <MeetingViewCard key={m.id} b={b} m={m} linkedRes={resolutions.filter((r: any) => r.meeting_id === m.id)} memberMap={memberMap} />)}</div>}
       </section>
     </div>
   );
 }
 
-function MeetingViewCard({ m, linkedRes, memberMap }: any) {
+function MeetingViewCard({ b, m, linkedRes, memberMap }: any) {
   const attended: string[] = m.attended_member_ids ?? [];
   const absent: string[] = m.absent_member_ids ?? [];
+  const noneLabel = b("ఎవరూ లేరు", "None recorded");
   return (
     <Card className="mbr-theme-mini-box bg-card border-border p-3">
       <div className="flex items-center gap-2 flex-wrap">
         <span className="text-[10px] px-2 py-0.5 rounded border border-border text-foreground">
-          {m.meeting_type === "online" ? "ఆన్‌లైన్ / Online" : "ఆఫ్‌లైన్ / Offline"}
+          {m.meeting_type === "online" ? b("ఆన్‌లైన్", "Online") : b("ఆఫ్‌లైన్", "Offline")}
         </span>
         <span className="text-[10px] px-2 py-0.5 rounded bg-card text-muted-foreground border border-border">{m.status}</span>
       </div>
@@ -192,7 +195,7 @@ function MeetingViewCard({ m, linkedRes, memberMap }: any) {
       {m.meeting_link && <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1"><LinkIcon className="w-3 h-3" /> <a href={m.meeting_link} target="_blank" rel="noreferrer" className="text-primary underline break-all">{m.meeting_link}</a></p>}
       {m.agenda && (
         <div className="mt-2 rounded border border-border bg-background/40 p-2">
-          <p className="text-[11px] font-semibold text-foreground flex items-center gap-1"><FileText className="w-3 h-3" /> అజెండా / Agenda</p>
+          <p className="text-[11px] font-semibold text-foreground flex items-center gap-1"><FileText className="w-3 h-3" /> {b("అజెండా", "Agenda")}</p>
           <p className="text-xs text-muted-foreground whitespace-pre-wrap mt-1">{m.agenda}</p>
         </div>
       )}
@@ -200,28 +203,28 @@ function MeetingViewCard({ m, linkedRes, memberMap }: any) {
       <div className="mt-3 space-y-3">
         <div>
           <p className="text-[11px] font-semibold text-foreground flex items-center gap-1 mb-1.5">
-            <Users className="w-3 h-3" /> హాజరు / Attended ({attended.length})
+            <Users className="w-3 h-3" /> {b("హాజరు", "Attended")} ({attended.length})
           </p>
-          <NameList ids={attended} memberMap={memberMap} tone="approve" emptyLabel="ఎవరూ లేరు / None recorded" />
+          <NameList ids={attended} memberMap={memberMap} tone="approve" emptyLabel={noneLabel} />
         </div>
         <div>
           <p className="text-[11px] font-semibold text-foreground flex items-center gap-1 mb-1.5">
-            <XCircle className="w-3 h-3" /> గైర్హాజరు / Absent ({absent.length})
+            <XCircle className="w-3 h-3" /> {b("గైర్హాజరు", "Absent")} ({absent.length})
           </p>
-          <NameList ids={absent} memberMap={memberMap} tone="oppose" emptyLabel="ఎవరూ లేరు / None recorded" />
+          <NameList ids={absent} memberMap={memberMap} tone="oppose" emptyLabel={noneLabel} />
         </div>
       </div>
 
       {m.notes && (
         <div className="mt-3 rounded border border-border bg-background/40 p-2">
-          <p className="text-[11px] font-semibold text-foreground">అదనపు గమనికలు / Notes</p>
+          <p className="text-[11px] font-semibold text-foreground">{b("అదనపు గమనికలు", "Notes")}</p>
           <p className="text-xs text-muted-foreground whitespace-pre-wrap mt-1">{m.notes}</p>
         </div>
       )}
 
       {linkedRes.length > 0 && (
         <div className="mt-3">
-          <p className="text-[11px] font-semibold text-foreground mb-1">సంబంధిత నిర్ణయాలు / Linked Resolutions ({linkedRes.length})</p>
+          <p className="text-[11px] font-semibold text-foreground mb-1">{b("సంబంధిత నిర్ణయాలు", "Linked Resolutions")} ({linkedRes.length})</p>
           <div className="flex flex-wrap gap-1.5">
             {linkedRes.map((r: any) => (
               <span key={r.id} className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/30 font-medium">
@@ -236,8 +239,9 @@ function MeetingViewCard({ m, linkedRes, memberMap }: any) {
 }
 
 /* ============ Resolutions (View-Only) ============ */
-function ResolutionsView({ resolutions, meetings, memberMap }: any) {
-  if (resolutions.length === 0) return <p className="text-muted-foreground text-xs">ఇంకా నిర్ణయాలు లేవు. / No resolutions yet.</p>;
+function ResolutionsView({ b, resolutions, meetings, memberMap }: any) {
+  if (resolutions.length === 0) return <p className="text-muted-foreground text-xs">{b("ఇంకా నిర్ణయాలు లేవు.", "No resolutions yet.")}</p>;
+  const none = b("ఎవరూ లేరు", "None");
   return (
     <div className="space-y-3">
       {resolutions.map((r: any) => {
@@ -249,12 +253,12 @@ function ResolutionsView({ resolutions, meetings, memberMap }: any) {
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-[10px] px-2 py-0.5 rounded bg-primary text-primary-foreground font-bold">{r.resolution_no}</span>
               <span className="text-[10px] px-2 py-0.5 rounded border border-border text-foreground">
-                {r.status === "passed" ? "ఆమోదించబడింది / Passed" : r.status === "rejected" ? "తిరస్కరించబడింది / Rejected" : "పెండింగ్ / Pending"}
+                {r.status === "passed" ? b("ఆమోదించబడింది", "Passed") : r.status === "rejected" ? b("తిరస్కరించబడింది", "Rejected") : b("పెండింగ్", "Pending")}
               </span>
             </div>
             <h4 className="text-foreground font-semibold mt-1 text-sm">{r.topic}</h4>
             <p className="text-[11px] text-muted-foreground">{new Date(r.decision_date).toLocaleDateString("en-IN", { dateStyle: "long" })}</p>
-            {linkedMeeting && <p className="text-[11px] text-muted-foreground">సమావేశం / Meeting: <span className="text-foreground">{linkedMeeting.title}</span></p>}
+            {linkedMeeting && <p className="text-[11px] text-muted-foreground">{b("సమావేశం", "Meeting")}: <span className="text-foreground">{linkedMeeting.title}</span></p>}
             {r.description && (
               <div className="mt-2 rounded border border-border bg-background/40 p-2">
                 <p className="text-xs text-muted-foreground whitespace-pre-wrap">{r.description}</p>
@@ -264,15 +268,15 @@ function ResolutionsView({ resolutions, meetings, memberMap }: any) {
             <div className="mt-3 space-y-3">
               <div>
                 <p className="text-[11px] font-semibold text-foreground flex items-center gap-1 mb-1.5">
-                  <CheckCircle2 className="w-3 h-3 text-emerald-500" /> ఆమోదం / Approved ({approved.length})
+                  <CheckCircle2 className="w-3 h-3 text-emerald-500" /> {b("ఆమోదం", "Approved")} ({approved.length})
                 </p>
-                <NameList ids={approved} memberMap={memberMap} tone="approve" emptyLabel="ఎవరూ లేరు / None" />
+                <NameList ids={approved} memberMap={memberMap} tone="approve" emptyLabel={none} />
               </div>
               <div>
                 <p className="text-[11px] font-semibold text-foreground flex items-center gap-1 mb-1.5">
-                  <XCircle className="w-3 h-3 text-rose-500" /> వ్యతిరేకం / Disapproved ({opposed.length})
+                  <XCircle className="w-3 h-3 text-rose-500" /> {b("వ్యతిరేకం", "Disapproved")} ({opposed.length})
                 </p>
-                <NameList ids={opposed} memberMap={memberMap} tone="oppose" emptyLabel="ఎవరూ లేరు / None" />
+                <NameList ids={opposed} memberMap={memberMap} tone="oppose" emptyLabel={none} />
               </div>
             </div>
           </Card>
@@ -283,8 +287,8 @@ function ResolutionsView({ resolutions, meetings, memberMap }: any) {
 }
 
 /* ============ Activities (View-Only) ============ */
-function ActivitiesView({ activities }: any) {
-  if (activities.length === 0) return <p className="text-muted-foreground text-xs">ఇంకా కార్యక్రమాలు లేవు. / No activities yet.</p>;
+function ActivitiesView({ b, activities }: any) {
+  if (activities.length === 0) return <p className="text-muted-foreground text-xs">{b("ఇంకా కార్యక్రమాలు లేవు.", "No activities yet.")}</p>;
   return (
     <div className="space-y-3">
       {activities.map((a: any) => {
@@ -305,15 +309,15 @@ function ActivitiesView({ activities }: any) {
             )}
             <div className="grid grid-cols-3 gap-2 mt-3 text-[11px]">
               <div className="rounded border border-border bg-background/40 p-2 text-center">
-                <div className="text-muted-foreground">బడ్జెట్ / Budget</div>
+                <div className="text-muted-foreground">{b("బడ్జెట్", "Budget")}</div>
                 <div className="text-foreground font-bold text-sm mt-0.5">₹{budget.toLocaleString("en-IN")}</div>
               </div>
               <div className="rounded border border-border bg-background/40 p-2 text-center">
-                <div className="text-muted-foreground">ఖర్చు / Expense</div>
+                <div className="text-muted-foreground">{b("ఖర్చు", "Expense")}</div>
                 <div className="text-foreground font-bold text-sm mt-0.5">₹{expense.toLocaleString("en-IN")}</div>
               </div>
               <div className="rounded border border-border bg-background/40 p-2 text-center">
-                <div className="text-muted-foreground">మిగులు / Balance</div>
+                <div className="text-muted-foreground">{b("మిగులు", "Balance")}</div>
                 <div className={`font-bold text-sm mt-0.5 ${balance < 0 ? "text-rose-500" : "text-emerald-600 dark:text-emerald-400"}`}>₹{balance.toLocaleString("en-IN")}</div>
               </div>
             </div>
@@ -323,3 +327,4 @@ function ActivitiesView({ activities }: any) {
     </div>
   );
 }
+
