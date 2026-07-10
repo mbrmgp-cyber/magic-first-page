@@ -59,8 +59,9 @@ table.kv td.k { width:32%; color:#555; font-weight:600; }
 .timeline .step { margin-bottom:8px; font-size:11px; }
 .timeline .step b { color:#7c2d12; }
 @media print { .noprint { display:none !important; } body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
-.noprint { position:fixed; top:10px; right:10px; }
+.noprint { position:fixed; top:10px; right:10px; display:flex; gap:8px; z-index:9999; }
 .noprint button { background:#d97706; color:white; border:0; padding:8px 14px; border-radius:4px; cursor:pointer; font-weight:600; }
+.noprint button.back { background:#374151; }
 `;
 
 function headerBlock(org: any) {
@@ -139,7 +140,7 @@ export async function printLoanApplication(r: any) {
   const html = `<!doctype html><html><head><meta charset="utf-8" />
 <title>Loan Application — ${esc(r.member?.name ?? "")}</title>
 <style>${baseStyles}</style></head><body>
-<div class="noprint"><button onclick="window.print()">🖨 Print / Save PDF</button></div>
+<div class="noprint"><button class="back" onclick="try{window.close()}catch(e){};history.back()">← వెనుకకు / Back</button><button onclick="window.print()">🖨 Print / Save PDF</button></div>
 ${headerBlock(org)}
 
 <div class="title-row">
@@ -216,7 +217,7 @@ export async function printSuretyConsent(r: any) {
   const html = `<!doctype html><html><head><meta charset="utf-8" />
 <title>Surety Consent — ${esc(r.member?.name ?? "")}</title>
 <style>${baseStyles}</style></head><body>
-<div class="noprint"><button onclick="window.print()">🖨 Print / Save PDF</button></div>
+<div class="noprint"><button class="back" onclick="try{window.close()}catch(e){};history.back()">← వెనుకకు / Back</button><button onclick="window.print()">🖨 Print / Save PDF</button></div>
 ${headerBlock(org)}
 
 <div class="title-row">
