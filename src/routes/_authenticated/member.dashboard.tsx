@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MemberIdCard } from "@/components/MemberIdCard";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { useI18n, transliterateText } from "@/lib/i18n";
 import {
   LogOut, IdCard, BookOpen, Wallet, Briefcase, MessageSquare, Vote, ShieldCheck, User, ScanLine,
   Facebook, Youtube, Gavel, CalendarDays,
@@ -67,6 +68,9 @@ function MemberDashboard() {
   const [photoUrl, setPhotoUrl] = useState<string>("");
   const [photoBroken, setPhotoBroken] = useState(false);
   const [idCardOpen, setIdCardOpen] = useState(false);
+  const { lang } = useI18n();
+  const tr = (s: string) => transliterateText(s, lang);
+
 
   const m: any = meQ.data?.membership;
   const org = m?.organizations;
@@ -180,7 +184,7 @@ function MemberDashboard() {
               : <ShieldCheck className="h-7 w-7 text-black" />}
           </div>
           <div className="flex-1 min-w-0 flex flex-col items-center justify-center gap-2">
-            <p className="text-sm font-semibold text-white leading-tight text-center">స్వాగతం గౌరవ సభ్యులకు 🙏</p>
+            <p className="text-sm font-semibold text-white leading-tight text-center">{tr("స్వాగతం గౌరవ సభ్యులకు")} 🙏</p>
             <LanguageToggle />
           </div>
           <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-950 flex items-center justify-center overflow-hidden shrink-0"
@@ -232,7 +236,7 @@ function MemberDashboard() {
               style={{ backgroundColor: `${brand}26` }}>
               <IdCard className="h-5 w-5" style={{ color: brand }} />
             </div>
-            <p className="text-[14px] font-semibold text-white leading-tight">సభ్యుడి ఐడి కార్డ్</p>
+            <p className="text-[14px] font-semibold text-white leading-tight">{tr("సభ్యుడి ఐడి కార్డ్")}</p>
           </button>
 
           {MENU.map((it) => {
@@ -250,7 +254,7 @@ function MemberDashboard() {
                   <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-red-500 border-2 border-black animate-pulse" aria-label="New message" />
                 )}
               </div>
-              <p className="text-[14px] font-semibold text-white leading-tight">{it.te}</p>
+              <p className="text-[14px] font-semibold text-white leading-tight">{tr(it.te)}</p>
             </Link>
             );
           })}
@@ -259,7 +263,7 @@ function MemberDashboard() {
             <div className="h-11 w-11 rounded-full bg-zinc-900 flex items-center justify-center">
               <LogOut className="h-5 w-5 text-zinc-400" />
             </div>
-            <p className="text-[14px] font-semibold text-white">లాగ్ అవుట్</p>
+            <p className="text-[14px] font-semibold text-white">{tr("లాగ్ అవుట్")}</p>
           </button>
         </div>
 
@@ -267,7 +271,7 @@ function MemberDashboard() {
         <Card className="bg-zinc-950 border-zinc-800 p-4"
           style={{ boxShadow: `0 0 24px ${brand}1f` }}>
           <div className="text-center mb-3">
-            <p className="text-sm font-semibold text-white">మాతో కనెక్ట్ అవ్వండి</p>
+            <p className="text-sm font-semibold text-white">{tr("మాతో కనెక్ట్ అవ్వండి")}</p>
           </div>
           <div className="grid grid-cols-3 gap-3">
             {SOCIAL_LINKS.map((s) => (
@@ -287,7 +291,7 @@ function MemberDashboard() {
                   style={{ backgroundColor: `${s.color}22`, color: s.color }}>
                   {s.icon}
                 </span>
-                <p className="text-[12px] font-semibold leading-tight text-white">{s.te}</p>
+                <p className="text-[12px] font-semibold leading-tight text-white">{tr(s.te)}</p>
               </a>
             ))}
           </div>
@@ -298,7 +302,7 @@ function MemberDashboard() {
       <Dialog open={idCardOpen} onOpenChange={setIdCardOpen}>
         <DialogContent className="max-w-[480px] p-4 bg-zinc-950 border-zinc-800 text-white">
           <DialogHeader>
-            <DialogTitle className="text-white">సభ్యుడి ID కార్డ్</DialogTitle>
+            <DialogTitle className="text-white">{tr("సభ్యుడి ID కార్డ్")}</DialogTitle>
           </DialogHeader>
           <MemberIdCard member={m} org={org} />
         </DialogContent>
