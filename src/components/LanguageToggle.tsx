@@ -13,7 +13,7 @@ export function LanguageToggle({ className = "" }: { className?: string }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className={`inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/40 backdrop-blur px-3 py-1.5 text-xs text-white/90 hover:bg-white/10 transition-colors cursor-pointer ${className}`}
+        className={`inline-flex items-center gap-2 rounded-md border border-zinc-700 bg-black/40 backdrop-blur px-3 h-9 text-xs text-white/90 hover:bg-white/10 transition-colors cursor-pointer ${className}`}
         aria-label={t("language")}
       >
         <Globe className="h-4 w-4 text-[#ff8c28]" />
