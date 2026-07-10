@@ -278,10 +278,10 @@ function Dashboard() {
           </button>
           <div className="flex items-center gap-1 flex-nowrap justify-end min-w-0">
             <LanguageToggle />
-            <Button variant="ghost" size="sm" onClick={() => setSettingsOpen(true)} className="text-zinc-200 hover:bg-zinc-900 hover:text-white px-2" aria-label="Settings">
+            <Button variant="ghost" size="sm" onClick={() => setSettingsOpen(true)} className="text-zinc-200 hover:bg-zinc-900 hover:text-white px-0 h-9 w-9 rounded-md border border-zinc-700 flex items-center justify-center shrink-0" aria-label="Settings">
               <Settings className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={logout} className="text-zinc-200 hover:bg-zinc-900 hover:text-white px-2">
+            <Button variant="ghost" size="sm" onClick={logout} className="text-zinc-200 hover:bg-zinc-900 hover:text-white px-2 h-9 rounded-md border border-zinc-700 shrink-0">
               <LogOut className="h-4 w-4 mr-1" />{lt("Logout", "లాగ్ అవుట్")}
             </Button>
             <img src={mbrLogo.url} alt="MBR" data-mbr-logo className="w-10 h-10 shrink-0 rounded-md border border-zinc-800 object-contain p-0.5" style={{ backgroundColor: "#000" }} />
