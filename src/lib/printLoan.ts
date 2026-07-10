@@ -59,8 +59,9 @@ table.kv td.k { width:32%; color:#555; font-weight:600; }
 .timeline .step { margin-bottom:8px; font-size:11px; }
 .timeline .step b { color:#7c2d12; }
 @media print { .noprint { display:none !important; } body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
-.noprint { position:fixed; top:10px; right:10px; }
+.noprint { position:fixed; top:10px; right:10px; display:flex; gap:8px; z-index:9999; }
 .noprint button { background:#d97706; color:white; border:0; padding:8px 14px; border-radius:4px; cursor:pointer; font-weight:600; }
+.noprint button.back { background:#374151; }
 `;
 
 function headerBlock(org: any) {
