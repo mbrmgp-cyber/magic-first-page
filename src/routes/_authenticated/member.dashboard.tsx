@@ -271,7 +271,7 @@ function MemberDashboard() {
         <Card className="bg-zinc-950 border-zinc-800 p-4"
           style={{ boxShadow: `0 0 24px ${brand}1f` }}>
           <div className="text-center mb-3">
-            <p className="text-sm font-semibold text-white">మాతో కనెక్ట్ అవ్వండి</p>
+            <p className="text-sm font-semibold text-white">{tr("మాతో కనెక్ట్ అవ్వండి")}</p>
           </div>
           <div className="grid grid-cols-3 gap-3">
             {SOCIAL_LINKS.map((s) => (
