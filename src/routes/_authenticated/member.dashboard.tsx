@@ -68,6 +68,9 @@ function MemberDashboard() {
   const [photoUrl, setPhotoUrl] = useState<string>("");
   const [photoBroken, setPhotoBroken] = useState(false);
   const [idCardOpen, setIdCardOpen] = useState(false);
+  const { lang } = useI18n();
+  const tr = (s: string) => transliterateText(s, lang);
+
 
   const m: any = meQ.data?.membership;
   const org = m?.organizations;
