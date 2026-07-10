@@ -302,7 +302,7 @@ function MemberDashboard() {
       <Dialog open={idCardOpen} onOpenChange={setIdCardOpen}>
         <DialogContent className="max-w-[480px] p-4 bg-zinc-950 border-zinc-800 text-white">
           <DialogHeader>
-            <DialogTitle className="text-white">సభ్యుడి ID కార్డ్</DialogTitle>
+            <DialogTitle className="text-white">{tr("సభ్యుడి ID కార్డ్")}</DialogTitle>
           </DialogHeader>
           <MemberIdCard member={m} org={org} />
         </DialogContent>
