@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MemberIdCard } from "@/components/MemberIdCard";
 import { LogOut, Clock, CheckCircle2, XCircle } from "lucide-react";
+import { useI18n, bi } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/member/pending")({
   head: () => ({ meta: [{ title: "Member Status — MBR App" }] }),
