@@ -169,8 +169,8 @@ function MemberDashboard() {
   } as React.CSSProperties;
 
   return (
-    <div className="min-h-screen bg-black text-white" style={themeStyle}>
-      <div className="max-w-md mx-auto p-4 space-y-5">
+    <div className="min-h-screen bg-black text-white" style={themeStyle} translate="no">
+      <div className="max-w-md mx-auto p-4 space-y-5" translate="no">
 
         {/* Top header: society logo + welcome + society QR */}
         <header className="flex items-start justify-between gap-3">
