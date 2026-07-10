@@ -184,7 +184,7 @@ function MemberDashboard() {
               : <ShieldCheck className="h-7 w-7 text-black" />}
           </div>
           <div className="flex-1 min-w-0 flex flex-col items-center justify-center gap-2">
-            <p className="text-sm font-semibold text-white leading-tight text-center">స్వాగతం గౌరవ సభ్యులకు 🙏</p>
+            <p className="text-sm font-semibold text-white leading-tight text-center">{tr("స్వాగతం గౌరవ సభ్యులకు")} 🙏</p>
             <LanguageToggle />
           </div>
           <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-950 flex items-center justify-center overflow-hidden shrink-0"
