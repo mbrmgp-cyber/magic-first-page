@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MemberIdCard } from "@/components/MemberIdCard";
+import { LanguageToggle } from "@/components/LanguageToggle";
 import {
   LogOut, IdCard, BookOpen, Wallet, Briefcase, MessageSquare, Vote, ShieldCheck, User, ScanLine,
   Facebook, Youtube, Gavel, CalendarDays,
@@ -168,8 +169,8 @@ function MemberDashboard() {
   } as React.CSSProperties;
 
   return (
-    <div className="min-h-screen bg-black text-white" style={themeStyle}>
-      <div className="max-w-md mx-auto p-4 space-y-5">
+    <div className="min-h-screen bg-black text-white" style={themeStyle} translate="no">
+      <div className="max-w-md mx-auto p-4 space-y-5" translate="no">
 
         {/* Top header: society logo + welcome + society QR */}
         <header className="flex items-start justify-between gap-3">
@@ -178,9 +179,9 @@ function MemberDashboard() {
               ? <img src={org.logo_url} alt="" className="h-full w-full object-contain p-1" />
               : <ShieldCheck className="h-7 w-7 text-black" />}
           </div>
-          <div className="flex-1 min-w-0 text-center">
-            <p className="text-sm font-semibold text-white leading-tight">స్వాగతం గౌరవ సభ్యులకు 🙏</p>
-            <p className="text-sm font-semibold text-white truncate mt-1" style={{ color: brand }}>{fullName}</p>
+          <div className="flex-1 min-w-0 flex flex-col items-center justify-center gap-2">
+            <p className="text-sm font-semibold text-white leading-tight text-center">స్వాగతం గౌరవ సభ్యులకు 🙏</p>
+            <LanguageToggle />
           </div>
           <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-950 flex items-center justify-center overflow-hidden shrink-0"
             style={{ borderWidth: 1, borderStyle: "solid", borderColor: `${brand}4d` }}>
