@@ -254,7 +254,7 @@ function MemberDashboard() {
                   <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-red-500 border-2 border-black animate-pulse" aria-label="New message" />
                 )}
               </div>
-              <p className="text-[14px] font-semibold text-white leading-tight">{it.te}</p>
+              <p className="text-[14px] font-semibold text-white leading-tight">{tr(it.te)}</p>
             </Link>
             );
           })}
