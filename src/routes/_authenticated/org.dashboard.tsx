@@ -264,21 +264,23 @@ function Dashboard() {
       <div className="max-w-3xl mx-auto space-y-4">
         {/* Top bar */}
         <div className="flex items-center justify-between gap-1.5 flex-nowrap">
-          <button
-            type="button"
-            onClick={() => setQrOpen(true)}
-            className="w-10 h-10 shrink-0 rounded-md bg-zinc-950 border border-zinc-800 shadow-[0_0_20px_rgba(255,140,40,0.2)] flex items-center justify-center overflow-hidden hover:scale-105 transition"
-            aria-label="సొసైటీ QR కోడ్"
-          >
-            {qrDataUrl ? (
-              <img src={qrDataUrl} alt="Society QR" className="w-full h-full object-contain p-0.5 bg-white" />
-            ) : (
-              <QrCode className="w-5 h-5 text-zinc-500" />
-            )}
-          </button>
-          <div className="flex items-center gap-1 flex-nowrap justify-end min-w-0">
+          <div className="flex items-center gap-1.5 flex-nowrap min-w-0">
+            <button
+              type="button"
+              onClick={() => setQrOpen(true)}
+              className="w-10 h-10 shrink-0 rounded-md bg-zinc-950 border border-zinc-800 shadow-[0_0_20px_rgba(255,140,40,0.2)] flex items-center justify-center overflow-hidden hover:scale-105 transition"
+              aria-label="సొసైటీ QR కోడ్"
+            >
+              {qrDataUrl ? (
+                <img src={qrDataUrl} alt="Society QR" className="w-full h-full object-contain p-0.5 bg-white" />
+              ) : (
+                <QrCode className="w-5 h-5 text-zinc-500" />
+              )}
+            </button>
             <LanguageToggle />
-            <Button variant="ghost" size="sm" onClick={() => setSettingsOpen(true)} className="text-zinc-200 hover:bg-zinc-900 hover:text-white px-0 h-9 w-9 rounded-md border border-zinc-700 flex items-center justify-center shrink-0" aria-label="Settings">
+          </div>
+          <div className="flex items-center gap-1 flex-nowrap justify-end min-w-0">
+            <Button variant="ghost" size="icon" onClick={() => setSettingsOpen(true)} className="text-zinc-200 hover:bg-zinc-900 hover:text-white h-9 w-9 p-0 rounded-md border border-zinc-700 inline-flex items-center justify-center shrink-0" aria-label="Settings">
               <Settings className="h-4 w-4" />
             </Button>
             <Button variant="ghost" size="sm" onClick={logout} className="text-zinc-200 hover:bg-zinc-900 hover:text-white px-2 h-9 rounded-md border border-zinc-700 shrink-0">
@@ -287,6 +289,7 @@ function Dashboard() {
             <img src={mbrLogo.url} alt="MBR" data-mbr-logo className="w-10 h-10 shrink-0 rounded-md border border-zinc-800 object-contain p-0.5" style={{ backgroundColor: "#000" }} />
           </div>
         </div>
+
 
 
 
