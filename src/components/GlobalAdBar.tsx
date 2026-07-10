@@ -136,12 +136,12 @@ export function GlobalAdBar() {
 
   return (
     <div
-      className="mbr-global-ad-bar no-print print:hidden fixed left-0 right-0 bottom-0 z-40 pointer-events-none w-screen m-0 p-0 overflow-hidden"
+      className="mbr-global-ad-bar no-print print:hidden fixed inset-x-0 bottom-0 z-40 pointer-events-none m-0 p-0 overflow-hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       aria-hidden="true"
     >
-      <div className="w-screen max-w-none pointer-events-auto m-0 p-0">
-        <div className="relative overflow-hidden bg-black shadow-[0_-6px_24px_rgba(0,0,0,0.55)] w-screen max-w-none h-[70px] m-0 p-0">
+      <div className="w-full max-w-none pointer-events-auto m-0 p-0">
+        <div className="relative overflow-hidden bg-black shadow-[0_-6px_24px_rgba(0,0,0,0.55)] w-full max-w-none h-[70px] m-0 p-0">
           <img
             src={current}
             alt="MBR platform advertisement"
@@ -149,6 +149,7 @@ export function GlobalAdBar() {
           />
         </div>
       </div>
+
     </div>
   );
 }
