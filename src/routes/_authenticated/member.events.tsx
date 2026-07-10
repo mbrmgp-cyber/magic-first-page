@@ -70,22 +70,22 @@ function MemberEventsPage() {
   }, [membersQ.data]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground" translate="no">
       <div className="mx-auto max-w-3xl px-3 py-4">
         <div className="flex items-center gap-2 mb-3">
           <Link to="/member/dashboard" className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground text-sm">
-            <ArrowLeft className="w-4 h-4" /> డాష్‌బోర్డ్ / Dashboard
+            <ArrowLeft className="w-4 h-4" /> {b("డాష్‌బోర్డ్", "Dashboard")}
           </Link>
         </div>
 
         <Card className="mbr-theme-big-box border p-4 mb-4">
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold text-foreground">కార్యక్రమాలు & నిర్ణయాలు</h1>
+            <h1 className="text-xl font-bold text-foreground">{b("కార్యక్రమాలు & నిర్ణయాలు", "Events & Decisions")}</h1>
             <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/30 font-semibold">
-              <Eye className="w-3 h-3" /> View Only
+              <Eye className="w-3 h-3" /> {b("వీక్షణ మాత్రమే", "View Only")}
             </span>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">Events, Meetings & Decisions — Member View</p>
+          <p className="text-xs text-muted-foreground mt-1">{b("సమావేశాలు, నిర్ణయాలు మరియు కార్యక్రమాలు", "Events, Meetings & Decisions")}</p>
         </Card>
 
         <div className="grid grid-cols-3 gap-2 mb-4">
@@ -104,20 +104,19 @@ function MemberEventsPage() {
                 className={`mbr-theme-mini-box relative flex flex-col items-center gap-1 rounded-lg p-2 border text-xs transition ${active ? "bg-primary text-primary-foreground border-primary shadow-md ring-2 ring-primary/50 border-b-4 border-b-primary-foreground/80" : "bg-card border-border text-foreground hover:border-primary"}`}
               >
                 <Ic className="w-4 h-4" />
-                <span className="font-semibold leading-tight">{t.te}</span>
-                <span className="text-[10px] opacity-70">{t.en}</span>
+                <span className="font-semibold leading-tight">{b(t.te, t.en)}</span>
               </button>
             );
           })}
         </div>
 
         {!orgId ? (
-          <p className="text-muted-foreground text-sm">లోడ్ అవుతోంది…</p>
+          <p className="text-muted-foreground text-sm">{b("లోడ్ అవుతోంది…", "Loading…")}</p>
         ) : (
           <>
-            {tab === "meetings" && <MeetingsView meetings={meetingsQ.data ?? []} resolutions={resolutionsQ.data ?? []} memberMap={memberMap} />}
-            {tab === "resolutions" && <ResolutionsView resolutions={resolutionsQ.data ?? []} meetings={meetingsQ.data ?? []} memberMap={memberMap} />}
-            {tab === "activities" && <ActivitiesView activities={activitiesQ.data ?? []} />}
+            {tab === "meetings" && <MeetingsView b={b} meetings={meetingsQ.data ?? []} resolutions={resolutionsQ.data ?? []} memberMap={memberMap} />}
+            {tab === "resolutions" && <ResolutionsView b={b} resolutions={resolutionsQ.data ?? []} meetings={meetingsQ.data ?? []} memberMap={memberMap} />}
+            {tab === "activities" && <ActivitiesView b={b} activities={activitiesQ.data ?? []} />}
           </>
         )}
       </div>
