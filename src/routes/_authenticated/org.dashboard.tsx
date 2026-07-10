@@ -263,30 +263,31 @@ function Dashboard() {
       <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onLogoPicked} />
       <div className="max-w-3xl mx-auto space-y-4">
         {/* Top bar */}
-        <div className="flex items-start justify-between gap-2 flex-wrap">
+        <div className="flex items-center justify-between gap-1.5 flex-nowrap">
           <button
             type="button"
             onClick={() => setQrOpen(true)}
-            className="w-14 h-14 shrink-0 rounded-md bg-zinc-950 border border-zinc-800 shadow-[0_0_20px_rgba(255,140,40,0.2)] flex items-center justify-center overflow-hidden hover:scale-105 transition"
+            className="w-10 h-10 shrink-0 rounded-md bg-zinc-950 border border-zinc-800 shadow-[0_0_20px_rgba(255,140,40,0.2)] flex items-center justify-center overflow-hidden hover:scale-105 transition"
             aria-label="సొసైటీ QR కోడ్"
           >
             {qrDataUrl ? (
-              <img src={qrDataUrl} alt="Society QR" className="w-full h-full object-contain p-1 bg-white" />
+              <img src={qrDataUrl} alt="Society QR" className="w-full h-full object-contain p-0.5 bg-white" />
             ) : (
-              <QrCode className="w-7 h-7 text-zinc-500" />
+              <QrCode className="w-5 h-5 text-zinc-500" />
             )}
           </button>
-          <div className="flex items-center gap-2 flex-wrap justify-end min-w-0">
+          <div className="flex items-center gap-1 flex-nowrap justify-end min-w-0">
             <LanguageToggle />
-            <Button variant="ghost" size="sm" onClick={() => setSettingsOpen(true)} className="text-zinc-200 hover:bg-zinc-900 hover:text-white" aria-label="Settings">
+            <Button variant="ghost" size="sm" onClick={() => setSettingsOpen(true)} className="text-zinc-200 hover:bg-zinc-900 hover:text-white px-2" aria-label="Settings">
               <Settings className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={logout} className="text-zinc-200 hover:bg-zinc-900 hover:text-white">
+            <Button variant="ghost" size="sm" onClick={logout} className="text-zinc-200 hover:bg-zinc-900 hover:text-white px-2">
               <LogOut className="h-4 w-4 mr-1" />{lt("Logout", "లాగ్ అవుట్")}
             </Button>
-            <img src={mbrLogo.url} alt="MBR" data-mbr-logo className="w-12 h-12 shrink-0 rounded-md border border-zinc-800 object-contain p-1" style={{ backgroundColor: "#000" }} />
+            <img src={mbrLogo.url} alt="MBR" data-mbr-logo className="w-10 h-10 shrink-0 rounded-md border border-zinc-800 object-contain p-0.5" style={{ backgroundColor: "#000" }} />
           </div>
         </div>
+
 
 
         {/* Society headline card */}
