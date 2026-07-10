@@ -236,7 +236,7 @@ function MemberDashboard() {
               style={{ backgroundColor: `${brand}26` }}>
               <IdCard className="h-5 w-5" style={{ color: brand }} />
             </div>
-            <p className="text-[14px] font-semibold text-white leading-tight">సభ్యుడి ఐడి కార్డ్</p>
+            <p className="text-[14px] font-semibold text-white leading-tight">{tr("సభ్యుడి ఐడి కార్డ్")}</p>
           </button>
 
           {MENU.map((it) => {
