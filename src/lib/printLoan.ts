@@ -140,7 +140,7 @@ export async function printLoanApplication(r: any) {
   const html = `<!doctype html><html><head><meta charset="utf-8" />
 <title>Loan Application — ${esc(r.member?.name ?? "")}</title>
 <style>${baseStyles}</style></head><body>
-<div class="noprint"><button onclick="window.print()">🖨 Print / Save PDF</button></div>
+<div class="noprint"><button class="back" onclick="try{window.close()}catch(e){};history.back()">← వెనుకకు / Back</button><button onclick="window.print()">🖨 Print / Save PDF</button></div>
 ${headerBlock(org)}
 
 <div class="title-row">
@@ -217,7 +217,7 @@ export async function printSuretyConsent(r: any) {
   const html = `<!doctype html><html><head><meta charset="utf-8" />
 <title>Surety Consent — ${esc(r.member?.name ?? "")}</title>
 <style>${baseStyles}</style></head><body>
-<div class="noprint"><button onclick="window.print()">🖨 Print / Save PDF</button></div>
+<div class="noprint"><button class="back" onclick="try{window.close()}catch(e){};history.back()">← వెనుకకు / Back</button><button onclick="window.print()">🖨 Print / Save PDF</button></div>
 ${headerBlock(org)}
 
 <div class="title-row">
