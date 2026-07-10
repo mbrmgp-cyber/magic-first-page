@@ -14,6 +14,8 @@ export const Route = createFileRoute("/_authenticated/member/events")({
 type Tab = "meetings" | "resolutions" | "activities";
 
 function MemberEventsPage() {
+  const { lang } = useI18n();
+  const b = (te: string, en: string) => bi(te, en, lang);
   const [tab, setTab] = useState<Tab>("meetings");
   const [orgId, setOrgId] = useState<string | null>(null);
 
