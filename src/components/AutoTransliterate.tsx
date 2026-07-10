@@ -508,6 +508,7 @@ function shouldSkip(node: Node): boolean {
     const el = p as HTMLElement;
     if (SKIP_TAGS.has(el.tagName)) return true;
     if (el.hasAttribute("data-notranslit")) return true;
+    if (el.getAttribute("translate") === "no") return true;
     if (el.getAttribute("contenteditable") === "true") return true;
     p = p.parentNode;
   }
@@ -619,6 +620,7 @@ function translateNode(node: Text, lang: string) {
 
 function translateAttrs(el: Element, lang: string) {
   if (el.hasAttribute("data-notranslit")) return;
+  if (el.getAttribute("translate") === "no") return;
   for (const attr of TRANSLATABLE_ATTRS) {
     const current = el.getAttribute(attr);
     if (!current) continue;
@@ -652,6 +654,7 @@ function walk(root: Node, lang: string) {
     acceptNode(n) {
       const el = n as Element;
       if (el.hasAttribute("data-notranslit")) return NodeFilter.FILTER_REJECT;
+      if (el.getAttribute("translate") === "no") return NodeFilter.FILTER_REJECT;
       return NodeFilter.FILTER_ACCEPT;
     },
   });

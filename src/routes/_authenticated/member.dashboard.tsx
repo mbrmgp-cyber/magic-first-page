@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MemberIdCard } from "@/components/MemberIdCard";
 import { LanguageToggle } from "@/components/LanguageToggle";
-import { useI18n, transliterateText } from "@/lib/i18n";
+import { useI18n, bi } from "@/lib/i18n";
 import {
   LogOut, IdCard, BookOpen, Wallet, Briefcase, MessageSquare, Vote, ShieldCheck, User, ScanLine,
   Facebook, Youtube, Gavel, CalendarDays,
@@ -69,7 +69,7 @@ function MemberDashboard() {
   const [photoBroken, setPhotoBroken] = useState(false);
   const [idCardOpen, setIdCardOpen] = useState(false);
   const { lang } = useI18n();
-  const tr = (s: string) => transliterateText(s, lang);
+  const b = (te: string, en: string) => bi(te, en, lang);
 
 
   const m: any = meQ.data?.membership;
@@ -138,7 +138,7 @@ function MemberDashboard() {
   }
 
   if (meQ.isLoading) {
-    return <div className="min-h-screen bg-black text-white flex items-center justify-center">Loading…</div>;
+    return <div className="min-h-screen bg-black text-white flex items-center justify-center">{b("లోడ్ అవుతోంది…", "Loading…")}</div>;
   }
   if (!m || m.status !== "approved") {
     if (typeof window !== "undefined") navigate({ to: "/member/pending", replace: true });
@@ -149,13 +149,15 @@ function MemberDashboard() {
       <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
         <div className="max-w-sm w-full text-center space-y-4 bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6">
           <div className="text-3xl">⏸️</div>
-          <h2 className="text-lg font-semibold">మీ సభ్యత్వం ప్రస్తుతం Inactive గా ఉంది</h2>
+          <h2 className="text-lg font-semibold">{b("మీ సభ్యత్వం ప్రస్తుతం యాక్టివ్ లో లేదు", "Your membership is currently inactive")}</h2>
           <p className="text-sm text-white/70">
-            Your membership has been marked Inactive by the organization. You will not receive
-            any updates until your membership is reactivated. Please contact the organization admin.
+            {b(
+              "మీ సభ్యత్వం సంస్థ ద్వారా ఇనాక్టివ్ గా మార్చబడింది. మళ్లీ యాక్టివ్ అయ్యే వరకు updates రావు. దయచేసి సంస్థ admin ను సంప్రదించండి.",
+              "Your membership has been marked inactive by the organization. You will not receive updates until it is reactivated. Please contact the organization admin."
+            )}
           </p>
           <button onClick={logout} className="mt-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm">
-            Logout
+            {b("లాగ్ అవుట్", "Logout")}
           </button>
         </div>
       </div>
@@ -173,7 +175,7 @@ function MemberDashboard() {
   } as React.CSSProperties;
 
   return (
-    <div className="min-h-screen bg-black text-white" style={themeStyle} translate="no">
+    <div key={lang} lang={lang} className="min-h-screen bg-black text-white" style={themeStyle} translate="no">
       <div className="max-w-md mx-auto p-4 space-y-5" translate="no">
 
         {/* Top header: society logo + welcome + society QR */}
@@ -184,7 +186,7 @@ function MemberDashboard() {
               : <ShieldCheck className="h-7 w-7 text-black" />}
           </div>
           <div className="flex-1 min-w-0 flex flex-col items-center justify-center gap-2">
-            <p className="text-sm font-semibold text-white leading-tight text-center">{tr("స్వాగతం గౌరవ సభ్యులకు")} 🙏</p>
+            <p className="text-sm font-semibold text-white leading-tight text-center">{b("స్వాగతం గౌరవ సభ్యులకు", "Welcome, respected member")} 🙏</p>
             <LanguageToggle />
           </div>
           <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-950 flex items-center justify-center overflow-hidden shrink-0"
@@ -236,7 +238,7 @@ function MemberDashboard() {
               style={{ backgroundColor: `${brand}26` }}>
               <IdCard className="h-5 w-5" style={{ color: brand }} />
             </div>
-            <p className="text-[14px] font-semibold text-white leading-tight">{tr("సభ్యుడి ఐడి కార్డ్")}</p>
+            <p className="text-[14px] font-semibold text-white leading-tight">{b("సభ్యుడి ఐడి కార్డ్", "Member ID Card")}</p>
           </button>
 
           {MENU.map((it) => {
@@ -254,7 +256,7 @@ function MemberDashboard() {
                   <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-red-500 border-2 border-black animate-pulse" aria-label="New message" />
                 )}
               </div>
-              <p className="text-[14px] font-semibold text-white leading-tight">{tr(it.te)}</p>
+              <p className="text-[14px] font-semibold text-white leading-tight">{b(it.te, it.label)}</p>
             </Link>
             );
           })}
@@ -263,7 +265,7 @@ function MemberDashboard() {
             <div className="h-11 w-11 rounded-full bg-zinc-900 flex items-center justify-center">
               <LogOut className="h-5 w-5 text-zinc-400" />
             </div>
-            <p className="text-[14px] font-semibold text-white">{tr("లాగ్ అవుట్")}</p>
+            <p className="text-[14px] font-semibold text-white">{b("లాగ్ అవుట్", "Logout")}</p>
           </button>
         </div>
 
@@ -271,7 +273,7 @@ function MemberDashboard() {
         <Card className="bg-zinc-950 border-zinc-800 p-4"
           style={{ boxShadow: `0 0 24px ${brand}1f` }}>
           <div className="text-center mb-3">
-            <p className="text-sm font-semibold text-white">{tr("మాతో కనెక్ట్ అవ్వండి")}</p>
+            <p className="text-sm font-semibold text-white">{b("మాతో కనెక్ట్ అవ్వండి", "Connect with us")}</p>
           </div>
           <div className="grid grid-cols-3 gap-3">
             {SOCIAL_LINKS.map((s) => (
@@ -291,7 +293,7 @@ function MemberDashboard() {
                   style={{ backgroundColor: `${s.color}22`, color: s.color }}>
                   {s.icon}
                 </span>
-                <p className="text-[12px] font-semibold leading-tight text-white">{tr(s.te)}</p>
+                <p className="text-[12px] font-semibold leading-tight text-white">{b(s.te, s.label)}</p>
               </a>
             ))}
           </div>
@@ -302,7 +304,7 @@ function MemberDashboard() {
       <Dialog open={idCardOpen} onOpenChange={setIdCardOpen}>
         <DialogContent className="max-w-[480px] p-4 bg-zinc-950 border-zinc-800 text-white">
           <DialogHeader>
-            <DialogTitle className="text-white">{tr("సభ్యుడి ID కార్డ్")}</DialogTitle>
+            <DialogTitle className="text-white">{b("సభ్యుడి ID కార్డ్", "Member ID Card")}</DialogTitle>
           </DialogHeader>
           <MemberIdCard member={m} org={org} />
         </DialogContent>
