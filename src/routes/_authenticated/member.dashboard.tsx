@@ -291,7 +291,7 @@ function MemberDashboard() {
                   style={{ backgroundColor: `${s.color}22`, color: s.color }}>
                   {s.icon}
                 </span>
-                <p className="text-[12px] font-semibold leading-tight text-white">{s.te}</p>
+                <p className="text-[12px] font-semibold leading-tight text-white">{tr(s.te)}</p>
               </a>
             ))}
           </div>
