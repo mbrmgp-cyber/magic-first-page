@@ -125,12 +125,14 @@ function DonorMomento({ donor }: { donor: Donor }) {
             top: 0,
             left: 0,
 
-            background:
-              "linear-gradient(135deg, #fffbeb 0%, #fef3c7 45%, #fde68a 100%)",
-            border: "10px double #b45309",
+            backgroundColor: "#fffaf0",
+            backgroundImage:
+              "radial-gradient(circle at 15% 10%, rgba(251,191,36,0.35) 0%, transparent 45%), radial-gradient(circle at 85% 90%, rgba(180,83,9,0.25) 0%, transparent 50%), linear-gradient(135deg, #fffaf0 0%, #fef3c7 55%, #fde68a 100%)",
+            border: "8px solid #7c2d12",
+            outline: "2px solid #d97706",
+            outlineOffset: "-14px",
             padding: "18mm 14mm",
-            
-            color: "#78350f",
+            color: "#3f1d0a",
             fontFamily:
               '"Noto Sans Telugu", "Playfair Display", system-ui, sans-serif',
             display: "flex",
@@ -139,48 +141,73 @@ function DonorMomento({ donor }: { donor: Donor }) {
             textAlign: "center",
           }}
         >
-          {/* corner ornaments */}
-          <div style={{ position: "absolute", top: 6, left: 6, right: 6, bottom: 6, border: "1px solid #d97706", pointerEvents: "none" }} />
+          {/* gold inner frame */}
+          <div style={{ position: "absolute", inset: 20, border: "1px solid #b45309", pointerEvents: "none" }} />
+          {/* corner medallions */}
+          {[
+            { top: 10, left: 10 },
+            { top: 10, right: 10 },
+            { bottom: 10, left: 10 },
+            { bottom: 10, right: 10 },
+          ].map((pos, i) => (
+            <div
+              key={i}
+              style={{
+                position: "absolute",
+                width: 22,
+                height: 22,
+                border: "2px solid #b45309",
+                background: "#fff7ed",
+                transform: "rotate(45deg)",
+                ...pos,
+              }}
+            />
+          ))}
 
           {org?.logo_url && (
-            <img src={org.logo_url} alt="" style={{ width: 60, height: 60, objectFit: "contain", marginBottom: 6 }} />
+            <img src={org.logo_url} alt="" style={{ width: 64, height: 64, objectFit: "contain", marginBottom: 6 }} />
           )}
-          <div style={{ fontSize: 20, fontWeight: 800, color: "#7c2d12", letterSpacing: 0.3 }}>
+          <div style={{ fontSize: 22, fontWeight: 900, color: "#4a0e0e", letterSpacing: 0.5, textShadow: "0 1px 0 rgba(255,255,255,0.6)" }}>
             {org?.name || "—"}
           </div>
           {org?.slogan && (
-            <div style={{ fontSize: 12, color: "#92400e", marginTop: 2 }}>{org.slogan}</div>
+            <div style={{ fontSize: 12, color: "#7c2d12", marginTop: 2, fontStyle: "italic" }}>{org.slogan}</div>
           )}
 
           <div
             style={{
-              marginTop: 16,
+              marginTop: 14,
               fontFamily: '"Playfair Display", serif',
-              fontSize: 34,
-              fontWeight: 800,
-              color: "#b45309",
-              letterSpacing: 4,
+              fontSize: 38,
+              fontWeight: 900,
+              color: "#7c2d12",
+              letterSpacing: 6,
               textTransform: "uppercase",
+              textShadow: "0 2px 4px rgba(180,83,9,0.25)",
             }}
           >
             Certificate
           </div>
-          <div style={{ fontSize: 14, color: "#92400e", letterSpacing: 3, marginTop: -2 }}>
-            of Appreciation · కృతజ్ఞతా పత్రం
+          <div style={{ fontSize: 13, color: "#4a0e0e", letterSpacing: 4, marginTop: 0, fontWeight: 700 }}>
+            of Appreciation
+          </div>
+          <div style={{ fontSize: 15, color: "#7c2d12", marginTop: 4, fontWeight: 700 }}>
+            కృతజ్ఞతా పత్రం
           </div>
 
-          <div style={{ marginTop: 18, fontSize: 13, color: "#78350f" }}>
+          <div style={{ marginTop: 14, fontSize: 13, color: "#3f1d0a", fontWeight: 500 }}>
             This certificate is proudly presented to
           </div>
 
-          <div style={{ marginTop: 14 }}>
+          <div style={{ marginTop: 12 }}>
             <div
               style={{
-                width: 96,
-                height: 96,
+                width: 100,
+                height: 100,
                 borderRadius: "50%",
                 overflow: "hidden",
-                border: "3px solid #b45309",
+                border: "4px solid #b45309",
+                boxShadow: "0 0 0 3px #fff7ed, 0 4px 12px rgba(124,45,18,0.3)",
                 background: "#fff",
                 display: "flex",
                 alignItems: "center",
@@ -191,30 +218,31 @@ function DonorMomento({ donor }: { donor: Donor }) {
               {photoUrl ? (
                 <img src={photoUrl} alt={fullName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               ) : (
-                <User style={{ width: 40, height: 40, color: "#b45309" }} />
+                <User style={{ width: 44, height: 44, color: "#b45309" }} />
               )}
             </div>
           </div>
 
           <div
             style={{
-              marginTop: 12,
+              marginTop: 10,
               fontFamily: '"Dancing Script", cursive',
-              fontSize: 42,
+              fontSize: 44,
               fontWeight: 700,
-              color: "#7c2d12",
+              color: "#4a0e0e",
               lineHeight: 1.1,
+              textShadow: "0 1px 0 rgba(255,255,255,0.6)",
             }}
           >
             {fullName}
           </div>
-          <div style={{ borderBottom: "1px solid #b45309", width: "70%", margin: "4px auto 0" }} />
+          <div style={{ borderBottom: "2px solid #b45309", width: "70%", margin: "4px auto 0" }} />
 
-          <div style={{ marginTop: 14, fontSize: 13, lineHeight: 1.6, color: "#78350f", padding: "0 8mm" }}>
+          <div style={{ marginTop: 14, fontSize: 13, lineHeight: 1.7, color: "#3f1d0a", padding: "0 8mm", fontWeight: 500 }}>
             గౌరవప్రదమైన విరాళంతో సంఘ సేవలో పాలుపంచుకున్నందుకు
             హృదయపూర్వక కృతజ్ఞతలు తెలియజేస్తున్నాము.
             <br />
-            <span style={{ fontStyle: "italic", color: "#92400e" }}>
+            <span style={{ fontStyle: "italic", color: "#7c2d12", fontSize: 12 }}>
               In grateful recognition of your generous contribution
               towards our society's mission.
             </span>
@@ -223,13 +251,15 @@ function DonorMomento({ donor }: { donor: Donor }) {
           <div
             style={{
               marginTop: 14,
-              background: "#fff7ed",
+              background: "linear-gradient(135deg, #fff7ed 0%, #fde68a 100%)",
               border: "2px solid #b45309",
-              borderRadius: 8,
-              padding: "8px 22px",
-              fontSize: 22,
-              fontWeight: 800,
-              color: "#7c2d12",
+              borderRadius: 10,
+              padding: "10px 28px",
+              fontSize: 24,
+              fontWeight: 900,
+              color: "#4a0e0e",
+              boxShadow: "0 4px 10px rgba(124,45,18,0.2)",
+              letterSpacing: 0.5,
             }}
           >
             ₹ {amount.toLocaleString("en-IN")}
@@ -245,15 +275,16 @@ function DonorMomento({ donor }: { donor: Donor }) {
               alignItems: "flex-end",
               marginTop: 20,
               fontSize: 11,
-              color: "#78350f",
+              color: "#3f1d0a",
+              fontWeight: 600,
             }}
           >
             <div style={{ textAlign: "left" }}>
-              <div style={{ borderTop: "1px solid #b45309", paddingTop: 3, minWidth: 90 }}>Date</div>
+              <div style={{ borderTop: "1.5px solid #7c2d12", paddingTop: 3, minWidth: 90, color: "#7c2d12", fontWeight: 700 }}>Date</div>
               <div>{dateStr}</div>
             </div>
             <div style={{ textAlign: "right" }}>
-              <div style={{ borderTop: "1px solid #b45309", paddingTop: 3, minWidth: 120 }}>అధ్యక్షుడు</div>
+              <div style={{ borderTop: "1.5px solid #7c2d12", paddingTop: 3, minWidth: 120, color: "#7c2d12", fontWeight: 700 }}>అధ్యక్షుడు</div>
               <div>{org?.president_name || "—"}</div>
             </div>
           </div>
