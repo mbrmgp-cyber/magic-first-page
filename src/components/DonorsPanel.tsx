@@ -409,15 +409,39 @@ function EditDonorDialog({ donor, onSaved }: { donor: Donor; onSaved: () => void
     notes: donor.notes || "",
     status: donor.status || "approved",
   });
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [existingPhotoUrl, setExistingPhotoUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
     listAppr().then((r: any) => setMembers(r.members ?? [])).catch(() => {});
+    if (donor.photo_url) {
+      supabase.storage.from("member-photos").createSignedUrl(donor.photo_url, 3600)
+        .then(({ data }) => data?.signedUrl && setExistingPhotoUrl(data.signedUrl));
+    }
   }, [open]);
+
+  function onPickPhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("ఫైల్ 5MB మించరాదు"); return; }
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
+  }
 
   async function save() {
     setSaving(true);
     try {
+      let newPath: string | undefined;
+      if (photoFile && donor.org_id) {
+        const ext = photoFile.name.split(".").pop() || "jpg";
+        const path = `donors/${donor.org_id}/${donor.id}/${Date.now()}.${ext}`;
+        const { error: upErr } = await supabase.storage.from("member-photos")
+          .upload(path, photoFile, { upsert: true, contentType: photoFile.type });
+        if (upErr) throw new Error("ఫోటో అప్‌లోడ్ విఫలమైంది: " + upErr.message);
+        newPath = path;
+      }
       await upd({ data: {
         donor_id: donor.id,
         first_name: f.first_name.trim(),
@@ -427,9 +451,11 @@ function EditDonorDialog({ donor, onSaved }: { donor: Donor; onSaved: () => void
         linked_member_id: f.linked_member_id || null,
         notes: f.notes || null,
         status: f.status as any,
+        ...(newPath ? { photo_url: newPath } : {}),
       }});
       toast.success("సేవ్ అయింది");
       setOpen(false);
+      setPhotoFile(null); setPhotoPreview(null);
       onSaved();
     } catch (e: any) { toast.error(e.message); }
     finally { setSaving(false); }
@@ -443,6 +469,17 @@ function EditDonorDialog({ donor, onSaved }: { donor: Donor; onSaved: () => void
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>డోనర్ వివరాలు ఎడిట్</DialogTitle></DialogHeader>
         <div className="space-y-3 pt-2">
+          <div className="flex items-center gap-3">
+            <div className="h-20 w-20 rounded-full overflow-hidden bg-muted flex items-center justify-center shrink-0 border">
+              {photoPreview ? <img src={photoPreview} className="h-full w-full object-cover" />
+                : existingPhotoUrl ? <img src={existingPhotoUrl} className="h-full w-full object-cover" />
+                : <User className="w-8 h-8 text-muted-foreground" />}
+            </div>
+            <label className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-md border cursor-pointer hover:bg-accent">
+              <Camera className="w-4 h-4" /> ఫోటో మార్చండి
+              <input type="file" accept="image/*" className="hidden" onChange={onPickPhoto} />
+            </label>
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <div><Label>మొదటి పేరు</Label>
               <Input value={f.first_name} onChange={(e) => setF({ ...f, first_name: e.target.value })} /></div>
@@ -489,6 +526,7 @@ function EditDonorDialog({ donor, onSaved }: { donor: Donor; onSaved: () => void
     </Dialog>
   );
 }
+
 
 function AddDonationDialog({ donor, onSaved }: { donor: Donor; onSaved: () => void }) {
   const add = useServerFn(addDonation);
