@@ -112,16 +112,19 @@ function DonorMomento({ donor }: { donor: Donor }) {
 
   return (
     <div className="space-y-3">
-      <div className="flex justify-center">
+      <div ref={wrapRef} style={{ width: "100%", overflow: "hidden" }}>
+        <div style={{ width: 559 * scale, height: 792 * scale, margin: "0 auto", position: "relative" }}>
         <div
           ref={cardRef}
           style={{
             width: "148mm",
             height: "210mm",
-            maxWidth: "100%",
-            transform: "scale(0.62)",
-            transformOrigin: "top center",
-            marginBottom: "-72mm",
+            transform: `scale(${scale})`,
+            transformOrigin: "top left",
+            position: "absolute",
+            top: 0,
+            left: 0,
+
             background:
               "linear-gradient(135deg, #fffbeb 0%, #fef3c7 45%, #fde68a 100%)",
             border: "10px double #b45309",
