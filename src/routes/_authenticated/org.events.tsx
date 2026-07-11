@@ -1,3 +1,4 @@
+import { DateInput } from "@/components/DateInput";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -470,7 +471,7 @@ function ResolutionDialog({ open, onOpenChange, orgId, meetings, members, editin
         <div className="space-y-3 text-sm">
           <div className="grid grid-cols-2 gap-2">
             <div><Label>నిర్ణయ సంఖ్య *</Label><Input value={form.resolution_no} onChange={(e) => setForm({ ...form, resolution_no: e.target.value })} placeholder="R-001" className="bg-zinc-800 border-zinc-700" /></div>
-            <div><Label>తేదీ</Label><Input type="date" value={form.decision_date} onChange={(e) => setForm({ ...form, decision_date: e.target.value })} className="bg-zinc-800 border-zinc-700" /></div>
+            <div><Label>తేదీ</Label><DateInput value={form.decision_date} onChange={(e) => setForm({ ...form, decision_date: e.target.value })} className="bg-zinc-800 border-zinc-700" /></div>
           </div>
           <div><Label>శీర్షిక / Topic *</Label><Input value={form.topic} onChange={(e) => setForm({ ...form, topic: e.target.value })} className="bg-zinc-800 border-zinc-700" /></div>
           <div><Label>వివరణ / Description</Label><Textarea rows={4} value={form.description || ""} onChange={(e) => setForm({ ...form, description: e.target.value })} className="bg-zinc-800 border-zinc-700" /></div>
@@ -610,7 +611,7 @@ function ActivityDialog({ open, onOpenChange, orgId, editing, onSaved }: any) {
         <div className="space-y-3 text-sm">
           <div><Label>పేరు / Event Name *</Label><Input value={form.event_name} onChange={(e) => setForm({ ...form, event_name: e.target.value })} className="bg-zinc-800 border-zinc-700" /></div>
           <div className="grid grid-cols-2 gap-2">
-            <div><Label>తేదీ</Label><Input type="date" value={form.event_date} onChange={(e) => setForm({ ...form, event_date: e.target.value })} className="bg-zinc-800 border-zinc-700" /></div>
+            <div><Label>తేదీ</Label><DateInput value={form.event_date} onChange={(e) => setForm({ ...form, event_date: e.target.value })} className="bg-zinc-800 border-zinc-700" /></div>
             <div>
               <Label>స్థితి</Label>
               <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="w-full h-10 bg-zinc-800 border border-zinc-700 rounded px-2">

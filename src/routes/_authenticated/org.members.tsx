@@ -1,3 +1,4 @@
+import { DateInput } from "@/components/DateInput";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
@@ -409,7 +410,7 @@ function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => voi
             <Textarea rows={2} value={f.address} onChange={(e) => setF({ ...f, address: e.target.value })} /></div>
           <div className="grid grid-cols-2 gap-3">
             <div><Label>చేరిన తేదీ</Label>
-              <Input type="date" value={f.joined_date} onChange={(e) => setF({ ...f, joined_date: e.target.value })} /></div>
+              <DateInput value={f.joined_date} onChange={(e) => setF({ ...f, joined_date: e.target.value })} /></div>
             <div><Label>కమిటీ Fee ₹</Label>
               <Input type="number" step="0.01" value={f.committee_fee_paid}
                 onChange={(e) => setF({ ...f, committee_fee_paid: e.target.value })} /></div>
@@ -773,13 +774,6 @@ function JoinedDateInput({ value, onChange }: { value: string; onChange: (v: str
         }}
         className="flex-1"
       />
-      <Input
-        type="date"
-        value={value ?? ""}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-[44px] p-1"
-        aria-label="Pick date"
-      />
     </div>
   );
 }
@@ -848,7 +842,7 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
             <div><Label>నెల Interest %</Label>
               <Input type="number" step="0.01" value={nf.interest_rate_monthly} onChange={(e) => setNf({ ...nf, interest_rate_monthly: e.target.value })} /></div>
             <div><Label>Start Date</Label>
-              <Input type="date" value={nf.start_date} onChange={(e) => setNf({ ...nf, start_date: e.target.value })} /></div>
+              <DateInput value={nf.start_date} onChange={(e) => setNf({ ...nf, start_date: e.target.value })} /></div>
             <div><Label>Purpose</Label>
               <Input value={nf.purpose} onChange={(e) => setNf({ ...nf, purpose: e.target.value })} /></div>
           </div>
@@ -941,7 +935,7 @@ function LoanCard({ loan, orgId, onChange, onClose, onDelete }:
               <div className="flex-1"><Label className="text-xs">Amount ₹</Label>
                 <Input type="number" step="0.01" value={amt} onChange={(e) => setAmt(e.target.value)} /></div>
               <div><Label className="text-xs">Date</Label>
-                <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
+                <DateInput value={date} onChange={(e) => setDate(e.target.value)} /></div>
               <Button size="sm" onClick={payNow}>Pay</Button>
             </div>
           )}

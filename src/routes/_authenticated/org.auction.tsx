@@ -1,3 +1,4 @@
+import { DateInput } from "@/components/DateInput";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -1492,7 +1493,7 @@ function AuctionRoom() {
                     <StatBox label={lt("Total Months", "మొత్తం నెలలు")} value={String((activeGroup as any).totalMonths ?? totalMonths)} />
                     <StatBox
                       label={lt("Start Date", "ప్రారంభ తేదీ")}
-                      value={(activeGroup as any).startDate ? new Date((activeGroup as any).startDate).toLocaleDateString() : (chitStartDate ? new Date(chitStartDate).toLocaleDateString() : "—")}
+                      value={(activeGroup as any).startDate ? new Date((activeGroup as any).startDate).toLocaleDateString("en-GB") : (chitStartDate ? new Date(chitStartDate).toLocaleDateString("en-GB") : "—")}
                     />
                     <StatBox label={lt("Closed Months", "ముగిసిన నెలలు")} value={`${closedMonths} / ${(activeGroup as any).totalMonths ?? totalMonths}`} />
                   </div>
@@ -1718,7 +1719,7 @@ function AuctionRoom() {
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs">{lt("Start Date", "ప్రారంభ తేదీ")}</Label>
-              <Input type="date" value={chitStartDate} onChange={(e) => setChitStartDate(e.target.value)} className="h-10" />
+              <DateInput value={chitStartDate} onChange={(e) => setChitStartDate(e.target.value)} className="h-10" />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs">{lt("Total Months", "మొత్తం నెలలు")}</Label>
@@ -2431,7 +2432,7 @@ function AuctionRoom() {
                                     : lt("No winner recorded", "విజేత నమోదు కాలేదు")}
                                 </p>
                                 <p className="text-[10px] text-muted-foreground">
-                                  {lt("Closed", "ముగిసింది")} {new Date(a.closed_at).toLocaleDateString()}
+                                  {lt("Closed", "ముగిసింది")} {new Date(a.closed_at).toLocaleDateString("en-GB")}
                                 </p>
                               </div>
                               <Button

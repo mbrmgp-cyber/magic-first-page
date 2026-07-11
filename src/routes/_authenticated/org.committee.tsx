@@ -1,3 +1,4 @@
+import { DateInput } from "@/components/DateInput";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -368,7 +369,7 @@ function CommitteePage() {
                     <td>${escapeHtml(cm.members?.name ?? "-")}</td>
                     <td>${escapeHtml(cm.members?.phone ?? "-")}</td>
                     <td>${escapeHtml(cm.members?.email ?? "-")}</td>
-                    <td>${escapeHtml(new Date(cm.term_start_date).toLocaleDateString())} – ${escapeHtml(new Date(cm.term_end_date).toLocaleDateString())}</td>
+                    <td>${escapeHtml(new Date(cm.term_start_date).toLocaleDateString("en-GB"))} – ${escapeHtml(new Date(cm.term_end_date).toLocaleDateString("en-GB"))}</td>
                     <td>${escapeHtml(cm.qualifications ?? "-")}</td>
                   </tr>
                 `).join("");
@@ -486,11 +487,11 @@ function CommitteePage() {
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="text-xs font-medium">{lt("Term start", "పదవీకాలం ప్రారంభం")}</label>
-                <Input type="date" value={termStart} onChange={e => setTermStart(e.target.value)} />
+                <DateInput value={termStart} onChange={e => setTermStart(e.target.value)} />
               </div>
               <div>
                 <label className="text-xs font-medium">{lt("Term end", "పదవీకాలం ముగింపు")}</label>
-                <Input type="date" value={termEnd} onChange={e => setTermEnd(e.target.value)} />
+                <DateInput value={termEnd} onChange={e => setTermEnd(e.target.value)} />
               </div>
             </div>
             <div>

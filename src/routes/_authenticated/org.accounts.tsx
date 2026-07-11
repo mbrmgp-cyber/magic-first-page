@@ -1,3 +1,4 @@
+import { DateInput } from "@/components/DateInput";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -322,7 +323,7 @@ function AccountsPage() {
             </div>
             <div className="space-y-1.5">
               <Label>తేదీ</Label>
-              <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={locked} />
+              <DateInput value={date} onChange={(e) => setDate(e.target.value)} disabled={locked} />
             </div>
             <div className="space-y-1.5">
               <Label>గమనికలు</Label>

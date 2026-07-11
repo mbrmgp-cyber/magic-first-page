@@ -136,7 +136,7 @@ function SuretyInbox() {
                 </div>
                 <div className="text-xs text-white/60 grid grid-cols-2 gap-1">
                   <div><span className="text-white/40">{pick("కాలవ్యవధి", "Tenure")}:</span> {r.tenure_months ? `${r.tenure_months} mo` : "—"}</div>
-                  <div><span className="text-white/40">{pick("తేదీ", "Date")}:</span> {new Date(r.created_at).toLocaleDateString()}</div>
+                  <div><span className="text-white/40">{pick("తేదీ", "Date")}:</span> {new Date(r.created_at).toLocaleDateString("en-GB")}</div>
                   <div className="col-span-2"><span className="text-white/40">{pick("కారణం", "Purpose")}:</span> {r.reason}</div>
                 </div>
                 <Button size="sm" className="w-full bg-amber-600 hover:bg-amber-500" onClick={() => { setActive(r); setSignature(null); setDeclineReason(""); }}>

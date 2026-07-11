@@ -1,3 +1,4 @@
+import { DateInput } from "@/components/DateInput";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -532,7 +533,7 @@ function AddDonationDialog({ donor, onSaved }: { donor: Donor; onSaved: () => vo
             <div><Label>Amount ₹ *</Label>
               <Input type="number" step="0.01" value={f.amount} onChange={(e) => setF({ ...f, amount: e.target.value })} /></div>
             <div><Label>Date</Label>
-              <Input type="date" value={f.donation_date} onChange={(e) => setF({ ...f, donation_date: e.target.value })} /></div>
+              <DateInput value={f.donation_date} onChange={(e) => setF({ ...f, donation_date: e.target.value })} /></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>

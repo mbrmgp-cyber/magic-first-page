@@ -1,3 +1,4 @@
+import { DateInput } from "@/components/DateInput";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -266,7 +267,7 @@ function DisciplinaryPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
                     <label className="text-[10px] uppercase text-muted-foreground">Effective Until (optional)</label>
-                    <Input type="date" value={sUntil} onChange={(e) => setSUntil(e.target.value)} />
+                    <DateInput value={sUntil} onChange={(e) => setSUntil(e.target.value)} />
                   </div>
                   <div>
                     <label className="text-[10px] uppercase text-muted-foreground">Notes (optional)</label>
@@ -298,8 +299,8 @@ function DisciplinaryPage() {
                       </div>
                       <p className="text-xs mt-1 whitespace-pre-wrap">{s.reason}</p>
                       <p className="text-[10px] text-muted-foreground mt-1">
-                        From {new Date(s.effective_from).toLocaleDateString()}
-                        {s.effective_until ? ` → ${new Date(s.effective_until).toLocaleDateString()}` : ""}
+                        From {new Date(s.effective_from).toLocaleDateString("en-GB")}
+                        {s.effective_until ? ` → ${new Date(s.effective_until).toLocaleDateString("en-GB")}` : ""}
                       </p>
                     </div>
                     {canManage && s.status === "active" && (

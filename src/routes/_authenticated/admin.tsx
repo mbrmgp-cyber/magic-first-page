@@ -1,3 +1,4 @@
+import { DateInput } from "@/components/DateInput";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -502,8 +503,7 @@ function AllOrganizationsManager() {
                       </span>
                     )}
                   </div>
-                  <Input
-                    type="date"
+                  <DateInput
                     value={inputVal}
                     onChange={(e) => setExpiryEdits((p) => ({ ...p, [o.id]: e.target.value }))}
                     className="h-8 text-xs w-full sm:w-[150px]"
@@ -573,7 +573,7 @@ function AllOrganizationsManager() {
                 {detailsQ.data.org.gov_reg_number && <div><b>Reg No:</b> {detailsQ.data.org.gov_reg_number}</div>}
                 {detailsQ.data.org.slogan && <div><b>Slogan:</b> {detailsQ.data.org.slogan}</div>}
                 {(detailsQ.data.org as any).address && <div><b>Address:</b> {(detailsQ.data.org as any).address}</div>}
-                <div><b>Created:</b> {new Date(detailsQ.data.org.created_at).toLocaleDateString()}</div>
+                <div><b>Created:</b> {new Date(detailsQ.data.org.created_at).toLocaleDateString("en-GB")}</div>
                 <div>
                   <b>Status:</b>{" "}
                   <span className={`text-[10px] px-2 py-0.5 rounded border font-semibold uppercase ${STATUS_STYLES[(detailsQ.data.org.approval_status ?? "pending") as OrgStatus]}`}>

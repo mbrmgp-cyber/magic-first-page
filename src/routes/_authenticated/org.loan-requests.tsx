@@ -1,3 +1,4 @@
+import { DateInput } from "@/components/DateInput";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
@@ -132,7 +133,7 @@ function LoanRequestsAdmin() {
                         {r.member?.name ?? "—"}
                       </Link>
                       <div className="text-[11px] text-white/50">
-                        ID: {r.member?.member_code} · {new Date(r.created_at).toLocaleDateString()}
+                        ID: {r.member?.member_code} · {new Date(r.created_at).toLocaleDateString("en-GB")}
                       </div>
                     </div>
                     <StatusPill status={r.status} lang={lang} />
@@ -240,7 +241,7 @@ function LoanRequestsAdmin() {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>{lt("Payment Date", "చెల్లింపు తేదీ")}</Label>
-                <Input type="date" value={payDate} onChange={(e) => setPayDate(e.target.value)}
+                <DateInput value={payDate} onChange={(e) => setPayDate(e.target.value)}
                   className="bg-black border-white/15 text-white" />
               </div>
               <div className="space-y-1.5">
