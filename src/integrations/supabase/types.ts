@@ -699,6 +699,138 @@ export type Database = {
           },
         ]
       }
+      donations: {
+        Row: {
+          amount: number
+          created_at: string
+          donation_date: string
+          donor_id: string
+          id: string
+          mode: string
+          notes: string | null
+          org_id: string
+          proof_url: string | null
+          receipt_no: string | null
+          recorded_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          donation_date?: string
+          donor_id: string
+          id?: string
+          mode?: string
+          notes?: string | null
+          org_id: string
+          proof_url?: string | null
+          receipt_no?: string | null
+          recorded_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          donation_date?: string
+          donor_id?: string
+          id?: string
+          mode?: string
+          notes?: string | null
+          org_id?: string
+          proof_url?: string | null
+          receipt_no?: string | null
+          recorded_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donations_donor_id_fkey"
+            columns: ["donor_id"]
+            isOneToOne: false
+            referencedRelation: "donors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donations_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      donors: {
+        Row: {
+          created_at: string
+          email: string | null
+          first_name: string
+          id: string
+          last_name: string | null
+          linked_member_id: string | null
+          momento_issued: boolean
+          momento_issued_at: string | null
+          notes: string | null
+          org_id: string
+          phone: string | null
+          photo_url: string | null
+          status: string
+          total_donated: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          first_name: string
+          id?: string
+          last_name?: string | null
+          linked_member_id?: string | null
+          momento_issued?: boolean
+          momento_issued_at?: string | null
+          notes?: string | null
+          org_id: string
+          phone?: string | null
+          photo_url?: string | null
+          status?: string
+          total_donated?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          first_name?: string
+          id?: string
+          last_name?: string | null
+          linked_member_id?: string | null
+          momento_issued?: boolean
+          momento_issued_at?: string | null
+          notes?: string | null
+          org_id?: string
+          phone?: string | null
+          photo_url?: string | null
+          status?: string
+          total_donated?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donors_linked_member_id_fkey"
+            columns: ["linked_member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donors_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -1756,6 +1888,7 @@ export type Database = {
           bank_ifsc: string | null
           committee_term_years: number
           created_at: string
+          donor_recognition_threshold: number
           election_mode_enabled: boolean
           email: string
           founders: Json
@@ -1795,6 +1928,7 @@ export type Database = {
           bank_ifsc?: string | null
           committee_term_years?: number
           created_at?: string
+          donor_recognition_threshold?: number
           election_mode_enabled?: boolean
           email: string
           founders?: Json
@@ -1834,6 +1968,7 @@ export type Database = {
           bank_ifsc?: string | null
           committee_term_years?: number
           created_at?: string
+          donor_recognition_threshold?: number
           election_mode_enabled?: boolean
           email?: string
           founders?: Json
