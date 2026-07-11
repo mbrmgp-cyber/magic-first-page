@@ -1,6 +1,48 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+async function ensureDonorAuthAndSendLink(donorId: string, emailRaw: string) {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const email = emailRaw.trim().toLowerCase();
+    let userId: string | null = null;
+    for (let page = 1; page <= 20; page += 1) {
+      const { data: list, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 1000 });
+      if (error) break;
+      const u = list.users.find((x: any) => x.email?.toLowerCase() === email);
+      if (u) { userId = u.id; break; }
+      if (list.users.length < 1000) break;
+    }
+    if (!userId) {
+      const { data: created } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password: `MBR-${crypto.randomUUID()}`,
+        email_confirm: true,
+        user_metadata: { role: "donor" },
+      });
+      userId = created?.user?.id ?? null;
+    }
+    if (userId) {
+      await supabaseAdmin.from("donors").update({ user_id: userId }).eq("id", donorId);
+    }
+    const { createClient } = await import("@supabase/supabase-js");
+    const pub = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+      auth: { persistSession: false, autoRefreshToken: false, storage: undefined as any },
+    });
+    const origin = process.env.PUBLIC_APP_URL || "https://mbrplatform.com";
+    const { error: otpErr } = await pub.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: `${origin}/donor/dashboard`, shouldCreateUser: false },
+    });
+    if (otpErr) { console.error("[donor magic link]", otpErr.message); return { ok: false, error: otpErr.message }; }
+    return { ok: true };
+  } catch (e: any) {
+    console.error("[donor magic link] failed", e);
+    return { ok: false, error: e?.message || String(e) };
+  }
+}
+
+
 async function getOrgForUser(supabase: any, userId: string) {
   const { data: org } = await supabase
     .from("organizations")
