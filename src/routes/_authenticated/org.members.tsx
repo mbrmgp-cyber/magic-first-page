@@ -774,13 +774,6 @@ function JoinedDateInput({ value, onChange }: { value: string; onChange: (v: str
         }}
         className="flex-1"
       />
-      <Input
-        type="text"
-        value={value ?? ""}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-[44px] p-1"
-        aria-label="Pick date"
-      />
     </div>
   );
 }
