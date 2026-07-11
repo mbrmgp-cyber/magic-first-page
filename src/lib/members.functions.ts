@@ -137,10 +137,11 @@ export const updateMemberProfile = createServerFn({ method: "POST" })
     membership_receipt_url?: string | null;
     is_active?: boolean;
     blood_group?: string | null;
+    send_login_link?: boolean;
   }) => d)
   .handler(async ({ data, context }) => {
     const { supabase } = context;
-    const { member_id, ...patch } = data;
+    const { member_id, send_login_link = true, ...patch } = data;
     const { error } = await supabase.from("members").update(patch as any).eq("id", member_id);
     if (error) throw new Error(error.message);
     // Best-effort: notify the member via a magic login link that their profile was updated.
@@ -153,7 +154,7 @@ export const updateMemberProfile = createServerFn({ method: "POST" })
         .eq("id", member_id)
         .maybeSingle();
       const email = (m?.email || "").trim().toLowerCase();
-      if (email && m?.status === "approved") {
+      if (send_login_link && email && m?.status === "approved") {
         const { sendMemberProfileUpdatedEmail } = await import("@/lib/org.functions");
         await sendMemberProfileUpdatedEmail({ data: { email, name: (patch as any).name ?? m?.name ?? null } });
         emailSent = true;
@@ -174,7 +175,24 @@ export const setMemberActive = createServerFn({ method: "POST" })
     const { error } = await supabase.from("members")
       .update({ is_active: data.is_active }).eq("id", data.member_id);
     if (error) throw new Error(error.message);
-    return { ok: true };
+    let emailSent = false;
+    let emailError: string | null = null;
+    try {
+      const { data: m } = await supabase
+        .from("members")
+        .select("email, name, status")
+        .eq("id", data.member_id)
+        .maybeSingle();
+      const email = (m?.email || "").trim().toLowerCase();
+      if (email && m?.status === "approved") {
+        const { sendMemberProfileUpdatedEmail } = await import("@/lib/org.functions");
+        await sendMemberProfileUpdatedEmail({ data: { email, name: m?.name ?? null } });
+        emailSent = true;
+      }
+    } catch (e) {
+      emailError = e instanceof Error ? e.message : String(e);
+    }
+    return { ok: true, emailSent, emailError };
   });
 
 export const orgUpdateMemberCode = createServerFn({ method: "POST" })
@@ -187,7 +205,19 @@ export const orgUpdateMemberCode = createServerFn({ method: "POST" })
       _new_code: data.new_code,
     });
     if (error) throw new Error(error.message);
-    return { ok: true, member: row };
+    let emailSent = false;
+    let emailError: string | null = null;
+    try {
+      const email = ((row as any)?.email || "").trim().toLowerCase();
+      if (email && (row as any)?.status === "approved") {
+        const { sendMemberProfileUpdatedEmail } = await import("@/lib/org.functions");
+        await sendMemberProfileUpdatedEmail({ data: { email, name: (row as any)?.name ?? null } });
+        emailSent = true;
+      }
+    } catch (e) {
+      emailError = e instanceof Error ? e.message : String(e);
+    }
+    return { ok: true, member: row, emailSent, emailError };
   });
 
 

@@ -1,46 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-
-async function ensureDonorAuthAndSendLink(donorId: string, emailRaw: string) {
-  try {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const email = emailRaw.trim().toLowerCase();
-    let userId: string | null = null;
-    for (let page = 1; page <= 20; page += 1) {
-      const { data: list, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 1000 });
-      if (error) break;
-      const u = list.users.find((x: any) => x.email?.toLowerCase() === email);
-      if (u) { userId = u.id; break; }
-      if (list.users.length < 1000) break;
-    }
-    if (!userId) {
-      const { data: created } = await supabaseAdmin.auth.admin.createUser({
-        email,
-        password: `MBR-${crypto.randomUUID()}`,
-        email_confirm: true,
-        user_metadata: { role: "donor" },
-      });
-      userId = created?.user?.id ?? null;
-    }
-    if (userId) {
-      await supabaseAdmin.from("donors").update({ user_id: userId }).eq("id", donorId);
-    }
-    const { createClient } = await import("@supabase/supabase-js");
-    const pub = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
-      auth: { persistSession: false, autoRefreshToken: false, storage: undefined as any },
-    });
-    const origin = process.env.PUBLIC_APP_URL || "https://mbrplatform.com";
-    const { error: otpErr } = await pub.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: `${origin}/donor/dashboard`, shouldCreateUser: false },
-    });
-    if (otpErr) { console.error("[donor magic link]", otpErr.message); return { ok: false, error: otpErr.message }; }
-    return { ok: true };
-  } catch (e: any) {
-    console.error("[donor magic link] failed", e);
-    return { ok: false, error: e?.message || String(e) };
-  }
-}
+import { ensureDonorAuthAndSendLink } from "@/lib/donor-login-link.server";
 
 
 async function getOrgForUser(supabase: any, userId: string) {
@@ -146,6 +106,7 @@ export const updateDonor = createServerFn({ method: "POST" })
     notes?: string | null;
     status?: "pending" | "approved" | "inactive";
     momento_issued?: boolean;
+    send_login_link?: boolean;
   }) => d)
   .handler(async ({ data, context }) => {
     const { supabase } = context;
@@ -157,9 +118,21 @@ export const updateDonor = createServerFn({ method: "POST" })
       patch.momento_issued = data.momento_issued;
       patch.momento_issued_at = data.momento_issued ? new Date().toISOString() : null;
     }
-    const { error } = await supabase.from("donors").update(patch).eq("id", data.donor_id);
+    const { data: donor, error } = await supabase
+      .from("donors")
+      .update(patch)
+      .eq("id", data.donor_id)
+      .select("id, email, status")
+      .maybeSingle();
     if (error) throw new Error(error.message);
-    return { ok: true };
+    let linkSent = false;
+    let linkError: string | null = null;
+    if (data.send_login_link && donor?.status === "approved" && donor?.email?.trim()) {
+      const r = await ensureDonorAuthAndSendLink(donor.id, donor.email);
+      linkSent = r.ok;
+      linkError = r.ok ? null : r.error ?? null;
+    }
+    return { ok: true, linkSent, linkError };
   });
 
 export const deleteDonor = createServerFn({ method: "POST" })
@@ -191,49 +164,8 @@ export const reviewDonor = createServerFn({ method: "POST" })
       .maybeSingle();
     if (upErr) throw new Error(upErr.message);
 
-    if (donor?.email && !donor.user_id) {
-      try {
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const email = donor.email.trim().toLowerCase();
-        // Try to find existing auth user
-        let userId: string | null = null;
-        for (let page = 1; page <= 20; page += 1) {
-          const { data: list, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 1000 });
-          if (error) break;
-          const u = list.users.find((x: any) => x.email?.toLowerCase() === email);
-          if (u) { userId = u.id; break; }
-          if (list.users.length < 1000) break;
-        }
-        if (!userId) {
-          const { data: created } = await supabaseAdmin.auth.admin.createUser({
-            email,
-            password: `MBR-${crypto.randomUUID()}`,
-            email_confirm: true,
-            user_metadata: { role: "donor" },
-          });
-          userId = created?.user?.id ?? null;
-        }
-        if (userId) {
-          await supabaseAdmin.from("donors").update({ user_id: userId }).eq("id", donor.id);
-        }
-        // Send magic link to donor email so they can login without a password
-        try {
-          const { createClient } = await import("@supabase/supabase-js");
-          const pub = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
-            auth: { persistSession: false, autoRefreshToken: false, storage: undefined as any },
-          });
-          const origin = process.env.PUBLIC_APP_URL || "https://mbrplatform.com";
-          await pub.auth.signInWithOtp({
-            email,
-            options: { emailRedirectTo: `${origin}/donor/dashboard`, shouldCreateUser: false },
-          });
-        } catch (e) {
-          console.error("[reviewDonor] magic link send failed", e);
-        }
-      } catch (e) {
-        // Don't fail approval if auth user creation fails; admin can retry
-        console.error("[reviewDonor] auth link failed", e);
-      }
+    if (donor?.email) {
+      await ensureDonorAuthAndSendLink(donor.id, donor.email);
     }
     return { ok: true };
   });
@@ -266,7 +198,19 @@ export const addDonation = createServerFn({ method: "POST" })
       recorded_by: userId,
     }).select().single();
     if (error) throw new Error(error.message);
-    return { id: row.id };
+    let linkSent = false;
+    let linkError: string | null = null;
+    const { data: donor } = await supabase
+      .from("donors")
+      .select("id, email, status")
+      .eq("id", data.donor_id)
+      .maybeSingle();
+    if (donor?.status === "approved" && donor?.email?.trim()) {
+      const r = await ensureDonorAuthAndSendLink(donor.id, donor.email);
+      linkSent = r.ok;
+      linkError = r.ok ? null : r.error ?? null;
+    }
+    return { id: row.id, linkSent, linkError };
   });
 
 export const deleteDonation = createServerFn({ method: "POST" })
