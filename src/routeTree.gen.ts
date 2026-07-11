@@ -42,6 +42,7 @@ import { Route as AuthenticatedMemberLoanRequestRouteImport } from './routes/_au
 import { Route as AuthenticatedMemberLedgerRouteImport } from './routes/_authenticated/member.ledger'
 import { Route as AuthenticatedMemberEventsRouteImport } from './routes/_authenticated/member.events'
 import { Route as AuthenticatedMemberDashboardRouteImport } from './routes/_authenticated/member.dashboard'
+import { Route as AuthenticatedDonorDashboardRouteImport } from './routes/_authenticated/donor.dashboard'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -226,6 +227,12 @@ const AuthenticatedMemberDashboardRoute =
     path: '/member/dashboard',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDonorDashboardRoute =
+  AuthenticatedDonorDashboardRouteImport.update({
+    id: '/donor/dashboard',
+    path: '/donor/dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -252,6 +259,7 @@ export interface FileRoutesByFullPath {
   '/donor/register': typeof DonorRegisterRoute
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
+  '/donor/dashboard': typeof AuthenticatedDonorDashboardRoute
   '/member/dashboard': typeof AuthenticatedMemberDashboardRoute
   '/member/events': typeof AuthenticatedMemberEventsRoute
   '/member/ledger': typeof AuthenticatedMemberLedgerRoute
@@ -289,6 +297,7 @@ export interface FileRoutesByTo {
   '/donor/register': typeof DonorRegisterRoute
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
+  '/donor/dashboard': typeof AuthenticatedDonorDashboardRoute
   '/member/dashboard': typeof AuthenticatedMemberDashboardRoute
   '/member/events': typeof AuthenticatedMemberEventsRoute
   '/member/ledger': typeof AuthenticatedMemberLedgerRoute
@@ -328,6 +337,7 @@ export interface FileRoutesById {
   '/donor/register': typeof DonorRegisterRoute
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
+  '/_authenticated/donor/dashboard': typeof AuthenticatedDonorDashboardRoute
   '/_authenticated/member/dashboard': typeof AuthenticatedMemberDashboardRoute
   '/_authenticated/member/events': typeof AuthenticatedMemberEventsRoute
   '/_authenticated/member/ledger': typeof AuthenticatedMemberLedgerRoute
@@ -367,6 +377,7 @@ export interface FileRouteTypes {
     | '/donor/register'
     | '/member/register'
     | '/org/register'
+    | '/donor/dashboard'
     | '/member/dashboard'
     | '/member/events'
     | '/member/ledger'
@@ -404,6 +415,7 @@ export interface FileRouteTypes {
     | '/donor/register'
     | '/member/register'
     | '/org/register'
+    | '/donor/dashboard'
     | '/member/dashboard'
     | '/member/events'
     | '/member/ledger'
@@ -442,6 +454,7 @@ export interface FileRouteTypes {
     | '/donor/register'
     | '/member/register'
     | '/org/register'
+    | '/_authenticated/donor/dashboard'
     | '/_authenticated/member/dashboard'
     | '/_authenticated/member/events'
     | '/_authenticated/member/ledger'
@@ -718,6 +731,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMemberDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/donor/dashboard': {
+      id: '/_authenticated/donor/dashboard'
+      path: '/donor/dashboard'
+      fullPath: '/donor/dashboard'
+      preLoaderRoute: typeof AuthenticatedDonorDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
       path: '/lovable/email/queue/process'
@@ -744,6 +764,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedDonorDashboardRoute: typeof AuthenticatedDonorDashboardRoute
   AuthenticatedMemberDashboardRoute: typeof AuthenticatedMemberDashboardRoute
   AuthenticatedMemberEventsRoute: typeof AuthenticatedMemberEventsRoute
   AuthenticatedMemberLedgerRoute: typeof AuthenticatedMemberLedgerRoute
@@ -772,6 +793,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedDonorDashboardRoute: AuthenticatedDonorDashboardRoute,
   AuthenticatedMemberDashboardRoute: AuthenticatedMemberDashboardRoute,
   AuthenticatedMemberEventsRoute: AuthenticatedMemberEventsRoute,
   AuthenticatedMemberLedgerRoute: AuthenticatedMemberLedgerRoute,
