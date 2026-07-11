@@ -27,6 +27,7 @@ import {
   addDonation, listDonorDonations, deleteDonation, updateOrgDonorThreshold,
 } from "@/lib/donors.functions";
 import { listApprovedMembers } from "@/lib/members.functions";
+import { DonorMomentoButton } from "@/components/DonorMomento";
 
 type Donor = any;
 
@@ -182,7 +183,10 @@ function DonorCard({ donor, threshold, onChange, recognitionMode }:
             <DonationsDialog donor={donor} onChanged={onChange} />
             <EditDonorDialog donor={donor} onSaved={onChange} />
             {recognitionMode && recognized && (
-              <MomentoToggle donor={donor} onChange={onChange} />
+              <>
+                <MomentoToggle donor={donor} onChange={onChange} />
+                <DonorMomentoButton donor={donor} />
+              </>
             )}
           </>
         )}
