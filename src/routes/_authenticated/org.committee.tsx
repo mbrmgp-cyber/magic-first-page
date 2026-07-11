@@ -369,7 +369,7 @@ function CommitteePage() {
                     <td>${escapeHtml(cm.members?.name ?? "-")}</td>
                     <td>${escapeHtml(cm.members?.phone ?? "-")}</td>
                     <td>${escapeHtml(cm.members?.email ?? "-")}</td>
-                    <td>${escapeHtml(new Date(cm.term_start_date).toLocaleDateString())} – ${escapeHtml(new Date(cm.term_end_date).toLocaleDateString())}</td>
+                    <td>${escapeHtml(new Date(cm.term_start_date).toLocaleDateString("en-GB"))} – ${escapeHtml(new Date(cm.term_end_date).toLocaleDateString("en-GB"))}</td>
                     <td>${escapeHtml(cm.qualifications ?? "-")}</td>
                   </tr>
                 `).join("");

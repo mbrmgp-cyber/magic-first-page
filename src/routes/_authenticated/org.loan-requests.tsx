@@ -133,7 +133,7 @@ function LoanRequestsAdmin() {
                         {r.member?.name ?? "—"}
                       </Link>
                       <div className="text-[11px] text-white/50">
-                        ID: {r.member?.member_code} · {new Date(r.created_at).toLocaleDateString()}
+                        ID: {r.member?.member_code} · {new Date(r.created_at).toLocaleDateString("en-GB")}
                       </div>
                     </div>
                     <StatusPill status={r.status} lang={lang} />

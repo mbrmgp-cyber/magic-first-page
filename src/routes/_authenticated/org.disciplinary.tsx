@@ -299,8 +299,8 @@ function DisciplinaryPage() {
                       </div>
                       <p className="text-xs mt-1 whitespace-pre-wrap">{s.reason}</p>
                       <p className="text-[10px] text-muted-foreground mt-1">
-                        From {new Date(s.effective_from).toLocaleDateString()}
-                        {s.effective_until ? ` → ${new Date(s.effective_until).toLocaleDateString()}` : ""}
+                        From {new Date(s.effective_from).toLocaleDateString("en-GB")}
+                        {s.effective_until ? ` → ${new Date(s.effective_until).toLocaleDateString("en-GB")}` : ""}
                       </p>
                     </div>
                     {canManage && s.status === "active" && (

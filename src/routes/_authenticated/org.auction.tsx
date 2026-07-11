@@ -1493,7 +1493,7 @@ function AuctionRoom() {
                     <StatBox label={lt("Total Months", "మొత్తం నెలలు")} value={String((activeGroup as any).totalMonths ?? totalMonths)} />
                     <StatBox
                       label={lt("Start Date", "ప్రారంభ తేదీ")}
-                      value={(activeGroup as any).startDate ? new Date((activeGroup as any).startDate).toLocaleDateString() : (chitStartDate ? new Date(chitStartDate).toLocaleDateString() : "—")}
+                      value={(activeGroup as any).startDate ? new Date((activeGroup as any).startDate).toLocaleDateString("en-GB") : (chitStartDate ? new Date(chitStartDate).toLocaleDateString("en-GB") : "—")}
                     />
                     <StatBox label={lt("Closed Months", "ముగిసిన నెలలు")} value={`${closedMonths} / ${(activeGroup as any).totalMonths ?? totalMonths}`} />
                   </div>
@@ -2432,7 +2432,7 @@ function AuctionRoom() {
                                     : lt("No winner recorded", "విజేత నమోదు కాలేదు")}
                                 </p>
                                 <p className="text-[10px] text-muted-foreground">
-                                  {lt("Closed", "ముగిసింది")} {new Date(a.closed_at).toLocaleDateString()}
+                                  {lt("Closed", "ముగిసింది")} {new Date(a.closed_at).toLocaleDateString("en-GB")}
                                 </p>
                               </div>
                               <Button
