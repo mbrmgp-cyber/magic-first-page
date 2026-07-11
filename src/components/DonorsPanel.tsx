@@ -325,7 +325,7 @@ function AddDonorDialog({ onAdded }: { onAdded: () => void }) {
         const { error: upErr } = await supabase.storage.from("member-photos")
           .upload(path, photoFile, { upsert: true, contentType: photoFile.type });
         if (upErr) toast.error("ఫోటో అప్‌లోడ్ విఫలమైంది: " + upErr.message);
-        else await upd({ data: { donor_id: r.id, photo_url: path } });
+        else await upd({ data: { donor_id: r.id, photo_url: path, send_login_link: false } });
       }
       toast.success(r?.linkSent ? "డోనర్ చేర్చబడ్డారు · లాగిన్ లింక్ ఈమెయిల్‌కు పంపబడింది" : "డోనర్ చేర్చబడ్డారు");
       if (r?.linkError) toast.error("లాగిన్ లింక్ పంపడంలో సమస్య: " + r.linkError);
@@ -443,7 +443,7 @@ function EditDonorDialog({ donor, onSaved }: { donor: Donor; onSaved: () => void
         if (upErr) throw new Error("ఫోటో అప్‌లోడ్ విఫలమైంది: " + upErr.message);
         newPath = path;
       }
-      await upd({ data: {
+      const r: any = await upd({ data: {
         donor_id: donor.id,
         first_name: f.first_name.trim(),
         last_name: f.last_name || null,
@@ -452,9 +452,11 @@ function EditDonorDialog({ donor, onSaved }: { donor: Donor; onSaved: () => void
         linked_member_id: f.linked_member_id || null,
         notes: f.notes || null,
         status: f.status as any,
+        send_login_link: true,
         ...(newPath ? { photo_url: newPath } : {}),
       }});
-      toast.success("సేవ్ అయింది");
+      toast.success(r?.linkSent ? "సేవ్ అయింది · లాగిన్ లింక్ ఈమెయిల్‌కు పంపబడింది" : "సేవ్ అయింది");
+      if (r?.linkError) toast.error("లాగిన్ లింక్ పంపడంలో సమస్య: " + r.linkError);
       setOpen(false);
       setPhotoFile(null); setPhotoPreview(null);
       onSaved();
@@ -542,7 +544,7 @@ function AddDonationDialog({ donor, onSaved }: { donor: Donor; onSaved: () => vo
     if (!(amt > 0)) { toast.error("Amount ఇవ్వండి"); return; }
     setSaving(true);
     try {
-      await add({ data: {
+      const r: any = await add({ data: {
         donor_id: donor.id,
         amount: amt,
         donation_date: f.donation_date,
@@ -550,7 +552,8 @@ function AddDonationDialog({ donor, onSaved }: { donor: Donor; onSaved: () => vo
         receipt_no: f.receipt_no || null,
         notes: f.notes || null,
       }});
-      toast.success("విరాళం నమోదైంది");
+      toast.success(r?.linkSent ? "విరాళం నమోదైంది · డోనర్‌కు లాగిన్ లింక్ పంపబడింది" : "విరాళం నమోదైంది");
+      if (r?.linkError) toast.error("లాగిన్ లింక్ పంపడంలో సమస్య: " + r.linkError);
       setOpen(false);
       setF(initial);
       onSaved();

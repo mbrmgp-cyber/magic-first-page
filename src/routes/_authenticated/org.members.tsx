@@ -355,7 +355,7 @@ function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => voi
         const { error: upErr } = await supabase.storage.from("member-photos")
           .upload(path, photoFile, { upsert: true, contentType: photoFile.type });
         if (upErr) toast.error("ఫోటో అప్‌లోడ్ విఫలమైంది: " + upErr.message);
-        else await upd({ data: { member_id: r.id, photo_url: path } });
+        else await upd({ data: { member_id: r.id, photo_url: path, send_login_link: false } });
       }
       // Upload receipt if picked
       if (receiptFile && r.id && r.orgId) {
@@ -364,9 +364,10 @@ function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => voi
         const { error: rErr } = await supabase.storage.from("member-receipts")
           .upload(path, receiptFile, { upsert: true, contentType: receiptFile.type });
         if (rErr) toast.error("రసీదు అప్‌లోడ్ విఫలమైంది: " + rErr.message);
-        else await upd({ data: { member_id: r.id, membership_receipt_url: path } });
+        else await upd({ data: { member_id: r.id, membership_receipt_url: path, send_login_link: false } });
       }
-      toast.success("సభ్యుడు చేర్చబడ్డారు");
+      toast.success((r as any)?.emailSent ? "సభ్యుడు చేర్చబడ్డారు · లాగిన్ లింక్ ఈమెయిల్‌కు పంపబడింది" : "సభ్యుడు చేర్చబడ్డారు");
+      if ((r as any)?.emailError) toast.error("లాగిన్ లింక్ పంపడంలో సమస్య: " + (r as any).emailError);
       setOpen(false);
       setF(initial);
       setPhotoFile(null); setPhotoPreview(null);
@@ -568,7 +569,7 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
         if (rErr) throw new Error("రసీదు అప్‌లోడ్ విఫలం: " + rErr.message);
         membership_receipt_url = path;
       }
-      await upd({
+      const r: any = await upd({
         data: {
           member_id: member.id,
           name: f.name?.trim() || member.name,
@@ -585,7 +586,8 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
           ...(membership_receipt_url ? { membership_receipt_url } : {}),
         },
       });
-      toast.success("Saved");
+      toast.success(r?.emailSent ? "Saved · లాగిన్ లింక్ ఈమెయిల్‌కు పంపబడింది" : "Saved");
+      if (r?.emailError) toast.error("లాగిన్ లింక్ పంపడంలో సమస్య: " + r.emailError);
       setPhotoFile(null); setPhotoPreview(null);
       onSaved();
     } catch (e: any) { toast.error(e.message); }
@@ -595,8 +597,9 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
   async function quickToggle(v: boolean) {
     setActive(v);
     try {
-      await toggleActive({ data: { member_id: member.id, is_active: v } });
-      toast.success(v ? "యాక్టివ్ చేయబడింది" : "ఇనాక్టివ్ చేయబడింది");
+      const r: any = await toggleActive({ data: { member_id: member.id, is_active: v } });
+      toast.success(r?.emailSent ? `${v ? "యాక్టివ్ చేయబడింది" : "ఇనాక్టివ్ చేయబడింది"} · లాగిన్ లింక్ పంపబడింది` : (v ? "యాక్టివ్ చేయబడింది" : "ఇనాక్టివ్ చేయబడింది"));
+      if (r?.emailError) toast.error("లాగిన్ లింక్ పంపడంలో సమస్య: " + r.emailError);
       onSaved();
     } catch (e: any) { toast.error(e.message); setActive(!v); }
   }

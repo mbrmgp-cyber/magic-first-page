@@ -51,12 +51,12 @@ function DonorMomento({ donor }: { donor: Donor }) {
 
   useEffect(() => {
     if (!wrapRef.current) return;
-    // A5 width = 148mm ≈ 559px at 96dpi. Fit to wrapper width with a little padding.
-      const CARD_W = 559;
-      const SAFE_GAP = 20;
+    // A5 width = 148mm ≈ 559px at 96dpi. Extra bleed keeps all borders visible.
+    const CARD_W = 559;
+    const BLEED = 22;
     const compute = () => {
       const w = wrapRef.current?.clientWidth ?? 0;
-        if (w > 0) setScale(Math.min(1, Math.max(0.35, (w - SAFE_GAP) / CARD_W)));
+      if (w > 0) setScale(Math.min(1, Math.max(0.32, (w - 2) / (CARD_W + BLEED * 2))));
     };
     compute();
     const ro = new ResizeObserver(compute);
@@ -113,8 +113,8 @@ function DonorMomento({ donor }: { donor: Donor }) {
 
   return (
     <div className="space-y-3">
-      <div ref={wrapRef} style={{ width: "100%", overflow: "hidden", padding: "0 6px" }}>
-        <div style={{ width: 559 * scale, height: 792 * scale, margin: "0 auto", position: "relative" }}>
+      <div ref={wrapRef} style={{ width: "100%", overflow: "hidden", padding: "8px 0", background: "#ffffff" }}>
+        <div style={{ width: (559 + 44) * scale, height: (794 + 44) * scale, margin: "0 auto", position: "relative" }}>
         <div
           ref={cardRef}
           style={{
@@ -123,8 +123,8 @@ function DonorMomento({ donor }: { donor: Donor }) {
             transform: `scale(${scale})`,
             transformOrigin: "top left",
             position: "absolute",
-            top: 0,
-            left: 0,
+            top: 22 * scale,
+            left: 22 * scale,
 
             overflow: "hidden",
             backgroundColor: "#fff8e3",
