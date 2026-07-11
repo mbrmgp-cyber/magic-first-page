@@ -27,6 +27,7 @@ import {
   addDonation, listDonorDonations, deleteDonation, updateOrgDonorThreshold,
 } from "@/lib/donors.functions";
 import { listApprovedMembers } from "@/lib/members.functions";
+import { DonorMomentoButton } from "@/components/DonorMomento";
 
 type Donor = any;
 
