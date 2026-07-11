@@ -129,7 +129,7 @@ function DonorMomento({ donor }: { donor: Donor }) {
               "linear-gradient(135deg, #fffbeb 0%, #fef3c7 45%, #fde68a 100%)",
             border: "10px double #b45309",
             padding: "18mm 14mm",
-            position: "relative",
+            
             color: "#78350f",
             fontFamily:
               '"Noto Sans Telugu", "Playfair Display", system-ui, sans-serif',
