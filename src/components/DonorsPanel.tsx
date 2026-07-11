@@ -321,7 +321,7 @@ function AddDonorDialog({ onAdded }: { onAdded: () => void }) {
       });
       if (photoFile && r.id && r.orgId) {
         const ext = photoFile.name.split(".").pop() || "jpg";
-        const path = `donors/${r.orgId}/${r.id}/${Date.now()}.${ext}`;
+        const path = `admin/${r.orgId}/donors/${r.id}/${Date.now()}.${ext}`;
         const { error: upErr } = await supabase.storage.from("member-photos")
           .upload(path, photoFile, { upsert: true, contentType: photoFile.type });
         if (upErr) toast.error("ఫోటో అప్‌లోడ్ విఫలమైంది: " + upErr.message);
@@ -436,7 +436,7 @@ function EditDonorDialog({ donor, onSaved }: { donor: Donor; onSaved: () => void
       let newPath: string | undefined;
       if (photoFile && donor.org_id) {
         const ext = photoFile.name.split(".").pop() || "jpg";
-        const path = `donors/${donor.org_id}/${donor.id}/${Date.now()}.${ext}`;
+        const path = `admin/${donor.org_id}/donors/${donor.id}/${Date.now()}.${ext}`;
         const { error: upErr } = await supabase.storage.from("member-photos")
           .upload(path, photoFile, { upsert: true, contentType: photoFile.type });
         if (upErr) throw new Error("ఫోటో అప్‌లోడ్ విఫలమైంది: " + upErr.message);
