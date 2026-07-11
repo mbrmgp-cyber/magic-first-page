@@ -32,9 +32,9 @@ export function DonorMomentoButton({ donor }: { donor: Donor }) {
           <Award className="w-4 h-4 mr-1" /> గుర్తింపు కార్డు
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-[560px] p-4">
-        <DialogHeader>
-          <DialogTitle>డోనర్ గుర్తింపు కార్డు (Momento)</DialogTitle>
+      <DialogContent className="max-h-[96dvh] w-[calc(100vw-1rem)] max-w-[640px] overflow-y-auto p-3 sm:p-4">
+        <DialogHeader className="pr-8">
+          <DialogTitle>డోనర్ గుర్తింపు కార్డు</DialogTitle>
         </DialogHeader>
         <DonorMomento donor={donor} />
       </DialogContent>
@@ -52,10 +52,11 @@ function DonorMomento({ donor }: { donor: Donor }) {
   useEffect(() => {
     if (!wrapRef.current) return;
     // A5 width = 148mm ≈ 559px at 96dpi. Fit to wrapper width with a little padding.
-    const CARD_W = 559;
+      const CARD_W = 559;
+      const SAFE_GAP = 20;
     const compute = () => {
       const w = wrapRef.current?.clientWidth ?? 0;
-      if (w > 0) setScale(Math.min(1, Math.max(0.35, w / CARD_W)));
+        if (w > 0) setScale(Math.min(1, Math.max(0.35, (w - SAFE_GAP) / CARD_W)));
     };
     compute();
     const ro = new ResizeObserver(compute);
@@ -112,7 +113,7 @@ function DonorMomento({ donor }: { donor: Donor }) {
 
   return (
     <div className="space-y-3">
-      <div ref={wrapRef} style={{ width: "100%", overflow: "hidden" }}>
+      <div ref={wrapRef} style={{ width: "100%", overflow: "hidden", padding: "0 6px" }}>
         <div style={{ width: 559 * scale, height: 792 * scale, margin: "0 auto", position: "relative" }}>
         <div
           ref={cardRef}
@@ -125,14 +126,14 @@ function DonorMomento({ donor }: { donor: Donor }) {
             top: 0,
             left: 0,
 
-            backgroundColor: "#fffaf0",
+            overflow: "hidden",
+            backgroundColor: "#fff8e3",
             backgroundImage:
-              "radial-gradient(circle at 15% 10%, rgba(251,191,36,0.35) 0%, transparent 45%), radial-gradient(circle at 85% 90%, rgba(180,83,9,0.25) 0%, transparent 50%), linear-gradient(135deg, #fffaf0 0%, #fef3c7 55%, #fde68a 100%)",
-            border: "8px solid #7c2d12",
-            outline: "2px solid #d97706",
-            outlineOffset: "-14px",
-            padding: "18mm 14mm",
-            color: "#3f1d0a",
+              "radial-gradient(circle at 50% 7%, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.2) 28%, transparent 42%), linear-gradient(180deg, #fffdf4 0%, #fff4c8 46%, #ffe6a1 100%)",
+            border: "7px solid #8b1e1e",
+            boxShadow: "inset 0 0 0 3px #d6a540, inset 0 0 0 10px #fff7d6, inset 0 0 0 12px #b78322",
+            padding: "17mm 13mm 15mm",
+            color: "#2b1207",
             fontFamily:
               '"Noto Sans Telugu", "Playfair Display", system-ui, sans-serif',
             display: "flex",
@@ -142,7 +143,8 @@ function DonorMomento({ donor }: { donor: Donor }) {
           }}
         >
           {/* gold inner frame */}
-          <div style={{ position: "absolute", inset: 20, border: "1px solid #b45309", pointerEvents: "none" }} />
+          <div style={{ position: "absolute", inset: 24, border: "2px solid #b78322", pointerEvents: "none" }} />
+          <div style={{ position: "absolute", inset: 34, border: "1px solid rgba(139,30,30,0.55)", pointerEvents: "none" }} />
           {/* corner medallions */}
           {[
             { top: 10, left: 10 },
@@ -154,10 +156,10 @@ function DonorMomento({ donor }: { donor: Donor }) {
               key={i}
               style={{
                 position: "absolute",
-                width: 22,
-                height: 22,
-                border: "2px solid #b45309",
-                background: "#fff7ed",
+                width: 24,
+                height: 24,
+                border: "2px solid #8b1e1e",
+                background: "#fffdf4",
                 transform: "rotate(45deg)",
                 ...pos,
               }}
@@ -165,37 +167,37 @@ function DonorMomento({ donor }: { donor: Donor }) {
           ))}
 
           {org?.logo_url && (
-            <img src={org.logo_url} alt="" style={{ width: 64, height: 64, objectFit: "contain", marginBottom: 6 }} />
+            <img src={org.logo_url} alt="" style={{ width: 60, height: 60, objectFit: "contain", marginBottom: 6 }} />
           )}
-          <div style={{ fontSize: 22, fontWeight: 900, color: "#4a0e0e", letterSpacing: 0.5, textShadow: "0 1px 0 rgba(255,255,255,0.6)" }}>
+          <div style={{ fontSize: 21, fontWeight: 900, color: "#7a1616", textShadow: "0 1px 0 #ffffff", maxWidth: "100%", lineHeight: 1.25 }}>
             {org?.name || "—"}
           </div>
           {org?.slogan && (
-            <div style={{ fontSize: 12, color: "#7c2d12", marginTop: 2, fontStyle: "italic" }}>{org.slogan}</div>
+            <div style={{ fontSize: 12, color: "#5a220d", marginTop: 2, fontWeight: 700 }}>{org.slogan}</div>
           )}
 
           <div
             style={{
-              marginTop: 14,
+              marginTop: 12,
               fontFamily: '"Playfair Display", serif',
-              fontSize: 38,
+              fontSize: 37,
               fontWeight: 900,
-              color: "#7c2d12",
+              color: "#8b1e1e",
               letterSpacing: 6,
               textTransform: "uppercase",
-              textShadow: "0 2px 4px rgba(180,83,9,0.25)",
+              textShadow: "0 1px 0 #ffffff, 0 2px 0 rgba(183,131,34,0.25)",
             }}
           >
             Certificate
           </div>
-          <div style={{ fontSize: 13, color: "#4a0e0e", letterSpacing: 4, marginTop: 0, fontWeight: 700 }}>
+          <div style={{ fontSize: 13, color: "#2b1207", letterSpacing: 4, marginTop: 0, fontWeight: 900 }}>
             of Appreciation
           </div>
-          <div style={{ fontSize: 15, color: "#7c2d12", marginTop: 4, fontWeight: 700 }}>
+          <div style={{ fontSize: 15, color: "#7a1616", marginTop: 4, fontWeight: 900 }}>
             కృతజ్ఞతా పత్రం
           </div>
 
-          <div style={{ marginTop: 14, fontSize: 13, color: "#3f1d0a", fontWeight: 500 }}>
+          <div style={{ marginTop: 12, fontSize: 13, color: "#2b1207", fontWeight: 800 }}>
             This certificate is proudly presented to
           </div>
 
@@ -206,8 +208,8 @@ function DonorMomento({ donor }: { donor: Donor }) {
                 height: 100,
                 borderRadius: "50%",
                 overflow: "hidden",
-                border: "4px solid #b45309",
-                boxShadow: "0 0 0 3px #fff7ed, 0 4px 12px rgba(124,45,18,0.3)",
+                border: "4px solid #8b1e1e",
+                boxShadow: "0 0 0 4px #fffdf4, 0 0 0 7px #d6a540, 0 5px 14px rgba(43,18,7,0.28)",
                 background: "#fff",
                 display: "flex",
                 alignItems: "center",
@@ -225,24 +227,26 @@ function DonorMomento({ donor }: { donor: Donor }) {
 
           <div
             style={{
-              marginTop: 10,
+              marginTop: 12,
               fontFamily: '"Dancing Script", cursive',
-              fontSize: 44,
+              fontSize: fullName.length > 24 ? 36 : 43,
               fontWeight: 700,
-              color: "#4a0e0e",
+              color: "#5f1111",
               lineHeight: 1.1,
-              textShadow: "0 1px 0 rgba(255,255,255,0.6)",
+              textShadow: "0 1px 0 #ffffff, 0 2px 0 rgba(183,131,34,0.3)",
+              maxWidth: "100%",
+              overflowWrap: "anywhere",
             }}
           >
             {fullName}
           </div>
-          <div style={{ borderBottom: "2px solid #b45309", width: "70%", margin: "4px auto 0" }} />
+          <div style={{ borderBottom: "3px solid #b78322", width: "72%", margin: "5px auto 0" }} />
 
-          <div style={{ marginTop: 14, fontSize: 13, lineHeight: 1.7, color: "#3f1d0a", padding: "0 8mm", fontWeight: 500 }}>
+          <div style={{ marginTop: 13, fontSize: 13, lineHeight: 1.65, color: "#2b1207", padding: "0 7mm", fontWeight: 800 }}>
             గౌరవప్రదమైన విరాళంతో సంఘ సేవలో పాలుపంచుకున్నందుకు
             హృదయపూర్వక కృతజ్ఞతలు తెలియజేస్తున్నాము.
             <br />
-            <span style={{ fontStyle: "italic", color: "#7c2d12", fontSize: 12 }}>
+            <span style={{ color: "#5a220d", fontSize: 12, fontWeight: 700 }}>
               In grateful recognition of your generous contribution
               towards our society's mission.
             </span>
@@ -251,13 +255,13 @@ function DonorMomento({ donor }: { donor: Donor }) {
           <div
             style={{
               marginTop: 14,
-              background: "linear-gradient(135deg, #fff7ed 0%, #fde68a 100%)",
-              border: "2px solid #b45309",
+              background: "linear-gradient(135deg, #fffdf4 0%, #ffe082 100%)",
+              border: "2px solid #8b1e1e",
               borderRadius: 10,
               padding: "10px 28px",
               fontSize: 24,
               fontWeight: 900,
-              color: "#4a0e0e",
+              color: "#0f766e",
               boxShadow: "0 4px 10px rgba(124,45,18,0.2)",
               letterSpacing: 0.5,
             }}
@@ -275,16 +279,16 @@ function DonorMomento({ donor }: { donor: Donor }) {
               alignItems: "flex-end",
               marginTop: 20,
               fontSize: 11,
-              color: "#3f1d0a",
+              color: "#2b1207",
               fontWeight: 600,
             }}
           >
             <div style={{ textAlign: "left" }}>
-              <div style={{ borderTop: "1.5px solid #7c2d12", paddingTop: 3, minWidth: 90, color: "#7c2d12", fontWeight: 700 }}>Date</div>
+              <div style={{ borderTop: "2px solid #8b1e1e", paddingTop: 3, minWidth: 90, color: "#7a1616", fontWeight: 900 }}>Date</div>
               <div>{dateStr}</div>
             </div>
             <div style={{ textAlign: "right" }}>
-              <div style={{ borderTop: "1.5px solid #7c2d12", paddingTop: 3, minWidth: 120, color: "#7c2d12", fontWeight: 700 }}>అధ్యక్షుడు</div>
+              <div style={{ borderTop: "2px solid #8b1e1e", paddingTop: 3, minWidth: 120, color: "#7a1616", fontWeight: 900 }}>అధ్యక్షుడు</div>
               <div>{org?.president_name || "—"}</div>
             </div>
           </div>
