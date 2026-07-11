@@ -38,25 +38,13 @@ function AuthPage() {
       navigate({ to: "/org/dashboard" });
       return;
     }
-    let { data: member } = await supabase.from("members").select("id").eq("user_id", userId).maybeSingle();
-    if (!member) {
-      // Auto-claim a row admin created with our email but no user_id yet.
-      const { data: u } = await supabase.auth.getUser();
-      const email = (u.user?.email || "").trim().toLowerCase();
-      if (email) {
-        const { data: claimed } = await supabase
-          .from("members")
-          .update({ user_id: userId })
-          .is("user_id", null)
-          .ilike("email", email)
-          .select("id")
-          .maybeSingle();
-        if (claimed) member = claimed as any;
-      }
-    }
-    if (member) navigate({ to: "/member/pending" });
+    // getMyMembership auto-claims any row created by admin with matching email + null user_id.
+    const { getMyMembership } = await import("@/lib/org.functions");
+    const res = await getMyMembership().catch(() => ({ membership: null as any }));
+    if (res?.membership) navigate({ to: "/member/pending" });
     else navigate({ to: "/org/register" });
   }
+
 
 
   useEffect(() => {
