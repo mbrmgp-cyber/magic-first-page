@@ -327,7 +327,8 @@ function AddDonorDialog({ onAdded }: { onAdded: () => void }) {
         if (upErr) toast.error("ఫోటో అప్‌లోడ్ విఫలమైంది: " + upErr.message);
         else await upd({ data: { donor_id: r.id, photo_url: path } });
       }
-      toast.success("డోనర్ చేర్చబడ్డారు");
+      toast.success(r?.linkSent ? "డోనర్ చేర్చబడ్డారు · లాగిన్ లింక్ ఈమెయిల్‌కు పంపబడింది" : "డోనర్ చేర్చబడ్డారు");
+      if (r?.linkError) toast.error("లాగిన్ లింక్ పంపడంలో సమస్య: " + r.linkError);
       setOpen(false);
       setF(initial);
       setPhotoFile(null); setPhotoPreview(null);
