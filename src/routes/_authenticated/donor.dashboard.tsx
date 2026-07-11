@@ -2,12 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { getMyDonor } from "@/lib/donors.functions";
+import { getMyDonor, getDonorAuctionView } from "@/lib/donors.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { useI18n, localizeText } from "@/lib/i18n";
-import { HandHeart, User, IndianRupee, Award, Coins, Clock, LogOut, ArrowLeft } from "lucide-react";
+import { HandHeart, User, IndianRupee, Award, Coins, Clock, LogOut, ArrowLeft, Eye, Trophy } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/donor/dashboard")({
@@ -23,6 +23,8 @@ function DonorDashboard() {
   const [donor, setDonor] = useState<any>(null);
   const [donations, setDonations] = useState<any[]>([]);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [auctionView, setAuctionView] = useState<any>(null);
+  const loadAuction = useServerFn(getDonorAuctionView);
 
   async function refresh() {
     setLoading(true);
@@ -34,6 +36,11 @@ function DonorDashboard() {
     finally { setLoading(false); }
   }
   useEffect(() => { refresh(); }, []);
+
+  useEffect(() => {
+    if (donor?.status !== "approved" || donor?.linked_member?.id) return;
+    loadAuction().then((r: any) => setAuctionView(r)).catch(() => {});
+  }, [donor?.status, donor?.linked_member?.id]);
 
   useEffect(() => {
     if (!donor?.photo_url) return;
@@ -130,6 +137,67 @@ function DonorDashboard() {
                     <Coins className="w-4 h-4 mr-1" /> {lt("Open", "తెరవండి")}
                   </Button>
                 </Link>
+              </Card>
+            )}
+
+            {!donor.linked_member?.id && auctionView?.session && (
+              <Card className="p-4 bg-black/40 border-white/10 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold inline-flex items-center gap-2">
+                    <Coins className="w-4 h-4 text-blue-400" />
+                    {lt("Live Chit Progress", "లైవ్ చిట్టీ ప్రోగ్రెస్")}
+                  </h3>
+                  <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white/70 border border-white/15">
+                    <Eye className="w-3 h-3" /> {lt("View only", "వీక్షణ మాత్రమే")}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="rounded bg-white/5 p-2">
+                    <div className="text-white/50">{lt("Group", "గ్రూప్")}</div>
+                    <div className="font-semibold">{auctionView.groupName ?? "-"}</div>
+                  </div>
+                  <div className="rounded bg-white/5 p-2">
+                    <div className="text-white/50">{lt("Chit value", "చిట్టీ విలువ")}</div>
+                    <div className="font-semibold">₹{Number(auctionView.session.chit_value ?? 0).toLocaleString("en-IN")}</div>
+                  </div>
+                  <div className="rounded bg-white/5 p-2">
+                    <div className="text-white/50">{lt("Month", "నెల")}</div>
+                    <div className="font-semibold">{auctionView.session.current_month ?? 1} / {auctionView.session.total_months ?? "-"}</div>
+                  </div>
+                  <div className="rounded bg-white/5 p-2">
+                    <div className="text-white/50">{lt("Members", "సభ్యులు")}</div>
+                    <div className="font-semibold">{auctionView.session.total_members ?? "-"}</div>
+                  </div>
+                </div>
+                {auctionView.session.winner_member_name && !auctionView.session.auction_closed && (
+                  <div className="rounded bg-emerald-500/10 border border-emerald-500/30 p-2 text-xs">
+                    <div className="inline-flex items-center gap-1 text-emerald-300 font-semibold">
+                      <Trophy className="w-3 h-3" /> {lt("Current winner", "ప్రస్తుత విజేత")}
+                    </div>
+                    <div className="text-white/80 mt-1">
+                      {auctionView.session.winner_member_name}
+                      {auctionView.session.winner_member_code ? ` (${auctionView.session.winner_member_code})` : ""}
+                      {auctionView.session.winner_amount ? ` — ₹${Number(auctionView.session.winner_amount).toLocaleString("en-IN")}` : ""}
+                    </div>
+                  </div>
+                )}
+                {Array.isArray(auctionView.session.past_winners) && auctionView.session.past_winners.length > 0 && (
+                  <div>
+                    <div className="text-[11px] text-white/50 mb-1">{lt("Past winners", "గత విజేతలు")}</div>
+                    <div className="space-y-1 max-h-40 overflow-auto">
+                      {auctionView.session.past_winners.slice().reverse().map((w: any, i: number) => (
+                        <div key={i} className="flex justify-between text-xs border-b border-white/5 last:border-0 pb-1">
+                          <span className="text-white/70">M{w.month}: {w.memberName ?? w.member_name ?? "-"}</span>
+                          <span className="text-white/60">₹{Number(w.net ?? w.amount ?? 0).toLocaleString("en-IN")}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <p className="text-[10px] text-white/40">
+                  {lt("You are viewing live chit progress as a donor. Bidding is limited to enrolled members.",
+                      "మీరు డోనర్‌గా లైవ్ చిట్టీని వీక్షిస్తున్నారు. బిడ్డింగ్ నమోదైన సభ్యులకు మాత్రమే.")}
+                </p>
               </Card>
             )}
 
