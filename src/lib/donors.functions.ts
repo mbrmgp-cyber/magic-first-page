@@ -122,8 +122,16 @@ export const adminAddDonor = createServerFn({ method: "POST" })
       status: data.status ?? "approved",
     }).select().single();
     if (error) throw new Error(error.message);
-    return { id: row.id, orgId };
+    let linkSent = false;
+    let linkError: string | null = null;
+    if ((data.status ?? "approved") === "approved" && data.email?.trim()) {
+      const r = await ensureDonorAuthAndSendLink(row.id, data.email);
+      linkSent = r.ok;
+      linkError = r.ok ? null : (r as any).error ?? null;
+    }
+    return { id: row.id, orgId, linkSent, linkError };
   });
+
 
 export const updateDonor = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
