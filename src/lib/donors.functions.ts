@@ -401,3 +401,37 @@ export const getDonorAuctionView = createServerFn({ method: "GET" })
     return { session: active, orgId: donor.org_id, groupName: active?.live_group_name || active?.group_name || null };
   });
 
+export const getDonorActivities = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId, claims } = context;
+    const email = (claims as any)?.email?.toLowerCase?.() ?? null;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    let donor: any = null;
+    const { data: byUser } = await supabase.from("donors").select("id, org_id, status").eq("user_id", userId).maybeSingle();
+    donor = byUser;
+    if (!donor && email) {
+      const { data: byEmail } = await supabaseAdmin.from("donors").select("id, org_id, status").eq("email", email).maybeSingle();
+      donor = byEmail;
+    }
+    if (!donor || donor.status !== "approved" || !donor.org_id) {
+      return { activities: [], milestones: [] };
+    }
+
+    const { data: activities } = await supabaseAdmin
+      .from("org_activities")
+      .select("id, event_name, event_date, description, status, allocated_budget, actual_expense")
+      .eq("org_id", donor.org_id)
+      .order("event_date", { ascending: false })
+      .limit(50);
+    const { data: milestones } = await supabaseAdmin
+      .from("org_milestones")
+      .select("id, title, description, milestone_date, photo_url")
+      .eq("org_id", donor.org_id)
+      .order("milestone_date", { ascending: false })
+      .limit(20);
+    return { activities: activities ?? [], milestones: milestones ?? [] };
+  });
+
+
