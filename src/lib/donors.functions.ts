@@ -166,6 +166,20 @@ export const reviewDonor = createServerFn({ method: "POST" })
         if (userId) {
           await supabaseAdmin.from("donors").update({ user_id: userId }).eq("id", donor.id);
         }
+        // Send magic link to donor email so they can login without a password
+        try {
+          const { createClient } = await import("@supabase/supabase-js");
+          const pub = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+            auth: { persistSession: false, autoRefreshToken: false, storage: undefined as any },
+          });
+          const origin = process.env.PUBLIC_APP_URL || "https://mbrplatform.com";
+          await pub.auth.signInWithOtp({
+            email,
+            options: { emailRedirectTo: `${origin}/donor/dashboard`, shouldCreateUser: false },
+          });
+        } catch (e) {
+          console.error("[reviewDonor] magic link send failed", e);
+        }
       } catch (e) {
         // Don't fail approval if auth user creation fails; admin can retry
         console.error("[reviewDonor] auth link failed", e);
