@@ -125,177 +125,168 @@ function DonorMomento({ donor }: { donor: Donor }) {
             position: "absolute",
             top: 22 * scale,
             left: 22 * scale,
-
             overflow: "hidden",
-            backgroundColor: "#fff8e3",
-            backgroundImage:
-              "radial-gradient(circle at 50% 7%, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.2) 28%, transparent 42%), linear-gradient(180deg, #fffdf4 0%, #fff4c8 46%, #ffe6a1 100%)",
-            border: "7px solid #8b1e1e",
-            boxShadow: "inset 0 0 0 3px #d6a540, inset 0 0 0 10px #fff7d6, inset 0 0 0 12px #b78322",
-            padding: "17mm 13mm 15mm",
+            background: "#000000",
+            padding: "10mm 8mm",
             color: "#2b1207",
-            fontFamily:
-              '"Noto Sans Telugu", "Playfair Display", system-ui, sans-serif',
+            fontFamily: '"Noto Sans Telugu", "Playfair Display", Georgia, serif',
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             textAlign: "center",
           }}
+
         >
-          {/* gold inner frame */}
-          <div style={{ position: "absolute", inset: 24, border: "2px solid #b78322", pointerEvents: "none" }} />
-          <div style={{ position: "absolute", inset: 34, border: "1px solid rgba(139,30,30,0.55)", pointerEvents: "none" }} />
-          {/* corner medallions */}
-          {[
-            { top: 10, left: 10 },
-            { top: 10, right: 10 },
-            { bottom: 10, left: 10 },
-            { bottom: 10, right: 10 },
-          ].map((pos, i) => (
-            <div
-              key={i}
-              style={{
-                position: "absolute",
-                width: 24,
-                height: 24,
-                border: "2px solid #8b1e1e",
-                background: "#fffdf4",
-                transform: "rotate(45deg)",
-                ...pos,
-              }}
-            />
-          ))}
+          {/* Scroll top roll */}
+          <div style={{
+            position: "absolute", top: 14, left: 18, right: 18, height: 34,
+            background: "linear-gradient(180deg,#e8c98a 0%,#d0a45a 45%,#a97a3c 100%)",
+            borderRadius: "50%/60%",
+            boxShadow: "inset 0 -6px 10px rgba(0,0,0,0.25), inset 0 4px 6px rgba(255,255,255,0.55), 0 3px 6px rgba(0,0,0,0.35)",
+          }} />
+          {/* Scroll bottom roll */}
+          <div style={{
+            position: "absolute", bottom: 14, left: 18, right: 18, height: 34,
+            background: "linear-gradient(180deg,#e8c98a 0%,#d0a45a 45%,#a97a3c 100%)",
+            borderRadius: "50%/60%",
+            boxShadow: "inset 0 -6px 10px rgba(0,0,0,0.25), inset 0 4px 6px rgba(255,255,255,0.55), 0 3px 6px rgba(0,0,0,0.35)",
+          }} />
 
-          {org?.logo_url && (
-            <img src={org.logo_url} alt="" style={{ width: 60, height: 60, objectFit: "contain", marginBottom: 6 }} />
-          )}
-          <div style={{ fontSize: 21, fontWeight: 900, color: "#7a1616", textShadow: "0 1px 0 #ffffff", maxWidth: "100%", lineHeight: 1.25 }}>
-            {org?.name || "—"}
-          </div>
-          {org?.slogan && (
-            <div style={{ fontSize: 12, color: "#5a220d", marginTop: 2, fontWeight: 700 }}>{org.slogan}</div>
-          )}
+          {/* Parchment body */}
+          <div style={{
+            position: "absolute",
+            top: 40, bottom: 40, left: 24, right: 24,
+            background: "radial-gradient(circle at 50% 30%, #fbe6b8 0%, #f3d59a 55%, #d9b072 100%)",
+            boxShadow: "inset 0 0 40px rgba(120,70,20,0.35), 0 6px 14px rgba(0,0,0,0.4)",
+          }} />
 
-          <div
-            style={{
-              marginTop: 12,
-              fontFamily: '"Playfair Display", serif',
-              fontSize: 37,
-              fontWeight: 900,
-              color: "#8b1e1e",
-              letterSpacing: 6,
-              textTransform: "uppercase",
-              textShadow: "0 1px 0 #ffffff, 0 2px 0 rgba(183,131,34,0.25)",
-            }}
-          >
-            Certificate
-          </div>
-          <div style={{ fontSize: 13, color: "#2b1207", letterSpacing: 4, marginTop: 0, fontWeight: 900 }}>
-            of Appreciation
-          </div>
-          <div style={{ fontSize: 15, color: "#7a1616", marginTop: 4, fontWeight: 900 }}>
-            కృతజ్ఞతా పత్రం
-          </div>
+          {/* Ornate green border frame */}
+          <div style={{
+            position: "absolute",
+            top: 62, bottom: 62, left: 44, right: 44,
+            border: "10px solid transparent",
+            borderImage: "repeating-linear-gradient(45deg,#3d5a1e 0 6px,#6b8a3a 6px 12px,#8fa84a 12px 18px) 10",
+            background: "linear-gradient(180deg,#fff4d6 0%,#fbe4a8 100%)",
+            boxShadow: "inset 0 0 0 2px #c48f3a, inset 0 0 0 4px #fff2c8, inset 0 0 0 6px #b07322",
+          }} />
 
-          <div style={{ marginTop: 12, fontSize: 13, color: "#2b1207", fontWeight: 800 }}>
-            This certificate is proudly presented to
-          </div>
+          {/* Content area */}
+          <div style={{
+            position: "absolute", top: 78, bottom: 78, left: 60, right: 60,
+            display: "flex", flexDirection: "column", alignItems: "center", padding: "10px 8px",
+          }}>
+            {/* Gold stars */}
+            <div style={{ display: "flex", justifyContent: "space-between", width: "88%", marginTop: 2 }}>
+              {[0, 1, 2].map((i) => (
+                <div key={i} style={{
+                  fontSize: i === 1 ? 34 : 28,
+                  color: "#e8b530",
+                  textShadow: "0 2px 3px rgba(120,70,10,0.55), 0 0 6px rgba(255,220,120,0.6)",
+                  transform: i === 1 ? "translateY(-4px)" : "none",
+                  lineHeight: 1,
+                }}>★</div>
+              ))}
+            </div>
 
-          <div style={{ marginTop: 12 }}>
-            <div
-              style={{
-                width: 100,
-                height: 100,
-                borderRadius: "50%",
-                overflow: "hidden",
-                border: "4px solid #8b1e1e",
-                boxShadow: "0 0 0 4px #fffdf4, 0 0 0 7px #d6a540, 0 5px 14px rgba(43,18,7,0.28)",
-                background: "#fff",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                margin: "0 auto",
-              }}
-            >
+            {/* Photo in decorative cartouche */}
+            <div style={{
+              marginTop: 4,
+              width: 130, height: 130,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              background: "#fff",
+              border: "4px solid #a4732a",
+              boxShadow: "0 0 0 2px #fbe6b8, 0 4px 10px rgba(80,40,10,0.4)",
+              borderRadius: "48% 48% 42% 42% / 55% 55% 40% 40%",
+              overflow: "hidden",
+            }}>
               {photoUrl ? (
                 <img src={photoUrl} alt={fullName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               ) : (
-                <User style={{ width: 44, height: 44, color: "#b45309" }} />
+                <User style={{ width: 56, height: 56, color: "#a4732a" }} />
               )}
             </div>
-          </div>
 
-          <div
-            style={{
+            {/* Title */}
+            <div style={{
               marginTop: 12,
-              fontFamily: '"Dancing Script", cursive',
-              fontSize: fullName.length > 24 ? 36 : 43,
-              fontWeight: 700,
-              color: "#5f1111",
-              lineHeight: 1.1,
-              textShadow: "0 1px 0 #ffffff, 0 2px 0 rgba(183,131,34,0.3)",
+              fontSize: 20,
+              fontWeight: 900,
+              color: "#c81919",
+              letterSpacing: 1.5,
+              fontFamily: '"Playfair Display", Georgia, serif',
+              textShadow: "0 1px 0 #fff6d8",
+            }}>
+              THE BEST SUPPORTER
+            </div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: "#7a1616", marginTop: 2 }}>
+              ఉత్తమ సభ్యుడు
+            </div>
+
+            {/* Body text */}
+            <div style={{ marginTop: 10, fontSize: 14, color: "#2b1207", fontWeight: 700, lineHeight: 1.55 }}>
+              Award presented to
+            </div>
+            <div style={{
+              marginTop: 4,
+              fontSize: fullName.length > 22 ? 20 : 24,
+              fontWeight: 900,
+              color: "#c81919",
+              fontFamily: '"Playfair Display", Georgia, serif',
+              lineHeight: 1.15,
               maxWidth: "100%",
               overflowWrap: "anywhere",
-            }}
-          >
-            {fullName}
-          </div>
-          <div style={{ borderBottom: "3px solid #b78322", width: "72%", margin: "5px auto 0" }} />
-
-          <div style={{ marginTop: 13, fontSize: 13, lineHeight: 1.65, color: "#2b1207", padding: "0 7mm", fontWeight: 800 }}>
-            గౌరవప్రదమైన విరాళంతో సంఘ సేవలో పాలుపంచుకున్నందుకు
-            హృదయపూర్వక కృతజ్ఞతలు తెలియజేస్తున్నాము.
-            <br />
-            <span style={{ color: "#5a220d", fontSize: 12, fontWeight: 700 }}>
-              In grateful recognition of your generous contribution
-              towards our society's mission.
-            </span>
-          </div>
-
-          <div
-            style={{
-              marginTop: 14,
-              background: "linear-gradient(135deg, #fffdf4 0%, #ffe082 100%)",
-              border: "2px solid #8b1e1e",
-              borderRadius: 10,
-              padding: "10px 28px",
-              fontSize: 24,
-              fontWeight: 900,
-              color: "#0f766e",
-              boxShadow: "0 4px 10px rgba(124,45,18,0.2)",
-              letterSpacing: 0.5,
-            }}
-          >
-            ₹ {amount.toLocaleString("en-IN")}
-          </div>
-
-          <div style={{ flex: 1 }} />
-
-          <div
-            style={{
-              width: "100%",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-end",
-              marginTop: 20,
-              fontSize: 11,
-              color: "#2b1207",
-              fontWeight: 600,
-            }}
-          >
-            <div style={{ textAlign: "left" }}>
-              <div style={{ borderTop: "2px solid #8b1e1e", paddingTop: 3, minWidth: 90, color: "#7a1616", fontWeight: 900 }}>Date</div>
-              <div>{dateStr}</div>
+            }}>
+              {fullName}
             </div>
-            <div style={{ textAlign: "right" }}>
-              <div style={{ borderTop: "2px solid #8b1e1e", paddingTop: 3, minWidth: 120, color: "#7a1616", fontWeight: 900 }}>అధ్యక్షుడు</div>
-              <div>{org?.president_name || "—"}</div>
+            <div style={{ marginTop: 6, fontSize: 12.5, color: "#2b1207", fontWeight: 700, lineHeight: 1.55, padding: "0 4mm" }}>
+              On {issuedDate.getFullYear()} towards his/her grateful
+              <br />support and exemplary service
+              <br />Towards
+            </div>
+
+            {org?.logo_url && (
+              <img src={org.logo_url} alt="" style={{ width: 54, height: 54, objectFit: "contain", marginTop: 8 }} />
+            )}
+
+            <div style={{ marginTop: 4, fontSize: 15, fontWeight: 900, color: "#1a3d5c", fontFamily: '"Playfair Display", Georgia, serif' }}>
+              {org?.name || "—"}
+            </div>
+            {org?.slogan && (
+              <div style={{ fontSize: 11, color: "#5a220d", marginTop: 2, fontWeight: 700 }}>{org.slogan}</div>
+            )}
+
+            {amount > 0 && (
+              <div style={{
+                marginTop: 8,
+                background: "linear-gradient(135deg,#fff6d8 0%,#f0c96b 100%)",
+                border: "1.5px solid #a4732a",
+                borderRadius: 6,
+                padding: "3px 14px",
+                fontSize: 14,
+                fontWeight: 900,
+                color: "#7a1616",
+              }}>
+                ₹ {amount.toLocaleString("en-IN")}
+              </div>
+            )}
+
+            <div style={{ flex: 1 }} />
+
+            {/* Ornament divider */}
+            <div style={{ fontSize: 20, color: "#5a4020", letterSpacing: 4, marginTop: 4 }}>
+              ❦ ✦ ❦
+            </div>
+            <div style={{
+              display: "flex", justifyContent: "space-between", width: "100%",
+              marginTop: 4, fontSize: 10, color: "#2b1207", fontWeight: 700,
+            }}>
+              <div>{dateStr}</div>
+              <div>{org?.president_name || "అధ్యక్షుడు"}</div>
             </div>
           </div>
         </div>
         </div>
       </div>
-
 
       <div className="flex justify-end">
         <Button onClick={handlePrint} className="bg-amber-600 hover:bg-amber-700">
@@ -305,3 +296,4 @@ function DonorMomento({ donor }: { donor: Donor }) {
     </div>
   );
 }
+
