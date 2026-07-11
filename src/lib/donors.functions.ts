@@ -427,9 +427,9 @@ export const getDonorActivities = createServerFn({ method: "GET" })
       .limit(50);
     const { data: milestones } = await supabaseAdmin
       .from("org_milestones")
-      .select("id, title, description, milestone_date, photo_url")
+      .select("id, title, description, event_date, photo_url")
       .eq("org_id", donor.org_id)
-      .order("milestone_date", { ascending: false })
+      .order("event_date", { ascending: false })
       .limit(20);
     return { activities: activities ?? [], milestones: milestones ?? [] };
   });
