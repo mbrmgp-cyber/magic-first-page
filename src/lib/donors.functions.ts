@@ -130,9 +130,46 @@ export const reviewDonor = createServerFn({ method: "POST" })
     if (data.action === "reject") {
       const { error } = await supabase.from("donors").delete().eq("id", data.donor_id);
       if (error) throw new Error(error.message);
-    } else {
-      const { error } = await supabase.from("donors").update({ status: "approved" }).eq("id", data.donor_id);
-      if (error) throw new Error(error.message);
+      return { ok: true };
+    }
+    // Approve: mark approved and best-effort create auth user + link
+    const { data: donor, error: upErr } = await supabase
+      .from("donors")
+      .update({ status: "approved" })
+      .eq("id", data.donor_id)
+      .select("id, email, user_id")
+      .maybeSingle();
+    if (upErr) throw new Error(upErr.message);
+
+    if (donor?.email && !donor.user_id) {
+      try {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const email = donor.email.trim().toLowerCase();
+        // Try to find existing auth user
+        let userId: string | null = null;
+        for (let page = 1; page <= 20; page += 1) {
+          const { data: list, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 1000 });
+          if (error) break;
+          const u = list.users.find((x: any) => x.email?.toLowerCase() === email);
+          if (u) { userId = u.id; break; }
+          if (list.users.length < 1000) break;
+        }
+        if (!userId) {
+          const { data: created } = await supabaseAdmin.auth.admin.createUser({
+            email,
+            password: `MBR-${crypto.randomUUID()}`,
+            email_confirm: true,
+            user_metadata: { role: "donor" },
+          });
+          userId = created?.user?.id ?? null;
+        }
+        if (userId) {
+          await supabaseAdmin.from("donors").update({ user_id: userId }).eq("id", donor.id);
+        }
+      } catch (e) {
+        // Don't fail approval if auth user creation fails; admin can retry
+        console.error("[reviewDonor] auth link failed", e);
+      }
     }
     return { ok: true };
   });
