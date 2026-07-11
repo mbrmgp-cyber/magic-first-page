@@ -16,6 +16,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as OrgRegisterRouteImport } from './routes/org.register'
 import { Route as MemberRegisterRouteImport } from './routes/member.register'
+import { Route as DonorRegisterRouteImport } from './routes/donor.register'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedOrgThemeRouteImport } from './routes/_authenticated/org.theme'
 import { Route as AuthenticatedOrgRulesRouteImport } from './routes/_authenticated/org.rules'
@@ -77,6 +78,11 @@ const OrgRegisterRoute = OrgRegisterRouteImport.update({
 const MemberRegisterRoute = MemberRegisterRouteImport.update({
   id: '/member/register',
   path: '/member/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DonorRegisterRoute = DonorRegisterRouteImport.update({
+  id: '/donor/register',
+  path: '/donor/register',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
@@ -243,6 +249,7 @@ export interface FileRoutesByFullPath {
   '/new-organization': typeof NewOrganizationRoute
   '/register': typeof RegisterRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/donor/register': typeof DonorRegisterRoute
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
   '/member/dashboard': typeof AuthenticatedMemberDashboardRoute
@@ -279,6 +286,7 @@ export interface FileRoutesByTo {
   '/new-organization': typeof NewOrganizationRoute
   '/register': typeof RegisterRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/donor/register': typeof DonorRegisterRoute
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
   '/member/dashboard': typeof AuthenticatedMemberDashboardRoute
@@ -317,6 +325,7 @@ export interface FileRoutesById {
   '/new-organization': typeof NewOrganizationRoute
   '/register': typeof RegisterRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/donor/register': typeof DonorRegisterRoute
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
   '/_authenticated/member/dashboard': typeof AuthenticatedMemberDashboardRoute
@@ -355,6 +364,7 @@ export interface FileRouteTypes {
     | '/new-organization'
     | '/register'
     | '/admin'
+    | '/donor/register'
     | '/member/register'
     | '/org/register'
     | '/member/dashboard'
@@ -391,6 +401,7 @@ export interface FileRouteTypes {
     | '/new-organization'
     | '/register'
     | '/admin'
+    | '/donor/register'
     | '/member/register'
     | '/org/register'
     | '/member/dashboard'
@@ -428,6 +439,7 @@ export interface FileRouteTypes {
     | '/new-organization'
     | '/register'
     | '/_authenticated/admin'
+    | '/donor/register'
     | '/member/register'
     | '/org/register'
     | '/_authenticated/member/dashboard'
@@ -465,6 +477,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   NewOrganizationRoute: typeof NewOrganizationRoute
   RegisterRoute: typeof RegisterRoute
+  DonorRegisterRoute: typeof DonorRegisterRoute
   MemberRegisterRoute: typeof MemberRegisterRoute
   OrgRegisterRoute: typeof OrgRegisterRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -521,6 +534,13 @@ declare module '@tanstack/react-router' {
       path: '/member/register'
       fullPath: '/member/register'
       preLoaderRoute: typeof MemberRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/donor/register': {
+      id: '/donor/register'
+      path: '/donor/register'
+      fullPath: '/donor/register'
+      preLoaderRoute: typeof DonorRegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -787,6 +807,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   NewOrganizationRoute: NewOrganizationRoute,
   RegisterRoute: RegisterRoute,
+  DonorRegisterRoute: DonorRegisterRoute,
   MemberRegisterRoute: MemberRegisterRoute,
   OrgRegisterRoute: OrgRegisterRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
