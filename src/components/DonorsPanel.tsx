@@ -183,7 +183,10 @@ function DonorCard({ donor, threshold, onChange, recognitionMode }:
             <DonationsDialog donor={donor} onChanged={onChange} />
             <EditDonorDialog donor={donor} onSaved={onChange} />
             {recognitionMode && recognized && (
-              <MomentoToggle donor={donor} onChange={onChange} />
+              <>
+                <MomentoToggle donor={donor} onChange={onChange} />
+                <DonorMomentoButton donor={donor} />
+              </>
             )}
           </>
         )}
