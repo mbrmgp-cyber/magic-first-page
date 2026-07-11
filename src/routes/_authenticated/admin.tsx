@@ -503,8 +503,7 @@ function AllOrganizationsManager() {
                       </span>
                     )}
                   </div>
-                  <Input
-                    type="text"
+                  <DateInput
                     value={inputVal}
                     onChange={(e) => setExpiryEdits((p) => ({ ...p, [o.id]: e.target.value }))}
                     className="h-8 text-xs w-full sm:w-[150px]"
