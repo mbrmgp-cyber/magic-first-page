@@ -38,6 +38,11 @@ function DonorDashboard() {
   useEffect(() => { refresh(); }, []);
 
   useEffect(() => {
+    if (donor?.status !== "approved" || donor?.linked_member?.id) return;
+    loadAuction().then((r: any) => setAuctionView(r)).catch(() => {});
+  }, [donor?.status, donor?.linked_member?.id]);
+
+
     if (!donor?.photo_url) return;
     let cancelled = false;
     (async () => {
