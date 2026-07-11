@@ -205,7 +205,19 @@ export const orgUpdateMemberCode = createServerFn({ method: "POST" })
       _new_code: data.new_code,
     });
     if (error) throw new Error(error.message);
-    return { ok: true, member: row };
+    let emailSent = false;
+    let emailError: string | null = null;
+    try {
+      const email = ((row as any)?.email || "").trim().toLowerCase();
+      if (email && (row as any)?.status === "approved") {
+        const { sendMemberProfileUpdatedEmail } = await import("@/lib/org.functions");
+        await sendMemberProfileUpdatedEmail({ data: { email, name: (row as any)?.name ?? null } });
+        emailSent = true;
+      }
+    } catch (e) {
+      emailError = e instanceof Error ? e.message : String(e);
+    }
+    return { ok: true, member: row, emailSent, emailError };
   });
 
 

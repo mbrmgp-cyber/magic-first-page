@@ -227,7 +227,9 @@ function MomentoToggle({ donor, onChange }: { donor: Donor; onChange: () => void
   async function toggle() {
     setBusy(true);
     try {
-      await fn({ data: { donor_id: donor.id, momento_issued: !donor.momento_issued } });
+      const r: any = await fn({ data: { donor_id: donor.id, momento_issued: !donor.momento_issued, send_login_link: true } });
+      if (r?.linkSent) toast.success("డోనర్‌కు లాగిన్ లింక్ పంపబడింది");
+      if (r?.linkError) toast.error("లాగిన్ లింక్ పంపడంలో సమస్య: " + r.linkError);
       onChange();
     } catch (e: any) { toast.error(e.message); }
     finally { setBusy(false); }

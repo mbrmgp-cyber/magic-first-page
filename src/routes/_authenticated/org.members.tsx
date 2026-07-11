@@ -690,8 +690,9 @@ function MemberCodeEditor({ member, onSaved }: { member: Member; onSaved: () => 
     if (!v || v === member.member_code) { setEditing(false); return; }
     setSaving(true);
     try {
-      await update({ data: { member_id: member.id, new_code: v } });
-      toast.success("ఐడి అప్‌డేట్ అయింది & లాక్ చేయబడింది");
+      const r: any = await update({ data: { member_id: member.id, new_code: v } });
+      toast.success(r?.emailSent ? "ఐడి అప్‌డేట్ అయింది & లాగిన్ లింక్ పంపబడింది" : "ఐడి అప్‌డేట్ అయింది & లాక్ చేయబడింది");
+      if (r?.emailError) toast.error("లాగిన్ లింక్ పంపడంలో సమస్య: " + r.emailError);
       setEditing(false);
       onSaved();
     } catch (e: any) {
