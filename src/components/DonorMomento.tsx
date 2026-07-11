@@ -258,7 +258,9 @@ function DonorMomento({ donor }: { donor: Donor }) {
             </div>
           </div>
         </div>
+        </div>
       </div>
+
 
       <div className="flex justify-end">
         <Button onClick={handlePrint} className="bg-amber-600 hover:bg-amber-700">
