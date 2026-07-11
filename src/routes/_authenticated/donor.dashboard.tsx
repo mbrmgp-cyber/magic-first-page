@@ -212,6 +212,46 @@ function DonorDashboard() {
               </Card>
             )}
 
+            {(activities.length > 0 || milestones.length > 0) && (
+              <Card className="p-4 bg-black/40 border-white/10 space-y-3">
+                <h3 className="text-sm font-semibold inline-flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-purple-300" />
+                  {lt("Service activities", "సేవా కార్యక్రమాలు")}
+                </h3>
+                {activities.length > 0 && (
+                  <div className="space-y-2">
+                    {activities.map((a) => (
+                      <div key={a.id} className="rounded bg-white/5 p-2 text-xs">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="font-semibold text-white/90 truncate">{a.event_name}</div>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-white/70 shrink-0">{a.status}</span>
+                        </div>
+                        <div className="text-white/50 inline-flex items-center gap-1 mt-0.5">
+                          <Calendar className="w-3 h-3" />
+                          {new Date(a.event_date).toLocaleDateString("en-GB")}
+                        </div>
+                        {a.description && <div className="text-white/70 mt-1 line-clamp-2">{a.description}</div>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {milestones.length > 0 && (
+                  <div>
+                    <div className="text-[11px] text-white/50 mb-1">{lt("Milestones", "మైలురాళ్లు")}</div>
+                    <div className="space-y-1">
+                      {milestones.map((m) => (
+                        <div key={m.id} className="text-xs border-b border-white/5 last:border-0 pb-1">
+                          <div className="font-semibold text-white/90">{m.title}</div>
+                          <div className="text-white/50">{new Date(m.event_date).toLocaleDateString("en-GB")}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </Card>
+            )}
+
+
             <Card className="p-4 bg-black/40 border-white/10">
               <h3 className="text-sm font-semibold mb-3 inline-flex items-center gap-2">
                 <IndianRupee className="w-4 h-4 text-emerald-400" />
