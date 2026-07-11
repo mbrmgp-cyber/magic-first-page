@@ -25,6 +25,9 @@ function DonorDashboard() {
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [auctionView, setAuctionView] = useState<any>(null);
   const loadAuction = useServerFn(getDonorAuctionView);
+  const loadActivities = useServerFn(getDonorActivities);
+  const [activities, setActivities] = useState<any[]>([]);
+  const [milestones, setMilestones] = useState<any[]>([]);
 
   async function refresh() {
     setLoading(true);
@@ -41,6 +44,14 @@ function DonorDashboard() {
     if (donor?.status !== "approved" || donor?.linked_member?.id) return;
     loadAuction().then((r: any) => setAuctionView(r)).catch(() => {});
   }, [donor?.status, donor?.linked_member?.id]);
+
+  useEffect(() => {
+    if (donor?.status !== "approved") return;
+    loadActivities().then((r: any) => {
+      setActivities(r.activities ?? []);
+      setMilestones(r.milestones ?? []);
+    }).catch(() => {});
+  }, [donor?.status]);
 
   useEffect(() => {
     if (!donor?.photo_url) return;
