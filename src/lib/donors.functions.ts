@@ -166,6 +166,20 @@ export const reviewDonor = createServerFn({ method: "POST" })
         if (userId) {
           await supabaseAdmin.from("donors").update({ user_id: userId }).eq("id", donor.id);
         }
+        // Send magic link to donor email so they can login without a password
+        try {
+          const { createClient } = await import("@supabase/supabase-js");
+          const pub = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+            auth: { persistSession: false, autoRefreshToken: false, storage: undefined as any },
+          });
+          const origin = process.env.PUBLIC_APP_URL || "https://mbrplatform.com";
+          await pub.auth.signInWithOtp({
+            email,
+            options: { emailRedirectTo: `${origin}/donor/dashboard`, shouldCreateUser: false },
+          });
+        } catch (e) {
+          console.error("[reviewDonor] magic link send failed", e);
+        }
       } catch (e) {
         // Don't fail approval if auth user creation fails; admin can retry
         console.error("[reviewDonor] auth link failed", e);
@@ -386,4 +400,38 @@ export const getDonorAuctionView = createServerFn({ method: "GET" })
     const active = sessions.find((r: any) => r.status !== "closed" && !r.auction_closed) ?? sessions[0] ?? null;
     return { session: active, orgId: donor.org_id, groupName: active?.live_group_name || active?.group_name || null };
   });
+
+export const getDonorActivities = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId, claims } = context;
+    const email = (claims as any)?.email?.toLowerCase?.() ?? null;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    let donor: any = null;
+    const { data: byUser } = await supabase.from("donors").select("id, org_id, status").eq("user_id", userId).maybeSingle();
+    donor = byUser;
+    if (!donor && email) {
+      const { data: byEmail } = await supabaseAdmin.from("donors").select("id, org_id, status").eq("email", email).maybeSingle();
+      donor = byEmail;
+    }
+    if (!donor || donor.status !== "approved" || !donor.org_id) {
+      return { activities: [], milestones: [] };
+    }
+
+    const { data: activities } = await supabaseAdmin
+      .from("org_activities")
+      .select("id, event_name, event_date, description, status, allocated_budget, actual_expense")
+      .eq("org_id", donor.org_id)
+      .order("event_date", { ascending: false })
+      .limit(50);
+    const { data: milestones } = await supabaseAdmin
+      .from("org_milestones")
+      .select("id, title, description, event_date, photo_url")
+      .eq("org_id", donor.org_id)
+      .order("event_date", { ascending: false })
+      .limit(20);
+    return { activities: activities ?? [], milestones: milestones ?? [] };
+  });
+
 

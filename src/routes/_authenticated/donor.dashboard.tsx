@@ -2,12 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { getMyDonor, getDonorAuctionView } from "@/lib/donors.functions";
+import { getMyDonor, getDonorAuctionView, getDonorActivities } from "@/lib/donors.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { useI18n, localizeText } from "@/lib/i18n";
-import { HandHeart, User, IndianRupee, Award, Coins, Clock, LogOut, ArrowLeft, Eye, Trophy } from "lucide-react";
+import { HandHeart, User, IndianRupee, Award, Coins, Clock, LogOut, ArrowLeft, Eye, Trophy, Sparkles, Calendar } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/donor/dashboard")({
@@ -25,6 +25,9 @@ function DonorDashboard() {
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [auctionView, setAuctionView] = useState<any>(null);
   const loadAuction = useServerFn(getDonorAuctionView);
+  const loadActivities = useServerFn(getDonorActivities);
+  const [activities, setActivities] = useState<any[]>([]);
+  const [milestones, setMilestones] = useState<any[]>([]);
 
   async function refresh() {
     setLoading(true);
@@ -41,6 +44,14 @@ function DonorDashboard() {
     if (donor?.status !== "approved" || donor?.linked_member?.id) return;
     loadAuction().then((r: any) => setAuctionView(r)).catch(() => {});
   }, [donor?.status, donor?.linked_member?.id]);
+
+  useEffect(() => {
+    if (donor?.status !== "approved") return;
+    loadActivities().then((r: any) => {
+      setActivities(r.activities ?? []);
+      setMilestones(r.milestones ?? []);
+    }).catch(() => {});
+  }, [donor?.status]);
 
   useEffect(() => {
     if (!donor?.photo_url) return;
@@ -200,6 +211,46 @@ function DonorDashboard() {
                 </p>
               </Card>
             )}
+
+            {(activities.length > 0 || milestones.length > 0) && (
+              <Card className="p-4 bg-black/40 border-white/10 space-y-3">
+                <h3 className="text-sm font-semibold inline-flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-purple-300" />
+                  {lt("Service activities", "సేవా కార్యక్రమాలు")}
+                </h3>
+                {activities.length > 0 && (
+                  <div className="space-y-2">
+                    {activities.map((a) => (
+                      <div key={a.id} className="rounded bg-white/5 p-2 text-xs">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="font-semibold text-white/90 truncate">{a.event_name}</div>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-white/70 shrink-0">{a.status}</span>
+                        </div>
+                        <div className="text-white/50 inline-flex items-center gap-1 mt-0.5">
+                          <Calendar className="w-3 h-3" />
+                          {new Date(a.event_date).toLocaleDateString("en-GB")}
+                        </div>
+                        {a.description && <div className="text-white/70 mt-1 line-clamp-2">{a.description}</div>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {milestones.length > 0 && (
+                  <div>
+                    <div className="text-[11px] text-white/50 mb-1">{lt("Milestones", "మైలురాళ్లు")}</div>
+                    <div className="space-y-1">
+                      {milestones.map((m) => (
+                        <div key={m.id} className="text-xs border-b border-white/5 last:border-0 pb-1">
+                          <div className="font-semibold text-white/90">{m.title}</div>
+                          <div className="text-white/50">{new Date(m.event_date).toLocaleDateString("en-GB")}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </Card>
+            )}
+
 
             <Card className="p-4 bg-black/40 border-white/10">
               <h3 className="text-sm font-semibold mb-3 inline-flex items-center gap-2">
