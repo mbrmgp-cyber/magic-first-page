@@ -27,6 +27,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { User, Plus, IndianRupee, CheckCircle2, XCircle, Trash2, Lock, UserPlus, Camera, Pencil, FileDown } from "lucide-react";
 import { downloadMemberListPdf } from "@/lib/member-list-pdf";
+import { DonorsPanel } from "@/components/DonorsPanel";
 
 
 
@@ -105,38 +106,56 @@ function MembersPage() {
 
   return (
     <SectionShell title="సభ్యుల వివరాలు">
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex flex-wrap gap-2">
-          {(["all", "pending", "approved", "rejected"] as const).map((s) => (
-            <Button key={s} size="sm" variant={filter === s ? "default" : "outline"} onClick={() => setFilter(s)}>
-              {s === "all" ? "అందరూ" : s === "pending" ? "Pending" : s === "approved" ? "Approved" : "Rejected"}
-              <Badge variant="secondary" className="ml-2">
-                {s === "all"
-                  ? members.filter((m) => m.status !== "rejected").length
-                  : members.filter((m) => m.status === s).length}
-              </Badge>
-            </Button>
-          ))}
-        </div>
-        {orgId && <AddMemberDialog orgId={orgId} onAdded={refresh} />}
-        {filtered.length > 0 && (
-          <Button size="sm" variant="outline" disabled={pdfBusy} onClick={downloadMembersPdf}>
-            <FileDown className="w-4 h-4 mr-1" /> {pdfBusy ? "PDF తయారవుతోంది…" : "PDF డౌన్‌లోడ్"}
-          </Button>
-        )}
-      </div>
+      <Tabs defaultValue="members" className="w-full">
+        <TabsList className="grid grid-cols-3 w-full">
+          <TabsTrigger value="members">సభ్యులు</TabsTrigger>
+          <TabsTrigger value="donors">డోనర్స్</TabsTrigger>
+          <TabsTrigger value="recognition">గుర్తింపు</TabsTrigger>
+        </TabsList>
 
-      {loading ? (
-        <Card className="p-6 text-center text-muted-foreground">Loading…</Card>
-      ) : filtered.length === 0 ? (
-        <Card className="p-6 text-center text-muted-foreground">సభ్యులు లేరు</Card>
-      ) : (
-        <div className="space-y-3">
-          {filtered.map((m) => (
-            <MemberCard key={m.id} member={m} orgId={orgId!} org={org} onReview={onReview} onChange={refresh} />
-          ))}
-        </div>
-      )}
+        <TabsContent value="members" className="space-y-3 pt-3">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <div className="flex flex-wrap gap-2">
+              {(["all", "pending", "approved", "rejected"] as const).map((s) => (
+                <Button key={s} size="sm" variant={filter === s ? "default" : "outline"} onClick={() => setFilter(s)}>
+                  {s === "all" ? "అందరూ" : s === "pending" ? "Pending" : s === "approved" ? "Approved" : "Rejected"}
+                  <Badge variant="secondary" className="ml-2">
+                    {s === "all"
+                      ? members.filter((m) => m.status !== "rejected").length
+                      : members.filter((m) => m.status === s).length}
+                  </Badge>
+                </Button>
+              ))}
+            </div>
+            {orgId && <AddMemberDialog orgId={orgId} onAdded={refresh} />}
+            {filtered.length > 0 && (
+              <Button size="sm" variant="outline" disabled={pdfBusy} onClick={downloadMembersPdf}>
+                <FileDown className="w-4 h-4 mr-1" /> {pdfBusy ? "PDF తయారవుతోంది…" : "PDF డౌన్‌లోడ్"}
+              </Button>
+            )}
+          </div>
+
+          {loading ? (
+            <Card className="p-6 text-center text-muted-foreground">Loading…</Card>
+          ) : filtered.length === 0 ? (
+            <Card className="p-6 text-center text-muted-foreground">సభ్యులు లేరు</Card>
+          ) : (
+            <div className="space-y-3">
+              {filtered.map((m) => (
+                <MemberCard key={m.id} member={m} orgId={orgId!} org={org} onReview={onReview} onChange={refresh} />
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="donors" className="pt-3">
+          <DonorsPanel />
+        </TabsContent>
+
+        <TabsContent value="recognition" className="pt-3">
+          <DonorsPanel recognitionOnly />
+        </TabsContent>
+      </Tabs>
     </SectionShell>
   );
 }
