@@ -357,3 +357,33 @@ export const getMyDonor = createServerFn({ method: "GET" })
     return { donor, donations: donations ?? [] };
   });
 
+export const getDonorAuctionView = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId, claims } = context;
+    const email = (claims as any)?.email?.toLowerCase?.() ?? null;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Locate donor (by user_id or email) and confirm approved
+    let donor: any = null;
+    const { data: byUser } = await supabase.from("donors").select("id, org_id, status").eq("user_id", userId).maybeSingle();
+    donor = byUser;
+    if (!donor && email) {
+      const { data: byEmail } = await supabaseAdmin.from("donors").select("id, org_id, status").eq("email", email).maybeSingle();
+      donor = byEmail;
+    }
+    if (!donor || donor.status !== "approved" || !donor.org_id) {
+      return { session: null, groupName: null, orgId: null };
+    }
+
+    // Load active session via admin (donor is not org member; RLS would block)
+    const { data: rows } = await supabaseAdmin
+      .from("auction_sessions")
+      .select("id, group_name, live_group_name, chit_value, total_months, current_month, commission_pct, start_date, auction_closed, status, winner_member_name, winner_member_code, winner_amount, winner_net, winner_dividend, past_winners, total_members, updated_at")
+      .eq("org_id", donor.org_id)
+      .order("updated_at", { ascending: false });
+    const sessions = rows ?? [];
+    const active = sessions.find((r: any) => r.status !== "closed" && !r.auction_closed) ?? sessions[0] ?? null;
+    return { session: active, orgId: donor.org_id, groupName: active?.live_group_name || active?.group_name || null };
+  });
+
