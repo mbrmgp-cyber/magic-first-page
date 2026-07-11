@@ -193,3 +193,115 @@ export const updateOrgDonorThreshold = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+function normalizeOrgCode(input: string) {
+  const raw = (input || "").trim();
+  if (!raw) return "";
+  try {
+    const parsed = JSON.parse(raw);
+    const v = parsed?.code || parsed?.org_code || parsed?.orgCode;
+    if (typeof v === "string" && v.trim()) return v.trim().toUpperCase();
+  } catch {}
+  try {
+    const url = new URL(raw);
+    const v = url.searchParams.get("code") || url.searchParams.get("org_code");
+    if (v) return v.trim().toUpperCase();
+  } catch {}
+  const m = raw.match(/[?&](?:code|org_code)=([^&#]+)/i);
+  if (m?.[1]) return decodeURIComponent(m[1]).trim().toUpperCase();
+  return raw.toUpperCase();
+}
+
+export const submitDonorRequest = createServerFn({ method: "POST" })
+  .inputValidator((d: {
+    code: string;
+    first_name: string;
+    last_name?: string;
+    phone?: string;
+    email: string;
+    photo_data_url?: string;
+    notes?: string;
+  }) => d)
+  .handler(async ({ data }) => {
+    const code = normalizeOrgCode(data.code);
+    if (!code) throw new Error("Invalid code");
+    if (!data.first_name?.trim()) throw new Error("పేరు ఇవ్వండి");
+    if (!data.email?.trim()) throw new Error("Email ఇవ్వండి");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: org } = await supabaseAdmin
+      .from("organizations")
+      .select("id")
+      .or(`org_code.eq.${code},letter_code.eq.${code}`)
+      .maybeSingle();
+    if (!org) throw new Error("Invalid QR / Code");
+
+    let photo_url: string | null = null;
+    if (data.photo_data_url?.startsWith("data:image/")) {
+      const match = data.photo_data_url.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
+      if (!match) throw new Error("Invalid photo file");
+      const contentType = match[1];
+      const bytes = Uint8Array.from(atob(match[2]), (c) => c.charCodeAt(0));
+      if (bytes.byteLength > 5 * 1024 * 1024) throw new Error("Photo must be under 5MB");
+      const ext = (contentType.split("/")[1] || "jpg").replace("jpeg", "jpg");
+      const path = `public-requests/${org.id}/${crypto.randomUUID()}.${ext}`;
+      const { error: upErr } = await supabaseAdmin.storage
+        .from("member-photos")
+        .upload(path, bytes, { contentType, upsert: false });
+      if (upErr) throw new Error(upErr.message);
+      photo_url = path;
+    }
+
+    const { data: donor, error } = await supabaseAdmin
+      .from("donors")
+      .insert({
+        org_id: org.id,
+        first_name: data.first_name.trim(),
+        last_name: data.last_name?.trim() || null,
+        phone: data.phone?.trim() || null,
+        email: data.email.trim().toLowerCase(),
+        photo_url,
+        notes: data.notes?.trim() || null,
+        status: "pending",
+      } as any)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return { donor };
+  });
+
+export const getMyDonor = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId, claims } = context;
+    const email = (claims as any)?.email?.toLowerCase?.() ?? null;
+
+    // Try by user_id first, then by email
+    let donor: any = null;
+    const { data: byUser } = await supabase
+      .from("donors")
+      .select("*, organizations(id,name,logo_url,letter_code), linked_member:linked_member_id(id,name,member_code)")
+      .eq("user_id", userId)
+      .maybeSingle();
+    donor = byUser;
+    if (!donor && email) {
+      const { data: byEmail } = await supabase
+        .from("donors")
+        .select("*, organizations(id,name,logo_url,letter_code), linked_member:linked_member_id(id,name,member_code)")
+        .eq("email", email)
+        .maybeSingle();
+      donor = byEmail;
+      // Best-effort self-link so future queries are direct
+      if (donor && !donor.user_id) {
+        await supabase.from("donors").update({ user_id: userId }).eq("id", donor.id);
+      }
+    }
+    if (!donor) return { donor: null, donations: [] };
+
+    const { data: donations } = await supabase
+      .from("donations")
+      .select("*")
+      .eq("donor_id", donor.id)
+      .order("donation_date", { ascending: false });
+    return { donor, donations: donations ?? [] };
+  });
+
