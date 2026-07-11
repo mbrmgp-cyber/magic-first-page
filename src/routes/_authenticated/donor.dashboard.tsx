@@ -42,7 +42,7 @@ function DonorDashboard() {
     loadAuction().then((r: any) => setAuctionView(r)).catch(() => {});
   }, [donor?.status, donor?.linked_member?.id]);
 
-
+  useEffect(() => {
     if (!donor?.photo_url) return;
     let cancelled = false;
     (async () => {
