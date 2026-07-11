@@ -284,15 +284,30 @@ export const getMyDonor = createServerFn({ method: "GET" })
       .maybeSingle();
     donor = byUser;
     if (!donor && email) {
-      const { data: byEmail } = await supabase
+      // Bootstrap: donor row may not yet have user_id, so RLS as this user won't
+      // see it. Use admin to find + self-link by email, then re-read as user.
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: byEmail } = await supabaseAdmin
         .from("donors")
-        .select("*, organizations(id,name,logo_url,letter_code), linked_member:linked_member_id(id,name,member_code)")
+        .select("id, status")
         .eq("email", email)
         .maybeSingle();
-      donor = byEmail;
-      // Best-effort self-link so future queries are direct
-      if (donor && !donor.user_id) {
-        await supabase.from("donors").update({ user_id: userId }).eq("id", donor.id);
+      if (byEmail && byEmail.status === "approved") {
+        await supabaseAdmin.from("donors").update({ user_id: userId }).eq("id", byEmail.id);
+        const { data: linked } = await supabase
+          .from("donors")
+          .select("*, organizations(id,name,logo_url,letter_code), linked_member:linked_member_id(id,name,member_code)")
+          .eq("id", byEmail.id)
+          .maybeSingle();
+        donor = linked;
+      } else if (byEmail) {
+        // Return a minimal pending shape (fetched via admin) so UI can show "pending approval"
+        const { data: pending } = await supabaseAdmin
+          .from("donors")
+          .select("*, organizations(id,name,logo_url,letter_code)")
+          .eq("id", byEmail.id)
+          .maybeSingle();
+        donor = pending;
       }
     }
     if (!donor) return { donor: null, donations: [] };
