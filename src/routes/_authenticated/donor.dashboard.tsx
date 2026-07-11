@@ -23,6 +23,8 @@ function DonorDashboard() {
   const [donor, setDonor] = useState<any>(null);
   const [donations, setDonations] = useState<any[]>([]);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [auctionView, setAuctionView] = useState<any>(null);
+  const loadAuction = useServerFn(getDonorAuctionView);
 
   async function refresh() {
     setLoading(true);
