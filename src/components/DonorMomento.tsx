@@ -134,8 +134,8 @@ function DonorMomento({ donor }: { donor: Donor }) {
             flexDirection: "column",
             alignItems: "center",
             textAlign: "center",
-            position: "relative" as const,
           }}
+
         >
           {/* Scroll top roll */}
           <div style={{
