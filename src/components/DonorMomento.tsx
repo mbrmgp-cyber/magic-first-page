@@ -46,6 +46,23 @@ function DonorMomento({ donor }: { donor: Donor }) {
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [org, setOrg] = useState<Org | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.62);
+
+  useEffect(() => {
+    if (!wrapRef.current) return;
+    // A5 width = 148mm ≈ 559px at 96dpi. Fit to wrapper width with a little padding.
+    const CARD_W = 559;
+    const compute = () => {
+      const w = wrapRef.current?.clientWidth ?? 0;
+      if (w > 0) setScale(Math.min(1, Math.max(0.35, w / CARD_W)));
+    };
+    compute();
+    const ro = new ResizeObserver(compute);
+    ro.observe(wrapRef.current);
+    return () => ro.disconnect();
+  }, []);
+
 
   useEffect(() => {
     let cancel = false;
