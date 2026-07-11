@@ -619,7 +619,19 @@ export const submitMemberRequest = createServerFn({ method: "POST" })
 export const getMyMembership = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabase, userId } = context;
+    const { supabase, userId, claims } = context;
+    // Auto-claim: if a member row exists with matching email but no user_id, link it now.
+    const email = ((claims as any)?.email || "").trim().toLowerCase();
+    if (email) {
+      try {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        await supabaseAdmin
+          .from("members")
+          .update({ user_id: userId })
+          .is("user_id", null)
+          .ilike("email", email);
+      } catch {}
+    }
     const { data } = await supabase
       .from("members")
       .select("*, organizations(id, name, admin_user_id, logo_url, slogan, letter_code, org_code, gov_reg_number, phone, email, president_name, president_signature_url, theme_color, theme_font, theme_settings, id_card_design, ad_banners)")
@@ -629,6 +641,7 @@ export const getMyMembership = createServerFn({ method: "GET" })
       .maybeSingle();
     return { membership: data };
   });
+
 
 export const sendApprovedMemberLoginLink = createServerFn({ method: "POST" })
   .inputValidator((d: { email: string; lang?: string }) => d)

@@ -38,10 +38,14 @@ function AuthPage() {
       navigate({ to: "/org/dashboard" });
       return;
     }
-    const { data: member } = await supabase.from("members").select("id").eq("user_id", userId).maybeSingle();
-    if (member) navigate({ to: "/member/pending" });
+    // getMyMembership auto-claims any row created by admin with matching email + null user_id.
+    const { getMyMembership } = await import("@/lib/org.functions");
+    const res = await getMyMembership().catch(() => ({ membership: null as any }));
+    if (res?.membership) navigate({ to: "/member/pending" });
     else navigate({ to: "/org/register" });
   }
+
+
 
   useEffect(() => {
     let active = true;
