@@ -1718,7 +1718,7 @@ function AuctionRoom() {
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs">{lt("Start Date", "ప్రారంభ తేదీ")}</Label>
-              <Input type="date" value={chitStartDate} onChange={(e) => setChitStartDate(e.target.value)} className="h-10" />
+              <DateInput value={chitStartDate} onChange={(e) => setChitStartDate(e.target.value)} className="h-10" />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs">{lt("Total Months", "మొత్తం నెలలు")}</Label>

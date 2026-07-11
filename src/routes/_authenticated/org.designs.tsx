@@ -457,7 +457,7 @@ function DesignsPage() {
                       </div>
                       <div className="space-y-1">
                         <Label className="text-[11px]" style={{ color: PAGE_SUB }}>{lt("Date", "తేదీ")}</Label>
-                        <Input type="date" value={letterDate} onChange={(e) => setLetterDate(e.target.value)} />
+                        <DateInput value={letterDate} onChange={(e) => setLetterDate(e.target.value)} />
                       </div>
                     </div>
                     <div className="space-y-1">
@@ -598,7 +598,7 @@ function DesignsPage() {
                   <div className="space-y-3 rounded-lg p-3 border" data-theme-surface="mini-box" style={{ background: PAGE_MINI, borderColor: PAGE_BORDER }}>
                     <div className="grid grid-cols-2 gap-2">
                       <Field label={lt("Receipt No", "రసీదు నెం")} value={receipt.receiptNo} onChange={(v) => setReceipt({ ...receipt, receiptNo: v })} />
-                      <Field label={lt("Date", "తేదీ")} value={receipt.date} onChange={(v) => setReceipt({ ...receipt, date: v })} type="date" />
+                      <Field label={lt("Date", "తేదీ")} value={receipt.date} onChange={(v) => setReceipt({ ...receipt, date: v })} type="text" />
                       <Field label={lt("Payer Name", "చెల్లించినవారి పేరు")} value={receipt.payerName} onChange={(v) => setReceipt({ ...receipt, payerName: v })} />
                       <Field label={lt("Amount (₹)", "మొత్తం (₹)")} value={receipt.amount} onChange={(v) => setReceipt({ ...receipt, amount: v })} />
                       <Field label={lt("Purpose", "ఉద్దేశం")} value={receipt.purpose} onChange={(v) => setReceipt({ ...receipt, purpose: v })} />

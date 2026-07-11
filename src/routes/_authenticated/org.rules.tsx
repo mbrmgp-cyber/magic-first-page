@@ -340,7 +340,7 @@ function HistoryTab() {
       )}
       {canEdit && showForm && (
         <Card className="p-4 bg-white/95 border-white space-y-2">
-          <Input type="date" value={date} onChange={e => setDate(e.target.value)} />
+          <DateInput value={date} onChange={e => setDate(e.target.value)} />
           <div className="text-[11px] font-semibold text-muted-foreground">తెలుగు</div>
           <Input placeholder="శీర్షిక (ఉదా: సొసైటీ స్థాపన)" value={title} onChange={e => setTitle(e.target.value)} />
           <Textarea placeholder="వివరణ (ఐచ్ఛికం)" rows={3} value={desc} onChange={e => setDesc(e.target.value)} />

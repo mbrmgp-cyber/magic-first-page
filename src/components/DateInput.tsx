@@ -2,7 +2,7 @@ import * as React from "react";
 import { Input } from "@/components/ui/input";
 
 // Text-based date input. Accepts/emits ISO YYYY-MM-DD via `value` and `onChange`
-// (compatible with existing <Input type="date"> callers using e.target.value),
+// (compatible with existing <DateInput> callers using e.target.value),
 // but displays and edits DD/MM/YYYY as plain text (no calendar picker).
 
 function isoToDmy(iso?: string | null): string {

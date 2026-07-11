@@ -196,7 +196,7 @@ function IncomePage() {
           <form onSubmit={onSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label className="text-white">{lt("Date", "తేదీ")}</Label>
-              <Input type="date" value={date} onChange={(e) => setDate(e.target.value)}
+              <DateInput value={date} onChange={(e) => setDate(e.target.value)}
                 className="bg-zinc-900 border-white/10 text-white" />
             </div>
             <div className="space-y-1.5">

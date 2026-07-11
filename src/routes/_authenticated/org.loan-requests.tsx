@@ -240,7 +240,7 @@ function LoanRequestsAdmin() {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>{lt("Payment Date", "చెల్లింపు తేదీ")}</Label>
-                <Input type="date" value={payDate} onChange={(e) => setPayDate(e.target.value)}
+                <DateInput value={payDate} onChange={(e) => setPayDate(e.target.value)}
                   className="bg-black border-white/15 text-white" />
               </div>
               <div className="space-y-1.5">

@@ -266,7 +266,7 @@ function DisciplinaryPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
                     <label className="text-[10px] uppercase text-muted-foreground">Effective Until (optional)</label>
-                    <Input type="date" value={sUntil} onChange={(e) => setSUntil(e.target.value)} />
+                    <DateInput value={sUntil} onChange={(e) => setSUntil(e.target.value)} />
                   </div>
                   <div>
                     <label className="text-[10px] uppercase text-muted-foreground">Notes (optional)</label>
