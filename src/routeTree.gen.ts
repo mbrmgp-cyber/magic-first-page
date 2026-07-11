@@ -16,6 +16,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as OrgRegisterRouteImport } from './routes/org.register'
 import { Route as MemberRegisterRouteImport } from './routes/member.register'
+import { Route as DonorRegisterRouteImport } from './routes/donor.register'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedOrgThemeRouteImport } from './routes/_authenticated/org.theme'
 import { Route as AuthenticatedOrgRulesRouteImport } from './routes/_authenticated/org.rules'
@@ -41,6 +42,7 @@ import { Route as AuthenticatedMemberLoanRequestRouteImport } from './routes/_au
 import { Route as AuthenticatedMemberLedgerRouteImport } from './routes/_authenticated/member.ledger'
 import { Route as AuthenticatedMemberEventsRouteImport } from './routes/_authenticated/member.events'
 import { Route as AuthenticatedMemberDashboardRouteImport } from './routes/_authenticated/member.dashboard'
+import { Route as AuthenticatedDonorDashboardRouteImport } from './routes/_authenticated/donor.dashboard'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -77,6 +79,11 @@ const OrgRegisterRoute = OrgRegisterRouteImport.update({
 const MemberRegisterRoute = MemberRegisterRouteImport.update({
   id: '/member/register',
   path: '/member/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DonorRegisterRoute = DonorRegisterRouteImport.update({
+  id: '/donor/register',
+  path: '/donor/register',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
@@ -220,6 +227,12 @@ const AuthenticatedMemberDashboardRoute =
     path: '/member/dashboard',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDonorDashboardRoute =
+  AuthenticatedDonorDashboardRouteImport.update({
+    id: '/donor/dashboard',
+    path: '/donor/dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -243,8 +256,10 @@ export interface FileRoutesByFullPath {
   '/new-organization': typeof NewOrganizationRoute
   '/register': typeof RegisterRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/donor/register': typeof DonorRegisterRoute
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
+  '/donor/dashboard': typeof AuthenticatedDonorDashboardRoute
   '/member/dashboard': typeof AuthenticatedMemberDashboardRoute
   '/member/events': typeof AuthenticatedMemberEventsRoute
   '/member/ledger': typeof AuthenticatedMemberLedgerRoute
@@ -279,8 +294,10 @@ export interface FileRoutesByTo {
   '/new-organization': typeof NewOrganizationRoute
   '/register': typeof RegisterRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/donor/register': typeof DonorRegisterRoute
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
+  '/donor/dashboard': typeof AuthenticatedDonorDashboardRoute
   '/member/dashboard': typeof AuthenticatedMemberDashboardRoute
   '/member/events': typeof AuthenticatedMemberEventsRoute
   '/member/ledger': typeof AuthenticatedMemberLedgerRoute
@@ -317,8 +334,10 @@ export interface FileRoutesById {
   '/new-organization': typeof NewOrganizationRoute
   '/register': typeof RegisterRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/donor/register': typeof DonorRegisterRoute
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
+  '/_authenticated/donor/dashboard': typeof AuthenticatedDonorDashboardRoute
   '/_authenticated/member/dashboard': typeof AuthenticatedMemberDashboardRoute
   '/_authenticated/member/events': typeof AuthenticatedMemberEventsRoute
   '/_authenticated/member/ledger': typeof AuthenticatedMemberLedgerRoute
@@ -355,8 +374,10 @@ export interface FileRouteTypes {
     | '/new-organization'
     | '/register'
     | '/admin'
+    | '/donor/register'
     | '/member/register'
     | '/org/register'
+    | '/donor/dashboard'
     | '/member/dashboard'
     | '/member/events'
     | '/member/ledger'
@@ -391,8 +412,10 @@ export interface FileRouteTypes {
     | '/new-organization'
     | '/register'
     | '/admin'
+    | '/donor/register'
     | '/member/register'
     | '/org/register'
+    | '/donor/dashboard'
     | '/member/dashboard'
     | '/member/events'
     | '/member/ledger'
@@ -428,8 +451,10 @@ export interface FileRouteTypes {
     | '/new-organization'
     | '/register'
     | '/_authenticated/admin'
+    | '/donor/register'
     | '/member/register'
     | '/org/register'
+    | '/_authenticated/donor/dashboard'
     | '/_authenticated/member/dashboard'
     | '/_authenticated/member/events'
     | '/_authenticated/member/ledger'
@@ -465,6 +490,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   NewOrganizationRoute: typeof NewOrganizationRoute
   RegisterRoute: typeof RegisterRoute
+  DonorRegisterRoute: typeof DonorRegisterRoute
   MemberRegisterRoute: typeof MemberRegisterRoute
   OrgRegisterRoute: typeof OrgRegisterRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -521,6 +547,13 @@ declare module '@tanstack/react-router' {
       path: '/member/register'
       fullPath: '/member/register'
       preLoaderRoute: typeof MemberRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/donor/register': {
+      id: '/donor/register'
+      path: '/donor/register'
+      fullPath: '/donor/register'
+      preLoaderRoute: typeof DonorRegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -698,6 +731,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMemberDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/donor/dashboard': {
+      id: '/_authenticated/donor/dashboard'
+      path: '/donor/dashboard'
+      fullPath: '/donor/dashboard'
+      preLoaderRoute: typeof AuthenticatedDonorDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
       path: '/lovable/email/queue/process'
@@ -724,6 +764,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedDonorDashboardRoute: typeof AuthenticatedDonorDashboardRoute
   AuthenticatedMemberDashboardRoute: typeof AuthenticatedMemberDashboardRoute
   AuthenticatedMemberEventsRoute: typeof AuthenticatedMemberEventsRoute
   AuthenticatedMemberLedgerRoute: typeof AuthenticatedMemberLedgerRoute
@@ -752,6 +793,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedDonorDashboardRoute: AuthenticatedDonorDashboardRoute,
   AuthenticatedMemberDashboardRoute: AuthenticatedMemberDashboardRoute,
   AuthenticatedMemberEventsRoute: AuthenticatedMemberEventsRoute,
   AuthenticatedMemberLedgerRoute: AuthenticatedMemberLedgerRoute,
@@ -787,6 +829,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   NewOrganizationRoute: NewOrganizationRoute,
   RegisterRoute: RegisterRoute,
+  DonorRegisterRoute: DonorRegisterRoute,
   MemberRegisterRoute: MemberRegisterRoute,
   OrgRegisterRoute: OrgRegisterRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
