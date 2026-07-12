@@ -173,9 +173,66 @@ export function printDocument(doc: PrintDoc) {
   printStyle.id = PRINT_STYLE_ID;
   printStyle.textContent = `
     @media print {
-      body > *:not(#${PRINT_ROOT_ID}) { display: none !important; }
-      #${PRINT_ROOT_ID} { display: block !important; }
-      html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+      html, body {
+        background: #fff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        min-height: 297mm !important;
+        overflow: visible !important;
+      }
+      body > *:not(#${PRINT_ROOT_ID}) {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
+        pointer-events: none !important;
+        background: transparent !important;
+        background-image: none !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        transform: scale(0) !important;
+      }
+      body > *:not(#${PRINT_ROOT_ID}) * {
+        visibility: hidden !important;
+        color: transparent !important;
+        background: transparent !important;
+        background-image: none !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        border-color: transparent !important;
+      }
+      #${PRINT_ROOT_ID} {
+        display: block !important;
+        position: relative !important;
+        z-index: 2147483647 !important;
+        width: 100% !important;
+        min-height: 297mm !important;
+        background: #fff !important;
+        color: #111 !important;
+      }
+      #${PRINT_ROOT_ID}::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        background: #fff !important;
+      }
+      .mbr-global-ad-bar,
+      .mbr-global-ad-bar *,
+      [data-radix-portal],
+      [data-radix-dialog-overlay],
+      [role="dialog"],
+      [data-sonner-toaster],
+      .no-print {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        background: transparent !important;
+        background-image: none !important;
+        box-shadow: none !important;
+      }
     }
     @media screen {
       #${PRINT_ROOT_ID} { display: none !important; }
