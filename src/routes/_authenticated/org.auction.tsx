@@ -1316,12 +1316,24 @@ function AuctionRoom() {
           body * { visibility: hidden !important; }
           .print-area, .print-area * { visibility: visible !important; }
           .no-print { display: none !important; }
+          /* Strip backgrounds/shadows/images on everything outside the print-area
+             so leaked dark cards/overlays cannot paint a black block on the PDF
+             (some Android Chrome builds ignore visibility:hidden for backgrounds). */
+          body *:not(.print-area):not(.print-area *) {
+            background: transparent !important;
+            background-image: none !important;
+            background-color: transparent !important;
+            box-shadow: none !important;
+            border-color: transparent !important;
+            color: transparent !important;
+          }
           /* Hide any Radix portal content (dialogs, popovers, tooltips, toasts) */
           [data-radix-portal],
           [data-radix-popper-content-wrapper],
           [role="dialog"],
           [role="alertdialog"],
           [data-sonner-toaster],
+          [data-radix-dialog-overlay],
           [data-state="open"][data-radix-dialog-overlay] { display: none !important; }
           .print-only { display: block !important; }
           .print-area, .print-area * { color: #000 !important; }
