@@ -27,6 +27,7 @@ type Props = {
 
 export function AuctionPaymentsPanel({ orgId, auctionId, monthNo, amount, isAdmin }: Props) {
   const { lang } = useI18n();
+  const { symbol: sym } = useCurrency();
   const lt = (en: string, te: string) => localizeText({ en, te }, lang);
   const listFn = useServerFn(listAuctionPayments);
   const uploadFn = useServerFn(uploadAuctionPayment);
