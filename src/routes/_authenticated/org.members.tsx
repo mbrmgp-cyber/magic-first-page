@@ -931,7 +931,7 @@ function LoanCard({ loan, orgId, onChange, onClose, onDelete }:
         </div>
       </div>
       <p className="text-[10px] text-muted-foreground mt-1 text-center">
-        Interest accrued: ₹{Number(s.accrued_interest ?? 0).toLocaleString("en-IN")} · {Number(s.months_elapsed ?? 0).toFixed(1)} నెలలు
+        Interest accrued: {symbol}{Number(s.accrued_interest ?? 0).toLocaleString("en-IN")} · {Number(s.months_elapsed ?? 0).toFixed(1)} నెలలు
       </p>
 
       <Button size="sm" variant="outline" className="w-full mt-2" onClick={() => setOpen((o) => !o)}>
