@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, XCircle, Clock, Upload, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { localizeText, useI18n } from "@/lib/i18n";
+import { useCurrency } from "@/lib/currency-context";
 import {
   listAuctionPayments,
   uploadAuctionPayment,
@@ -26,6 +27,7 @@ type Props = {
 
 export function AuctionPaymentsPanel({ orgId, auctionId, monthNo, amount, isAdmin }: Props) {
   const { lang } = useI18n();
+  const { symbol: sym } = useCurrency();
   const lt = (en: string, te: string) => localizeText({ en, te }, lang);
   const listFn = useServerFn(listAuctionPayments);
   const uploadFn = useServerFn(uploadAuctionPayment);
@@ -128,7 +130,7 @@ export function AuctionPaymentsPanel({ orgId, auctionId, monthNo, amount, isAdmi
           <div key={p.id} className="flex items-center gap-2 rounded-md border border-border bg-background/50 p-2 text-xs">
             <span className="font-mono opacity-70 w-16 truncate">{p.member_code || "—"}</span>
             <span className="flex-1 truncate">{p.member_name || "Member"}</span>
-            <span className="tabular-nums font-semibold">₹{Number(p.amount).toLocaleString("en-IN")}</span>
+            <span className="tabular-nums font-semibold">{sym}{Number(p.amount).toLocaleString("en-IN")}</span>
             {p.status === "verified" && <Badge className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/40 gap-1"><CheckCircle2 className="size-3" />{lt("Verified", "ధృవీకరించబడింది")}</Badge>}
             {p.status === "rejected" && <Badge className="bg-red-500/15 text-red-400 border border-red-500/40 gap-1"><XCircle className="size-3" />{lt("Rejected", "తిరస్కరించబడింది")}</Badge>}
             {p.status === "pending" && <Badge className="bg-yellow-500/15 text-yellow-400 border border-yellow-500/40 gap-1"><Clock className="size-3" />{lt("Pending", "పెండింగ్")}</Badge>}

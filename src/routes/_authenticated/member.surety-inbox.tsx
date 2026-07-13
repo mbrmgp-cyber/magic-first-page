@@ -12,6 +12,7 @@ import { listSuretyRequests, respondAsSurety } from "@/lib/loan-requests.functio
 import { SignaturePad } from "@/components/SignaturePad";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n, localizeText } from "@/lib/i18n";
+import { useCurrency } from "@/lib/currency-context";
 import { printSuretyConsent } from "@/lib/printLoan";
 
 export const Route = createFileRoute("/_authenticated/member/surety-inbox")({
@@ -37,6 +38,7 @@ function SignedImg({ path, className }: { path?: string | null; className?: stri
 
 function SuretyInbox() {
   const { lang } = useI18n();
+  const { symbol: sym } = useCurrency();
   const isTe = lang !== "en";
   const pick = (te: string, en: string) => (lang === "en" ? en : localizeText({ te, en }, lang));
 
@@ -130,8 +132,8 @@ function SuretyInbox() {
                 </div>
                 <div className="text-sm text-white/80">
                   {pick(
-                    `${r.member?.name} గారు ₹ ${Number(r.requested_amount).toLocaleString()} లోను కోరారు. మీరు షూరిటీగా ఉండటానికి సమ్మతిస్తారా?`,
-                    `${r.member?.name} requested ₹ ${Number(r.requested_amount).toLocaleString()}. Do you accept being their surety?`,
+                    `${r.member?.name} గారు ${sym} ${Number(r.requested_amount).toLocaleString()} లోను కోరారు. మీరు షూరిటీగా ఉండటానికి సమ్మతిస్తారా?`,
+                    `${r.member?.name} requested ${sym} ${Number(r.requested_amount).toLocaleString()}. Do you accept being their surety?`,
                   )}
                 </div>
                 <div className="text-xs text-white/60 grid grid-cols-2 gap-1">
@@ -154,7 +156,7 @@ function SuretyInbox() {
               <Card key={r.id} className="bg-zinc-950 border-white/10 p-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-semibold text-sm">{r.member?.name} · ₹ {Number(r.requested_amount).toLocaleString()}</div>
+                    <div className="font-semibold text-sm">{r.member?.name} · {sym} {Number(r.requested_amount).toLocaleString()}</div>
                     <div className="text-[11px] text-white/50">{r.reason}</div>
                   </div>
                   <Pill status={r.surety_status} isTe={isTe} />

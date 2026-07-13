@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, Calendar, Gavel, Activity, Users, CheckCircle2, XCircle, MapPin, Link as LinkIcon, FileText, Eye } from "lucide-react";
 import { useI18n, bi } from "@/lib/i18n";
+import { useCurrency } from "@/lib/currency-context";
 
 export const Route = createFileRoute("/_authenticated/member/events")({
   head: () => ({ meta: [{ title: "Events & Decisions — Member View" }] }),
@@ -288,6 +289,7 @@ function ResolutionsView({ b, resolutions, meetings, memberMap }: any) {
 
 /* ============ Activities (View-Only) ============ */
 function ActivitiesView({ b, activities }: any) {
+  const { symbol: sym } = useCurrency();
   if (activities.length === 0) return <p className="text-muted-foreground text-xs">{b("ఇంకా కార్యక్రమాలు లేవు.", "No activities yet.")}</p>;
   return (
     <div className="space-y-3">
@@ -310,15 +312,15 @@ function ActivitiesView({ b, activities }: any) {
             <div className="grid grid-cols-3 gap-2 mt-3 text-[11px]">
               <div className="rounded border border-border bg-background/40 p-2 text-center">
                 <div className="text-muted-foreground">{b("బడ్జెట్", "Budget")}</div>
-                <div className="text-foreground font-bold text-sm mt-0.5">₹{budget.toLocaleString("en-IN")}</div>
+                <div className="text-foreground font-bold text-sm mt-0.5">{sym}{budget.toLocaleString("en-IN")}</div>
               </div>
               <div className="rounded border border-border bg-background/40 p-2 text-center">
                 <div className="text-muted-foreground">{b("ఖర్చు", "Expense")}</div>
-                <div className="text-foreground font-bold text-sm mt-0.5">₹{expense.toLocaleString("en-IN")}</div>
+                <div className="text-foreground font-bold text-sm mt-0.5">{sym}{expense.toLocaleString("en-IN")}</div>
               </div>
               <div className="rounded border border-border bg-background/40 p-2 text-center">
                 <div className="text-muted-foreground">{b("మిగులు", "Balance")}</div>
-                <div className={`font-bold text-sm mt-0.5 ${balance < 0 ? "text-rose-500" : "text-emerald-600 dark:text-emerald-400"}`}>₹{balance.toLocaleString("en-IN")}</div>
+                <div className={`font-bold text-sm mt-0.5 ${balance < 0 ? "text-rose-500" : "text-emerald-600 dark:text-emerald-400"}`}>{sym}{balance.toLocaleString("en-IN")}</div>
               </div>
             </div>
           </Card>

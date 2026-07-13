@@ -28,11 +28,13 @@ import {
   addDonation, listDonorDonations, deleteDonation, updateOrgDonorThreshold,
 } from "@/lib/donors.functions";
 import { listApprovedMembers } from "@/lib/members.functions";
+import { useCurrency } from "@/lib/currency-context";
 import { DonorMomentoButton } from "@/components/DonorMomento";
 
 type Donor = any;
 
 export function DonorsPanel({ recognitionOnly = false }: { recognitionOnly?: boolean }) {
+  const { symbol: sym } = useCurrency();
   const list = useServerFn(listDonors);
   const [donors, setDonors] = useState<Donor[]>([]);
   const [orgId, setOrgId] = useState<string | null>(null);
@@ -79,7 +81,7 @@ export function DonorsPanel({ recognitionOnly = false }: { recognitionOnly?: boo
           </div>
         ) : (
           <div className="text-xs text-muted-foreground">
-            ₹{threshold.toLocaleString("en-IN")} కంటే ఎక్కువ విరాళం ఇచ్చిన డోనర్లు
+            {sym}{threshold.toLocaleString("en-IN")} కంటే ఎక్కువ విరాళం ఇచ్చిన డోనర్లు
           </div>
         )}
         <div className="flex gap-2">
@@ -107,6 +109,7 @@ export function DonorsPanel({ recognitionOnly = false }: { recognitionOnly?: boo
 
 function DonorCard({ donor, threshold, onChange, recognitionMode }:
   { donor: Donor; threshold: number; onChange: () => void; recognitionMode: boolean }) {
+  const { symbol: sym } = useCurrency();
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -156,7 +159,7 @@ function DonorCard({ donor, threshold, onChange, recognitionMode }:
             </p>
           )}
           <p className="text-sm font-semibold mt-1">
-            మొత్తం విరాళం: <span className="text-emerald-700">₹{total.toLocaleString("en-IN")}</span>
+            మొత్తం విరాళం: <span className="text-emerald-700">{sym}{total.toLocaleString("en-IN")}</span>
           </p>
           {recognitionMode && (
             <p className="text-xs mt-1">
@@ -534,6 +537,7 @@ function EditDonorDialog({ donor, onSaved }: { donor: Donor; onSaved: () => void
 
 
 function AddDonationDialog({ donor, onSaved }: { donor: Donor; onSaved: () => void }) {
+  const { symbol: sym } = useCurrency();
   const add = useServerFn(addDonation);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -574,7 +578,7 @@ function AddDonationDialog({ donor, onSaved }: { donor: Donor; onSaved: () => vo
         <DialogHeader><DialogTitle>విరాళం నమోదు — {donor.first_name}</DialogTitle></DialogHeader>
         <div className="space-y-3 pt-2">
           <div className="grid grid-cols-2 gap-3">
-            <div><Label>Amount ₹ *</Label>
+            <div><Label>Amount {sym} *</Label>
               <Input type="number" step="0.01" value={f.amount} onChange={(e) => setF({ ...f, amount: e.target.value })} /></div>
             <div><Label>Date</Label>
               <DateInput value={f.donation_date} onChange={(e) => setF({ ...f, donation_date: e.target.value })} /></div>
@@ -611,6 +615,7 @@ function AddDonationDialog({ donor, onSaved }: { donor: Donor; onSaved: () => vo
 }
 
 function DonationsDialog({ donor, onChanged }: { donor: Donor; onChanged: () => void }) {
+  const { symbol: sym } = useCurrency();
   const listFn = useServerFn(listDonorDonations);
   const delFn = useServerFn(deleteDonation);
   const [open, setOpen] = useState(false);
@@ -649,7 +654,7 @@ function DonationsDialog({ donor, onChanged }: { donor: Donor; onChanged: () => 
             {rows.map((d) => (
               <div key={d.id} className="flex items-center justify-between border rounded-md p-2">
                 <div className="text-sm">
-                  <div className="font-semibold">₹{Number(d.amount).toLocaleString("en-IN")} <span className="text-xs text-muted-foreground">({d.mode})</span></div>
+                  <div className="font-semibold">{sym}{Number(d.amount).toLocaleString("en-IN")} <span className="text-xs text-muted-foreground">({d.mode})</span></div>
                   <div className="text-xs text-muted-foreground">
                     {new Date(d.donation_date).toLocaleDateString("te-IN")}
                     {d.receipt_no ? ` • Rcpt: ${d.receipt_no}` : ""}

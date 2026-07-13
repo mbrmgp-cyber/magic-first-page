@@ -17,6 +17,7 @@ import { printLoanApplication } from "@/lib/printLoan";
 import { SignaturePad } from "@/components/SignaturePad";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n, localizeText } from "@/lib/i18n";
+import { useCurrency } from "@/lib/currency-context";
 
 export const Route = createFileRoute("/_authenticated/member/loan-request")({
   head: () => ({ meta: [{ title: "లోన్ అభ్యర్థన — Loan Request" }] }),
@@ -27,6 +28,7 @@ function LoanRequestPage() {
   const { lang } = useI18n();
   const isTe = lang !== "en";
   const pick = (te: string, en: string) => (lang === "en" ? en : localizeText({ te, en }, lang));
+  const { symbol: sym } = useCurrency();
 
   const submit = useServerFn(submitLoanRequest);
   const listFn = useServerFn(listMyLoanRequests);
@@ -114,7 +116,7 @@ function LoanRequestPage() {
         <Card className="bg-zinc-950 border-white/10 p-4 space-y-4">
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <Label className="text-white/80">{pick("కోరుకునే లోన్ మొత్తం (₹)", "Loan amount (₹)")} <span className="text-red-400">*</span></Label>
+              <Label className="text-white/80">{pick(`కోరుకునే లోన్ మొత్తం (${sym})`, `Loan amount (${sym})`)} <span className="text-red-400">*</span></Label>
               <Input
                 type="number" min="1" step="1" required inputMode="numeric"
                 value={amount} onChange={(e) => setAmount(e.target.value)}
@@ -209,7 +211,7 @@ function LoanRequestPage() {
             <Card key={r.id} className="bg-zinc-950 border-white/10 p-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-semibold">₹ {Number(r.requested_amount).toLocaleString()}</div>
+                  <div className="font-semibold">{sym} {Number(r.requested_amount).toLocaleString()}</div>
                   <div className="text-xs text-white/60">
                     {r.reason}
                     {r.tenure_months ? ` · ${r.tenure_months} ${pick("నెలలు", "mo")}` : ""}

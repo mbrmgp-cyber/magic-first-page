@@ -5,6 +5,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { Award, Printer, User } from "lucide-react";
+import { useCurrency } from "@/lib/currency-context";
 
 type Donor = {
   id: string;
@@ -43,6 +44,7 @@ export function DonorMomentoButton({ donor }: { donor: Donor }) {
 }
 
 function DonorMomento({ donor }: { donor: Donor }) {
+  const { symbol: sym } = useCurrency();
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [org, setOrg] = useState<Org | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -266,7 +268,7 @@ function DonorMomento({ donor }: { donor: Donor }) {
               letterSpacing: 0.5,
             }}
           >
-            ₹ {amount.toLocaleString("en-IN")}
+            {sym} {amount.toLocaleString("en-IN")}
           </div>
 
           <div style={{ flex: 1 }} />

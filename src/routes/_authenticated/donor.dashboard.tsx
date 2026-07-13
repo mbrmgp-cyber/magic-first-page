@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { useI18n, localizeText } from "@/lib/i18n";
+import { useCurrency } from "@/lib/currency-context";
 import { HandHeart, User, IndianRupee, Award, Coins, Clock, LogOut, ArrowLeft, Eye, Trophy, Sparkles, Calendar } from "lucide-react";
 import { toast } from "sonner";
 
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/_authenticated/donor/dashboard")({
 function DonorDashboard() {
   const load = useServerFn(getMyDonor);
   const { lang } = useI18n();
+  const { symbol: sym } = useCurrency();
   const lt = (en: string, te: string) => localizeText({ en, te }, lang);
   const [loading, setLoading] = useState(true);
   const [donor, setDonor] = useState<any>(null);
@@ -126,7 +128,7 @@ function DonorDashboard() {
                 {lt("Total contributed", "మొత్తం విరాళం")}
               </div>
               <div className="text-3xl font-bold mt-2 text-[#ff8c28]">
-                ₹{total.toLocaleString("en-IN")}
+                {sym}{total.toLocaleString("en-IN")}
               </div>
               {donor.momento_issued && (
                 <div className="mt-3 inline-flex items-center gap-1 text-xs px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
@@ -169,7 +171,7 @@ function DonorDashboard() {
                   </div>
                   <div className="rounded bg-white/5 p-2">
                     <div className="text-white/50">{lt("Chit value", "చిట్టీ విలువ")}</div>
-                    <div className="font-semibold">₹{Number(auctionView.session.chit_value ?? 0).toLocaleString("en-IN")}</div>
+                    <div className="font-semibold">{sym}{Number(auctionView.session.chit_value ?? 0).toLocaleString("en-IN")}</div>
                   </div>
                   <div className="rounded bg-white/5 p-2">
                     <div className="text-white/50">{lt("Month", "నెల")}</div>
@@ -188,7 +190,7 @@ function DonorDashboard() {
                     <div className="text-white/80 mt-1">
                       {auctionView.session.winner_member_name}
                       {auctionView.session.winner_member_code ? ` (${auctionView.session.winner_member_code})` : ""}
-                      {auctionView.session.winner_amount ? ` — ₹${Number(auctionView.session.winner_amount).toLocaleString("en-IN")}` : ""}
+                      {auctionView.session.winner_amount ? ` — ${sym}${Number(auctionView.session.winner_amount).toLocaleString("en-IN")}` : ""}
                     </div>
                   </div>
                 )}
@@ -199,7 +201,7 @@ function DonorDashboard() {
                       {auctionView.session.past_winners.slice().reverse().map((w: any, i: number) => (
                         <div key={i} className="flex justify-between text-xs border-b border-white/5 last:border-0 pb-1">
                           <span className="text-white/70">M{w.month}: {w.memberName ?? w.member_name ?? "-"}</span>
-                          <span className="text-white/60">₹{Number(w.net ?? w.amount ?? 0).toLocaleString("en-IN")}</span>
+                          <span className="text-white/60">{sym}{Number(w.net ?? w.amount ?? 0).toLocaleString("en-IN")}</span>
                         </div>
                       ))}
                     </div>
@@ -265,7 +267,7 @@ function DonorDashboard() {
                     <div key={d.id} className="flex items-center justify-between border-b border-white/10 last:border-0 pb-2 last:pb-0">
                       <div>
                         <div className="text-sm font-semibold">
-                          ₹{Number(d.amount).toLocaleString("en-IN")}
+                          {sym}{Number(d.amount).toLocaleString("en-IN")}
                           <span className="text-xs text-white/50 ml-2">({d.mode})</span>
                         </div>
                         <div className="text-xs text-white/60">

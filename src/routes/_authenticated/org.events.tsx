@@ -16,6 +16,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { sendMeetingInvites } from "@/lib/org.functions";
 import { Mail, Send } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { useCurrency } from "@/lib/currency-context";
 
 export const Route = createFileRoute("/_authenticated/org/events")({
   head: () => ({ meta: [{ title: "Events, Meetings, Decisions" }] }),
@@ -535,6 +536,7 @@ function blankResolution() {
 /* ============ Activities Tab ============ */
 function ActivitiesTab({ orgId, activities, onChange }: any) {
   const { lang } = useI18n();
+  const { symbol: sym } = useCurrency();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   return (
@@ -556,9 +558,9 @@ function ActivitiesTab({ orgId, activities, onChange }: any) {
                   <p className="text-[11px] text-muted-foreground">{new Date(a.event_date).toLocaleDateString("en-IN", { dateStyle: "long" })}</p>
                   {a.description && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{a.description}</p>}
                   <div className="grid grid-cols-3 gap-2 mt-2 text-[11px]">
-                    <div className="bg-card border border-border rounded p-1.5"><div className="text-muted-foreground">బడ్జెట్</div><div className="text-foreground font-semibold">₹{Number(a.allocated_budget).toLocaleString("en-IN")}</div></div>
-                    <div className="bg-card border border-border rounded p-1.5"><div className="text-muted-foreground">ఖర్చు</div><div className="text-foreground font-semibold">₹{Number(a.actual_expense).toLocaleString("en-IN")}</div></div>
-                    <div className="bg-card border border-border rounded p-1.5"><div className="text-muted-foreground">మిగులు</div><div className="text-foreground font-semibold">₹{variance.toLocaleString("en-IN")}</div></div>
+                    <div className="bg-card border border-border rounded p-1.5"><div className="text-muted-foreground">బడ్జెట్</div><div className="text-foreground font-semibold">{sym}{Number(a.allocated_budget).toLocaleString("en-IN")}</div></div>
+                    <div className="bg-card border border-border rounded p-1.5"><div className="text-muted-foreground">ఖర్చు</div><div className="text-foreground font-semibold">{sym}{Number(a.actual_expense).toLocaleString("en-IN")}</div></div>
+                    <div className="bg-card border border-border rounded p-1.5"><div className="text-muted-foreground">మిగులు</div><div className="text-foreground font-semibold">{sym}{variance.toLocaleString("en-IN")}</div></div>
                   </div>
                 </div>
               </div>
@@ -624,8 +626,8 @@ function ActivityDialog({ open, onOpenChange, orgId, editing, onSaved }: any) {
           </div>
           <div><Label>వివరణ</Label><Textarea rows={3} value={form.description || ""} onChange={(e) => setForm({ ...form, description: e.target.value })} className="bg-zinc-800 border-zinc-700" /></div>
           <div className="grid grid-cols-2 gap-2">
-            <div><Label>బడ్జెట్ (₹)</Label><Input type="number" value={form.allocated_budget} onChange={(e) => setForm({ ...form, allocated_budget: e.target.value })} className="bg-zinc-800 border-zinc-700" /></div>
-            <div><Label>ఖర్చు (₹)</Label><Input type="number" value={form.actual_expense} onChange={(e) => setForm({ ...form, actual_expense: e.target.value })} className="bg-zinc-800 border-zinc-700" /></div>
+            <div><Label>బడ్జెట్</Label><Input type="number" value={form.allocated_budget} onChange={(e) => setForm({ ...form, allocated_budget: e.target.value })} className="bg-zinc-800 border-zinc-700" /></div>
+            <div><Label>ఖర్చు</Label><Input type="number" value={form.actual_expense} onChange={(e) => setForm({ ...form, actual_expense: e.target.value })} className="bg-zinc-800 border-zinc-700" /></div>
           </div>
         </div>
         <DialogFooter>

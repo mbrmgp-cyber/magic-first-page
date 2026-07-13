@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { recordExpense, listExpenses, listWalletAccounts, type ExpenseType, type WalletType } from "@/lib/cashflow.functions";
-import { CURRENCIES, BASE_CURRENCY, type CurrencyCode } from "@/lib/currency-context";
+import { CURRENCIES, BASE_CURRENCY, type CurrencyCode, useCurrency } from "@/lib/currency-context";
 import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/org/expenses")({
@@ -37,6 +37,7 @@ const WALLETS: { v: WalletType; te: string; en: string }[] = [
 
 function ExpensesPage() {
   const { lang } = useI18n();
+  const { symbol: sym } = useCurrency();
   const lt = (en: string, te: string) => lang === "te" ? te : en;
   const qc = useQueryClient();
   const save = useServerFn(recordExpense);
@@ -74,7 +75,7 @@ function ExpensesPage() {
         remarks: remarks || undefined,
       }});
       const baseAmt = a * (txCurrency === BASE_CURRENCY ? 1 : rate);
-      toast.success(lt(`₹${baseAmt.toLocaleString("en-IN")} expense recorded`, `₹${baseAmt.toLocaleString("en-IN")} ఖర్చు నమోదు అయింది`));
+      toast.success(lt(`${sym}${baseAmt.toLocaleString("en-IN")} expense recorded`, `${sym}${baseAmt.toLocaleString("en-IN")} ఖర్చు నమోదు అయింది`));
       setRecipient(""); setAmount(""); setRemarks("");
       setTxCurrency(BASE_CURRENCY); setExchangeRate("1"); setWalletAccountId("");
       qc.invalidateQueries({ queryKey: ["org-expenses"] });
@@ -143,7 +144,7 @@ function ExpensesPage() {
                   className="bg-zinc-900 border-white/10 text-white" />
                 {Number(amount) > 0 && Number(exchangeRate) > 0 && (
                   <p className="text-[11px] text-amber-400">
-                    ≈ ₹ {(Number(amount) * Number(exchangeRate)).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                    ≈ {sym} {(Number(amount) * Number(exchangeRate)).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
                   </p>
                 )}
               </div>
@@ -190,7 +191,7 @@ function ExpensesPage() {
               {rows.map((r) => (
                 <div key={r.id} className="flex items-center justify-between gap-2 bg-zinc-900 border border-white/5 rounded-lg p-3">
                   <div className="min-w-0">
-                    <p className="text-sm font-medium truncate text-white">{r.recipient_name} • <span className="text-red-400">₹{Number(r.amount).toLocaleString("en-IN")}</span></p>
+                    <p className="text-sm font-medium truncate text-white">{r.recipient_name} • <span className="text-red-400">{sym}{Number(r.amount).toLocaleString("en-IN")}</span></p>
                     <p className="text-[11px] text-white/60">{r.entry_date} • {(() => { const t = EXPENSE_TYPES.find(x => x.v === r.expense_type); return t ? lt(t.en, t.te) : r.expense_type; })()} • {(() => { const w = WALLETS.find(x => x.v === r.wallet); return w ? lt(w.en, w.te) : r.wallet; })()}</p>
                     {r.remarks && <p className="text-[11px] text-white/50 mt-0.5">{r.remarks}</p>}
                   </div>
