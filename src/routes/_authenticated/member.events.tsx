@@ -312,15 +312,15 @@ function ActivitiesView({ b, activities }: any) {
             <div className="grid grid-cols-3 gap-2 mt-3 text-[11px]">
               <div className="rounded border border-border bg-background/40 p-2 text-center">
                 <div className="text-muted-foreground">{b("బడ్జెట్", "Budget")}</div>
-                <div className="text-foreground font-bold text-sm mt-0.5">₹{budget.toLocaleString("en-IN")}</div>
+                <div className="text-foreground font-bold text-sm mt-0.5">{sym}{budget.toLocaleString("en-IN")}</div>
               </div>
               <div className="rounded border border-border bg-background/40 p-2 text-center">
                 <div className="text-muted-foreground">{b("ఖర్చు", "Expense")}</div>
-                <div className="text-foreground font-bold text-sm mt-0.5">₹{expense.toLocaleString("en-IN")}</div>
+                <div className="text-foreground font-bold text-sm mt-0.5">{sym}{expense.toLocaleString("en-IN")}</div>
               </div>
               <div className="rounded border border-border bg-background/40 p-2 text-center">
                 <div className="text-muted-foreground">{b("మిగులు", "Balance")}</div>
-                <div className={`font-bold text-sm mt-0.5 ${balance < 0 ? "text-rose-500" : "text-emerald-600 dark:text-emerald-400"}`}>₹{balance.toLocaleString("en-IN")}</div>
+                <div className={`font-bold text-sm mt-0.5 ${balance < 0 ? "text-rose-500" : "text-emerald-600 dark:text-emerald-400"}`}>{sym}{balance.toLocaleString("en-IN")}</div>
               </div>
             </div>
           </Card>
