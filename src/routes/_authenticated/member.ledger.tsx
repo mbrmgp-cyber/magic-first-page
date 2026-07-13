@@ -74,9 +74,9 @@ function MemberLedger() {
                           </span>
                         )}
                       </td>
-                      <td className="p-2 text-right">{fmt(e.principal)}</td>
-                      <td className="p-2 text-right">{fmt(e.interest)}</td>
-                      <td className="p-2 text-right font-semibold">{fmt(e.amount)}</td>
+                      <td className="p-2 text-right">{fmt(e.principal, sym)}</td>
+                      <td className="p-2 text-right">{fmt(e.interest, sym)}</td>
+                      <td className="p-2 text-right font-semibold">{fmt(e.amount, sym)}</td>
                       <td className="p-2 text-zinc-400 truncate max-w-[180px]">{e.note ?? "—"}</td>
                     </tr>
                   ))}
