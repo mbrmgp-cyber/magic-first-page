@@ -878,6 +878,7 @@ function LoanCard({ loan, orgId, onChange, onClose, onDelete }:
   { loan: Loan; orgId: string; onChange: () => void; onClose: () => void; onDelete: () => void }) {
   const listP = useServerFn(listLoanPayments);
   const addP = useServerFn(addLoanPayment);
+  const { symbol } = useCurrency();
   const [pays, setPays] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [amt, setAmt] = useState("");
