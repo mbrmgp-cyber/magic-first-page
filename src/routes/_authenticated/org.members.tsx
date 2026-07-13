@@ -29,6 +29,7 @@ import { Switch } from "@/components/ui/switch";
 import { User, Plus, IndianRupee, CheckCircle2, XCircle, Trash2, Lock, UserPlus, Camera, Pencil, FileDown } from "lucide-react";
 import { downloadMemberListPdf } from "@/lib/member-list-pdf";
 import { DonorsPanel } from "@/components/DonorsPanel";
+import { useCurrency } from "@/lib/currency-context";
 
 
 
@@ -163,6 +164,7 @@ function MembersPage() {
 
 function MemberCard({ member, orgId, org, onReview, onChange }:
   { member: Member; orgId: string; org: any; onReview: (id: string, a: "approve" | "reject") => void; onChange: () => void }) {
+  const { symbol } = useCurrency();
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -224,7 +226,7 @@ function MemberCard({ member, orgId, org, onReview, onChange }:
             <p className="text-xs text-muted-foreground">పరిచయం: {member.introducer.name}</p>
           )}
           {Number(member.committee_fee_paid) > 0 && (
-            <p className="text-xs">కమిటీ Fee: ₹{Number(member.committee_fee_paid).toFixed(2)}</p>
+            <p className="text-xs">కమిటీ Fee: {symbol}{Number(member.committee_fee_paid).toFixed(2)}</p>
           )}
         </div>
       </div>
@@ -292,6 +294,7 @@ function DeleteMemberButton({ member, onChange }: { member: Member; onChange: ()
 function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => void }) {
   const add = useServerFn(adminAddMember);
   const upd = useServerFn(updateMemberProfile);
+  const { symbol } = useCurrency();
   const listAppr = useServerFn(listApprovedMembers);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -412,7 +415,7 @@ function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => voi
           <div className="grid grid-cols-2 gap-3">
             <div><Label>చేరిన తేదీ</Label>
               <DateInput value={f.joined_date} onChange={(e) => setF({ ...f, joined_date: e.target.value })} /></div>
-            <div><Label>కమిటీ Fee ₹</Label>
+            <div><Label>కమిటీ Fee {symbol}</Label>
               <Input type="number" step="0.01" value={f.committee_fee_paid}
                 onChange={(e) => setF({ ...f, committee_fee_paid: e.target.value })} /></div>
           </div>
@@ -503,6 +506,7 @@ function EditMemberDialog({ member, onChange }: { member: Member; onChange: () =
 function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void }) {
   const upd = useServerFn(updateMemberProfile);
   const toggleActive = useServerFn(setMemberActive);
+  const { symbol } = useCurrency();
   const [f, setF] = useState({
     name: member.name ?? "",
     father_name: member.father_name ?? "",
@@ -646,7 +650,7 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
       <div className="grid grid-cols-2 gap-3">
         <div><Label>బ్లడ్ గ్రూప్</Label>
           <Input placeholder="A+ / B+ / O+ ..." value={f.blood_group} onChange={(e) => setF({ ...f, blood_group: e.target.value })} /></div>
-        <div><Label>కమిటీ Fee (₹)</Label>
+        <div><Label>కమిటీ Fee ({symbol})</Label>
           <Input type="number" step="0.01" value={f.committee_fee_paid} onChange={(e) => setF({ ...f, committee_fee_paid: e.target.value })} /></div>
       </div>
       <div className="rounded-md border p-3 space-y-2">
@@ -792,6 +796,7 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
   const addL = useServerFn(addMemberLoan);
   const closeL = useServerFn(closeLoan);
   const delL = useServerFn(deleteLoan);
+  const { symbol } = useCurrency();
 
   const [loans, setLoans] = useState<Loan[]>([]);
   const [loading, setLoading] = useState(true);
@@ -841,7 +846,7 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
       {showAdd && (
         <Card className="p-3 space-y-2 border-dashed">
           <div className="grid grid-cols-2 gap-2">
-            <div><Label>Principal ₹ *</Label>
+            <div><Label>Principal {symbol} *</Label>
               <Input type="number" step="0.01" value={nf.principal} onChange={(e) => setNf({ ...nf, principal: e.target.value })} /></div>
             <div><Label>నెల Interest %</Label>
               <Input type="number" step="0.01" value={nf.interest_rate_monthly} onChange={(e) => setNf({ ...nf, interest_rate_monthly: e.target.value })} /></div>
@@ -873,6 +878,7 @@ function LoanCard({ loan, orgId, onChange, onClose, onDelete }:
   { loan: Loan; orgId: string; onChange: () => void; onClose: () => void; onDelete: () => void }) {
   const listP = useServerFn(listLoanPayments);
   const addP = useServerFn(addLoanPayment);
+  const { symbol } = useCurrency();
   const [pays, setPays] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [amt, setAmt] = useState("");
@@ -900,7 +906,7 @@ function LoanCard({ loan, orgId, onChange, onClose, onDelete }:
       <div className="flex justify-between items-start gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold">₹{Number(loan.principal).toLocaleString("en-IN")}</span>
+            <span className="font-semibold">{symbol}{Number(loan.principal).toLocaleString("en-IN")}</span>
             <Badge variant="outline" className="text-xs">{loan.interest_rate_monthly}% /నెల</Badge>
             {loan.status === "closed" && <Badge className="bg-emerald-600">Closed</Badge>}
           </div>
@@ -913,19 +919,19 @@ function LoanCard({ loan, orgId, onChange, onClose, onDelete }:
       <div className="grid grid-cols-3 gap-2 mt-2 text-center text-xs" style={{ color: "inherit" }}>
         <div className="rounded p-2" style={{ backgroundColor: "color-mix(in srgb, currentColor 10%, transparent)", color: "inherit" }}>
           <div style={{ color: "inherit", opacity: 0.75 }}>Total Due</div>
-          <div className="font-semibold" style={{ color: "inherit" }}>₹{Number(s.total_due ?? loan.principal).toLocaleString("en-IN")}</div>
+          <div className="font-semibold" style={{ color: "inherit" }}>{symbol}{Number(s.total_due ?? loan.principal).toLocaleString("en-IN")}</div>
         </div>
         <div className="rounded p-2" style={{ backgroundColor: "color-mix(in srgb, currentColor 10%, transparent)", color: "inherit" }}>
           <div style={{ color: "inherit", opacity: 0.75 }}>Paid</div>
-          <div className="font-semibold" style={{ color: "inherit" }}>₹{Number(s.total_paid ?? 0).toLocaleString("en-IN")}</div>
+          <div className="font-semibold" style={{ color: "inherit" }}>{symbol}{Number(s.total_paid ?? 0).toLocaleString("en-IN")}</div>
         </div>
         <div className="rounded p-2" style={{ backgroundColor: "color-mix(in srgb, currentColor 10%, transparent)", color: "inherit" }}>
           <div style={{ color: "inherit", opacity: 0.75 }}>Balance</div>
-          <div className="font-semibold" style={{ color: "inherit" }}>₹{Number(s.balance ?? 0).toLocaleString("en-IN")}</div>
+          <div className="font-semibold" style={{ color: "inherit" }}>{symbol}{Number(s.balance ?? 0).toLocaleString("en-IN")}</div>
         </div>
       </div>
       <p className="text-[10px] text-muted-foreground mt-1 text-center">
-        Interest accrued: ₹{Number(s.accrued_interest ?? 0).toLocaleString("en-IN")} · {Number(s.months_elapsed ?? 0).toFixed(1)} నెలలు
+        Interest accrued: {symbol}{Number(s.accrued_interest ?? 0).toLocaleString("en-IN")} · {Number(s.months_elapsed ?? 0).toFixed(1)} నెలలు
       </p>
 
       <Button size="sm" variant="outline" className="w-full mt-2" onClick={() => setOpen((o) => !o)}>
@@ -936,7 +942,7 @@ function LoanCard({ loan, orgId, onChange, onClose, onDelete }:
         <div className="mt-2 space-y-2 border-t pt-2">
           {loan.status !== "closed" && (
             <div className="flex gap-2 items-end">
-              <div className="flex-1"><Label className="text-xs">Amount ₹</Label>
+              <div className="flex-1"><Label className="text-xs">Amount {symbol}</Label>
                 <Input type="number" step="0.01" value={amt} onChange={(e) => setAmt(e.target.value)} /></div>
               <div><Label className="text-xs">Date</Label>
                 <DateInput value={date} onChange={(e) => setDate(e.target.value)} /></div>
@@ -948,7 +954,7 @@ function LoanCard({ loan, orgId, onChange, onClose, onDelete }:
               {pays.map((p) => (
                 <div key={p.id} className="flex justify-between border-b pb-1">
                   <span>{new Date(p.payment_date).toLocaleDateString("te-IN")}</span>
-                  <span className="font-medium">₹{Number(p.amount).toLocaleString("en-IN")}</span>
+                  <span className="font-medium">{symbol}{Number(p.amount).toLocaleString("en-IN")}</span>
                 </div>
               ))}
             </div>
