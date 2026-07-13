@@ -15,7 +15,7 @@ import {
 import { toast } from "sonner";
 import { recordIncome, listIncome, listWalletAccounts, type IncomeType, type WalletType } from "@/lib/cashflow.functions";
 import { getMyOrg } from "@/lib/org.functions";
-import { CURRENCIES, BASE_CURRENCY, type CurrencyCode } from "@/lib/currency-context";
+import { CURRENCIES, BASE_CURRENCY, type CurrencyCode, useCurrency } from "@/lib/currency-context";
 import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/org/income")({
