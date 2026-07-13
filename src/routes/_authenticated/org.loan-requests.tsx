@@ -141,7 +141,7 @@ function LoanRequestsAdmin() {
                     <StatusPill status={r.status} lang={lang} />
                   </div>
                   <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-                    <div><span className="text-white/50">{lt("Amount:", "మొత్తం:")}</span> <span className="font-semibold text-orange-400">₹ {Number(r.requested_amount).toLocaleString()}</span></div>
+                    <div><span className="text-white/50">{lt("Amount:", "మొత్తం:")}</span> <span className="font-semibold text-orange-400">{sym} {Number(r.requested_amount).toLocaleString()}</span></div>
                     <div><span className="text-white/50">{lt("Tenure:", "కాలం:")}</span> {r.tenure_months ? lt(`${r.tenure_months} mo`, `${r.tenure_months} నెలలు`) : "—"}</div>
                     <div className="col-span-2"><span className="text-white/50">{lt("Reason:", "కారణం:")}</span> {r.reason}</div>
                     <div className="col-span-2 flex items-center gap-2 flex-wrap">
@@ -232,7 +232,7 @@ function LoanRequestsAdmin() {
           </DialogHeader>
           <div className="space-y-3">
             <div className="text-sm text-white/70">
-              {lt("Amount:", "మొత్తం:")} <span className="font-semibold text-orange-400">₹ {Number(approving?.requested_amount ?? 0).toLocaleString()}</span>
+              {lt("Amount:", "మొత్తం:")} <span className="font-semibold text-orange-400">{sym} {Number(approving?.requested_amount ?? 0).toLocaleString()}</span>
             </div>
             <div className="space-y-1.5">
               <Label>{lt("Bank Transaction No. / UTR No", "బ్యాంక్ ట్రాన్సాక్షన్ నెం.")} <span className="text-red-400">*</span></Label>
