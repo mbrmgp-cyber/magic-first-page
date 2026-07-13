@@ -12,6 +12,7 @@ import { listSuretyRequests, respondAsSurety } from "@/lib/loan-requests.functio
 import { SignaturePad } from "@/components/SignaturePad";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n, localizeText } from "@/lib/i18n";
+import { useCurrency } from "@/lib/currency-context";
 import { printSuretyConsent } from "@/lib/printLoan";
 
 export const Route = createFileRoute("/_authenticated/member/surety-inbox")({
