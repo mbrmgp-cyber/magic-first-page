@@ -578,7 +578,7 @@ function AddDonationDialog({ donor, onSaved }: { donor: Donor; onSaved: () => vo
         <DialogHeader><DialogTitle>విరాళం నమోదు — {donor.first_name}</DialogTitle></DialogHeader>
         <div className="space-y-3 pt-2">
           <div className="grid grid-cols-2 gap-3">
-            <div><Label>Amount ₹ *</Label>
+            <div><Label>Amount {sym} *</Label>
               <Input type="number" step="0.01" value={f.amount} onChange={(e) => setF({ ...f, amount: e.target.value })} /></div>
             <div><Label>Date</Label>
               <DateInput value={f.donation_date} onChange={(e) => setF({ ...f, donation_date: e.target.value })} /></div>
