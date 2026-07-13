@@ -846,7 +846,7 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
       {showAdd && (
         <Card className="p-3 space-y-2 border-dashed">
           <div className="grid grid-cols-2 gap-2">
-            <div><Label>Principal ₹ *</Label>
+            <div><Label>Principal {symbol} *</Label>
               <Input type="number" step="0.01" value={nf.principal} onChange={(e) => setNf({ ...nf, principal: e.target.value })} /></div>
             <div><Label>నెల Interest %</Label>
               <Input type="number" step="0.01" value={nf.interest_rate_monthly} onChange={(e) => setNf({ ...nf, interest_rate_monthly: e.target.value })} /></div>
