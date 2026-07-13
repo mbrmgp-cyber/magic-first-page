@@ -654,7 +654,7 @@ function DonationsDialog({ donor, onChanged }: { donor: Donor; onChanged: () => 
             {rows.map((d) => (
               <div key={d.id} className="flex items-center justify-between border rounded-md p-2">
                 <div className="text-sm">
-                  <div className="font-semibold">₹{Number(d.amount).toLocaleString("en-IN")} <span className="text-xs text-muted-foreground">({d.mode})</span></div>
+                  <div className="font-semibold">{sym}{Number(d.amount).toLocaleString("en-IN")} <span className="text-xs text-muted-foreground">({d.mode})</span></div>
                   <div className="text-xs text-muted-foreground">
                     {new Date(d.donation_date).toLocaleDateString("te-IN")}
                     {d.receipt_no ? ` • Rcpt: ${d.receipt_no}` : ""}
