@@ -90,13 +90,13 @@ function MemberLedger() {
   );
 }
 
-function fmt(n: number) {
+function fmt(n: number, sym: string) {
   if (!n) return "—";
-  return `₹ ${n.toLocaleString("en-IN")}`;
+  return `${sym} ${n.toLocaleString("en-IN")}`;
 }
 
-function Stat({ label, value, accent }: { label: string; value: number; accent: string }) {
-  const text = `₹ ${value.toLocaleString("en-IN")}`;
+function Stat({ label, value, accent, sym }: { label: string; value: number; accent: string; sym: string }) {
+  const text = `${sym} ${value.toLocaleString("en-IN")}`;
   const len = text.length;
   const sizeClass = len > 14 ? "text-[11px]" : len > 11 ? "text-xs" : len > 9 ? "text-sm" : "text-lg";
   return (
