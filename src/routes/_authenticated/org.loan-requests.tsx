@@ -18,6 +18,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { printLoanApplication } from "@/lib/printLoan";
 import { useI18n } from "@/lib/i18n";
+import { useCurrency } from "@/lib/currency-context";
 
 export const Route = createFileRoute("/_authenticated/org/loan-requests")({
   head: () => ({ meta: [{ title: "Loan Requests — Admin" }] }),
