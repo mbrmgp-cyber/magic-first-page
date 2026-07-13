@@ -164,6 +164,7 @@ function MembersPage() {
 
 function MemberCard({ member, orgId, org, onReview, onChange }:
   { member: Member; orgId: string; org: any; onReview: (id: string, a: "approve" | "reject") => void; onChange: () => void }) {
+  const { symbol } = useCurrency();
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
   useEffect(() => {
