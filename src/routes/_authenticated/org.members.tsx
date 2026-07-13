@@ -906,7 +906,7 @@ function LoanCard({ loan, orgId, onChange, onClose, onDelete }:
       <div className="flex justify-between items-start gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold">₹{Number(loan.principal).toLocaleString("en-IN")}</span>
+            <span className="font-semibold">{symbol}{Number(loan.principal).toLocaleString("en-IN")}</span>
             <Badge variant="outline" className="text-xs">{loan.interest_rate_monthly}% /నెల</Badge>
             {loan.status === "closed" && <Badge className="bg-emerald-600">Closed</Badge>}
           </div>
