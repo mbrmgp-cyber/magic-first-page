@@ -74,8 +74,15 @@ function DonorDashboard() {
   const total = Number(donor?.total_donated ?? 0);
   const fullName = donor ? [donor.first_name, donor.last_name].filter(Boolean).join(" ") : "";
 
+  const brand = (donor?.organizations?.theme_color as string) || "#ff8c28";
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black text-white pb-16">
+    <div
+      className="min-h-screen text-white pb-16"
+      style={{
+        background: `radial-gradient(1200px 500px at 50% -10%, ${brand}33 0%, rgba(0,0,0,0) 55%), linear-gradient(to bottom right, #0a0a0a, #16181d 55%, #000000)`,
+      }}
+    >
       <div className="max-w-2xl mx-auto p-4 space-y-4">
         <header className="flex items-center justify-between">
           <Link to="/" className="inline-flex items-center gap-2 text-white/80 text-sm hover:text-white">
