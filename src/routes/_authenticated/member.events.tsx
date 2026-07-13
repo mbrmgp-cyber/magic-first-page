@@ -289,6 +289,7 @@ function ResolutionsView({ b, resolutions, meetings, memberMap }: any) {
 
 /* ============ Activities (View-Only) ============ */
 function ActivitiesView({ b, activities }: any) {
+  const { symbol: sym } = useCurrency();
   if (activities.length === 0) return <p className="text-muted-foreground text-xs">{b("ఇంకా కార్యక్రమాలు లేవు.", "No activities yet.")}</p>;
   return (
     <div className="space-y-3">
