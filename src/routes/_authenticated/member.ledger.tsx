@@ -14,6 +14,7 @@ export const Route = createFileRoute("/_authenticated/member/ledger")({
 
 function MemberLedger() {
   const { lang } = useI18n();
+  const { symbol: sym } = useCurrency();
   const b = (te: string, en: string) => bi(te, en, lang);
   const fetchLedger = useServerFn(getMyLedger);
   const q = useQuery({ queryKey: ["my-ledger"], queryFn: () => fetchLedger() });
