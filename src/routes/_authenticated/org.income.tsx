@@ -106,7 +106,7 @@ function IncomePage() {
       <tr><td class="k">Wallet</td><td>${walletLabel}</td></tr>
       ${entry.remarks ? `<tr><td class="k">Remarks</td><td>${entry.remarks}</td></tr>` : ""}
     </table>
-    <div class="amt">₹ ${Number(entry.amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}</div>
+    <div class="amt">${sym} ${Number(entry.amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}</div>
     <div class="ftr">
       <div>Thank you for your contribution.<br/>Generated: ${new Date().toLocaleString()}</div>
       <div class="sig">Authorised Signatory<br/>${org?.president_name ?? "President"}</div>
@@ -129,7 +129,7 @@ function IncomePage() {
     const org = orgQ.data?.org?.name ?? "Society";
     const msg = `*${org} — Official Receipt*\n` +
       `No: ${entry.receipt_no}\nDate: ${entry.entry_date}\n` +
-      `From: ${entry.payer_name}\nAmount: ₹${Number(entry.amount).toLocaleString("en-IN")}\n` +
+      `From: ${entry.payer_name}\nAmount: ${sym}${Number(entry.amount).toLocaleString("en-IN")}\n` +
       `Type: ${INCOME_TYPES.find((t) => t.v === entry.income_type)?.en}\n\nThank you for your contribution.`;
     const phoneClean = (entry.payer_phone || "").replace(/\D/g, "");
     const url = phoneClean
@@ -141,7 +141,7 @@ function IncomePage() {
   function emailReceipt(entry: any) {
     const org = orgQ.data?.org?.name ?? "Society";
     const subject = `${org} — Receipt ${entry.receipt_no}`;
-    const body = `Dear ${entry.payer_name},%0D%0A%0D%0AThank you for your contribution of ₹${entry.amount}.%0D%0AReceipt No: ${entry.receipt_no}%0D%0ADate: ${entry.entry_date}%0D%0A%0D%0APlease find your official receipt attached (printed from the receipt window).%0D%0A%0D%0ARegards,%0D%0A${org}`;
+    const body = `Dear ${entry.payer_name},%0D%0A%0D%0AThank you for your contribution of ${sym}${entry.amount}.%0D%0AReceipt No: ${entry.receipt_no}%0D%0ADate: ${entry.entry_date}%0D%0A%0D%0APlease find your official receipt attached (printed from the receipt window).%0D%0A%0D%0ARegards,%0D%0A${org}`;
     const to = entry.payer_email ? encodeURIComponent(entry.payer_email) : "";
     window.location.href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${body}`;
   }
@@ -249,7 +249,7 @@ function IncomePage() {
                   className="bg-zinc-900 border-white/10 text-white" />
                 {Number(amount) > 0 && Number(exchangeRate) > 0 && (
                   <p className="text-[11px] text-amber-400">
-                    ≈ ₹ {(Number(amount) * Number(exchangeRate)).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                    ≈ {sym} {(Number(amount) * Number(exchangeRate)).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
                   </p>
                 )}
               </div>
@@ -296,7 +296,7 @@ function IncomePage() {
               {rows.map((r) => (
                 <div key={r.id} className="flex items-center justify-between gap-2 bg-zinc-900 border border-white/5 rounded-lg p-3">
                   <div className="min-w-0">
-                    <p className="text-sm font-medium truncate text-white">{r.payer_name} • <span className="text-[#ff8c28]">₹{Number(r.amount).toLocaleString("en-IN")}</span></p>
+                    <p className="text-sm font-medium truncate text-white">{r.payer_name} • <span className="text-[#ff8c28]">{sym}{Number(r.amount).toLocaleString("en-IN")}</span></p>
                     <p className="text-[11px] text-white/60">{r.receipt_no} • {r.entry_date} • {(() => { const t = INCOME_TYPES.find(x => x.v === r.income_type); return t ? lt(t.en, t.te) : r.income_type; })()}</p>
                   </div>
                   <div className="flex gap-1 shrink-0">
