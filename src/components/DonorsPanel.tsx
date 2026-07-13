@@ -537,6 +537,7 @@ function EditDonorDialog({ donor, onSaved }: { donor: Donor; onSaved: () => void
 
 
 function AddDonationDialog({ donor, onSaved }: { donor: Donor; onSaved: () => void }) {
+  const { symbol: sym } = useCurrency();
   const add = useServerFn(addDonation);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
