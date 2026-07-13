@@ -294,6 +294,7 @@ function DeleteMemberButton({ member, onChange }: { member: Member; onChange: ()
 function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => void }) {
   const add = useServerFn(adminAddMember);
   const upd = useServerFn(updateMemberProfile);
+  const { symbol } = useCurrency();
   const listAppr = useServerFn(listApprovedMembers);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
