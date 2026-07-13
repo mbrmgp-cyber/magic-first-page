@@ -415,7 +415,7 @@ function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => voi
           <div className="grid grid-cols-2 gap-3">
             <div><Label>చేరిన తేదీ</Label>
               <DateInput value={f.joined_date} onChange={(e) => setF({ ...f, joined_date: e.target.value })} /></div>
-            <div><Label>కమిటీ Fee ₹</Label>
+            <div><Label>కమిటీ Fee {symbol}</Label>
               <Input type="number" step="0.01" value={f.committee_fee_paid}
                 onChange={(e) => setF({ ...f, committee_fee_paid: e.target.value })} /></div>
           </div>
