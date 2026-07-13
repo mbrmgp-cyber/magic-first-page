@@ -81,7 +81,7 @@ export function DonorsPanel({ recognitionOnly = false }: { recognitionOnly?: boo
           </div>
         ) : (
           <div className="text-xs text-muted-foreground">
-            ₹{threshold.toLocaleString("en-IN")} కంటే ఎక్కువ విరాళం ఇచ్చిన డోనర్లు
+            {sym}{threshold.toLocaleString("en-IN")} కంటే ఎక్కువ విరాళం ఇచ్చిన డోనర్లు
           </div>
         )}
         <div className="flex gap-2">
