@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { getMyLedger } from "@/lib/accounts.functions";
 import { useI18n, bi } from "@/lib/i18n";
+import { useCurrency } from "@/lib/currency-context";
 
 export const Route = createFileRoute("/_authenticated/member/ledger")({
   head: () => ({ meta: [{ title: "My Statement — MBR App" }] }),
