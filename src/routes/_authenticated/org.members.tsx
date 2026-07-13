@@ -650,7 +650,7 @@ function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void 
       <div className="grid grid-cols-2 gap-3">
         <div><Label>బ్లడ్ గ్రూప్</Label>
           <Input placeholder="A+ / B+ / O+ ..." value={f.blood_group} onChange={(e) => setF({ ...f, blood_group: e.target.value })} /></div>
-        <div><Label>కమిటీ Fee (₹)</Label>
+        <div><Label>కమిటీ Fee ({symbol})</Label>
           <Input type="number" step="0.01" value={f.committee_fee_paid} onChange={(e) => setF({ ...f, committee_fee_paid: e.target.value })} /></div>
       </div>
       <div className="rounded-md border p-3 space-y-2">
