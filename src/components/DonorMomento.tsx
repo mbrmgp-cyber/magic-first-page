@@ -44,6 +44,7 @@ export function DonorMomentoButton({ donor }: { donor: Donor }) {
 }
 
 function DonorMomento({ donor }: { donor: Donor }) {
+  const { symbol: sym } = useCurrency();
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [org, setOrg] = useState<Org | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
