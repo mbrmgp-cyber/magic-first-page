@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, Calendar, Gavel, Activity, Users, CheckCircle2, XCircle, MapPin, Link as LinkIcon, FileText, Eye } from "lucide-react";
 import { useI18n, bi } from "@/lib/i18n";
+import { useCurrency } from "@/lib/currency-context";
 
 export const Route = createFileRoute("/_authenticated/member/events")({
   head: () => ({ meta: [{ title: "Events & Decisions — Member View" }] }),
