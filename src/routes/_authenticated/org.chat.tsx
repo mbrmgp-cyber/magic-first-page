@@ -247,8 +247,10 @@ function InteractionsPanel({ ctx }: { ctx: Ctx }) {
       return data ?? [];
     },
   });
-  const [picked, setPicked] = useState<any | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [composeOpen, setComposeOpen] = useState(false);
   const [tpl, setTpl] = useState<Tpl | null>(null);
+  const [customText, setCustomText] = useState("");
   const [sending, setSending] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -256,24 +258,45 @@ function InteractionsPanel({ ctx }: { ctx: Ctx }) {
     !search.trim() || m.name?.toLowerCase().includes(search.toLowerCase()) || m.member_code?.toLowerCase().includes(search.toLowerCase())
   ).filter(m => m.id !== ctx.myMemberId), [membersQ.data, search, ctx.myMemberId]);
 
+  const committeeMembers = useMemo(
+    () => (membersQ.data ?? []).filter(m => m.role && m.id !== ctx.myMemberId),
+    [membersQ.data, ctx.myMemberId],
+  );
+
+  function toggle(id: string) {
+    setSelectedIds(prev => {
+      const n = new Set(prev);
+      n.has(id) ? n.delete(id) : n.add(id);
+      return n;
+    });
+  }
+  function selectAllCommittee() {
+    setSelectedIds(new Set(committeeMembers.map(m => m.id)));
+  }
+  function clearSelection() { setSelectedIds(new Set()); }
+
   async function send() {
-    if (!picked || !tpl) return;
-    setSending(true);
+    if (selectedIds.size === 0 || !tpl) return;
     const t = TEMPLATES[tpl];
-    const { error } = await supabase.from("chat_interactions").insert({
+    const msg_te = t.custom ? customText.trim() : t.msg_te;
+    const msg_en = t.custom ? customText.trim() : t.msg_en;
+    if (t.custom && !msg_te) return toast.error(pick("సందేశం రాయండి", "Please type a message"));
+    setSending(true);
+    const rows = Array.from(selectedIds).map(rid => ({
       org_id: ctx.orgId,
       sender_user_id: ctx.userId,
       sender_member_id: ctx.myMemberId,
-      recipient_member_id: picked.id,
+      recipient_member_id: rid,
       template_type: tpl,
-      message_te: t.msg_te,
-      message_en: t.msg_en,
+      message_te: msg_te,
+      message_en: msg_en,
       status: "pending",
-    });
+    }));
+    const { error } = await supabase.from("chat_interactions").insert(rows);
     setSending(false);
     if (error) return toast.error(error.message);
-    toast.success(pick("కార్యవర్గం ఆమోదం కోసం పంపబడింది", "Sent for committee approval"));
-    setPicked(null); setTpl(null);
+    toast.success(pick(`${rows.length} మందికి ఆమోదానికి పంపబడింది`, `Sent to ${rows.length} recipient(s) for approval`));
+    setComposeOpen(false); setTpl(null); setCustomText(""); clearSelection();
     sentQ.refetch();
   }
 
@@ -323,9 +346,32 @@ function InteractionsPanel({ ctx }: { ctx: Ctx }) {
         </Link>
       )}
 
-      <Card className="p-3 bg-zinc-950 border-zinc-800">
-        <p className="text-[11px] text-zinc-400 mb-2">{pick("ఒక సభ్యుని ఎంచుకోండి. వివాదాలను నివారించడానికి ముందుగా ఆమోదించబడిన 3 టెంప్లేట్‌లలో ఒకటి మాత్రమే పంపగలరు — ఉచిత టెక్స్ట్ నిషేధించబడింది.", "Pick a member. You can only send one of three pre-approved templates — free text is disabled to prevent disputes.")}</p>
+      <Card className="p-3 bg-zinc-950 border-zinc-800 space-y-2">
+        <p className="text-[11px] text-zinc-400">
+          {pick(
+            "ఒకరిని లేదా అనేకమందిని ఎంచుకోండి. కార్యవర్గానికి పంపాలంటే 'కార్యవర్గం ఎంచుకో' నొక్కండి. టెంప్లేట్ లేదా వ్యక్తిగత సందేశం (ఫ్రీ టెక్స్ట్) పంపవచ్చు — అన్నీ కార్యవర్గం ఆమోదం తర్వాతే గ్రహీతలకు చేరతాయి.",
+            "Select one or more members. Use ‘Select Committee’ to message the whole working committee. Send a template or a personal free-text message — everything is delivered only after committee approval.",
+          )}
+        </p>
         <Input placeholder={pick("సభ్యులను వెతకండి…", "Search members…")} value={search} onChange={e => setSearch(e.target.value)} className="bg-zinc-900 border-zinc-800 text-white" />
+        <div className="flex flex-wrap gap-2 pt-1">
+          <Button size="sm" variant="outline" onClick={selectAllCommittee}
+            className="border-[#ff8c28]/60 bg-[#ff8c28]/10 text-[#ff8c28] hover:bg-[#ff8c28]/20">
+            <ShieldCheck className="w-4 h-4 mr-1" /> {pick("కార్యవర్గం ఎంచుకో", "Select Committee")}
+          </Button>
+          {selectedIds.size > 0 && (
+            <>
+              <Button size="sm" variant="outline" onClick={clearSelection}
+                className="border-zinc-700 bg-zinc-900 text-zinc-200 hover:bg-zinc-800">
+                {pick(`ఎంపిక తీసివేయి (${selectedIds.size})`, `Clear (${selectedIds.size})`)}
+              </Button>
+              <Button size="sm" onClick={() => { setComposeOpen(true); setTpl(null); setCustomText(""); }}
+                className="bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-black">
+                <MessageSquare className="w-4 h-4 mr-1" /> {pick(`సందేశం రాయి (${selectedIds.size})`, `Compose (${selectedIds.size})`)}
+              </Button>
+            </>
+          )}
+        </div>
       </Card>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {filtered.map(m => {
@@ -333,14 +379,18 @@ function InteractionsPanel({ ctx }: { ctx: Ctx }) {
             ? pick(ROLE_LABEL[m.role]?.te ?? m.role, ROLE_LABEL[m.role]?.en ?? m.role)
             : pick(GENERAL_LABEL.te, GENERAL_LABEL.en);
           const isCommitteeMember = !!m.role;
+          const checked = selectedIds.has(m.id);
           return (
-            <button key={m.id} type="button" onClick={() => { setPicked(m); setTpl(null); }}
-              className="text-left p-3 rounded-lg bg-zinc-950 border border-zinc-800 hover:border-[#ff8c28] transition flex items-center gap-3">
+            <button key={m.id} type="button" onClick={() => toggle(m.id)}
+              className={`text-left p-3 rounded-lg border transition flex items-center gap-3 ${checked ? "bg-[#ff8c28]/10 border-[#ff8c28]" : "bg-zinc-950 border-zinc-800 hover:border-[#ff8c28]"}`}>
               <MemberAvatar name={m.name} url={m.photo_url} />
               <div className="min-w-0 flex-1">
                 <p className="text-sm text-white truncate">{m.name}</p>
                 <p className="text-[10px] text-zinc-500 font-mono">{m.member_code ?? "—"}</p>
                 <p className={`text-[10px] mt-0.5 truncate ${isCommitteeMember ? "text-[#ff8c28]" : "text-zinc-500"}`}>{roleLabel}</p>
+              </div>
+              <div className={`w-5 h-5 rounded border shrink-0 flex items-center justify-center ${checked ? "bg-[#ff8c28] border-[#ff8c28]" : "border-zinc-600"}`}>
+                {checked && <Check className="w-3.5 h-3.5 text-black" />}
               </div>
             </button>
           );
@@ -354,7 +404,7 @@ function InteractionsPanel({ ctx }: { ctx: Ctx }) {
           <div className="space-y-1">
             {sentQ.data.map(s => (
               <div key={s.id} className="flex items-center justify-between text-xs text-zinc-400 py-1 border-b border-zinc-800 last:border-0">
-                <span>{pick(TEMPLATES[s.template_type as Tpl]?.label_te ?? "", TEMPLATES[s.template_type as Tpl]?.label_en ?? "")}</span>
+                <span>{pick(TEMPLATES[s.template_type as Tpl]?.label_te ?? s.template_type, TEMPLATES[s.template_type as Tpl]?.label_en ?? s.template_type)}</span>
                 <span className={s.status === "approved" ? "text-green-400" : s.status === "rejected" ? "text-red-400" : "text-amber-400"}>{s.status.toUpperCase()}</span>
               </div>
             ))}
@@ -362,12 +412,14 @@ function InteractionsPanel({ ctx }: { ctx: Ctx }) {
         </Card>
       )}
 
-      <Dialog open={!!picked} onOpenChange={(o) => !o && (setPicked(null), setTpl(null))}>
+      <Dialog open={composeOpen} onOpenChange={(o) => { if (!o) { setComposeOpen(false); setTpl(null); setCustomText(""); } }}>
         <DialogContent className="bg-zinc-950 border-zinc-800 text-white">
           <DialogHeader>
-            <DialogTitle className="text-white">{pick("వీరికి:", "To:")} {picked?.name}</DialogTitle>
+            <DialogTitle className="text-white">
+              {pick(`${selectedIds.size} మందికి పంపు`, `Send to ${selectedIds.size} recipient(s)`)}
+            </DialogTitle>
           </DialogHeader>
-          <div className="space-y-2">
+          <div className="space-y-2 max-h-[60vh] overflow-y-auto">
             {(Object.keys(TEMPLATES) as Tpl[]).map(k => {
               const t = TEMPLATES[k];
               const Icon = t.icon;
@@ -376,17 +428,32 @@ function InteractionsPanel({ ctx }: { ctx: Ctx }) {
                 <button key={k} type="button" onClick={() => setTpl(k)}
                   className={`w-full text-left p-3 rounded-lg border transition flex items-start gap-3 ${active ? "border-[#ff8c28] bg-[#ff8c28]/10" : "border-zinc-800 bg-zinc-900 hover:border-zinc-600"}`}>
                   <Icon className="w-5 h-5 mt-0.5 shrink-0" style={{ color: t.tone }} />
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-white">{pick(t.label_te, t.label_en)}</p>
-                    <p className="text-xs text-zinc-300 mt-1">{pick(t.msg_te, t.msg_en)}</p>
+                    {!t.custom && <p className="text-xs text-zinc-300 mt-1">{pick(t.msg_te, t.msg_en)}</p>}
+                    {t.custom && active && (
+                      <Textarea
+                        autoFocus
+                        rows={4}
+                        maxLength={1000}
+                        placeholder={pick("మీ వ్యక్తిగత సందేశం రాయండి…", "Type your personal message…")}
+                        value={customText}
+                        onChange={e => setCustomText(e.target.value)}
+                        onClick={e => e.stopPropagation()}
+                        className="mt-2 bg-zinc-950 border-zinc-700 text-white"
+                      />
+                    )}
+                    {t.custom && !active && (
+                      <p className="text-xs text-zinc-400 mt-1">{pick("మీ స్వంత మాటల్లో సందేశం రాయండి (కార్యవర్గం ఆమోదం అవసరం).", "Write in your own words (committee approval required).")}</p>
+                    )}
                   </div>
                 </button>
               );
             })}
           </div>
           <DialogFooter>
-            <Button variant="outline" className="border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800" onClick={() => { setPicked(null); setTpl(null); }}>{pick("రద్దు", "Cancel")}</Button>
-            <Button disabled={!tpl || sending} onClick={send} className="bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-black">{sending ? pick("పంపుతోంది…", "Sending…") : pick("ఆమోదానికి పంపండి", "Send for Approval")}</Button>
+            <Button variant="outline" className="border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800" onClick={() => { setComposeOpen(false); setTpl(null); setCustomText(""); }}>{pick("రద్దు", "Cancel")}</Button>
+            <Button disabled={!tpl || sending || (TEMPLATES[tpl!]?.custom && !customText.trim())} onClick={send} className="bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-black">{sending ? pick("పంపుతోంది…", "Sending…") : pick("ఆమోదానికి పంపండి", "Send for Approval")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
