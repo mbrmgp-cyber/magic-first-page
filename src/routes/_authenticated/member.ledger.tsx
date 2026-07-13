@@ -39,9 +39,9 @@ function MemberLedger() {
         {d && (
           <>
             <div className="grid grid-cols-3 gap-3">
-              <Stat label={b("మొత్తం తీసుకున్నది", "Total Received")} value={d.totals.received} accent="#fbbf24" />
-              <Stat label={b("మొత్తం చెల్లించినది", "Total Repaid")} value={d.totals.repaid} accent="#34d399" />
-              <Stat label={b("బాకీ", "Outstanding")} value={d.totals.balance} accent="#ff8c28" />
+              <Stat label={b("మొత్తం తీసుకున్నది", "Total Received")} value={d.totals.received} accent="#fbbf24" sym={sym} />
+              <Stat label={b("మొత్తం చెల్లించినది", "Total Repaid")} value={d.totals.repaid} accent="#34d399" sym={sym} />
+              <Stat label={b("బాకీ", "Outstanding")} value={d.totals.balance} accent="#ff8c28" sym={sym} />
             </div>
 
             <Card className="bg-zinc-950 border-zinc-800 overflow-x-auto">
