@@ -1,0 +1,2 @@
+ALTER TABLE public.chat_interactions DROP CONSTRAINT chat_interactions_template_type_check;
+ALTER TABLE public.chat_interactions ADD CONSTRAINT chat_interactions_template_type_check CHECK (template_type = ANY (ARRAY['appreciation'::text, 'condolence'::text, 'help'::text, 'personal'::text]));
