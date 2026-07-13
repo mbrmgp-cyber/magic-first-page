@@ -273,25 +273,53 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
   function handlePrint() {
     const f = frontRef.current; const b = backRef.current;
     if (!f || !b) return;
-    const w = window.open("", "_blank", "width=900,height=700");
-    if (!w) return;
-    w.document.write(`<!DOCTYPE html><html><head><title>ID Card - ${member.name}</title>
+    const html = `<!DOCTYPE html><html><head><title>ID Card - ${member.name}</title>
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Noto+Sans+Telugu:wght@400;600;700;800;900&family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap">
       <style>
         @page { size: 85.6mm 54mm; margin: 0; }
         * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        body { margin: 0; font-family: "Noto Sans Telugu", "Noto Sans Devanagari", system-ui, -apple-system, sans-serif; }
+        html, body { margin: 0; background: #fff; font-family: "Noto Sans Telugu", "Noto Sans Devanagari", system-ui, -apple-system, sans-serif; }
         .pg { page-break-after: always; }
         .pg:last-child { page-break-after: auto; }
       </style></head><body>
       <div class="pg">${f.outerHTML}</div>
       <div class="pg">${b.outerHTML}</div>
-      </body></html>`);
-    w.document.close();
-    w.focus();
-    setTimeout(() => { w.print(); w.close(); }, 350);
+      </body></html>`;
+
+    // Use a hidden iframe — mobile browsers (Android Chrome, iOS Safari) block
+    // window.open popups and close them before the print dialog appears.
+    const iframe = document.createElement("iframe");
+    iframe.setAttribute("aria-hidden", "true");
+    iframe.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0;";
+    document.body.appendChild(iframe);
+    const doc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!doc) { document.body.removeChild(iframe); return; }
+    doc.open(); doc.write(html); doc.close();
+
+    const trigger = async () => {
+      try {
+        const win = iframe.contentWindow!;
+        // Wait for images (photo, logo, signature, QR) to load
+        const imgs = Array.from(doc.images || []);
+        await Promise.all(imgs.map((im) => im.complete ? Promise.resolve() : new Promise((res) => {
+          im.addEventListener("load", res, { once: true });
+          im.addEventListener("error", res, { once: true });
+        })));
+        // Wait for fonts
+        try { await (doc as any).fonts?.ready; } catch {}
+        win.focus();
+        win.print();
+      } catch (e) {
+        console.error("Print failed", e);
+      } finally {
+        setTimeout(() => { try { document.body.removeChild(iframe); } catch {} }, 2000);
+      }
+    };
+
+    if (doc.readyState === "complete") setTimeout(trigger, 300);
+    else iframe.addEventListener("load", () => setTimeout(trigger, 300), { once: true });
   }
 
   const joined = member.joined_date
