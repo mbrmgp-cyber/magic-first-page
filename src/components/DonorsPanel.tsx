@@ -34,6 +34,7 @@ import { DonorMomentoButton } from "@/components/DonorMomento";
 type Donor = any;
 
 export function DonorsPanel({ recognitionOnly = false }: { recognitionOnly?: boolean }) {
+  const { symbol: sym } = useCurrency();
   const list = useServerFn(listDonors);
   const [donors, setDonors] = useState<Donor[]>([]);
   const [orgId, setOrgId] = useState<string | null>(null);
