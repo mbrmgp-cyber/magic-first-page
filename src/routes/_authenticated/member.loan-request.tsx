@@ -211,7 +211,7 @@ function LoanRequestPage() {
             <Card key={r.id} className="bg-zinc-950 border-white/10 p-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-semibold">₹ {Number(r.requested_amount).toLocaleString()}</div>
+                  <div className="font-semibold">{sym} {Number(r.requested_amount).toLocaleString()}</div>
                   <div className="text-xs text-white/60">
                     {r.reason}
                     {r.tenure_months ? ` · ${r.tenure_months} ${pick("నెలలు", "mo")}` : ""}
