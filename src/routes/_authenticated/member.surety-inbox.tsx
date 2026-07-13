@@ -38,6 +38,7 @@ function SignedImg({ path, className }: { path?: string | null; className?: stri
 
 function SuretyInbox() {
   const { lang } = useI18n();
+  const { symbol: sym } = useCurrency();
   const isTe = lang !== "en";
   const pick = (te: string, en: string) => (lang === "en" ? en : localizeText({ te, en }, lang));
 
