@@ -796,6 +796,7 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
   const addL = useServerFn(addMemberLoan);
   const closeL = useServerFn(closeLoan);
   const delL = useServerFn(deleteLoan);
+  const { symbol } = useCurrency();
 
   const [loans, setLoans] = useState<Loan[]>([]);
   const [loading, setLoading] = useState(true);
