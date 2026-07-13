@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, XCircle, Clock, Upload, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { localizeText, useI18n } from "@/lib/i18n";
+import { useCurrency } from "@/lib/currency-context";
 import {
   listAuctionPayments,
   uploadAuctionPayment,
