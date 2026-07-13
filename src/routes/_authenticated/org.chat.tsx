@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { ArrowLeft, Megaphone, Users, ShieldCheck, ThumbsUp, HandHeart, Handshake, CheckCircle2, XCircle, Inbox, Loader2, User, IndianRupee } from "lucide-react";
+import { ArrowLeft, Megaphone, Users, ShieldCheck, ThumbsUp, HandHeart, Handshake, CheckCircle2, XCircle, Inbox, Loader2, User, IndianRupee, MessageSquare, Check } from "lucide-react";
 import { toast } from "sonner";
 import { useI18n, localizeText } from "@/lib/i18n";
 
