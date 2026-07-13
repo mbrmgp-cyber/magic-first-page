@@ -5,6 +5,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { Award, Printer, User } from "lucide-react";
+import { useCurrency } from "@/lib/currency-context";
 
 type Donor = {
   id: string;
