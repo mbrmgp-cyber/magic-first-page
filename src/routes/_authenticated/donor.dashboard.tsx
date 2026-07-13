@@ -19,6 +19,7 @@ export const Route = createFileRoute("/_authenticated/donor/dashboard")({
 function DonorDashboard() {
   const load = useServerFn(getMyDonor);
   const { lang } = useI18n();
+  const { symbol: sym } = useCurrency();
   const lt = (en: string, te: string) => localizeText({ en, te }, lang);
   const [loading, setLoading] = useState(true);
   const [donor, setDonor] = useState<any>(null);
