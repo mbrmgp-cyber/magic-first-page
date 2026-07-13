@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { useI18n, localizeText } from "@/lib/i18n";
+import { useCurrency } from "@/lib/currency-context";
 import { HandHeart, User, IndianRupee, Award, Coins, Clock, LogOut, ArrowLeft, Eye, Trophy, Sparkles, Calendar } from "lucide-react";
 import { toast } from "sonner";
 
