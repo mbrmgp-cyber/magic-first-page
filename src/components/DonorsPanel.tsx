@@ -109,6 +109,7 @@ export function DonorsPanel({ recognitionOnly = false }: { recognitionOnly?: boo
 
 function DonorCard({ donor, threshold, onChange, recognitionMode }:
   { donor: Donor; threshold: number; onChange: () => void; recognitionMode: boolean }) {
+  const { symbol: sym } = useCurrency();
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
   useEffect(() => {
