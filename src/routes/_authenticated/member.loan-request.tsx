@@ -116,7 +116,7 @@ function LoanRequestPage() {
         <Card className="bg-zinc-950 border-white/10 p-4 space-y-4">
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <Label className="text-white/80">{pick("కోరుకునే లోన్ మొత్తం (${sym})", `Loan amount (${sym})`)} <span className="text-red-400">*</span></Label>
+              <Label className="text-white/80">{pick(`కోరుకునే లోన్ మొత్తం (${sym})`, `Loan amount (${sym})`)} <span className="text-red-400">*</span></Label>
               <Input
                 type="number" min="1" step="1" required inputMode="numeric"
                 value={amount} onChange={(e) => setAmount(e.target.value)}
