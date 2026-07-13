@@ -226,7 +226,7 @@ function MemberCard({ member, orgId, org, onReview, onChange }:
             <p className="text-xs text-muted-foreground">పరిచయం: {member.introducer.name}</p>
           )}
           {Number(member.committee_fee_paid) > 0 && (
-            <p className="text-xs">కమిటీ Fee: ₹{Number(member.committee_fee_paid).toFixed(2)}</p>
+            <p className="text-xs">కమిటీ Fee: {symbol}{Number(member.committee_fee_paid).toFixed(2)}</p>
           )}
         </div>
       </div>
