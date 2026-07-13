@@ -919,7 +919,7 @@ function LoanCard({ loan, orgId, onChange, onClose, onDelete }:
       <div className="grid grid-cols-3 gap-2 mt-2 text-center text-xs" style={{ color: "inherit" }}>
         <div className="rounded p-2" style={{ backgroundColor: "color-mix(in srgb, currentColor 10%, transparent)", color: "inherit" }}>
           <div style={{ color: "inherit", opacity: 0.75 }}>Total Due</div>
-          <div className="font-semibold" style={{ color: "inherit" }}>₹{Number(s.total_due ?? loan.principal).toLocaleString("en-IN")}</div>
+          <div className="font-semibold" style={{ color: "inherit" }}>{symbol}{Number(s.total_due ?? loan.principal).toLocaleString("en-IN")}</div>
         </div>
         <div className="rounded p-2" style={{ backgroundColor: "color-mix(in srgb, currentColor 10%, transparent)", color: "inherit" }}>
           <div style={{ color: "inherit", opacity: 0.75 }}>Paid</div>
