@@ -43,6 +43,7 @@ function SignedImage({ path, alt, className }: { path?: string | null; alt: stri
 
 function LoanRequestsAdmin() {
   const { lang } = useI18n();
+  const { symbol: sym } = useCurrency();
   const lt = (en: string, te: string) => lang === "te" ? te : en;
   const listFn = useServerFn(listOrgLoanRequests);
   const approveFn = useServerFn(approveLoanRequest);
