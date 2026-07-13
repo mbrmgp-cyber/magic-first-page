@@ -159,7 +159,7 @@ function DonorCard({ donor, threshold, onChange, recognitionMode }:
             </p>
           )}
           <p className="text-sm font-semibold mt-1">
-            మొత్తం విరాళం: <span className="text-emerald-700">₹{total.toLocaleString("en-IN")}</span>
+            మొత్తం విరాళం: <span className="text-emerald-700">{sym}{total.toLocaleString("en-IN")}</span>
           </p>
           {recognitionMode && (
             <p className="text-xs mt-1">
