@@ -268,7 +268,7 @@ function DonorMomento({ donor }: { donor: Donor }) {
               letterSpacing: 0.5,
             }}
           >
-            ₹ {amount.toLocaleString("en-IN")}
+            {sym} {amount.toLocaleString("en-IN")}
           </div>
 
           <div style={{ flex: 1 }} />
