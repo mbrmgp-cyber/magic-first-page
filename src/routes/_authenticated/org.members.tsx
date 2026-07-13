@@ -954,7 +954,7 @@ function LoanCard({ loan, orgId, onChange, onClose, onDelete }:
               {pays.map((p) => (
                 <div key={p.id} className="flex justify-between border-b pb-1">
                   <span>{new Date(p.payment_date).toLocaleDateString("te-IN")}</span>
-                  <span className="font-medium">₹{Number(p.amount).toLocaleString("en-IN")}</span>
+                  <span className="font-medium">{symbol}{Number(p.amount).toLocaleString("en-IN")}</span>
                 </div>
               ))}
             </div>
