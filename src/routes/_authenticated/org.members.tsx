@@ -506,6 +506,7 @@ function EditMemberDialog({ member, onChange }: { member: Member; onChange: () =
 function ProfileEdit({ member, onSaved }: { member: Member; onSaved: () => void }) {
   const upd = useServerFn(updateMemberProfile);
   const toggleActive = useServerFn(setMemberActive);
+  const { symbol } = useCurrency();
   const [f, setF] = useState({
     name: member.name ?? "",
     father_name: member.father_name ?? "",
