@@ -942,7 +942,7 @@ function LoanCard({ loan, orgId, onChange, onClose, onDelete }:
         <div className="mt-2 space-y-2 border-t pt-2">
           {loan.status !== "closed" && (
             <div className="flex gap-2 items-end">
-              <div className="flex-1"><Label className="text-xs">Amount ₹</Label>
+              <div className="flex-1"><Label className="text-xs">Amount {symbol}</Label>
                 <Input type="number" step="0.01" value={amt} onChange={(e) => setAmt(e.target.value)} /></div>
               <div><Label className="text-xs">Date</Label>
                 <DateInput value={date} onChange={(e) => setDate(e.target.value)} /></div>
