@@ -927,7 +927,7 @@ function LoanCard({ loan, orgId, onChange, onClose, onDelete }:
         </div>
         <div className="rounded p-2" style={{ backgroundColor: "color-mix(in srgb, currentColor 10%, transparent)", color: "inherit" }}>
           <div style={{ color: "inherit", opacity: 0.75 }}>Balance</div>
-          <div className="font-semibold" style={{ color: "inherit" }}>₹{Number(s.balance ?? 0).toLocaleString("en-IN")}</div>
+          <div className="font-semibold" style={{ color: "inherit" }}>{symbol}{Number(s.balance ?? 0).toLocaleString("en-IN")}</div>
         </div>
       </div>
       <p className="text-[10px] text-muted-foreground mt-1 text-center">
