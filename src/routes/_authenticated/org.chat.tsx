@@ -17,12 +17,13 @@ export const Route = createFileRoute("/_authenticated/org/chat")({
   component: ChatHub,
 });
 
-type Tpl = "appreciation" | "condolence" | "help";
+type Tpl = "appreciation" | "condolence" | "help" | "personal";
 
-const TEMPLATES: Record<Tpl, { icon: any; label_en: string; label_te: string; msg_en: string; msg_te: string; tone: string }> = {
+const TEMPLATES: Record<Tpl, { icon: any; label_en: string; label_te: string; msg_en: string; msg_te: string; tone: string; custom?: boolean }> = {
   appreciation: { icon: ThumbsUp, label_en: "Appreciation", label_te: "ప్రశంసించడం", msg_en: "Great job — thank you for your service.", msg_te: "మీ సేవలకు ధన్యవాదాలు. చాలా బాగా చేశారు.", tone: "#16a34a" },
   condolence: { icon: HandHeart, label_en: "Condolence", label_te: "ఓదార్చడం", msg_en: "Stay strong — we are with you.", msg_te: "ధైర్యంగా ఉండండి. మేము మీతో ఉన్నాము.", tone: "#dc2626" },
   help: { icon: Handshake, label_en: "Offer Help", label_te: "సహాయం ప్రకటించడం", msg_en: "I'm ready to support you.", msg_te: "నేను సహాయం అందించడానికి సిద్ధంగా ఉన్నాను.", tone: "#f59e0b" },
+  personal: { icon: MessageSquare, label_en: "Personal Message", label_te: "వ్యక్తిగత సందేశం", msg_en: "", msg_te: "", tone: "#38bdf8", custom: true },
 };
 
 const ROLE_LABEL: Record<string, { te: string; en: string }> = {
