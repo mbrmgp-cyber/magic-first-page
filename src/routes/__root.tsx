@@ -161,9 +161,14 @@ function RootComponent() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const path = window.location.pathname;
-    // Skip splash entirely on public registration entry points so unauthenticated
-    // users see the form immediately with no loading screen.
-    if (path === "/register" || path === "/member/register") {
+    // Skip splash entirely on public marketing / registration entry points so
+    // unauthenticated users see the page immediately with no loading screen.
+    if (
+      path === "/" ||
+      path === "/varadhi" ||
+      path === "/register" ||
+      path === "/member/register"
+    ) {
       setShowSplash(false);
       return;
     }
