@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Sparkles, Bell } from "lucide-react";
+import { ArrowLeft, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/varadhi")({
   head: () => ({
@@ -52,11 +52,6 @@ function VaradhiComingSoon() {
         <p className="mt-3 text-sm text-[#f5f0e0]/50 max-w-md">
           A dedicated experience is being crafted. Details will be shared as we approach launch.
         </p>
-
-        <div className="mt-10 flex items-center gap-2 text-xs text-[#f5f0e0]/50">
-          <Bell className="h-3.5 w-3.5" />
-          <span>varadhi.mbrplatform.com</span>
-        </div>
 
         {/* Ornamental divider */}
         <div className="mt-14 flex items-center gap-3 text-[#c9a84c]/60">
