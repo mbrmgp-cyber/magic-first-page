@@ -119,9 +119,6 @@ function PlatformPortal() {
           </Link>
         </div>
 
-        <div className="mt-4 text-xs text-[#f5f0e0]/40">
-          mbr.mbrplatform.com &nbsp;·&nbsp; varadhi.mbrplatform.com
-        </div>
       </section>
 
       {/* Products */}
