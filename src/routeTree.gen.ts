@@ -16,6 +16,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as OrgRegisterRouteImport } from './routes/org.register'
 import { Route as MemberRegisterRouteImport } from './routes/member.register'
+import { Route as MCodeRouteImport } from './routes/m.$code'
 import { Route as DonorRegisterRouteImport } from './routes/donor.register'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedOrgThemeRouteImport } from './routes/_authenticated/org.theme'
@@ -79,6 +80,11 @@ const OrgRegisterRoute = OrgRegisterRouteImport.update({
 const MemberRegisterRoute = MemberRegisterRouteImport.update({
   id: '/member/register',
   path: '/member/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MCodeRoute = MCodeRouteImport.update({
+  id: '/m/$code',
+  path: '/m/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DonorRegisterRoute = DonorRegisterRouteImport.update({
@@ -257,6 +263,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/donor/register': typeof DonorRegisterRoute
+  '/m/$code': typeof MCodeRoute
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
   '/donor/dashboard': typeof AuthenticatedDonorDashboardRoute
@@ -295,6 +302,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/donor/register': typeof DonorRegisterRoute
+  '/m/$code': typeof MCodeRoute
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
   '/donor/dashboard': typeof AuthenticatedDonorDashboardRoute
@@ -335,6 +343,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/donor/register': typeof DonorRegisterRoute
+  '/m/$code': typeof MCodeRoute
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
   '/_authenticated/donor/dashboard': typeof AuthenticatedDonorDashboardRoute
@@ -375,6 +384,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/admin'
     | '/donor/register'
+    | '/m/$code'
     | '/member/register'
     | '/org/register'
     | '/donor/dashboard'
@@ -413,6 +423,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/admin'
     | '/donor/register'
+    | '/m/$code'
     | '/member/register'
     | '/org/register'
     | '/donor/dashboard'
@@ -452,6 +463,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/_authenticated/admin'
     | '/donor/register'
+    | '/m/$code'
     | '/member/register'
     | '/org/register'
     | '/_authenticated/donor/dashboard'
@@ -491,6 +503,7 @@ export interface RootRouteChildren {
   NewOrganizationRoute: typeof NewOrganizationRoute
   RegisterRoute: typeof RegisterRoute
   DonorRegisterRoute: typeof DonorRegisterRoute
+  MCodeRoute: typeof MCodeRoute
   MemberRegisterRoute: typeof MemberRegisterRoute
   OrgRegisterRoute: typeof OrgRegisterRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -547,6 +560,13 @@ declare module '@tanstack/react-router' {
       path: '/member/register'
       fullPath: '/member/register'
       preLoaderRoute: typeof MemberRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/m/$code': {
+      id: '/m/$code'
+      path: '/m/$code'
+      fullPath: '/m/$code'
+      preLoaderRoute: typeof MCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/donor/register': {
@@ -830,6 +850,7 @@ const rootRouteChildren: RootRouteChildren = {
   NewOrganizationRoute: NewOrganizationRoute,
   RegisterRoute: RegisterRoute,
   DonorRegisterRoute: DonorRegisterRoute,
+  MCodeRoute: MCodeRoute,
   MemberRegisterRoute: MemberRegisterRoute,
   OrgRegisterRoute: OrgRegisterRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
