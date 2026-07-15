@@ -5,6 +5,7 @@ import { ArrowLeft, FileSpreadsheet, FileText, RefreshCw } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getMasterLedger } from "@/lib/accounts.functions";
+import { downloadMasterLedgerPdfCanvas } from "@/lib/loan-pdf";
 import { useCurrency } from "@/lib/currency-context";
 import { useI18n } from "@/lib/i18n";
 
@@ -50,7 +51,7 @@ function MasterLedgerPage() {
   }
 
   async function exportPDF() {
-    await downloadMasterLedgerPdf({
+    await downloadMasterLedgerPdfCanvas({
       title: lt("Master Ledger", "మాస్టర్ లెడ్జర్"),
       orgName: lt("Society", "సొసైటీ"),
       dateText: new Date().toLocaleDateString(lang === "te" ? "te-IN" : "en-IN", {
@@ -63,6 +64,7 @@ function MasterLedgerPage() {
       headers: H,
       fmt,
       totalLabel: H.totalLabel,
+      fileName: `master-ledger-${new Date().toISOString().slice(0, 10)}.pdf`,
     });
   }
 
@@ -141,216 +143,4 @@ function MasterLedgerPage() {
       </div>
     </div>
   );
-}
-
-type MasterLedgerPdfRow = {
-  member_id: string;
-  member_name: string;
-  old_balance: number;
-  principal_collected: number;
-  interest_collected: number;
-  new_loan: number;
-  net_balance: number;
-};
-
-type MasterLedgerPdfTotals = {
-  outstanding: number;
-  principal: number;
-  interest: number;
-  newLoan: number;
-  net: number;
-};
-
-type MasterLedgerHeaders = {
-  id: string;
-  name: string;
-  oldBal: string;
-  principal: string;
-  interest: string;
-  newLoan: string;
-  total: string;
-};
-
-type PdfColumn = {
-  label: string;
-  width: number;
-  align?: CanvasTextAlign;
-  value: (row: MasterLedgerPdfRow) => string;
-  bold?: boolean;
-};
-
-async function downloadMasterLedgerPdf({
-  title,
-  orgName,
-  dateText,
-  rows,
-  totals,
-  headers,
-  fmt,
-  totalLabel,
-}: {
-  title: string;
-  orgName: string;
-  dateText: string;
-  rows: MasterLedgerPdfRow[];
-  totals: MasterLedgerPdfTotals;
-  headers: MasterLedgerHeaders;
-  fmt: (n: number) => string;
-  totalLabel: string;
-}) {
-  const { jsPDF } = await import("jspdf");
-  await document.fonts?.ready;
-
-  const pageWidth = 1240;
-  const pageHeight = 1754;
-  const marginX = 56;
-  const headerHeight = 206;
-  const footerHeight = 78;
-  const tableHeaderHeight = 42;
-  const rowHeight = 38;
-  const totalHeight = 42;
-
-  const columns: PdfColumn[] = [
-    { label: headers.id, width: 92, value: (r) => r.member_id },
-    { label: headers.name, width: 270, value: (r) => r.member_name },
-    { label: headers.oldBal, width: 154, align: "right", value: (r) => fmt(r.old_balance) },
-    { label: headers.principal, width: 154, align: "right", value: (r) => fmt(r.principal_collected) },
-    { label: headers.interest, width: 154, align: "right", value: (r) => fmt(r.interest_collected) },
-    { label: headers.newLoan, width: 154, align: "right", value: (r) => fmt(r.new_loan) },
-    { label: headers.total, width: 154, align: "right", value: (r) => fmt(r.net_balance), bold: true },
-  ];
-
-  const tableWidth = columns.reduce((sum, c) => sum + c.width, 0);
-  const rowsPerPage = Math.max(
-    1,
-    Math.floor((pageHeight - headerHeight - footerHeight - tableHeaderHeight - totalHeight) / rowHeight),
-  );
-  const rowChunks = rows.length
-    ? Array.from({ length: Math.ceil(rows.length / rowsPerPage) }, (_, i) => rows.slice(i * rowsPerPage, (i + 1) * rowsPerPage))
-    : [[] as MasterLedgerPdfRow[]];
-
-  const fontFamily = '"Noto Sans Telugu", "Noto Sans", "Segoe UI", Arial, sans-serif';
-  const setFont = (ctx: CanvasRenderingContext2D, size: number, weight: number | string = 400) => {
-    ctx.font = `${weight} ${size}px ${fontFamily}`;
-  };
-  const drawFittedText = (
-    ctx: CanvasRenderingContext2D,
-    text: string,
-    x: number,
-    y: number,
-    width: number,
-    size: number,
-    align: CanvasTextAlign = "left",
-    weight: number | string = 400,
-  ) => {
-    const safe = String(text ?? "");
-    let fittedSize = size;
-    setFont(ctx, fittedSize, weight);
-    while (fittedSize > 9 && ctx.measureText(safe).width > width) {
-      fittedSize -= 1;
-      setFont(ctx, fittedSize, weight);
-    }
-    ctx.textAlign = align;
-    ctx.textBaseline = "middle";
-    const drawX = align === "right" ? x + width : align === "center" ? x + width / 2 : x;
-    ctx.fillText(safe, drawX, y);
-  };
-
-  const buildPage = (pageRows: MasterLedgerPdfRow[], pageIndex: number, pageCount: number) => {
-    const canvas = document.createElement("canvas");
-    canvas.width = pageWidth;
-    canvas.height = pageHeight;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error("PDF canvas is not available");
-
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, pageWidth, pageHeight);
-
-    ctx.fillStyle = "#8b1a1a";
-    drawFittedText(ctx, orgName, (pageWidth - 540) / 2, 78, 540, 28, "center", 800);
-    ctx.fillStyle = "#111111";
-    drawFittedText(ctx, title, (pageWidth - 540) / 2, 116, 540, 20, "center", 700);
-    ctx.fillStyle = "#555555";
-    drawFittedText(ctx, dateText, (pageWidth - 540) / 2, 146, 540, 14, "center", 400);
-
-    const lineY = 176;
-    const lineX = marginX;
-    const lineW = tableWidth;
-    ctx.fillStyle = "#ff9933";
-    ctx.fillRect(lineX, lineY, lineW * 0.44, 5);
-    ctx.fillStyle = "#f7f7f7";
-    ctx.fillRect(lineX + lineW * 0.44, lineY, lineW * 0.12, 5);
-    ctx.fillStyle = "#138808";
-    ctx.fillRect(lineX + lineW * 0.56, lineY, lineW * 0.44, 5);
-
-    let y = headerHeight;
-    let x = marginX;
-    ctx.strokeStyle = "#b8b8b8";
-    ctx.lineWidth = 1;
-    columns.forEach((col) => {
-      ctx.fillStyle = "#f4e6d0";
-      ctx.fillRect(x, y, col.width, tableHeaderHeight);
-      ctx.strokeRect(x, y, col.width, tableHeaderHeight);
-      ctx.fillStyle = "#111111";
-      drawFittedText(ctx, col.label, x + 8, y + tableHeaderHeight / 2, col.width - 16, 13, col.align ?? "left", 700);
-      x += col.width;
-    });
-
-    y += tableHeaderHeight;
-    pageRows.forEach((row, index) => {
-      x = marginX;
-      ctx.fillStyle = index % 2 ? "#ffffff" : "#fff7ed";
-      ctx.fillRect(marginX, y, tableWidth, rowHeight);
-      columns.forEach((col) => {
-        ctx.strokeStyle = "#c4c4c4";
-        ctx.strokeRect(x, y, col.width, rowHeight);
-        ctx.fillStyle = "#111111";
-        drawFittedText(ctx, col.value(row), x + 8, y + rowHeight / 2, col.width - 16, 13, col.align ?? "left", col.bold ? 700 : 400);
-        x += col.width;
-      });
-      y += rowHeight;
-    });
-
-    if (pageIndex === pageCount - 1) {
-      x = marginX;
-      ctx.fillStyle = "#dcfce7";
-      ctx.fillRect(marginX, y, tableWidth, totalHeight);
-      const totalValues = [
-        totalLabel,
-        "",
-        fmt(totals.outstanding),
-        fmt(totals.principal),
-        fmt(totals.interest),
-        fmt(totals.newLoan),
-        fmt(totals.net),
-      ];
-      columns.forEach((col, index) => {
-        ctx.strokeStyle = "#a8c8ad";
-        ctx.strokeRect(x, y, col.width, totalHeight);
-        ctx.fillStyle = "#111111";
-        const label = index === 0 ? totalValues[0] : index === 1 ? "" : totalValues[index];
-        drawFittedText(ctx, label, x + 8, y + totalHeight / 2, col.width - 16, 14, index < 2 ? "left" : "right", 800);
-        x += col.width;
-      });
-    }
-
-    const footerY = pageHeight - 54;
-    ctx.strokeStyle = "#dddddd";
-    ctx.beginPath();
-    ctx.moveTo(marginX, footerY - 18);
-    ctx.lineTo(marginX + tableWidth, footerY - 18);
-    ctx.stroke();
-    ctx.fillStyle = "#666666";
-    drawFittedText(ctx, `Download from MBR APP · ${pageIndex + 1}/${pageCount}`, (pageWidth - 520) / 2, footerY, 520, 12, "center", 400);
-
-    return canvas;
-  };
-
-  const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-  rowChunks.forEach((chunk, index) => {
-    if (index > 0) pdf.addPage("a4", "portrait");
-    const canvas = buildPage(chunk, index, rowChunks.length);
-    pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, 210, 297, undefined, "FAST");
-  });
-  pdf.save(`master-ledger-${new Date().toISOString().slice(0, 10)}.pdf`);
 }

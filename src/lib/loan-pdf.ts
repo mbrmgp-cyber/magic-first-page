@@ -3,14 +3,30 @@
 // to a canvas using the loaded "Noto Sans Telugu" web font, then embed the
 // canvas as a PNG page in the PDF.
 
-const FONT_FAMILY = '"Noto Sans Telugu", "Noto Sans", "Segoe UI", Arial, sans-serif';
+const TELUGU_FONT = '"Noto Sans Telugu"';
+const FONT_FAMILY = `${TELUGU_FONT}, "Noto Sans", "Arial Unicode MS", "Segoe UI", Arial, sans-serif`;
+const FONT_SAMPLE = "చిట్వేల్ హెల్ప్ లైన్ సొసైటీ ₹ 123";
 
 async function ensureFonts() {
+  if (typeof document === "undefined") return;
   try {
-    await (document as any).fonts?.ready;
-    await (document as any).fonts?.load?.(`400 14px ${FONT_FAMILY}`);
-    await (document as any).fonts?.load?.(`700 14px ${FONT_FAMILY}`);
+    const fonts = (document as any).fonts;
+    if (!fonts) return;
+    await Promise.all([400, 600, 700, 800, 900].map((weight) => fonts.load(`${weight} 18px ${TELUGU_FONT}`, FONT_SAMPLE)));
+    await Promise.race([
+      fonts.ready,
+      new Promise((resolve) => window.setTimeout(resolve, 2500)),
+    ]);
   } catch {}
+}
+
+function pdfText(text: unknown) {
+  // Some Android PDF viewers mangle the rupee glyph in generated PDFs. "Rs."
+  // stays readable everywhere while Telugu text is rendered through canvas.
+  return String(text ?? "")
+    .replace(/₹/g, "Rs.")
+    .replace(/د\.إ/g, "AED")
+    .replace(/د\.ك/g, "KWD");
 }
 
 function newPage(w = 1240, h = 1754) {
@@ -34,11 +50,12 @@ function drawText(
   y: number,
   opts: { size?: number; weight?: number | string; align?: CanvasTextAlign; color?: string; maxWidth?: number } = {},
 ) {
+  const safeText = pdfText(text);
   const size = opts.size ?? 14;
   let fitted = size;
   setFont(ctx, fitted, opts.weight ?? 400);
   if (opts.maxWidth) {
-    while (fitted > 9 && ctx.measureText(text).width > opts.maxWidth) {
+    while (fitted > 9 && ctx.measureText(safeText).width > opts.maxWidth) {
       fitted -= 1;
       setFont(ctx, fitted, opts.weight ?? 400);
     }
@@ -46,7 +63,7 @@ function drawText(
   ctx.fillStyle = opts.color ?? "#111111";
   ctx.textAlign = opts.align ?? "left";
   ctx.textBaseline = "alphabetic";
-  ctx.fillText(text, x, y);
+  ctx.fillText(safeText, x, y);
 }
 
 export type PersonalStatementInput = {
@@ -169,11 +186,12 @@ export async function downloadMasterLedgerPdfCanvas(input: {
     : [[] as MasterLedgerRow[]];
 
   const cellText = (ctx: CanvasRenderingContext2D, text: string, x: number, y: number, w: number, size: number, align: CanvasTextAlign, weight: number | string) => {
+    const safeText = pdfText(text);
     let s = size; setFont(ctx, s, weight);
-    while (s > 9 && ctx.measureText(text).width > w - 12) { s -= 1; setFont(ctx, s, weight); }
+    while (s > 9 && ctx.measureText(safeText).width > w - 12) { s -= 1; setFont(ctx, s, weight); }
     ctx.fillStyle = "#111"; ctx.textAlign = align; ctx.textBaseline = "middle";
     const dx = align === "right" ? x + w - 8 : align === "center" ? x + w / 2 : x + 8;
-    ctx.fillText(text, dx, y);
+    ctx.fillText(safeText, dx, y);
   };
 
   const pages: HTMLCanvasElement[] = [];
