@@ -33,7 +33,7 @@ import { DonorMomentoButton } from "@/components/DonorMomento";
 
 type Donor = any;
 
-export function DonorsPanel({ recognitionOnly = false }: { recognitionOnly?: boolean }) {
+export function DonorsPanel({ recognitionOnly = false, searchQuery = "" }: { recognitionOnly?: boolean; searchQuery?: string }) {
   const { symbol: sym } = useCurrency();
   const list = useServerFn(listDonors);
   const [donors, setDonors] = useState<Donor[]>([]);
@@ -62,8 +62,23 @@ export function DonorsPanel({ recognitionOnly = false }: { recognitionOnly?: boo
     } else if (filter !== "all") {
       base = donors.filter((d) => d.status === filter);
     }
+    const q = (searchQuery ?? "").trim().toLowerCase();
+    if (q) {
+      base = base.filter((d) => {
+        const full = [d.first_name, d.last_name].filter(Boolean).join(" ").toLowerCase();
+        return (
+          full.includes(q) ||
+          (d.first_name ?? "").toLowerCase().includes(q) ||
+          (d.last_name ?? "").toLowerCase().includes(q) ||
+          (d.phone ?? "").toLowerCase().includes(q) ||
+          (d.email ?? "").toLowerCase().includes(q) ||
+          (d.linked_member?.name ?? "").toLowerCase().includes(q) ||
+          (d.linked_member?.member_code ?? "").toLowerCase().includes(q)
+        );
+      });
+    }
     return [...base].sort((a, b) => Number(b.total_donated ?? 0) - Number(a.total_donated ?? 0));
-  }, [donors, filter, recognitionOnly, threshold]);
+  }, [donors, filter, recognitionOnly, threshold, searchQuery]);
 
   return (
     <div className="space-y-3">
