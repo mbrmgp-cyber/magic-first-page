@@ -125,7 +125,8 @@ function AccountsPage() {
     setBusy(true);
     try {
       const { downloadPersonalStatementPdf } = await import("@/lib/loan-pdf");
-      const fmtAmt = (n: number) => `${sym} ${Number(n || 0).toLocaleString("en-IN")}`;
+      const safeSym = sym === "₹" ? "Rs." : sym === "د.إ" ? "AED" : sym === "د.ك" ? "KWD" : sym;
+      const fmtAmt = (n: number) => `${safeSym} ${Number(n || 0).toLocaleString("en-IN")}`;
       await downloadPersonalStatementPdf({
         orgName: orgQ.data?.org?.name ?? "Society",
         title: lt("Personal Loan Statement", "వ్యక్తిగత రుణ వివరాలు"),
