@@ -7,12 +7,20 @@ const TELUGU_FONT = '"Noto Sans Telugu"';
 const FONT_FAMILY = `${TELUGU_FONT}, "Noto Sans", "Arial Unicode MS", "Segoe UI", Arial, sans-serif`;
 const FONT_SAMPLE = "చిట్వేల్ హెల్ప్ లైన్ సొసైటీ ₹ 123";
 
-async function ensureFonts() {
+export async function ensurePdfFonts() {
   if (typeof document === "undefined") return;
   try {
     const fonts = (document as any).fonts;
     if (!fonts) return;
-    await Promise.all([400, 600, 700, 800, 900].map((weight) => fonts.load(`${weight} 18px ${TELUGU_FONT}`, FONT_SAMPLE)));
+    const FontFaceCtor = (window as any).FontFace;
+    if (FontFaceCtor && !fonts.check(`400 18px ${TELUGU_FONT}`, FONT_SAMPLE)) {
+      const regular = new FontFaceCtor("Noto Sans Telugu", "url(/fonts/NotoSansTelugu-Regular.ttf)", { weight: "400" });
+      const bold = new FontFaceCtor("Noto Sans Telugu", "url(/fonts/NotoSansTelugu-Bold.ttf)", { weight: "700" });
+      await Promise.all([regular.load(), bold.load()]);
+      fonts.add(regular);
+      fonts.add(bold);
+    }
+    await Promise.all([400, 700].map((weight) => fonts.load(`${weight} 20px ${TELUGU_FONT}`, FONT_SAMPLE)));
     await Promise.race([
       fonts.ready,
       new Promise((resolve) => window.setTimeout(resolve, 2500)),
@@ -20,11 +28,12 @@ async function ensureFonts() {
   } catch {}
 }
 
-function pdfText(text: unknown) {
+export function pdfText(text: unknown) {
   // Some Android PDF viewers mangle the rupee glyph in generated PDFs. "Rs."
   // stays readable everywhere while Telugu text is rendered through canvas.
   return String(text ?? "")
     .replace(/₹/g, "Rs.")
+    .replace(/రూ\.?/g, "Rs.")
     .replace(/د\.إ/g, "AED")
     .replace(/د\.ك/g, "KWD");
 }
@@ -40,7 +49,8 @@ function newPage(w = 1240, h = 1754) {
 }
 
 function setFont(ctx: CanvasRenderingContext2D, size: number, weight: number | string = 400) {
-  ctx.font = `${weight} ${size}px ${FONT_FAMILY}`;
+  const safeWeight = Number(weight) >= 600 ? 700 : 400;
+  ctx.font = `${safeWeight} ${size}px ${FONT_FAMILY}`;
 }
 
 function drawText(
@@ -85,7 +95,7 @@ export type PersonalStatementInput = {
 
 export async function downloadPersonalStatementPdf(input: PersonalStatementInput) {
   const { jsPDF } = await import("jspdf");
-  await ensureFonts();
+  await ensurePdfFonts();
   const { canvas, ctx, w } = newPage();
 
   let y = 90;
@@ -164,20 +174,21 @@ export async function downloadMasterLedgerPdfCanvas(input: {
   fileName: string;
 }) {
   const { jsPDF } = await import("jspdf");
-  await ensureFonts();
+  await ensurePdfFonts();
 
-  const pageW = 1240, pageH = 1754;
-  const marginX = 56;
-  const headerH = 200, footerH = 78, thH = 42, rowH = 38, totalH = 44;
+  // Landscape keeps the master ledger readable on phones and in Android PDF viewers.
+  const pageW = 1754, pageH = 1240;
+  const marginX = 72;
+  const headerH = 170, footerH = 70, thH = 50, rowH = 42, totalH = 50;
 
   const cols = [
-    { label: input.headers.id, width: 92, align: "left" as CanvasTextAlign, get: (r: MasterLedgerRow) => r.member_id },
-    { label: input.headers.name, width: 280, align: "left" as CanvasTextAlign, get: (r: MasterLedgerRow) => r.member_name },
-    { label: input.headers.oldBal, width: 150, align: "right" as CanvasTextAlign, get: (r: MasterLedgerRow) => input.fmt(r.old_balance) },
-    { label: input.headers.principal, width: 150, align: "right" as CanvasTextAlign, get: (r: MasterLedgerRow) => input.fmt(r.principal_collected) },
-    { label: input.headers.interest, width: 150, align: "right" as CanvasTextAlign, get: (r: MasterLedgerRow) => input.fmt(r.interest_collected) },
-    { label: input.headers.newLoan, width: 150, align: "right" as CanvasTextAlign, get: (r: MasterLedgerRow) => input.fmt(r.new_loan) },
-    { label: input.headers.total, width: 156, align: "right" as CanvasTextAlign, get: (r: MasterLedgerRow) => input.fmt(r.net_balance), bold: true },
+    { label: input.headers.id, width: 126, align: "left" as CanvasTextAlign, get: (r: MasterLedgerRow) => r.member_id },
+    { label: input.headers.name, width: 390, align: "left" as CanvasTextAlign, get: (r: MasterLedgerRow) => r.member_name },
+    { label: input.headers.oldBal, width: 190, align: "right" as CanvasTextAlign, get: (r: MasterLedgerRow) => input.fmt(r.old_balance) },
+    { label: input.headers.principal, width: 190, align: "right" as CanvasTextAlign, get: (r: MasterLedgerRow) => input.fmt(r.principal_collected) },
+    { label: input.headers.interest, width: 190, align: "right" as CanvasTextAlign, get: (r: MasterLedgerRow) => input.fmt(r.interest_collected) },
+    { label: input.headers.newLoan, width: 190, align: "right" as CanvasTextAlign, get: (r: MasterLedgerRow) => input.fmt(r.new_loan) },
+    { label: input.headers.total, width: 210, align: "right" as CanvasTextAlign, get: (r: MasterLedgerRow) => input.fmt(r.net_balance), bold: true },
   ];
   const tableW = cols.reduce((s, c) => s + c.width, 0);
   const rowsPerPage = Math.max(1, Math.floor((pageH - headerH - footerH - thH - totalH) / rowH));
@@ -197,9 +208,9 @@ export async function downloadMasterLedgerPdfCanvas(input: {
   const pages: HTMLCanvasElement[] = [];
   chunks.forEach((chunk, pageIdx) => {
     const { canvas, ctx } = newPage(pageW, pageH);
-    drawText(ctx, input.orgName, pageW / 2, 80, { size: 28, weight: 800, align: "center", color: "#8b1a1a" });
-    drawText(ctx, input.title, pageW / 2, 118, { size: 20, weight: 700, align: "center" });
-    drawText(ctx, input.dateText, pageW / 2, 148, { size: 14, align: "center", color: "#555" });
+    drawText(ctx, input.orgName, pageW / 2, 62, { size: 30, weight: 700, align: "center", color: "#8b1a1a" });
+    drawText(ctx, input.title, pageW / 2, 104, { size: 22, weight: 700, align: "center" });
+    drawText(ctx, input.dateText, pageW / 2, 136, { size: 16, align: "center", color: "#555" });
 
     // header row
     let x = marginX;
@@ -207,7 +218,7 @@ export async function downloadMasterLedgerPdfCanvas(input: {
     cols.forEach(c => {
       ctx.fillStyle = "#f4e6d0"; ctx.fillRect(x, y, c.width, thH);
       ctx.strokeStyle = "#b8b8b8"; ctx.strokeRect(x, y, c.width, thH);
-      cellText(ctx, c.label, x, y + thH / 2, c.width, 13, c.align, 700);
+      cellText(ctx, c.label, x, y + thH / 2, c.width, 16, c.align, 700);
       x += c.width;
     });
     y += thH;
@@ -218,7 +229,7 @@ export async function downloadMasterLedgerPdfCanvas(input: {
       ctx.fillRect(marginX, y, tableW, rowH);
       cols.forEach(c => {
         ctx.strokeStyle = "#c4c4c4"; ctx.strokeRect(x, y, c.width, rowH);
-        cellText(ctx, c.get(r), x, y + rowH / 2, c.width, 13, c.align, (c as any).bold ? 700 : 400);
+        cellText(ctx, c.get(r), x, y + rowH / 2, c.width, 15, c.align, (c as any).bold ? 700 : 400);
         x += c.width;
       });
       y += rowH;
@@ -230,19 +241,19 @@ export async function downloadMasterLedgerPdfCanvas(input: {
       const vals = [input.totalLabel, "", input.fmt(input.totals.outstanding), input.fmt(input.totals.principal), input.fmt(input.totals.interest), input.fmt(input.totals.newLoan), input.fmt(input.totals.net)];
       cols.forEach((c, i) => {
         ctx.strokeStyle = "#a8c8ad"; ctx.strokeRect(x, y, c.width, totalH);
-        cellText(ctx, vals[i], x, y + totalH / 2, c.width, 14, i < 2 ? "left" : "right", 800);
+        cellText(ctx, vals[i], x, y + totalH / 2, c.width, 16, i < 2 ? "left" : "right", 700);
         x += c.width;
       });
     }
 
-    drawText(ctx, `Download from MBR APP · ${pageIdx + 1}/${chunks.length}`, pageW / 2, pageH - 40, { size: 12, align: "center", color: "#666" });
+    drawText(ctx, `Download from MBR APP · ${pageIdx + 1}/${chunks.length}`, pageW / 2, pageH - 36, { size: 14, align: "center", color: "#666" });
     pages.push(canvas);
   });
 
-  const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+  const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
   pages.forEach((cv, i) => {
-    if (i > 0) pdf.addPage("a4", "portrait");
-    pdf.addImage(cv.toDataURL("image/png"), "PNG", 0, 0, 210, 297, undefined, "FAST");
+    if (i > 0) pdf.addPage("a4", "landscape");
+    pdf.addImage(cv.toDataURL("image/png"), "PNG", 0, 0, 297, 210, undefined, "FAST");
   });
   pdf.save(input.fileName);
 }
