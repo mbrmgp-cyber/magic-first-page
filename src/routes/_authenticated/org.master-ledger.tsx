@@ -21,7 +21,8 @@ function MasterLedgerPage() {
   const { lang } = useI18n();
   const lt = (en: string, te: string) => (lang === "te" ? te : en);
   const pdfSymbol = symbol === "₹" ? "Rs." : symbol === "د.إ" ? "AED" : symbol === "د.ك" ? "KWD" : symbol;
-  const fmt = (n: number) => `${pdfSymbol} ${Number(n || 0).toLocaleString("en-IN")}`;
+  const fmt = (n: number) => `${symbol} ${Number(n || 0).toLocaleString("en-IN")}`;
+  const fmtPdf = (n: number) => `${pdfSymbol} ${Number(n || 0).toLocaleString("en-IN")}`;
 
   const rows = q.data?.rows ?? [];
   const totals = q.data?.totals ?? { outstanding: 0, principal: 0, interest: 0, newLoan: 0, net: 0 };
@@ -63,7 +64,7 @@ function MasterLedgerPage() {
       rows,
       totals,
       headers: H,
-      fmt,
+      fmt: fmtPdf,
       totalLabel: H.totalLabel,
       fileName: `master-ledger-${new Date().toISOString().slice(0, 10)}.pdf`,
     });
