@@ -26,7 +26,7 @@ import {
   orgUpdateMemberCode,
 } from "@/lib/members.functions";
 import { Switch } from "@/components/ui/switch";
-import { User, Plus, IndianRupee, CheckCircle2, XCircle, Trash2, Lock, UserPlus, Camera, Pencil, FileDown } from "lucide-react";
+import { User, Plus, IndianRupee, CheckCircle2, XCircle, Trash2, Lock, UserPlus, Camera, Pencil, FileDown, Search } from "lucide-react";
 import { downloadMemberListPdf } from "@/lib/member-list-pdf";
 import { DonorsPanel } from "@/components/DonorsPanel";
 import { useCurrency } from "@/lib/currency-context";
@@ -50,6 +50,7 @@ function MembersPage() {
   const [loading, setLoading] = useState(true);
   const [pdfBusy, setPdfBusy] = useState(false);
   const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   async function refresh() {
     setLoading(true);
@@ -68,17 +69,24 @@ function MembersPage() {
     const base = filter === "all"
       ? members.filter((m) => m.status !== "rejected")
       : members.filter((m) => m.status === filter);
+    const q = searchQuery.trim().toLowerCase();
+    const searched = q
+      ? base.filter((m) =>
+          (m.member_code ?? "").toLowerCase().includes(q) ||
+          (m.name ?? "").toLowerCase().includes(q)
+        )
+      : base;
     const codeNum = (c: string | null | undefined) => {
       if (!c) return Number.MAX_SAFE_INTEGER;
       const n = parseInt(String(c).replace(/[^0-9]/g, ""), 10);
       return Number.isFinite(n) ? n : Number.MAX_SAFE_INTEGER;
     };
-    return [...base].sort((a, b) => {
+    return [...searched].sort((a, b) => {
       const d = codeNum(a.member_code) - codeNum(b.member_code);
       if (d !== 0) return d;
       return (a.name ?? "").localeCompare(b.name ?? "");
     });
-  }, [members, filter]);
+  }, [members, filter, searchQuery]);
 
   async function onReview(id: string, action: "approve" | "reject") {
     try {
@@ -116,6 +124,17 @@ function MembersPage() {
         </TabsList>
 
         <TabsContent value="members" className="space-y-3 pt-3">
+          {/* Smart Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-yellow-400" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by Member ID or Name..."
+              className="pl-10 bg-primary text-primary-foreground placeholder:text-primary-foreground/60 border-primary-foreground/20 focus-visible:ring-yellow-400"
+            />
+          </div>
+
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <div className="flex flex-wrap gap-2">
               {(["all", "pending", "approved", "rejected"] as const).map((s) => (
