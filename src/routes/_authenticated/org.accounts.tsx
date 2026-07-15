@@ -176,7 +176,8 @@ function AccountsPage() {
       const res = await fetchMaster();
       const rows = res?.rows ?? [];
       const totals = res?.totals ?? { outstanding: 0, principal: 0, interest: 0, newLoan: 0, net: 0 };
-      const fmtAmt = (n: number) => `${sym} ${Number(n || 0).toLocaleString("en-IN")}`;
+      const safeSym = sym === "₹" ? "Rs." : sym === "د.إ" ? "AED" : sym === "د.ك" ? "KWD" : sym;
+      const fmtAmt = (n: number) => `${safeSym} ${Number(n || 0).toLocaleString("en-IN")}`;
       await downloadMasterLedgerPdfCanvas({
         orgName: orgQ.data?.org?.name ?? "Society",
         title: lt("Master Ledger", "మాస్టర్ లెడ్జర్"),
