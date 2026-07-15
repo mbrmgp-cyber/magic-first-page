@@ -88,11 +88,38 @@ function AccountsPage() {
       const res = await lookup({ data: { code } }) as Lookup;
       if (!res.found) { setInfo(null); toast.error("ఈ ID NO కనపడలేదు / Member not found"); return; }
       setInfo(res);
+      setIdNo(res.member.member_code ?? code);
+      setSearchInput(`${res.member.name} (${res.member.member_code ?? code})`);
+      setShowSuggest(false);
       setInterest(String(Math.round(res.monthlyInterest * 100) / 100));
     } catch (e: any) {
       toast.error(e?.message ?? "Lookup failed");
     } finally { setBusy(false); }
   }
+
+  const suggestions = useMemo(() => {
+    const q = searchInput.trim().toLowerCase();
+    if (!q) return [];
+    const list = (membersQ.data?.members ?? []) as Array<{ id: string; name: string; member_code: string | null }>;
+    // If it exactly matches the selected value, don't show suggestions
+    if (info && searchInput === `${info.member.name} (${info.member.member_code ?? ""})`) return [];
+    return list
+      .filter((m) =>
+        (m.name ?? "").toLowerCase().includes(q) ||
+        (m.member_code ?? "").toLowerCase().includes(q)
+      )
+      .slice(0, 8);
+  }, [searchInput, membersQ.data, info]);
+
+  useEffect(() => {
+    function onClick(e: MouseEvent) {
+      if (!searchWrapRef.current) return;
+      if (!searchWrapRef.current.contains(e.target as Node)) setShowSuggest(false);
+    }
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, []);
+
 
   async function onSave() {
     if (!info) { toast.error("Look up a member first"); return; }
