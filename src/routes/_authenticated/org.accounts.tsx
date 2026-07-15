@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { ArrowLeft, Save, Send, Pencil, FileText, FileSpreadsheet, Search, RefreshCw, Upload, BookOpen } from "lucide-react";
+import { ArrowLeft, Save, Pencil, FileText, FileSpreadsheet, Search, RefreshCw, Upload, BookOpen } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -109,54 +109,12 @@ function AccountsPage() {
         balance: res.balance, emailed_to: res.emailed_to,
         collected: res.collected, disbursed: res.disbursed,
       });
-      generateReceipt({
-        member: info.member.name, code: idNo, date,
-        collectedPrincipal: p, collectedInterest: i,
-        newLoan: nl, newLoanRate: nr, balance: res.balance,
-        remarks,
-      });
       setLocked(true);
       await qc.invalidateQueries({ queryKey: ["master-ledger"] });
       toast.success(`Saved. రసీదు ${res.emailed_to ?? "—"}కు పంపబడింది`);
     } catch (e: any) {
       toast.error(e?.message ?? "Save failed");
     } finally { setBusy(false); }
-  }
-
-  function generateReceipt(r: {
-    member: string; code: string; date: string;
-    collectedPrincipal: number; collectedInterest: number;
-    newLoan: number; newLoanRate: number; balance: number; remarks: string;
-  }) {
-    const w = window.open("", "_blank", "width=720,height=900");
-    if (!w) return;
-    const fmt = (n: number) => `${sym} ${Number(n || 0).toLocaleString("en-IN")}`;
-    w.document.write(`<!doctype html><html><head><title>Receipt</title>
-    <style>body{font-family:system-ui,sans-serif;padding:24px;color:#111}
-    h1{margin:0 0 4px;font-size:20px;color:#c2410c}
-    h2{font-size:14px;margin:16px 0 6px;color:#15803d;border-bottom:1px solid #ddd;padding-bottom:4px}
-    table{width:100%;border-collapse:collapse;font-size:13px}
-    td{padding:6px 4px;border-bottom:1px dashed #eee}
-    td:last-child{text-align:right;font-weight:600}
-    .foot{margin-top:24px;font-size:11px;color:#666;text-align:center}</style></head><body>
-    <h1>Chitvel Help Line Society</h1>
-    <div style="font-size:12px;color:#555">Committee Accounts &mdash; Receipt</div>
-    <table style="margin-top:12px"><tr><td>Member</td><td>${r.member} (${r.code})</td></tr>
-    <tr><td>Date</td><td>${r.date}</td></tr>
-    ${r.remarks ? `<tr><td>Remarks</td><td>${r.remarks}</td></tr>` : ""}</table>
-    <h2>Today's Collection</h2>
-    <table><tr><td>Principal Paid</td><td>${fmt(r.collectedPrincipal)}</td></tr>
-    <tr><td>Interest Paid</td><td>${fmt(r.collectedInterest)}</td></tr>
-    <tr><td><b>Total Collected</b></td><td>${fmt(r.collectedPrincipal + r.collectedInterest)}</td></tr></table>
-    <h2>New Loan Disbursed</h2>
-    <table><tr><td>Loan Amount</td><td>${fmt(r.newLoan)}</td></tr>
-    <tr><td>Monthly Interest Rate</td><td>${r.newLoanRate}%</td></tr></table>
-    <h2>Updated Outstanding Balance</h2>
-    <table><tr><td>Total Due</td><td>${fmt(r.balance)}</td></tr></table>
-    <div class="foot">Auto-generated receipt</div>
-    <script>setTimeout(()=>window.print(),300)</script>
-    </body></html>`);
-    w.document.close();
   }
 
   function onEdit() { setLocked(false); }
