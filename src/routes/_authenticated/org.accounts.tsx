@@ -3,13 +3,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { ArrowLeft, Save, Pencil, FileText, FileSpreadsheet, Search, RefreshCw, Upload, BookOpen } from "lucide-react";
+import { ArrowLeft, Save, Pencil, FileText, Search, RefreshCw, Upload, BookOpen } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { lookupMemberByCode, recordMonthlyPayment, getMasterLedger } from "@/lib/accounts.functions";
+import { lookupMemberByCode, recordMonthlyPayment } from "@/lib/accounts.functions";
 import { getMyOrg, updateOrgLogo } from "@/lib/org.functions";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -43,7 +43,6 @@ function AccountsPage() {
   const { symbol: sym } = useCurrency();
   const { lang } = useI18n();
   const lt = (en: string, te: string) => (lang === "te" ? te : en);
-  const fetchMaster = useServerFn(getMasterLedger);
   const [info, setInfo] = useState<Extract<Lookup, { found: true }> | null>(null);
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState<{ balance: number; emailed_to: string | null; collected: number; disbursed: number } | null>(null);
@@ -118,8 +117,6 @@ function AccountsPage() {
   }
 
   function onEdit() { setLocked(false); }
-  function comingSoon(label: string) { toast(`${label} — coming soon`); }
-
   async function downloadPersonalPdf() {
     if (!info) { toast.error(lt("Look up a member first", "మొదట సభ్యుని వెతకండి")); return; }
     setBusy(true);
@@ -162,40 +159,6 @@ function AccountsPage() {
         remarks: remarks || undefined,
         updatedBalance: saved ? fmtAmt(saved.balance) : undefined,
         fileName: `member-${idNo || "statement"}-${date}.pdf`,
-      });
-      toast.success(lt("PDF downloaded", "పిడిఎఫ్ డౌన్‌లోడ్ అయింది"));
-    } catch (e: any) {
-      toast.error(e?.message ?? "PDF failed");
-    } finally { setBusy(false); }
-  }
-
-  async function downloadFullPdf() {
-    setBusy(true);
-    try {
-      const { downloadMasterLedgerPdfCanvas } = await import("@/lib/loan-pdf");
-      const res = await fetchMaster();
-      const rows = res?.rows ?? [];
-      const totals = res?.totals ?? { outstanding: 0, principal: 0, interest: 0, newLoan: 0, net: 0 };
-      const safeSym = sym === "₹" ? "Rs." : sym === "د.إ" ? "AED" : sym === "د.ك" ? "KWD" : sym;
-      const fmtAmt = (n: number) => `${safeSym} ${Number(n || 0).toLocaleString("en-IN")}`;
-      await downloadMasterLedgerPdfCanvas({
-        orgName: orgQ.data?.org?.name ?? "Society",
-        title: lt("Master Ledger", "మాస్టర్ లెడ్జర్"),
-        dateText: new Date().toLocaleDateString(lang === "te" ? "te-IN" : "en-IN", { year: "numeric", month: "long", day: "numeric" }),
-        rows,
-        totals,
-        headers: {
-          id: "ID",
-          name: lt("Name", "పేరు"),
-          oldBal: lt("Old Bal", "పాత బాకీ"),
-          principal: lt("Principal", "అసలు"),
-          interest: lt("Interest", "వడ్డీ"),
-          newLoan: lt("New Loan", "కొత్త అప్పు"),
-          total: lt("Total", "మొత్తం"),
-        },
-        totalLabel: lt("Total", "మొత్తం"),
-        fmt: fmtAmt,
-        fileName: `master-ledger-${new Date().toISOString().slice(0, 10)}.pdf`,
       });
       toast.success(lt("PDF downloaded", "పిడిఎఫ్ డౌన్‌లోడ్ అయింది"));
     } catch (e: any) {
