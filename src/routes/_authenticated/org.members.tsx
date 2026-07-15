@@ -69,17 +69,24 @@ function MembersPage() {
     const base = filter === "all"
       ? members.filter((m) => m.status !== "rejected")
       : members.filter((m) => m.status === filter);
+    const q = searchQuery.trim().toLowerCase();
+    const searched = q
+      ? base.filter((m) =>
+          (m.member_code ?? "").toLowerCase().includes(q) ||
+          (m.name ?? "").toLowerCase().includes(q)
+        )
+      : base;
     const codeNum = (c: string | null | undefined) => {
       if (!c) return Number.MAX_SAFE_INTEGER;
       const n = parseInt(String(c).replace(/[^0-9]/g, ""), 10);
       return Number.isFinite(n) ? n : Number.MAX_SAFE_INTEGER;
     };
-    return [...base].sort((a, b) => {
+    return [...searched].sort((a, b) => {
       const d = codeNum(a.member_code) - codeNum(b.member_code);
       if (d !== 0) return d;
       return (a.name ?? "").localeCompare(b.name ?? "");
     });
-  }, [members, filter]);
+  }, [members, filter, searchQuery]);
 
   async function onReview(id: string, action: "approve" | "reject") {
     try {
