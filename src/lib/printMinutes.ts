@@ -3,7 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 
 type Lang = "en" | "te" | string;
 
-const esc = (s: any) => String(s ?? "").replace(/[&<>"']/g, (c) =>
+const safe = (s: any) => String(s ?? "")
+  .replace(/₹/g, "Rs.")
+  .replace(/రూ\.?/g, "Rs.")
+  .replace(/د\.إ/g, "AED")
+  .replace(/د\.ك/g, "KWD");
+const esc = (s: any) => safe(s).replace(/[&<>"']/g, (c) =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 
 const fmtDate = (d?: string | null, lang: Lang = "en") =>
@@ -20,6 +25,8 @@ function openPrint(html: string) {
 
 const styles = `
 @page { size: A4; margin: 14mm; }
+@font-face { font-family:'Noto Sans Telugu'; src:url('/fonts/NotoSansTelugu-Regular.ttf') format('truetype'); font-weight:400; font-style:normal; }
+@font-face { font-family:'Noto Sans Telugu'; src:url('/fonts/NotoSansTelugu-Bold.ttf') format('truetype'); font-weight:700 900; font-style:normal; }
 * { box-sizing: border-box; }
 body { font-family:'Noto Sans Telugu','Inter',Arial,sans-serif; color:#111; margin:0; font-size:12px; line-height:1.5; }
 .header { display:flex; align-items:center; gap:14px; border-bottom:2px solid #b45309; padding-bottom:10px; margin-bottom:14px; }
@@ -263,7 +270,7 @@ export async function printActivity(opts: {
   const budget = Number(a.allocated_budget) || 0;
   const expense = Number(a.actual_expense) || 0;
   const variance = budget - expense;
-  const inr = (n: number) => `₹${n.toLocaleString("en-IN")}`;
+  const inr = (n: number) => `Rs. ${n.toLocaleString("en-IN")}`;
   const statusTxt =
     a.status === "completed" ? L(lang, "Completed", "పూర్తయింది") :
     a.status === "ongoing" ? L(lang, "Ongoing", "జరుగుతోంది") :
