@@ -37,6 +37,9 @@ function AccountsPage() {
   const [uploading, setUploading] = useState(false);
 
   const [idNo, setIdNo] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [showSuggest, setShowSuggest] = useState(false);
+  const searchWrapRef = useRef<HTMLDivElement>(null);
   const [date, setDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
   const [remarks, setRemarks] = useState("");
   const [principal, setPrincipal] = useState("");
