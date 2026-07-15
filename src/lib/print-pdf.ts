@@ -13,6 +13,14 @@ export function escapeHtml(s: unknown): string {
     .replace(/'/g, "&#39;");
 }
 
+function printSafe(s: unknown): string {
+  return String(s ?? "")
+    .replace(/₹/g, "Rs.")
+    .replace(/రూ\.?/g, "Rs.")
+    .replace(/د\.إ/g, "AED")
+    .replace(/د\.ك/g, "KWD");
+}
+
 export type PrintDoc = {
   title: string;
   orgName: string;
@@ -42,9 +50,11 @@ function buildHtml({ title, orgName, subtitle, bodyHtml, logoUrl }: PrintDoc): s
 <html>
 <head>
 <meta charset="utf-8" />
-<title>${escapeHtml(title)}</title>
+<title>${escapeHtml(printSafe(title))}</title>
 <style>
   @page { size: A4; margin: 18mm 12mm 22mm 12mm; }
+  @font-face { font-family: "Noto Sans Telugu"; src: url("${toAbsolute("/fonts/NotoSansTelugu-Regular.ttf")}") format("truetype"); font-weight: 400; font-style: normal; }
+  @font-face { font-family: "Noto Sans Telugu"; src: url("${toAbsolute("/fonts/NotoSansTelugu-Bold.ttf")}") format("truetype"); font-weight: 700 900; font-style: normal; }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body {
@@ -113,12 +123,12 @@ function buildHtml({ title, orgName, subtitle, bodyHtml, logoUrl }: PrintDoc): s
 <body>
   <div class="doc-header">
     ${societyLogo ? `<img class="doc-logo" src="${escapeHtml(societyLogo)}" alt="logo" crossorigin="anonymous" />` : ""}
-    <div class="doc-org">${escapeHtml(orgName || "Society")}</div>
-    <div class="doc-title">${escapeHtml(title)}</div>
-    <div class="doc-subtitle">${escapeHtml(subtitle || today)}</div>
+    <div class="doc-org">${escapeHtml(printSafe(orgName || "Society"))}</div>
+    <div class="doc-title">${escapeHtml(printSafe(title))}</div>
+    <div class="doc-subtitle">${escapeHtml(printSafe(subtitle || today))}</div>
   </div>
   <div class="content">
-    ${bodyHtml}
+    ${printSafe(bodyHtml)}
   </div>
   <div class="print-footer">
     <img src="${escapeHtml(mbrUrl)}" alt="MBR" />

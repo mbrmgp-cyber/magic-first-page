@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getCashFlowSummary, type TimeRange } from "@/lib/cashflow.functions";
 import { useCurrency, BASE_CURRENCY } from "@/lib/currency-context";
 import { useI18n } from "@/lib/i18n";
+import { pdfText } from "@/lib/loan-pdf";
 
 export const Route = createFileRoute("/_authenticated/org/cashflow")({
   head: () => ({ meta: [{ title: "Society Cash Flow Statement" }] }),
@@ -293,17 +294,17 @@ function CashFlowPrintSheet({
       </header>
 
       <div className="cashflow-print-metrics cashflow-print-metrics-five">
-        <PrintMetric label={labels.bank} value={fmt(data.wallets.bank)} accent="blue" />
-        <PrintMetric label={labels.accountant} value={fmt(data.wallets.accountant)} accent="amber" />
-        <PrintMetric label={labels.president} value={fmt(data.wallets.president)} accent="violet" />
-        <PrintMetric label={labels.members} value={fmt(data.membersOutstanding ?? 0)} accent="orange" />
-        <PrintMetric label={labels.pendingInterest} value={fmt(data.pendingInterest ?? 0)} accent="rose" />
+        <PrintMetric label={labels.bank} value={pdfText(fmt(data.wallets.bank))} accent="blue" />
+        <PrintMetric label={labels.accountant} value={pdfText(fmt(data.wallets.accountant))} accent="amber" />
+        <PrintMetric label={labels.president} value={pdfText(fmt(data.wallets.president))} accent="violet" />
+        <PrintMetric label={labels.members} value={pdfText(fmt(data.membersOutstanding ?? 0))} accent="orange" />
+        <PrintMetric label={labels.pendingInterest} value={pdfText(fmt(data.pendingInterest ?? 0))} accent="rose" />
       </div>
 
       <div className="cashflow-print-total-row">
-        <PrintTotal label={labels.income} value={fmt(data.totalIncome)} tone="green" />
-        <PrintTotal label={labels.expense} value={fmt(data.totalExpense)} tone="red" />
-        <PrintTotal label={labels.balance} value={fmt(data.closingBalance)} tone="orange" />
+        <PrintTotal label={labels.income} value={pdfText(fmt(data.totalIncome))} tone="green" />
+        <PrintTotal label={labels.expense} value={pdfText(fmt(data.totalExpense))} tone="red" />
+        <PrintTotal label={labels.balance} value={pdfText(fmt(data.closingBalance))} tone="orange" />
       </div>
 
       <div className="cashflow-print-breakdowns">
@@ -346,7 +347,7 @@ function PrintBreakdown({ title, rows, fmt, emptyText, tone }: { title: string; 
             {rows.map(([label, amount]) => (
               <tr key={label}>
                 <td>{label}</td>
-                <td>{fmt(amount)}</td>
+                <td>{pdfText(fmt(amount))}</td>
               </tr>
             ))}
           </tbody>

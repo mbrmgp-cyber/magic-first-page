@@ -31,6 +31,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { AuctionPaymentsPanel } from "@/components/auction/AuctionPaymentsPanel";
 import { localizeText, useI18n } from "@/lib/i18n";
+import { pdfText } from "@/lib/loan-pdf";
 
 export const Route = createFileRoute("/_authenticated/org/auction")({
   head: () => ({ meta: [{ title: "Live Chit Auction — MBR App" }] }),
@@ -216,6 +217,7 @@ function AuctionRoom() {
   const { lang } = useI18n();
   const lt = (en: string, te: string) => localizeText({ en, te }, lang);
   const { fmt, symbol } = useCurrency();
+  const fmtPdf = (n: number) => pdfText(fmt(n));
   const fetchMembers = useServerFn(listApprovedMembers);
   const fetchRoles = useServerFn(getMyRoles);
   const fetchMe = useServerFn(getMyMembership);
@@ -1300,6 +1302,8 @@ function AuctionRoom() {
       {/* Print-only styles */}
       <style>{`
         @media print {
+          @font-face { font-family: "Noto Sans Telugu"; src: url("/fonts/NotoSansTelugu-Regular.ttf") format("truetype"); font-weight: 400; font-style: normal; }
+          @font-face { font-family: "Noto Sans Telugu"; src: url("/fonts/NotoSansTelugu-Bold.ttf") format("truetype"); font-weight: 700 900; font-style: normal; }
           @page { size: A4; margin: 12mm; }
           html, body {
             background: #fff !important; color: #000 !important;
@@ -2558,7 +2562,7 @@ function AuctionRoom() {
           : winnerCalc;
         return (
       <div ref={printRef} className="print-only print-area" style={{ display: "none" }}>
-        <div style={{ fontFamily: "Georgia, serif" }}>
+        <div style={{ fontFamily: '"Noto Sans Telugu", Arial, sans-serif' }}>
           {/* Letterhead */}
           <div style={{ textAlign: "center", borderBottom: "2px solid #000", paddingBottom: 12, marginBottom: 16 }}>
             {org?.logo_url && (
@@ -2586,7 +2590,7 @@ function AuctionRoom() {
             <tbody>
               <tr>
                 <td><b>Chit Group:</b> {p_groupName}</td>
-                <td><b>Chit Value:</b> {fmt(p_chitValue)}</td>
+                <td><b>Chit Value:</b> {fmtPdf(p_chitValue)}</td>
                 <td><b>Month:</b> {p_month} / {p_totalMonths}</td>
               </tr>
               <tr>
@@ -2618,7 +2622,7 @@ function AuctionRoom() {
                   <td style={tdStyle}>{i + 1}</td>
                   <td style={tdStyle}>{b.memberCode || "—"}</td>
                   <td style={tdStyle}>{b.memberName}</td>
-                  <td style={{ ...tdStyle, textAlign: "right" }}>{fmt(b.amount)}</td>
+                  <td style={{ ...tdStyle, textAlign: "right" }}>{fmtPdf(b.amount)}</td>
                   <td style={{ ...tdStyle, textAlign: "right" }}>
                     {new Date(b.submittedAt).toLocaleTimeString()}
                   </td>
@@ -2636,12 +2640,12 @@ function AuctionRoom() {
                 <b>Name:</b> {p_winner.memberName}
               </p>
               <p style={{ margin: "2px 0", fontSize: 12 }}>
-                <b>Winning Bid:</b> {fmt(p_winner.amount)} &nbsp;·&nbsp;
-                <b>Foreman Commission:</b> {fmt(p_winnerCalc.commission)}
+                 <b>Winning Bid:</b> {fmtPdf(p_winner.amount)} &nbsp;·&nbsp;
+                 <b>Foreman Commission:</b> {fmtPdf(p_winnerCalc.commission)}
               </p>
               <p style={{ margin: "2px 0", fontSize: 12 }}>
-                <b>Net Paid to Winner:</b> {fmt(p_winnerCalc.net)} &nbsp;·&nbsp;
-                <b>Dividend / Member:</b> {fmt(p_winnerCalc.dividend)} (across {p_winnerCalc.others} members)
+                 <b>Net Paid to Winner:</b> {fmtPdf(p_winnerCalc.net)} &nbsp;·&nbsp;
+                 <b>Dividend / Member:</b> {fmtPdf(p_winnerCalc.dividend)} (across {p_winnerCalc.others} members)
               </p>
             </div>
           )}

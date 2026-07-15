@@ -3,13 +3,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { ArrowLeft, Save, Send, Pencil, FileText, FileSpreadsheet, Search, RefreshCw, Upload, BookOpen } from "lucide-react";
+import { ArrowLeft, Save, Pencil, FileText, Search, RefreshCw, Upload, BookOpen } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { lookupMemberByCode, recordMonthlyPayment, getMasterLedger } from "@/lib/accounts.functions";
+import { lookupMemberByCode, recordMonthlyPayment } from "@/lib/accounts.functions";
 import { getMyOrg, updateOrgLogo } from "@/lib/org.functions";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -43,7 +43,6 @@ function AccountsPage() {
   const { symbol: sym } = useCurrency();
   const { lang } = useI18n();
   const lt = (en: string, te: string) => (lang === "te" ? te : en);
-  const fetchMaster = useServerFn(getMasterLedger);
   const [info, setInfo] = useState<Extract<Lookup, { found: true }> | null>(null);
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState<{ balance: number; emailed_to: string | null; collected: number; disbursed: number } | null>(null);
@@ -109,12 +108,6 @@ function AccountsPage() {
         balance: res.balance, emailed_to: res.emailed_to,
         collected: res.collected, disbursed: res.disbursed,
       });
-      generateReceipt({
-        member: info.member.name, code: idNo, date,
-        collectedPrincipal: p, collectedInterest: i,
-        newLoan: nl, newLoanRate: nr, balance: res.balance,
-        remarks,
-      });
       setLocked(true);
       await qc.invalidateQueries({ queryKey: ["master-ledger"] });
       toast.success(`Saved. రసీదు ${res.emailed_to ?? "—"}కు పంపబడింది`);
@@ -123,51 +116,14 @@ function AccountsPage() {
     } finally { setBusy(false); }
   }
 
-  function generateReceipt(r: {
-    member: string; code: string; date: string;
-    collectedPrincipal: number; collectedInterest: number;
-    newLoan: number; newLoanRate: number; balance: number; remarks: string;
-  }) {
-    const w = window.open("", "_blank", "width=720,height=900");
-    if (!w) return;
-    const fmt = (n: number) => `${sym} ${Number(n || 0).toLocaleString("en-IN")}`;
-    w.document.write(`<!doctype html><html><head><title>Receipt</title>
-    <style>body{font-family:system-ui,sans-serif;padding:24px;color:#111}
-    h1{margin:0 0 4px;font-size:20px;color:#c2410c}
-    h2{font-size:14px;margin:16px 0 6px;color:#15803d;border-bottom:1px solid #ddd;padding-bottom:4px}
-    table{width:100%;border-collapse:collapse;font-size:13px}
-    td{padding:6px 4px;border-bottom:1px dashed #eee}
-    td:last-child{text-align:right;font-weight:600}
-    .foot{margin-top:24px;font-size:11px;color:#666;text-align:center}</style></head><body>
-    <h1>Chitvel Help Line Society</h1>
-    <div style="font-size:12px;color:#555">Committee Accounts &mdash; Receipt</div>
-    <table style="margin-top:12px"><tr><td>Member</td><td>${r.member} (${r.code})</td></tr>
-    <tr><td>Date</td><td>${r.date}</td></tr>
-    ${r.remarks ? `<tr><td>Remarks</td><td>${r.remarks}</td></tr>` : ""}</table>
-    <h2>Today's Collection</h2>
-    <table><tr><td>Principal Paid</td><td>${fmt(r.collectedPrincipal)}</td></tr>
-    <tr><td>Interest Paid</td><td>${fmt(r.collectedInterest)}</td></tr>
-    <tr><td><b>Total Collected</b></td><td>${fmt(r.collectedPrincipal + r.collectedInterest)}</td></tr></table>
-    <h2>New Loan Disbursed</h2>
-    <table><tr><td>Loan Amount</td><td>${fmt(r.newLoan)}</td></tr>
-    <tr><td>Monthly Interest Rate</td><td>${r.newLoanRate}%</td></tr></table>
-    <h2>Updated Outstanding Balance</h2>
-    <table><tr><td>Total Due</td><td>${fmt(r.balance)}</td></tr></table>
-    <div class="foot">Auto-generated receipt</div>
-    <script>setTimeout(()=>window.print(),300)</script>
-    </body></html>`);
-    w.document.close();
-  }
-
   function onEdit() { setLocked(false); }
-  function comingSoon(label: string) { toast(`${label} — coming soon`); }
-
   async function downloadPersonalPdf() {
     if (!info) { toast.error(lt("Look up a member first", "మొదట సభ్యుని వెతకండి")); return; }
     setBusy(true);
     try {
       const { downloadPersonalStatementPdf } = await import("@/lib/loan-pdf");
-      const fmtAmt = (n: number) => `${sym} ${Number(n || 0).toLocaleString("en-IN")}`;
+      const safeSym = sym === "₹" ? "Rs." : sym === "د.إ" ? "AED" : sym === "د.ك" ? "KWD" : sym;
+      const fmtAmt = (n: number) => `${safeSym} ${Number(n || 0).toLocaleString("en-IN")}`;
       await downloadPersonalStatementPdf({
         orgName: orgQ.data?.org?.name ?? "Society",
         title: lt("Personal Loan Statement", "వ్యక్తిగత రుణ వివరాలు"),
@@ -203,39 +159,6 @@ function AccountsPage() {
         remarks: remarks || undefined,
         updatedBalance: saved ? fmtAmt(saved.balance) : undefined,
         fileName: `member-${idNo || "statement"}-${date}.pdf`,
-      });
-      toast.success(lt("PDF downloaded", "పిడిఎఫ్ డౌన్‌లోడ్ అయింది"));
-    } catch (e: any) {
-      toast.error(e?.message ?? "PDF failed");
-    } finally { setBusy(false); }
-  }
-
-  async function downloadFullPdf() {
-    setBusy(true);
-    try {
-      const { downloadMasterLedgerPdfCanvas } = await import("@/lib/loan-pdf");
-      const res = await fetchMaster();
-      const rows = res?.rows ?? [];
-      const totals = res?.totals ?? { outstanding: 0, principal: 0, interest: 0, newLoan: 0, net: 0 };
-      const fmtAmt = (n: number) => `${sym} ${Number(n || 0).toLocaleString("en-IN")}`;
-      await downloadMasterLedgerPdfCanvas({
-        orgName: orgQ.data?.org?.name ?? "Society",
-        title: lt("Master Ledger", "మాస్టర్ లెడ్జర్"),
-        dateText: new Date().toLocaleDateString(lang === "te" ? "te-IN" : "en-IN", { year: "numeric", month: "long", day: "numeric" }),
-        rows,
-        totals,
-        headers: {
-          id: "ID",
-          name: lt("Name", "పేరు"),
-          oldBal: lt("Old Bal", "పాత బాకీ"),
-          principal: lt("Principal", "అసలు"),
-          interest: lt("Interest", "వడ్డీ"),
-          newLoan: lt("New Loan", "కొత్త అప్పు"),
-          total: lt("Total", "మొత్తం"),
-        },
-        totalLabel: lt("Total", "మొత్తం"),
-        fmt: fmtAmt,
-        fileName: `master-ledger-${new Date().toISOString().slice(0, 10)}.pdf`,
       });
       toast.success(lt("PDF downloaded", "పిడిఎఫ్ డౌన్‌లోడ్ అయింది"));
     } catch (e: any) {

@@ -9,6 +9,7 @@ import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 import { IdCardRenderer, type OrgContext, type SampleMember } from "@/components/IdCard/IdCardRenderer";
 import type { IdCardDesign } from "@/lib/idCardTemplates";
 import { memberRegistrationUrl, memberVerifyUrl } from "@/lib/public-url";
+import { pdfText } from "@/lib/loan-pdf";
 
 // Transliterate Telugu-script source text into the chosen card language script.
 // Numbers, ASCII (phone, email, codes), and punctuation pass through unchanged.
@@ -273,19 +274,23 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
   function handlePrint() {
     const f = frontRef.current; const b = backRef.current;
     if (!f || !b) return;
-    const html = `<!DOCTYPE html><html><head><title>ID Card - ${member.name}</title>
+    const frontHtml = f.outerHTML.replace(/₹/g, "Rs.").replace(/రూ\.?/g, "Rs.").replace(/د\.إ/g, "AED").replace(/د\.ك/g, "KWD");
+    const backHtml = b.outerHTML.replace(/₹/g, "Rs.").replace(/రూ\.?/g, "Rs.").replace(/د\.إ/g, "AED").replace(/د\.ك/g, "KWD");
+    const html = `<!DOCTYPE html><html><head><title>ID Card - ${pdfText(member.name)}</title>
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Noto+Sans+Telugu:wght@400;600;700;800;900&family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap">
       <style>
         @page { size: 85.6mm 54mm; margin: 0; }
+        @font-face{font-family:'Noto Sans Telugu';src:url('/fonts/NotoSansTelugu-Regular.ttf') format('truetype');font-weight:400;font-style:normal}
+        @font-face{font-family:'Noto Sans Telugu';src:url('/fonts/NotoSansTelugu-Bold.ttf') format('truetype');font-weight:700 900;font-style:normal}
         * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         html, body { margin: 0; background: #fff; font-family: "Noto Sans Telugu", "Noto Sans Devanagari", system-ui, -apple-system, sans-serif; }
         .pg { page-break-after: always; }
         .pg:last-child { page-break-after: auto; }
       </style></head><body>
-      <div class="pg">${f.outerHTML}</div>
-      <div class="pg">${b.outerHTML}</div>
+      <div class="pg">${frontHtml}</div>
+      <div class="pg">${backHtml}</div>
       </body></html>`;
 
     // Use a hidden iframe — mobile browsers (Android Chrome, iOS Safari) block

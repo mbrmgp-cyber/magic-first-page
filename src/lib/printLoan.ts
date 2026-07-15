@@ -8,7 +8,12 @@ async function resolveAsset(path?: string | null): Promise<string | null> {
   return data?.signedUrl ?? null;
 }
 
-const esc = (s: any) => String(s ?? "").replace(/[&<>"']/g, (c) =>
+const safe = (s: any) => String(s ?? "")
+  .replace(/₹/g, "Rs.")
+  .replace(/రూ\.?/g, "Rs.")
+  .replace(/د\.إ/g, "AED")
+  .replace(/د\.ك/g, "KWD");
+const esc = (s: any) => safe(s).replace(/[&<>"']/g, (c) =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 const fmtDate = (d?: string | null) =>
   d ? new Date(d).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "—";
@@ -29,6 +34,8 @@ function openPrint(html: string) {
 
 const baseStyles = `
 @page { size: A4; margin: 14mm; }
+@font-face { font-family:'Noto Sans Telugu'; src:url('/fonts/NotoSansTelugu-Regular.ttf') format('truetype'); font-weight:400; font-style:normal; }
+@font-face { font-family:'Noto Sans Telugu'; src:url('/fonts/NotoSansTelugu-Bold.ttf') format('truetype'); font-weight:700 900; font-style:normal; }
 * { box-sizing: border-box; }
 body { font-family: 'Noto Sans Telugu','Inter',Arial,sans-serif; color:#111; margin:0; font-size:12px; line-height:1.45; }
 .header { display:flex; align-items:center; gap:14px; border-bottom:2px solid #b45309; padding-bottom:10px; margin-bottom:14px; }
@@ -158,7 +165,7 @@ ${headerBlock(org)}
 
 <h2>లోన్ వివరాలు / Loan Details</h2>
 <table class="kv">
-  <tr><td class="k">మొత్తం / Amount</td><td><b>₹ ${Number(r.requested_amount).toLocaleString("en-IN")}</b></td>
+  <tr><td class="k">మొత్తం / Amount</td><td><b>Rs. ${Number(r.requested_amount).toLocaleString("en-IN")}</b></td>
       <td class="k">కాలవ్యవధి / Tenure</td><td>${tenure(r.tenure_months)}</td></tr>
   <tr><td class="k">వడ్డీ / Interest</td><td>${r.interest_rate_monthly ?? "—"} % / month</td>
       <td class="k">UTR</td><td>${esc(r.utr_number ?? "—")}</td></tr>
@@ -227,7 +234,7 @@ ${headerBlock(org)}
 
 <table class="kv">
   <tr><td class="k">దరఖాస్తుదారు / Applicant</td><td>${esc(r.member?.name)} (${esc(r.member?.member_code)})</td>
-      <td class="k">మొత్తం / Amount</td><td><b>₹ ${Number(r.requested_amount).toLocaleString("en-IN")}</b></td></tr>
+      <td class="k">మొత్తం / Amount</td><td><b>Rs. ${Number(r.requested_amount).toLocaleString("en-IN")}</b></td></tr>
   <tr><td class="k">కారణం / Purpose</td><td colspan="3">${esc(r.reason)}</td></tr>
   <tr><td class="k">షూరిటీ స్థితి / Surety Status</td><td>${esc(statusLabel(r.surety_status))}</td>
       <td class="k">స్పందించిన తేదీ / Responded At</td><td>${fmtDate(r.surety_responded_at)}</td></tr>
