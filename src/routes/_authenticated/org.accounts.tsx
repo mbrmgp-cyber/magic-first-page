@@ -29,8 +29,10 @@ function AccountsPage() {
   const record = useServerFn(recordMonthlyPayment);
   const fetchOrg = useServerFn(getMyOrg);
   const saveLogo = useServerFn(updateOrgLogo);
+  const fetchMembers = useServerFn(listApprovedMembers);
   const qc = useQueryClient();
   const orgQ = useQuery({ queryKey: ["my-org"], queryFn: () => fetchOrg() });
+  const membersQ = useQuery({ queryKey: ["approved-members"], queryFn: () => fetchMembers() });
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
