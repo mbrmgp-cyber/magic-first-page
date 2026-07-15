@@ -247,13 +247,72 @@ function AccountsPage() {
         <Card className="p-4 bg-white/95 border-white shadow-xl space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div className="space-y-1.5">
-              <Label>సభ్యుని ID</Label>
-              <div className="flex gap-2">
-                <Input value={idNo} onChange={(e) => setIdNo(e.target.value.toUpperCase())}
-                  placeholder="ఉదా. A/0001" disabled={locked} />
-                <Button type="button" onClick={() => doLookup(idNo)} disabled={busy || locked}>
-                  {busy ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-                </Button>
+              <Label>సభ్యుని ID / పేరు</Label>
+              <div ref={searchWrapRef} className="relative">
+                <div className="flex gap-2">
+                  <Input
+                    value={searchInput}
+                    onChange={(e) => {
+                      setSearchInput(e.target.value);
+                      setShowSuggest(true);
+                      // keep idNo in sync if the user types an ID-shaped token
+                      const v = e.target.value.trim();
+                      if (/^[A-Za-z]?\/?\d+$/.test(v)) setIdNo(v.toUpperCase());
+                    }}
+                    onFocus={() => setShowSuggest(true)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        if (suggestions.length > 0) {
+                          const m = suggestions[0];
+                          if (m.member_code) doLookup(m.member_code);
+                        } else if (idNo) {
+                          doLookup(idNo);
+                        }
+                      }
+                    }}
+                    placeholder="ఉదా. A/0001 లేదా పేరు"
+                    disabled={locked}
+                    autoComplete="off"
+                  />
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      const q = searchInput.trim();
+                      // If it looks like an ID, look it up directly. Otherwise pick top suggestion.
+                      if (/^[A-Za-z]?\/?\d+$/.test(q)) doLookup(q);
+                      else if (suggestions[0]?.member_code) doLookup(suggestions[0].member_code);
+                      else if (idNo) doLookup(idNo);
+                    }}
+                    disabled={busy || locked}
+                  >
+                    {busy ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                  </Button>
+                </div>
+                {showSuggest && suggestions.length > 0 && !locked && (
+                  <ul className="absolute z-20 mt-1 left-0 right-0 max-h-64 overflow-auto rounded-md border bg-white shadow-lg">
+                    {suggestions.map((m) => (
+                      <li key={m.id}>
+                        <button
+                          type="button"
+                          className="w-full text-left px-3 py-2 hover:bg-orange-50 flex items-center justify-between gap-2 border-b last:border-b-0"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            if (m.member_code) doLookup(m.member_code);
+                          }}
+                        >
+                          <span className="font-medium text-foreground truncate">{m.name}</span>
+                          <span className="text-xs text-muted-foreground shrink-0">{m.member_code ?? "—"}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {showSuggest && searchInput.trim() && suggestions.length === 0 && membersQ.data && !locked && (
+                  <div className="absolute z-20 mt-1 left-0 right-0 rounded-md border bg-white shadow-lg px-3 py-2 text-xs text-muted-foreground">
+                    సరిపోలిక లేదు / No matches
+                  </div>
+                )}
               </div>
             </div>
             <div className="space-y-1.5">
