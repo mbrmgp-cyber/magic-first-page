@@ -17,6 +17,7 @@ import { recordIncome, listIncome, listWalletAccounts, type IncomeType, type Wal
 import { getMyOrg } from "@/lib/org.functions";
 import { CURRENCIES, BASE_CURRENCY, type CurrencyCode, useCurrency } from "@/lib/currency-context";
 import { useI18n } from "@/lib/i18n";
+import { pdfText } from "@/lib/loan-pdf";
 
 export const Route = createFileRoute("/_authenticated/org/income")({
   head: () => ({ meta: [{ title: "ఆదాయం / Income Receipts" }] }),
@@ -68,9 +69,12 @@ function IncomePage() {
     const typeLabel = INCOME_TYPES.find((t) => t.v === entry.income_type)?.en ?? entry.income_type;
     const w = WALLETS.find((x) => x.v === entry.wallet);
     const walletLabel = w ? lt(w.en, w.te) : entry.wallet;
+    const e = (v: any) => String(pdfText(v)).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
     return `<!doctype html><html><head><meta charset="utf-8"><title>${entry.receipt_no}</title>
 <style>
-  body{font-family:'Helvetica',Arial,sans-serif;margin:0;padding:24px;color:#111}
+  @font-face{font-family:'Noto Sans Telugu';src:url('/fonts/NotoSansTelugu-Regular.ttf') format('truetype');font-weight:400;font-style:normal}
+  @font-face{font-family:'Noto Sans Telugu';src:url('/fonts/NotoSansTelugu-Bold.ttf') format('truetype');font-weight:700 900;font-style:normal}
+  body{font-family:'Noto Sans Telugu','Helvetica',Arial,sans-serif;margin:0;padding:24px;color:#111}
   .wrap{max-width:680px;margin:auto;border:2px solid #ff8c28;border-radius:14px;overflow:hidden}
   .hdr{display:flex;align-items:center;gap:14px;padding:18px 22px;background:linear-gradient(90deg,#ff8c28,#ffb072);color:#fff}
   .hdr img{width:56px;height:56px;border-radius:50%;background:#fff;padding:4px;object-fit:contain}
@@ -90,26 +94,26 @@ function IncomePage() {
     <div class="hdr">
       ${org?.logo_url ? `<img src="${org.logo_url}" alt="logo"/>` : ""}
       <div>
-        <h1>${org?.name ?? "Society"}</h1>
-        <p>${org?.slogan ?? ""} ${org?.gov_reg_number ? "• Reg: " + org.gov_reg_number : ""}</p>
+        <h1>${e(org?.name ?? "Society")}</h1>
+        <p>${e(org?.slogan ?? "")} ${org?.gov_reg_number ? "• Reg: " + e(org.gov_reg_number) : ""}</p>
       </div>
     </div>
     <div class="title">OFFICIAL RECEIPT / అధికారిక రసీదు</div>
     <div class="meta">
-      <span>Receipt No: <b>${entry.receipt_no}</b></span>
-      <span>Date: <b>${entry.entry_date}</b></span>
+      <span>Receipt No: <b>${e(entry.receipt_no)}</b></span>
+      <span>Date: <b>${e(entry.entry_date)}</b></span>
     </div>
     <table>
-      <tr><td class="k">Received From / నుండి అందినది</td><td><b>${entry.payer_name}</b></td></tr>
-      ${entry.payer_phone ? `<tr><td class="k">Phone</td><td>${entry.payer_phone}</td></tr>` : ""}
-      <tr><td class="k">Income Type</td><td>${typeLabel}</td></tr>
-      <tr><td class="k">Wallet</td><td>${walletLabel}</td></tr>
-      ${entry.remarks ? `<tr><td class="k">Remarks</td><td>${entry.remarks}</td></tr>` : ""}
+      <tr><td class="k">Received From / నుండి అందినది</td><td><b>${e(entry.payer_name)}</b></td></tr>
+      ${entry.payer_phone ? `<tr><td class="k">Phone</td><td>${e(entry.payer_phone)}</td></tr>` : ""}
+      <tr><td class="k">Income Type</td><td>${e(typeLabel)}</td></tr>
+      <tr><td class="k">Wallet</td><td>${e(walletLabel)}</td></tr>
+      ${entry.remarks ? `<tr><td class="k">Remarks</td><td>${e(entry.remarks)}</td></tr>` : ""}
     </table>
-    <div class="amt">${sym} ${Number(entry.amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}</div>
+    <div class="amt">${e(sym)} ${Number(entry.amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}</div>
     <div class="ftr">
       <div>Thank you for your contribution.<br/>Generated: ${new Date().toLocaleString()}</div>
-      <div class="sig">Authorised Signatory<br/>${org?.president_name ?? "President"}</div>
+      <div class="sig">Authorised Signatory<br/>${e(org?.president_name ?? "President")}</div>
     </div>
   </div>
   <div class="noprint" style="text-align:center;margin-top:14px">
