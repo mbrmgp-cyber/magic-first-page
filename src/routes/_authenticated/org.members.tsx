@@ -124,6 +124,17 @@ function MembersPage() {
         </TabsList>
 
         <TabsContent value="members" className="space-y-3 pt-3">
+          {/* Smart Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-yellow-400" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by Member ID or Name..."
+              className="pl-10 bg-primary text-primary-foreground placeholder:text-primary-foreground/60 border-primary-foreground/20 focus-visible:ring-yellow-400"
+            />
+          </div>
+
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <div className="flex flex-wrap gap-2">
               {(["all", "pending", "approved", "rejected"] as const).map((s) => (
