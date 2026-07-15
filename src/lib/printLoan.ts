@@ -8,13 +8,13 @@ async function resolveAsset(path?: string | null): Promise<string | null> {
   return data?.signedUrl ?? null;
 }
 
-const esc = (s: any) => String(s ?? "").replace(/[&<>"']/g, (c) =>
-  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 const safe = (s: any) => String(s ?? "")
   .replace(/₹/g, "Rs.")
   .replace(/రూ\.?/g, "Rs.")
   .replace(/د\.إ/g, "AED")
   .replace(/د\.ك/g, "KWD");
+const esc = (s: any) => safe(s).replace(/[&<>"']/g, (c) =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 const fmtDate = (d?: string | null) =>
   d ? new Date(d).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "—";
 
