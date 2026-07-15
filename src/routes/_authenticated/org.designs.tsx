@@ -27,6 +27,7 @@ import { memberRegistrationUrl } from "@/lib/public-url";
 import { CustomIdBuilder } from "@/components/CustomIdBuilder";
 import { Wand2 } from "lucide-react";
 import { localizeText, useI18n } from "@/lib/i18n";
+import { pdfText } from "@/lib/loan-pdf";
 
 export const Route = createFileRoute("/_authenticated/org/designs")({
   head: () => ({ meta: [{ title: "Designs Studio — MBR App" }] }),
@@ -270,7 +271,7 @@ function DesignsPage() {
   const effectiveReceiptLogo: string = receiptLogo || orgLogo;
 
   function escapeHtml(s: string): string {
-    return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
+    return pdfText(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
   }
 
   function printLetterhead() {
@@ -338,8 +339,10 @@ function DesignsPage() {
       <title>Letterhead — ${escapeHtml(orgName)}</title>
       <style>
         @page { size: A4; margin: 0; }
+        @font-face{font-family:'Noto Sans Telugu';src:url('/fonts/NotoSansTelugu-Regular.ttf') format('truetype');font-weight:400;font-style:normal}
+        @font-face{font-family:'Noto Sans Telugu';src:url('/fonts/NotoSansTelugu-Bold.ttf') format('truetype');font-weight:700 900;font-style:normal}
         html,body{margin:0;padding:0;background:#fff;}
-        .page{width:210mm;min-height:297mm;background:#fff;position:relative;}
+        .page{width:210mm;min-height:297mm;background:#fff;position:relative;font-family:'Noto Sans Telugu',system-ui,sans-serif;}
         @media print { .noprint{display:none!important;} }
       </style></head><body>
       <div class="noprint" style="padding:12px;background:#111;color:#fff;font-family:system-ui;display:flex;gap:12px;align-items:center;">
