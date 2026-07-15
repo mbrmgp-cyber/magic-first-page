@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/dialog";
 import { Award, Printer, User } from "lucide-react";
 import { useCurrency } from "@/lib/currency-context";
+import { pdfText } from "@/lib/loan-pdf";
 
 type Donor = {
   id: string;
@@ -99,15 +100,18 @@ function DonorMomento({ donor }: { donor: Donor }) {
     if (!el) return;
     const w = window.open("", "_blank", "width=900,height=1000");
     if (!w) return;
-    w.document.write(`<!DOCTYPE html><html><head><title>Momento - ${fullName}</title>
+    const safeHtml = el.outerHTML.replace(/₹/g, "Rs.").replace(/రూ\.?/g, "Rs.").replace(/د\.إ/g, "AED").replace(/د\.ك/g, "KWD");
+    w.document.write(`<!DOCTYPE html><html><head><title>Momento - ${pdfText(fullName)}</title>
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Noto+Sans+Telugu:wght@400;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap">
       <style>
         @page { size: A5 portrait; margin: 0; }
+        @font-face{font-family:'Noto Sans Telugu';src:url('/fonts/NotoSansTelugu-Regular.ttf') format('truetype');font-weight:400;font-style:normal}
+        @font-face{font-family:'Noto Sans Telugu';src:url('/fonts/NotoSansTelugu-Bold.ttf') format('truetype');font-weight:700 900;font-style:normal}
         * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         body { margin: 0; font-family: "Noto Sans Telugu", "Playfair Display", system-ui, sans-serif; }
-      </style></head><body>${el.outerHTML}</body></html>`);
+      </style></head><body>${safeHtml}</body></html>`);
     w.document.close();
     w.focus();
     setTimeout(() => { w.print(); w.close(); }, 400);
