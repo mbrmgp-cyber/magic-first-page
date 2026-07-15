@@ -2,7 +2,7 @@ import { DateInput } from "@/components/DateInput";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Save, Pencil, FileText, Search, RefreshCw, Upload, BookOpen } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { lookupMemberByCode, recordMonthlyPayment } from "@/lib/accounts.functions";
+import { listApprovedMembers } from "@/lib/members.functions";
 import { getMyOrg, updateOrgLogo } from "@/lib/org.functions";
 import { supabase } from "@/integrations/supabase/client";
 
