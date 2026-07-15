@@ -384,17 +384,11 @@ function AccountsPage() {
             <Button onClick={onSave} disabled={busy || locked} className="bg-orange-600 hover:bg-orange-700">
               <Save className="h-4 w-4" /> సేవ్ చేయండి
             </Button>
-            <Button variant="outline" onClick={() => comingSoon("ఫైల్ పంపండి")} disabled={busy}>
-              <Send className="h-4 w-4" /> ఫైల్ పంపండి
-            </Button>
             <Button variant="outline" onClick={onEdit} disabled={!locked}>
               <Pencil className="h-4 w-4" /> సవరించు
             </Button>
             <Button variant="outline" onClick={downloadPersonalPdf} disabled={busy}>
               <FileText className="h-4 w-4" /> {lt("Personal PDF", "వ్యక్తిగత పిడిఎఫ్")}
-            </Button>
-            <Button variant="outline" onClick={downloadFullPdf} disabled={busy}>
-              <FileSpreadsheet className="h-4 w-4" /> {lt("Full PDF", "మొత్తం పిడిఎఫ్")}
             </Button>
           </div>
         </Card>
