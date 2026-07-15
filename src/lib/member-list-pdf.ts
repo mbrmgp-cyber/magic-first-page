@@ -1,4 +1,5 @@
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
+import { ensurePdfFonts, pdfText } from "@/lib/loan-pdf";
 
 export type MemberListPdfMember = {
   member_code?: string | null;
@@ -33,7 +34,7 @@ function toAbsolute(url?: string | null) {
 }
 
 function text(value: unknown) {
-  const v = String(value ?? "").trim();
+  const v = pdfText(value).trim();
   return v || "-";
 }
 
@@ -272,7 +273,7 @@ function drawPage(
 
 export async function downloadMemberListPdf(options: MemberListPdfOptions) {
   const jsPdf = await import("jspdf");
-  await document.fonts?.ready;
+  await ensurePdfFonts();
 
   const mbrSrc = await safeImageSrc(mbrLogo.url);
   const logoSrc = await safeImageSrc(options.logoUrl) || mbrSrc;
