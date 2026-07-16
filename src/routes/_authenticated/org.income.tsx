@@ -41,6 +41,7 @@ function IncomePage() {
   const { symbol: sym } = useCurrency();
   const lt = (en: string, te: string) => lang === "te" ? te : en;
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const save = useServerFn(recordIncome);
   const listFn = useServerFn(listIncome);
   const orgFn = useServerFn(getMyOrg);
