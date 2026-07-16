@@ -1084,3 +1084,48 @@ export const getMySubscriptionStatus = createServerFn({ method: "GET" })
     };
   });
 
+
+export const getOrgBankDetails = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data: adminOrg } = await supabase
+      .from("organizations")
+      .select("id, name, bank_name, bank_branch, bank_account_number, bank_ifsc, bank_account_holder")
+      .eq("admin_user_id", userId)
+      .maybeSingle();
+    if (adminOrg) return { org: adminOrg, is_admin: true };
+    const { data: member } = await supabase
+      .from("members")
+      .select("organizations(id, name, bank_name, bank_branch, bank_account_number, bank_ifsc, bank_account_holder)")
+      .eq("user_id", userId)
+      .maybeSingle();
+    return { org: (member as any)?.organizations ?? null, is_admin: false };
+  });
+
+export const updateOrgBankDetails = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: {
+    bank_name?: string;
+    bank_branch?: string;
+    bank_account_number?: string;
+    bank_ifsc?: string;
+    bank_account_holder?: string;
+  }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: org, error } = await supabase
+      .from("organizations")
+      .update({
+        bank_name: data.bank_name ?? null,
+        bank_branch: data.bank_branch ?? null,
+        bank_account_number: data.bank_account_number ?? null,
+        bank_ifsc: data.bank_ifsc ?? null,
+        bank_account_holder: data.bank_account_holder ?? null,
+      } as any)
+      .eq("admin_user_id", userId)
+      .select("id, bank_name, bank_branch, bank_account_number, bank_ifsc, bank_account_holder")
+      .single();
+    if (error) throw new Error(error.message);
+    return { org };
+  });
