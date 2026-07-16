@@ -81,6 +81,7 @@ function ExpensesPage() {
       setTxCurrency(BASE_CURRENCY); setExchangeRate("1"); setWalletAccountId("");
       qc.invalidateQueries({ queryKey: ["org-expenses"] });
       qc.invalidateQueries({ queryKey: ["cashflow"] });
+      navigate({ to: "/org/cashflow" });
     } catch (err: any) {
       toast.error(err?.message ?? "Failed");
     } finally { setBusy(false); }
