@@ -328,6 +328,19 @@ function MemberDashboard() {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={payOpen} onOpenChange={setPayOpen}>
+        <DialogContent className="max-w-[440px] p-5 bg-zinc-950 border-zinc-800 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Building2 className="h-5 w-5" style={{ color: brand }} />
+              {b("సొసైటీకి పేమెంట్ వివరాలు", "Pay to Society")}
+            </DialogTitle>
+          </DialogHeader>
+          <PayToSociety org={org} brand={brand} b={b} />
+        </DialogContent>
+      </Dialog>
+
+
     </div>
   );
 }
