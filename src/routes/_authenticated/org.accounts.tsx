@@ -237,10 +237,17 @@ function AccountsPage() {
           </h1>
           <div className="flex items-center justify-between flex-wrap gap-2">
             <p className="text-xs text-muted-foreground">సభ్యుల చెల్లింపులు మరియు కొత్త అప్పులు</p>
-            <Link to="/org/master-ledger" className="inline-flex items-center gap-1 text-xs text-green-700 hover:text-green-900 font-semibold">
-              <BookOpen className="h-3 w-3" /> మాస్టర్ లెడ్జర్ చూడండి →
-            </Link>
           </div>
+          <Link
+            to="/org/master-ledger"
+            className="mt-3 flex items-center justify-between gap-2 rounded-xl px-4 py-3 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 text-white font-bold shadow-lg hover:shadow-xl hover:brightness-110 transition-all border border-amber-300"
+          >
+            <span className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5" />
+              <span className="text-sm md:text-base">మాస్టర్ లెడ్జర్ చూడండి / View Master Ledger</span>
+            </span>
+            <span className="text-lg">→</span>
+          </Link>
         </Card>
 
         {/* Lookup row */}
