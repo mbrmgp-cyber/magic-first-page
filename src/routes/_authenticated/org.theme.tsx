@@ -117,7 +117,7 @@ function OrgThemePage() {
       }});
       await qc.invalidateQueries({ queryKey: ["my-org"] });
       await qc.invalidateQueries({ queryKey: ["my-membership"] });
-      toast.success("Theme saved / థీమ్ సేవ్ అయింది");
+      toast.success(lt("Theme saved", "థీమ్ సేవ్ అయింది"));
     } catch (e: any) {
       toast.error(e.message ?? "Failed");
     } finally {
@@ -211,7 +211,7 @@ function OrgThemePage() {
             {lt("English Society Name", "సొసైటీ ఇంగ్లీష్ పేరు")}
           </p>
           <p className="text-[11px] text-zinc-400">
-            {lt("This name appears in the header when English is selected. If empty, the society name is shown automatically.", "లాంగ్వేజ్ English అయినప్పుడు హెడర్‌లో ఈ పేరు కనిపిస్తుంది. ఖాళీగా ఉంచితే తెలుగు పేరు ఆటోగా చూపబడుతుంది.")}
+            {lt("This name appears in the header when English is selected. If empty, the society name is shown automatically.", "ఇంగ్లీష్ భాష ఎంచుకున్నప్పుడు హెడర్‌లో ఈ పేరు కనిపిస్తుంది. ఖాళీగా ఉంచితే సొసైటీ పేరు ఆటోగా చూపబడుతుంది.")}
           </p>
           <Input
             value={nameEn}
@@ -362,6 +362,8 @@ type AdBanner = { url: string; active?: boolean; label?: string | null };
 
 function AdBannersCard({ orgId, initial, accent, onSaved }: { orgId?: string; initial?: AdBanner[]; accent: string; onSaved: () => void }) {
   const saveFn = useServerFn(updateOrgAdBanners);
+  const { lang } = useI18n();
+  const lt = (en: string, te: string) => localizeText({ en, te }, lang);
   const [banners, setBanners] = useState<AdBanner[]>([]);
   const [previews, setPreviews] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
@@ -401,9 +403,9 @@ function AdBannersCard({ orgId, initial, accent, onSaved }: { orgId?: string; in
         next.push({ url: path, active: true, label: null });
       }
       setBanners(next);
-      toast.success("Uploaded / అప్‌లోడ్ అయింది");
+      toast.success(lt("Uploaded", "అప్‌లోడ్ అయింది"));
     } catch (err: any) {
-      toast.error(err.message ?? "Upload failed");
+      toast.error(err.message ?? lt("Upload failed", "అప్‌లోడ్ విఫలమైంది"));
     } finally {
       setUploading(false);
     }
@@ -426,9 +428,9 @@ function AdBannersCard({ orgId, initial, accent, onSaved }: { orgId?: string; in
     try {
       await saveFn({ data: { ad_banners: banners } });
       onSaved();
-      toast.success("Banners saved / బ్యానర్‌లు సేవ్ అయ్యాయి");
+      toast.success(lt("Banners saved", "బ్యానర్‌లు సేవ్ అయ్యాయి"));
     } catch (e: any) {
-      toast.error(e.message ?? "Failed");
+      toast.error(e.message ?? lt("Failed", "విఫలమైంది"));
     } finally {
       setBusy(false);
     }
@@ -438,33 +440,35 @@ function AdBannersCard({ orgId, initial, accent, onSaved }: { orgId?: string; in
     <Card className="bg-zinc-950 border-zinc-800 p-4 space-y-3">
       <div className="flex items-center gap-2 text-sm font-semibold text-white">
         <ImageIcon className="h-4 w-4" style={{ color: accent }} />
-        Member Dashboard Ads / సభ్యుల డాష్‌బోర్డ్ ప్రకటనలు
+        {lt("Member Dashboard Ads", "సభ్యుల డాష్‌బోర్డ్ ప్రకటనలు")}
       </div>
       <p className="text-[11px] text-zinc-400">
-        Upload banners to display at the top of every member's dashboard. Toggle any banner off to hide it. When no banners are active, the slot auto-hides.
+        {lt(
+          "Upload banners to display at the top of every member's dashboard. Toggle any banner off to hide it. When no banners are active, the slot auto-hides.",
+          "ప్రతి సభ్యుడి డాష్‌బోర్డ్ పైభాగంలో చూపించేందుకు బ్యానర్‌లు అప్‌లోడ్ చేయండి. ఏ బ్యానర్‌నైనా దాచడానికి ఆఫ్ చేయండి. యాక్టివ్ బ్యానర్‌లు లేకపోతే ఆ స్థలం ఆటోగా దాచబడుతుంది."
+        )}
       </p>
       <div className="rounded-lg border border-dashed p-2.5 text-[11px] leading-relaxed"
         style={{ borderColor: `${accent}55`, background: `${accent}0f`, color: "#e4e4e7" }}>
         <p className="font-semibold text-white mb-0.5">
-          Recommended Banner Size / సిఫార్సు చేయబడిన బ్యానర్ సైజ్
+          {lt("Recommended Banner Size", "సిఫార్సు చేయబడిన బ్యానర్ సైజ్")}
         </p>
         <p>
-          <span className="font-mono text-white">1200 × 160 px</span> (ratio 15:2) —
-          slim horizontal banner, max height <span className="font-mono">80px</span> on mobile.
-        </p>
-        <p className="text-zinc-400">
-          మొబైల్ స్క్రీన్ కోసం సన్నని అడ్డం బ్యానర్ — వెడల్పు 1200px, పొడవు 160px. JPG/PNG, 500KB లోపు.
+          {lt(
+            "1200 × 160 px (ratio 15:2) — slim horizontal banner, max height 80px on mobile. JPG/PNG, under 500KB.",
+            "మొబైల్ స్క్రీన్ కోసం సన్నని అడ్డం బ్యానర్ — వెడల్పు 1200px, పొడవు 160px. JPG/PNG, 500KB లోపు."
+          )}
         </p>
       </div>
 
       <label className="flex items-center justify-center gap-2 rounded-lg border border-dashed border-zinc-700 bg-zinc-900/60 py-4 cursor-pointer hover:border-zinc-500 transition">
         <Upload className="h-4 w-4" style={{ color: accent }} />
-        <span className="text-sm text-white">{uploading ? "Uploading…" : "Upload banner image(s)"}</span>
+        <span className="text-sm text-white">{uploading ? lt("Uploading…", "అప్‌లోడ్ అవుతోంది…") : lt("Upload banner image(s)", "బ్యానర్ చిత్రం(లు) అప్‌లోడ్ చేయండి")}</span>
         <input type="file" accept="image/*" multiple className="hidden" onChange={handleUpload} disabled={uploading || !orgId} />
       </label>
 
       {banners.length === 0 ? (
-        <p className="text-[12px] text-zinc-500 italic text-center py-2">No banners yet — dashboards will show none.</p>
+        <p className="text-[12px] text-zinc-500 italic text-center py-2">{lt("No banners yet — dashboards will show none.", "ఇంకా బ్యానర్‌లు లేవు — డాష్‌బోర్డ్‌లలో ఏవి చూపించబడవు.")}</p>
       ) : (
         <div className="grid grid-cols-2 gap-3">
           {banners.map((b, i) => {
@@ -482,11 +486,11 @@ function AdBannersCard({ orgId, initial, accent, onSaved }: { orgId?: string; in
                   <button type="button" onClick={() => toggle(i)}
                     className="inline-flex items-center gap-1 text-[11px] text-white/90 hover:text-white">
                     {active ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
-                    {active ? "Active" : "Hidden"}
+                    {active ? lt("Active", "యాక్టివ్") : lt("Hidden", "దాచబడింది")}
                   </button>
                   <button type="button" onClick={() => remove(i)}
                     className="inline-flex items-center gap-1 text-[11px] text-rose-300 hover:text-rose-200">
-                    <Trash2 className="h-3.5 w-3.5" /> Delete
+                    <Trash2 className="h-3.5 w-3.5" /> {lt("Delete", "తొలగించండి")}
                   </button>
                 </div>
               </div>
@@ -499,7 +503,7 @@ function AdBannersCard({ orgId, initial, accent, onSaved }: { orgId?: string; in
         className="w-full font-semibold"
         style={{ background: accent, color: "#fff" }}>
         <Save className="h-4 w-4 mr-2" />
-        {busy ? "Saving…" : "Save Banners / బ్యానర్‌లు సేవ్ చేయండి"}
+        {busy ? lt("Saving…", "సేవ్ అవుతోంది…") : lt("Save Banners", "బ్యానర్‌లు సేవ్ చేయండి")}
       </Button>
     </Card>
   );
