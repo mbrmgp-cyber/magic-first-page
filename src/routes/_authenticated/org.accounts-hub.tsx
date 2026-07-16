@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Wallet, PieChart, FileDown, Coins, Building2 } from "lucide-react";
+import { ArrowLeft, Wallet, PieChart, Coins, Building2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { CurrencySelector } from "@/lib/currency-context";
 import { RoleGate } from "@/components/RoleGate";
@@ -13,7 +13,6 @@ export const Route = createFileRoute("/_authenticated/org/accounts-hub")({
 const TILES = [
   { to: "/org/loan-requests", en: "Member Loan Requests", te: "సభ్యుల అప్పు అభ్యర్థనలు", icon: Wallet, color: "#ff8c28" },
   { to: "/org/cashflow", en: "Society Cash Flow Statement", te: "నగదు ప్రవాహ నివేదిక", icon: PieChart, color: "#3b82f6" },
-  { to: "/org/master-ledger", en: "Admin Master Ledger", te: "మాస్టర్ లెడ్జర్", icon: FileDown, color: "#a855f7" },
   { to: "/org/accounts", en: "Currency & Loan Entry", te: "కరెన్సీ & అప్పు నమోదు", icon: Coins, color: "#eab308" },
   { to: "/org/bank-details", en: "Society Bank Details", te: "సొసైటీ బ్యాంక్ వివరాలు", icon: Building2, color: "#06b6d4" },
 ] as const;
@@ -42,11 +41,10 @@ function AccountsHub() {
         </header>
 
         <div className="grid grid-cols-2 gap-3">
-          {TILES.map((t, i) => (
+          {TILES.map((t) => (
             <Link
               key={t.to}
               to={t.to}
-              className={i === TILES.length - 1 ? "col-span-2" : ""}
             >
               <Card
                 className="p-4 bg-zinc-950 border-white/10 hover:border-[#ff8c28] transition-all cursor-pointer h-full"
