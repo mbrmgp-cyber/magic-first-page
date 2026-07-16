@@ -1884,8 +1884,11 @@ export type Database = {
           approval_status: Database["public"]["Enums"]["org_approval_status"]
           approved_at: string | null
           approved_by: string | null
+          bank_account_holder: string | null
           bank_account_number: string | null
+          bank_branch: string | null
           bank_ifsc: string | null
+          bank_name: string | null
           committee_term_years: number
           created_at: string
           donor_recognition_threshold: number
@@ -1924,8 +1927,11 @@ export type Database = {
           approval_status?: Database["public"]["Enums"]["org_approval_status"]
           approved_at?: string | null
           approved_by?: string | null
+          bank_account_holder?: string | null
           bank_account_number?: string | null
+          bank_branch?: string | null
           bank_ifsc?: string | null
+          bank_name?: string | null
           committee_term_years?: number
           created_at?: string
           donor_recognition_threshold?: number
@@ -1964,8 +1970,11 @@ export type Database = {
           approval_status?: Database["public"]["Enums"]["org_approval_status"]
           approved_at?: string | null
           approved_by?: string | null
+          bank_account_holder?: string | null
           bank_account_number?: string | null
+          bank_branch?: string | null
           bank_ifsc?: string | null
+          bank_name?: string | null
           committee_term_years?: number
           created_at?: string
           donor_recognition_threshold?: number
