@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
+import { ArrowLeft, ArrowDownCircle, ArrowUpCircle, HandCoins } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { getMyLedger } from "@/lib/accounts.functions";
 import { useI18n, bi } from "@/lib/i18n";
