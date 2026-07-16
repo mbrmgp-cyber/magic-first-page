@@ -150,7 +150,7 @@ function Dashboard() {
       a.download = `${orgQ.data.org.org_code}-export-${Date.now()}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success("Data downloaded / డేటా డౌన్‌లోడ్ అయింది");
+      toast.success(lt("Data downloaded", "డేటా డౌన్‌లోడ్ అయింది"));
     } catch (e: any) {
       toast.error(e.message ?? "Export failed");
     } finally {
@@ -172,9 +172,9 @@ function Dashboard() {
       if (error) throw error;
       const { data } = await supabase.storage.from("org-documents").createSignedUrl(path, 60 * 60 * 24 * 365);
       setResolutionUrl(data?.signedUrl ?? path);
-      toast.success("Resolution uploaded");
+      toast.success(lt("Resolution uploaded", "తీర్మానం పత్రం అప్‌లోడ్ అయింది"));
     } catch (err: any) {
-      toast.error(err.message ?? "Upload failed");
+      toast.error(err.message ?? lt("Upload failed", "అప్‌లోడ్ విఫలమైంది"));
     } finally {
       setResolutionBusy(false);
     }
@@ -189,13 +189,13 @@ function Dashboard() {
           approval_notes: `[CANCELLATION_REQUESTED ${new Date().toISOString()}] Resolution: ${resolutionUrl}`,
         }).eq("id", orgQ.data.org.id);
       }
-      toast.success("Cancellation request recorded. 30-day grace period started.");
+      toast.success(lt("Cancellation request recorded. 30-day grace period started.", "రద్దు అభ్యర్థన నమోదు అయింది. 30 రోజుల గ్రేస్ పీరియడ్ ప్రారంభమైంది."));
       setCancelOpen(false);
       setSettingsOpen(false);
       await supabase.auth.signOut();
       navigate({ to: "/auth", replace: true });
     } catch (e: any) {
-      toast.error(e.message ?? "Failed");
+      toast.error(e.message ?? lt("Failed", "విఫలమైంది"));
     } finally {
       setConfirming(false);
     }
@@ -458,17 +458,20 @@ function Dashboard() {
         <DialogContent className="max-w-sm bg-zinc-950 border-zinc-800 text-white">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-amber-500" /> Leave Organization?
+              <AlertTriangle className="h-5 w-5 text-amber-500" /> {lt("Leave Organization?", "సంస్థ నుండి వైదొలగాలా?")}
             </DialogTitle>
             <DialogDescription className="text-zinc-400">
-              మీరు ఈ సంస్థ నుండి వైదొలగాలనుకుంటున్నారా? మీ సభ్యత్వ ప్రొఫైల్ తొలగించబడుతుంది మరియు మీరు లాగ్ అవుట్ చేయబడతారు. ఈ చర్య తిరిగి మార్చబడదు.
+              {lt(
+                "Are you sure you want to leave this organization? Your membership profile will be removed and you will be logged out. This action cannot be undone.",
+                "మీరు ఈ సంస్థ నుండి వైదొలగాలనుకుంటున్నారా? మీ సభ్యత్వ ప్రొఫైల్ తొలగించబడుతుంది మరియు మీరు లాగ్ అవుట్ చేయబడతారు. ఈ చర్య తిరిగి మార్చబడదు."
+              )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setLeaveOpen(false)} className="border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800">Cancel</Button>
+            <Button variant="outline" onClick={() => setLeaveOpen(false)} className="border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800">{lt("Cancel", "రద్దు")}</Button>
             <Button disabled={leaving} onClick={leaveOrganization} className="bg-amber-600 hover:bg-amber-700 text-white font-semibold">
               {leaving ? <RefreshCw className="h-4 w-4 mr-1 animate-spin" /> : <LogOut className="h-4 w-4 mr-1" />}
-              Confirm Leave
+              {lt("Confirm Leave", "వైదొలగడాన్ని నిర్ధారించండి")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -480,27 +483,30 @@ function Dashboard() {
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-red-500" />
-              Cancel Registration — Step {cancelStep} of 3
+              {lt(`Cancel Registration — Step ${cancelStep} of 3`, `సభ్యత్వం రద్దు — 3లో ${cancelStep}వ స్టెప్`)}
             </DialogTitle>
             <DialogDescription className="text-zinc-400">
-              {cancelStep === 1 && "Export your data before leaving."}
-              {cancelStep === 2 && "Upload signed committee resolution."}
-              {cancelStep === 3 && "Final confirmation."}
+              {cancelStep === 1 && lt("Export your data before leaving.", "వెళ్లే ముందు మీ డేటాను డౌన్‌లోడ్ చేసుకోండి.")}
+              {cancelStep === 2 && lt("Upload signed committee resolution.", "సంతకం చేసిన కమిటీ తీర్మానాన్ని అప్‌లోడ్ చేయండి.")}
+              {cancelStep === 3 && lt("Final confirmation.", "చివరి నిర్ధారణ.")}
             </DialogDescription>
           </DialogHeader>
 
           {cancelStep === 1 && (
             <div className="space-y-3">
               <p className="text-sm text-zinc-300">
-                Download your entire society data (members, committee, rules, events) before cancelling.
+                {lt(
+                  "Download your entire society data (members, committee, rules, events) before cancelling.",
+                  "రద్దు చేసే ముందు మీ పూర్తి సొసైటీ డేటాను (సభ్యులు, కమిటీ, నియమాలు, ఈవెంట్‌లు) డౌన్‌లోడ్ చేసుకోండి."
+                )}
               </p>
               <Button onClick={exportData} disabled={exporting} className="w-full bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white font-semibold shadow-[0_0_24px_rgba(255,140,40,0.45)]">
                 {exporting ? <RefreshCw className="h-4 w-4 mr-1 animate-spin" /> : <FileDown className="h-4 w-4 mr-1" />}
-                Download Entire Society Data / డేటాను డౌన్‌లోడ్ చేసుకోండి
+                {lt("Download Entire Society Data", "పూర్తి సొసైటీ డేటాను డౌన్‌లోడ్ చేసుకోండి")}
               </Button>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setCancelOpen(false)} className="border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800">Back</Button>
-                <Button onClick={() => setCancelStep(2)} className="bg-zinc-200 text-black hover:bg-white">Next →</Button>
+                <Button variant="outline" onClick={() => setCancelOpen(false)} className="border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800">{lt("Back", "వెనక్కి")}</Button>
+                <Button onClick={() => setCancelStep(2)} className="bg-zinc-200 text-black hover:bg-white">{lt("Next", "తర్వాత")} →</Button>
               </DialogFooter>
             </div>
           )}
@@ -508,17 +514,20 @@ function Dashboard() {
           {cancelStep === 2 && (
             <div className="space-y-3">
               <p className="text-sm text-zinc-300">
-                Upload Committee Resolution Copy / కమిటీ తీర్మానం పత్రం (signed picture/PDF approving exit).
+                {lt(
+                  "Upload Committee Resolution Copy (signed picture/PDF approving exit).",
+                  "కమిటీ తీర్మానం పత్రం అప్‌లోడ్ చేయండి (వైదొలగడాన్ని ఆమోదించిన సంతకం చేసిన చిత్రం/PDF)."
+                )}
               </p>
               <label className="block">
                 <input type="file" accept="image/*,application/pdf" className="hidden" onChange={uploadResolution} />
                 <div className="cursor-pointer flex items-center justify-center gap-2 h-24 rounded-md border-2 border-dashed border-zinc-700 bg-zinc-900 hover:border-[#ff8c28]/60 text-sm text-zinc-300">
-                  {resolutionBusy ? <RefreshCw className="h-5 w-5 animate-spin" /> : resolutionUrl ? <><CheckCircle2 className="h-5 w-5 text-emerald-500" /> Uploaded — tap to replace</> : <><Upload className="h-5 w-5" /> Tap to upload resolution</>}
+                  {resolutionBusy ? <RefreshCw className="h-5 w-5 animate-spin" /> : resolutionUrl ? <><CheckCircle2 className="h-5 w-5 text-emerald-500" /> {lt("Uploaded — tap to replace", "అప్‌లోడ్ అయింది — మార్చడానికి నొక్కండి")}</> : <><Upload className="h-5 w-5" /> {lt("Tap to upload resolution", "తీర్మానం పత్రం అప్‌లోడ్ చేయడానికి నొక్కండి")}</>}
                 </div>
               </label>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setCancelStep(1)} className="border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800">← Back</Button>
-                <Button disabled={!resolutionUrl} onClick={() => setCancelStep(3)} className="bg-zinc-200 text-black hover:bg-white disabled:opacity-50">Next →</Button>
+                <Button variant="outline" onClick={() => setCancelStep(1)} className="border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800">← {lt("Back", "వెనక్కి")}</Button>
+                <Button disabled={!resolutionUrl} onClick={() => setCancelStep(3)} className="bg-zinc-200 text-black hover:bg-white disabled:opacity-50">{lt("Next", "తర్వాత")} →</Button>
               </DialogFooter>
             </div>
           )}
@@ -526,13 +535,13 @@ function Dashboard() {
           {cancelStep === 3 && (
             <div className="space-y-3">
               <div className="rounded-md border border-red-900 bg-red-950/40 p-3 text-sm text-red-200">
-                <strong>⚠ Final Warning:</strong> Your data will enter a <strong>30-day Read-Only Grace Period</strong> before permanent erasure. You can reactivate anytime within 30 days by contacting MBR support.
+                <strong>{lt("⚠ Final Warning:", "⚠ చివరి హెచ్చరిక:")}</strong> {lt("Your data will enter a 30-day Read-Only Grace Period before permanent erasure. You can reactivate anytime within 30 days by contacting MBR support.", "శాశ్వతంగా తొలగించే ముందు మీ డేటా 30 రోజుల Read-Only గ్రేస్ పీరియడ్‌లో ఉంటుంది. 30 రోజుల్లో ఎప్పుడైనా MBR సపోర్ట్‌ను సంప్రదించి మళ్లీ యాక్టివేట్ చేసుకోవచ్చు.")}
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setCancelStep(2)} className="border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800">← Back</Button>
+                <Button variant="outline" onClick={() => setCancelStep(2)} className="border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800">← {lt("Back", "వెనక్కి")}</Button>
                 <Button disabled={confirming} onClick={confirmCancellation} className="bg-red-600 hover:bg-red-700 text-white font-semibold shadow-[0_0_24px_rgba(220,38,38,0.45)]">
                   {confirming ? <RefreshCw className="h-4 w-4 mr-1 animate-spin" /> : <ShieldAlert className="h-4 w-4 mr-1" />}
-                  Confirm Cancellation
+                  {lt("Confirm Cancellation", "రద్దును నిర్ధారించండి")}
                 </Button>
               </DialogFooter>
             </div>
