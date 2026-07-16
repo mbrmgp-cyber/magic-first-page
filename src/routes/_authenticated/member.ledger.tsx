@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
+import { ArrowLeft, ArrowDownCircle, ArrowUpCircle, HandCoins } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { getMyLedger } from "@/lib/accounts.functions";
 import { useI18n, bi } from "@/lib/i18n";
@@ -33,6 +33,22 @@ function MemberLedger() {
             {b("విచ్చుకున్నది", "Received")} {b("మరియు", "and")} {b("పుచ్చుకున్నది", "Repayments")}
           </p>
         </Card>
+
+        <Link
+          to="/member/loan-request"
+          className="flex items-center justify-between gap-3 rounded-xl p-4 border border-amber-500/40 bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/10 hover:from-amber-500/20 hover:to-orange-500/20 transition"
+        >
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-amber-500/20 flex items-center justify-center">
+              <HandCoins className="h-5 w-5 text-amber-300" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-white">{b("కొత్త అప్పు కోసం అభ్యర్థన", "Request a New Loan")}</p>
+              <p className="text-[11px] text-white/60">{b("కార్యవర్గం ఆమోదం కోసం అభ్యర్థన పంపండి", "Apply — sent to committee for approval")}</p>
+            </div>
+          </div>
+          <span className="text-amber-300 text-lg">→</span>
+        </Link>
 
         {q.isLoading && <p className="text-zinc-400 text-sm">{b("లోడ్ అవుతోంది…", "Loading…")}</p>}
 
