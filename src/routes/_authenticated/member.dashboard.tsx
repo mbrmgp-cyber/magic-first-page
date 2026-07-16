@@ -244,6 +244,21 @@ function MemberDashboard() {
             <p className="text-[14px] font-semibold text-white leading-tight">{b("సభ్యుడి ఐడి కార్డ్", "Member ID Card")}</p>
           </button>
 
+          {/* Pay to Society: opens dialog with bank details */}
+          <button
+            type="button"
+            onClick={() => setPayOpen(true)}
+            className="rounded-xl bg-zinc-950 border border-zinc-800 p-4 flex flex-col items-center justify-center gap-2.5 text-center transition hover:-translate-y-0.5 min-h-[112px]"
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${brand}99`; e.currentTarget.style.boxShadow = `0 0 20px ${brand}33`; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = ""; e.currentTarget.style.boxShadow = ""; }}
+          >
+            <div className="h-11 w-11 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: `${brand}26` }}>
+              <Building2 className="h-5 w-5" style={{ color: brand }} />
+            </div>
+            <p className="text-[14px] font-semibold text-white leading-tight">{b("సొసైటీకి పేమెంట్", "Pay to Society")}</p>
+          </button>
+
           {MENU.map((it) => {
             const showDot = it.to === "/org/chat" && hasNewChat;
             return (
