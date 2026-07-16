@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Wallet, PieChart, FileDown, Coins, Building2 } from "lucide-react";
+import { ArrowLeft, Wallet, PieChart, Coins, Building2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { CurrencySelector } from "@/lib/currency-context";
 import { RoleGate } from "@/components/RoleGate";
