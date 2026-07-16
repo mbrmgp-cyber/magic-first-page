@@ -41,11 +41,10 @@ function AccountsHub() {
         </header>
 
         <div className="grid grid-cols-2 gap-3">
-          {TILES.map((t, i) => (
+          {TILES.map((t) => (
             <Link
               key={t.to}
               to={t.to}
-              className={i === TILES.length - 1 ? "col-span-2" : ""}
             >
               <Card
                 className="p-4 bg-zinc-950 border-white/10 hover:border-[#ff8c28] transition-all cursor-pointer h-full"
