@@ -222,28 +222,31 @@ function Dashboard() {
       <div className="min-h-screen flex items-center justify-center p-6 bg-black">
         <Card className="w-full max-w-md p-6 text-center space-y-4 bg-zinc-950 border-zinc-800 text-white shadow-[0_0_60px_rgba(255,140,40,0.15)]">
           <img src={mbrLogo.url} alt="MBR" className="w-16 h-16 mx-auto rounded-md bg-black p-1.5" />
-          <h2 className="text-xl font-bold">{pending ? "MBR సమీక్షలో ఉంది" : "Application Rejected"}</h2>
+          <h2 className="text-xl font-bold">{pending ? lt("Under MBR Review", "MBR సమీక్షలో ఉంది") : lt("Application Rejected", "దరఖాస్తు తిరస్కరించబడింది")}</h2>
           {pending ? (
             <>
               <p className="text-sm text-zinc-400">
-                మీ Society registration MBR admin సమీక్షిస్తున్నారు. Logo, Government Registration, Founders ID ధృవీకరణ తర్వాత Email ద్వారా approval వస్తుంది.
+                {lt(
+                  "MBR admin is reviewing your society registration. Approval will be sent by email after logo, government registration, and founders ID verification.",
+                  "మీ సొసైటీ నమోదును MBR అడ్మిన్ సమీక్షిస్తున్నారు. లోగో, ప్రభుత్వ నమోదు, వ్యవస్థాపకుల ID ధృవీకరణ తర్వాత ఈమెయిల్ ద్వారా ఆమోదం వస్తుంది."
+                )}
               </p>
               <div className="text-xs bg-[#ff8c28]/10 border border-[#ff8c28]/40 rounded-md p-3 text-[#ffb072]">
-                Status: <span className="font-bold">PENDING REVIEW</span>
+                {lt("Status", "స్థితి")}: <span className="font-bold">{lt("PENDING REVIEW", "సమీక్షలో ఉంది")}</span>
               </div>
             </>
           ) : (
             <>
-              <p className="text-sm text-red-400">మీ application reject అయింది.</p>
+              <p className="text-sm text-red-400">{lt("Your application was rejected.", "మీ దరఖాస్తు తిరస్కరించబడింది.")}</p>
               {org.approval_notes && (
                 <div className="text-xs bg-red-950 border border-red-900 rounded-md p-3 text-red-200 text-left">
-                  <strong>కారణం:</strong> {org.approval_notes}
+                  <strong>{lt("Reason", "కారణం")}:</strong> {org.approval_notes}
                 </div>
               )}
             </>
           )}
           <Button onClick={logout} variant="outline" className="w-full border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800">
-            <LogOut className="h-4 w-4 mr-2" />Logout
+            <LogOut className="h-4 w-4 mr-2" />{lt("Logout", "లాగ్ అవుట్")}
           </Button>
         </Card>
       </div>
@@ -311,7 +314,7 @@ function Dashboard() {
                 </span>
               )}
               <span className="absolute inset-0 bg-black/60 text-white text-[10px] flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition">
-                {uploading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <><Camera className="w-5 h-5 mb-0.5" />మార్చండి</>}
+                {uploading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <><Camera className="w-5 h-5 mb-0.5" />{lt("Change", "మార్చండి")}</>}
               </span>
             </button>
             <div className="min-w-0 flex-1" style={{ textAlign: theme.headAlign }}>
@@ -410,7 +413,7 @@ function Dashboard() {
                 {registrationUrl}
               </a>
               <a href={qrDataUrl} download={`${org.org_code}-qr.png`}>
-                <Button variant="outline" size="sm" className="border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800"><Download className="w-4 h-4 mr-1" />Download</Button>
+                <Button variant="outline" size="sm" className="border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800"><Download className="w-4 h-4 mr-1" />{lt("Download", "డౌన్‌లోడ్")}</Button>
               </a>
             </div>
           ) : (
