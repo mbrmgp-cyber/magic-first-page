@@ -424,10 +424,10 @@ function Dashboard() {
         <DialogContent className="max-w-sm bg-zinc-950 border-zinc-800 text-white">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
-              <Settings className="h-5 w-5 text-[#ff8c28]" /> Settings / సెట్టింగ్స్
+              <Settings className="h-5 w-5 text-[#ff8c28]" /> {lt("Settings", "సెట్టింగ్స్")}
             </DialogTitle>
             <DialogDescription className="text-zinc-400">
-              Manage your society's MBR registration.
+              {lt("Manage your society's MBR registration.", "మీ సొసైటీ MBR నమోదును నిర్వహించండి.")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 pt-2">
@@ -435,19 +435,19 @@ function Dashboard() {
               onClick={() => { setSettingsOpen(false); navigate({ to: "/org/theme" }); }}
               className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-semibold border border-zinc-700"
             >
-              <Settings className="h-4 w-4 mr-1" /> Design & Theme / రంగులు & డిజైన్
+              <Settings className="h-4 w-4 mr-1" /> {lt("Design & Theme", "రంగులు & డిజైన్")}
             </Button>
             <Button
               onClick={() => { setSettingsOpen(false); setLeaveOpen(true); }}
               className="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold border-0"
             >
-              <LogOut className="h-4 w-4 mr-1" /> Leave Organization / సంస్థ నుండి వైదొలగండి
+              <LogOut className="h-4 w-4 mr-1" /> {lt("Leave Organization", "సంస్థ నుండి వైదొలగండి")}
             </Button>
             <Button
               onClick={() => { setCancelStep(1); setResolutionUrl(""); setSettingsOpen(false); setCancelOpen(true); }}
               className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold border-0 shadow-[0_0_24px_rgba(220,38,38,0.45)]"
             >
-              <ShieldAlert className="h-4 w-4 mr-1" /> Cancel MBR Registration / సభ్యత్వం రద్దు
+              <ShieldAlert className="h-4 w-4 mr-1" /> {lt("Cancel MBR Registration", "సభ్యత్వం రద్దు")}
             </Button>
           </div>
         </DialogContent>
