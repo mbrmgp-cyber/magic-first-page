@@ -353,8 +353,8 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
                   {lt("Reference Details", "పరిచయస్తుడి వివరాలు")}
                 </p>
                 <div className="space-y-1.5">
-                  <BiLabel en="Introduced By Name" te="పరిచయస్తుడు పేరు" />
-                  <Input className="bg-zinc-900 border-zinc-700 text-white"
+                  <BiLabel en="Introduced By Name" te="పరిచయస్తుడు పేరు" required />
+                  <Input className="bg-zinc-900 border-zinc-700 text-white" required
                     value={form.introduced_by_name}
                     onChange={(e) => setForm({ ...form, introduced_by_name: e.target.value })} />
                 </div>
