@@ -171,8 +171,23 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
     });
   }
 
+  const requiredMissing =
+    !photoFile ||
+    !form.first_name.trim() ||
+    !form.last_name.trim() ||
+    !form.village.trim() ||
+    !form.pin_code.trim() ||
+    !form.email.trim() ||
+    !form.phone.trim() ||
+    !form.blood_group ||
+    !form.introduced_by_name.trim();
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (requiredMissing) {
+      toast.error(lt("Please fill all required fields and upload photo", "అన్ని అవసరమైన వివరాలు పూర్తి చేసి ఫోటో అప్‌లోడ్ చేయండి"));
+      return;
+    }
     setLoading(true);
     try {
       const photo_data_url = photoFile ? await fileToDataUrl(photoFile) : undefined;
