@@ -306,14 +306,14 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <BiLabel en="Village" te="గ్రామం పేరు" />
-                  <Input className="bg-zinc-900 border-zinc-700 text-white"
+                  <BiLabel en="Village" te="గ్రామం పేరు" required />
+                  <Input className="bg-zinc-900 border-zinc-700 text-white" required
                     value={form.village}
                     onChange={(e) => setForm({ ...form, village: e.target.value })} />
                 </div>
                 <div className="space-y-1.5">
-                  <BiLabel en="Pin Code" te="పిన్ నెంబర్" />
-                  <Input className="bg-zinc-900 border-zinc-700 text-white" inputMode="numeric"
+                  <BiLabel en="Pin Code" te="పిన్ నెంబర్" required />
+                  <Input className="bg-zinc-900 border-zinc-700 text-white" inputMode="numeric" required
                     value={form.pin_code}
                     onChange={(e) => setForm({ ...form, pin_code: e.target.value })} />
                 </div>
@@ -327,8 +327,8 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
               </div>
 
               <div className="space-y-1.5">
-                <BiLabel en="Phone Number" te="ఫోన్ నెంబర్" />
-                <Input className="bg-zinc-900 border-zinc-700 text-white" inputMode="tel"
+                <BiLabel en="Phone Number" te="ఫోన్ నెంబర్" required />
+                <Input className="bg-zinc-900 border-zinc-700 text-white" inputMode="tel" required
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })} />
               </div>
