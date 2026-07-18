@@ -416,8 +416,13 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
                 {receiptFile && <p className="text-[11px] text-emerald-400">✓ {receiptFile.name}</p>}
               </div>
 
-              <Button type="submit" disabled={loading}
-                className="w-full bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white font-semibold shadow-[0_0_24px_rgba(255,140,40,0.45)]">
+              {requiredMissing && (
+                <p className="text-[11px] text-amber-400 text-center">
+                  {lt("Please upload photo and fill all required (*) fields to submit.", "సబ్మిట్ చేయడానికి ఫోటో అప్‌లోడ్ చేసి అన్ని అవసరమైన (*) వివరాలు నింపండి.")}
+                </p>
+              )}
+              <Button type="submit" disabled={loading || requiredMissing}
+                className="w-full bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white font-semibold shadow-[0_0_24px_rgba(255,140,40,0.45)] disabled:opacity-50 disabled:cursor-not-allowed">
                 {loading ? <><RefreshCw className="h-4 w-4 animate-spin" /> {lt("Submitting…", "సమర్పిస్తున్నాం…")}</> : <><ShieldCheck className="h-4 w-4" /> {lt("Submit for Approval", "ఆమోదం కోసం సమర్పించండి")}</>}
               </Button>
             </form>
