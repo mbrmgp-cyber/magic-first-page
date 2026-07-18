@@ -171,8 +171,23 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
     });
   }
 
+  const requiredMissing =
+    !photoFile ||
+    !form.first_name.trim() ||
+    !form.last_name.trim() ||
+    !form.village.trim() ||
+    !form.pin_code.trim() ||
+    !form.email.trim() ||
+    !form.phone.trim() ||
+    !form.blood_group ||
+    !form.introduced_by_name.trim();
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (requiredMissing) {
+      toast.error(lt("Please fill all required fields and upload photo", "అన్ని అవసరమైన వివరాలు పూర్తి చేసి ఫోటో అప్‌లోడ్ చేయండి"));
+      return;
+    }
     setLoading(true);
     try {
       const photo_data_url = photoFile ? await fileToDataUrl(photoFile) : undefined;
@@ -291,14 +306,14 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <BiLabel en="Village" te="గ్రామం పేరు" />
-                  <Input className="bg-zinc-900 border-zinc-700 text-white"
+                  <BiLabel en="Village" te="గ్రామం పేరు" required />
+                  <Input className="bg-zinc-900 border-zinc-700 text-white" required
                     value={form.village}
                     onChange={(e) => setForm({ ...form, village: e.target.value })} />
                 </div>
                 <div className="space-y-1.5">
-                  <BiLabel en="Pin Code" te="పిన్ నెంబర్" />
-                  <Input className="bg-zinc-900 border-zinc-700 text-white" inputMode="numeric"
+                  <BiLabel en="Pin Code" te="పిన్ నెంబర్" required />
+                  <Input className="bg-zinc-900 border-zinc-700 text-white" inputMode="numeric" required
                     value={form.pin_code}
                     onChange={(e) => setForm({ ...form, pin_code: e.target.value })} />
                 </div>
@@ -312,8 +327,8 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
               </div>
 
               <div className="space-y-1.5">
-                <BiLabel en="Phone Number" te="ఫోన్ నెంబర్" />
-                <Input className="bg-zinc-900 border-zinc-700 text-white" inputMode="tel"
+                <BiLabel en="Phone Number" te="ఫోన్ నెంబర్" required />
+                <Input className="bg-zinc-900 border-zinc-700 text-white" inputMode="tel" required
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })} />
               </div>
@@ -338,8 +353,8 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
                   {lt("Reference Details", "పరిచయస్తుడి వివరాలు")}
                 </p>
                 <div className="space-y-1.5">
-                  <BiLabel en="Introduced By Name" te="పరిచయస్తుడు పేరు" />
-                  <Input className="bg-zinc-900 border-zinc-700 text-white"
+                  <BiLabel en="Introduced By Name" te="పరిచయస్తుడు పేరు" required />
+                  <Input className="bg-zinc-900 border-zinc-700 text-white" required
                     value={form.introduced_by_name}
                     onChange={(e) => setForm({ ...form, introduced_by_name: e.target.value })} />
                 </div>
@@ -401,8 +416,13 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
                 {receiptFile && <p className="text-[11px] text-emerald-400">✓ {receiptFile.name}</p>}
               </div>
 
-              <Button type="submit" disabled={loading}
-                className="w-full bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white font-semibold shadow-[0_0_24px_rgba(255,140,40,0.45)]">
+              {requiredMissing && (
+                <p className="text-[11px] text-amber-400 text-center">
+                  {lt("Please upload photo and fill all required (*) fields to submit.", "సబ్మిట్ చేయడానికి ఫోటో అప్‌లోడ్ చేసి అన్ని అవసరమైన (*) వివరాలు నింపండి.")}
+                </p>
+              )}
+              <Button type="submit" disabled={loading || requiredMissing}
+                className="w-full bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white font-semibold shadow-[0_0_24px_rgba(255,140,40,0.45)] disabled:opacity-50 disabled:cursor-not-allowed">
                 {loading ? <><RefreshCw className="h-4 w-4 animate-spin" /> {lt("Submitting…", "సమర్పిస్తున్నాం…")}</> : <><ShieldCheck className="h-4 w-4" /> {lt("Submit for Approval", "ఆమోదం కోసం సమర్పించండి")}</>}
               </Button>
             </form>
