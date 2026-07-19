@@ -69,6 +69,33 @@ function AccountsPage() {
   const fmtCur = (n: number) => `${sym} ${Number(n || 0).toLocaleString("en-IN")}`;
   const fmtINR = (n: number) => `Rs. ${Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+  // Auto-fetch FX rate (foreign → INR) from open.er-api.com
+  async function fetchFxRate(code: FxCode): Promise<number | null> {
+    if (code === "INR") return 1;
+    try {
+      const r = await fetch(`https://open.er-api.com/v6/latest/${code}`);
+      const j = await r.json();
+      const inr = j?.rates?.INR;
+      return typeof inr === "number" && inr > 0 ? Math.round(inr * 100) / 100 : null;
+    } catch { return null; }
+  }
+
+  // Auto-populate payment currency rate on change
+  useEffect(() => {
+    if (payCcy === "INR") { setPayRate(""); return; }
+    let cancel = false;
+    fetchFxRate(payCcy).then((v) => { if (!cancel && v) setPayRate(String(v)); });
+    return () => { cancel = true; };
+  }, [payCcy]);
+
+  // Auto-populate new-loan currency rate on change
+  useEffect(() => {
+    if (newLoanCcy === "INR") { setNewLoanFxRate(""); return; }
+    let cancel = false;
+    fetchFxRate(newLoanCcy).then((v) => { if (!cancel && v) setNewLoanFxRate(String(v)); });
+    return () => { cancel = true; };
+  }, [newLoanCcy]);
+
   // Auto-convert FX → INR for OLD LOAN payments
   useEffect(() => {
     if (payCcy === "INR") return;
@@ -85,6 +112,7 @@ function AccountsPage() {
     if (!(r > 0)) return;
     if (newLoanFxAmt) setNewLoan(String(Math.round(Number(newLoanFxAmt) * r * 100) / 100));
   }, [newLoanFxAmt, newLoanFxRate, newLoanCcy]);
+
 
   // Carry-forward: monthly due minus interest paid this entry
   const monthlyDue = info?.monthlyInterest ?? 0;
