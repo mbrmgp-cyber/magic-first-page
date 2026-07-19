@@ -151,28 +151,28 @@ function AdminPanel() {
           {filtered.map((o) => {
             const founders = Array.isArray(o.founders) ? (o.founders as any[]) : [];
             const statusColor =
-              o.approval_status === "approved" ? "bg-green-100 text-green-800 border-green-300" :
-              o.approval_status === "rejected" ? "bg-red-100 text-red-800 border-red-300" :
-              "bg-amber-100 text-amber-800 border-amber-300";
+              o.approval_status === "approved" ? "bg-green-900/60 text-green-200 border-green-700" :
+              o.approval_status === "rejected" ? "bg-red-900/60 text-red-200 border-red-700" :
+              "bg-amber-900/60 text-amber-200 border-amber-700";
             return (
-              <Card key={o.id} className="p-4 bg-white/95 backdrop-blur border-white shadow-md space-y-3">
+              <Card key={o.id} className="p-4 bg-zinc-900/95 border-zinc-700 text-white shadow-md space-y-3">
                 <div className="flex items-start gap-3">
                   {o.logo_url ? (
-                    <img src={o.logo_url} alt="" className="w-16 h-16 rounded-md border object-cover bg-white shrink-0" />
+                    <img src={o.logo_url} alt="" className="w-16 h-16 rounded-md border object-cover bg-black shrink-0" style={{ borderColor: "#3f3f46" }} />
                   ) : (
-                    <div className="w-16 h-16 rounded-md border bg-muted flex items-center justify-center shrink-0">
-                      <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                    <div className="w-16 h-16 rounded-md border bg-zinc-800 flex items-center justify-center shrink-0" style={{ borderColor: "#3f3f46" }}>
+                      <ImageIcon className="h-6 w-6 text-zinc-400" />
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-bold truncate">{o.name}</h3>
+                      <h3 className="font-bold truncate text-white">{o.name}</h3>
                       <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold uppercase ${statusColor}`}>
                         {o.approval_status}
                       </span>
                     </div>
-                    {o.slogan && <p className="text-xs italic text-muted-foreground">"{o.slogan}"</p>}
-                    <div className="text-xs text-muted-foreground mt-1 space-y-0.5">
+                    {o.slogan && <p className="text-xs italic text-zinc-400">"{o.slogan}"</p>}
+                    <div className="text-xs text-zinc-400 mt-1 space-y-0.5">
                       <div>📧 {o.email}</div>
                       {o.phone && <div>📞 {o.phone}</div>}
                       {o.gov_reg_number && <div className="font-mono">Reg No: {o.gov_reg_number}</div>}
@@ -182,23 +182,23 @@ function AdminPanel() {
                 </div>
 
                 {founders.length > 0 && (
-                  <div className="border-t pt-2">
-                    <div className="text-xs font-semibold flex items-center gap-1 mb-2"><Users className="h-3 w-3" /> Founders ({founders.length})</div>
+                  <div className="border-t border-zinc-700 pt-2">
+                    <div className="text-xs font-semibold flex items-center gap-1 mb-2 text-white"><Users className="h-3 w-3" /> Founders ({founders.length})</div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {founders.map((f, i) => (
-                        <div key={i} className="flex items-start gap-2 p-2 bg-muted/40 rounded text-xs">
+                        <div key={i} className="flex items-start gap-2 p-2 bg-zinc-800/60 rounded text-xs">
                           {f.aadhaar_url ? (
                             <a href={f.aadhaar_url} target="_blank" rel="noopener" className="shrink-0">
-                              <img src={f.aadhaar_url} alt="ID" className="w-12 h-12 rounded border object-cover hover:scale-110 transition" />
+                              <img src={f.aadhaar_url} alt="ID" className="w-12 h-12 rounded border object-cover hover:scale-110 transition" style={{ borderColor: "#3f3f46" }} />
                             </a>
                           ) : (
-                            <div className="w-12 h-12 rounded border bg-background flex items-center justify-center shrink-0">
-                              <FileText className="h-4 w-4 text-muted-foreground" />
+                            <div className="w-12 h-12 rounded border bg-zinc-900 flex items-center justify-center shrink-0" style={{ borderColor: "#3f3f46" }}>
+                              <FileText className="h-4 w-4 text-zinc-400" />
                             </div>
                           )}
                           <div className="min-w-0">
-                            <div className="font-semibold truncate">{f.name || "—"}</div>
-                            {f.address && <div className="text-muted-foreground text-[10px] truncate">{f.address}</div>}
+                            <div className="font-semibold truncate text-white">{f.name || "—"}</div>
+                            {f.address && <div className="text-zinc-400 text-[10px] truncate">{f.address}</div>}
                           </div>
                         </div>
                       ))}
@@ -207,20 +207,20 @@ function AdminPanel() {
                 )}
 
                 {o.approval_status === "rejected" && o.approval_notes && (
-                  <Alert variant="destructive" className="py-2">
+                  <Alert variant="destructive" className="py-2 bg-red-900/30 border-red-800 text-red-100">
                     <AlertTitle className="text-xs">Rejection reason</AlertTitle>
                     <AlertDescription className="text-xs">{o.approval_notes}</AlertDescription>
                   </Alert>
                 )}
 
                 {o.approval_status === "pending" && (
-                  <div className="border-t pt-3 space-y-2">
+                  <div className="border-t border-zinc-700 pt-3 space-y-2">
                     <Textarea
                       placeholder="Notes / reason (rejection కి compulsory)"
                       rows={2}
                       value={notes[o.id] ?? ""}
                       onChange={(e) => setNotes((n) => ({ ...n, [o.id]: e.target.value }))}
-                      className="text-sm"
+                      className="text-sm bg-zinc-900 border-zinc-700 text-white placeholder:text-zinc-500"
                     />
                     <div className="flex gap-2">
                       <Button
@@ -245,7 +245,7 @@ function AdminPanel() {
                 )}
 
                 {o.approval_status !== "pending" && (
-                  <div className="text-[11px] text-muted-foreground flex items-center gap-1 border-t pt-2">
+                  <div className="text-[11px] text-zinc-400 flex items-center gap-1 border-t border-zinc-700 pt-2">
                     <Clock className="h-3 w-3" />
                     {o.approved_at ? new Date(o.approved_at).toLocaleString() : "—"}
                   </div>
