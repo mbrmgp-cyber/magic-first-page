@@ -508,7 +508,7 @@ export function GlobalThemeApplier() {
         }
       }
     `;
-  }, [org]);
+  }, [org, isAdminRoute]);
 
   return null;
 }
