@@ -535,49 +535,49 @@ function AllOrganizationsManager() {
       </Card>
 
       <Dialog open={!!detailsId} onOpenChange={(o) => !o && setDetailsId(null)}>
-        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto bg-zinc-900 border-zinc-700 text-white">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5" />
+            <DialogTitle className="flex items-center gap-2 text-white">
+              <Building2 className="h-5 w-5 text-green-400" />
               {detailsQ.data?.org.name ?? "Organization Details"}
             </DialogTitle>
-            <DialogDescription className="text-xs font-mono">
+            <DialogDescription className="text-xs font-mono text-zinc-400">
               {detailsQ.data?.org.org_code}
             </DialogDescription>
           </DialogHeader>
 
-          {detailsQ.isLoading && <div className="text-center py-6 text-sm">Loading…</div>}
+          {detailsQ.isLoading && <div className="text-center py-6 text-sm text-zinc-400">Loading…</div>}
 
           {detailsQ.data && (
             <div className="space-y-4">
               <div className="grid grid-cols-4 gap-2 text-center">
-                <div className="p-2 bg-muted rounded">
-                  <div className="text-xl font-bold">{detailsQ.data.counts.total}</div>
-                  <div className="text-[10px] uppercase text-muted-foreground">Total</div>
+                <div className="p-2 bg-zinc-800 rounded" style={{ borderColor: "#3f3f46" }}>
+                  <div className="text-xl font-bold text-white">{detailsQ.data.counts.total}</div>
+                  <div className="text-[10px] uppercase text-zinc-400">Total</div>
                 </div>
-                <div className="p-2 bg-green-50 rounded">
-                  <div className="text-xl font-bold text-green-700">{detailsQ.data.counts.approved}</div>
-                  <div className="text-[10px] uppercase text-muted-foreground">Approved</div>
+                <div className="p-2 bg-green-900/60 rounded" style={{ borderColor: "#3f3f46" }}>
+                  <div className="text-xl font-bold text-green-200">{detailsQ.data.counts.approved}</div>
+                  <div className="text-[10px] uppercase text-zinc-400">Approved</div>
                 </div>
-                <div className="p-2 bg-amber-50 rounded">
-                  <div className="text-xl font-bold text-amber-700">{detailsQ.data.counts.pending}</div>
-                  <div className="text-[10px] uppercase text-muted-foreground">Pending</div>
+                <div className="p-2 bg-amber-900/60 rounded" style={{ borderColor: "#3f3f46" }}>
+                  <div className="text-xl font-bold text-amber-200">{detailsQ.data.counts.pending}</div>
+                  <div className="text-[10px] uppercase text-zinc-400">Pending</div>
                 </div>
-                <div className="p-2 bg-red-50 rounded">
-                  <div className="text-xl font-bold text-red-700">{detailsQ.data.counts.rejected}</div>
-                  <div className="text-[10px] uppercase text-muted-foreground">Rejected</div>
+                <div className="p-2 bg-red-900/60 rounded" style={{ borderColor: "#3f3f46" }}>
+                  <div className="text-xl font-bold text-red-200">{detailsQ.data.counts.rejected}</div>
+                  <div className="text-[10px] uppercase text-zinc-400">Rejected</div>
                 </div>
               </div>
 
-              <div className="text-xs space-y-1 border rounded p-3 bg-muted/30">
-                <div><b>Email:</b> {detailsQ.data.org.email ?? "—"}</div>
-                <div><b>Phone:</b> {detailsQ.data.org.phone ?? "—"}</div>
-                {detailsQ.data.org.gov_reg_number && <div><b>Reg No:</b> {detailsQ.data.org.gov_reg_number}</div>}
-                {detailsQ.data.org.slogan && <div><b>Slogan:</b> {detailsQ.data.org.slogan}</div>}
-                {(detailsQ.data.org as any).address && <div><b>Address:</b> {(detailsQ.data.org as any).address}</div>}
-                <div><b>Created:</b> {new Date(detailsQ.data.org.created_at).toLocaleDateString("en-GB")}</div>
+              <div className="text-xs space-y-1 border rounded p-3 bg-zinc-800/60" style={{ borderColor: "#3f3f46" }}>
+                <div><b className="text-zinc-300">Email:</b> {detailsQ.data.org.email ?? "—"}</div>
+                <div><b className="text-zinc-300">Phone:</b> {detailsQ.data.org.phone ?? "—"}</div>
+                {detailsQ.data.org.gov_reg_number && <div><b className="text-zinc-300">Reg No:</b> {detailsQ.data.org.gov_reg_number}</div>}
+                {detailsQ.data.org.slogan && <div><b className="text-zinc-300">Slogan:</b> {detailsQ.data.org.slogan}</div>}
+                {(detailsQ.data.org as any).address && <div><b className="text-zinc-300">Address:</b> {(detailsQ.data.org as any).address}</div>}
+                <div><b className="text-zinc-300">Created:</b> {new Date(detailsQ.data.org.created_at).toLocaleDateString("en-GB")}</div>
                 <div>
-                  <b>Status:</b>{" "}
+                  <b className="text-zinc-300">Status:</b>{" "}
                   <span className={`text-[10px] px-2 py-0.5 rounded border font-semibold uppercase ${STATUS_STYLES[(detailsQ.data.org.approval_status ?? "pending") as OrgStatus]}`}>
                     {STATUS_LABEL[(detailsQ.data.org.approval_status ?? "pending") as OrgStatus]}
                   </span>
@@ -585,25 +585,25 @@ function AllOrganizationsManager() {
               </div>
 
               <div>
-                <div className="font-semibold text-sm mb-2 flex items-center gap-1">
-                  <Users className="h-4 w-4" /> Members ({detailsQ.data.members.length})
+                <div className="font-semibold text-sm mb-2 flex items-center gap-1 text-white">
+                  <Users className="h-4 w-4 text-zinc-400" /> Members ({detailsQ.data.members.length})
                 </div>
-                <div className="space-y-1 max-h-64 overflow-y-auto border rounded">
+                <div className="space-y-1 max-h-64 overflow-y-auto border rounded bg-zinc-900" style={{ borderColor: "#3f3f46" }}>
                   {detailsQ.data.members.length === 0 && (
-                    <div className="text-xs text-muted-foreground text-center py-4">No members yet.</div>
+                    <div className="text-xs text-zinc-400 text-center py-4">No members yet.</div>
                   )}
                   {detailsQ.data.members.map((m: any) => (
-                    <div key={m.id} className="flex items-center gap-2 p-2 border-b last:border-0 text-xs">
+                    <div key={m.id} className="flex items-center gap-2 p-2 border-b last:border-0 text-xs" style={{ borderColor: "#3f3f46" }}>
                       <div className="flex-1 min-w-0">
-                        <div className="font-semibold truncate">{m.name}</div>
-                        <div className="text-[10px] text-muted-foreground truncate">
+                        <div className="font-semibold truncate text-white">{m.name}</div>
+                        <div className="text-[10px] text-zinc-400 truncate">
                           {m.member_code ?? "—"} · {m.email ?? m.phone ?? ""}
                         </div>
                       </div>
                       <span className={`text-[9px] px-1.5 py-0.5 rounded border uppercase font-semibold ${
-                        m.status === "approved" ? "bg-green-100 text-green-800 border-green-300" :
-                        m.status === "rejected" ? "bg-red-100 text-red-800 border-red-300" :
-                        "bg-amber-100 text-amber-800 border-amber-300"
+                        m.status === "approved" ? "bg-green-900/60 text-green-200 border-green-700" :
+                        m.status === "rejected" ? "bg-red-900/60 text-red-200 border-red-700" :
+                        "bg-amber-900/60 text-amber-200 border-amber-700"
                       }`}>
                         {m.status}
                       </span>
