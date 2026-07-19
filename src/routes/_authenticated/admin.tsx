@@ -310,9 +310,9 @@ function MemberIdUpdater() {
         ఏ సొసైటీ లోనైనా సభ్యుని ID నెంబరును మార్చండి. Name / ID / Email / Phone తో వెతకండి.
       </p>
       <form onSubmit={doSearch} className="flex gap-2">
-        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, ID, email, phone…" className="bg-zinc-900 border-zinc-700 text-white placeholder:text-zinc-500" />
+        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, ID, email, phone…" className="bg-zinc-900 border-zinc-700 text-white placeholder:text-zinc-300" />
         <Button type="submit" disabled={loading || !q.trim()} className="bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white">
-          <Search className="h-4 w-4 mr-1" />{loading ? "…" : "Search"}
+          <Search className="h-4 w-4 mr-1 text-white" />{loading ? "…" : "Search"}
         </Button>
       </form>
       {results.length > 0 && (
@@ -431,7 +431,7 @@ function AllOrganizationsManager() {
           placeholder="Search by name, code, email, phone…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="bg-zinc-900 border-zinc-700 text-white placeholder:text-zinc-500"
+          className="bg-zinc-900 border-zinc-700 text-white placeholder:text-zinc-300"
         />
 
         {orgsQ.isLoading && <div className="text-sm text-zinc-400 text-center py-4">Loading…</div>}
