@@ -139,10 +139,10 @@ function AdminPanel() {
 
 
 
-        {orgsQ.isLoading && <Card className="p-6 text-center bg-white/90">Loading societies…</Card>}
+        {orgsQ.isLoading && <Card className="p-6 text-center bg-zinc-900/95 border-zinc-700 text-white">Loading societies…</Card>}
 
         {!orgsQ.isLoading && filtered.length === 0 && (
-          <Card className="p-6 text-center bg-white/90 text-muted-foreground">
+          <Card className="p-6 text-center bg-zinc-900/95 border-zinc-700 text-zinc-400">
             {filter === "pending" ? "Pending applications లేవు 🎉" : "ఈ filter లో societies లేవు"}
           </Card>
         )}
