@@ -700,43 +700,43 @@ function MbrGlobalAdsManager() {
   }
 
   return (
-    <Card className="p-4 bg-white/95 backdrop-blur border-white shadow-md space-y-3">
+    <Card className="p-4 bg-zinc-900/95 border-zinc-700 text-white shadow-md space-y-3">
       <div className="flex items-center gap-2">
-        <ImageIcon className="h-5 w-5 text-[#FF9933]" />
-        <h2 className="font-bold">MBR APP Global Ad Banners (Super Admin only)</h2>
+        <ImageIcon className="h-5 w-5 text-[#ff8c28]" />
+        <h2 className="font-bold text-white">MBR APP Global Ad Banners (Super Admin only)</h2>
       </div>
-      <p className="text-xs text-muted-foreground">
+      <p className="text-xs text-zinc-400">
         ఈ ప్రకటనలు అన్ని సొసైటీల సభ్యుల డాష్‌బోర్డ్ కింద sticky bar లో కనిపిస్తాయి. Society admins దీన్ని edit చేయలేరు.
       </p>
-      <div className="rounded-md border border-dashed border-orange-300 bg-orange-50 p-2 text-[11px] text-orange-900">
+      <div className="rounded-md border border-dashed border-[#ff8c28]/60 bg-[#ff8c28]/10 p-2 text-[11px] text-[#ff8c28]">
         Recommended: <span className="font-mono">1200 × 128 px</span> (ratio ~9:1) — slim horizontal banner, max height 64px on mobile. JPG/PNG, &lt; 500KB.
       </div>
 
-      <label className="flex items-center justify-center gap-2 rounded-lg border border-dashed border-zinc-300 bg-white py-4 cursor-pointer hover:border-[#FF9933] transition">
-        <ImageIcon className="h-4 w-4 text-[#FF9933]" />
-        <span className="text-sm">{uploading ? "Uploading…" : "Upload global banner image(s)"}</span>
+      <label className="flex items-center justify-center gap-2 rounded-lg border border-dashed border-zinc-600 bg-zinc-900 py-4 cursor-pointer hover:border-[#ff8c28] transition">
+        <ImageIcon className="h-4 w-4 text-[#ff8c28]" />
+        <span className="text-sm text-white">{uploading ? "Uploading…" : "Upload global banner image(s)"}</span>
         <input type="file" accept="image/*" multiple className="hidden" onChange={handleUpload} disabled={uploading} />
       </label>
 
       {ads.length === 0 ? (
-        <p className="text-xs text-muted-foreground italic text-center py-2">No global banners yet.</p>
+        <p className="text-xs text-zinc-400 italic text-center py-2">No global banners yet.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {ads.map((a) => {
             const src = previews[a.url] || "";
             return (
               <div key={a.id} className="rounded-lg overflow-hidden border relative"
-                style={{ borderColor: a.active ? "#FF993388" : "#d4d4d8", opacity: a.active ? 1 : 0.55 }}>
+                style={{ borderColor: a.active ? "#ff8c28" : "#3f3f46", opacity: a.active ? 1 : 0.55 }}>
                 {src
                   ? <img src={src} alt="" className="w-full h-16 object-cover" />
-                  : <div className="w-full h-16 bg-zinc-100 animate-pulse" />}
-                <div className="flex items-center justify-between p-1.5 bg-white/95 border-t">
+                  : <div className="w-full h-16 bg-zinc-800 animate-pulse" />}
+                <div className="flex items-center justify-between p-1.5 bg-zinc-900 border-t" style={{ borderColor: "#3f3f46" }}>
                   <button type="button" onClick={() => toggleActive(a)}
-                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-zinc-700 hover:text-zinc-900">
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-white hover:text-zinc-300">
                     {a.active ? <><Eye className="h-3.5 w-3.5" /> Active</> : <><Ban className="h-3.5 w-3.5" /> Hidden</>}
                   </button>
                   <button type="button" onClick={() => remove(a)}
-                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-red-600 hover:text-red-700">
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-red-400 hover:text-red-300">
                     <XCircle className="h-3.5 w-3.5" /> Delete
                   </button>
                 </div>
