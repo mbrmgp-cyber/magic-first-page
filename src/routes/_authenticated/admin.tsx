@@ -70,21 +70,21 @@ function AdminPanel() {
     }
   }
 
-  if (rolesQ.isLoading) return <div className="min-h-screen flex items-center justify-center bg-tricolor">Loading…</div>;
+  if (rolesQ.isLoading) return <div className="min-h-screen flex items-center justify-center bg-black text-white">Loading…</div>;
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 bg-tricolor">
-        <Card className="w-full max-w-md p-6 text-center space-y-4 bg-white/92 backdrop-blur-xl shadow-2xl border-white">
-          <img src={mbrLogo.url} alt="MBR" className="w-16 h-16 mx-auto rounded-md bg-black p-1.5" />
-          <h1 className="text-xl font-bold">MBR Admin Bootstrap</h1>
-          <p className="text-sm text-muted-foreground">
+      <div className="min-h-screen flex items-center justify-center p-6 bg-black text-white">
+        <Card className="w-full max-w-md p-6 text-center space-y-4 bg-zinc-900/95 border-zinc-700 text-white shadow-2xl">
+          <img src={mbrLogo.url} alt="MBR" className="w-16 h-16 mx-auto rounded-md bg-black border border-zinc-700 p-1.5" />
+          <h1 className="text-xl font-bold text-white">MBR Admin Bootstrap</h1>
+          <p className="text-sm text-zinc-400">
             ఇంకా MBR Admin assign కాలేదు. మీరు మొదటిగా admin role తీసుకోవచ్చు. Claim చేసిన తర్వాత ఇతరులు ఈ button ద్వారా claim చేయలేరు.
           </p>
-          <Button onClick={onClaim} className="w-full">
+          <Button onClick={onClaim} className="w-full bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white">
             <ShieldCheck className="h-4 w-4 mr-2" />నేను MBR Admin అవుతాను
           </Button>
-          <Button onClick={logout} variant="ghost" size="sm" className="w-full">
+          <Button onClick={logout} variant="ghost" size="sm" className="w-full text-white hover:bg-zinc-800">
             <LogOut className="h-4 w-4 mr-1" />Logout
           </Button>
         </Card>
@@ -101,17 +101,17 @@ function AdminPanel() {
   };
 
   return (
-    <div className="min-h-screen bg-tricolor p-3 md:p-6">
+    <div className="min-h-screen bg-black text-white p-3 md:p-6">
       <div className="max-w-5xl mx-auto space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={mbrLogo.url} alt="MBR" className="w-12 h-12 rounded-md bg-black p-1" />
+            <img src={mbrLogo.url} alt="MBR" className="w-12 h-12 rounded-md bg-black border border-zinc-700 p-1" />
             <div>
-              <h1 className="text-lg font-bold flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-green-700" /> MBR Admin Panel</h1>
-              <p className="text-xs text-muted-foreground">Society approvals</p>
+              <h1 className="text-lg font-bold flex items-center gap-2 text-white"><ShieldCheck className="h-5 w-5 text-green-400" /> MBR Admin Panel</h1>
+              <p className="text-xs text-zinc-400">Society approvals</p>
             </div>
           </div>
-          <Button onClick={logout} variant="ghost" size="sm"><LogOut className="h-4 w-4 mr-1" />Logout</Button>
+          <Button onClick={logout} variant="ghost" size="sm" className="text-white hover:bg-zinc-800 border border-zinc-700"><LogOut className="h-4 w-4 mr-1" />Logout</Button>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -119,10 +119,10 @@ function AdminPanel() {
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`p-3 rounded-lg border text-left transition ${filter === f ? "bg-white shadow-md border-[#FF9933]" : "bg-white/70 border-white"}`}
+              className={`p-3 rounded-lg border text-left transition ${filter === f ? "bg-zinc-900 shadow-md border-[#ff8c28] ring-1 ring-[#ff8c28]/50" : "bg-zinc-900/70 border-zinc-700 text-white"}`}
             >
-              <div className="text-xs uppercase text-muted-foreground">{f}</div>
-              <div className="text-xl font-bold">
+              <div className="text-xs uppercase text-zinc-400">{f}</div>
+              <div className="text-xl font-bold text-white">
                 {f === "all" ? orgs.length : counts[f as keyof typeof counts]}
               </div>
             </button>
