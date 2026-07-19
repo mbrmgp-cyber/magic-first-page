@@ -42,10 +42,22 @@ function AccountsPage() {
   const searchWrapRef = useRef<HTMLDivElement>(null);
   const [date, setDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
   const [remarks, setRemarks] = useState("");
+  // OLD LOAN payment inputs — stored as INR (Rs.)
   const [principal, setPrincipal] = useState("");
   const [interest, setInterest] = useState("");
+  // OLD LOAN foreign-currency helpers
+  type FxCode = "INR" | "USD" | "AED" | "KWD" | "MYR";
+  const [payCcy, setPayCcy] = useState<FxCode>("INR");
+  const [payRate, setPayRate] = useState(""); // 1 unit foreign = ? INR
+  const [payPrincipalFx, setPayPrincipalFx] = useState("");
+  const [payInterestFx, setPayInterestFx] = useState("");
+  // NEW LOAN
   const [newLoan, setNewLoan] = useState("");
   const [newLoanRate, setNewLoanRate] = useState("2");
+  const [newLoanCcy, setNewLoanCcy] = useState<FxCode>("INR");
+  const [newLoanFxRate, setNewLoanFxRate] = useState("");
+  const [newLoanFxAmt, setNewLoanFxAmt] = useState("");
+  const [nextDueMonths, setNextDueMonths] = useState<"1" | "3" | "6" | "12">("1");
   const { symbol: sym } = useCurrency();
   const { lang } = useI18n();
   const lt = (en: string, te: string) => (lang === "te" ? te : en);
@@ -55,6 +67,29 @@ function AccountsPage() {
   const [locked, setLocked] = useState(false);
 
   const fmtCur = (n: number) => `${sym} ${Number(n || 0).toLocaleString("en-IN")}`;
+  const fmtINR = (n: number) => `Rs. ${Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  // Auto-convert FX → INR for OLD LOAN payments
+  useEffect(() => {
+    if (payCcy === "INR") return;
+    const r = Number(payRate || 0);
+    if (!(r > 0)) return;
+    if (payPrincipalFx) setPrincipal(String(Math.round(Number(payPrincipalFx) * r * 100) / 100));
+    if (payInterestFx) setInterest(String(Math.round(Number(payInterestFx) * r * 100) / 100));
+  }, [payPrincipalFx, payInterestFx, payRate, payCcy]);
+
+  // Auto-convert FX → INR for NEW LOAN disbursement
+  useEffect(() => {
+    if (newLoanCcy === "INR") return;
+    const r = Number(newLoanFxRate || 0);
+    if (!(r > 0)) return;
+    if (newLoanFxAmt) setNewLoan(String(Math.round(Number(newLoanFxAmt) * r * 100) / 100));
+  }, [newLoanFxAmt, newLoanFxRate, newLoanCcy]);
+
+  // Carry-forward: monthly due minus interest paid this entry
+  const monthlyDue = info?.monthlyInterest ?? 0;
+  const paidInterest = Number(interest || 0);
+  const carryForward = Math.max(0, Math.round((monthlyDue - paidInterest) * 100) / 100);
 
   async function onLogoPicked(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
