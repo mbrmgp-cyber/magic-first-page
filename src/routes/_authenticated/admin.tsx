@@ -728,8 +728,20 @@ function MbrGlobalAdsManager() {
               <div key={a.id} className="rounded-lg overflow-hidden border relative"
                 style={{ borderColor: a.active ? "#ff8c28" : "#3f3f46", opacity: a.active ? 1 : 0.55 }}>
                 {src
-                  ? <img src={src} alt="" className="w-full h-16 object-cover" />
+                  ? <img
+                      src={src}
+                      alt=""
+                      className="w-full h-16 object-cover bg-zinc-800"
+                      onError={async (e) => {
+                        const img = e.currentTarget;
+                        if (img.dataset.retried) return;
+                        img.dataset.retried = "1";
+                        const { data } = await supabase.storage.from("mbr-global-ads").createSignedUrl(a.url, 3600);
+                        if (data?.signedUrl) img.src = data.signedUrl;
+                      }}
+                    />
                   : <div className="w-full h-16 bg-zinc-800 animate-pulse" />}
+
                 <div className="flex items-center justify-between p-1.5 bg-zinc-900 border-t" style={{ borderColor: "#3f3f46" }}>
                   <button type="button" onClick={() => toggleActive(a)}
                     className="inline-flex items-center gap-1 text-[11px] font-semibold text-white hover:text-zinc-300">

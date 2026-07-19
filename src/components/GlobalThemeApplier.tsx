@@ -1,8 +1,10 @@
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { useRouterState } from "@tanstack/react-router";
 import { getMyOrg, getMyMembership } from "@/lib/org.functions";
 import { resolveTheme } from "@/lib/theme";
+
 
 /**
  * Applies the organization's theme (colors + font) globally by overriding
@@ -31,14 +33,32 @@ export function GlobalThemeApplier() {
     ((memberQ.data?.membership as any)?.organizations as any) ||
     null;
 
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isAdminRoute = pathname?.startsWith("/admin");
+
   useEffect(() => {
     if (typeof document === "undefined") return;
-    const t = resolveTheme(org);
     const root = document.documentElement;
+
+    // MBR Admin panel is a global surface — do NOT apply the current org's
+    // theme. Force the pure black + zinc + orange design used by admin.tsx.
+    if (isAdminRoute) {
+      root.classList.add("dark");
+      delete root.dataset.mbrTheme;
+      document.body.style.backgroundColor = "#000000";
+      document.body.style.color = "#ffffff";
+      document.body.style.fontFamily = "";
+      const prev = document.getElementById("mbr-global-theme-overrides");
+      if (prev) prev.remove();
+      return;
+    }
+
+    const t = resolveTheme(org);
 
     // Force dark mode wrapper so shadcn .dark variants apply
     root.classList.add("dark");
     root.dataset.mbrTheme = "on";
+
 
     // Map theme to shadcn semantic tokens. Using hex directly works because
     // Tailwind v4 reads --background etc. as plain CSS values.
@@ -488,7 +508,7 @@ export function GlobalThemeApplier() {
         }
       }
     `;
-  }, [org]);
+  }, [org, isAdminRoute]);
 
   return null;
 }
