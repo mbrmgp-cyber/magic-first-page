@@ -161,6 +161,20 @@ function AccountsPage() {
     const p = Number(principal || 0), i = Number(interest || 0);
     const nl = Number(newLoan || 0), nr = Number(newLoanRate || 0);
     if (p + i + nl <= 0) { toast.error("ఏదైనా మొత్తం నమోదు చేయండి"); return; }
+    // Compose remarks with FX + next-due metadata
+    const meta: string[] = [];
+    if (payCcy !== "INR" && Number(payRate) > 0) {
+      meta.push(`Paid in ${payCcy} @ ${payRate} → INR`);
+      if (payPrincipalFx) meta.push(`Principal ${payPrincipalFx} ${payCcy}`);
+      if (payInterestFx) meta.push(`Interest ${payInterestFx} ${payCcy}`);
+    }
+    if (nl > 0) {
+      if (newLoanCcy !== "INR" && Number(newLoanFxRate) > 0) {
+        meta.push(`Disbursed ${newLoanFxAmt} ${newLoanCcy} @ ${newLoanFxRate} → INR`);
+      }
+      meta.push(`Next due: ${nextDueMonths} month(s)`);
+    }
+    const combinedRemarks = [remarks, ...meta].filter(Boolean).join(" • ");
     setBusy(true);
     try {
       const res = await record({
@@ -169,7 +183,7 @@ function AccountsPage() {
           principal_amount: p, interest_amount: i,
           new_loan_amount: nl > 0 ? nl : undefined,
           new_loan_interest_rate: nl > 0 ? nr : undefined,
-          remarks: remarks || undefined,
+          remarks: combinedRemarks || undefined,
         },
       });
       setSaved({
