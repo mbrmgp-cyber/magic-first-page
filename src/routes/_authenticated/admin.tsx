@@ -419,21 +419,22 @@ function AllOrganizationsManager() {
 
   return (
     <>
-      <Card className="p-4 bg-white/95 backdrop-blur border-white shadow-md space-y-3">
+      <Card className="p-4 bg-zinc-900/95 border-zinc-700 text-white shadow-md space-y-3">
         <div className="flex items-center gap-2">
-          <Building2 className="h-5 w-5 text-[#138808]" />
-          <h2 className="font-bold">All Organizations ({orgs.length})</h2>
+          <Building2 className="h-5 w-5 text-green-400" />
+          <h2 className="font-bold text-white">All Organizations ({orgs.length})</h2>
         </div>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-zinc-400">
           సొసైటీని Active / Suspended / Rejected గా మార్చండి. వివరాలు చూడడానికి View నొక్కండి.
         </p>
         <Input
           placeholder="Search by name, code, email, phone…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          className="bg-zinc-900 border-zinc-700 text-white placeholder:text-zinc-500"
         />
 
-        {orgsQ.isLoading && <div className="text-sm text-muted-foreground text-center py-4">Loading…</div>}
+        {orgsQ.isLoading && <div className="text-sm text-zinc-400 text-center py-4">Loading…</div>}
 
         <div className="space-y-2">
           {filtered.map((o) => {
@@ -447,19 +448,19 @@ function AllOrganizationsManager() {
             const inputVal =
               expiryEdits[o.id] ?? (expDate ? expDate.toISOString().slice(0, 10) : "");
             return (
-              <div key={o.id} className="p-3 border rounded-lg bg-muted/30 space-y-2">
+              <div key={o.id} className="p-3 border rounded-lg bg-zinc-800/60 space-y-2" style={{ borderColor: "#3f3f46" }}>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     {o.logo_url ? (
-                      <img src={o.logo_url} alt="" className="w-10 h-10 rounded border object-cover bg-white shrink-0" />
+                      <img src={o.logo_url} alt="" className="w-10 h-10 rounded border object-cover bg-black shrink-0" style={{ borderColor: "#3f3f46" }} />
                     ) : (
-                      <div className="w-10 h-10 rounded border bg-background flex items-center justify-center shrink-0">
-                        <Building2 className="h-4 w-4 text-muted-foreground" />
+                      <div className="w-10 h-10 rounded border bg-zinc-900 flex items-center justify-center shrink-0" style={{ borderColor: "#3f3f46" }}>
+                        <Building2 className="h-4 w-4 text-zinc-400" />
                       </div>
                     )}
                     <div className="min-w-0 flex-1">
-                      <div className="font-semibold text-sm truncate">{o.name}</div>
-                      <div className="text-[11px] text-muted-foreground truncate font-mono">
+                      <div className="font-semibold text-sm truncate text-white">{o.name}</div>
+                      <div className="text-[11px] text-zinc-400 truncate font-mono">
                         {o.org_code} · {o.email ?? "—"}
                       </div>
                     </div>
@@ -474,10 +475,10 @@ function AllOrganizationsManager() {
                     onValueChange={(v) => changeStatus(o.id, v as OrgStatus)}
                     disabled={busy === o.id}
                   >
-                    <SelectTrigger className="h-8 w-full sm:w-[140px] text-xs">
+                    <SelectTrigger className="h-8 w-full sm:w-[140px] text-xs bg-zinc-900 border-zinc-700 text-white">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-zinc-900 border-zinc-700 text-white">
                       <SelectItem value="pending"><Clock className="h-3 w-3 inline mr-1" />Pending</SelectItem>
                       <SelectItem value="approved"><PlayCircle className="h-3 w-3 inline mr-1" />Active</SelectItem>
                       <SelectItem value="suspended"><PauseCircle className="h-3 w-3 inline mr-1" />Suspended</SelectItem>
@@ -485,20 +486,20 @@ function AllOrganizationsManager() {
                     </SelectContent>
                   </Select>
 
-                  <Button size="sm" variant="outline" onClick={() => setDetailsId(o.id)}>
+                  <Button size="sm" variant="outline" onClick={() => setDetailsId(o.id)} className="border-zinc-600 text-white hover:bg-zinc-800 hover:text-white">
                     <Eye className="h-3 w-3 mr-1" />View
                   </Button>
                 </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 pt-2 border-t border-dashed">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 pt-2 border-t border-dashed border-zinc-700">
                   <div className="flex items-center gap-1 text-xs flex-1 min-w-0">
-                    <CalendarClock className="h-3.5 w-3.5 shrink-0" />
-                    <span className="text-muted-foreground">Expires on:</span>
-                    <span className={`font-semibold ${expired ? "text-destructive" : "text-foreground"}`}>
+                    <CalendarClock className="h-3.5 w-3.5 shrink-0 text-zinc-400" />
+                    <span className="text-zinc-400">Expires on:</span>
+                    <span className={`font-semibold ${expired ? "text-red-400" : "text-white"}`}>
                       {expLabel}
                     </span>
                     {expired && (
-                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-destructive text-destructive-foreground font-bold uppercase">
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-600 text-white font-bold uppercase">
                         Expired
                       </span>
                     )}
@@ -506,7 +507,7 @@ function AllOrganizationsManager() {
                   <DateInput
                     value={inputVal}
                     onChange={(e) => setExpiryEdits((p) => ({ ...p, [o.id]: e.target.value }))}
-                    className="h-8 text-xs w-full sm:w-[150px]"
+                    className="h-8 text-xs w-full sm:w-[150px] bg-zinc-900 border-zinc-700 text-white"
                     disabled={busy === o.id}
                   />
                   <Button
@@ -514,12 +515,13 @@ function AllOrganizationsManager() {
                     variant="outline"
                     disabled={busy === o.id || !inputVal}
                     onClick={() => saveExpiry(o.id, new Date(inputVal).toISOString())}
+                    className="border-zinc-600 text-white hover:bg-zinc-800"
                   >
                     <Save className="h-3 w-3 mr-1" />Set
                   </Button>
                   <div className="flex gap-1">
-                    <Button size="sm" variant="secondary" disabled={busy === o.id} onClick={() => saveExpiry(o.id, undefined, 30)}>+30d</Button>
-                    <Button size="sm" variant="secondary" disabled={busy === o.id} onClick={() => saveExpiry(o.id, undefined, 365)}>+1yr</Button>
+                    <Button size="sm" variant="secondary" disabled={busy === o.id} onClick={() => saveExpiry(o.id, undefined, 30)} className="bg-zinc-700 text-white hover:bg-zinc-600">+30d</Button>
+                    <Button size="sm" variant="secondary" disabled={busy === o.id} onClick={() => saveExpiry(o.id, undefined, 365)} className="bg-zinc-700 text-white hover:bg-zinc-600">+1yr</Button>
                   </div>
                 </div>
               </div>
@@ -527,7 +529,7 @@ function AllOrganizationsManager() {
           })}
 
           {!orgsQ.isLoading && filtered.length === 0 && (
-            <div className="text-center text-xs text-muted-foreground py-4">No organizations.</div>
+            <div className="text-center text-xs text-zinc-400 py-4">No organizations.</div>
           )}
         </div>
       </Card>
