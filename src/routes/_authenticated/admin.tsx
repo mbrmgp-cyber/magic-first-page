@@ -301,36 +301,36 @@ function MemberIdUpdater() {
   }
 
   return (
-    <Card className="p-4 bg-white/95 backdrop-blur border-white shadow-md space-y-3">
+    <Card className="p-4 bg-zinc-900/95 border-zinc-700 text-white shadow-md space-y-3">
       <div className="flex items-center gap-2">
-        <IdCard className="h-5 w-5 text-[#FF9933]" />
-        <h2 className="font-bold">Member ID Update (Super Admin)</h2>
+        <IdCard className="h-5 w-5 text-[#ff8c28]" />
+        <h2 className="font-bold text-white">Member ID Update (Super Admin)</h2>
       </div>
-      <p className="text-xs text-muted-foreground">
+      <p className="text-xs text-zinc-400">
         ఏ సొసైటీ లోనైనా సభ్యుని ID నెంబరును మార్చండి. Name / ID / Email / Phone తో వెతకండి.
       </p>
       <form onSubmit={doSearch} className="flex gap-2">
-        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, ID, email, phone…" />
-        <Button type="submit" disabled={loading || !q.trim()}>
+        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, ID, email, phone…" className="bg-zinc-900 border-zinc-700 text-white placeholder:text-zinc-500" />
+        <Button type="submit" disabled={loading || !q.trim()} className="bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white">
           <Search className="h-4 w-4 mr-1" />{loading ? "…" : "Search"}
         </Button>
       </form>
       {results.length > 0 && (
         <div className="space-y-2">
           {results.map((m) => (
-            <div key={m.id} className="flex items-center gap-2 p-2 border rounded bg-muted/30">
+            <div key={m.id} className="flex items-center gap-2 p-2 border rounded bg-zinc-800/60" style={{ borderColor: "#3f3f46" }}>
               <div className="flex-1 min-w-0">
-                <div className="font-semibold text-sm truncate">{m.name}</div>
-                <div className="text-[11px] text-muted-foreground truncate">
+                <div className="font-semibold text-sm truncate text-white">{m.name}</div>
+                <div className="text-[11px] text-zinc-400 truncate">
                   {(m.organizations as any)?.name ?? "—"} · {m.email ?? ""} {m.phone ? `· ${m.phone}` : ""}
                 </div>
               </div>
               <Input
-                className="w-36 font-mono text-sm"
+                className="w-36 font-mono text-sm bg-zinc-900 border-zinc-700 text-white"
                 value={edits[m.id] ?? ""}
                 onChange={(e) => setEdits((x) => ({ ...x, [m.id]: e.target.value.toUpperCase() }))}
               />
-              <Button size="sm" disabled={busy === m.id || !edits[m.id]?.trim() || edits[m.id] === m.member_code} onClick={() => save(m)}>
+              <Button size="sm" disabled={busy === m.id || !edits[m.id]?.trim() || edits[m.id] === m.member_code} onClick={() => save(m)} className="bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white">
                 <Save className="h-4 w-4 mr-1" />Save
               </Button>
             </div>
@@ -338,7 +338,7 @@ function MemberIdUpdater() {
         </div>
       )}
       {!loading && results.length === 0 && q && (
-        <div className="text-xs text-muted-foreground">No results yet — try Search.</div>
+        <div className="text-xs text-zinc-400">No results yet — try Search.</div>
       )}
     </Card>
   );
@@ -347,10 +347,10 @@ function MemberIdUpdater() {
 type OrgStatus = "pending" | "approved" | "rejected" | "suspended";
 
 const STATUS_STYLES: Record<OrgStatus, string> = {
-  pending: "bg-amber-100 text-amber-800 border-amber-300",
-  approved: "bg-green-100 text-green-800 border-green-300",
-  rejected: "bg-red-100 text-red-800 border-red-300",
-  suspended: "bg-zinc-200 text-zinc-800 border-zinc-400",
+  pending: "bg-amber-900/60 text-amber-200 border-amber-700",
+  approved: "bg-green-900/60 text-green-200 border-green-700",
+  rejected: "bg-red-900/60 text-red-200 border-red-700",
+  suspended: "bg-zinc-800 text-zinc-200 border-zinc-600",
 };
 
 const STATUS_LABEL: Record<OrgStatus, string> = {
