@@ -936,6 +936,48 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
     statusColor === "green" ? "bg-emerald-600" :
     statusColor === "yellow" ? "bg-amber-500" : "bg-red-600";
 
+  const setStatusFn = useServerFn(setMemberBehaviorStatus);
+  const [statusOpen, setStatusOpen] = useState(false);
+  const [statusPickColor, setStatusPickColor] = useState<"green" | "yellow" | "red">(statusColor);
+  const [statusReason, setStatusReason] = useState("");
+  const [statusBusy, setStatusBusy] = useState(false);
+
+  useEffect(() => {
+    if (statusOpen) {
+      setStatusPickColor(statusColor);
+      const currentReason = activeSuspensions[0]?.["reason" as any] as string | undefined;
+      setStatusReason(currentReason || "");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statusOpen]);
+
+  async function saveStatus() {
+    setStatusBusy(true);
+    try {
+      await setStatusFn({
+        data: {
+          target_member_id: member.id,
+          color: statusPickColor,
+          reason: statusReason.trim() || undefined,
+        },
+      });
+      // refresh suspensions
+      const { data } = await supabase
+        .from("disciplinary_suspensions")
+        .select("category,status,effective_until,reason")
+        .eq("target_member_id", member.id);
+      setSuspensions((data as any) ?? []);
+      toast.success("స్థితి నవీకరించబడింది");
+      setStatusOpen(false);
+    } catch (e: any) {
+      toast.error(e.message ?? "Failed");
+    } finally {
+      setStatusBusy(false);
+    }
+  }
+
+  const dot = (c: "green" | "yellow" | "red") =>
+    c === "green" ? "🟢" : c === "yellow" ? "🟡" : "🔴";
 
   return (
     <div className="space-y-3 pt-3">
@@ -943,17 +985,75 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
         <Button size="sm" onClick={() => setShowAdd((s) => !s)}>
           <Plus className="w-4 h-4 mr-1" /> కొత్త Loan
         </Button>
-        <div className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-white text-xs font-semibold ${statusBg}`}>
-          <span className="inline-block w-2.5 h-2.5 rounded-full bg-white/90" />
-          {statusLabel}
-        </div>
+        <button
+          type="button"
+          onClick={() => setStatusOpen(true)}
+          className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-white text-xs font-semibold shadow ${statusBg} hover:opacity-90`}
+          aria-label="Behavior status"
+        >
+          <span>స్థితి</span>
+          <span className="text-base leading-none">{dot(statusColor)}</span>
+        </button>
       </div>
+
+      <Dialog open={statusOpen} onOpenChange={setStatusOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>సభ్యుడి ప్రవర్తన స్థితి</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs">కారణం</Label>
+              <Textarea
+                rows={3}
+                value={statusReason}
+                onChange={(e) => setStatusReason(e.target.value)}
+                placeholder="కారణం రాయండి (ఐచ్ఛికం)"
+              />
+            </div>
+            <div>
+              <Label className="text-xs mb-1 block">రంగు ఎంపిక</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {(["green", "yellow", "red"] as const).map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setStatusPickColor(c)}
+                    className={`flex flex-col items-center gap-1 rounded-lg border-2 py-2 text-xs transition ${
+                      statusPickColor === c
+                        ? c === "green"
+                          ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950"
+                          : c === "yellow"
+                            ? "border-amber-500 bg-amber-50 dark:bg-amber-950"
+                            : "border-red-500 bg-red-50 dark:bg-red-950"
+                        : "border-muted"
+                    }`}
+                  >
+                    <span className="text-2xl leading-none">{dot(c)}</span>
+                    <span>
+                      {c === "green" ? "మంచి" : c === "yellow" ? "చిన్న తప్పు" : "పెద్ద తప్పు"}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex gap-2 pt-1">
+              <Button variant="outline" className="flex-1" onClick={() => setStatusOpen(false)} disabled={statusBusy}>
+                రద్దు
+              </Button>
+              <Button className="flex-1" onClick={saveStatus} disabled={statusBusy}>
+                {statusBusy ? "…" : "సేవ్"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {showAdd && (
         <Card className="p-3 space-y-2 border-dashed">
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <Label className="text-xs">కరెన్సీ / Currency</Label>
+              <Label className="text-xs">కరెన్సీ</Label>
               <select
                 value={nf.ccy}
                 onChange={(e) => setNf({ ...nf, ccy: e.target.value as LoanFxCode, fxAmt: "", principal: "" })}
@@ -978,8 +1078,8 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
 
           <div className="grid grid-cols-2 gap-2">
             {nf.ccy !== "INR" ? (
-              <div className="col-span-2">
-                <Label>Principal ({nf.ccy}) *</Label>
+              <div>
+                <Label className="text-xs">అసలు ({nf.ccy}) *</Label>
                 <Input type="number" step="0.01" value={nf.fxAmt}
                   onChange={(e) => setNf({ ...nf, fxAmt: e.target.value })} placeholder="0" />
                 <p className="text-[11px] text-emerald-600 mt-1 font-semibold">
@@ -988,19 +1088,22 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
               </div>
             ) : (
               <div>
-                <Label>Principal {symbol} *</Label>
+                <Label className="text-xs">అసలు {symbol} *</Label>
                 <Input type="number" step="0.01" value={nf.principal}
                   onChange={(e) => setNf({ ...nf, principal: e.target.value })} />
               </div>
             )}
-            <div><Label>నెల Interest %</Label>
+            <div>
+              <Label className="text-xs">నెల వడ్డీ %</Label>
               <Input type="number" step="0.01" value={nf.interest_rate_monthly}
-                onChange={(e) => setNf({ ...nf, interest_rate_monthly: e.target.value })} /></div>
-            <div><Label>Start Date</Label>
+                onChange={(e) => setNf({ ...nf, interest_rate_monthly: e.target.value })} />
+            </div>
+            <div><Label className="text-xs">తేదీ</Label>
               <DateInput value={nf.start_date} onChange={(e) => setNf({ ...nf, start_date: e.target.value })} /></div>
-            <div><Label>Purpose</Label>
+            <div><Label className="text-xs">ప్రయోజనం</Label>
               <Input value={nf.purpose} onChange={(e) => setNf({ ...nf, purpose: e.target.value })} /></div>
           </div>
+
 
           <div className="grid grid-cols-2 gap-2 pt-1 border-t">
             <div>
