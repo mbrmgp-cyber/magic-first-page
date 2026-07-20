@@ -654,14 +654,39 @@ function AccountsPage() {
               <div className="space-y-1.5">
                 <Label className="text-xs">షూరిటీ పేరు</Label>
                 <Input value={suretyName} disabled={locked}
-                  onChange={(e) => setSuretyName(e.target.value)} placeholder="పేరు" />
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setSuretyName(v);
+                    const list = (membersQ.data?.members ?? []) as Array<{ name: string; member_code: string | null }>;
+                    const hit = list.find((m) => m.name.toLowerCase() === v.trim().toLowerCase());
+                    if (hit?.member_code) setSuretyId(hit.member_code);
+                  }}
+                  list="surety-name-list" placeholder="పేరు" />
+                <datalist id="surety-name-list">
+                  {((membersQ.data?.members ?? []) as Array<{ name: string; member_code: string | null }>).map((m) => (
+                    <option key={m.member_code ?? m.name} value={m.name} />
+                  ))}
+                </datalist>
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">షూరిటీ ID నెంబర్</Label>
                 <Input value={suretyId} disabled={locked}
-                  onChange={(e) => setSuretyId(e.target.value.toUpperCase())} placeholder="A/0001" />
+                  onChange={(e) => {
+                    const v = e.target.value.toUpperCase();
+                    setSuretyId(v);
+                    const list = (membersQ.data?.members ?? []) as Array<{ name: string; member_code: string | null }>;
+                    const hit = list.find((m) => (m.member_code ?? "").toUpperCase() === v.trim());
+                    if (hit) setSuretyName(hit.name);
+                  }}
+                  list="surety-id-list" placeholder="A/0001" />
+                <datalist id="surety-id-list">
+                  {((membersQ.data?.members ?? []) as Array<{ name: string; member_code: string | null }>).map((m) => (
+                    <option key={m.member_code ?? m.name} value={m.member_code ?? ""}>{m.name}</option>
+                  ))}
+                </datalist>
               </div>
             </div>
+
 
             <div>
               <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-2">
