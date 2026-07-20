@@ -910,14 +910,30 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
 
   const activeLoans = loans.filter((l) => l.status !== "closed");
   const anyOverdue = activeLoans.some((l) => Number((l.summary as any)?.accrued_interest ?? 0) > 0);
+  const today = new Date().toISOString().slice(0, 10);
+  const activeSuspensions = suspensions.filter((s) => {
+    const st = (s.status || "").toLowerCase();
+    if (st && st !== "active") return false;
+    if (s.effective_until && s.effective_until < today) return false;
+    return true;
+  });
+  const hasMajor = activeSuspensions.some((s) => {
+    const c = (s.category || "").toLowerCase();
+    return c === "major" || c === "severe" || c === "expulsion";
+  });
+  const hasMinor = activeSuspensions.some((s) => {
+    const c = (s.category || "").toLowerCase();
+    return c === "minor" || c === "warning" || c === "" || (!["major", "severe", "expulsion"].includes(c));
+  });
   const statusColor: "green" | "yellow" | "red" =
-    activeLoans.length === 0 ? "green" : anyOverdue ? "red" : "yellow";
+    hasMajor || anyOverdue ? "red" : hasMinor ? "yellow" : "green";
   const statusLabel =
-    statusColor === "green" ? "క్లియర్ / Clear" :
-    statusColor === "yellow" ? "యాక్టివ్ / Active" : "బాకీ / Overdue";
+    statusColor === "green" ? "మంచి ప్రవర్తన / Clear" :
+    statusColor === "yellow" ? "చిన్న తప్పులు / Minor" : "పెద్ద తప్పులు / Major";
   const statusBg =
     statusColor === "green" ? "bg-emerald-600" :
     statusColor === "yellow" ? "bg-amber-500" : "bg-red-600";
+
 
   return (
     <div className="space-y-3 pt-3">
