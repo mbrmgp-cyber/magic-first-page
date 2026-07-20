@@ -834,7 +834,7 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
   const [loans, setLoans] = useState<Loan[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
-  const [suspensions, setSuspensions] = useState<Array<{ category: string | null; status: string | null; effective_until: string | null }>>([]);
+  const [suspensions, setSuspensions] = useState<Array<{ category: string | null; status: string | null; effective_until: string | null; reason?: string | null }>>([]);
   const [nf, setNf] = useState({
     principal: "", interest_rate_monthly: "1.5",
     start_date: new Date().toISOString().slice(0, 10), purpose: "",
