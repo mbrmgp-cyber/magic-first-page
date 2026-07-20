@@ -75,6 +75,11 @@ export const recordMonthlyPayment = createServerFn({ method: "POST" })
     new_loan_interest_rate?: number;
     wallet?: "bank" | "accountant" | "president";
     remarks?: string;
+    borrower_signature_url?: string;
+    surety_signature_url?: string;
+    surety_name?: string;
+    surety_code?: string;
+    surety_phone?: string;
   }) => d)
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
