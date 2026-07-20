@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Save, Pencil, FileText, Search, RefreshCw, Upload, BookOpen } from "lucide-react";
+import { SignaturePad } from "@/components/SignaturePad";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,6 +59,11 @@ function AccountsPage() {
   const [newLoanFxRate, setNewLoanFxRate] = useState("");
   const [newLoanFxAmt, setNewLoanFxAmt] = useState("");
   const [nextDueMonths, setNextDueMonths] = useState<"1" | "3" | "6" | "12">("1");
+  // Surety + signatures
+  const [suretyName, setSuretyName] = useState("");
+  const [suretyId, setSuretyId] = useState("");
+  const [borrowerSig, setBorrowerSig] = useState<string | null>(null);
+  const [suretySig, setSuretySig] = useState<string | null>(null);
   const { symbol: sym } = useCurrency();
   const { lang } = useI18n();
   const lt = (en: string, te: string) => (lang === "te" ? te : en);
@@ -201,6 +207,9 @@ function AccountsPage() {
         meta.push(`Disbursed ${newLoanFxAmt} ${newLoanCcy} @ ${newLoanFxRate} → INR`);
       }
       meta.push(`Next due: ${nextDueMonths} month(s)`);
+      if (suretyName || suretyId) meta.push(`Surety: ${suretyName}${suretyId ? ` (${suretyId})` : ""}`);
+      if (borrowerSig) meta.push("Borrower signed");
+      if (suretySig) meta.push("Surety signed");
     }
     const combinedRemarks = [remarks, ...meta].filter(Boolean).join(" • ");
     setBusy(true);
@@ -397,79 +406,96 @@ function AccountsPage() {
                 )}
               </div>
             </div>
-            <div className="space-y-1.5 flex-1 min-w-0">
-              <Label>గమనికలు</Label>
+          </div>
+
+
+          {info && (() => {
+            const st = info.totalOutstanding <= 0
+              ? { color: "bg-green-500", label: "🟢 Clear" }
+              : paidInterest < monthlyDue
+                ? { color: "bg-red-500", label: "🔴 Overdue" }
+                : { color: "bg-yellow-500", label: "🟡 Active" };
+            return (
+              <div className="grid grid-cols-2 gap-3 rounded-lg border bg-orange-50/60 p-3">
+                <div>
+                  <p className="text-[11px] tracking-wide text-muted-foreground">అప్పు తీసుకున్న వారి పేరు</p>
+                  <p className="text-base md:text-lg font-bold text-foreground truncate">{info.member.name}</p>
+                </div>
+                <div className="justify-self-end self-center">
+                  <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-white text-xs font-semibold ${st.color}`}>
+                    {st.label}
+                  </span>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Note (L) | Date (R) */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs">గమనిక</Label>
               <Input value={remarks} onChange={(e) => setRemarks(e.target.value)} disabled={locked} placeholder="—" />
             </div>
-            <div className="space-y-1.5 md:w-36 shrink-0">
+            <div className="space-y-1.5">
               <Label className="text-xs">తేదీ</Label>
               <DateInput value={date} onChange={(e) => setDate(e.target.value)} disabled={locked} className="text-sm" />
             </div>
           </div>
 
+          {/* OLD LOAN block */}
+          <div className="rounded-lg border-2 border-orange-200 bg-orange-50/40 p-3 space-y-3">
+            <p className="text-xs font-bold text-red-600 tracking-wide">పాత అప్పు (Rs.)</p>
 
-          {/* Member name banner */}
-          <div className="rounded-lg border bg-orange-50/60 p-3">
-            <p className="text-[11px] tracking-wide text-muted-foreground">అప్పు తీసుకున్న వారి పేరు</p>
-            <p className="text-lg font-bold text-foreground">{info?.member.name ?? "—"}</p>
-          </div>
-
-          {/* Dual-pane: OLD LOAN | TODAY NEW LOAN */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {/* OLD LOAN */}
-            <div className="rounded-lg border-2 border-orange-200 bg-orange-50/40 p-3 space-y-3">
-              <p className="text-xs font-bold text-red-600 tracking-wide">పాత అప్పు (Rs.)</p>
+            {/* Outstanding (L) | Interest Due (R) */}
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <p className="text-[11px] text-muted-foreground">అసలు బాకీ / Outstanding Principal</p>
+                <p className="text-[11px] text-muted-foreground">కట్టాల్సిన అసలు</p>
                 <p className="font-bold text-lg">{info ? fmtINR(info.totalOutstanding) : "Rs. 0"}</p>
               </div>
               <div>
-                <p className="text-[11px] text-muted-foreground">చెల్లించవలసిన వడ్డీ / Interest Due (this month)</p>
+                <p className="text-[11px] text-muted-foreground">కట్టాల్సిన వడ్డీ</p>
                 <p className="font-bold text-lg text-orange-700">{info ? fmtINR(info.monthlyInterest) : "Rs. 0"}</p>
               </div>
+            </div>
 
-              {/* Payment currency */}
-              <div className="pt-2 border-t border-orange-200 space-y-2">
-                <Label className="text-xs">చెల్లింపు కరెన్సీ / Payment currency</Label>
-                <div className="flex gap-2">
-                  <select
-                    value={payCcy}
-                    onChange={(e) => setPayCcy(e.target.value as FxCode)}
-                    disabled={locked}
-                    className="flex-1 rounded-md border px-2 py-2 text-sm bg-white"
-                  >
-                    <option value="INR">INR (Rs.)</option>
-                    <option value="USD">USD ($)</option>
-                    <option value="AED">AED (د.إ)</option>
-                    <option value="KWD">KWD (د.ك)</option>
-                    <option value="MYR">MYR (RM)</option>
-                  </select>
-                  {payCcy !== "INR" && (
-                    <Input
-                      inputMode="decimal" value={payRate} disabled={locked}
-                      onChange={(e) => setPayRate(e.target.value.replace(/[^\d.]/g, ""))}
-                      placeholder="1 = ? Rs."
-                      className="w-32"
-                    />
-                  )}
-                </div>
-                {payCcy !== "INR" && Number(payRate) > 0 && (
-                  <p className="text-[10px] text-muted-foreground">
-                    1 {payCcy} = Rs. {Number(payRate).toLocaleString("en-IN")}
-                  </p>
+            {/* Payment currency */}
+            <div className="pt-2 border-t border-orange-200 space-y-2">
+              <Label className="text-xs">చెల్లింపు కరెన్సీ</Label>
+              <div className="flex gap-2">
+                <select
+                  value={payCcy}
+                  onChange={(e) => setPayCcy(e.target.value as FxCode)}
+                  disabled={locked}
+                  className="flex-1 rounded-md border px-2 py-2 text-sm bg-white"
+                >
+                  <option value="INR">INR (Rs.)</option>
+                  <option value="USD">USD ($)</option>
+                  <option value="AED">AED (د.إ)</option>
+                  <option value="KWD">KWD (د.ك)</option>
+                  <option value="MYR">MYR (RM)</option>
+                </select>
+                {payCcy !== "INR" && (
+                  <Input
+                    inputMode="decimal" value={payRate} disabled={locked}
+                    onChange={(e) => setPayRate(e.target.value.replace(/[^\d.]/g, ""))}
+                    placeholder="1 = ? Rs." className="w-32"
+                  />
                 )}
               </div>
+            </div>
 
+            {/* Principal paying (L) | Interest paying (R) */}
+            <div className="grid grid-cols-2 gap-3">
               {payCcy !== "INR" ? (
                 <>
                   <div className="space-y-1.5">
-                    <Label className="text-xs">అసలు జమ ({payCcy})</Label>
+                    <Label className="text-xs">జమ చేస్తున్న అసలు ({payCcy})</Label>
                     <Input inputMode="decimal" value={payPrincipalFx} disabled={locked}
                       onChange={(e) => setPayPrincipalFx(e.target.value.replace(/[^\d.]/g, ""))} placeholder="0" />
                     <p className="text-[10px] text-green-700">= {fmtINR(Number(principal || 0))}</p>
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs">వడ్డీ జమ ({payCcy})</Label>
+                    <Label className="text-xs">జమ చేస్తున్న వడ్డీ ({payCcy})</Label>
                     <Input inputMode="decimal" value={payInterestFx} disabled={locked}
                       onChange={(e) => setPayInterestFx(e.target.value.replace(/[^\d.]/g, ""))} placeholder="0" />
                     <p className="text-[10px] text-green-700">= {fmtINR(Number(interest || 0))}</p>
@@ -478,106 +504,154 @@ function AccountsPage() {
               ) : (
                 <>
                   <div className="space-y-1.5">
-                    <Label className="text-xs">అసలు జమ (Rs.)</Label>
+                    <Label className="text-xs">జమ చేస్తున్న అసలు (Rs.)</Label>
                     <Input inputMode="decimal" value={principal} disabled={locked}
                       onChange={(e) => setPrincipal(e.target.value.replace(/[^\d.]/g, ""))} placeholder="0" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs">వడ్డీ జమ (Rs.)</Label>
+                    <Label className="text-xs">జమ చేస్తున్న వడ్డీ (Rs.)</Label>
                     <Input inputMode="decimal" value={interest} disabled={locked}
                       onChange={(e) => setInterest(e.target.value.replace(/[^\d.]/g, ""))} placeholder="0" />
                   </div>
                 </>
               )}
+            </div>
 
-              {info && paidInterest < monthlyDue && paidInterest >= 0 && (
-                <div className="text-[11px] rounded-md bg-yellow-100 border border-yellow-300 p-2 text-yellow-900">
-                  Carry-forward: <b>{fmtINR(carryForward)}</b> unpaid interest — వచ్చే నెల బాకీలో జమ అవుతుంది
-                </div>
+            {info && paidInterest < monthlyDue && paidInterest >= 0 && (
+              <div className="text-[11px] rounded-md bg-yellow-100 border border-yellow-300 p-2 text-yellow-900">
+                Carry-forward: <b>{fmtINR(carryForward)}</b> — వచ్చే నెల బాకీలో జమ అవుతుంది
+              </div>
+            )}
+          </div>
+
+          {/* NEW LOAN block */}
+          <div className="rounded-lg border-2 border-red-300 bg-red-50/40 p-3 space-y-3">
+            <p className="text-xs font-bold text-red-600 tracking-wide">ఈ రోజు కొత్త అప్పు</p>
+
+            {/* Currency + rate */}
+            <div className="flex gap-2">
+              <select
+                value={newLoanCcy}
+                onChange={(e) => setNewLoanCcy(e.target.value as FxCode)}
+                disabled={locked}
+                className="flex-1 rounded-md border px-2 py-2 text-sm bg-white"
+              >
+                <option value="INR">INR (Rs.)</option>
+                <option value="USD">USD ($)</option>
+                <option value="AED">AED (د.إ)</option>
+                <option value="KWD">KWD (د.ك)</option>
+                <option value="MYR">MYR (RM)</option>
+              </select>
+              {newLoanCcy !== "INR" && (
+                <Input
+                  inputMode="decimal" value={newLoanFxRate} disabled={locked}
+                  onChange={(e) => setNewLoanFxRate(e.target.value.replace(/[^\d.]/g, ""))}
+                  placeholder="1 = ? Rs." className="w-32"
+                />
               )}
             </div>
 
-            {/* TODAY NEW LOAN */}
-            <div className="rounded-lg border-2 border-red-300 bg-red-50/40 p-3 space-y-3">
-              <p className="text-xs font-bold text-red-600 tracking-wide">ఈ రోజు కొత్త అప్పు</p>
-
-              <div className="space-y-2">
-                <Label className="text-xs">కరెన్సీ / Disburse currency</Label>
-                <div className="flex gap-2">
-                  <select
-                    value={newLoanCcy}
-                    onChange={(e) => setNewLoanCcy(e.target.value as FxCode)}
-                    disabled={locked}
-                    className="flex-1 rounded-md border px-2 py-2 text-sm bg-white"
-                  >
-                    <option value="INR">INR (Rs.)</option>
-                    <option value="USD">USD ($)</option>
-                    <option value="AED">AED (د.إ)</option>
-                    <option value="KWD">KWD (د.ك)</option>
-                    <option value="MYR">MYR (RM)</option>
-                  </select>
-                  {newLoanCcy !== "INR" && (
-                    <Input
-                      inputMode="decimal" value={newLoanFxRate} disabled={locked}
-                      onChange={(e) => setNewLoanFxRate(e.target.value.replace(/[^\d.]/g, ""))}
-                      placeholder="1 = ? Rs." className="w-32"
-                    />
-                  )}
-                </div>
-              </div>
-
+            {/* Loan amount (L) | Interest % (R) */}
+            <div className="grid grid-cols-2 gap-3">
               {newLoanCcy !== "INR" ? (
                 <div className="space-y-1.5">
-                  <Label className="text-xs text-green-700 font-semibold">కొత్త అప్పు ({newLoanCcy})</Label>
+                  <Label className="text-xs text-green-700 font-semibold">తీసుకుంటున్న అప్పు ({newLoanCcy})</Label>
                   <Input inputMode="decimal" value={newLoanFxAmt} disabled={locked}
                     onChange={(e) => setNewLoanFxAmt(e.target.value.replace(/[^\d.]/g, ""))} placeholder="0" />
                   <p className="text-[10px] text-green-700">= {fmtINR(Number(newLoan || 0))}</p>
                 </div>
               ) : (
                 <div className="space-y-1.5">
-                  <Label className="text-xs text-green-700 font-semibold">కొత్త అప్పు మొత్తం (Rs.)</Label>
+                  <Label className="text-xs text-green-700 font-semibold">తీసుకుంటున్న అప్పు (Rs.)</Label>
                   <Input inputMode="decimal" value={newLoan} disabled={locked}
                     onChange={(e) => setNewLoan(e.target.value.replace(/[^\d.]/g, ""))} placeholder="0" />
                 </div>
               )}
-
               <div className="space-y-1.5">
-                <Label className="text-xs text-green-700 font-semibold">వడ్డీ రేటు (% నెలవారీ)</Label>
+                <Label className="text-xs text-green-700 font-semibold">వడ్డీ %</Label>
                 <Input inputMode="decimal" value={newLoanRate} disabled={locked}
                   onChange={(e) => setNewLoanRate(e.target.value.replace(/[^\d.]/g, ""))} placeholder="2.0" />
               </div>
-
-              <div className="space-y-1.5">
-                <Label className="text-xs text-green-700 font-semibold">తదుపరి బాకీ తేదీ / Next due</Label>
-                <select
-                  value={nextDueMonths}
-                  onChange={(e) => setNextDueMonths(e.target.value as "1" | "3" | "6" | "12")}
-                  disabled={locked}
-                  className="w-full rounded-md border px-2 py-2 text-sm bg-white"
-                >
-                  <option value="1">1 నెల / 1 Month</option>
-                  <option value="3">3 నెలలు / 3 Months</option>
-                  <option value="6">6 నెలలు / 6 Months</option>
-                  <option value="12">12 నెలలు / 12 Months</option>
-                </select>
-              </div>
-
-              {newLoan && Number(newLoan) > 0 && (
-                <div className="text-[11px] text-muted-foreground pt-2 border-t border-red-200 space-y-0.5">
-                  <div>ఈ రోజు ఇవ్వబడుతుంది: <b className="text-red-700">{fmtINR(Number(newLoan))}</b></div>
-                  <div>నెలవారీ వడ్డీ: <b>{fmtINR(Math.round(Number(newLoan) * Number(newLoanRate || 0)) / 100)}</b></div>
-                </div>
-              )}
             </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs text-green-700 font-semibold">తదుపరి బాకీ తేదీ</Label>
+              <select
+                value={nextDueMonths}
+                onChange={(e) => setNextDueMonths(e.target.value as "1" | "3" | "6" | "12")}
+                disabled={locked}
+                className="w-full rounded-md border px-2 py-2 text-sm bg-white"
+              >
+                <option value="1">1 నెల</option>
+                <option value="3">3 నెలలు</option>
+                <option value="6">6 నెలలు</option>
+                <option value="12">12 నెలలు</option>
+              </select>
+            </div>
+
+            {/* Next month due: principal (L) | interest (R) */}
+            {newLoan && Number(newLoan) > 0 && (() => {
+              const months = Number(nextDueMonths);
+              const principalPerMonth = months > 0 ? Number(newLoan) / months : 0;
+              const interestPerMonth = Number(newLoan) * Number(newLoanRate || 0) / 100;
+              return (
+                <div className="grid grid-cols-2 gap-3 pt-2 border-t border-red-200">
+                  <div>
+                    <p className="text-[11px] text-muted-foreground">వచ్చే నెల కట్టాల్సిన అసలు</p>
+                    <p className="font-bold text-red-700">{fmtINR(principalPerMonth)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] text-muted-foreground">వచ్చే నెల కట్టాల్సిన వడ్డీ</p>
+                    <p className="font-bold text-red-700">{fmtINR(interestPerMonth)}</p>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
+          {/* Signatures + Surety */}
+          <div className="rounded-lg border bg-green-50/60 p-3 space-y-4">
+            <div>
+              <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">
+                అప్పు తీసుకున్న వారి డిజిటల్ సంతకం
+              </p>
+              <p className="text-xs font-semibold mb-2">
+                {info?.member.name ? `${info.member.name} (${info.member.member_code ?? "—"})` : "—"}
+              </p>
+              {!locked ? (
+                <SignaturePad onChange={setBorrowerSig} height={140} hint="వేలితో సంతకం చేయండి" />
+              ) : borrowerSig ? (
+                <img src={borrowerSig} alt="borrower signature" className="h-24 bg-white rounded border" />
+              ) : (
+                <p className="text-xs text-muted-foreground">— సంతకం లేదు —</p>
+              )}
+            </div>
 
-          {/* Surety */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 rounded-lg border bg-green-50/60 p-3">
-            <Field label="అప్పు చేసిన వారి సంతకం"
-              value={info?.member.name ? `${info.member.name} (${info.member.member_code ?? "—"})` : "—"} />
-            <Field label="షూరిటీ సంతకం + ID NO"
-              value={info?.surety ? `${info.surety.name} (${info.surety.member_code ?? "—"})` : "—"} />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs">షూరిటీ పేరు</Label>
+                <Input value={suretyName} disabled={locked}
+                  onChange={(e) => setSuretyName(e.target.value)} placeholder="పేరు" />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">షూరిటీ ID నెంబర్</Label>
+                <Input value={suretyId} disabled={locked}
+                  onChange={(e) => setSuretyId(e.target.value.toUpperCase())} placeholder="A/0001" />
+              </div>
+            </div>
+
+            <div>
+              <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-2">
+                షూరిటీ డిజిటల్ సంతకం
+              </p>
+              {!locked ? (
+                <SignaturePad onChange={setSuretySig} height={140} hint="షూరిటీ సంతకం" />
+              ) : suretySig ? (
+                <img src={suretySig} alt="surety signature" className="h-24 bg-white rounded border" />
+              ) : (
+                <p className="text-xs text-muted-foreground">— సంతకం లేదు —</p>
+              )}
+            </div>
           </div>
 
           {saved && (
