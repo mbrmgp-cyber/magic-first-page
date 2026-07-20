@@ -1170,7 +1170,7 @@ function LoanCard({ loan, orgId, onChange, onClose, onDelete }:
       <div className="flex justify-between items-start gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold">{symbol}{Number(loan.principal).toLocaleString("en-IN")}</span>
+            <span className="font-semibold">Rs. {Number(loan.principal).toLocaleString("en-IN")}</span>
             <Badge variant="outline" className="text-xs">{loan.interest_rate_monthly}% /నెల</Badge>
             {loan.status === "closed" && <Badge className="bg-emerald-600">Closed</Badge>}
           </div>
@@ -1183,19 +1183,19 @@ function LoanCard({ loan, orgId, onChange, onClose, onDelete }:
       <div className="grid grid-cols-3 gap-2 mt-2 text-center text-xs" style={{ color: "inherit" }}>
         <div className="rounded p-2" style={{ backgroundColor: "color-mix(in srgb, currentColor 10%, transparent)", color: "inherit" }}>
           <div style={{ color: "inherit", opacity: 0.75 }}>Total Due</div>
-          <div className="font-semibold" style={{ color: "inherit" }}>{symbol}{Number(s.total_due ?? loan.principal).toLocaleString("en-IN")}</div>
+          <div className="font-semibold" style={{ color: "inherit" }}>Rs. {Number(s.total_due ?? loan.principal).toLocaleString("en-IN")}</div>
         </div>
         <div className="rounded p-2" style={{ backgroundColor: "color-mix(in srgb, currentColor 10%, transparent)", color: "inherit" }}>
           <div style={{ color: "inherit", opacity: 0.75 }}>Paid</div>
-          <div className="font-semibold" style={{ color: "inherit" }}>{symbol}{Number(s.total_paid ?? 0).toLocaleString("en-IN")}</div>
+          <div className="font-semibold" style={{ color: "inherit" }}>Rs. {Number(s.total_paid ?? 0).toLocaleString("en-IN")}</div>
         </div>
         <div className="rounded p-2" style={{ backgroundColor: "color-mix(in srgb, currentColor 10%, transparent)", color: "inherit" }}>
           <div style={{ color: "inherit", opacity: 0.75 }}>Balance</div>
-          <div className="font-semibold" style={{ color: "inherit" }}>{symbol}{Number(s.balance ?? 0).toLocaleString("en-IN")}</div>
+          <div className="font-semibold" style={{ color: "inherit" }}>Rs. {Number(s.balance ?? 0).toLocaleString("en-IN")}</div>
         </div>
       </div>
       <p className="text-[10px] text-muted-foreground mt-1 text-center">
-        Interest accrued: {symbol}{Number(s.accrued_interest ?? 0).toLocaleString("en-IN")} · {Number(s.months_elapsed ?? 0).toFixed(1)} నెలలు
+        Interest accrued: Rs. {Number(s.accrued_interest ?? 0).toLocaleString("en-IN")} · {Number(s.months_elapsed ?? 0).toFixed(1)} నెలలు
       </p>
 
       <Button size="sm" variant="outline" className="w-full mt-2" onClick={() => setOpen((o) => !o)}>
@@ -1206,7 +1206,7 @@ function LoanCard({ loan, orgId, onChange, onClose, onDelete }:
         <div className="mt-2 space-y-2 border-t pt-2">
           {loan.status !== "closed" && (
             <div className="flex gap-2 items-end">
-              <div className="flex-1"><Label className="text-xs">Amount {symbol}</Label>
+              <div className="flex-1"><Label className="text-xs">Amount Rs.</Label>
                 <Input type="number" step="0.01" value={amt} onChange={(e) => setAmt(e.target.value)} /></div>
               <div><Label className="text-xs">Date</Label>
                 <DateInput value={date} onChange={(e) => setDate(e.target.value)} /></div>
