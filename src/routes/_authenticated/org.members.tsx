@@ -832,12 +832,25 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
   const [loans, setLoans] = useState<Loan[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
+  const [suspensions, setSuspensions] = useState<Array<{ category: string | null; status: string | null; effective_until: string | null }>>([]);
   const [nf, setNf] = useState({
     principal: "", interest_rate_monthly: "1.5",
     start_date: new Date().toISOString().slice(0, 10), purpose: "",
     surety_name: "", surety_id: "",
     ccy: "INR" as LoanFxCode, fxRate: "", fxAmt: "",
   });
+
+  useEffect(() => {
+    let cancel = false;
+    (async () => {
+      const { data } = await supabase
+        .from("disciplinary_suspensions")
+        .select("category,status,effective_until")
+        .eq("target_member_id", member.id);
+      if (!cancel) setSuspensions((data as any) ?? []);
+    })();
+    return () => { cancel = true; };
+  }, [member.id]);
 
   useEffect(() => {
     if (nf.ccy === "INR") { setNf((s) => ({ ...s, fxRate: "" })); return; }
