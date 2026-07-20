@@ -310,20 +310,13 @@ function AccountsPage() {
               </button>
               <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onLogoPicked} />
               <div className="leading-tight">
-                <p className="text-[11px] tracking-wide text-muted-foreground">సొసైటీ</p>
                 <p className="font-bold text-foreground">{orgQ.data?.org?.name ?? "చిట్వేల్ హెల్ప్ లైన్ సొసైటీ"}</p>
               </div>
             </div>
-            <div className="flex flex-col gap-1 text-right">
-              <span className="text-[10px] tracking-wide text-muted-foreground">బేస్ కరెన్సీ ఖాతాల కేంద్రంలో సెట్ చేయబడింది</span>
-            </div>
           </div>
           <h1 className="mt-3 text-lg md:text-2xl font-bold text-orange-700">
-            కమిటీ ఖాతాలు – నెలవారీ అప్పు నమోదు
+            సభ్యుల చెల్లింపులు మరియు కొత్త అప్పులు
           </h1>
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <p className="text-xs text-muted-foreground">సభ్యుల చెల్లింపులు మరియు కొత్త అప్పులు</p>
-          </div>
           <Link
             to="/org/master-ledger"
             className="mt-3 flex items-center justify-between gap-2 rounded-xl px-4 py-3 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 text-white font-bold shadow-lg hover:shadow-xl hover:brightness-110 transition-all border border-amber-300"
@@ -335,6 +328,7 @@ function AccountsPage() {
             <span className="text-lg">→</span>
           </Link>
         </Card>
+
 
         {/* Lookup row */}
         <Card className="p-4 bg-white/95 border-white shadow-xl space-y-4">
