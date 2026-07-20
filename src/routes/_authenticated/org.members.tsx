@@ -910,8 +910,6 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
     } catch (e: any) { toast.error(e.message); }
   }
 
-  const activeLoans = loans.filter((l) => l.status !== "closed");
-  const anyOverdue = activeLoans.some((l) => Number((l.summary as any)?.accrued_interest ?? 0) > 0);
   const today = new Date().toISOString().slice(0, 10);
   const activeSuspensions = suspensions.filter((s) => {
     const st = (s.status || "").toLowerCase();
@@ -925,10 +923,11 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
   });
   const hasMinor = activeSuspensions.some((s) => {
     const c = (s.category || "").toLowerCase();
-    return c === "minor" || c === "warning" || c === "" || (!["major", "severe", "expulsion"].includes(c));
+    return !(c === "major" || c === "severe" || c === "expulsion");
   });
+  // Status reflects admin-set behavior only — not loan activity.
   const statusColor: "green" | "yellow" | "red" =
-    hasMajor || anyOverdue ? "red" : hasMinor ? "yellow" : "green";
+    hasMajor ? "red" : hasMinor ? "yellow" : "green";
   const statusLabel =
     statusColor === "green" ? "మంచి ప్రవర్తన / Clear" :
     statusColor === "yellow" ? "చిన్న తప్పులు / Minor" : "పెద్ద తప్పులు / Major";
