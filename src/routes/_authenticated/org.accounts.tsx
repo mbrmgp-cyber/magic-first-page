@@ -403,15 +403,8 @@ function AccountsPage() {
                 )}
               </div>
             </div>
-            <div className="space-y-1.5 flex-1 min-w-0">
-              <Label>గమనికలు</Label>
-              <Input value={remarks} onChange={(e) => setRemarks(e.target.value)} disabled={locked} placeholder="—" />
-            </div>
-            <div className="space-y-1.5 md:w-36 shrink-0">
-              <Label className="text-xs">తేదీ</Label>
-              <DateInput value={date} onChange={(e) => setDate(e.target.value)} disabled={locked} className="text-sm" />
-            </div>
           </div>
+
 
           {info && (() => {
             const st = info.totalOutstanding <= 0
