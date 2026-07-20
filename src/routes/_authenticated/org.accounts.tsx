@@ -329,8 +329,8 @@ function AccountsPage() {
 
         {/* Lookup row */}
         <Card className="p-4 bg-white/95 border-white shadow-xl space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div className="space-y-1.5">
+          <div className="flex flex-col md:flex-row md:items-end gap-3">
+            <div className="space-y-1.5 flex-1 min-w-0">
               <Label>సభ్యుని ID / పేరు</Label>
               <div ref={searchWrapRef} className="relative">
                 <div className="flex gap-2">
@@ -339,7 +339,6 @@ function AccountsPage() {
                     onChange={(e) => {
                       setSearchInput(e.target.value);
                       setShowSuggest(true);
-                      // keep idNo in sync if the user types an ID-shaped token
                       const v = e.target.value.trim();
                       if (/^[A-Za-z]?\/?\d+$/.test(v)) setIdNo(v.toUpperCase());
                     }}
@@ -363,7 +362,6 @@ function AccountsPage() {
                     type="button"
                     onClick={() => {
                       const q = searchInput.trim();
-                      // If it looks like an ID, look it up directly. Otherwise pick top suggestion.
                       if (/^[A-Za-z]?\/?\d+$/.test(q)) doLookup(q);
                       else if (suggestions[0]?.member_code) doLookup(suggestions[0].member_code);
                       else if (idNo) doLookup(idNo);
@@ -399,15 +397,16 @@ function AccountsPage() {
                 )}
               </div>
             </div>
-            <div className="space-y-1.5">
-              <Label>తేదీ</Label>
-              <DateInput value={date} onChange={(e) => setDate(e.target.value)} disabled={locked} />
-            </div>
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 flex-1 min-w-0">
               <Label>గమనికలు</Label>
               <Input value={remarks} onChange={(e) => setRemarks(e.target.value)} disabled={locked} placeholder="—" />
             </div>
+            <div className="space-y-1.5 md:w-36 shrink-0">
+              <Label className="text-xs">తేదీ</Label>
+              <DateInput value={date} onChange={(e) => setDate(e.target.value)} disabled={locked} className="text-sm" />
+            </div>
           </div>
+
 
           {/* Member name banner */}
           <div className="rounded-lg border bg-orange-50/60 p-3">
