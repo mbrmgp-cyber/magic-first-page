@@ -810,6 +810,18 @@ function JoinedDateInput({ value, onChange }: { value: string; onChange: (v: str
 
 
 
+type LoanFxCode = "INR" | "USD" | "AED" | "KWD" | "MYR";
+
+async function fetchLoanFx(code: LoanFxCode): Promise<number | null> {
+  if (code === "INR") return 1;
+  try {
+    const r = await fetch(`https://open.er-api.com/v6/latest/${code}`);
+    const j = await r.json();
+    const inr = j?.rates?.INR;
+    return typeof inr === "number" && inr > 0 ? Math.round(inr * 100) / 100 : null;
+  } catch { return null; }
+}
+
 function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
   const listL = useServerFn(listMemberLoans);
   const addL = useServerFn(addMemberLoan);
@@ -823,7 +835,24 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
   const [nf, setNf] = useState({
     principal: "", interest_rate_monthly: "1.5",
     start_date: new Date().toISOString().slice(0, 10), purpose: "",
+    surety_name: "", surety_id: "",
+    ccy: "INR" as LoanFxCode, fxRate: "", fxAmt: "",
   });
+
+  useEffect(() => {
+    if (nf.ccy === "INR") { setNf((s) => ({ ...s, fxRate: "" })); return; }
+    let cancel = false;
+    fetchLoanFx(nf.ccy).then((v) => { if (!cancel && v) setNf((s) => ({ ...s, fxRate: String(v) })); });
+    return () => { cancel = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nf.ccy]);
+
+  useEffect(() => {
+    if (nf.ccy === "INR") return;
+    const r = Number(nf.fxRate || 0);
+    if (!(r > 0)) return;
+    if (nf.fxAmt) setNf((s) => ({ ...s, principal: String(Math.round(Number(nf.fxAmt) * r * 100) / 100) }));
+  }, [nf.fxAmt, nf.fxRate, nf.ccy]);
 
   async function refresh() {
     setLoading(true);
@@ -837,43 +866,126 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
 
   async function addNew() {
     if (!nf.principal || Number(nf.principal) <= 0) { toast.error("Principal ఇవ్వండి"); return; }
+    if (!nf.surety_name.trim() || !nf.surety_id.trim()) { toast.error("Surety Name + ID అవసరం"); return; }
     try {
+      const purposeParts: string[] = [];
+      if (nf.purpose.trim()) purposeParts.push(nf.purpose.trim());
+      purposeParts.push(`Surety: ${nf.surety_name.trim()} (${nf.surety_id.trim()})`);
+      if (nf.ccy !== "INR" && Number(nf.fxRate) > 0) {
+        purposeParts.push(`FX: ${nf.fxAmt} ${nf.ccy} @ ${nf.fxRate}`);
+      }
       await addL({
         data: {
           org_id: orgId, member_id: member.id,
           principal: Number(nf.principal),
           interest_rate_monthly: Number(nf.interest_rate_monthly || 0),
           start_date: nf.start_date,
-          purpose: nf.purpose || undefined,
+          purpose: purposeParts.join(" | "),
         },
       });
       toast.success("Loan added");
       setShowAdd(false);
-      setNf({ principal: "", interest_rate_monthly: "1.5", start_date: new Date().toISOString().slice(0, 10), purpose: "" });
+      setNf({
+        principal: "", interest_rate_monthly: "1.5",
+        start_date: new Date().toISOString().slice(0, 10), purpose: "",
+        surety_name: "", surety_id: "",
+        ccy: "INR", fxRate: "", fxAmt: "",
+      });
       refresh();
     } catch (e: any) { toast.error(e.message); }
   }
 
+  const activeLoans = loans.filter((l) => l.status !== "closed");
+  const anyOverdue = activeLoans.some((l) => Number((l.summary as any)?.accrued_interest ?? 0) > 0);
+  const statusColor: "green" | "yellow" | "red" =
+    activeLoans.length === 0 ? "green" : anyOverdue ? "red" : "yellow";
+  const statusLabel =
+    statusColor === "green" ? "క్లియర్ / Clear" :
+    statusColor === "yellow" ? "యాక్టివ్ / Active" : "బాకీ / Overdue";
+  const statusBg =
+    statusColor === "green" ? "bg-emerald-600" :
+    statusColor === "yellow" ? "bg-amber-500" : "bg-red-600";
+
   return (
     <div className="space-y-3 pt-3">
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between gap-2">
         <Button size="sm" onClick={() => setShowAdd((s) => !s)}>
           <Plus className="w-4 h-4 mr-1" /> కొత్త Loan
         </Button>
+        <div className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-white text-xs font-semibold ${statusBg}`}>
+          <span className="inline-block w-2.5 h-2.5 rounded-full bg-white/90" />
+          {statusLabel}
+        </div>
       </div>
 
       {showAdd && (
         <Card className="p-3 space-y-2 border-dashed">
           <div className="grid grid-cols-2 gap-2">
-            <div><Label>Principal {symbol} *</Label>
-              <Input type="number" step="0.01" value={nf.principal} onChange={(e) => setNf({ ...nf, principal: e.target.value })} /></div>
+            <div>
+              <Label className="text-xs">కరెన్సీ / Currency</Label>
+              <select
+                value={nf.ccy}
+                onChange={(e) => setNf({ ...nf, ccy: e.target.value as LoanFxCode, fxAmt: "", principal: "" })}
+                className="w-full rounded-md border px-2 py-2 text-sm bg-background"
+              >
+                <option value="INR">INR (Rs.)</option>
+                <option value="USD">USD ($)</option>
+                <option value="AED">AED (د.إ)</option>
+                <option value="KWD">KWD (د.ك)</option>
+                <option value="MYR">MYR (RM)</option>
+              </select>
+            </div>
+            {nf.ccy !== "INR" && (
+              <div>
+                <Label className="text-xs">1 {nf.ccy} = ? Rs.</Label>
+                <Input inputMode="decimal" value={nf.fxRate}
+                  onChange={(e) => setNf({ ...nf, fxRate: e.target.value.replace(/[^\d.]/g, "") })}
+                  placeholder="Rate" />
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            {nf.ccy !== "INR" ? (
+              <div className="col-span-2">
+                <Label>Principal ({nf.ccy}) *</Label>
+                <Input type="number" step="0.01" value={nf.fxAmt}
+                  onChange={(e) => setNf({ ...nf, fxAmt: e.target.value })} placeholder="0" />
+                <p className="text-[11px] text-emerald-600 mt-1 font-semibold">
+                  = Rs. {Number(nf.principal || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
+              </div>
+            ) : (
+              <div>
+                <Label>Principal {symbol} *</Label>
+                <Input type="number" step="0.01" value={nf.principal}
+                  onChange={(e) => setNf({ ...nf, principal: e.target.value })} />
+              </div>
+            )}
             <div><Label>నెల Interest %</Label>
-              <Input type="number" step="0.01" value={nf.interest_rate_monthly} onChange={(e) => setNf({ ...nf, interest_rate_monthly: e.target.value })} /></div>
+              <Input type="number" step="0.01" value={nf.interest_rate_monthly}
+                onChange={(e) => setNf({ ...nf, interest_rate_monthly: e.target.value })} /></div>
             <div><Label>Start Date</Label>
               <DateInput value={nf.start_date} onChange={(e) => setNf({ ...nf, start_date: e.target.value })} /></div>
             <div><Label>Purpose</Label>
               <Input value={nf.purpose} onChange={(e) => setNf({ ...nf, purpose: e.target.value })} /></div>
           </div>
+
+          <div className="grid grid-cols-2 gap-2 pt-1 border-t">
+            <div>
+              <Label>షూరిటీ పేరు / Surety Name *</Label>
+              <Input value={nf.surety_name}
+                onChange={(e) => setNf({ ...nf, surety_name: e.target.value })}
+                placeholder="Surety full name" />
+            </div>
+            <div>
+              <Label>షూరిటీ ID *</Label>
+              <Input value={nf.surety_id}
+                onChange={(e) => setNf({ ...nf, surety_id: e.target.value })}
+                placeholder="Member ID" />
+            </div>
+          </div>
+
           <Button onClick={addNew} className="w-full">Add</Button>
         </Card>
       )}
