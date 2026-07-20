@@ -707,11 +707,54 @@ function AccountsPage() {
           </div>
 
           {saved && (
-            <div className="rounded-md border border-green-300 bg-green-50 p-3 text-sm text-green-900 space-y-1">
+            <div className="rounded-md border border-green-300 bg-green-50 p-3 text-sm text-green-900 space-y-2">
               <div>✅ సేవ్ అయింది. మొత్తం బాకీ: <b>{sym} {saved.balance.toLocaleString("en-IN")}</b></div>
               {saved.collected > 0 && <div>ఈ రోజు వసూలు: <b>{sym} {saved.collected.toLocaleString("en-IN")}</b></div>}
               {saved.disbursed > 0 && <div>కొత్త అప్పు: <b>{sym} {saved.disbursed.toLocaleString("en-IN")}</b></div>}
               {saved.emailed_to && <div>రసీదు <b>{saved.emailed_to}</b>కు పంపబడింది</div>}
+              <Button
+                size="sm"
+                className="bg-amber-600 hover:bg-amber-700 mt-1"
+                onClick={async () => {
+                  if (!info || !orgQ.data?.org?.id) return;
+                  const { printPaymentReceipt } = await import("@/lib/promissory-note");
+                  const p = Number(principal || 0);
+                  const i = Number(interest || 0);
+                  const nl = Number(newLoan || 0);
+                  const nr = Number(newLoanRate || 0);
+                  const before = { principal: info.totalOutstanding, interest: info.monthlyInterest };
+                  const principalRemaining = Math.max(0, before.principal - p) + nl;
+                  const carry = Math.max(0, Math.round((before.interest - i) * 100) / 100);
+                  const months = Number(nextDueMonths) || 1;
+                  const nextPrincipal = nl > 0 ? nl / months : Math.max(0, before.principal - p) / 12;
+                  const rateForNext = nr > 0 ? nr : (info.monthlyInterest > 0 && info.totalOutstanding > 0 ? (info.monthlyInterest / info.totalOutstanding) * 100 : 2);
+                  const nextInterest = principalRemaining * rateForNext / 100 + carry;
+                  await printPaymentReceipt({
+                    orgId: orgQ.data.org.id,
+                    member: {
+                      name: info.member.name,
+                      member_code: info.member.member_code ?? idNo,
+                      phone: info.member.phone ?? undefined,
+                      email: info.member.email ?? undefined,
+                    },
+
+                    date,
+                    before,
+                    paid: { principal: p, interest: i },
+                    fx: payCcy !== "INR" && Number(payRate) > 0 ? {
+                      code: payCcy, rate: Number(payRate),
+                      principal: Number(payPrincipalFx || 0) || undefined,
+                      interest: Number(payInterestFx || 0) || undefined,
+                    } : null,
+                    after: { principalRemaining, interestCarryForward: carry },
+                    nextMonth: { principal: Math.round(nextPrincipal * 100) / 100, interest: Math.round(nextInterest * 100) / 100 },
+                    newLoan: nl > 0 ? { amount: nl, rate: nr, nextDueMonths: months } : null,
+                    remarks: remarks || undefined,
+                  });
+                }}
+              >
+                🧾 రసీదు ప్రింట్ / PDF
+              </Button>
             </div>
           )}
 
@@ -727,6 +770,7 @@ function AccountsPage() {
               <FileText className="h-4 w-4" /> {lt("Personal PDF", "వ్యక్తిగత పిడిఎఫ్")}
             </Button>
           </div>
+
         </Card>
       </div>
     </div>
