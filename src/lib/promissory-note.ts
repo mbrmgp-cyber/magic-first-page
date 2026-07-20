@@ -126,9 +126,12 @@ p.body { text-align: justify; text-indent: 24px; margin: 8px 0; }
     <div><b>Place / స్థలం:</b> ${esc(place || "—")}</div>
     <div><b>Date / తేదీ:</b> ${esc(dateStr)}</div>
     <div class="stamp-box">
-      REVENUE<br/>STAMP<br/>₹ 1/-
+      REVENUE<br/>STAMP<br/>Rs. 1/-
     </div>
   </div>
+
+  <!-- ============ FULL ENGLISH VERSION ============ -->
+  <h3 style="margin:14px 0 6px;color:#6b3f10;border-bottom:1px solid #d8b98a;padding-bottom:3px;">ENGLISH</h3>
 
   <p class="body">
     ON DEMAND, I, <span class="u">${esc(member.name)}</span>
@@ -144,34 +147,62 @@ p.body { text-align: justify; text-indent: 24px; margin: 8px 0; }
     <span class="u">${esc(dateStr)}</span>.
   </p>
 
+  ${loan.surety_name || loan.surety_code ? `
   <p class="body">
-    డిమాండ్‌ మేరకు, నేను <b>${esc(member.name)}</b> (సభ్యుని ID: ${esc(member.member_code)}),
-    పైన పేర్కొన్న సంఘానికి <b>${inr(principal)}</b>
-    (అక్షరాలలో: <b>${esc(words)} రూపాయలు మాత్రమే</b>) మొత్తాన్ని,
-    నెలకు <b>${rate}%</b> వడ్డీతో సహా, డిమాండ్‌ మేరకు తిరిగి చెల్లిస్తానని
-    పూర్తి స్వేచ్ఛతో, ఆరోగ్యమనసుతో వాగ్దానం చేస్తున్నాను. పై సొమ్మును
-    <span class="u">${esc(dateStr)}</span> నాడు నగదు / బదిలీ రూపంలో స్వీకరించాను.
+    <b>SURETY:</b> I, <span class="u">${esc(loan.surety_name)}</span>
+    ${loan.surety_code ? `(Member ID <span class="u">${esc(loan.surety_code)}</span>)` : ""}
+    ${loan.surety_phone ? `, Phone <span class="u">${esc(loan.surety_phone)}</span>` : ""},
+    stand as surety and jointly &amp; severally undertake to repay the above
+    amount with interest in case of default by the borrower. I have signed
+    below with full understanding and free consent.
+  </p>` : ""}
+
+  <p class="body">
+    I confirm that I have received the said amount in cash / by bank transfer
+    on the date mentioned above, and I shall repay the principal along with
+    accrued interest on demand. This note is executed voluntarily, in sound
+    mind, and without any coercion.
+  </p>
+
+  <!-- ============ FULL TELUGU VERSION ============ -->
+  <h3 style="margin:18px 0 6px;color:#6b3f10;border-bottom:1px solid #d8b98a;padding-bottom:3px;">తెలుగు</h3>
+
+  <p class="body">
+    డిమాండ్‌ మేరకు, నేను <b>${esc(member.name)}</b>
+    ${member.father_name ? `(తండ్రి / భర్త పేరు: <b>${esc(member.father_name)}</b>)` : ""},
+    సభ్యుని ID: <b>${esc(member.member_code)}</b>${member.phone ? `, ఫోన్: <b>${esc(member.phone)}</b>` : ""},
+    ${member.address ? `చిరునామా: <b>${esc(member.address)}</b>,` : ""}
+    <b>${esc(org?.name ?? "సంఘం")}</b> వారికి లేదా వారి ఆదేశానుసారం,
+    <b>${inr(principal)}</b> (అక్షరాలలో: <b>${esc(words)} రూపాయలు మాత్రమే</b>) మొత్తాన్ని,
+    నెలకు <b>${rate}%</b> వడ్డీ (సంవత్సరానికి ${rate * 12}%) తో సహా, డిమాండ్‌ మేరకు తిరిగి
+    చెల్లిస్తానని పూర్తి స్వేచ్ఛతో, ఆరోగ్యమనసుతో వాగ్దానం చేస్తున్నాను. పై సొమ్మును
+    <b>${esc(dateStr)}</b> నాడు నగదు / బదిలీ రూపంలో పూర్తిగా స్వీకరించాను.
   </p>
 
   ${loan.surety_name || loan.surety_code ? `
   <p class="body">
-    <b>SURETY / హామీదారు:</b> I, <span class="u">${esc(loan.surety_name)}</span>
-    ${loan.surety_code ? `(Member ID <span class="u">${esc(loan.surety_code)}</span>)` : ""}
-    ${loan.surety_phone ? `, Phone <span class="u">${esc(loan.surety_phone)}</span>` : ""},
-    stand as surety and jointly &amp; severally undertake to repay the above amount
-    with interest in case of default by the borrower.
-    పైన పేర్కొన్న అప్పు తీసుకున్న వ్యక్తి చెల్లించలేని పక్షంలో, హామీదారుగా
-    పూర్తి బాధ్యతతో నేను ఈ మొత్తాన్ని వడ్డీతో సహా చెల్లిస్తానని అంగీకరిస్తున్నాను.
+    <b>హామీదారు:</b> నేను <b>${esc(loan.surety_name)}</b>
+    ${loan.surety_code ? `(సభ్యుని ID: <b>${esc(loan.surety_code)}</b>)` : ""}
+    ${loan.surety_phone ? `, ఫోన్: <b>${esc(loan.surety_phone)}</b>` : ""},
+    పైన పేర్కొన్న అప్పు తీసుకున్న వ్యక్తి చెల్లించలేని పక్షంలో, హామీదారుగా పూర్తి బాధ్యతతో
+    ఈ మొత్తాన్ని వడ్డీతో సహా చెల్లిస్తానని అంగీకరిస్తూ, స్వేచ్ఛగా, ఆరోగ్యమనసుతో సంతకం
+    చేస్తున్నాను.
   </p>` : ""}
+
+  <p class="body">
+    ఈ వాగ్దాన పత్రాన్ని ఎటువంటి ఒత్తిడి లేకుండా, పూర్తి అవగాహనతో, స్వచ్ఛందంగా
+    రాసి సంతకం చేస్తున్నాను. భారత నెగోషియబుల్ ఇన్‌స్ట్రుమెంట్స్ చట్టం, 1881 ప్రకారం
+    ఇది చెల్లుబాటవుతుంది.
+  </p>
 
   <div class="sig-grid">
     <div class="sig-box">
-      <div class="sig-line">${bSig ? `<img src="${esc(bSig)}"/>` : ""}</div>
+      <div class="sig-line">${bSig ? `<img crossorigin="anonymous" src="${esc(bSig)}"/>` : ""}</div>
       <div class="sig-label"><b>Borrower Signature / అప్పు తీసుకున్నవారి సంతకం</b></div>
       <div class="sig-meta">${esc(member.name)} · ${esc(member.member_code)}</div>
     </div>
     <div class="sig-box">
-      <div class="sig-line">${sSig ? `<img src="${esc(sSig)}"/>` : ""}</div>
+      <div class="sig-line">${sSig ? `<img crossorigin="anonymous" src="${esc(sSig)}"/>` : ""}</div>
       <div class="sig-label"><b>Surety Signature / హామీదారు సంతకం</b></div>
       <div class="sig-meta">${loan.surety_name ? esc(loan.surety_name) : "—"}${loan.surety_code ? " · " + esc(loan.surety_code) : ""}</div>
     </div>
@@ -188,7 +219,25 @@ p.body { text-align: justify; text-indent: 24px; margin: 8px 0; }
   </div>
 </div>
 
-<script>window.addEventListener('load', () => setTimeout(() => window.print(), 500));</script>
+<script>
+  // Wait for all images (logo + signatures) to finish loading before printing,
+  // so signatures actually appear in the saved PDF.
+  (function () {
+    function ready() {
+      var imgs = Array.prototype.slice.call(document.images || []);
+      return Promise.all(imgs.map(function (img) {
+        if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+        return new Promise(function (res) {
+          img.addEventListener('load', res, { once: true });
+          img.addEventListener('error', res, { once: true });
+        });
+      }));
+    }
+    window.addEventListener('load', function () {
+      ready().then(function () { setTimeout(function () { window.print(); }, 400); });
+    });
+  })();
+</script>
 </body></html>`;
 
   const w = window.open("", "_blank", "width=900,height=1100");
