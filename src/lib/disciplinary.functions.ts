@@ -171,6 +171,46 @@ export const revokeSuspension = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const setMemberBehaviorStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    (d: {
+      target_member_id: string;
+      color: "green" | "yellow" | "red";
+      reason?: string;
+    }) => d,
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const orgId = await resolveOrgId(supabase, userId);
+    if (!orgId) throw new Error("Org not found");
+    if (!(await canManage(supabase, userId, orgId))) throw new Error("Forbidden");
+
+    // Revoke all currently-active suspensions for this member in this org.
+    await supabase
+      .from("disciplinary_suspensions")
+      .update({ status: "revoked", revoked_by: userId, revoked_at: new Date().toISOString() })
+      .eq("org_id", orgId)
+      .eq("target_member_id", data.target_member_id)
+      .eq("status", "active");
+
+    if (data.color === "green") return { ok: true };
+
+    const category = data.color === "yellow" ? "minor" : "major";
+    const reason = (data.reason || "").trim() || (data.color === "yellow" ? "Minor behavior issue" : "Major behavior issue");
+    const { error } = await supabase.from("disciplinary_suspensions").insert({
+      org_id: orgId,
+      target_member_id: data.target_member_id,
+      reason,
+      category,
+      issued_by: userId,
+      status: "active",
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+
 export const nominatePresident = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { candidate_member_id: string; notes?: string }) => d)
