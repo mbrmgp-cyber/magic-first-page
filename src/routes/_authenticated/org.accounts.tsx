@@ -207,6 +207,9 @@ function AccountsPage() {
         meta.push(`Disbursed ${newLoanFxAmt} ${newLoanCcy} @ ${newLoanFxRate} → INR`);
       }
       meta.push(`Next due: ${nextDueMonths} month(s)`);
+      if (suretyName || suretyId) meta.push(`Surety: ${suretyName}${suretyId ? ` (${suretyId})` : ""}`);
+      if (borrowerSig) meta.push("Borrower signed");
+      if (suretySig) meta.push("Surety signed");
     }
     const combinedRemarks = [remarks, ...meta].filter(Boolean).join(" • ");
     setBusy(true);
