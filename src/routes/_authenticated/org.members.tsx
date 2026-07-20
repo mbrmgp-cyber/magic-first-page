@@ -1198,9 +1198,18 @@ function LoanCard({ loan, orgId, member, onChange, onClose, onDelete }:
         Interest accrued: Rs. {Number(s.accrued_interest ?? 0).toLocaleString("en-IN")} · {Number(s.months_elapsed ?? 0).toFixed(1)} నెలలు
       </p>
 
-      <Button size="sm" variant="outline" className="w-full mt-2" onClick={() => setOpen((o) => !o)}>
-        {open ? "మూసివేయి" : "Payments / Pay"}
-      </Button>
+      <div className="grid grid-cols-2 gap-2 mt-2">
+        <Button size="sm" variant="outline" onClick={() => setOpen((o) => !o)}>
+          {open ? "మూసివేయి" : "Payments / Pay"}
+        </Button>
+        <Button size="sm" variant="outline"
+          onClick={async () => {
+            const { printPromissoryNote } = await import("@/lib/promissory-note");
+            await printPromissoryNote({ loan, member, orgId });
+          }}>
+          📜 ప్రామిసరీ నోట్ PDF
+        </Button>
+      </div>
 
       {open && (
         <div className="mt-2 space-y-2 border-t pt-2">
