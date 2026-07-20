@@ -1126,7 +1126,7 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
       {loading ? <p className="text-sm text-muted-foreground">Loading…</p>
         : loans.length === 0 ? <p className="text-sm text-muted-foreground">Loans లేవు</p>
         : loans.map((l) => (
-          <LoanCard key={l.id} loan={l} orgId={orgId} onChange={refresh}
+          <LoanCard key={l.id} loan={l} orgId={orgId} member={member} onChange={refresh}
             onClose={async () => { await closeL({ data: { loan_id: l.id } }); refresh(); }}
             onDelete={async () => {
               if (!confirm("Delete this loan?")) return;
