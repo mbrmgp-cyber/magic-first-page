@@ -129,11 +129,12 @@ export const issueSuspension = createServerFn({ method: "POST" })
     (d: {
       target_member_id: string;
       reason: string;
-      category?: "rule_violation" | "misuse" | "reputation_damage" | "financial_loss" | "other";
+      category?: "rule_violation" | "misuse" | "reputation_damage" | "financial_loss" | "other" | "minor" | "warning" | "major" | "severe" | "expulsion";
       effective_until?: string | null;
       notes?: string;
     }) => d,
   )
+
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const orgId = await resolveOrgId(supabase, userId);
