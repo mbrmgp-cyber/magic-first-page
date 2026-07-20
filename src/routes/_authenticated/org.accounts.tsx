@@ -71,6 +71,20 @@ function AccountsPage() {
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState<{ balance: number; emailed_to: string | null; collected: number; disbursed: number } | null>(null);
   const [locked, setLocked] = useState(false);
+  const [memberSuspensions, setMemberSuspensions] = useState<Array<{ category: string | null; status: string | null; effective_until: string | null }>>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (!info?.member?.id) { setMemberSuspensions([]); return; }
+      const { data } = await supabase
+        .from("disciplinary_suspensions")
+        .select("category,status,effective_until")
+        .eq("target_member_id", info.member.id);
+      if (!cancelled) setMemberSuspensions((data as any) ?? []);
+    })();
+    return () => { cancelled = true; };
+  }, [info?.member?.id]);
 
   const fmtCur = (n: number) => `${sym} ${Number(n || 0).toLocaleString("en-IN")}`;
   const fmtINR = (n: number) => `Rs. ${Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
