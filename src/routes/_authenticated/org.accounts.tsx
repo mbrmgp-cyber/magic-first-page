@@ -71,6 +71,20 @@ function AccountsPage() {
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState<{ balance: number; emailed_to: string | null; collected: number; disbursed: number } | null>(null);
   const [locked, setLocked] = useState(false);
+  const [memberSuspensions, setMemberSuspensions] = useState<Array<{ category: string | null; status: string | null; effective_until: string | null }>>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (!info?.member?.id) { setMemberSuspensions([]); return; }
+      const { data } = await supabase
+        .from("disciplinary_suspensions")
+        .select("category,status,effective_until")
+        .eq("target_member_id", info.member.id);
+      if (!cancelled) setMemberSuspensions((data as any) ?? []);
+    })();
+    return () => { cancelled = true; };
+  }, [info?.member?.id]);
 
   const fmtCur = (n: number) => `${sym} ${Number(n || 0).toLocaleString("en-IN")}`;
   const fmtINR = (n: number) => `Rs. ${Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -404,11 +418,26 @@ function AccountsPage() {
 
 
           {info && (() => {
-            const st = info.totalOutstanding <= 0
-              ? { color: "bg-green-500", label: "🟢 Clear" }
-              : paidInterest < monthlyDue
-                ? { color: "bg-red-500", label: "🔴 Overdue" }
-                : { color: "bg-yellow-500", label: "🟡 Active" };
+            const today = new Date().toISOString().slice(0, 10);
+            const active = memberSuspensions.filter((s) => {
+              const st = (s.status || "").toLowerCase();
+              if (st && st !== "active") return false;
+              if (s.effective_until && s.effective_until < today) return false;
+              return true;
+            });
+            const hasMajor = active.some((s) => {
+              const c = (s.category || "").toLowerCase();
+              return c === "major" || c === "severe" || c === "expulsion";
+            });
+            const hasMinor = active.some((s) => {
+              const c = (s.category || "").toLowerCase();
+              return !(c === "major" || c === "severe" || c === "expulsion");
+            });
+            const st = hasMajor
+              ? { color: "bg-red-600", label: "🔴 Major" }
+              : hasMinor
+                ? { color: "bg-amber-500", label: "🟡 Minor" }
+                : { color: "bg-emerald-600", label: "🟢 Clear" };
             return (
               <div className="grid grid-cols-2 gap-3 rounded-lg border bg-orange-50/60 p-3">
                 <div>
