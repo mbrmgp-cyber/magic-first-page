@@ -418,11 +418,26 @@ function AccountsPage() {
 
 
           {info && (() => {
-            const st = info.totalOutstanding <= 0
-              ? { color: "bg-green-500", label: "🟢 Clear" }
-              : paidInterest < monthlyDue
-                ? { color: "bg-red-500", label: "🔴 Overdue" }
-                : { color: "bg-yellow-500", label: "🟡 Active" };
+            const today = new Date().toISOString().slice(0, 10);
+            const active = memberSuspensions.filter((s) => {
+              const st = (s.status || "").toLowerCase();
+              if (st && st !== "active") return false;
+              if (s.effective_until && s.effective_until < today) return false;
+              return true;
+            });
+            const hasMajor = active.some((s) => {
+              const c = (s.category || "").toLowerCase();
+              return c === "major" || c === "severe" || c === "expulsion";
+            });
+            const hasMinor = active.some((s) => {
+              const c = (s.category || "").toLowerCase();
+              return !(c === "major" || c === "severe" || c === "expulsion");
+            });
+            const st = hasMajor
+              ? { color: "bg-red-600", label: "🔴 Major" }
+              : hasMinor
+                ? { color: "bg-amber-500", label: "🟡 Minor" }
+                : { color: "bg-emerald-600", label: "🟢 Clear" };
             return (
               <div className="grid grid-cols-2 gap-3 rounded-lg border bg-orange-50/60 p-3">
                 <div>
