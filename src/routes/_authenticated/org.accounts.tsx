@@ -549,14 +549,14 @@ function AccountsPage() {
             <div className="grid grid-cols-2 gap-3">
               {newLoanCcy !== "INR" ? (
                 <div className="space-y-1.5">
-                  <Label className="text-xs text-green-700 font-semibold">తీసుకుంటున్న అప్పు ({newLoanCcy})</Label>
+                  <Label className="text-xs text-green-700 font-semibold">{newLoanCcy}</Label>
                   <Input inputMode="decimal" value={newLoanFxAmt} disabled={locked}
                     onChange={(e) => setNewLoanFxAmt(e.target.value.replace(/[^\d.]/g, ""))} placeholder="0" />
                   <p className="text-[10px] text-green-700">= {fmtINR(Number(newLoan || 0))}</p>
                 </div>
               ) : (
                 <div className="space-y-1.5">
-                  <Label className="text-xs text-green-700 font-semibold">తీసుకుంటున్న అప్పు (Rs.)</Label>
+                  <Label className="text-xs text-green-700 font-semibold">Rs.</Label>
                   <Input inputMode="decimal" value={newLoan} disabled={locked}
                     onChange={(e) => setNewLoan(e.target.value.replace(/[^\d.]/g, ""))} placeholder="0" />
                 </div>
