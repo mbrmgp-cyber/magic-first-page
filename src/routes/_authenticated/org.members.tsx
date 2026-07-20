@@ -847,7 +847,7 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
     (async () => {
       const { data } = await supabase
         .from("disciplinary_suspensions")
-        .select("category,status,effective_until")
+        .select("category,status,effective_until,reason")
         .eq("target_member_id", member.id);
       if (!cancel) setSuspensions((data as any) ?? []);
     })();
