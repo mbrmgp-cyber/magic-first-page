@@ -235,6 +235,10 @@ function AccountsPage() {
           new_loan_amount: nl > 0 ? nl : undefined,
           new_loan_interest_rate: nl > 0 ? nr : undefined,
           remarks: combinedRemarks || undefined,
+          borrower_signature_url: nl > 0 && borrowerSig ? borrowerSig : undefined,
+          surety_signature_url: nl > 0 && suretySig ? suretySig : undefined,
+          surety_name: nl > 0 && suretyName ? suretyName : undefined,
+          surety_code: nl > 0 && suretyId ? suretyId : undefined,
         },
       });
       setSaved({

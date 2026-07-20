@@ -75,6 +75,11 @@ export const recordMonthlyPayment = createServerFn({ method: "POST" })
     new_loan_interest_rate?: number;
     wallet?: "bank" | "accountant" | "president";
     remarks?: string;
+    borrower_signature_url?: string;
+    surety_signature_url?: string;
+    surety_name?: string;
+    surety_code?: string;
+    surety_phone?: string;
   }) => d)
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
@@ -161,6 +166,11 @@ export const recordMonthlyPayment = createServerFn({ method: "POST" })
         interest_rate_monthly: rate,
         start_date: data.payment_date,
         purpose: data.remarks ?? "Committee disbursement",
+        borrower_signature_url: data.borrower_signature_url ?? null,
+        surety_signature_url: data.surety_signature_url ?? null,
+        surety_name: data.surety_name ?? null,
+        surety_code: data.surety_code ?? null,
+        surety_phone: data.surety_phone ?? null,
       }).select("id").single();
       if (lerr) throw new Error(lerr.message);
       newLoanId = created!.id;

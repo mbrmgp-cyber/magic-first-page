@@ -1126,7 +1126,7 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
       {loading ? <p className="text-sm text-muted-foreground">Loading…</p>
         : loans.length === 0 ? <p className="text-sm text-muted-foreground">Loans లేవు</p>
         : loans.map((l) => (
-          <LoanCard key={l.id} loan={l} orgId={orgId} onChange={refresh}
+          <LoanCard key={l.id} loan={l} orgId={orgId} member={member} onChange={refresh}
             onClose={async () => { await closeL({ data: { loan_id: l.id } }); refresh(); }}
             onDelete={async () => {
               if (!confirm("Delete this loan?")) return;
@@ -1138,8 +1138,8 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
   );
 }
 
-function LoanCard({ loan, orgId, onChange, onClose, onDelete }:
-  { loan: Loan; orgId: string; onChange: () => void; onClose: () => void; onDelete: () => void }) {
+function LoanCard({ loan, orgId, member, onChange, onClose, onDelete }:
+  { loan: Loan; orgId: string; member: Member; onChange: () => void; onClose: () => void; onDelete: () => void }) {
   const listP = useServerFn(listLoanPayments);
   const addP = useServerFn(addLoanPayment);
   const { symbol } = useCurrency();
@@ -1198,9 +1198,18 @@ function LoanCard({ loan, orgId, onChange, onClose, onDelete }:
         Interest accrued: Rs. {Number(s.accrued_interest ?? 0).toLocaleString("en-IN")} · {Number(s.months_elapsed ?? 0).toFixed(1)} నెలలు
       </p>
 
-      <Button size="sm" variant="outline" className="w-full mt-2" onClick={() => setOpen((o) => !o)}>
-        {open ? "మూసివేయి" : "Payments / Pay"}
-      </Button>
+      <div className="grid grid-cols-2 gap-2 mt-2">
+        <Button size="sm" variant="outline" onClick={() => setOpen((o) => !o)}>
+          {open ? "మూసివేయి" : "Payments / Pay"}
+        </Button>
+        <Button size="sm" variant="outline"
+          onClick={async () => {
+            const { printPromissoryNote } = await import("@/lib/promissory-note");
+            await printPromissoryNote({ loan, member, orgId });
+          }}>
+          📜 ప్రామిసరీ నోట్ PDF
+        </Button>
+      </div>
 
       {open && (
         <div className="mt-2 space-y-2 border-t pt-2">
