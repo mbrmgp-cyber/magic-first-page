@@ -18,6 +18,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { reviewMember } from "@/lib/org.functions";
+import { setMemberBehaviorStatus } from "@/lib/disciplinary.functions";
 import {
   listOrgMembersFull, updateMemberProfile,
   listMemberLoans, listLoanPayments,
@@ -25,6 +26,7 @@ import {
   adminAddMember, adminDeleteMember, listApprovedMembers, setMemberActive,
   orgUpdateMemberCode,
 } from "@/lib/members.functions";
+
 import { Switch } from "@/components/ui/switch";
 import { User, Plus, IndianRupee, CheckCircle2, XCircle, Trash2, Lock, UserPlus, Camera, Pencil, FileDown, Search } from "lucide-react";
 import { downloadMemberListPdf } from "@/lib/member-list-pdf";
