@@ -59,6 +59,11 @@ function AccountsPage() {
   const [newLoanFxRate, setNewLoanFxRate] = useState("");
   const [newLoanFxAmt, setNewLoanFxAmt] = useState("");
   const [nextDueMonths, setNextDueMonths] = useState<"1" | "3" | "6" | "12">("1");
+  // Surety + signatures
+  const [suretyName, setSuretyName] = useState("");
+  const [suretyId, setSuretyId] = useState("");
+  const [borrowerSig, setBorrowerSig] = useState<string | null>(null);
+  const [suretySig, setSuretySig] = useState<string | null>(null);
   const { symbol: sym } = useCurrency();
   const { lang } = useI18n();
   const lt = (en: string, te: string) => (lang === "te" ? te : en);
