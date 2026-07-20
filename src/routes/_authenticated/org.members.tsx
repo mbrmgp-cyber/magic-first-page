@@ -945,7 +945,7 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
   useEffect(() => {
     if (statusOpen) {
       setStatusPickColor(statusColor);
-      const currentReason = activeSuspensions[0]?.["reason" as any] as string | undefined;
+      const currentReason = (activeSuspensions[0] as any)?.reason as string | undefined;
       setStatusReason(currentReason || "");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
