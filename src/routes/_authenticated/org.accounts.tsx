@@ -483,13 +483,13 @@ function AccountsPage() {
               {payCcy !== "INR" ? (
                 <>
                   <div className="space-y-1.5">
-                    <Label className="text-xs">జమ చేస్తున్న అసలు ({payCcy})</Label>
+                    <Label className="text-xs">అసలు జమ ({payCcy})</Label>
                     <Input inputMode="decimal" value={payPrincipalFx} disabled={locked}
                       onChange={(e) => setPayPrincipalFx(e.target.value.replace(/[^\d.]/g, ""))} placeholder="0" />
                     <p className="text-[10px] text-green-700">= {fmtINR(Number(principal || 0))}</p>
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs">జమ చేస్తున్న వడ్డీ ({payCcy})</Label>
+                    <Label className="text-xs">వడ్డీ జమ ({payCcy})</Label>
                     <Input inputMode="decimal" value={payInterestFx} disabled={locked}
                       onChange={(e) => setPayInterestFx(e.target.value.replace(/[^\d.]/g, ""))} placeholder="0" />
                     <p className="text-[10px] text-green-700">= {fmtINR(Number(interest || 0))}</p>
@@ -498,12 +498,12 @@ function AccountsPage() {
               ) : (
                 <>
                   <div className="space-y-1.5">
-                    <Label className="text-xs">జమ చేస్తున్న అసలు (Rs.)</Label>
+                    <Label className="text-xs">అసలు జమ (Rs.)</Label>
                     <Input inputMode="decimal" value={principal} disabled={locked}
                       onChange={(e) => setPrincipal(e.target.value.replace(/[^\d.]/g, ""))} placeholder="0" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs">జమ చేస్తున్న వడ్డీ (Rs.)</Label>
+                    <Label className="text-xs">వడ్డీ జమ (Rs.)</Label>
                     <Input inputMode="decimal" value={interest} disabled={locked}
                       onChange={(e) => setInterest(e.target.value.replace(/[^\d.]/g, ""))} placeholder="0" />
                   </div>
