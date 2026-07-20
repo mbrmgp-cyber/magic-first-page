@@ -164,6 +164,19 @@ export const approveLoanRequest = createServerFn({ method: "POST" })
 
     const rate = data.interest_rate_monthly ?? req.interest_rate_monthly ?? 2.0;
 
+    // Look up surety details to persist onto the loan
+    let suretyName: string | null = null;
+    let suretyCode: string | null = null;
+    let suretyPhone: string | null = null;
+    if (req.surety_member_id) {
+      const { data: s } = await supabase
+        .from("members").select("name, member_code, phone")
+        .eq("id", req.surety_member_id).maybeSingle();
+      suretyName = s?.name ?? null;
+      suretyCode = s?.member_code ?? null;
+      suretyPhone = s?.phone ?? null;
+    }
+
     const { data: loan, error: lerr } = await supabase.from("member_loans").insert({
       org_id: req.org_id,
       member_id: req.member_id,
@@ -171,6 +184,11 @@ export const approveLoanRequest = createServerFn({ method: "POST" })
       interest_rate_monthly: rate,
       start_date: data.payment_date,
       purpose: `${req.reason}${data.utr_number ? ` (UTR: ${data.utr_number})` : ""}`,
+      borrower_signature_url: req.signature_data_url ?? null,
+      surety_signature_url: req.surety_signature_url ?? null,
+      surety_name: suretyName,
+      surety_code: suretyCode,
+      surety_phone: suretyPhone,
     }).select("id").single();
     if (lerr) throw new Error(lerr.message);
 
