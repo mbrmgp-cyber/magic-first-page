@@ -1138,8 +1138,8 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
   );
 }
 
-function LoanCard({ loan, orgId, onChange, onClose, onDelete }:
-  { loan: Loan; orgId: string; onChange: () => void; onClose: () => void; onDelete: () => void }) {
+function LoanCard({ loan, orgId, member, onChange, onClose, onDelete }:
+  { loan: Loan; orgId: string; member: Member; onChange: () => void; onClose: () => void; onDelete: () => void }) {
   const listP = useServerFn(listLoanPayments);
   const addP = useServerFn(addLoanPayment);
   const { symbol } = useCurrency();
