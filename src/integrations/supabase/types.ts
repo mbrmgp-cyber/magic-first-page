@@ -1108,6 +1108,7 @@ export type Database = {
       }
       member_loans: {
         Row: {
+          borrower_signature_url: string | null
           closed_at: string | null
           created_at: string
           id: string
@@ -1118,9 +1119,14 @@ export type Database = {
           purpose: string | null
           start_date: string
           status: string
+          surety_code: string | null
+          surety_name: string | null
+          surety_phone: string | null
+          surety_signature_url: string | null
           updated_at: string
         }
         Insert: {
+          borrower_signature_url?: string | null
           closed_at?: string | null
           created_at?: string
           id?: string
@@ -1131,9 +1137,14 @@ export type Database = {
           purpose?: string | null
           start_date?: string
           status?: string
+          surety_code?: string | null
+          surety_name?: string | null
+          surety_phone?: string | null
+          surety_signature_url?: string | null
           updated_at?: string
         }
         Update: {
+          borrower_signature_url?: string | null
           closed_at?: string | null
           created_at?: string
           id?: string
@@ -1144,6 +1155,10 @@ export type Database = {
           purpose?: string | null
           start_date?: string
           status?: string
+          surety_code?: string | null
+          surety_name?: string | null
+          surety_phone?: string | null
+          surety_signature_url?: string | null
           updated_at?: string
         }
         Relationships: [
