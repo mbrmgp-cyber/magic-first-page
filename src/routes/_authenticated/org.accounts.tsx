@@ -492,17 +492,17 @@ function AccountsPage() {
 
           {/* OLD LOAN block */}
           <div className="rounded-lg border-2 border-orange-200 bg-orange-50/40 p-3 space-y-3">
-            <p className="text-xs font-bold text-red-600 tracking-wide">పాత అప్పు (Rs.)</p>
+            <p className="text-xs font-bold text-red-600 tracking-wide">పాత అప్పు ({dispSym})</p>
 
             {/* Outstanding (L) | Interest Due (R) */}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <p className="text-[11px] text-muted-foreground">కట్టాల్సిన అసలు</p>
-                <p className="font-bold text-lg">{info ? fmtINR(info.totalOutstanding) : "Rs. 0"}</p>
+                <p className="font-bold text-lg">{info ? fmtINR(info.totalOutstanding) : `${dispSym} 0`}</p>
               </div>
               <div>
                 <p className="text-[11px] text-muted-foreground">కట్టాల్సిన వడ్డీ</p>
-                <p className="font-bold text-lg text-orange-700">{info ? fmtINR(info.monthlyInterest) : "Rs. 0"}</p>
+                <p className="font-bold text-lg text-orange-700">{info ? fmtINR(info.monthlyInterest) : `${dispSym} 0`}</p>
               </div>
             </div>
 
