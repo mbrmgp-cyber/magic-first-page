@@ -64,7 +64,9 @@ function AccountsPage() {
   const [suretyId, setSuretyId] = useState("");
   const [borrowerSig, setBorrowerSig] = useState<string | null>(null);
   const [suretySig, setSuretySig] = useState<string | null>(null);
-  const { symbol: sym } = useCurrency();
+  const { symbol: sym, currency: dispCcy } = useCurrency();
+  const dispSym = sym === "₹" ? "Rs." : sym === "د.إ" ? "AED" : sym === "د.ك" ? "KWD" : sym;
+  const [dispFxPerInr, setDispFxPerInr] = useState<number>(1); // 1 INR = ? dispCcy
   const { lang } = useI18n();
   const lt = (en: string, te: string) => (lang === "te" ? te : en);
   const [info, setInfo] = useState<Extract<Lookup, { found: true }> | null>(null);
@@ -87,7 +89,26 @@ function AccountsPage() {
   }, [info?.member?.id]);
 
   const fmtCur = (n: number) => `${sym} ${Number(n || 0).toLocaleString("en-IN")}`;
-  const fmtINR = (n: number) => `Rs. ${Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  // Format an INR-stored amount using the account-hub display currency.
+  const fmtINR = (n: number) => {
+    const v = Number(n || 0) * (dispFxPerInr || 1);
+    return `${dispSym} ${v.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
+  // Auto-fetch INR → display-currency rate whenever the account-hub currency changes
+  useEffect(() => {
+    if (dispCcy === "INR") { setDispFxPerInr(1); return; }
+    let cancel = false;
+    (async () => {
+      try {
+        const r = await fetch(`https://open.er-api.com/v6/latest/INR`);
+        const j = await r.json();
+        const rate = j?.rates?.[dispCcy];
+        if (!cancel && typeof rate === "number" && rate > 0) setDispFxPerInr(rate);
+      } catch { /* keep previous */ }
+    })();
+    return () => { cancel = true; };
+  }, [dispCcy]);
 
   // Auto-fetch FX rate (foreign → INR) from open.er-api.com
   async function fetchFxRate(code: FxCode): Promise<number | null> {
@@ -471,17 +492,17 @@ function AccountsPage() {
 
           {/* OLD LOAN block */}
           <div className="rounded-lg border-2 border-orange-200 bg-orange-50/40 p-3 space-y-3">
-            <p className="text-xs font-bold text-red-600 tracking-wide">పాత అప్పు (Rs.)</p>
+            <p className="text-xs font-bold text-red-600 tracking-wide">పాత అప్పు ({dispSym})</p>
 
             {/* Outstanding (L) | Interest Due (R) */}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <p className="text-[11px] text-muted-foreground">కట్టాల్సిన అసలు</p>
-                <p className="font-bold text-lg">{info ? fmtINR(info.totalOutstanding) : "Rs. 0"}</p>
+                <p className="font-bold text-lg">{info ? fmtINR(info.totalOutstanding) : `${dispSym} 0`}</p>
               </div>
               <div>
                 <p className="text-[11px] text-muted-foreground">కట్టాల్సిన వడ్డీ</p>
-                <p className="font-bold text-lg text-orange-700">{info ? fmtINR(info.monthlyInterest) : "Rs. 0"}</p>
+                <p className="font-bold text-lg text-orange-700">{info ? fmtINR(info.monthlyInterest) : `${dispSym} 0`}</p>
               </div>
             </div>
 
