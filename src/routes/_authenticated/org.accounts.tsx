@@ -806,9 +806,6 @@ function AccountsPage() {
             <Button variant="outline" onClick={onEdit} disabled={!locked}>
               <Pencil className="h-4 w-4" /> సవరించు
             </Button>
-            <Button variant="outline" onClick={downloadPersonalPdf} disabled={busy}>
-              <FileText className="h-4 w-4" /> {lt("Personal PDF", "వ్యక్తిగత పిడిఎఫ్")}
-            </Button>
           </div>
 
         </Card>
