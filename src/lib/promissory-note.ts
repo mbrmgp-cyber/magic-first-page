@@ -444,34 +444,34 @@ body { font-family: 'Noto Sans Telugu','Segoe UI', Arial, sans-serif; color:#111
   <div class="section box">
     <h3>${L.before}</h3>
     <div class="grid2">
-      <div class="kv"><span class="k">${L.principal}</span><span class="v">${inr(opts.before.principal)}</span></div>
-      <div class="kv"><span class="k">${L.interest}</span><span class="v">${inr(opts.before.interest)}</span></div>
+      <div class="kv"><span class="k">${L.principal}</span><span class="v">${money(opts.before.principal)}</span></div>
+      <div class="kv"><span class="k">${L.interest}</span><span class="v">${money(opts.before.interest)}</span></div>
     </div>
   </div>
 
   <div class="section box paid">
     <h3>${L.paid}</h3>
     <div class="grid2">
-      <div class="kv"><span class="k">${L.principal}</span><span class="v">${inr(opts.paid.principal)}</span></div>
-      <div class="kv"><span class="k">${L.interest}</span><span class="v">${inr(opts.paid.interest)}</span></div>
+      <div class="kv"><span class="k">${L.principal}</span><span class="v">${money(opts.paid.principal)}</span></div>
+      <div class="kv"><span class="k">${L.interest}</span><span class="v">${money(opts.paid.interest)}</span></div>
     </div>
     ${fxLine}
-    <div class="total-row"><span class="lbl">${L.total}</span><span class="amt">${inr(totalPaid)}</span></div>
+    <div class="total-row"><span class="lbl">${L.total}</span><span class="amt">${money(totalPaid)}</span></div>
   </div>
 
   <div class="section box after">
     <h3>${L.after}</h3>
     <div class="grid2">
-      <div class="kv"><span class="k">${L.principalLeft}</span><span class="v">${inr(opts.after.principalRemaining)}</span></div>
-      <div class="kv"><span class="k">${L.carry}</span><span class="v">${inr(opts.after.interestCarryForward)}</span></div>
+      <div class="kv"><span class="k">${L.principalLeft}</span><span class="v">${money(opts.after.principalRemaining)}</span></div>
+      <div class="kv"><span class="k">${L.carry}</span><span class="v">${money(opts.after.interestCarryForward)}</span></div>
     </div>
   </div>
 
   <div class="section box next">
     <h3>${L.nextMonth}</h3>
     <div class="grid2">
-      <div class="kv"><span class="k">${L.principal}</span><span class="v">${inr(opts.nextMonth.principal)}</span></div>
-      <div class="kv"><span class="k">${L.interest}</span><span class="v">${inr(opts.nextMonth.interest)}</span></div>
+      <div class="kv"><span class="k">${L.principal}</span><span class="v">${money(opts.nextMonth.principal)}</span></div>
+      <div class="kv"><span class="k">${L.interest}</span><span class="v">${money(opts.nextMonth.interest)}</span></div>
     </div>
   </div>
 
@@ -479,7 +479,7 @@ body { font-family: 'Noto Sans Telugu','Segoe UI', Arial, sans-serif; color:#111
   <div class="section box newloan">
     <h3>${L.newLoan}</h3>
     <div class="grid2">
-      <div class="kv"><span class="k">${L.amount}</span><span class="v">${inr(opts.newLoan.amount)}</span></div>
+      <div class="kv"><span class="k">${L.amount}</span><span class="v">${money(opts.newLoan.amount)}</span></div>
       <div class="kv"><span class="k">${L.rate}</span><span class="v">${opts.newLoan.rate}%</span></div>
       <div class="kv"><span class="k">${L.tenure}</span><span class="v">${opts.newLoan.nextDueMonths} ${L.months}</span></div>
     </div>
