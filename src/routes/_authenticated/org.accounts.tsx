@@ -746,8 +746,7 @@ function AccountsPage() {
                   const before = { principal: info.totalOutstanding, interest: info.monthlyInterest };
                   const principalRemaining = Math.max(0, before.principal - p) + nl;
                   const carry = Math.max(0, Math.round((before.interest - i) * 100) / 100);
-                  const months = Number(nextDueMonths) || 1;
-                  const nextPrincipal = nl > 0 ? nl / months : Math.max(0, before.principal - p) / 12;
+                  const nextPrincipal = principalRemaining;
                   const rateForNext = nr > 0 ? nr : (info.monthlyInterest > 0 && info.totalOutstanding > 0 ? (info.monthlyInterest / info.totalOutstanding) * 100 : 2);
                   const nextInterest = principalRemaining * rateForNext / 100 + carry;
                   await printPaymentReceipt({
