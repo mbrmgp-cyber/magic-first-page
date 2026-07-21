@@ -137,6 +137,22 @@ export async function downloadPersonalStatementPdf(input: PersonalStatementInput
     y += 30;
   }
 
+  if (input.nextMonthPrincipal || input.nextMonthInterest) {
+    y += 8;
+    drawText(ctx, L.nextMonth ?? "Next Month Due", 80, y, { size: 18, weight: 800, color: "#8b1a1a" });
+    y += 30;
+    if (input.nextMonthPrincipal) {
+      drawText(ctx, `${L.nextPrincipal ?? "Principal"}:`, 80, y, { size: 16, weight: 600 });
+      drawText(ctx, input.nextMonthPrincipal, 300, y, { size: 16, weight: 400 });
+      y += 34;
+    }
+    if (input.nextMonthInterest) {
+      drawText(ctx, `${L.nextInterest ?? "Interest"}:`, 80, y, { size: 16, weight: 600 });
+      drawText(ctx, input.nextMonthInterest, 300, y, { size: 16, weight: 400 });
+      y += 34;
+    }
+  }
+
   drawText(ctx, "Download from MBR APP", w / 2, 1710, { size: 12, align: "center", color: "#666" });
 
   const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
