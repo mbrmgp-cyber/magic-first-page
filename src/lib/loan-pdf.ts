@@ -90,6 +90,8 @@ export type PersonalStatementInput = {
   newLoanRate: string;
   remarks?: string;
   updatedBalance?: string;
+  nextMonthPrincipal?: string;
+  nextMonthInterest?: string;
   fileName: string;
 };
 
