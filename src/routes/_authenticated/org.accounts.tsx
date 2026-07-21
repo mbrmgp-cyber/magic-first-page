@@ -89,7 +89,26 @@ function AccountsPage() {
   }, [info?.member?.id]);
 
   const fmtCur = (n: number) => `${sym} ${Number(n || 0).toLocaleString("en-IN")}`;
-  const fmtINR = (n: number) => `Rs. ${Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  // Format an INR-stored amount using the account-hub display currency.
+  const fmtINR = (n: number) => {
+    const v = Number(n || 0) * (dispFxPerInr || 1);
+    return `${dispSym} ${v.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
+  // Auto-fetch INR → display-currency rate whenever the account-hub currency changes
+  useEffect(() => {
+    if (dispCcy === "INR") { setDispFxPerInr(1); return; }
+    let cancel = false;
+    (async () => {
+      try {
+        const r = await fetch(`https://open.er-api.com/v6/latest/INR`);
+        const j = await r.json();
+        const rate = j?.rates?.[dispCcy];
+        if (!cancel && typeof rate === "number" && rate > 0) setDispFxPerInr(rate);
+      } catch { /* keep previous */ }
+    })();
+    return () => { cancel = true; };
+  }, [dispCcy]);
 
   // Auto-fetch FX rate (foreign → INR) from open.er-api.com
   async function fetchFxRate(code: FxCode): Promise<number | null> {
