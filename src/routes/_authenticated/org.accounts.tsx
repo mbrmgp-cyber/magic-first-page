@@ -64,7 +64,9 @@ function AccountsPage() {
   const [suretyId, setSuretyId] = useState("");
   const [borrowerSig, setBorrowerSig] = useState<string | null>(null);
   const [suretySig, setSuretySig] = useState<string | null>(null);
-  const { symbol: sym } = useCurrency();
+  const { symbol: sym, currency: dispCcy } = useCurrency();
+  const dispSym = sym === "₹" ? "Rs." : sym === "د.إ" ? "AED" : sym === "د.ك" ? "KWD" : sym;
+  const [dispFxPerInr, setDispFxPerInr] = useState<number>(1); // 1 INR = ? dispCcy
   const { lang } = useI18n();
   const lt = (en: string, te: string) => (lang === "te" ? te : en);
   const [info, setInfo] = useState<Extract<Lookup, { found: true }> | null>(null);
