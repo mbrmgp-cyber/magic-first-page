@@ -459,6 +459,16 @@ body { font-family: 'Noto Sans Telugu','Segoe UI', Arial, sans-serif; color:#111
     <div class="total-row"><span class="lbl">${L.total}</span><span class="amt">${money(totalPaid)}</span></div>
   </div>
 
+  ${opts.newLoan && opts.newLoan.amount > 0 ? `
+  <div class="section box newloan">
+    <h3>${L.newLoan}</h3>
+    <div class="grid2">
+      <div class="kv"><span class="k">${L.amount}</span><span class="v">${money(opts.newLoan.amount)}</span></div>
+      <div class="kv"><span class="k">${L.rate}</span><span class="v">${opts.newLoan.rate}%</span></div>
+      <div class="kv"><span class="k">${L.tenure}</span><span class="v">${opts.newLoan.nextDueMonths} ${L.months}</span></div>
+    </div>
+  </div>` : ""}
+
   <div class="section box after">
     <h3>${L.after}</h3>
     <div class="grid2">
@@ -474,16 +484,6 @@ body { font-family: 'Noto Sans Telugu','Segoe UI', Arial, sans-serif; color:#111
       <div class="kv"><span class="k">${L.interest}</span><span class="v">${money(opts.nextMonth.interest)}</span></div>
     </div>
   </div>
-
-  ${opts.newLoan && opts.newLoan.amount > 0 ? `
-  <div class="section box newloan">
-    <h3>${L.newLoan}</h3>
-    <div class="grid2">
-      <div class="kv"><span class="k">${L.amount}</span><span class="v">${money(opts.newLoan.amount)}</span></div>
-      <div class="kv"><span class="k">${L.rate}</span><span class="v">${opts.newLoan.rate}%</span></div>
-      <div class="kv"><span class="k">${L.tenure}</span><span class="v">${opts.newLoan.nextDueMonths} ${L.months}</span></div>
-    </div>
-  </div>` : ""}
 
   ${opts.remarks ? `
   <div class="section">
