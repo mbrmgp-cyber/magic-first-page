@@ -288,8 +288,16 @@ export async function printPaymentReceipt(opts: {
   newLoan?: { amount: number; rate: number; nextDueMonths: number } | null;
   remarks?: string;
   lang?: "te" | "en";
+  /** Display currency for all amounts. Stored values are INR; converted for display. */
+  display?: { symbol: string; code: string; rateFromInr: number } | null;
 }) {
   const lang = opts.lang ?? currentLang();
+  const disp = opts.display && opts.display.rateFromInr > 0 ? opts.display : null;
+  const money = (n: any) => {
+    const v = Number(n || 0) * (disp ? disp.rateFromInr : 1);
+    const sym = disp ? disp.symbol : "Rs.";
+    return `${sym} ${v.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
   const isTe = lang === "te";
   const { data: org } = await supabase
     .from("organizations")
