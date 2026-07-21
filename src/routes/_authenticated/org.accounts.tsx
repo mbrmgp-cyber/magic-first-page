@@ -566,7 +566,7 @@ function AccountsPage() {
             </div>
 
             {info && paidInterest < monthlyDue && paidInterest >= 0 && (
-              <div className="text-[11px] rounded-md bg-yellow-100 border border-yellow-300 p-2 text-yellow-900">
+              <div className="text-[11px] rounded-md bg-slate-900/80 border border-slate-600 p-2 text-white">
                 Carry-forward: <b>{fmtINR(carryForward)}</b> — వచ్చే నెల బాకీలో జమ అవుతుంది
               </div>
             )}
