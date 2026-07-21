@@ -307,6 +307,9 @@ function AccountsPage() {
           newLoanRate: lt("New Loan Rate", "వడ్డీ రేటు"),
           remarks: lt("Remarks", "గమనికలు"),
           updatedBalance: lt("Updated Balance", "నవీకరించిన బాకీ"),
+          nextMonth: lt("Next Month Due", "వచ్చే నెల కట్టవలసినది"),
+          nextPrincipal: lt("Principal", "అసలు"),
+          nextInterest: lt("Interest", "వడ్డీ"),
         },
         outstanding: fmtAmt(info.totalOutstanding),
         monthlyInterest: fmtAmt(info.monthlyInterest),
@@ -316,6 +319,22 @@ function AccountsPage() {
         newLoanRate: `${newLoanRate}%`,
         remarks: remarks || undefined,
         updatedBalance: saved ? fmtAmt(saved.balance) : undefined,
+        nextMonthPrincipal: (() => {
+          const p = Number(principal || 0);
+          const nl = Number(newLoan || 0);
+          const remaining = Math.max(0, info.totalOutstanding - p) + nl;
+          return fmtAmt(Math.round(remaining * 100) / 100);
+        })(),
+        nextMonthInterest: (() => {
+          const p = Number(principal || 0);
+          const i = Number(interest || 0);
+          const nl = Number(newLoan || 0);
+          const nr = Number(newLoanRate || 0);
+          const remaining = Math.max(0, info.totalOutstanding - p) + nl;
+          const carry = Math.max(0, info.monthlyInterest - i);
+          const rate = nr > 0 ? nr : (info.monthlyInterest > 0 && info.totalOutstanding > 0 ? (info.monthlyInterest / info.totalOutstanding) * 100 : 2);
+          return fmtAmt(Math.round((remaining * rate / 100 + carry) * 100) / 100);
+        })(),
         fileName: `member-${idNo || "statement"}-${date}.pdf`,
       });
       toast.success(lt("PDF downloaded", "పిడిఎఫ్ డౌన్‌లోడ్ అయింది"));
