@@ -280,8 +280,20 @@ function AccountsPage() {
     setBusy(true);
     try {
       const { downloadPersonalStatementPdf } = await import("@/lib/loan-pdf");
-      const safeSym = sym === "₹" ? "Rs." : sym === "د.إ" ? "AED" : sym === "د.ك" ? "KWD" : sym;
-      const fmtAmt = (n: number) => `${safeSym} ${Number(n || 0).toLocaleString("en-IN")}`;
+      const rate = dispCcy !== "INR" && dispFxPerInr > 0 ? dispFxPerInr : 1;
+      const symOut = dispCcy !== "INR" && dispFxPerInr > 0 ? dispSym : "Rs.";
+      const fmtAmt = (nInr: number) => {
+        const v = Number(nInr || 0) * rate;
+        return `${symOut} ${(Math.round(v * 100) / 100).toLocaleString("en-IN")}`;
+      };
+      const pIn = Number(principal || 0);
+      const iIn = Number(interest || 0);
+      const nlIn = Number(newLoan || 0);
+      const nrIn = Number(newLoanRate || 0);
+      const remainingInr = Math.max(0, info.totalOutstanding - pIn) + nlIn;
+      const carryInr = Math.max(0, info.monthlyInterest - iIn);
+      const rateForNext = nrIn > 0 ? nrIn : (info.monthlyInterest > 0 && info.totalOutstanding > 0 ? (info.monthlyInterest / info.totalOutstanding) * 100 : 2);
+      const nextInterestInr = remainingInr * rateForNext / 100 + carryInr;
       await downloadPersonalStatementPdf({
         orgName: orgQ.data?.org?.name ?? "Society",
         title: lt("Personal Loan Statement", "వ్యక్తిగత రుణ వివరాలు"),
@@ -313,28 +325,14 @@ function AccountsPage() {
         },
         outstanding: fmtAmt(info.totalOutstanding),
         monthlyInterest: fmtAmt(info.monthlyInterest),
-        principalPaid: fmtAmt(Number(principal || 0)),
-        interestPaid: fmtAmt(Number(interest || 0)),
-        newLoan: fmtAmt(Number(newLoan || 0)),
-        newLoanRate: `${newLoanRate}%`,
+        principalPaid: fmtAmt(pIn),
+        interestPaid: fmtAmt(iIn),
+        newLoan: fmtAmt(nlIn),
+        newLoanRate: `${newLoanRate || 0}%`,
         remarks: remarks || undefined,
-        updatedBalance: saved ? fmtAmt(saved.balance) : undefined,
-        nextMonthPrincipal: (() => {
-          const p = Number(principal || 0);
-          const nl = Number(newLoan || 0);
-          const remaining = Math.max(0, info.totalOutstanding - p) + nl;
-          return fmtAmt(Math.round(remaining * 100) / 100);
-        })(),
-        nextMonthInterest: (() => {
-          const p = Number(principal || 0);
-          const i = Number(interest || 0);
-          const nl = Number(newLoan || 0);
-          const nr = Number(newLoanRate || 0);
-          const remaining = Math.max(0, info.totalOutstanding - p) + nl;
-          const carry = Math.max(0, info.monthlyInterest - i);
-          const rate = nr > 0 ? nr : (info.monthlyInterest > 0 && info.totalOutstanding > 0 ? (info.monthlyInterest / info.totalOutstanding) * 100 : 2);
-          return fmtAmt(Math.round((remaining * rate / 100 + carry) * 100) / 100);
-        })(),
+        updatedBalance: saved ? fmtAmt(saved.balance) : fmtAmt(remainingInr),
+        nextMonthPrincipal: fmtAmt(remainingInr),
+        nextMonthInterest: fmtAmt(Math.round(nextInterestInr * 100) / 100),
         fileName: `member-${idNo || "statement"}-${date}.pdf`,
       });
       toast.success(lt("PDF downloaded", "పిడిఎఫ్ డౌన్‌లోడ్ అయింది"));
