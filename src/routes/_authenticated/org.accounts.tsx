@@ -770,6 +770,9 @@ function AccountsPage() {
                     nextMonth: { principal: Math.round(nextPrincipal * 100) / 100, interest: Math.round(nextInterest * 100) / 100 },
                     newLoan: nl > 0 ? { amount: nl, rate: nr, nextDueMonths: Number(nextDueMonths) || 1 } : null,
                     remarks: remarks || undefined,
+                    display: dispCcy !== "INR" && dispFxPerInr > 0
+                      ? { symbol: dispSym, code: dispCcy, rateFromInr: dispFxPerInr }
+                      : null,
                   });
                 }}
               >
