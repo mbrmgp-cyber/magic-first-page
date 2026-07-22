@@ -220,14 +220,14 @@ function AccountsPage() {
     if (p + i + nl <= 0) { toast.error("ఏదైనా మొత్తం నమోదు చేయండి"); return; }
     // Compose remarks with FX + next-due metadata
     const meta: string[] = [];
-    if (payCcy !== "INR" && Number(payRate) > 0) {
-      meta.push(`Paid in ${payCcy} @ ${payRate} → INR`);
+    if (payCcy !== dispCcy && Number(payRate) > 0) {
+      meta.push(`Paid in ${payCcy} @ ${payRate} → ${dispCcy}`);
       if (payPrincipalFx) meta.push(`Principal ${payPrincipalFx} ${payCcy}`);
       if (payInterestFx) meta.push(`Interest ${payInterestFx} ${payCcy}`);
     }
     if (nl > 0) {
-      if (newLoanCcy !== "INR" && Number(newLoanFxRate) > 0) {
-        meta.push(`Disbursed ${newLoanFxAmt} ${newLoanCcy} @ ${newLoanFxRate} → INR`);
+      if (newLoanCcy !== dispCcy && Number(newLoanFxRate) > 0) {
+        meta.push(`Disbursed ${newLoanFxAmt} ${newLoanCcy} @ ${newLoanFxRate} → ${dispCcy}`);
       }
       meta.push(`Next due: ${nextDueMonths} month(s)`);
       if (suretyName || suretyId) meta.push(`Surety: ${suretyName}${suretyId ? ` (${suretyId})` : ""}`);
