@@ -1142,7 +1142,7 @@ function LoanCard({ loan, orgId, member, onChange, onClose, onDelete }:
   { loan: Loan; orgId: string; member: Member; onChange: () => void; onClose: () => void; onDelete: () => void }) {
   const listP = useServerFn(listLoanPayments);
   const addP = useServerFn(addLoanPayment);
-  const { symbol } = useCurrency();
+  const { fmtBase } = useCurrency();
   const [pays, setPays] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [amt, setAmt] = useState("");
@@ -1170,7 +1170,7 @@ function LoanCard({ loan, orgId, member, onChange, onClose, onDelete }:
       <div className="flex justify-between items-start gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold">Rs. {Number(loan.principal).toLocaleString("en-IN")}</span>
+            <span className="font-semibold">{fmtBase(loan.principal)}</span>
             <Badge variant="outline" className="text-xs">{loan.interest_rate_monthly}% /నెల</Badge>
             {loan.status === "closed" && <Badge className="bg-emerald-600">Closed</Badge>}
           </div>
@@ -1183,19 +1183,19 @@ function LoanCard({ loan, orgId, member, onChange, onClose, onDelete }:
       <div className="grid grid-cols-3 gap-2 mt-2 text-center text-xs" style={{ color: "inherit" }}>
         <div className="rounded p-2" style={{ backgroundColor: "color-mix(in srgb, currentColor 10%, transparent)", color: "inherit" }}>
           <div style={{ color: "inherit", opacity: 0.75 }}>Total Due</div>
-          <div className="font-semibold" style={{ color: "inherit" }}>Rs. {Number(s.total_due ?? loan.principal).toLocaleString("en-IN")}</div>
+          <div className="font-semibold" style={{ color: "inherit" }}>{fmtBase(s.total_due ?? loan.principal)}</div>
         </div>
         <div className="rounded p-2" style={{ backgroundColor: "color-mix(in srgb, currentColor 10%, transparent)", color: "inherit" }}>
           <div style={{ color: "inherit", opacity: 0.75 }}>Paid</div>
-          <div className="font-semibold" style={{ color: "inherit" }}>Rs. {Number(s.total_paid ?? 0).toLocaleString("en-IN")}</div>
+          <div className="font-semibold" style={{ color: "inherit" }}>{fmtBase(s.total_paid ?? 0)}</div>
         </div>
         <div className="rounded p-2" style={{ backgroundColor: "color-mix(in srgb, currentColor 10%, transparent)", color: "inherit" }}>
           <div style={{ color: "inherit", opacity: 0.75 }}>Balance</div>
-          <div className="font-semibold" style={{ color: "inherit" }}>Rs. {Number(s.balance ?? 0).toLocaleString("en-IN")}</div>
+          <div className="font-semibold" style={{ color: "inherit" }}>{fmtBase(s.balance ?? 0)}</div>
         </div>
       </div>
       <p className="text-[10px] text-muted-foreground mt-1 text-center">
-        Interest accrued: Rs. {Number(s.accrued_interest ?? 0).toLocaleString("en-IN")} · {Number(s.months_elapsed ?? 0).toFixed(1)} నెలలు
+        Interest accrued: {fmtBase(s.accrued_interest ?? 0)} · {Number(s.months_elapsed ?? 0).toFixed(1)} నెలలు
       </p>
 
       <div className="grid grid-cols-2 gap-2 mt-2">
@@ -1227,7 +1227,7 @@ function LoanCard({ loan, orgId, member, onChange, onClose, onDelete }:
               {pays.map((p) => (
                 <div key={p.id} className="flex justify-between border-b pb-1">
                   <span>{new Date(p.payment_date).toLocaleDateString("te-IN")}</span>
-                  <span className="font-medium">{symbol}{Number(p.amount).toLocaleString("en-IN")}</span>
+                  <span className="font-medium">{fmtBase(p.amount)}</span>
                 </div>
               ))}
             </div>
