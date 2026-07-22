@@ -57,8 +57,13 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         const { data } = await supabase.auth.getUser();
         if (!data.user) return;
         const pref = await loadPreference();
+        const storedCode = stored && CURRENCIES.some((c) => c.code === stored) ? stored : null;
+        if (!pref.hasPreference && storedCode) {
+          savePreference({ data: { currency: storedCode } }).catch(() => {});
+          return;
+        }
         const code = pref.currency as CurrencyCode;
-        if (!cancel && CURRENCIES.some((c) => c.code === code)) {
+        if (!cancel && pref.hasPreference && CURRENCIES.some((c) => c.code === code)) {
           setCurrencyState(code);
           window.localStorage.setItem(STORAGE_KEY, code);
           const cachedRate = Number(window.localStorage.getItem(rateKey(code)) || "");

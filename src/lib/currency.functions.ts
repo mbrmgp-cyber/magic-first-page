@@ -41,7 +41,8 @@ export const getOrgCurrencyPreference = createServerFn({ method: "GET" })
       .maybeSingle();
 
     const settings = (org?.theme_settings ?? {}) as Record<string, unknown>;
-    return { currency: normalizeCurrency(settings.display_currency) };
+    const hasPreference = typeof settings.display_currency === "string" && ALLOWED.has(String(settings.display_currency).toUpperCase());
+    return { currency: normalizeCurrency(settings.display_currency), hasPreference };
   });
 
 export const setOrgCurrencyPreference = createServerFn({ method: "POST" })
