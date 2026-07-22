@@ -94,49 +94,53 @@ function AccountsPage() {
     return `${dispSym} ${v.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
-  // Auto-fetch FX rate (foreign → INR) from open.er-api.com
-  async function fetchFxRate(code: FxCode): Promise<number | null> {
-    if (code === "INR") return 1;
+  // Auto-fetch FX rate (foreign → display currency selected in Account Hub) from open.er-api.com
+  async function fetchFxRate(code: FxCode, target: FxCode): Promise<number | null> {
+    if (code === target) return 1;
     try {
       const r = await fetch(`https://open.er-api.com/v6/latest/${code}`);
       const j = await r.json();
-      const inr = j?.rates?.INR;
-      return typeof inr === "number" && inr > 0 ? Math.round(inr * 100) / 100 : null;
+      const v = j?.rates?.[target];
+      return typeof v === "number" && v > 0 ? Math.round(v * 10000) / 10000 : null;
     } catch { return null; }
   }
 
-  // Auto-populate payment currency rate on change
-  useEffect(() => {
-    if (payCcy === "INR") { setPayRate(""); return; }
-    let cancel = false;
-    fetchFxRate(payCcy).then((v) => { if (!cancel && v) setPayRate(String(v)); });
-    return () => { cancel = true; };
-  }, [payCcy]);
+  // Convert display-currency amount → INR (stored base)
+  const dispToInr = (amtDisp: number) =>
+    dispCcy === "INR" || !(rateFromInr > 0) ? amtDisp : amtDisp / rateFromInr;
 
-  // Auto-populate new-loan currency rate on change
+  // Auto-populate payment currency rate on change (foreign → display currency)
   useEffect(() => {
-    if (newLoanCcy === "INR") { setNewLoanFxRate(""); return; }
+    if (payCcy === dispCcy) { setPayRate("1"); return; }
     let cancel = false;
-    fetchFxRate(newLoanCcy).then((v) => { if (!cancel && v) setNewLoanFxRate(String(v)); });
+    fetchFxRate(payCcy, dispCcy).then((v) => { if (!cancel && v) setPayRate(String(v)); });
     return () => { cancel = true; };
-  }, [newLoanCcy]);
+  }, [payCcy, dispCcy]);
 
-  // Auto-convert FX → INR for OLD LOAN payments
+  // Auto-populate new-loan currency rate on change (foreign → display currency)
   useEffect(() => {
-    if (payCcy === "INR") return;
+    if (newLoanCcy === dispCcy) { setNewLoanFxRate("1"); return; }
+    let cancel = false;
+    fetchFxRate(newLoanCcy, dispCcy).then((v) => { if (!cancel && v) setNewLoanFxRate(String(v)); });
+    return () => { cancel = true; };
+  }, [newLoanCcy, dispCcy]);
+
+  // Auto-convert FX → display currency → INR (stored) for OLD LOAN payments
+  useEffect(() => {
+    if (payCcy === "INR" && dispCcy === "INR") return;
     const r = Number(payRate || 0);
     if (!(r > 0)) return;
-    if (payPrincipalFx) setPrincipal(String(Math.round(Number(payPrincipalFx) * r * 100) / 100));
-    if (payInterestFx) setInterest(String(Math.round(Number(payInterestFx) * r * 100) / 100));
-  }, [payPrincipalFx, payInterestFx, payRate, payCcy]);
+    if (payPrincipalFx) setPrincipal(String(Math.round(dispToInr(Number(payPrincipalFx) * r) * 100) / 100));
+    if (payInterestFx) setInterest(String(Math.round(dispToInr(Number(payInterestFx) * r) * 100) / 100));
+  }, [payPrincipalFx, payInterestFx, payRate, payCcy, dispCcy, rateFromInr]);
 
-  // Auto-convert FX → INR for NEW LOAN disbursement
+  // Auto-convert FX → display currency → INR (stored) for NEW LOAN disbursement
   useEffect(() => {
-    if (newLoanCcy === "INR") return;
+    if (newLoanCcy === "INR" && dispCcy === "INR") return;
     const r = Number(newLoanFxRate || 0);
     if (!(r > 0)) return;
-    if (newLoanFxAmt) setNewLoan(String(Math.round(Number(newLoanFxAmt) * r * 100) / 100));
-  }, [newLoanFxAmt, newLoanFxRate, newLoanCcy]);
+    if (newLoanFxAmt) setNewLoan(String(Math.round(dispToInr(Number(newLoanFxAmt) * r) * 100) / 100));
+  }, [newLoanFxAmt, newLoanFxRate, newLoanCcy, dispCcy, rateFromInr]);
 
 
   // Carry-forward: monthly due minus interest paid this entry
@@ -216,14 +220,14 @@ function AccountsPage() {
     if (p + i + nl <= 0) { toast.error("ఏదైనా మొత్తం నమోదు చేయండి"); return; }
     // Compose remarks with FX + next-due metadata
     const meta: string[] = [];
-    if (payCcy !== "INR" && Number(payRate) > 0) {
-      meta.push(`Paid in ${payCcy} @ ${payRate} → INR`);
+    if (payCcy !== dispCcy && Number(payRate) > 0) {
+      meta.push(`Paid in ${payCcy} @ ${payRate} → ${dispCcy}`);
       if (payPrincipalFx) meta.push(`Principal ${payPrincipalFx} ${payCcy}`);
       if (payInterestFx) meta.push(`Interest ${payInterestFx} ${payCcy}`);
     }
     if (nl > 0) {
-      if (newLoanCcy !== "INR" && Number(newLoanFxRate) > 0) {
-        meta.push(`Disbursed ${newLoanFxAmt} ${newLoanCcy} @ ${newLoanFxRate} → INR`);
+      if (newLoanCcy !== dispCcy && Number(newLoanFxRate) > 0) {
+        meta.push(`Disbursed ${newLoanFxAmt} ${newLoanCcy} @ ${newLoanFxRate} → ${dispCcy}`);
       }
       meta.push(`Next due: ${nextDueMonths} month(s)`);
       if (suretyName || suretyId) meta.push(`Surety: ${suretyName}${suretyId ? ` (${suretyId})` : ""}`);
