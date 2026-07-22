@@ -1,4 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { supabase } from "@/integrations/supabase/client";
+import { getOrgCurrencyPreference, setOrgCurrencyPreference } from "@/lib/currency.functions";
 
 export type CurrencyCode = "INR" | "USD" | "AED" | "KWD" | "MYR";
 
@@ -13,7 +16,9 @@ export const CURRENCIES: { code: CurrencyCode; symbol: string; label: string }[]
 export const BASE_CURRENCY: CurrencyCode = "INR";
 
 const STORAGE_KEY = "mbr_display_currency";
-const RATE_KEY = "mbr_display_fx_rate"; // cached INR -> display rate
+const RATE_KEY_PREFIX = "mbr_display_fx_rate_"; // cached INR -> display rate per currency
+
+const rateKey = (currency: CurrencyCode) => `${RATE_KEY_PREFIX}${currency}`;
 
 type Ctx = {
   currency: CurrencyCode;
@@ -34,18 +39,43 @@ const CurrencyContext = createContext<Ctx | null>(null);
 export function CurrencyProvider({ children }: { children: ReactNode }) {
   const [currency, setCurrencyState] = useState<CurrencyCode>(BASE_CURRENCY);
   const [rateFromInr, setRateFromInr] = useState<number>(1);
+  const loadPreference = useServerFn(getOrgCurrencyPreference);
+  const savePreference = useServerFn(setOrgCurrencyPreference);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     const stored = window.localStorage.getItem(STORAGE_KEY) as CurrencyCode | null;
-    if (stored && CURRENCIES.some((c) => c.code === stored)) setCurrencyState(stored);
-    const cachedRate = Number(window.localStorage.getItem(RATE_KEY) || "");
-    if (cachedRate > 0) setRateFromInr(cachedRate);
+    if (stored && CURRENCIES.some((c) => c.code === stored)) {
+      setCurrencyState(stored);
+      const cachedRate = Number(window.localStorage.getItem(rateKey(stored)) || "");
+      setRateFromInr(stored === "INR" ? 1 : cachedRate > 0 ? cachedRate : 1);
+    }
+
+    let cancel = false;
+    (async () => {
+      try {
+        const { data } = await supabase.auth.getUser();
+        if (!data.user) return;
+        const pref = await loadPreference();
+        const code = pref.currency as CurrencyCode;
+        if (!cancel && CURRENCIES.some((c) => c.code === code)) {
+          setCurrencyState(code);
+          window.localStorage.setItem(STORAGE_KEY, code);
+          const cachedRate = Number(window.localStorage.getItem(rateKey(code)) || "");
+          setRateFromInr(code === "INR" ? 1 : cachedRate > 0 ? cachedRate : 1);
+        }
+      } catch { /* signed out or preference not available */ }
+    })();
+    return () => { cancel = true; };
   }, []);
 
   // Fetch INR → display currency rate whenever currency changes.
   useEffect(() => {
     if (currency === "INR") { setRateFromInr(1); return; }
+    if (typeof window !== "undefined") {
+      const cachedRate = Number(window.localStorage.getItem(rateKey(currency)) || "");
+      setRateFromInr(cachedRate > 0 ? cachedRate : 1);
+    }
     let cancel = false;
     (async () => {
       try {
@@ -55,7 +85,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         if (!cancel && typeof rate === "number" && rate > 0) {
           setRateFromInr(rate);
           if (typeof window !== "undefined")
-            window.localStorage.setItem(RATE_KEY, String(rate));
+            window.localStorage.setItem(rateKey(currency), String(rate));
         }
       } catch { /* keep cached */ }
     })();
@@ -65,6 +95,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   const setCurrency = (c: CurrencyCode) => {
     setCurrencyState(c);
     if (typeof window !== "undefined") window.localStorage.setItem(STORAGE_KEY, c);
+    savePreference({ data: { currency: c } }).catch(() => {});
   };
 
   const symbol = CURRENCIES.find((c) => c.code === currency)?.symbol ?? "₹";
