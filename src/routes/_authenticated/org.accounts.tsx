@@ -64,9 +64,8 @@ function AccountsPage() {
   const [suretyId, setSuretyId] = useState("");
   const [borrowerSig, setBorrowerSig] = useState<string | null>(null);
   const [suretySig, setSuretySig] = useState<string | null>(null);
-  const { symbol: sym, currency: dispCcy } = useCurrency();
+  const { symbol: sym, currency: dispCcy, rateFromInr } = useCurrency();
   const dispSym = sym === "₹" ? "Rs." : sym === "د.إ" ? "AED" : sym === "د.ك" ? "KWD" : sym;
-  const [dispFxPerInr, setDispFxPerInr] = useState<number>(1); // 1 INR = ? dispCcy
   const { lang } = useI18n();
   const lt = (en: string, te: string) => (lang === "te" ? te : en);
   const [info, setInfo] = useState<Extract<Lookup, { found: true }> | null>(null);
@@ -91,24 +90,9 @@ function AccountsPage() {
   const fmtCur = (n: number) => `${sym} ${Number(n || 0).toLocaleString("en-IN")}`;
   // Format an INR-stored amount using the account-hub display currency.
   const fmtINR = (n: number) => {
-    const v = Number(n || 0) * (dispFxPerInr || 1);
+    const v = Number(n || 0) * (rateFromInr || 1);
     return `${dispSym} ${v.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
-
-  // Auto-fetch INR → display-currency rate whenever the account-hub currency changes
-  useEffect(() => {
-    if (dispCcy === "INR") { setDispFxPerInr(1); return; }
-    let cancel = false;
-    (async () => {
-      try {
-        const r = await fetch(`https://open.er-api.com/v6/latest/INR`);
-        const j = await r.json();
-        const rate = j?.rates?.[dispCcy];
-        if (!cancel && typeof rate === "number" && rate > 0) setDispFxPerInr(rate);
-      } catch { /* keep previous */ }
-    })();
-    return () => { cancel = true; };
-  }, [dispCcy]);
 
   // Auto-fetch FX rate (foreign → INR) from open.er-api.com
   async function fetchFxRate(code: FxCode): Promise<number | null> {
@@ -280,8 +264,8 @@ function AccountsPage() {
     setBusy(true);
     try {
       const { downloadPersonalStatementPdf } = await import("@/lib/loan-pdf");
-      const rate = dispCcy !== "INR" && dispFxPerInr > 0 ? dispFxPerInr : 1;
-      const symOut = dispCcy !== "INR" && dispFxPerInr > 0 ? dispSym : "Rs.";
+      const rate = dispCcy !== "INR" && rateFromInr > 0 ? rateFromInr : 1;
+      const symOut = dispCcy !== "INR" && rateFromInr > 0 ? dispSym : "Rs.";
       const fmtAmt = (nInr: number) => {
         const v = Number(nInr || 0) * rate;
         return `${symOut} ${(Math.round(v * 100) / 100).toLocaleString("en-IN")}`;
@@ -746,9 +730,9 @@ function AccountsPage() {
 
           {saved && (
             <div className="rounded-md border border-green-300 bg-green-50 p-3 text-sm text-green-900 space-y-2">
-              <div>✅ సేవ్ అయింది. మొత్తం బాకీ: <b>{sym} {saved.balance.toLocaleString("en-IN")}</b></div>
-              {saved.collected > 0 && <div>ఈ రోజు వసూలు: <b>{sym} {saved.collected.toLocaleString("en-IN")}</b></div>}
-              {saved.disbursed > 0 && <div>కొత్త అప్పు: <b>{sym} {saved.disbursed.toLocaleString("en-IN")}</b></div>}
+              <div>✅ సేవ్ అయింది. మొత్తం బాకీ: <b>{fmtINR(saved.balance)}</b></div>
+              {saved.collected > 0 && <div>ఈ రోజు వసూలు: <b>{fmtINR(saved.collected)}</b></div>}
+              {saved.disbursed > 0 && <div>కొత్త అప్పు: <b>{fmtINR(saved.disbursed)}</b></div>}
               {saved.emailed_to && <div>రసీదు <b>{saved.emailed_to}</b>కు పంపబడింది</div>}
               <Button
                 size="sm"
@@ -787,8 +771,8 @@ function AccountsPage() {
                     nextMonth: { principal: Math.round(nextPrincipal * 100) / 100, interest: Math.round(nextInterest * 100) / 100 },
                     newLoan: nl > 0 ? { amount: nl, rate: nr, nextDueMonths: Number(nextDueMonths) || 1 } : null,
                     remarks: remarks || undefined,
-                    display: dispCcy !== "INR" && dispFxPerInr > 0
-                      ? { symbol: dispSym, code: dispCcy, rateFromInr: dispFxPerInr }
+                    display: dispCcy !== "INR" && rateFromInr > 0
+                      ? { symbol: dispSym, code: dispCcy, rateFromInr }
                       : null,
                   });
                 }}

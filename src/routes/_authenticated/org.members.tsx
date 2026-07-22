@@ -1142,7 +1142,8 @@ function LoanCard({ loan, orgId, member, onChange, onClose, onDelete }:
   { loan: Loan; orgId: string; member: Member; onChange: () => void; onClose: () => void; onDelete: () => void }) {
   const listP = useServerFn(listLoanPayments);
   const addP = useServerFn(addLoanPayment);
-  const { fmtBase } = useCurrency();
+  const { fmtBase, currency, symbol, rateFromInr } = useCurrency();
+  const pdfSymbol = symbol === "₹" ? "Rs." : symbol === "د.إ" ? "AED" : symbol === "د.ك" ? "KWD" : symbol;
   const [pays, setPays] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [amt, setAmt] = useState("");
@@ -1205,7 +1206,14 @@ function LoanCard({ loan, orgId, member, onChange, onClose, onDelete }:
         <Button size="sm" variant="outline"
           onClick={async () => {
             const { printPromissoryNote } = await import("@/lib/promissory-note");
-            await printPromissoryNote({ loan, member, orgId });
+            await printPromissoryNote({
+              loan,
+              member,
+              orgId,
+              display: currency !== "INR" && rateFromInr > 0
+                ? { symbol: pdfSymbol, code: currency, rateFromInr }
+                : null,
+            });
           }}>
           📜 ప్రామిసరీ నోట్ PDF
         </Button>

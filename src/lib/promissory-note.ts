@@ -63,6 +63,8 @@ export async function printPromissoryNote(opts: {
   member: { name?: string; member_code?: string; phone?: string; address?: string; father_name?: string };
   orgId: string;
   lang?: "te" | "en";
+  /** Display currency for all loan amounts. Stored values are INR; converted for display. */
+  display?: { symbol: string; code: string; rateFromInr: number } | null;
 }) {
   const { loan, member, orgId } = opts;
   const lang = opts.lang ?? currentLang();
@@ -81,7 +83,16 @@ export async function printPromissoryNote(opts: {
   const principal = Number(loan.principal || 0);
   const rate = Number(loan.interest_rate_monthly || 0);
   const dateStr = fmtDate(loan.start_date);
-  const words = inWords(principal);
+  const disp = opts.display && opts.display.rateFromInr > 0 ? opts.display : null;
+  const money = (n: any) => {
+    const v = Number(n || 0) * (disp ? disp.rateFromInr : 1);
+    const sym = disp ? disp.symbol : "Rs.";
+    return `${sym} ${v.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+  const displayPrincipal = Math.round(principal * (disp ? disp.rateFromInr : 1) * 100) / 100;
+  const words = inWords(displayPrincipal);
+  const currencyWordTe = disp ? disp.code : "రూపాయలు";
+  const currencyWordEn = disp ? disp.code : "Rupees";
   const place = org?.address ? String(org.address).split(",").pop()?.trim() : "";
 
   const L = isTe ? {
@@ -111,7 +122,7 @@ export async function printPromissoryNote(opts: {
       సభ్యుని ID: <b>${esc(member.member_code)}</b>${member.phone ? `, ఫోన్: <b>${esc(member.phone)}</b>` : ""},
       ${member.address ? `చిరునామా: <b>${esc(member.address)}</b>,` : ""}
       <b>${esc(org?.name ?? "సంఘం")}</b> వారికి లేదా వారి ఆదేశానుసారం,
-      <b>${inr(principal)}</b> (అక్షరాలలో: <b>${esc(words)} రూపాయలు మాత్రమే</b>) మొత్తాన్ని,
+      <b>${money(principal)}</b> (అక్షరాలలో: <b>${esc(words)} ${esc(currencyWordTe)} మాత్రమే</b>) మొత్తాన్ని,
       నెలకు <b>${rate}%</b> వడ్డీ (సంవత్సరానికి ${rate * 12}%) తో సహా, డిమాండ్‌ మేరకు తిరిగి
       చెల్లిస్తానని పూర్తి స్వేచ్ఛతో, ఆరోగ్యమనసుతో వాగ్దానం చేస్తున్నాను. పై సొమ్మును
       <b>${esc(dateStr)}</b> నాడు నగదు / బదిలీ రూపంలో పూర్తిగా స్వీకరించాను.
@@ -137,8 +148,8 @@ export async function printPromissoryNote(opts: {
       Member ID <span class="u">${esc(member.member_code)}</span>${member.phone ? `, Phone <span class="u">${esc(member.phone)}</span>` : ""},
       ${member.address ? `resident of <span class="u">${esc(member.address)}</span>,` : ""}
       do hereby promise to pay <b>${esc(org?.name ?? "the Society")}</b>
-      or order, the sum of <span class="u">${inr(principal)}</span>
-      (Rupees <span class="u">${esc(words)} only</span>),
+      or order, the sum of <span class="u">${money(principal)}</span>
+      (${esc(currencyWordEn)} <span class="u">${esc(words)} only</span>),
       together with interest thereon at the rate of
       <span class="u">${rate}% per month</span>
       (${rate * 12}% per annum), for value received in cash / by transfer on
