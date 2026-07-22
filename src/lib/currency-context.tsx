@@ -13,24 +13,54 @@ export const CURRENCIES: { code: CurrencyCode; symbol: string; label: string }[]
 export const BASE_CURRENCY: CurrencyCode = "INR";
 
 const STORAGE_KEY = "mbr_display_currency";
+const RATE_KEY = "mbr_display_fx_rate"; // cached INR -> display rate
 
 type Ctx = {
   currency: CurrencyCode;
   setCurrency: (c: CurrencyCode) => void;
   symbol: string;
+  /** Rate: 1 INR = rate * <display currency>. Always 1 for INR. */
+  rateFromInr: number;
+  /** Convert an INR-base amount into the currently-selected display currency. */
+  convert: (inrAmount: number | string | null | undefined) => number;
+  /** Format a raw number in current currency (no conversion). */
   fmt: (n: number | string | null | undefined, opts?: { withSymbol?: boolean }) => string;
+  /** Convert an INR base amount → display currency and format. */
+  fmtBase: (inrAmount: number | string | null | undefined, opts?: { withSymbol?: boolean }) => string;
 };
 
 const CurrencyContext = createContext<Ctx | null>(null);
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {
   const [currency, setCurrencyState] = useState<CurrencyCode>(BASE_CURRENCY);
+  const [rateFromInr, setRateFromInr] = useState<number>(1);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     const stored = window.localStorage.getItem(STORAGE_KEY) as CurrencyCode | null;
     if (stored && CURRENCIES.some((c) => c.code === stored)) setCurrencyState(stored);
+    const cachedRate = Number(window.localStorage.getItem(RATE_KEY) || "");
+    if (cachedRate > 0) setRateFromInr(cachedRate);
   }, []);
+
+  // Fetch INR → display currency rate whenever currency changes.
+  useEffect(() => {
+    if (currency === "INR") { setRateFromInr(1); return; }
+    let cancel = false;
+    (async () => {
+      try {
+        const r = await fetch("https://open.er-api.com/v6/latest/INR");
+        const j = await r.json();
+        const rate = j?.rates?.[currency];
+        if (!cancel && typeof rate === "number" && rate > 0) {
+          setRateFromInr(rate);
+          if (typeof window !== "undefined")
+            window.localStorage.setItem(RATE_KEY, String(rate));
+        }
+      } catch { /* keep cached */ }
+    })();
+    return () => { cancel = true; };
+  }, [currency]);
 
   const setCurrency = (c: CurrencyCode) => {
     setCurrencyState(c);
@@ -39,14 +69,27 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
 
   const symbol = CURRENCIES.find((c) => c.code === currency)?.symbol ?? "₹";
 
-  const fmt: Ctx["fmt"] = (n, opts) => {
+  const convert: Ctx["convert"] = (n) => {
     const num = Number(n ?? 0);
-    const text = num.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (currency === "INR") return num;
+    return num * (rateFromInr > 0 ? rateFromInr : 1);
+  };
+
+  const formatNumber = (num: number) =>
+    num.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const fmt: Ctx["fmt"] = (n, opts) => {
+    const text = formatNumber(Number(n ?? 0));
+    return opts?.withSymbol === false ? text : `${symbol} ${text}`;
+  };
+
+  const fmtBase: Ctx["fmtBase"] = (n, opts) => {
+    const text = formatNumber(convert(n));
     return opts?.withSymbol === false ? text : `${symbol} ${text}`;
   };
 
   return (
-    <CurrencyContext.Provider value={{ currency, setCurrency, symbol, fmt }}>
+    <CurrencyContext.Provider value={{ currency, setCurrency, symbol, rateFromInr, convert, fmt, fmtBase }}>
       {children}
     </CurrencyContext.Provider>
   );
