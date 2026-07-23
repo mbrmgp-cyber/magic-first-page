@@ -28,38 +28,28 @@ function AuthPage() {
   const [status, setStatus] = useState<{ type: "info" | "error" | "success"; title: string; message: string } | null>(null);
 
   async function redirectAfterLogin(userId: string) {
-    const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", userId);
-    if (roles?.some((r) => r.role === "mbr_admin")) {
-      navigate({ to: "/admin" });
-      return;
-    }
-    const { data: org } = await supabase.from("organizations").select("id, approval_status").eq("admin_user_id", userId).maybeSingle();
-    if (org) {
-      navigate({ to: "/org/dashboard" });
-      return;
-    }
-    // getMyMembership auto-claims any row created by admin with matching email + null user_id.
-    const { getMyMembership } = await import("@/lib/org.functions");
-    const res = await getMyMembership().catch(() => ({ membership: null as any }));
-    if (res?.membership) navigate({ to: "/member/pending" });
-    else navigate({ to: "/org/register" });
+    const { routeAfterLogin } = await import("@/lib/post-login-redirect");
+    await routeAfterLogin(userId, navigate);
   }
-
-
 
   useEffect(() => {
     let active = true;
-    supabase.auth.getUser().then(({ data }) => {
-      if (active && data.user) redirectAfterLogin(data.user.id);
+    // Use getSession() (local cache) instead of getUser() so flaky mobile
+    // networks don't drop already-signed-in users back onto the email form.
+    supabase.auth.getSession().then(({ data }) => {
+      if (active && data.session?.user) redirectAfterLogin(data.session.user.id);
     });
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session?.user) redirectAfterLogin(session.user.id);
+      if ((event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION") && session?.user) {
+        redirectAfterLogin(session.user.id);
+      }
     });
     return () => {
       active = false;
       listener.subscription.unsubscribe();
     };
   }, []);
+
 
   async function sendOtp(e: React.FormEvent) {
     e.preventDefault();

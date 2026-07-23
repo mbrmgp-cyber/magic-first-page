@@ -5,6 +5,9 @@ import { Building2, Users, LogIn, ArrowLeft } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import logo from "@/assets/mbr-logo.png.asset.json";
+import { supabase } from "@/integrations/supabase/client";
+import { routeAfterLogin } from "@/lib/post-login-redirect";
+
 
 export const Route = createFileRoute("/mbr")({
   head: () => ({
@@ -30,7 +33,22 @@ function MbrHome() {
       navigate({ to: "/member/register", search: { code }, replace: true });
     }
   }, [code, navigate]);
+  // Auto-forward already-signed-in users to their dashboard so tapping
+  // the home-screen icon doesn't ask for an email again.
+  useEffect(() => {
+    if (code) return;
+    let active = true;
+    supabase.auth.getSession().then(({ data }) => {
+      if (active && data.session?.user) {
+        routeAfterLogin(data.session.user.id, navigate);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [code, navigate]);
   if (code) return null;
+
   return (
     <div className="min-h-screen relative flex flex-col items-center justify-center p-6 overflow-hidden bg-black">
       <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
