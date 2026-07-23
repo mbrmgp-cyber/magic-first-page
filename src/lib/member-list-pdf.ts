@@ -6,6 +6,7 @@ export type MemberListPdfMember = {
   name?: string | null;
   father_name?: string | null;
   phone?: string | null;
+  introducer_id?: string | null;
   status?: string | null;
   is_active?: boolean | null;
 };
