@@ -211,8 +211,8 @@ function drawPage(
   const tableX = PAGE_MARGIN;
   const tableY = 235;
   const tableW = A4_WIDTH_PX - PAGE_MARGIN * 2;
-  const widths = [58, 100, 194, 158, 122, tableW - 58 - 100 - 194 - 158 - 122];
-  const headers = ["Serial No", "Member Code", "Name", "Father's Name", "Phone", "Status"];
+  const widths = [52, 84, 158, 130, 94, 84, tableW - 52 - 84 - 158 - 130 - 94 - 84];
+  const headers = ["Serial No", "Member Code", "Name", "Father's Name", "Phone", "Introducer ID", "Status"];
   const headerH = 30;
   const rowH = 34;
 
@@ -237,6 +237,7 @@ function drawPage(
       member.name,
       member.father_name,
       member.phone,
+      member.introducer_id,
       statusText(member),
     ];
     let cellX = tableX;
