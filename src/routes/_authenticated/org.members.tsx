@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { ensureMemberIdPrefix } from "@/lib/utils";
 import { SectionShell } from "@/components/SectionShell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -460,8 +461,8 @@ function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => voi
               <Input value={f.introduced_by_name}
                 onChange={(e) => setF({ ...f, introduced_by_name: e.target.value })} /></div>
             <div><Label className="text-xs">Introducer ID · పరిచయం చేసిన వారి ఐడి నంబర్</Label>
-              <Input value={f.introducer_id}
-                onChange={(e) => setF({ ...f, introducer_id: e.target.value })} /></div>
+              <Input value={ensureMemberIdPrefix(f.introducer_id)} className="font-mono"
+                onChange={(e) => setF({ ...f, introducer_id: ensureMemberIdPrefix(e.target.value) })} /></div>
           </div>
           <div className="flex items-center justify-between rounded-md border p-3">
             <div>
@@ -744,8 +745,8 @@ function MemberCodeEditor({ member, onSaved }: { member: Member; onSaved: () => 
       {editing ? (
         <div className="flex gap-2">
           <Input
-            value={val}
-            onChange={(e) => setVal(e.target.value.toUpperCase())}
+            value={ensureMemberIdPrefix(val)}
+            onChange={(e) => setVal(ensureMemberIdPrefix(e.target.value))}
             className="font-mono"
             autoFocus
           />
@@ -1113,9 +1114,9 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
             </div>
             <div>
               <Label>షూరిటీ ID *</Label>
-              <Input value={nf.surety_id}
-                onChange={(e) => setNf({ ...nf, surety_id: e.target.value })}
-                placeholder="Member ID" />
+              <Input value={ensureMemberIdPrefix(nf.surety_id)} className="font-mono"
+                onChange={(e) => setNf({ ...nf, surety_id: ensureMemberIdPrefix(e.target.value) })}
+                placeholder="A/0001" />
             </div>
           </div>
 
