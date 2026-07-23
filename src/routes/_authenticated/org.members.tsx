@@ -745,8 +745,8 @@ function MemberCodeEditor({ member, onSaved }: { member: Member; onSaved: () => 
       {editing ? (
         <div className="flex gap-2">
           <Input
-            value={val}
-            onChange={(e) => setVal(e.target.value.toUpperCase())}
+            value={ensureMemberIdPrefix(val)}
+            onChange={(e) => setVal(ensureMemberIdPrefix(e.target.value))}
             className="font-mono"
             autoFocus
           />
