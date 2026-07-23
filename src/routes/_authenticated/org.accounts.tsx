@@ -700,15 +700,15 @@ function AccountsPage() {
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">షూరిటీ ID నెంబర్</Label>
-                <Input value={suretyId} disabled={locked}
+                <Input value={ensureMemberIdPrefix(suretyId)} disabled={locked}
                   onChange={(e) => {
-                    const v = e.target.value.toUpperCase();
+                    const v = ensureMemberIdPrefix(e.target.value);
                     setSuretyId(v);
                     const list = (membersQ.data?.members ?? []) as Array<{ name: string; member_code: string | null }>;
                     const hit = list.find((m) => (m.member_code ?? "").toUpperCase() === v.trim());
                     if (hit) setSuretyName(hit.name);
                   }}
-                  list="surety-id-list" placeholder="A/0001" />
+                  list="surety-id-list" placeholder="A/0001" className="font-mono" />
                 <datalist id="surety-id-list">
                   {((membersQ.data?.members ?? []) as Array<{ name: string; member_code: string | null }>).map((m) => (
                     <option key={m.member_code ?? m.name} value={m.member_code ?? ""}>{m.name}</option>
