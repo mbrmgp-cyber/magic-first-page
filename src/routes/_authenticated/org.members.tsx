@@ -1114,9 +1114,9 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
             </div>
             <div>
               <Label>షూరిటీ ID *</Label>
-              <Input value={nf.surety_id}
-                onChange={(e) => setNf({ ...nf, surety_id: e.target.value })}
-                placeholder="Member ID" />
+              <Input value={ensureMemberIdPrefix(nf.surety_id)} className="font-mono"
+                onChange={(e) => setNf({ ...nf, surety_id: ensureMemberIdPrefix(e.target.value) })}
+                placeholder="A/0001" />
             </div>
           </div>
 
