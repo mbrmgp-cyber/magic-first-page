@@ -461,8 +461,8 @@ function AddMemberDialog({ orgId, onAdded }: { orgId: string; onAdded: () => voi
               <Input value={f.introduced_by_name}
                 onChange={(e) => setF({ ...f, introduced_by_name: e.target.value })} /></div>
             <div><Label className="text-xs">Introducer ID · పరిచయం చేసిన వారి ఐడి నంబర్</Label>
-              <Input value={f.introducer_id}
-                onChange={(e) => setF({ ...f, introducer_id: e.target.value })} /></div>
+              <Input value={ensureMemberIdPrefix(f.introducer_id)} className="font-mono"
+                onChange={(e) => setF({ ...f, introducer_id: ensureMemberIdPrefix(e.target.value) })} /></div>
           </div>
           <div className="flex items-center justify-between rounded-md border p-3">
             <div>
