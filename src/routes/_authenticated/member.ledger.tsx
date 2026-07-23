@@ -30,7 +30,7 @@ function MemberLedger() {
         <Card className="p-4 bg-zinc-950 border-zinc-800">
           <h1 className="text-xl font-bold">{b("ఆర్థిక వివరాలు", "My Statement")}</h1>
           <p className="text-xs text-zinc-400 mt-0.5">
-            {b("విచ్చుకున్నది", "Received")} {b("మరియు", "and")} {b("పుచ్చుకున్నది", "Repayments")}
+            {b("ఇచ్చుకున్నది", "Received")} {b("మరియు", "and")} {b("పుచ్చుకున్నది", "Repayments")}
           </p>
         </Card>
 
@@ -82,7 +82,7 @@ function MemberLedger() {
                       <td className="p-2">
                         {e.type === "received" ? (
                           <span className="inline-flex items-center gap-1 text-amber-400">
-                            <ArrowDownCircle className="h-3.5 w-3.5" /> {b("విచ్చుకున్నది", "Received")}
+                            <ArrowDownCircle className="h-3.5 w-3.5" /> {b("ఇచ్చుకున్నది", "Received")}
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 text-emerald-400">
