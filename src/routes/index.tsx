@@ -2,6 +2,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { ArrowRight, Building2, Sparkles, ShieldCheck, Layers, Globe2 } from "lucide-react";
 import logo from "@/assets/mbr-logo.png.asset.json";
+import { supabase } from "@/integrations/supabase/client";
+import { routeAfterLogin } from "@/lib/post-login-redirect";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -37,7 +40,22 @@ function PlatformPortal() {
       navigate({ to: "/member/register", search: { code }, replace: true });
     }
   }, [code, navigate]);
+  // If a session already exists (e.g. the installed PWA icon was tapped),
+  // send the user straight to their account instead of showing the portal.
+  useEffect(() => {
+    if (code) return;
+    let active = true;
+    supabase.auth.getSession().then(({ data }) => {
+      if (active && data.session?.user) {
+        routeAfterLogin(data.session.user.id, navigate);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [code, navigate]);
   if (code) return null;
+
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-[#0f1b3d] text-[#f5f0e0]">
