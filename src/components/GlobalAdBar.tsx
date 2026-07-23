@@ -1,6 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+
+type AdRow = { id: string; url: string; label: string | null };
+type AdSlide = { id: string; src: string; label: string | null; kind: "video" | "image" };
+
+function detectKind(url: string): "video" | "image" {
+  const clean = url.split("?")[0].toLowerCase();
+  if (/\.(mp4|webm|mov|m4v|ogv)$/.test(clean)) return "video";
+  return "image";
+}
 
 export function GlobalAdBar() {
   const q = useQuery({
@@ -13,34 +22,44 @@ export function GlobalAdBar() {
         .eq("active", true)
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: true });
-      if (error) return [] as { id: string; url: string; label: string | null }[];
-      return ((data as unknown) || []) as { id: string; url: string; label: string | null }[];
+      if (error) return [] as AdRow[];
+      return ((data as unknown) || []) as AdRow[];
     },
   });
 
-  const [signed, setSigned] = useState<string[]>([]);
+  const [slides, setSlides] = useState<AdSlide[]>([]);
   const [idx, setIdx] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
     const rows = q.data || [];
     (async () => {
-      const urls = await Promise.all(rows.map(async (r) => {
-        if (/^https?:\/\//i.test(r.url) || r.url.startsWith("data:")) return r.url;
-        const { data } = await supabase.storage.from("mbr-global-ads").createSignedUrl(r.url, 3600);
-        return data?.signedUrl || "";
+      const built = await Promise.all(rows.map(async (r) => {
+        let src = r.url;
+        if (!/^https?:\/\//i.test(r.url) && !r.url.startsWith("data:")) {
+          const { data } = await supabase.storage.from("mbr-global-ads").createSignedUrl(r.url, 3600);
+          src = data?.signedUrl || "";
+        }
+        return src ? { id: r.id, src, label: r.label, kind: detectKind(r.url) } as AdSlide : null;
       }));
-      if (!cancelled) setSigned(urls.filter(Boolean));
+      if (!cancelled) {
+        setSlides(built.filter(Boolean) as AdSlide[]);
+        setIdx(0);
+      }
     })();
     return () => { cancelled = true; };
-  }, [JSON.stringify((q.data || []).map((r) => r.url))]);
+  }, [JSON.stringify((q.data || []).map((r) => `${r.id}:${r.url}`))]);
 
+  // Auto-advance: videos linger longer than static images
   useEffect(() => {
-    if (signed.length <= 1) return;
-    const t = setInterval(() => setIdx((i) => (i + 1) % signed.length), 6000);
-    return () => clearInterval(t);
-  }, [signed.length]);
+    if (slides.length <= 1) return;
+    const current = slides[idx % slides.length];
+    const dwell = current?.kind === "video" ? 12000 : 6000;
+    const t = window.setTimeout(() => setIdx((i) => (i + 1) % slides.length), dwell);
+    return () => window.clearTimeout(t);
+  }, [idx, slides]);
 
+  // ---- Print suppression (unchanged behavior) ----
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -67,7 +86,6 @@ export function GlobalAdBar() {
         el.style.setProperty("overflow", "hidden", "important");
         el.style.setProperty("pointer-events", "none", "important");
       });
-      // Force a layout flush before Android/Chromium snapshots the print page.
       void document.documentElement.offsetHeight;
     };
 
@@ -131,8 +149,13 @@ export function GlobalAdBar() {
     };
   }, []);
 
-  if (!signed.length) return null;
-  const current = signed[idx % signed.length];
+  const marqueeLabels = useMemo(
+    () => slides.map((s) => s.label).filter((l): l is string => !!l && l.trim().length > 0),
+    [slides],
+  );
+  const marqueeText = marqueeLabels.join("   •   ");
+
+  if (!slides.length) return null;
 
   return (
     <div
@@ -140,16 +163,54 @@ export function GlobalAdBar() {
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       aria-hidden="true"
     >
+      <style>{`
+        @keyframes mbrAdFadeIn { from { opacity: 0; transform: scale(1.03); } to { opacity: 1; transform: scale(1); } }
+        @keyframes mbrAdMarquee { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
+        .mbr-ad-slide { animation: mbrAdFadeIn 700ms ease-out both; }
+        .mbr-ad-marquee-track { animation: mbrAdMarquee 22s linear infinite; }
+      `}</style>
       <div className="w-full max-w-none pointer-events-auto m-0 p-0">
         <div className="relative overflow-hidden bg-black shadow-[0_-6px_24px_rgba(0,0,0,0.55)] w-full max-w-none h-[70px] m-0 p-0">
-          <img
-            src={current}
-            alt="MBR platform advertisement"
-            className="w-full h-[70px] object-cover block"
-          />
+          {slides.map((s, i) => {
+            const active = i === (idx % slides.length);
+            return (
+              <div
+                key={s.id + ":" + i}
+                className={`absolute inset-0 transition-opacity duration-700 ease-out ${active ? "opacity-100 mbr-ad-slide" : "opacity-0"}`}
+                style={{ pointerEvents: active ? "auto" : "none" }}
+              >
+                {s.kind === "video" ? (
+                  <video
+                    src={s.src}
+                    className="w-full h-[70px] object-cover block bg-black"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="auto"
+                  />
+                ) : (
+                  <img
+                    src={s.src}
+                    alt={s.label || "MBR platform advertisement"}
+                    className="w-full h-[70px] object-cover block"
+                    loading="eager"
+                    decoding="async"
+                  />
+                )}
+              </div>
+            );
+          })}
+
+          {marqueeText ? (
+            <div className="absolute inset-x-0 bottom-0 h-6 overflow-hidden bg-gradient-to-t from-black/80 to-transparent">
+              <div className="mbr-ad-marquee-track whitespace-nowrap text-white text-xs font-semibold tracking-wide leading-6 px-4">
+                {marqueeText}   •   {marqueeText}
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
-
     </div>
   );
 }
