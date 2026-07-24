@@ -67,6 +67,10 @@ function MemberDashboard() {
   const navigate = useNavigate();
   const fetchMe = useServerFn(getMyMembership);
   const meQ = useQuery({ queryKey: ["my-membership"], queryFn: () => fetchMe() });
+  const fetchLeaveReq = useServerFn(getMyLeaveRequest);
+  const leaveReqQ = useQuery({ queryKey: ["my-leave-request"], queryFn: () => fetchLeaveReq(), refetchInterval: 30_000 });
+  const submitLeave = useServerFn(submitLeaveRequest);
+  const cancelLeave = useServerFn(cancelMyLeaveRequest);
   const [qrUrl, setQrUrl] = useState<string>("");
   const [qrTargetUrl, setQrTargetUrl] = useState<string>("");
   const [photoUrl, setPhotoUrl] = useState<string>("");
@@ -75,6 +79,7 @@ function MemberDashboard() {
   const [payOpen, setPayOpen] = useState(false);
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [leaving, setLeaving] = useState(false);
+  const [leaveReason, setLeaveReason] = useState("");
   const { lang } = useI18n();
   const b = (te: string, en: string) => bi(te, en, lang);
 
