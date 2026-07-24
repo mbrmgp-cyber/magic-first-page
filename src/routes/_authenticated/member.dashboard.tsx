@@ -368,6 +368,32 @@ function MemberDashboard() {
         </DialogContent>
       </Dialog>
 
+      {/* Leave Society Confirmation */}
+      <Dialog open={leaveOpen} onOpenChange={setLeaveOpen}>
+        <DialogContent className="max-w-sm bg-zinc-950 border-zinc-800 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              {b("సొసైటీ నుండి వైదొలగాలా?", "Leave Society?")}
+            </DialogTitle>
+            <DialogDescription className="text-zinc-400">
+              {b(
+                "మీరు స్వచ్ఛందంగా ఈ సొసైటీ నుండి వైదొలగాలనుకుంటున్నారా? మీ సభ్యత్వ ప్రొఫైల్ తొలగించబడుతుంది మరియు మీరు లాగ్ అవుట్ చేయబడతారు. ఈ చర్య తిరిగి మార్చబడదు. (గమనిక: సొసైటీ ఒక సభ్యుడిని సస్పెండ్ చేయాలంటే క్రమశిక్షణా కమిటీ పేజీ నుండి చేస్తుంది.)",
+                "Do you want to voluntarily leave this society? Your membership profile will be removed and you will be logged out. This cannot be undone. (Note: To suspend a member, the society uses the Disciplinary Committee page.)"
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setLeaveOpen(false)} className="border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800">
+              {b("రద్దు", "Cancel")}
+            </Button>
+            <Button disabled={leaving} onClick={leaveSociety} className="bg-amber-600 hover:bg-amber-700 text-white font-semibold">
+              {leaving ? <RefreshCw className="h-4 w-4 mr-1 animate-spin" /> : <DoorOpen className="h-4 w-4 mr-1" />}
+              {b("వైదొలగడాన్ని నిర్ధారించండి", "Confirm Leave")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
     </div>
   );
