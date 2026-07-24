@@ -71,6 +71,8 @@ function MemberDashboard() {
   const [photoBroken, setPhotoBroken] = useState(false);
   const [idCardOpen, setIdCardOpen] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
+  const [leaveOpen, setLeaveOpen] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const { lang } = useI18n();
   const b = (te: string, en: string) => bi(te, en, lang);
 
