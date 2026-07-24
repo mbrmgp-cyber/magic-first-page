@@ -234,7 +234,16 @@ function MemberDashboard() {
           </div>
           <div className="flex-1 min-w-0 flex flex-col items-center justify-center gap-2">
             <p className="text-sm font-semibold text-white leading-tight text-center">{b("స్వాగతం గౌరవ సభ్యులకు", "Welcome, respected member")} 🙏</p>
-            <LanguageToggle />
+            <div className="flex items-center gap-2">
+              <LanguageToggle />
+              <button
+                onClick={logout}
+                aria-label={b("లాగ్ అవుట్", "Logout")}
+                className="inline-flex items-center justify-center rounded-md border border-zinc-700 bg-black/40 backdrop-blur h-9 w-9 text-white/80 hover:bg-white/10 transition-colors"
+              >
+                <LogOut className="h-4 w-4 text-[#ff8c28]" />
+              </button>
+            </div>
           </div>
           <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-950 flex items-center justify-center overflow-hidden shrink-0"
             style={{ borderWidth: 1, borderStyle: "solid", borderColor: `${brand}4d` }}>
