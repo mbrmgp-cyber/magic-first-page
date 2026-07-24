@@ -289,6 +289,15 @@ function Dashboard() {
             <Settings className="h-4 w-4" />
           </Button>
           <div className="flex items-center gap-1 flex-nowrap justify-end min-w-0">
+            {committeeQ.data?.isCommittee && !committeeQ.data?.isPrimaryAdmin && (
+              <Link
+                to="/member/dashboard"
+                className="inline-flex items-center gap-1 px-2 h-9 rounded-md border border-amber-500/60 bg-amber-500/10 text-amber-200 hover:bg-amber-500/20 text-xs font-semibold shrink-0"
+                title={lt("Switch to Member Dashboard", "సభ్యుడి డాష్‌బోర్డ్‌కి మారండి")}
+              >
+                <User className="h-4 w-4 mr-0.5" />{lt("Member View", "సభ్యుడి")}
+              </Link>
+            )}
             <Button variant="ghost" size="sm" onClick={logout} className="text-zinc-200 hover:bg-zinc-900 hover:text-white px-2 h-9 rounded-md border border-zinc-700 shrink-0">
               <LogOut className="h-4 w-4 mr-1" />{lt("Logout", "లాగ్ అవుట్")}
             </Button>
