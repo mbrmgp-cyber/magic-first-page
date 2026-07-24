@@ -106,7 +106,7 @@ export const approveLeaveRequest = createServerFn({ method: "POST" })
     const { supabase } = context;
     const { error } = await supabase.rpc("approve_leave_request", {
       _request_id: data.id,
-      _notes: data.notes ?? null,
+      _notes: data.notes ?? undefined,
     });
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -119,7 +119,7 @@ export const rejectLeaveRequest = createServerFn({ method: "POST" })
     const { supabase } = context;
     const { error } = await supabase.rpc("reject_leave_request", {
       _request_id: data.id,
-      _notes: data.notes ?? null,
+      _notes: data.notes ?? undefined,
     });
     if (error) throw new Error(error.message);
     return { ok: true };
