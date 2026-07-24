@@ -156,20 +156,25 @@ function DisciplinaryPage() {
         )}
 
         {/* Tabs */}
-        <div className="flex gap-2 border-b border-border">
+        <div className="flex gap-2 border-b border-border flex-wrap">
           {([
             ["committee", "Committee · కమిటీ"],
             ["suspensions", "Suspensions · సస్పెన్షన్"],
             ["leadership", "Leadership · నాయకత్వం"],
-          ] as const).map(([k, label]) => (
+            ["leave", "Leave Requests · వైదొలగే అభ్యర్థనలు"],
+          ] as const).map(([k, label]) => {
+            const pending = k === "leave" ? (leaveQ.data?.requests ?? []).filter((r: any) => r.status === "pending").length : 0;
+            return (
             <button
               key={k}
               onClick={() => setTab(k as any)}
               className={`px-3 py-2 text-sm font-medium border-b-2 -mb-px transition ${tab === k ? "border-red-500 text-red-400" : "border-transparent text-muted-foreground hover:text-foreground"}`}
             >
               {label}
+              {pending > 0 && <span className="ml-1 inline-flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] px-1.5 py-0.5">{pending}</span>}
             </button>
-          ))}
+            );
+          })}
         </div>
 
         {/* Committee tab */}
