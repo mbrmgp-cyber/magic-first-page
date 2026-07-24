@@ -390,13 +390,6 @@ function MemberDashboard() {
                 : b("సొసైటీ నుండి వైదొలగండి", "Leave Society")}
             </p>
           </button>
-          <button onClick={logout}
-            className="rounded-xl bg-zinc-950 border border-zinc-800 p-4 flex flex-col items-center justify-center gap-2.5 text-center hover:border-zinc-600 transition min-h-[112px]">
-            <div className="h-11 w-11 rounded-full bg-zinc-900 flex items-center justify-center">
-              <LogOut className="h-5 w-5 text-zinc-400" />
-            </div>
-            <p className="text-[14px] font-semibold text-white">{b("లాగ్ అవుట్", "Logout")}</p>
-          </button>
         </div>
 
         {/* Social Media / Connect with Us */}
