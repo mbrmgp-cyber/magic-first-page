@@ -63,9 +63,16 @@ function Dashboard() {
   const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: () => fetchRoles() });
   const fetchCommittee = useServerFn(getMyCommitteeAccess);
   const committeeQ = useQuery({ queryKey: ["my-committee-access"], queryFn: () => fetchCommittee() });
+  const fetchModules = useServerFn(getMyModules);
+  const modulesQ = useQuery({ queryKey: ["my-modules"], queryFn: () => fetchModules() });
   const { role: simRole } = useSimRole();
   const isMbrAdmin = (rolesQ.data?.roles?.includes("mbr_admin") ?? false) && simRole === "super_admin";
-  const visibleMenu = MENU.filter((m) => canAccess(simRole, ROUTE_ACCESS[m.to] ?? "dashboard"));
+  const isSuperAdmin = modulesQ.data?.isSuperAdmin ?? false;
+  const allowed = new Set(modulesQ.data?.modules ?? []);
+  const visibleMenu = MENU.filter((m) => {
+    if (isSuperAdmin) return canAccess(simRole, ROUTE_ACCESS[m.to] ?? "dashboard");
+    return allowed.has(m.key as any);
+  });
   const [qrOpen, setQrOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
