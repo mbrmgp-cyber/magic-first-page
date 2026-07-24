@@ -142,6 +142,25 @@ function MemberDashboard() {
     navigate({ to: "/auth", replace: true });
   }
 
+  async function leaveSociety() {
+    setLeaving(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not signed in");
+      const { error } = await supabase.from("members").delete().eq("user_id", user.id);
+      if (error) throw error;
+      toast.success(b("మీరు సొసైటీ నుండి విజయవంతంగా వైదొలిగారు", "You have left the society"));
+      setLeaveOpen(false);
+      await supabase.auth.signOut();
+      navigate({ to: "/auth", replace: true });
+    } catch (e: any) {
+      toast.error(e.message ?? "Failed to leave");
+    } finally {
+      setLeaving(false);
+    }
+  }
+
+
   if (meQ.isLoading) {
     return <div className="min-h-screen bg-black text-white flex items-center justify-center">{b("లోడ్ అవుతోంది…", "Loading…")}</div>;
   }
