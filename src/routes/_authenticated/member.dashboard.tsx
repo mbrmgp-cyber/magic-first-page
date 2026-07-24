@@ -322,12 +322,32 @@ function MemberDashboard() {
             </Link>
             );
           })}
-          <button onClick={() => setLeaveOpen(true)}
-            className="rounded-xl bg-zinc-950 border border-amber-700/50 p-4 flex flex-col items-center justify-center gap-2.5 text-center hover:border-amber-500 transition min-h-[112px]">
-            <div className="h-11 w-11 rounded-full bg-amber-500/15 flex items-center justify-center">
-              <DoorOpen className="h-5 w-5 text-amber-400" />
+          <button
+            onClick={() => {
+              if (hasPendingLeave) {
+                toast.info(b("మీ అభ్యర్థన కమిటీ పరిశీలనలో ఉంది", "Your request is under committee review"));
+                return;
+              }
+              setLeaveOpen(true);
+            }}
+            className={`rounded-xl bg-zinc-950 border p-4 flex flex-col items-center justify-center gap-2.5 text-center transition min-h-[112px] ${
+              hasPendingLeave ? "border-yellow-600/60" : wasRejectedLeave ? "border-red-700/60" : "border-amber-700/50 hover:border-amber-500"
+            }`}
+          >
+            <div className={`h-11 w-11 rounded-full flex items-center justify-center ${
+              hasPendingLeave ? "bg-yellow-500/15" : wasRejectedLeave ? "bg-red-500/15" : "bg-amber-500/15"
+            }`}>
+              {hasPendingLeave ? <Clock className="h-5 w-5 text-yellow-400" />
+                : wasRejectedLeave ? <XCircle className="h-5 w-5 text-red-400" />
+                : <DoorOpen className="h-5 w-5 text-amber-400" />}
             </div>
-            <p className="text-[14px] font-semibold text-white leading-tight">{b("సొసైటీ నుండి వైదొలగండి", "Leave Society")}</p>
+            <p className="text-[13px] font-semibold text-white leading-tight">
+              {hasPendingLeave
+                ? b("అభ్యర్థన పెండింగ్‌లో", "Leave Request Pending")
+                : wasRejectedLeave
+                ? b("అభ్యర్థన తిరస్కరించబడింది", "Request Rejected — Try Again")
+                : b("సొసైటీ నుండి వైదొలగండి", "Leave Society")}
+            </p>
           </button>
           <button onClick={logout}
             className="rounded-xl bg-zinc-950 border border-zinc-800 p-4 flex flex-col items-center justify-center gap-2.5 text-center hover:border-zinc-600 transition min-h-[112px]">
