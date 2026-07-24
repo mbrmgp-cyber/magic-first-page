@@ -3,15 +3,17 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { getMyMembership } from "@/lib/org.functions";
+import { submitLeaveRequest, getMyLeaveRequest, cancelMyLeaveRequest } from "@/lib/leave-requests.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { MemberIdCard } from "@/components/MemberIdCard";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { useI18n, bi } from "@/lib/i18n";
 import {
   LogOut, IdCard, BookOpen, Wallet, Briefcase, MessageSquare, Vote, ShieldCheck, User, ScanLine,
-  Facebook, Youtube, Gavel, CalendarDays, Building2, Copy, DoorOpen, AlertTriangle, RefreshCw,
+  Facebook, Youtube, Gavel, CalendarDays, Building2, Copy, DoorOpen, AlertTriangle, RefreshCw, Clock, XCircle, CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
