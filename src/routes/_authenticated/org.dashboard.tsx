@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { getMyOrg, updateOrgLogo, getMyRoles, getMyCommitteeAccess } from "@/lib/org.functions";
+import { getMyModules } from "@/lib/admin-permissions.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,7 @@ import {
   LogOut, BookOpen, Users, Briefcase, Calendar, IdCard, Wallet,
   MessageSquare, QrCode, Camera, Download, RefreshCw, Settings, AlertTriangle,
   Upload, ShieldAlert, FileDown, CheckCircle2, Vote, TrendingUp, TrendingDown, PieChart, ShieldCheck, Gavel,
-  User,
+  User, KeyRound,
 } from "lucide-react";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 import { localizeText, transliterateText, useI18n } from "@/lib/i18n";
@@ -27,16 +28,16 @@ export const Route = createFileRoute("/_authenticated/org/dashboard")({
 });
 
 const MENU = [
-  { to: "/org/rules", en: "Society Rules & History", te: "సొసైటీ నియమావళి & చరిత్ర", icon: BookOpen },
-  { to: "/org/members", en: "Members & Registration", te: "సభ్యులు & నమోదు", icon: Users },
-  { to: "/org/committee", en: "Executive Committee", te: "కార్యనిర్వాహక కమిటీ", icon: Briefcase },
-  { to: "/org/events", en: "Events, Meetings, Decisions", te: "సమావేశాలు & నిర్ణయాలు", icon: Calendar },
-  { to: "/org/designs", en: "ID Cards, Mementos, Letterhead, Stamp Design", te: "ID కార్డులు, మెమెంటోలు, లెటర్‌ప్యాడ్, స్టాంప్ డిజైన్", icon: IdCard },
-  { to: "/org/accounts-hub", en: "Accounts Hub", te: "అకౌంట్స్ బాక్స్", icon: Wallet },
-  { to: "/org/chat", en: "Member Chat", te: "సభ్యులతో చాటింగ్", icon: MessageSquare },
-  { to: "/org/elections", en: "Board Elections", te: "బోర్డు ఎన్నికలు", icon: Vote },
-  { to: "/org/auction", en: "Live Chit Auction", te: "లైవ్ చిట్ ఆక్షన్", icon: Gavel },
-  { to: "/org/disciplinary", en: "Disciplinary Committee", te: "క్రమశిక్షణా కమిటీ", icon: ShieldAlert },
+  { to: "/org/rules", key: "rules", en: "Society Rules & History", te: "సొసైటీ నియమావళి & చరిత్ర", icon: BookOpen },
+  { to: "/org/members", key: "members", en: "Members & Registration", te: "సభ్యులు & నమోదు", icon: Users },
+  { to: "/org/committee", key: "committee", en: "Executive Committee", te: "కార్యనిర్వాహక కమిటీ", icon: Briefcase },
+  { to: "/org/events", key: "events", en: "Events, Meetings, Decisions", te: "సమావేశాలు & నిర్ణయాలు", icon: Calendar },
+  { to: "/org/designs", key: "designs", en: "ID Cards, Mementos, Letterhead, Stamp Design", te: "ID కార్డులు, మెమెంటోలు, లెటర్‌ప్యాడ్, స్టాంప్ డిజైన్", icon: IdCard },
+  { to: "/org/accounts-hub", key: "accounts", en: "Accounts Hub", te: "అకౌంట్స్ బాక్స్", icon: Wallet },
+  { to: "/org/chat", key: "chat", en: "Member Chat", te: "సభ్యులతో చాటింగ్", icon: MessageSquare },
+  { to: "/org/elections", key: "elections", en: "Board Elections", te: "బోర్డు ఎన్నికలు", icon: Vote },
+  { to: "/org/auction", key: "auction", en: "Live Chit Auction", te: "లైవ్ చిట్ ఆక్షన్", icon: Gavel },
+  { to: "/org/disciplinary", key: "disciplinary", en: "Disciplinary Committee", te: "క్రమశిక్షణా కమిటీ", icon: ShieldAlert },
 ] as const;
 
 
