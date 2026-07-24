@@ -440,12 +440,8 @@ function Dashboard() {
             >
               <Settings className="h-4 w-4 mr-1" /> {lt("Design & Theme", "రంగులు & డిజైన్")}
             </Button>
-            <Button
-              onClick={() => { setSettingsOpen(false); setLeaveOpen(true); }}
-              className="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold border-0"
-            >
-              <LogOut className="h-4 w-4 mr-1" /> {lt("Leave Organization", "సంస్థ నుండి వైదొలగండి")}
-            </Button>
+            {/* Admin has no "Leave Organization" — members leave from their own dashboard.
+                Suspending / removing another member is handled in the Disciplinary Committee page. */}
             <Button
               onClick={() => { setCancelStep(1); setResolutionUrl(""); setSettingsOpen(false); setCancelOpen(true); }}
               className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold border-0 shadow-[0_0_24px_rgba(220,38,38,0.45)]"

@@ -5,13 +5,13 @@ import { useEffect, useState } from "react";
 import { getMyMembership } from "@/lib/org.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { MemberIdCard } from "@/components/MemberIdCard";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { useI18n, bi } from "@/lib/i18n";
 import {
   LogOut, IdCard, BookOpen, Wallet, Briefcase, MessageSquare, Vote, ShieldCheck, User, ScanLine,
-  Facebook, Youtube, Gavel, CalendarDays, Building2, Copy,
+  Facebook, Youtube, Gavel, CalendarDays, Building2, Copy, DoorOpen, AlertTriangle, RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -71,6 +71,8 @@ function MemberDashboard() {
   const [photoBroken, setPhotoBroken] = useState(false);
   const [idCardOpen, setIdCardOpen] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
+  const [leaveOpen, setLeaveOpen] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const { lang } = useI18n();
   const b = (te: string, en: string) => bi(te, en, lang);
 
@@ -139,6 +141,25 @@ function MemberDashboard() {
     await supabase.auth.signOut();
     navigate({ to: "/auth", replace: true });
   }
+
+  async function leaveSociety() {
+    setLeaving(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not signed in");
+      const { error } = await supabase.from("members").delete().eq("user_id", user.id);
+      if (error) throw error;
+      toast.success(b("మీరు సొసైటీ నుండి విజయవంతంగా వైదొలిగారు", "You have left the society"));
+      setLeaveOpen(false);
+      await supabase.auth.signOut();
+      navigate({ to: "/auth", replace: true });
+    } catch (e: any) {
+      toast.error(e.message ?? "Failed to leave");
+    } finally {
+      setLeaving(false);
+    }
+  }
+
 
   if (meQ.isLoading) {
     return <div className="min-h-screen bg-black text-white flex items-center justify-center">{b("లోడ్ అవుతోంది…", "Loading…")}</div>;
@@ -278,6 +299,13 @@ function MemberDashboard() {
             </Link>
             );
           })}
+          <button onClick={() => setLeaveOpen(true)}
+            className="rounded-xl bg-zinc-950 border border-amber-700/50 p-4 flex flex-col items-center justify-center gap-2.5 text-center hover:border-amber-500 transition min-h-[112px]">
+            <div className="h-11 w-11 rounded-full bg-amber-500/15 flex items-center justify-center">
+              <DoorOpen className="h-5 w-5 text-amber-400" />
+            </div>
+            <p className="text-[14px] font-semibold text-white leading-tight">{b("సొసైటీ నుండి వైదొలగండి", "Leave Society")}</p>
+          </button>
           <button onClick={logout}
             className="rounded-xl bg-zinc-950 border border-zinc-800 p-4 flex flex-col items-center justify-center gap-2.5 text-center hover:border-zinc-600 transition min-h-[112px]">
             <div className="h-11 w-11 rounded-full bg-zinc-900 flex items-center justify-center">
@@ -340,6 +368,32 @@ function MemberDashboard() {
         </DialogContent>
       </Dialog>
 
+      {/* Leave Society Confirmation */}
+      <Dialog open={leaveOpen} onOpenChange={setLeaveOpen}>
+        <DialogContent className="max-w-sm bg-zinc-950 border-zinc-800 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              {b("సొసైటీ నుండి వైదొలగాలా?", "Leave Society?")}
+            </DialogTitle>
+            <DialogDescription className="text-zinc-400">
+              {b(
+                "మీరు స్వచ్ఛందంగా ఈ సొసైటీ నుండి వైదొలగాలనుకుంటున్నారా? మీ సభ్యత్వ ప్రొఫైల్ తొలగించబడుతుంది మరియు మీరు లాగ్ అవుట్ చేయబడతారు. ఈ చర్య తిరిగి మార్చబడదు. (గమనిక: సొసైటీ ఒక సభ్యుడిని సస్పెండ్ చేయాలంటే క్రమశిక్షణా కమిటీ పేజీ నుండి చేస్తుంది.)",
+                "Do you want to voluntarily leave this society? Your membership profile will be removed and you will be logged out. This cannot be undone. (Note: To suspend a member, the society uses the Disciplinary Committee page.)"
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setLeaveOpen(false)} className="border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800">
+              {b("రద్దు", "Cancel")}
+            </Button>
+            <Button disabled={leaving} onClick={leaveSociety} className="bg-amber-600 hover:bg-amber-700 text-white font-semibold">
+              {leaving ? <RefreshCw className="h-4 w-4 mr-1 animate-spin" /> : <DoorOpen className="h-4 w-4 mr-1" />}
+              {b("వైదొలగడాన్ని నిర్ధారించండి", "Confirm Leave")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
     </div>
   );
