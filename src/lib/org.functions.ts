@@ -304,14 +304,77 @@ export const getMyOrg = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
-    const { data: org } = await supabase
+    let { data: org } = await supabase
       .from("organizations")
       .select("*")
       .eq("admin_user_id", userId)
       .maybeSingle();
+    // Committee members (e.g. treasurer) can also open the org admin dashboard
+    // via their own account; resolve the org through their active membership.
+    if (!org) {
+      const { data: me } = await supabase
+        .from("members")
+        .select("id, org_id")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (me?.id && me?.org_id) {
+        const { data: cm } = await supabase
+          .from("committee_members")
+          .select("id")
+          .eq("member_id", me.id)
+          .eq("is_active", true)
+          .limit(1)
+          .maybeSingle();
+        if (cm?.id) {
+          const { data: orgViaCommittee } = await supabase
+            .from("organizations")
+            .select("*")
+            .eq("id", me.org_id)
+            .maybeSingle();
+          if (orgViaCommittee) org = orgViaCommittee;
+        }
+      }
+    }
     if (!org) return { org: null, qrDataUrl: null };
     const qrDataUrl = await QRCode.toDataURL(memberRegistrationUrl(org.org_code), { width: 512, margin: 2 });
     return { org, qrDataUrl };
+  });
+
+// Returns whether the current user has an active committee seat, and in
+// which organization / role. Used to expose an "Open Admin Panel" toggle
+// on the member dashboard for treasurers, presidents, etc.
+export const getMyCommitteeAccess = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data: me } = await supabase
+      .from("members")
+      .select("id, org_id")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (!me?.id) return { isCommittee: false as const, role: null, orgId: null, isPrimaryAdmin: false };
+    const [{ data: cm }, { data: orgRow }] = await Promise.all([
+      supabase
+        .from("committee_members")
+        .select("role")
+        .eq("member_id", me.id)
+        .eq("is_active", true)
+        .limit(1)
+        .maybeSingle(),
+      me.org_id
+        ? supabase.from("organizations").select("admin_user_id").eq("id", me.org_id).maybeSingle()
+        : Promise.resolve({ data: null }),
+    ]);
+    return {
+      isCommittee: !!cm,
+      role: (cm?.role as string | null) ?? null,
+      orgId: me.org_id ?? null,
+      isPrimaryAdmin: !!orgRow && (orgRow as any).admin_user_id === userId,
+    };
   });
 
 export const regenerateOrgQr = createServerFn({ method: "POST" })
