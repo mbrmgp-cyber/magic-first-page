@@ -11,7 +11,7 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { useI18n, bi } from "@/lib/i18n";
 import {
   LogOut, IdCard, BookOpen, Wallet, Briefcase, MessageSquare, Vote, ShieldCheck, User, ScanLine,
-  Facebook, Youtube, Gavel, CalendarDays, Building2, Copy,
+  Facebook, Youtube, Gavel, CalendarDays, Building2, Copy, DoorOpen, AlertTriangle, RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
