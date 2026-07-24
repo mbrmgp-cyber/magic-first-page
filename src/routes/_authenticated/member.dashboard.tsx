@@ -149,23 +149,39 @@ function MemberDashboard() {
     navigate({ to: "/auth", replace: true });
   }
 
-  async function leaveSociety() {
+  async function submitLeaveRequestFn() {
+    const reason = leaveReason.trim();
+    if (reason.length < 5) {
+      toast.error(b("దయచేసి కారణం రాయండి (కనీసం 5 అక్షరాలు)", "Please write a reason (min 5 characters)"));
+      return;
+    }
     setLeaving(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not signed in");
-      const { error } = await supabase.from("members").delete().eq("user_id", user.id);
-      if (error) throw error;
-      toast.success(b("మీరు సొసైటీ నుండి విజయవంతంగా వైదొలిగారు", "You have left the society"));
+      await submitLeave({ data: { reason } });
+      toast.success(b("మీ అభ్యర్థన క్రమశిక్షణ కమిటీకి పంపబడింది", "Your request has been sent to the Disciplinary Committee"));
       setLeaveOpen(false);
-      await supabase.auth.signOut();
-      navigate({ to: "/auth", replace: true });
+      setLeaveReason("");
+      leaveReqQ.refetch();
     } catch (e: any) {
-      toast.error(e.message ?? "Failed to leave");
+      toast.error(e.message ?? "Failed to submit");
     } finally {
       setLeaving(false);
     }
   }
+
+  async function cancelLeaveFn(id: string) {
+    try {
+      await cancelLeave({ data: { id } });
+      toast.success(b("అభ్యర్థన రద్దు అయ్యింది", "Request cancelled"));
+      leaveReqQ.refetch();
+    } catch (e: any) {
+      toast.error(e.message ?? "Failed to cancel");
+    }
+  }
+
+  const currentLeaveReq: any = leaveReqQ.data?.request;
+  const hasPendingLeave = currentLeaveReq?.status === "pending";
+  const wasRejectedLeave = currentLeaveReq?.status === "rejected";
 
 
   if (meQ.isLoading) {
