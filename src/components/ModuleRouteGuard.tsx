@@ -27,19 +27,24 @@ export function ModuleRouteGuard({ children }: { children: React.ReactNode }) {
 
   const modKey = moduleKeyFor(location.pathname);
 
+  const isAdminAccess = location.pathname.startsWith("/org/admin-access");
+  const needsCheck = !!modKey || isAdminAccess;
+
   const q = useQuery({
     queryKey: ["my-admin-modules"],
     queryFn: () => fetchMods(),
     staleTime: 60_000,
-    enabled: !!modKey,
+    enabled: needsCheck,
   });
 
   const allowed =
-    !modKey ||
+    !needsCheck ||
     q.isLoading ||
     !q.data ||
-    q.data.isSuperAdmin ||
-    (q.data.modules as string[]).includes(modKey);
+    (isAdminAccess
+      ? q.data.isSuperAdmin
+      : q.data.isSuperAdmin || (q.data.modules as string[]).includes(modKey!));
+
 
   useEffect(() => {
     // no auto-redirect; show the block screen so the user sees why
