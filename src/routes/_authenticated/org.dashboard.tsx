@@ -12,6 +12,7 @@ import {
   LogOut, BookOpen, Users, Briefcase, Calendar, IdCard, Wallet,
   MessageSquare, QrCode, Camera, Download, RefreshCw, Settings, AlertTriangle,
   Upload, ShieldAlert, FileDown, CheckCircle2, Vote, TrendingUp, TrendingDown, PieChart, ShieldCheck, Gavel,
+  User,
 } from "lucide-react";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 import { localizeText, transliterateText, useI18n } from "@/lib/i18n";
