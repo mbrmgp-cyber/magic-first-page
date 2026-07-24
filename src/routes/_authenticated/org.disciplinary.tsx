@@ -51,7 +51,14 @@ function DisciplinaryPage() {
   const decide = useServerFn(decideNomination);
   const setElec = useServerFn(setElectionMode);
 
-  const [tab, setTab] = useState<"committee" | "suspensions" | "leadership">("committee");
+  const [tab, setTab] = useState<"committee" | "suspensions" | "leadership" | "leave">("committee");
+
+  const fetchLeave = useServerFn(listOrgLeaveRequests);
+  const leaveQ = useQuery({ queryKey: ["org-leave-requests"], queryFn: () => fetchLeave(), refetchInterval: 30_000 });
+  const approveLeave = useServerFn(approveLeaveRequest);
+  const rejectLeave = useServerFn(rejectLeaveRequest);
+  const [leaveNotes, setLeaveNotes] = useState<Record<string, string>>({});
+  const invalidateLeave = () => qc.invalidateQueries({ queryKey: ["org-leave-requests"] });
 
   // Appoint form
   const [apMember, setApMember] = useState("");
