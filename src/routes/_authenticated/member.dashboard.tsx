@@ -371,8 +371,12 @@ function MemberDashboard() {
               }
               setLeaveOpen(true);
             }}
-            className={`rounded-xl bg-zinc-950 border p-4 flex flex-col items-center justify-center gap-2.5 text-center transition min-h-[112px] ${
-              hasPendingLeave ? "border-yellow-600/60" : wasRejectedLeave ? "border-red-700/60" : "border-amber-700/50 hover:border-amber-500"
+            className={`rounded-xl bg-zinc-950 border-2 p-4 flex flex-col items-center justify-center gap-2.5 text-center transition min-h-[112px] ${
+              hasPendingLeave
+                ? "border-yellow-500/80 hover:border-yellow-400"
+                : wasRejectedLeave
+                ? "border-red-500/80 hover:border-red-400"
+                : "border-amber-500/80 hover:border-amber-400 shadow-[0_0_16px_rgba(245,158,11,0.18)]"
             }`}
           >
             <div className={`h-11 w-11 rounded-full flex items-center justify-center ${
