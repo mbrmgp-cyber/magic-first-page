@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { getMyMembership } from "@/lib/org.functions";
+import { getMyMembership, getMyCommitteeAccess } from "@/lib/org.functions";
 import { submitLeaveRequest, getMyLeaveRequest, cancelMyLeaveRequest } from "@/lib/leave-requests.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
