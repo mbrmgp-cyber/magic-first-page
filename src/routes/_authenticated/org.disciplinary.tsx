@@ -14,13 +14,18 @@ import {
   decideNomination,
   setElectionMode,
 } from "@/lib/disciplinary.functions";
+import {
+  listOrgLeaveRequests,
+  approveLeaveRequest,
+  rejectLeaveRequest,
+} from "@/lib/leave-requests.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { ShieldAlert, Gavel, UserPlus, Ban, Vote, ArrowLeft, Trash2, ThumbsUp, ThumbsDown, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
+import { ShieldAlert, Gavel, UserPlus, Ban, Vote, ArrowLeft, Trash2, ThumbsUp, ThumbsDown, CheckCircle2, XCircle, AlertTriangle, DoorOpen, Clock } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/org/disciplinary")({
