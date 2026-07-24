@@ -175,7 +175,7 @@ function AdminAccessPage() {
               onPresetTreasurer={() => applyPreset(uid, "treasurer")}
               onSave={() => saveRow(uid)}
               onRevoke={() => revokeRow(uid)}
-              lang={lang}
+              lang={lang === "te" ? "te" : "en"}
               highlightPresident={isPres}
               highlightTreasurer={isTreas}
             />
