@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { getMyOrg, updateOrgLogo, getMyRoles, getMyCommitteeAccess } from "@/lib/org.functions";
+import { getMyModules } from "@/lib/admin-permissions.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,7 @@ import {
   LogOut, BookOpen, Users, Briefcase, Calendar, IdCard, Wallet,
   MessageSquare, QrCode, Camera, Download, RefreshCw, Settings, AlertTriangle,
   Upload, ShieldAlert, FileDown, CheckCircle2, Vote, TrendingUp, TrendingDown, PieChart, ShieldCheck, Gavel,
-  User,
+  User, KeyRound,
 } from "lucide-react";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 import { localizeText, transliterateText, useI18n } from "@/lib/i18n";
@@ -27,16 +28,16 @@ export const Route = createFileRoute("/_authenticated/org/dashboard")({
 });
 
 const MENU = [
-  { to: "/org/rules", en: "Society Rules & History", te: "సొసైటీ నియమావళి & చరిత్ర", icon: BookOpen },
-  { to: "/org/members", en: "Members & Registration", te: "సభ్యులు & నమోదు", icon: Users },
-  { to: "/org/committee", en: "Executive Committee", te: "కార్యనిర్వాహక కమిటీ", icon: Briefcase },
-  { to: "/org/events", en: "Events, Meetings, Decisions", te: "సమావేశాలు & నిర్ణయాలు", icon: Calendar },
-  { to: "/org/designs", en: "ID Cards, Mementos, Letterhead, Stamp Design", te: "ID కార్డులు, మెమెంటోలు, లెటర్‌ప్యాడ్, స్టాంప్ డిజైన్", icon: IdCard },
-  { to: "/org/accounts-hub", en: "Accounts Hub", te: "అకౌంట్స్ బాక్స్", icon: Wallet },
-  { to: "/org/chat", en: "Member Chat", te: "సభ్యులతో చాటింగ్", icon: MessageSquare },
-  { to: "/org/elections", en: "Board Elections", te: "బోర్డు ఎన్నికలు", icon: Vote },
-  { to: "/org/auction", en: "Live Chit Auction", te: "లైవ్ చిట్ ఆక్షన్", icon: Gavel },
-  { to: "/org/disciplinary", en: "Disciplinary Committee", te: "క్రమశిక్షణా కమిటీ", icon: ShieldAlert },
+  { to: "/org/rules", key: "rules", en: "Society Rules & History", te: "సొసైటీ నియమావళి & చరిత్ర", icon: BookOpen },
+  { to: "/org/members", key: "members", en: "Members & Registration", te: "సభ్యులు & నమోదు", icon: Users },
+  { to: "/org/committee", key: "committee", en: "Executive Committee", te: "కార్యనిర్వాహక కమిటీ", icon: Briefcase },
+  { to: "/org/events", key: "events", en: "Events, Meetings, Decisions", te: "సమావేశాలు & నిర్ణయాలు", icon: Calendar },
+  { to: "/org/designs", key: "designs", en: "ID Cards, Mementos, Letterhead, Stamp Design", te: "ID కార్డులు, మెమెంటోలు, లెటర్‌ప్యాడ్, స్టాంప్ డిజైన్", icon: IdCard },
+  { to: "/org/accounts-hub", key: "accounts", en: "Accounts Hub", te: "అకౌంట్స్ బాక్స్", icon: Wallet },
+  { to: "/org/chat", key: "chat", en: "Member Chat", te: "సభ్యులతో చాటింగ్", icon: MessageSquare },
+  { to: "/org/elections", key: "elections", en: "Board Elections", te: "బోర్డు ఎన్నికలు", icon: Vote },
+  { to: "/org/auction", key: "auction", en: "Live Chit Auction", te: "లైవ్ చిట్ ఆక్షన్", icon: Gavel },
+  { to: "/org/disciplinary", key: "disciplinary", en: "Disciplinary Committee", te: "క్రమశిక్షణా కమిటీ", icon: ShieldAlert },
 ] as const;
 
 
@@ -62,9 +63,16 @@ function Dashboard() {
   const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: () => fetchRoles() });
   const fetchCommittee = useServerFn(getMyCommitteeAccess);
   const committeeQ = useQuery({ queryKey: ["my-committee-access"], queryFn: () => fetchCommittee() });
+  const fetchModules = useServerFn(getMyModules);
+  const modulesQ = useQuery({ queryKey: ["my-modules"], queryFn: () => fetchModules() });
   const { role: simRole } = useSimRole();
   const isMbrAdmin = (rolesQ.data?.roles?.includes("mbr_admin") ?? false) && simRole === "super_admin";
-  const visibleMenu = MENU.filter((m) => canAccess(simRole, ROUTE_ACCESS[m.to] ?? "dashboard"));
+  const isSuperAdmin = modulesQ.data?.isSuperAdmin ?? false;
+  const allowed = new Set(modulesQ.data?.modules ?? []);
+  const visibleMenu = MENU.filter((m) => {
+    if (isSuperAdmin) return canAccess(simRole, ROUTE_ACCESS[m.to] ?? "dashboard");
+    return allowed.has(m.key as any);
+  });
   const [qrOpen, setQrOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
@@ -379,6 +387,34 @@ function Dashboard() {
             {lt("Logged in as", "లాగిన్ అయిన వారు")}: <span className="font-semibold" style={{ color: theme.headColor }}>{lt(ROLE_LABELS[simRole].en, ROLE_LABELS[simRole].te)}</span>
           </span>
         </div>
+
+        {/* Super Admin: Role & Access Management */}
+        {isSuperAdmin && (
+          <Link to="/org/admin-access" className="block">
+            <Card
+              className="p-3 border-2 flex items-center gap-3 transition-all hover:scale-[1.01]"
+              style={{
+                background: `linear-gradient(135deg, ${theme.icon}22, ${theme.bigBox})`,
+                borderColor: `${theme.icon}80`,
+                boxShadow: `0 0 20px ${theme.icon}33`,
+              }}
+            >
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 border"
+                style={{ background: `${theme.icon}26`, borderColor: `${theme.icon}66` }}>
+                <KeyRound className="w-5 h-5" style={{ color: theme.icon }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-bold text-sm leading-tight" style={{ color: theme.headColor }}>
+                  {lt("Admin Role & Access", "అడ్మిన్ పాత్రలు & అనుమతులు")}
+                </div>
+                <div className="text-[11px] leading-tight" style={{ color: theme.subColor }}>
+                  {lt("Grant module permissions to committee members", "కమిటీ సభ్యులకు మాడ్యూల్ అనుమతులు ఇవ్వండి")}
+                </div>
+              </div>
+              <span className="text-lg shrink-0" style={{ color: theme.icon }}>→</span>
+            </Card>
+          </Link>
+        )}
 
         {/* Menu 2-col grid */}
         <div className="grid grid-cols-2 gap-3">

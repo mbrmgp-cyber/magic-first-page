@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_module_access: {
+        Row: {
+          created_at: string
+          granted_by: string | null
+          id: string
+          modules: string[]
+          org_id: string
+          preset: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          modules?: string[]
+          org_id: string
+          preset?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          modules?: string[]
+          org_id?: string
+          preset?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_module_access_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       auction_month_archives: {
         Row: {
           archived_by: string | null
