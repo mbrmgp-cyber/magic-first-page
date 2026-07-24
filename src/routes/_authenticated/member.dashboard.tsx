@@ -391,28 +391,38 @@ function MemberDashboard() {
         </DialogContent>
       </Dialog>
 
-      {/* Leave Society Confirmation */}
-      <Dialog open={leaveOpen} onOpenChange={setLeaveOpen}>
-        <DialogContent className="max-w-sm bg-zinc-950 border-zinc-800 text-white">
+      {/* Leave Society Request Dialog */}
+      <Dialog open={leaveOpen} onOpenChange={(o) => { setLeaveOpen(o); if (!o) setLeaveReason(""); }}>
+        <DialogContent className="max-w-md bg-zinc-950 border-zinc-800 text-white">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-amber-500" />
-              {b("సొసైటీ నుండి వైదొలగాలా?", "Leave Society?")}
+              {b("సొసైటీ నుండి వైదొలగడానికి అభ్యర్థన", "Request to Leave Society")}
             </DialogTitle>
             <DialogDescription className="text-zinc-400">
               {b(
-                "మీరు స్వచ్ఛందంగా ఈ సొసైటీ నుండి వైదొలగాలనుకుంటున్నారా? మీ సభ్యత్వ ప్రొఫైల్ తొలగించబడుతుంది మరియు మీరు లాగ్ అవుట్ చేయబడతారు. ఈ చర్య తిరిగి మార్చబడదు. (గమనిక: సొసైటీ ఒక సభ్యుడిని సస్పెండ్ చేయాలంటే క్రమశిక్షణా కమిటీ పేజీ నుండి చేస్తుంది.)",
-                "Do you want to voluntarily leave this society? Your membership profile will be removed and you will be logged out. This cannot be undone. (Note: To suspend a member, the society uses the Disciplinary Committee page.)"
+                "మీరు స్వచ్ఛందంగా సొసైటీ నుండి వైదొలగాలంటే — దయచేసి కారణం రాయండి. మీ అభ్యర్థన క్రమశిక్షణా కమిటీకి పంపబడుతుంది. కమిటీ పరిశీలించి ఆమోదించిన తర్వాత మాత్రమే మీరు వెళ్ళగలరు. అప్పులు లేదా బాధ్యతలు ఉంటే కమిటీ తిరస్కరించవచ్చు.",
+                "To voluntarily leave, please provide a reason. Your request will be sent to the Disciplinary Committee. You can leave only after they review and approve. The committee may reject if you have outstanding dues or responsibilities."
               )}
             </DialogDescription>
           </DialogHeader>
+          <div className="space-y-2">
+            <label className="text-sm text-zinc-300">{b("వైదొలగడానికి కారణం", "Reason for leaving")} *</label>
+            <Textarea
+              value={leaveReason}
+              onChange={(e) => setLeaveReason(e.target.value)}
+              placeholder={b("మీ కారణాన్ని వివరంగా రాయండి…", "Please explain your reason in detail…")}
+              rows={4}
+              className="bg-zinc-900 border-zinc-700 text-white"
+            />
+          </div>
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setLeaveOpen(false)} className="border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800">
               {b("రద్దు", "Cancel")}
             </Button>
-            <Button disabled={leaving} onClick={leaveSociety} className="bg-amber-600 hover:bg-amber-700 text-white font-semibold">
+            <Button disabled={leaving || leaveReason.trim().length < 5} onClick={submitLeaveRequestFn} className="bg-amber-600 hover:bg-amber-700 text-white font-semibold">
               {leaving ? <RefreshCw className="h-4 w-4 mr-1 animate-spin" /> : <DoorOpen className="h-4 w-4 mr-1" />}
-              {b("వైదొలగడాన్ని నిర్ధారించండి", "Confirm Leave")}
+              {b("అభ్యర్థన సమర్పించండి", "Submit Request")}
             </Button>
           </DialogFooter>
         </DialogContent>
