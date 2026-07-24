@@ -271,6 +271,38 @@ function MemberDashboard() {
           </div>
         </Card>
 
+        {/* Leave-request status banner */}
+        {currentLeaveReq && currentLeaveReq.status !== "approved" && (
+          <div className={`rounded-xl border p-3 text-sm ${
+            hasPendingLeave ? "border-yellow-700/60 bg-yellow-950/30" : "border-red-700/60 bg-red-950/30"
+          }`}>
+            <div className="flex items-start gap-2">
+              {hasPendingLeave ? <Clock className="h-4 w-4 text-yellow-400 mt-0.5" /> : <XCircle className="h-4 w-4 text-red-400 mt-0.5" />}
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-white">
+                  {hasPendingLeave
+                    ? b("వైదొలగే అభ్యర్థన కమిటీ పరిశీలనలో ఉంది", "Leave request under committee review")
+                    : b("మీ వైదొలగే అభ్యర్థన తిరస్కరించబడింది", "Your leave request was rejected")}
+                </p>
+                <p className="text-zinc-300 mt-1">
+                  <span className="text-zinc-500">{b("కారణం:", "Reason:")}</span> {currentLeaveReq.reason}
+                </p>
+                {currentLeaveReq.review_notes && (
+                  <p className="text-zinc-300 mt-1">
+                    <span className="text-zinc-500">{b("కమిటీ గమనిక:", "Committee note:")}</span> {currentLeaveReq.review_notes}
+                  </p>
+                )}
+                {hasPendingLeave && (
+                  <button onClick={() => cancelLeaveFn(currentLeaveReq.id)} className="mt-2 text-xs underline text-yellow-300">
+                    {b("అభ్యర్థనను రద్దు చేయండి", "Cancel request")}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+
         {/* 2-column grid menu */}
         <div className="grid grid-cols-2 gap-3">
           {/* ID Card opens dialog */}
