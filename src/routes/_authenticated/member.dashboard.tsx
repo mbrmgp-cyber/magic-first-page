@@ -376,15 +376,15 @@ function MemberDashboard() {
                 ? "border-yellow-500/80 hover:border-yellow-400"
                 : wasRejectedLeave
                 ? "border-red-500/80 hover:border-red-400"
-                : "border-amber-500/80 hover:border-amber-400 shadow-[0_0_16px_rgba(245,158,11,0.18)]"
+                : "border-pink-500/80 hover:border-pink-400 shadow-[0_0_16px_rgba(236,72,153,0.18)]"
             }`}
           >
             <div className={`h-11 w-11 rounded-full flex items-center justify-center ${
-              hasPendingLeave ? "bg-yellow-500/15" : wasRejectedLeave ? "bg-red-500/15" : "bg-amber-500/15"
+              hasPendingLeave ? "bg-yellow-500/15" : wasRejectedLeave ? "bg-red-500/15" : "bg-pink-500/15"
             }`}>
               {hasPendingLeave ? <Clock className="h-5 w-5 text-yellow-400" />
                 : wasRejectedLeave ? <XCircle className="h-5 w-5 text-red-400" />
-                : <DoorOpen className="h-5 w-5 text-amber-400" />}
+                : <DoorOpen className="h-5 w-5 text-pink-400" />}
             </div>
             <p className="text-[13px] font-semibold text-white leading-tight">
               {hasPendingLeave
