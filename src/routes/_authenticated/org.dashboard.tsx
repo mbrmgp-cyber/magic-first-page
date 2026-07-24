@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { getMyOrg, updateOrgLogo, getMyRoles } from "@/lib/org.functions";
+import { getMyOrg, updateOrgLogo, getMyRoles, getMyCommitteeAccess } from "@/lib/org.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import {
   LogOut, BookOpen, Users, Briefcase, Calendar, IdCard, Wallet,
   MessageSquare, QrCode, Camera, Download, RefreshCw, Settings, AlertTriangle,
   Upload, ShieldAlert, FileDown, CheckCircle2, Vote, TrendingUp, TrendingDown, PieChart, ShieldCheck, Gavel,
+  User,
 } from "lucide-react";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 import { localizeText, transliterateText, useI18n } from "@/lib/i18n";
@@ -59,6 +60,8 @@ function Dashboard() {
   const orgQ = useQuery({ queryKey: ["my-org"], queryFn: () => fetchOrg() });
   const fetchRoles = useServerFn(getMyRoles);
   const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: () => fetchRoles() });
+  const fetchCommittee = useServerFn(getMyCommitteeAccess);
+  const committeeQ = useQuery({ queryKey: ["my-committee-access"], queryFn: () => fetchCommittee() });
   const { role: simRole } = useSimRole();
   const isMbrAdmin = (rolesQ.data?.roles?.includes("mbr_admin") ?? false) && simRole === "super_admin";
   const visibleMenu = MENU.filter((m) => canAccess(simRole, ROUTE_ACCESS[m.to] ?? "dashboard"));
@@ -286,6 +289,15 @@ function Dashboard() {
             <Settings className="h-4 w-4" />
           </Button>
           <div className="flex items-center gap-1 flex-nowrap justify-end min-w-0">
+            {committeeQ.data?.isCommittee && !committeeQ.data?.isPrimaryAdmin && (
+              <Link
+                to="/member/dashboard"
+                className="inline-flex items-center gap-1 px-2 h-9 rounded-md border border-amber-500/60 bg-amber-500/10 text-amber-200 hover:bg-amber-500/20 text-xs font-semibold shrink-0"
+                title={lt("Switch to Member Dashboard", "సభ్యుడి డాష్‌బోర్డ్‌కి మారండి")}
+              >
+                <User className="h-4 w-4 mr-0.5" />{lt("Member View", "సభ్యుడి")}
+              </Link>
+            )}
             <Button variant="ghost" size="sm" onClick={logout} className="text-zinc-200 hover:bg-zinc-900 hover:text-white px-2 h-9 rounded-md border border-zinc-700 shrink-0">
               <LogOut className="h-4 w-4 mr-1" />{lt("Logout", "లాగ్ అవుట్")}
             </Button>

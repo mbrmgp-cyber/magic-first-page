@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { getMyMembership } from "@/lib/org.functions";
+import { getMyMembership, getMyCommitteeAccess } from "@/lib/org.functions";
 import { submitLeaveRequest, getMyLeaveRequest, cancelMyLeaveRequest } from "@/lib/leave-requests.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -14,6 +14,7 @@ import { useI18n, bi } from "@/lib/i18n";
 import {
   LogOut, IdCard, BookOpen, Wallet, Briefcase, MessageSquare, Vote, ShieldCheck, User, ScanLine,
   Facebook, Youtube, Gavel, CalendarDays, Building2, Copy, DoorOpen, AlertTriangle, RefreshCw, Clock, XCircle, CheckCircle2,
+  LayoutDashboard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -71,6 +72,8 @@ function MemberDashboard() {
   const leaveReqQ = useQuery({ queryKey: ["my-leave-request"], queryFn: () => fetchLeaveReq(), refetchInterval: 30_000 });
   const submitLeave = useServerFn(submitLeaveRequest);
   const cancelLeave = useServerFn(cancelMyLeaveRequest);
+  const fetchCommittee = useServerFn(getMyCommitteeAccess);
+  const committeeQ = useQuery({ queryKey: ["my-committee-access"], queryFn: () => fetchCommittee() });
   const [qrUrl, setQrUrl] = useState<string>("");
   const [qrTargetUrl, setQrTargetUrl] = useState<string>("");
   const [photoUrl, setPhotoUrl] = useState<string>("");
@@ -343,6 +346,24 @@ function MemberDashboard() {
             </div>
             <p className="text-[14px] font-semibold text-white leading-tight">{b("సొసైటీకి పేమెంట్", "Pay to Society")}</p>
           </button>
+
+          {/* Committee toggle: opens the org admin dashboard for treasurers etc. */}
+          {committeeQ.data?.isCommittee && !committeeQ.data?.isPrimaryAdmin && (
+            <Link
+              to="/org/dashboard"
+              className="rounded-xl bg-gradient-to-br from-amber-950/60 to-zinc-950 border-2 border-amber-500/70 p-4 flex flex-col items-center justify-center gap-2.5 text-center transition hover:-translate-y-0.5 min-h-[112px] shadow-[0_0_18px_rgba(245,158,11,0.25)]"
+            >
+              <div className="h-11 w-11 rounded-full bg-amber-500/20 flex items-center justify-center">
+                <LayoutDashboard className="h-5 w-5 text-amber-400" />
+              </div>
+              <p className="text-[13px] font-semibold text-white leading-tight">
+                {b("అడ్మిన్ ప్యానెల్", "Admin Panel")}
+              </p>
+              {committeeQ.data.role && (
+                <p className="text-[10px] text-amber-300/90 uppercase tracking-wide">{committeeQ.data.role}</p>
+              )}
+            </Link>
+          )}
 
           {MENU.map((it) => {
             const showDot = it.to === "/org/chat" && hasNewChat;
