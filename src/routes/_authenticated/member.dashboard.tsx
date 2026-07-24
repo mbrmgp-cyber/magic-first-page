@@ -72,6 +72,8 @@ function MemberDashboard() {
   const leaveReqQ = useQuery({ queryKey: ["my-leave-request"], queryFn: () => fetchLeaveReq(), refetchInterval: 30_000 });
   const submitLeave = useServerFn(submitLeaveRequest);
   const cancelLeave = useServerFn(cancelMyLeaveRequest);
+  const fetchCommittee = useServerFn(getMyCommitteeAccess);
+  const committeeQ = useQuery({ queryKey: ["my-committee-access"], queryFn: () => fetchCommittee() });
   const [qrUrl, setQrUrl] = useState<string>("");
   const [qrTargetUrl, setQrTargetUrl] = useState<string>("");
   const [photoUrl, setPhotoUrl] = useState<string>("");
