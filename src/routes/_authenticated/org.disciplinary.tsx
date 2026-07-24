@@ -14,13 +14,18 @@ import {
   decideNomination,
   setElectionMode,
 } from "@/lib/disciplinary.functions";
+import {
+  listOrgLeaveRequests,
+  approveLeaveRequest,
+  rejectLeaveRequest,
+} from "@/lib/leave-requests.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { ShieldAlert, Gavel, UserPlus, Ban, Vote, ArrowLeft, Trash2, ThumbsUp, ThumbsDown, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
+import { ShieldAlert, Gavel, UserPlus, Ban, Vote, ArrowLeft, Trash2, ThumbsUp, ThumbsDown, CheckCircle2, XCircle, AlertTriangle, DoorOpen, Clock } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/org/disciplinary")({
@@ -46,7 +51,14 @@ function DisciplinaryPage() {
   const decide = useServerFn(decideNomination);
   const setElec = useServerFn(setElectionMode);
 
-  const [tab, setTab] = useState<"committee" | "suspensions" | "leadership">("committee");
+  const [tab, setTab] = useState<"committee" | "suspensions" | "leadership" | "leave">("committee");
+
+  const fetchLeave = useServerFn(listOrgLeaveRequests);
+  const leaveQ = useQuery({ queryKey: ["org-leave-requests"], queryFn: () => fetchLeave(), refetchInterval: 30_000 });
+  const approveLeave = useServerFn(approveLeaveRequest);
+  const rejectLeave = useServerFn(rejectLeaveRequest);
+  const [leaveNotes, setLeaveNotes] = useState<Record<string, string>>({});
+  const invalidateLeave = () => qc.invalidateQueries({ queryKey: ["org-leave-requests"] });
 
   // Appoint form
   const [apMember, setApMember] = useState("");
@@ -144,20 +156,25 @@ function DisciplinaryPage() {
         )}
 
         {/* Tabs */}
-        <div className="flex gap-2 border-b border-border">
+        <div className="flex gap-2 border-b border-border flex-wrap">
           {([
             ["committee", "Committee · కమిటీ"],
             ["suspensions", "Suspensions · సస్పెన్షన్"],
             ["leadership", "Leadership · నాయకత్వం"],
-          ] as const).map(([k, label]) => (
+            ["leave", "Leave Requests · వైదొలగే అభ్యర్థనలు"],
+          ] as const).map(([k, label]) => {
+            const pending = k === "leave" ? (leaveQ.data?.requests ?? []).filter((r: any) => r.status === "pending").length : 0;
+            return (
             <button
               key={k}
               onClick={() => setTab(k as any)}
               className={`px-3 py-2 text-sm font-medium border-b-2 -mb-px transition ${tab === k ? "border-red-500 text-red-400" : "border-transparent text-muted-foreground hover:text-foreground"}`}
             >
               {label}
+              {pending > 0 && <span className="ml-1 inline-flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] px-1.5 py-0.5">{pending}</span>}
             </button>
-          ))}
+            );
+          })}
         </div>
 
         {/* Committee tab */}
@@ -417,6 +434,106 @@ function DisciplinaryPage() {
                 </Card>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Leave Requests tab */}
+        {tab === "leave" && (
+          <div className="space-y-3">
+            <Card className="p-3 bg-card text-xs text-muted-foreground">
+              <DoorOpen className="size-4 inline mr-1 text-amber-400" />
+              Members who wish to leave the society submit a reason here. Review each case carefully — a member with outstanding loans, pending responsibilities, or good conduct may be denied to protect the society.
+              సభ్యుడు వైదొలగే ముందు అప్పులు / బాధ్యతలు తనిఖీ చేసి ఆమోదించండి లేదా తిరస్కరించండి.
+            </Card>
+
+            {(leaveQ.data?.requests ?? []).length === 0 && (
+              <Card className="p-6 text-center text-sm text-muted-foreground">No leave requests yet.</Card>
+            )}
+
+            {(leaveQ.data?.requests ?? []).map((r: any) => {
+              const isPending = r.status === "pending";
+              const notes = leaveNotes[r.id] ?? "";
+              return (
+                <Card key={r.id} className="p-4 bg-card space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="size-11 rounded-full bg-muted overflow-hidden flex items-center justify-center shrink-0">
+                      {r.members?.photo_url
+                        ? <img src={r.members.photo_url} className="size-full object-cover" alt="" />
+                        : <DoorOpen className="size-5 text-muted-foreground" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-semibold text-sm">{r.members?.name ?? "Unknown"}</p>
+                        {r.members?.member_code && <span className="text-[10px] text-muted-foreground">({r.members.member_code})</span>}
+                        {isPending && <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/40"><Clock className="size-3 mr-1" />Pending</Badge>}
+                        {r.status === "approved" && <Badge className="bg-green-500/20 text-green-300 border-green-500/40"><CheckCircle2 className="size-3 mr-1" />Approved · Removed</Badge>}
+                        {r.status === "rejected" && <Badge className="bg-red-500/20 text-red-300 border-red-500/40"><XCircle className="size-3 mr-1" />Rejected</Badge>}
+                      </div>
+                      {(r.members?.phone || r.members?.email) && (
+                        <p className="text-[11px] text-muted-foreground mt-0.5">
+                          {r.members?.phone ?? ""} {r.members?.email ? `· ${r.members.email}` : ""}
+                        </p>
+                      )}
+                      <p className="text-sm mt-2">
+                        <span className="text-muted-foreground text-xs">Reason / కారణం:</span><br />
+                        {r.reason}
+                      </p>
+                      {r.review_notes && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Committee note: {r.review_notes}
+                        </p>
+                      )}
+                      <p className="text-[10px] text-muted-foreground mt-1">
+                        Submitted: {new Date(r.created_at).toLocaleString()}
+                        {r.reviewed_at && ` · Reviewed: ${new Date(r.reviewed_at).toLocaleString()}`}
+                      </p>
+                    </div>
+                  </div>
+
+                  {canManage && isPending && (
+                    <div className="space-y-2 border-t border-border pt-3">
+                      <Textarea
+                        placeholder="Optional review note (e.g. outstanding loan of Rs. 5,000 — please clear first)"
+                        value={notes}
+                        onChange={(e) => setLeaveNotes((s) => ({ ...s, [r.id]: e.target.value }))}
+                        rows={2}
+                      />
+                      <div className="flex gap-2 flex-wrap">
+                        <Button
+                          size="sm"
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                          onClick={async () => {
+                            if (!confirm(`Approve leave for ${r.members?.name}? This will permanently remove the member.`)) return;
+                            try {
+                              await approveLeave({ data: { id: r.id, notes: notes || undefined } });
+                              toast.success("Leave approved — member removed");
+                              setLeaveNotes((s) => { const n = { ...s }; delete n[r.id]; return n; });
+                              invalidateLeave();
+                            } catch (e: any) { toast.error(e.message); }
+                          }}
+                        >
+                          <CheckCircle2 className="size-3 mr-1" /> Approve & Remove
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={async () => {
+                            try {
+                              await rejectLeave({ data: { id: r.id, notes: notes || undefined } });
+                              toast.success("Leave request rejected");
+                              setLeaveNotes((s) => { const n = { ...s }; delete n[r.id]; return n; });
+                              invalidateLeave();
+                            } catch (e: any) { toast.error(e.message); }
+                          }}
+                        >
+                          <XCircle className="size-3 mr-1" /> Reject
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </Card>
+              );
+            })}
           </div>
         )}
       </div>

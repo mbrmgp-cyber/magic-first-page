@@ -3,15 +3,17 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { getMyMembership } from "@/lib/org.functions";
+import { submitLeaveRequest, getMyLeaveRequest, cancelMyLeaveRequest } from "@/lib/leave-requests.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { MemberIdCard } from "@/components/MemberIdCard";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { useI18n, bi } from "@/lib/i18n";
 import {
   LogOut, IdCard, BookOpen, Wallet, Briefcase, MessageSquare, Vote, ShieldCheck, User, ScanLine,
-  Facebook, Youtube, Gavel, CalendarDays, Building2, Copy, DoorOpen, AlertTriangle, RefreshCw,
+  Facebook, Youtube, Gavel, CalendarDays, Building2, Copy, DoorOpen, AlertTriangle, RefreshCw, Clock, XCircle, CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -65,6 +67,10 @@ function MemberDashboard() {
   const navigate = useNavigate();
   const fetchMe = useServerFn(getMyMembership);
   const meQ = useQuery({ queryKey: ["my-membership"], queryFn: () => fetchMe() });
+  const fetchLeaveReq = useServerFn(getMyLeaveRequest);
+  const leaveReqQ = useQuery({ queryKey: ["my-leave-request"], queryFn: () => fetchLeaveReq(), refetchInterval: 30_000 });
+  const submitLeave = useServerFn(submitLeaveRequest);
+  const cancelLeave = useServerFn(cancelMyLeaveRequest);
   const [qrUrl, setQrUrl] = useState<string>("");
   const [qrTargetUrl, setQrTargetUrl] = useState<string>("");
   const [photoUrl, setPhotoUrl] = useState<string>("");
@@ -73,6 +79,7 @@ function MemberDashboard() {
   const [payOpen, setPayOpen] = useState(false);
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [leaving, setLeaving] = useState(false);
+  const [leaveReason, setLeaveReason] = useState("");
   const { lang } = useI18n();
   const b = (te: string, en: string) => bi(te, en, lang);
 
@@ -142,23 +149,39 @@ function MemberDashboard() {
     navigate({ to: "/auth", replace: true });
   }
 
-  async function leaveSociety() {
+  async function submitLeaveRequestFn() {
+    const reason = leaveReason.trim();
+    if (reason.length < 5) {
+      toast.error(b("దయచేసి కారణం రాయండి (కనీసం 5 అక్షరాలు)", "Please write a reason (min 5 characters)"));
+      return;
+    }
     setLeaving(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not signed in");
-      const { error } = await supabase.from("members").delete().eq("user_id", user.id);
-      if (error) throw error;
-      toast.success(b("మీరు సొసైటీ నుండి విజయవంతంగా వైదొలిగారు", "You have left the society"));
+      await submitLeave({ data: { reason } });
+      toast.success(b("మీ అభ్యర్థన క్రమశిక్షణ కమిటీకి పంపబడింది", "Your request has been sent to the Disciplinary Committee"));
       setLeaveOpen(false);
-      await supabase.auth.signOut();
-      navigate({ to: "/auth", replace: true });
+      setLeaveReason("");
+      leaveReqQ.refetch();
     } catch (e: any) {
-      toast.error(e.message ?? "Failed to leave");
+      toast.error(e.message ?? "Failed to submit");
     } finally {
       setLeaving(false);
     }
   }
+
+  async function cancelLeaveFn(id: string) {
+    try {
+      await cancelLeave({ data: { id } });
+      toast.success(b("అభ్యర్థన రద్దు అయ్యింది", "Request cancelled"));
+      leaveReqQ.refetch();
+    } catch (e: any) {
+      toast.error(e.message ?? "Failed to cancel");
+    }
+  }
+
+  const currentLeaveReq: any = leaveReqQ.data?.request;
+  const hasPendingLeave = currentLeaveReq?.status === "pending";
+  const wasRejectedLeave = currentLeaveReq?.status === "rejected";
 
 
   if (meQ.isLoading) {
@@ -248,6 +271,38 @@ function MemberDashboard() {
           </div>
         </Card>
 
+        {/* Leave-request status banner */}
+        {currentLeaveReq && currentLeaveReq.status !== "approved" && (
+          <div className={`rounded-xl border p-3 text-sm ${
+            hasPendingLeave ? "border-yellow-700/60 bg-yellow-950/30" : "border-red-700/60 bg-red-950/30"
+          }`}>
+            <div className="flex items-start gap-2">
+              {hasPendingLeave ? <Clock className="h-4 w-4 text-yellow-400 mt-0.5" /> : <XCircle className="h-4 w-4 text-red-400 mt-0.5" />}
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-white">
+                  {hasPendingLeave
+                    ? b("వైదొలగే అభ్యర్థన కమిటీ పరిశీలనలో ఉంది", "Leave request under committee review")
+                    : b("మీ వైదొలగే అభ్యర్థన తిరస్కరించబడింది", "Your leave request was rejected")}
+                </p>
+                <p className="text-zinc-300 mt-1">
+                  <span className="text-zinc-500">{b("కారణం:", "Reason:")}</span> {currentLeaveReq.reason}
+                </p>
+                {currentLeaveReq.review_notes && (
+                  <p className="text-zinc-300 mt-1">
+                    <span className="text-zinc-500">{b("కమిటీ గమనిక:", "Committee note:")}</span> {currentLeaveReq.review_notes}
+                  </p>
+                )}
+                {hasPendingLeave && (
+                  <button onClick={() => cancelLeaveFn(currentLeaveReq.id)} className="mt-2 text-xs underline text-yellow-300">
+                    {b("అభ్యర్థనను రద్దు చేయండి", "Cancel request")}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+
         {/* 2-column grid menu */}
         <div className="grid grid-cols-2 gap-3">
           {/* ID Card opens dialog */}
@@ -299,12 +354,32 @@ function MemberDashboard() {
             </Link>
             );
           })}
-          <button onClick={() => setLeaveOpen(true)}
-            className="rounded-xl bg-zinc-950 border border-amber-700/50 p-4 flex flex-col items-center justify-center gap-2.5 text-center hover:border-amber-500 transition min-h-[112px]">
-            <div className="h-11 w-11 rounded-full bg-amber-500/15 flex items-center justify-center">
-              <DoorOpen className="h-5 w-5 text-amber-400" />
+          <button
+            onClick={() => {
+              if (hasPendingLeave) {
+                toast.info(b("మీ అభ్యర్థన కమిటీ పరిశీలనలో ఉంది", "Your request is under committee review"));
+                return;
+              }
+              setLeaveOpen(true);
+            }}
+            className={`rounded-xl bg-zinc-950 border p-4 flex flex-col items-center justify-center gap-2.5 text-center transition min-h-[112px] ${
+              hasPendingLeave ? "border-yellow-600/60" : wasRejectedLeave ? "border-red-700/60" : "border-amber-700/50 hover:border-amber-500"
+            }`}
+          >
+            <div className={`h-11 w-11 rounded-full flex items-center justify-center ${
+              hasPendingLeave ? "bg-yellow-500/15" : wasRejectedLeave ? "bg-red-500/15" : "bg-amber-500/15"
+            }`}>
+              {hasPendingLeave ? <Clock className="h-5 w-5 text-yellow-400" />
+                : wasRejectedLeave ? <XCircle className="h-5 w-5 text-red-400" />
+                : <DoorOpen className="h-5 w-5 text-amber-400" />}
             </div>
-            <p className="text-[14px] font-semibold text-white leading-tight">{b("సొసైటీ నుండి వైదొలగండి", "Leave Society")}</p>
+            <p className="text-[13px] font-semibold text-white leading-tight">
+              {hasPendingLeave
+                ? b("అభ్యర్థన పెండింగ్‌లో", "Leave Request Pending")
+                : wasRejectedLeave
+                ? b("అభ్యర్థన తిరస్కరించబడింది", "Request Rejected — Try Again")
+                : b("సొసైటీ నుండి వైదొలగండి", "Leave Society")}
+            </p>
           </button>
           <button onClick={logout}
             className="rounded-xl bg-zinc-950 border border-zinc-800 p-4 flex flex-col items-center justify-center gap-2.5 text-center hover:border-zinc-600 transition min-h-[112px]">
@@ -368,28 +443,38 @@ function MemberDashboard() {
         </DialogContent>
       </Dialog>
 
-      {/* Leave Society Confirmation */}
-      <Dialog open={leaveOpen} onOpenChange={setLeaveOpen}>
-        <DialogContent className="max-w-sm bg-zinc-950 border-zinc-800 text-white">
+      {/* Leave Society Request Dialog */}
+      <Dialog open={leaveOpen} onOpenChange={(o) => { setLeaveOpen(o); if (!o) setLeaveReason(""); }}>
+        <DialogContent className="max-w-md bg-zinc-950 border-zinc-800 text-white">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-amber-500" />
-              {b("సొసైటీ నుండి వైదొలగాలా?", "Leave Society?")}
+              {b("సొసైటీ నుండి వైదొలగడానికి అభ్యర్థన", "Request to Leave Society")}
             </DialogTitle>
             <DialogDescription className="text-zinc-400">
               {b(
-                "మీరు స్వచ్ఛందంగా ఈ సొసైటీ నుండి వైదొలగాలనుకుంటున్నారా? మీ సభ్యత్వ ప్రొఫైల్ తొలగించబడుతుంది మరియు మీరు లాగ్ అవుట్ చేయబడతారు. ఈ చర్య తిరిగి మార్చబడదు. (గమనిక: సొసైటీ ఒక సభ్యుడిని సస్పెండ్ చేయాలంటే క్రమశిక్షణా కమిటీ పేజీ నుండి చేస్తుంది.)",
-                "Do you want to voluntarily leave this society? Your membership profile will be removed and you will be logged out. This cannot be undone. (Note: To suspend a member, the society uses the Disciplinary Committee page.)"
+                "మీరు స్వచ్ఛందంగా సొసైటీ నుండి వైదొలగాలంటే — దయచేసి కారణం రాయండి. మీ అభ్యర్థన క్రమశిక్షణా కమిటీకి పంపబడుతుంది. కమిటీ పరిశీలించి ఆమోదించిన తర్వాత మాత్రమే మీరు వెళ్ళగలరు. అప్పులు లేదా బాధ్యతలు ఉంటే కమిటీ తిరస్కరించవచ్చు.",
+                "To voluntarily leave, please provide a reason. Your request will be sent to the Disciplinary Committee. You can leave only after they review and approve. The committee may reject if you have outstanding dues or responsibilities."
               )}
             </DialogDescription>
           </DialogHeader>
+          <div className="space-y-2">
+            <label className="text-sm text-zinc-300">{b("వైదొలగడానికి కారణం", "Reason for leaving")} *</label>
+            <Textarea
+              value={leaveReason}
+              onChange={(e) => setLeaveReason(e.target.value)}
+              placeholder={b("మీ కారణాన్ని వివరంగా రాయండి…", "Please explain your reason in detail…")}
+              rows={4}
+              className="bg-zinc-900 border-zinc-700 text-white"
+            />
+          </div>
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setLeaveOpen(false)} className="border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800">
               {b("రద్దు", "Cancel")}
             </Button>
-            <Button disabled={leaving} onClick={leaveSociety} className="bg-amber-600 hover:bg-amber-700 text-white font-semibold">
+            <Button disabled={leaving || leaveReason.trim().length < 5} onClick={submitLeaveRequestFn} className="bg-amber-600 hover:bg-amber-700 text-white font-semibold">
               {leaving ? <RefreshCw className="h-4 w-4 mr-1 animate-spin" /> : <DoorOpen className="h-4 w-4 mr-1" />}
-              {b("వైదొలగడాన్ని నిర్ధారించండి", "Confirm Leave")}
+              {b("అభ్యర్థన సమర్పించండి", "Submit Request")}
             </Button>
           </DialogFooter>
         </DialogContent>

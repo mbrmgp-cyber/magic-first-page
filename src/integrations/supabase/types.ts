@@ -951,6 +951,63 @@ export type Database = {
         }
         Relationships: []
       }
+      member_leave_requests: {
+        Row: {
+          created_at: string
+          id: string
+          member_id: string
+          org_id: string
+          reason: string
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          member_id: string
+          org_id: string
+          reason: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          member_id?: string
+          org_id?: string
+          reason?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_leave_requests_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_leave_requests_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       member_loan_payments: {
         Row: {
           amount: number
@@ -2154,6 +2211,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      approve_leave_request: {
+        Args: { _notes?: string; _request_id: string }
+        Returns: undefined
+      }
       can_edit_accounts: { Args: { _org_id: string }; Returns: boolean }
       can_edit_events: { Args: { _org_id: string }; Returns: boolean }
       can_edit_org: { Args: { _org_id: string }; Returns: boolean }
@@ -2304,6 +2365,10 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      reject_leave_request: {
+        Args: { _notes?: string; _request_id: string }
+        Returns: undefined
       }
       reset_chit_month: {
         Args: { _auction_id: string; _org_id: string }
