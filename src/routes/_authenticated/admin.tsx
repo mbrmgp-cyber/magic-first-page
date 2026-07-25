@@ -443,6 +443,8 @@ function AllOrganizationsManager() {
   const [editForm, setEditForm] = useState<any>({});
   const [deleteOrgState, setDeleteOrgState] = useState<any | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [suspendOrgState, setSuspendOrgState] = useState<any | null>(null);
+  const [suspendConfirm, setSuspendConfirm] = useState("");
 
   const detailsQ = useQuery({
     queryKey: ["admin-org-details", detailsId],
