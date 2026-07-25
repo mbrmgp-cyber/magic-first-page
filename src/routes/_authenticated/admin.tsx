@@ -29,6 +29,7 @@ function AdminPanel() {
   const claim = useServerFn(claimMbrAdmin);
   const fetchOrgs = useServerFn(listAllOrgsForAdmin);
   const review = useServerFn(reviewOrganization);
+  const setStatus = useServerFn(setOrganizationStatus);
 
   const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: () => fetchRoles() });
   const isAdmin = rolesQ.data?.roles.includes("mbr_admin") ?? false;
