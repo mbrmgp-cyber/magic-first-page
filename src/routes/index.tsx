@@ -25,9 +25,10 @@ export const Route = createFileRoute("/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  validateSearch: (s: Record<string, unknown>) => ({
-    code: typeof s.code === "string" && s.code.trim() ? s.code.trim() : undefined,
-  }),
+  validateSearch: (s: Record<string, unknown>): { code?: string } => {
+    const code = typeof s.code === "string" && s.code.trim() ? s.code.trim() : undefined;
+    return code ? { code } : {};
+  },
   component: PlatformPortal,
 });
 
