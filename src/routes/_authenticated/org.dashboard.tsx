@@ -69,10 +69,10 @@ function Dashboard() {
   const isMbrAdmin = (rolesQ.data?.roles?.includes("mbr_admin") ?? false) && simRole === "super_admin";
   const isSuperAdmin = modulesQ.data?.isSuperAdmin ?? false;
   const allowed = new Set(modulesQ.data?.modules ?? []);
-  const visibleMenu = MENU.filter((m) => {
-    if (isSuperAdmin) return canAccess(simRole, ROUTE_ACCESS[m.to] ?? "dashboard");
-    return allowed.has(m.key as any);
-  });
+  // Committee admins see the same tile layout as the Super Admin.
+  // Per-module permissions are still enforced on click by ModuleRouteGuard.
+  void allowed;
+  const visibleMenu = MENU.filter((m) => canAccess(simRole, ROUTE_ACCESS[m.to] ?? "dashboard"));
   const [qrOpen, setQrOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
