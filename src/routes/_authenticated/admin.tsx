@@ -904,7 +904,151 @@ function AllOrganizationsManager() {
         onOpenChange={(open: boolean) => { if (!open) { setSuspendOrgState(null); setSuspendConfirm(""); } }}
         busy={busy === suspendOrgState?.id}
       />
+
+      {/* Renew subscription + create receipt */}
+      <Dialog open={!!renewOrg} onOpenChange={(o) => !o && setRenewOrg(null)}>
+        <DialogContent className="max-w-md bg-zinc-900 border-emerald-700 text-white">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-emerald-300">
+              <Receipt className="h-5 w-5" /> Renew Subscription
+            </DialogTitle>
+            <DialogDescription className="text-xs text-zinc-400">
+              Record a payment for <b className="text-white">{renewOrg?.name}</b>. A PAID receipt PDF will be generated automatically.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label className="text-xs">Amount</Label>
+              <Input
+                type="number"
+                inputMode="decimal"
+                value={renewForm.amount}
+                onChange={(e) => setRenewForm((p) => ({ ...p, amount: e.target.value }))}
+                placeholder="e.g. 1200"
+                className="bg-zinc-950 border-zinc-700 text-white"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Currency</Label>
+              <Select value={renewForm.currency} onValueChange={(v) => setRenewForm((p) => ({ ...p, currency: v }))}>
+                <SelectTrigger className="bg-zinc-950 border-zinc-700 text-white"><SelectValue /></SelectTrigger>
+                <SelectContent className="bg-zinc-900 border-zinc-700 text-white">
+                  <SelectItem value="INR">INR</SelectItem>
+                  <SelectItem value="USD">USD</SelectItem>
+                  <SelectItem value="AED">AED</SelectItem>
+                  <SelectItem value="KWD">KWD</SelectItem>
+                  <SelectItem value="EUR">EUR</SelectItem>
+                  <SelectItem value="GBP">GBP</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Extend (days)</Label>
+              <Input
+                type="number"
+                value={renewForm.days}
+                onChange={(e) => setRenewForm((p) => ({ ...p, days: e.target.value }))}
+                className="bg-zinc-950 border-zinc-700 text-white"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Method</Label>
+              <Select value={renewForm.method} onValueChange={(v) => setRenewForm((p) => ({ ...p, method: v }))}>
+                <SelectTrigger className="bg-zinc-950 border-zinc-700 text-white"><SelectValue /></SelectTrigger>
+                <SelectContent className="bg-zinc-900 border-zinc-700 text-white">
+                  <SelectItem value="cash">Cash</SelectItem>
+                  <SelectItem value="upi">UPI</SelectItem>
+                  <SelectItem value="bank">Bank Transfer</SelectItem>
+                  <SelectItem value="card">Card</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Notes (optional)</Label>
+            <Textarea
+              rows={2}
+              value={renewForm.notes}
+              onChange={(e) => setRenewForm((p) => ({ ...p, notes: e.target.value }))}
+              className="bg-zinc-950 border-zinc-700 text-white"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setRenewOrg(null)} className="text-white hover:bg-zinc-800">Cancel</Button>
+            <Button
+              className="bg-emerald-700 hover:bg-emerald-600 text-white"
+              disabled={busy === renewOrg?.id}
+              onClick={submitRenew}
+            >
+              <Receipt className="h-4 w-4 mr-1" /> Record & Generate Receipt
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Receipts list dialog */}
+      <ReceiptsDialog org={receiptsOrg} onClose={() => setReceiptsOrg(null)} />
     </>
+  );
+}
+
+function ReceiptsDialog({ org, onClose }: { org: any | null; onClose: () => void }) {
+  const fetchReceipts = useServerFn(listOrgReceipts);
+  const q = useQuery({
+    queryKey: ["admin-org-receipts", org?.id],
+    queryFn: () => fetchReceipts({ data: { org_id: org!.id } }),
+    enabled: !!org?.id,
+  });
+  const receipts = (q.data?.receipts ?? []) as any[];
+  const orgFull = q.data?.org ?? org;
+
+  return (
+    <Dialog open={!!org} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto bg-zinc-900 border-amber-700 text-white">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-amber-300">
+            <Receipt className="h-5 w-5" /> Receipts — {org?.name}
+          </DialogTitle>
+          <DialogDescription className="text-xs text-zinc-400 font-mono">
+            {org?.org_code}
+          </DialogDescription>
+        </DialogHeader>
+        {q.isLoading && <div className="py-6 text-center text-sm text-zinc-400">Loading…</div>}
+        {!q.isLoading && receipts.length === 0 && (
+          <div className="py-8 text-center text-sm text-zinc-500">No receipts recorded for this organization.</div>
+        )}
+        <div className="space-y-2">
+          {receipts.map((r) => {
+            const paid = new Date(r.paid_on).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+            const till = new Date(r.period_end).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+            const symbol = r.currency === "INR" ? "Rs." : String(r.currency || "").toUpperCase();
+            return (
+              <div key={r.id} className="p-3 rounded-lg border border-zinc-700 bg-zinc-800/60 flex flex-col sm:flex-row sm:items-center gap-2">
+                <div className="min-w-0 flex-1">
+                  <div className="font-mono text-xs text-amber-300">{r.receipt_number}</div>
+                  <div className="text-xs text-zinc-400 mt-0.5">
+                    Paid {paid} · Valid till {till} · {(r.payment_method || "other").toUpperCase()}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm font-bold">{symbol} {Number(r.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                  <div className="text-[10px] uppercase text-emerald-300 font-semibold">{(r.status || "paid").toUpperCase()}</div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-amber-600/60 text-amber-100 hover:bg-amber-950/40"
+                  onClick={() => printReceipt(orgFull, r)}
+                >
+                  <Download className="h-3.5 w-3.5 mr-1" /> PDF
+                </Button>
+              </div>
+            );
+          })}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
