@@ -317,7 +317,7 @@ function AdminPanel() {
         confirmText={suspendConfirm}
         onConfirmTextChange={setSuspendConfirm}
         onConfirm={confirmSuspend}
-        onOpenChange={(open) => { if (!open) { setSuspendOrg(null); setSuspendConfirm(""); } }}
+        onOpenChange={(open: boolean) => { if (!open) { setSuspendOrg(null); setSuspendConfirm(""); } }}
         busy={busyId === suspendOrg?.id}
       />
     </div>
