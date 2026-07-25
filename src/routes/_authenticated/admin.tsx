@@ -708,9 +708,15 @@ function AllOrganizationsManager() {
                   >
                     <Save className="h-3 w-3 mr-1" />Set
                   </Button>
-                  <div className="flex gap-1">
+                  <div className="flex gap-1 flex-wrap">
                     <Button size="sm" variant="secondary" disabled={busy === o.id} onClick={() => saveExpiry(o.id, undefined, 30)} className="bg-zinc-700 text-white hover:bg-zinc-600">+30d</Button>
                     <Button size="sm" variant="secondary" disabled={busy === o.id} onClick={() => saveExpiry(o.id, undefined, 365)} className="bg-zinc-700 text-white hover:bg-zinc-600">+1yr</Button>
+                    <Button size="sm" disabled={busy === o.id} onClick={() => openRenew(o)} className="bg-emerald-700 hover:bg-emerald-600 text-white">
+                      <Receipt className="h-3 w-3 mr-1" />Renew
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => setReceiptsOrg(o)} className="border-amber-600/60 text-amber-100 hover:bg-amber-950/40">
+                      <FileText className="h-3 w-3 mr-1" />Receipts
+                    </Button>
                   </div>
                 </div>
               </div>
