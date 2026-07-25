@@ -43,6 +43,8 @@ function AdminPanel() {
   const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "all">("pending");
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [suspendOrg, setSuspendOrg] = useState<any | null>(null);
+  const [suspendConfirm, setSuspendConfirm] = useState("");
 
   async function logout() {
     await supabase.auth.signOut();
