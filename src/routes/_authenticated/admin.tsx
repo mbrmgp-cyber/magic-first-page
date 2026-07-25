@@ -671,6 +671,90 @@ function AllOrganizationsManager() {
           )}
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!editOrg} onOpenChange={(o) => !o && setEditOrg(null)}>
+        <DialogContent className="max-w-lg bg-zinc-900 border-zinc-700 text-white">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-white">
+              <Pencil className="h-5 w-5 text-blue-400" /> Edit Organization
+            </DialogTitle>
+            <DialogDescription className="text-xs font-mono text-zinc-400">
+              {editOrg?.org_code}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs text-zinc-300">Name</Label>
+              <Input value={editForm.name ?? ""} onChange={(e) => setEditForm((f: any) => ({ ...f, name: e.target.value }))} className="bg-zinc-950 border-zinc-700 text-white" />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label className="text-xs text-zinc-300">Email</Label>
+                <Input value={editForm.email ?? ""} onChange={(e) => setEditForm((f: any) => ({ ...f, email: e.target.value }))} className="bg-zinc-950 border-zinc-700 text-white" />
+              </div>
+              <div>
+                <Label className="text-xs text-zinc-300">Phone</Label>
+                <Input value={editForm.phone ?? ""} onChange={(e) => setEditForm((f: any) => ({ ...f, phone: e.target.value }))} className="bg-zinc-950 border-zinc-700 text-white" />
+              </div>
+            </div>
+            <div>
+              <Label className="text-xs text-zinc-300">Slogan</Label>
+              <Input value={editForm.slogan ?? ""} onChange={(e) => setEditForm((f: any) => ({ ...f, slogan: e.target.value }))} className="bg-zinc-950 border-zinc-700 text-white" />
+            </div>
+            <div>
+              <Label className="text-xs text-zinc-300">Gov Registration No.</Label>
+              <Input value={editForm.gov_reg_number ?? ""} onChange={(e) => setEditForm((f: any) => ({ ...f, gov_reg_number: e.target.value }))} className="bg-zinc-950 border-zinc-700 text-white font-mono" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setEditOrg(null)} className="text-white hover:bg-zinc-800">Cancel</Button>
+            <Button onClick={saveEdit} disabled={busy === editOrg?.id} className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Save className="h-4 w-4 mr-1" />Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!deleteOrgState} onOpenChange={(o) => { if (!o) { setDeleteOrgState(null); setDeleteConfirm(""); } }}>
+        <DialogContent className="max-w-md bg-zinc-900 border-red-800 text-white">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-300">
+              <AlertTriangle className="h-5 w-5" /> Delete Organization
+            </DialogTitle>
+            <DialogDescription className="text-xs text-zinc-400">
+              This permanently deletes <b className="text-white">{deleteOrgState?.name}</b> and ALL related data
+              (members, loans, auctions, accounts, meetings, elections, chats). This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <Alert variant="destructive" className="bg-red-950/40 border-red-800 text-red-100">
+            <AlertTitle className="text-xs">Prefer to deactivate?</AlertTitle>
+            <AlertDescription className="text-xs">
+              Set the status to <b>Suspended</b> instead to disable the society while keeping its data safe.
+            </AlertDescription>
+          </Alert>
+          <div className="space-y-1">
+            <Label className="text-xs text-zinc-300">
+              Type org code <span className="font-mono text-red-300">{deleteOrgState?.org_code}</span> to confirm
+            </Label>
+            <Input
+              value={deleteConfirm}
+              onChange={(e) => setDeleteConfirm(e.target.value.toUpperCase())}
+              placeholder={deleteOrgState?.org_code}
+              className="bg-zinc-950 border-red-700 text-white font-mono"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => { setDeleteOrgState(null); setDeleteConfirm(""); }} className="text-white hover:bg-zinc-800">Cancel</Button>
+            <Button
+              variant="destructive"
+              disabled={busy === deleteOrgState?.id || deleteConfirm.trim().toUpperCase() !== String(deleteOrgState?.org_code ?? "").toUpperCase()}
+              onClick={confirmDelete}
+            >
+              <Trash2 className="h-4 w-4 mr-1" />Delete Permanently
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
