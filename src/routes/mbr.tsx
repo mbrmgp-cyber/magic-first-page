@@ -18,9 +18,10 @@ export const Route = createFileRoute("/mbr")({
       { property: "og:description", content: "Register your organization, share a unique QR code, and let members join with approval." },
     ],
   }),
-  validateSearch: (s: Record<string, unknown>) => ({
-    code: typeof s.code === "string" && s.code.trim() ? s.code.trim() : undefined,
-  }),
+  validateSearch: (s: Record<string, unknown>): { code?: string } => {
+    const code = typeof s.code === "string" && s.code.trim() ? s.code.trim() : undefined;
+    return code ? { code } : {};
+  },
   component: MbrHome,
 });
 
