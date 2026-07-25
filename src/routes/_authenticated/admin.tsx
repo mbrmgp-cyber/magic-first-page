@@ -247,9 +247,56 @@ function AdminPanel() {
                 )}
 
                 {o.approval_status !== "pending" && (
-                  <div className="text-[11px] text-zinc-400 flex items-center gap-1 border-t border-zinc-700 pt-2">
-                    <Clock className="h-3 w-3" />
-                    {o.approved_at ? new Date(o.approved_at).toLocaleString() : "—"}
+                  <div className="border-t border-zinc-700 pt-2 space-y-2">
+                    <div className="text-[11px] text-zinc-400 flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {o.approved_at ? new Date(o.approved_at).toLocaleString() : "—"}
+                    </div>
+                    {o.approval_status === "approved" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full bg-amber-900/40 hover:bg-amber-900/60 border-amber-700 text-amber-100"
+                        disabled={busyId === o.id}
+                        onClick={async () => {
+                          if (!confirm(`Suspend "${o.name}"?\n\nAll members will lose access until reactivated. Data is preserved and no records are deleted.`)) return;
+                          setBusyId(o.id);
+                          try {
+                            await setStatus({ data: { org_id: o.id, status: "suspended", notes: "Suspended by Super Admin" } });
+                            toast.success("Organization suspended");
+                            qc.invalidateQueries({ queryKey: ["admin-all-orgs"] });
+                          } catch (e: any) {
+                            toast.error(e.message ?? "Failed");
+                          } finally {
+                            setBusyId(null);
+                          }
+                        }}
+                      >
+                        <PauseCircle className="h-4 w-4 mr-1" />Suspend Organization
+                      </Button>
+                    )}
+                    {o.approval_status === "suspended" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full bg-green-900/40 hover:bg-green-900/60 border-green-700 text-green-100"
+                        disabled={busyId === o.id}
+                        onClick={async () => {
+                          setBusyId(o.id);
+                          try {
+                            await setStatus({ data: { org_id: o.id, status: "approved", notes: "Reactivated by Super Admin" } });
+                            toast.success("Organization reactivated");
+                            qc.invalidateQueries({ queryKey: ["admin-all-orgs"] });
+                          } catch (e: any) {
+                            toast.error(e.message ?? "Failed");
+                          } finally {
+                            setBusyId(null);
+                          }
+                        }}
+                      >
+                        <PlayCircle className="h-4 w-4 mr-1" />Reactivate
+                      </Button>
+                    )}
                   </div>
                 )}
               </Card>
