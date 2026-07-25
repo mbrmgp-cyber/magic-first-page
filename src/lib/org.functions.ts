@@ -1206,7 +1206,7 @@ export const setOrgSubscription = createServerFn({ method: "POST" })
           notes: data.notes || null,
           recorded_by: userId,
           status: "paid",
-        })
+        } as any)
         .select("*")
         .single();
       if (rErr) throw new Error(rErr.message);
