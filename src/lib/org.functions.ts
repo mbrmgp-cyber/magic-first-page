@@ -1152,22 +1152,31 @@ export const adminUpdateMemberCode = createServerFn({ method: "POST" })
 
 export const setOrgSubscription = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { org_id: string; expires_at?: string | null; extend_days?: number }) => d)
+  .inputValidator((d: {
+    org_id: string;
+    expires_at?: string | null;
+    extend_days?: number;
+    amount?: number;
+    currency?: string;
+    payment_method?: string;
+    notes?: string;
+    create_receipt?: boolean;
+  }) => d)
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "mbr_admin" });
     if (!isAdmin) throw new Error("Forbidden");
+    const { data: row } = await supabase
+      .from("organizations")
+      .select("subscription_expires_at")
+      .eq("id", data.org_id)
+      .maybeSingle();
+    const prevExpiry = row?.subscription_expires_at ? new Date(row.subscription_expires_at as string) : null;
+    const nowInFuture = prevExpiry && prevExpiry.getTime() > Date.now() ? prevExpiry : new Date();
     let nextExpiry: string;
+    let periodStart: string = nowInFuture.toISOString();
     if (typeof data.extend_days === "number" && data.extend_days !== 0) {
-      const { data: row } = await supabase
-        .from("organizations")
-        .select("subscription_expires_at")
-        .eq("id", data.org_id)
-        .maybeSingle();
-      const base = row?.subscription_expires_at
-        ? new Date(row.subscription_expires_at as string)
-        : new Date();
-      const start = base.getTime() > Date.now() ? base : new Date();
+      const start = new Date(nowInFuture);
       start.setDate(start.getDate() + data.extend_days);
       nextExpiry = start.toISOString();
     } else if (data.expires_at) {
@@ -1182,7 +1191,68 @@ export const setOrgSubscription = createServerFn({ method: "POST" })
       .update({ subscription_expires_at: nextExpiry })
       .eq("id", data.org_id);
     if (error) throw new Error(error.message);
-    return { ok: true, subscription_expires_at: nextExpiry };
+
+    let receipt: any = null;
+    if (data.create_receipt !== false) {
+      const { data: rcpt, error: rErr } = await supabase
+        .from("subscription_payments")
+        .insert({
+          org_id: data.org_id,
+          amount: Number(data.amount ?? 0),
+          currency: (data.currency || "INR").toUpperCase(),
+          period_start: periodStart,
+          period_end: nextExpiry,
+          payment_method: data.payment_method || "other",
+          notes: data.notes || null,
+          recorded_by: userId,
+          status: "paid",
+        })
+        .select("*")
+        .single();
+      if (rErr) throw new Error(rErr.message);
+      receipt = rcpt;
+    }
+    return { ok: true, subscription_expires_at: nextExpiry, receipt };
+  });
+
+export const listOrgReceipts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { org_id?: string } | undefined) => d ?? {})
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    let orgId = data.org_id ?? null;
+    if (!orgId) {
+      const { data: adminOrg } = await supabase
+        .from("organizations")
+        .select("id")
+        .eq("admin_user_id", userId)
+        .maybeSingle();
+      if (adminOrg?.id) orgId = adminOrg.id as string;
+      else {
+        const { data: mem } = await supabase
+          .from("members")
+          .select("org_id")
+          .eq("user_id", userId)
+          .eq("status", "approved")
+          .maybeSingle();
+        if (mem?.org_id) orgId = mem.org_id as string;
+      }
+    }
+    if (!orgId) return { receipts: [], org: null };
+
+    const { data: org } = await supabase
+      .from("organizations")
+      .select("id, name, org_code, email, phone, gov_reg_number, logo_url, subscription_expires_at, theme_color")
+      .eq("id", orgId)
+      .maybeSingle();
+
+    const { data: receipts, error } = await supabase
+      .from("subscription_payments")
+      .select("*")
+      .eq("org_id", orgId)
+      .order("paid_on", { ascending: false });
+    if (error) throw new Error(error.message);
+    return { receipts: receipts ?? [], org };
   });
 
 export const getMySubscriptionStatus = createServerFn({ method: "GET" })
