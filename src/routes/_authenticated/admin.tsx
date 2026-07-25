@@ -74,6 +74,22 @@ function AdminPanel() {
     }
   }
 
+  async function confirmSuspend() {
+    if (!suspendOrg) return;
+    setBusyId(suspendOrg.id);
+    try {
+      await setStatus({ data: { org_id: suspendOrg.id, status: "suspended", notes: "Suspended by Super Admin" } });
+      toast.success("Organization suspended");
+      qc.invalidateQueries({ queryKey: ["admin-all-orgs"] });
+    } catch (e: any) {
+      toast.error(e.message ?? "Failed");
+    } finally {
+      setBusyId(null);
+      setSuspendOrg(null);
+      setSuspendConfirm("");
+    }
+  }
+
   if (rolesQ.isLoading) return <div className="min-h-screen flex items-center justify-center bg-black text-white">Loading…</div>;
 
   if (!isAdmin) {
