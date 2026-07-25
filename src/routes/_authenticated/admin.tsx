@@ -367,12 +367,18 @@ function AllOrganizationsManager() {
   const setStatus = useServerFn(setOrganizationStatus);
   const getDetails = useServerFn(getOrganizationDetails);
   const setSub = useServerFn(setOrgSubscription);
+  const updateOrg = useServerFn(adminUpdateOrganization);
+  const deleteOrg = useServerFn(adminDeleteOrganization);
 
   const orgsQ = useQuery({ queryKey: ["admin-all-orgs"], queryFn: () => fetchOrgs() });
   const [busy, setBusy] = useState<string | null>(null);
   const [detailsId, setDetailsId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [expiryEdits, setExpiryEdits] = useState<Record<string, string>>({});
+  const [editOrg, setEditOrg] = useState<any | null>(null);
+  const [editForm, setEditForm] = useState<any>({});
+  const [deleteOrgState, setDeleteOrgState] = useState<any | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
 
   const detailsQ = useQuery({
     queryKey: ["admin-org-details", detailsId],
