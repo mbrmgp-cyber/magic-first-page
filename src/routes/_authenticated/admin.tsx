@@ -276,19 +276,7 @@ function AdminPanel() {
                         variant="outline"
                         className="w-full bg-amber-900/40 hover:bg-amber-900/60 border-amber-700 text-amber-100"
                         disabled={busyId === o.id}
-                        onClick={async () => {
-                          if (!confirm(`Suspend "${o.name}"?\n\nAll members will lose access until reactivated. Data is preserved and no records are deleted.`)) return;
-                          setBusyId(o.id);
-                          try {
-                            await setStatus({ data: { org_id: o.id, status: "suspended", notes: "Suspended by Super Admin" } });
-                            toast.success("Organization suspended");
-                            qc.invalidateQueries({ queryKey: ["admin-all-orgs"] });
-                          } catch (e: any) {
-                            toast.error(e.message ?? "Failed");
-                          } finally {
-                            setBusyId(null);
-                          }
-                        }}
+                        onClick={() => { setSuspendOrg(o); setSuspendConfirm(""); }}
                       >
                         <PauseCircle className="h-4 w-4 mr-1" />Suspend Organization
                       </Button>
