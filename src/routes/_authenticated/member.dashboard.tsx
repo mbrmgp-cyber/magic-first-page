@@ -10,11 +10,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Textarea } from "@/components/ui/textarea";
 import { MemberIdCard } from "@/components/MemberIdCard";
 import { LanguageToggle } from "@/components/LanguageToggle";
-import { PayToSociety } from "@/components/PayToSociety";
+
 import { useI18n, bi } from "@/lib/i18n";
 import {
   LogOut, IdCard, BookOpen, Wallet, Briefcase, MessageSquare, Vote, ShieldCheck, User, ScanLine,
-  Facebook, Youtube, Gavel, CalendarDays, Building2, DoorOpen, AlertTriangle, RefreshCw, Clock, XCircle, CheckCircle2,
+  Facebook, Youtube, Gavel, CalendarDays, DoorOpen, AlertTriangle, RefreshCw, Clock, XCircle, CheckCircle2,
   LayoutDashboard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -80,7 +80,6 @@ function MemberDashboard() {
   const [photoUrl, setPhotoUrl] = useState<string>("");
   const [photoBroken, setPhotoBroken] = useState(false);
   const [idCardOpen, setIdCardOpen] = useState(false);
-  const [payOpen, setPayOpen] = useState(false);
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [leaveReason, setLeaveReason] = useState("");
@@ -333,20 +332,6 @@ function MemberDashboard() {
             <p className="text-[14px] font-semibold text-white leading-tight">{b("సభ్యుడి ఐడి కార్డ్", "Member ID Card")}</p>
           </button>
 
-          {/* Pay to Society: opens dialog with bank details */}
-          <button
-            type="button"
-            onClick={() => setPayOpen(true)}
-            className="rounded-xl bg-zinc-950 border border-zinc-800 p-4 flex flex-col items-center justify-center gap-2.5 text-center transition hover:-translate-y-0.5 min-h-[112px]"
-            onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${brand}99`; e.currentTarget.style.boxShadow = `0 0 20px ${brand}33`; }}
-            onMouseLeave={(e) => { e.currentTarget.style.borderColor = ""; e.currentTarget.style.boxShadow = ""; }}
-          >
-            <div className="h-11 w-11 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: `${brand}26` }}>
-              <Building2 className="h-5 w-5" style={{ color: brand }} />
-            </div>
-            <p className="text-[14px] font-semibold text-white leading-tight">{b("సొసైటీకి పేమెంట్", "Pay to Society")}</p>
-          </button>
 
           {/* Committee toggle: opens the org admin dashboard for treasurers etc. */}
           {committeeQ.data?.isCommittee && !committeeQ.data?.isPrimaryAdmin && (
@@ -459,17 +444,6 @@ function MemberDashboard() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={payOpen} onOpenChange={setPayOpen}>
-        <DialogContent className="max-w-[440px] p-5 bg-zinc-950 border-zinc-800 text-white">
-          <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
-              <Building2 className="h-5 w-5" style={{ color: brand }} />
-              {b("సొసైటీకి పేమెంట్ వివరాలు", "Pay to Society")}
-            </DialogTitle>
-          </DialogHeader>
-          <PayToSociety org={org} brand={brand} b={b} />
-        </DialogContent>
-      </Dialog>
 
       {/* Leave Society Request Dialog */}
       <Dialog open={leaveOpen} onOpenChange={(o) => { setLeaveOpen(o); if (!o) setLeaveReason(""); }}>
