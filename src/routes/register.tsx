@@ -6,9 +6,10 @@ import { MemberRegister } from "./member.register";
 export const Route = createFileRoute("/register")({
   head: () => ({ meta: [{ title: "Member Registration — MBR App" }] }),
   ssr: false,
-  validateSearch: (s: Record<string, unknown>) => ({
-    code: typeof s.code === "string" ? s.code : undefined,
-  }),
+  validateSearch: (s: Record<string, unknown>): { code?: string } => {
+    const code = typeof s.code === "string" && s.code ? s.code : undefined;
+    return code ? { code } : {};
+  },
   component: function RegisterPage() {
     const search = Route.useSearch();
     return <MemberRegister initialCode={search.code} />;
