@@ -446,6 +446,11 @@ function AllOrganizationsManager() {
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [suspendOrgState, setSuspendOrgState] = useState<any | null>(null);
   const [suspendConfirm, setSuspendConfirm] = useState("");
+  const [receiptsOrg, setReceiptsOrg] = useState<any | null>(null);
+  const [renewOrg, setRenewOrg] = useState<any | null>(null);
+  const [renewForm, setRenewForm] = useState<{ amount: string; currency: string; days: string; method: string; notes: string }>({
+    amount: "", currency: "INR", days: "365", method: "cash", notes: "",
+  });
 
   const detailsQ = useQuery({
     queryKey: ["admin-org-details", detailsId],
