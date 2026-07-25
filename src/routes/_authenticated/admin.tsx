@@ -604,7 +604,14 @@ function AllOrganizationsManager() {
 
                   <Select
                     value={status}
-                    onValueChange={(v) => changeStatus(o.id, v as OrgStatus)}
+                    onValueChange={(v) => {
+                      if (v === "suspended") {
+                        setSuspendOrgState(o);
+                        setSuspendConfirm("");
+                      } else {
+                        changeStatus(o.id, v as OrgStatus);
+                      }
+                    }}
                     disabled={busy === o.id}
                   >
                     <SelectTrigger className="h-8 w-full sm:w-[140px] text-xs bg-zinc-900 border-zinc-700 text-white">
