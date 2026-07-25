@@ -844,6 +844,16 @@ function AllOrganizationsManager() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <SuspendConfirmDialog
+        org={suspendOrgState}
+        open={!!suspendOrgState}
+        confirmText={suspendConfirm}
+        onConfirmTextChange={setSuspendConfirm}
+        onConfirm={confirmSuspend}
+        onOpenChange={(open: boolean) => { if (!open) { setSuspendOrgState(null); setSuspendConfirm(""); } }}
+        busy={busy === suspendOrgState?.id}
+      />
     </>
   );
 }
