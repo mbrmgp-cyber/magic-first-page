@@ -539,6 +539,12 @@ function AllOrganizationsManager() {
                   <Button size="sm" variant="outline" onClick={() => setDetailsId(o.id)} className="border-zinc-600 text-white hover:bg-zinc-800 hover:text-white">
                     <Eye className="h-3 w-3 mr-1" />View
                   </Button>
+                  <Button size="sm" variant="outline" onClick={() => openEdit(o)} className="border-blue-600/60 bg-blue-950/40 text-blue-100 hover:bg-blue-900/60 hover:text-white">
+                    <Pencil className="h-3 w-3 mr-1" />Edit
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => { setDeleteOrgState(o); setDeleteConfirm(""); }} className="border-red-700 bg-red-950/40 text-red-100 hover:bg-red-900/60 hover:text-white">
+                    <Trash2 className="h-3 w-3 mr-1" />Delete
+                  </Button>
                 </div>
 
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 pt-2 border-t border-dashed border-zinc-700">
