@@ -310,6 +310,16 @@ function AdminPanel() {
           })}
         </div>
       </div>
+
+      <SuspendConfirmDialog
+        org={suspendOrg}
+        open={!!suspendOrg}
+        confirmText={suspendConfirm}
+        onConfirmTextChange={setSuspendConfirm}
+        onConfirm={confirmSuspend}
+        onOpenChange={(open) => { if (!open) { setSuspendOrg(null); setSuspendConfirm(""); } }}
+        busy={busyId === suspendOrg?.id}
+      />
     </div>
   );
 }
