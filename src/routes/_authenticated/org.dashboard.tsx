@@ -13,7 +13,7 @@ import {
   LogOut, BookOpen, Users, Briefcase, Calendar, IdCard, Wallet,
   MessageSquare, QrCode, Camera, Download, RefreshCw, Settings, AlertTriangle,
   Upload, ShieldAlert, FileDown, CheckCircle2, Vote, TrendingUp, TrendingDown, PieChart, ShieldCheck, Gavel,
-  User, KeyRound,
+  User, KeyRound, Receipt,
 } from "lucide-react";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 import { localizeText, transliterateText, useI18n } from "@/lib/i18n";
@@ -417,6 +417,32 @@ function Dashboard() {
             </Card>
           </Link>
         )}
+
+        {/* Subscription & Receipts */}
+        <Link to="/org/subscription" className="block">
+          <Card
+            className="p-3 border-2 flex items-center gap-3 transition-all hover:scale-[1.01]"
+            style={{
+              background: `linear-gradient(135deg, ${theme.icon}22, ${theme.bigBox})`,
+              borderColor: `${theme.icon}80`,
+              boxShadow: `0 0 20px ${theme.icon}33`,
+            }}
+          >
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 border"
+              style={{ background: `${theme.icon}26`, borderColor: `${theme.icon}66` }}>
+              <Receipt className="w-5 h-5" style={{ color: theme.icon }} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="font-bold text-sm leading-tight" style={{ color: theme.headColor }}>
+                {lt("Subscription & Receipts", "సబ్‌స్క్రిప్షన్ & రసీదులు")}
+              </div>
+              <div className="text-[11px] leading-tight" style={{ color: theme.subColor }}>
+                {lt("View validity and download payment receipts", "వ్యాలిడిటీ చూడండి, రసీదులు డౌన్‌లోడ్ చేయండి")}
+              </div>
+            </div>
+            <span className="text-lg shrink-0" style={{ color: theme.icon }}>→</span>
+          </Card>
+        </Link>
 
         {/* Menu 2-col grid */}
         <div className="grid grid-cols-2 gap-3">

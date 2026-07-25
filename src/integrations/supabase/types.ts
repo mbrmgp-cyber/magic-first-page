@@ -2117,6 +2117,65 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          id: string
+          notes: string | null
+          org_id: string
+          paid_on: string
+          payment_method: string
+          period_end: string
+          period_start: string | null
+          receipt_number: string
+          recorded_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          notes?: string | null
+          org_id: string
+          paid_on?: string
+          payment_method?: string
+          period_end: string
+          period_start?: string | null
+          receipt_number: string
+          recorded_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          notes?: string | null
+          org_id?: string
+          paid_on?: string
+          payment_method?: string
+          period_end?: string
+          period_start?: string | null
+          receipt_number?: string
+          recorded_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_payments_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppressed_emails: {
         Row: {
           created_at: string

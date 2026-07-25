@@ -22,6 +22,7 @@ import { Route as MCodeRouteImport } from './routes/m.$code'
 import { Route as DonorRegisterRouteImport } from './routes/donor.register'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedOrgThemeRouteImport } from './routes/_authenticated/org.theme'
+import { Route as AuthenticatedOrgSubscriptionRouteImport } from './routes/_authenticated/org.subscription'
 import { Route as AuthenticatedOrgRulesRouteImport } from './routes/_authenticated/org.rules'
 import { Route as AuthenticatedOrgMembersRouteImport } from './routes/_authenticated/org.members'
 import { Route as AuthenticatedOrgMasterLedgerRouteImport } from './routes/_authenticated/org.master-ledger'
@@ -116,6 +117,12 @@ const AuthenticatedOrgThemeRoute = AuthenticatedOrgThemeRouteImport.update({
   path: '/org/theme',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedOrgSubscriptionRoute =
+  AuthenticatedOrgSubscriptionRouteImport.update({
+    id: '/org/subscription',
+    path: '/org/subscription',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedOrgRulesRoute = AuthenticatedOrgRulesRouteImport.update({
   id: '/org/rules',
   path: '/org/rules',
@@ -320,6 +327,7 @@ export interface FileRoutesByFullPath {
   '/org/master-ledger': typeof AuthenticatedOrgMasterLedgerRoute
   '/org/members': typeof AuthenticatedOrgMembersRoute
   '/org/rules': typeof AuthenticatedOrgRulesRoute
+  '/org/subscription': typeof AuthenticatedOrgSubscriptionRoute
   '/org/theme': typeof AuthenticatedOrgThemeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -363,6 +371,7 @@ export interface FileRoutesByTo {
   '/org/master-ledger': typeof AuthenticatedOrgMasterLedgerRoute
   '/org/members': typeof AuthenticatedOrgMembersRoute
   '/org/rules': typeof AuthenticatedOrgRulesRoute
+  '/org/subscription': typeof AuthenticatedOrgSubscriptionRoute
   '/org/theme': typeof AuthenticatedOrgThemeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -408,6 +417,7 @@ export interface FileRoutesById {
   '/_authenticated/org/master-ledger': typeof AuthenticatedOrgMasterLedgerRoute
   '/_authenticated/org/members': typeof AuthenticatedOrgMembersRoute
   '/_authenticated/org/rules': typeof AuthenticatedOrgRulesRoute
+  '/_authenticated/org/subscription': typeof AuthenticatedOrgSubscriptionRoute
   '/_authenticated/org/theme': typeof AuthenticatedOrgThemeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -453,6 +463,7 @@ export interface FileRouteTypes {
     | '/org/master-ledger'
     | '/org/members'
     | '/org/rules'
+    | '/org/subscription'
     | '/org/theme'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -496,6 +507,7 @@ export interface FileRouteTypes {
     | '/org/master-ledger'
     | '/org/members'
     | '/org/rules'
+    | '/org/subscription'
     | '/org/theme'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -540,6 +552,7 @@ export interface FileRouteTypes {
     | '/_authenticated/org/master-ledger'
     | '/_authenticated/org/members'
     | '/_authenticated/org/rules'
+    | '/_authenticated/org/subscription'
     | '/_authenticated/org/theme'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -654,6 +667,13 @@ declare module '@tanstack/react-router' {
       path: '/org/theme'
       fullPath: '/org/theme'
       preLoaderRoute: typeof AuthenticatedOrgThemeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/subscription': {
+      id: '/_authenticated/org/subscription'
+      path: '/org/subscription'
+      fullPath: '/org/subscription'
+      preLoaderRoute: typeof AuthenticatedOrgSubscriptionRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/org/rules': {
@@ -890,6 +910,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedOrgMasterLedgerRoute: typeof AuthenticatedOrgMasterLedgerRoute
   AuthenticatedOrgMembersRoute: typeof AuthenticatedOrgMembersRoute
   AuthenticatedOrgRulesRoute: typeof AuthenticatedOrgRulesRoute
+  AuthenticatedOrgSubscriptionRoute: typeof AuthenticatedOrgSubscriptionRoute
   AuthenticatedOrgThemeRoute: typeof AuthenticatedOrgThemeRoute
 }
 
@@ -921,6 +942,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedOrgMasterLedgerRoute: AuthenticatedOrgMasterLedgerRoute,
   AuthenticatedOrgMembersRoute: AuthenticatedOrgMembersRoute,
   AuthenticatedOrgRulesRoute: AuthenticatedOrgRulesRoute,
+  AuthenticatedOrgSubscriptionRoute: AuthenticatedOrgSubscriptionRoute,
   AuthenticatedOrgThemeRoute: AuthenticatedOrgThemeRoute,
 }
 
