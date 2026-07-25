@@ -823,6 +823,66 @@ function AllOrganizationsManager() {
   );
 }
 
+function SuspendConfirmDialog({
+  org,
+  open,
+  confirmText,
+  onConfirmTextChange,
+  onConfirm,
+  onOpenChange,
+  busy,
+}: {
+  org: any | null;
+  open: boolean;
+  confirmText: string;
+  onConfirmTextChange: (v: string) => void;
+  onConfirm: () => void;
+  onOpenChange: (open: boolean) => void;
+  busy: boolean;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md bg-zinc-900 border-amber-700 text-white">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-amber-300">
+            <PauseCircle className="h-5 w-5" /> Suspend Organization
+          </DialogTitle>
+          <DialogDescription className="text-xs text-zinc-400">
+            This deactivates <b className="text-white">{org?.name}</b>. Members will lose access, but all data is preserved. You can reactivate anytime.
+          </DialogDescription>
+        </DialogHeader>
+        <Alert className="bg-amber-950/40 border-amber-800 text-amber-100">
+          <AlertTitle className="text-xs">Data is safe</AlertTitle>
+          <AlertDescription className="text-xs">
+            Suspending only changes the status. No records are deleted.
+          </AlertDescription>
+        </Alert>
+        <div className="space-y-1">
+          <Label className="text-xs text-zinc-300">
+            Type org code <span className="font-mono text-amber-300">{org?.org_code}</span> to confirm
+          </Label>
+          <Input
+            value={confirmText}
+            onChange={(e) => onConfirmTextChange(e.target.value.toUpperCase())}
+            placeholder={org?.org_code}
+            className="bg-zinc-950 border-amber-700 text-white font-mono"
+          />
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-white hover:bg-zinc-800">Cancel</Button>
+          <Button
+            className="bg-amber-700 hover:bg-amber-800 text-white"
+            disabled={busy || confirmText.trim().toUpperCase() !== String(org?.org_code ?? "").toUpperCase()}
+            onClick={onConfirm}
+          >
+            <PauseCircle className="h-4 w-4 mr-1" />Suspend Organization
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 type GlobalAd = { id: string; url: string; label: string | null; active: boolean; sort_order: number };
 
 function MbrGlobalAdsManager() {
