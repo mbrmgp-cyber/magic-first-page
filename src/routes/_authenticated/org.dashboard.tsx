@@ -297,20 +297,12 @@ function Dashboard() {
             <Settings className="h-4 w-4" />
           </Button>
           <div className="flex items-center gap-1 flex-nowrap justify-end min-w-0">
-            {committeeQ.data?.isCommittee && !committeeQ.data?.isPrimaryAdmin && (
-              <Link
-                to="/member/dashboard"
-                className="inline-flex items-center gap-1 px-2 h-9 rounded-md border border-amber-500/60 bg-amber-500/10 text-amber-200 hover:bg-amber-500/20 text-xs font-semibold shrink-0"
-                title={lt("Switch to Member Dashboard", "సభ్యుడి డాష్‌బోర్డ్‌కి మారండి")}
-              >
-                <User className="h-4 w-4 mr-0.5" />{lt("Member View", "సభ్యుడి")}
-              </Link>
-            )}
             <Button variant="ghost" size="sm" onClick={logout} className="text-zinc-200 hover:bg-zinc-900 hover:text-white px-2 h-9 rounded-md border border-zinc-700 shrink-0">
               <LogOut className="h-4 w-4 mr-1" />{lt("Logout", "లాగ్ అవుట్")}
             </Button>
             <img src={mbrLogo.url} alt="MBR" data-mbr-logo className="w-10 h-10 shrink-0 rounded-md border border-zinc-800 object-contain p-0.5" style={{ backgroundColor: "#000" }} />
           </div>
+
         </div>
 
 
@@ -380,13 +372,23 @@ function Dashboard() {
           </Link>
         )}
 
-        {/* Active role indicator */}
-        <div className="text-center text-[11px] -mt-1">
+        {/* Active role indicator + Member View switch */}
+        <div className="flex items-center justify-center gap-2 -mt-1 text-[11px]">
           <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 border" style={{ borderColor: theme.border, background: theme.miniBox, color: theme.subColor }}>
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: theme.icon }} />
             {lt("Logged in as", "లాగిన్ అయిన వారు")}: <span className="font-semibold" style={{ color: theme.headColor }}>{lt(ROLE_LABELS[simRole].en, ROLE_LABELS[simRole].te)}</span>
           </span>
+          {committeeQ.data?.isCommittee && !committeeQ.data?.isPrimaryAdmin && (
+            <Link
+              to="/member/dashboard"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border border-amber-500/60 bg-amber-500/10 text-amber-200 hover:bg-amber-500/20 font-semibold shrink-0"
+              title={lt("Switch to Member Dashboard", "సభ్యుడి డాష్‌బోర్డ్‌కి మారండి")}
+            >
+              <User className="h-3.5 w-3.5" />{lt("Member View", "సభ్యుడి వ్యూ")}
+            </Link>
+          )}
         </div>
+
 
         {/* Super Admin: Role & Access Management */}
         {isSuperAdmin && (
