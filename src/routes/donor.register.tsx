@@ -14,9 +14,10 @@ import { submitDonorRequest } from "@/lib/donors.functions";
 export const Route = createFileRoute("/donor/register")({
   head: () => ({ meta: [{ title: "Donor Registration — MBR App" }] }),
   ssr: false,
-  validateSearch: (s: Record<string, unknown>) => ({
-    code: typeof s.code === "string" ? s.code : undefined,
-  }),
+  validateSearch: (s: Record<string, unknown>): { code?: string } => {
+    const code = typeof s.code === "string" && s.code ? s.code : undefined;
+    return code ? { code } : {};
+  },
   component: function DonorRegisterRoute() {
     const search = Route.useSearch();
     return <DonorRegister initialCode={search.code} />;
