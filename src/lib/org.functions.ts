@@ -893,6 +893,81 @@ export const setOrganizationStatus = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const adminUpdateOrganization = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: {
+    org_id: string;
+    name?: string;
+    email?: string;
+    phone?: string | null;
+    slogan?: string | null;
+    address?: string | null;
+    gov_reg_number?: string | null;
+    logo_url?: string | null;
+  }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "mbr_admin" });
+    if (!isAdmin) throw new Error("Forbidden");
+    const patch: Record<string, any> = {};
+    if (data.name !== undefined) patch.name = data.name;
+    if (data.email !== undefined) patch.email = data.email;
+    if (data.phone !== undefined) patch.phone = data.phone;
+    if (data.slogan !== undefined) patch.slogan = data.slogan;
+    if (data.address !== undefined) patch.address = data.address;
+    if (data.gov_reg_number !== undefined) patch.gov_reg_number = data.gov_reg_number;
+    if (data.logo_url !== undefined) patch.logo_url = data.logo_url;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("organizations")
+      .update(patch as any)
+      .eq("id", data.org_id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminDeleteOrganization = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { org_id: string; confirm_code: string }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "mbr_admin" });
+    if (!isAdmin) throw new Error("Forbidden");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: org, error: fetchErr } = await supabaseAdmin
+      .from("organizations")
+      .select("id, org_code")
+      .eq("id", data.org_id)
+      .maybeSingle();
+    if (fetchErr) throw new Error(fetchErr.message);
+    if (!org) throw new Error("Organization not found");
+    if ((data.confirm_code || "").trim().toUpperCase() !== String(org.org_code).toUpperCase()) {
+      throw new Error("Confirmation code doesn't match the organization code");
+    }
+    // Best-effort cleanup of dependent rows so delete doesn't fail on FKs.
+    const orgId = data.org_id;
+    const tables = [
+      "bids", "auction_payments", "auction_month_archives", "auction_sessions", "chit_auctions",
+      "member_loan_payments", "member_loan_requests", "member_loans",
+      "member_leave_requests",
+      "disciplinary_suspensions", "disciplinary_president_nominations", "disciplinary_committee_members",
+      "committee_members",
+      "org_election_votes", "org_election_nominations", "org_elections",
+      "org_resolutions", "org_meetings", "org_milestones", "org_activities", "org_rules",
+      "org_income", "org_expenses", "wallet_accounts",
+      "donations", "donors",
+      "chat_interactions", "chat_announcements",
+      "admin_module_access",
+      "members",
+    ];
+    for (const t of tables) {
+      await supabaseAdmin.from(t as any).delete().eq("org_id", orgId);
+    }
+    const { error } = await supabaseAdmin.from("organizations").delete().eq("id", orgId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const getOrganizationDetails = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { org_id: string }) => d)
