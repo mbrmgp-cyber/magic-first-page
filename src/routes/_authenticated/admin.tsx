@@ -474,12 +474,50 @@ function AllOrganizationsManager() {
   async function saveExpiry(orgId: string, expires_at?: string, extend_days?: number) {
     setBusy(orgId);
     try {
-      await setSub({ data: { org_id: orgId, expires_at, extend_days } });
+      await setSub({ data: { org_id: orgId, expires_at, extend_days, create_receipt: false } });
       toast.success("Subscription updated");
       setExpiryEdits((p) => ({ ...p, [orgId]: "" }));
       qc.invalidateQueries({ queryKey: ["admin-all-orgs"] });
     } catch (e: any) {
       toast.error(e.message ?? "Update failed");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  function openRenew(o: any) {
+    setRenewOrg(o);
+    setRenewForm({ amount: "", currency: "INR", days: "365", method: "cash", notes: "" });
+  }
+
+  async function submitRenew() {
+    if (!renewOrg) return;
+    const amount = Number(renewForm.amount);
+    const days = Number(renewForm.days);
+    if (!(amount > 0)) { toast.error("Enter a valid amount"); return; }
+    if (!(days > 0)) { toast.error("Enter valid days"); return; }
+    setBusy(renewOrg.id);
+    try {
+      const res: any = await setSub({
+        data: {
+          org_id: renewOrg.id,
+          extend_days: days,
+          amount,
+          currency: renewForm.currency.toUpperCase(),
+          payment_method: renewForm.method,
+          notes: renewForm.notes || undefined,
+          create_receipt: true,
+        },
+      });
+      toast.success(`Renewed. Receipt ${res?.receipt?.receipt_number ?? ""}`);
+      // Immediately print receipt
+      if (res?.receipt) {
+        printReceipt(renewOrg, res.receipt);
+      }
+      setRenewOrg(null);
+      qc.invalidateQueries({ queryKey: ["admin-all-orgs"] });
+    } catch (e: any) {
+      toast.error(e.message ?? "Renewal failed");
     } finally {
       setBusy(null);
     }
