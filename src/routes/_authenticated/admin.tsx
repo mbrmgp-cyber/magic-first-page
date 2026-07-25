@@ -521,6 +521,22 @@ function AllOrganizationsManager() {
     }
   }
 
+  async function confirmSuspend() {
+    if (!suspendOrgState) return;
+    setBusy(suspendOrgState.id);
+    try {
+      await setStatus({ data: { org_id: suspendOrgState.id, status: "suspended", notes: "Suspended by Super Admin" } });
+      toast.success("Organization suspended");
+      qc.invalidateQueries({ queryKey: ["admin-all-orgs"] });
+    } catch (e: any) {
+      toast.error(e.message ?? "Suspend failed");
+    } finally {
+      setBusy(null);
+      setSuspendOrgState(null);
+      setSuspendConfirm("");
+    }
+  }
+
 
 
   const orgs = (orgsQ.data?.orgs ?? []) as any[];
