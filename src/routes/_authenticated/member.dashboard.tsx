@@ -10,10 +10,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Textarea } from "@/components/ui/textarea";
 import { MemberIdCard } from "@/components/MemberIdCard";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { PayToSociety } from "@/components/PayToSociety";
 import { useI18n, bi } from "@/lib/i18n";
 import {
   LogOut, IdCard, BookOpen, Wallet, Briefcase, MessageSquare, Vote, ShieldCheck, User, ScanLine,
-  Facebook, Youtube, Gavel, CalendarDays, Building2, Copy, DoorOpen, AlertTriangle, RefreshCw, Clock, XCircle, CheckCircle2,
+  Facebook, Youtube, Gavel, CalendarDays, Building2, DoorOpen, AlertTriangle, RefreshCw, Clock, XCircle, CheckCircle2,
   LayoutDashboard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
