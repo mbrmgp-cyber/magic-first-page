@@ -43,6 +43,8 @@ function AdminPanel() {
   const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "all">("pending");
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [suspendOrg, setSuspendOrg] = useState<any | null>(null);
+  const [suspendConfirm, setSuspendConfirm] = useState("");
 
   async function logout() {
     await supabase.auth.signOut();
@@ -69,6 +71,22 @@ function AdminPanel() {
       toast.error(e.message ?? "Failed");
     } finally {
       setBusyId(null);
+    }
+  }
+
+  async function confirmSuspend() {
+    if (!suspendOrg) return;
+    setBusyId(suspendOrg.id);
+    try {
+      await setStatus({ data: { org_id: suspendOrg.id, status: "suspended", notes: "Suspended by Super Admin" } });
+      toast.success("Organization suspended");
+      qc.invalidateQueries({ queryKey: ["admin-all-orgs"] });
+    } catch (e: any) {
+      toast.error(e.message ?? "Failed");
+    } finally {
+      setBusyId(null);
+      setSuspendOrg(null);
+      setSuspendConfirm("");
     }
   }
 
@@ -258,19 +276,7 @@ function AdminPanel() {
                         variant="outline"
                         className="w-full bg-amber-900/40 hover:bg-amber-900/60 border-amber-700 text-amber-100"
                         disabled={busyId === o.id}
-                        onClick={async () => {
-                          if (!confirm(`Suspend "${o.name}"?\n\nAll members will lose access until reactivated. Data is preserved and no records are deleted.`)) return;
-                          setBusyId(o.id);
-                          try {
-                            await setStatus({ data: { org_id: o.id, status: "suspended", notes: "Suspended by Super Admin" } });
-                            toast.success("Organization suspended");
-                            qc.invalidateQueries({ queryKey: ["admin-all-orgs"] });
-                          } catch (e: any) {
-                            toast.error(e.message ?? "Failed");
-                          } finally {
-                            setBusyId(null);
-                          }
-                        }}
+                        onClick={() => { setSuspendOrg(o); setSuspendConfirm(""); }}
                       >
                         <PauseCircle className="h-4 w-4 mr-1" />Suspend Organization
                       </Button>
@@ -304,6 +310,16 @@ function AdminPanel() {
           })}
         </div>
       </div>
+
+      <SuspendConfirmDialog
+        org={suspendOrg}
+        open={!!suspendOrg}
+        confirmText={suspendConfirm}
+        onConfirmTextChange={setSuspendConfirm}
+        onConfirm={confirmSuspend}
+        onOpenChange={(open: boolean) => { if (!open) { setSuspendOrg(null); setSuspendConfirm(""); } }}
+        busy={busyId === suspendOrg?.id}
+      />
     </div>
   );
 }
@@ -427,6 +443,8 @@ function AllOrganizationsManager() {
   const [editForm, setEditForm] = useState<any>({});
   const [deleteOrgState, setDeleteOrgState] = useState<any | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [suspendOrgState, setSuspendOrgState] = useState<any | null>(null);
+  const [suspendConfirm, setSuspendConfirm] = useState("");
 
   const detailsQ = useQuery({
     queryKey: ["admin-org-details", detailsId],
@@ -503,6 +521,22 @@ function AllOrganizationsManager() {
     }
   }
 
+  async function confirmSuspend() {
+    if (!suspendOrgState) return;
+    setBusy(suspendOrgState.id);
+    try {
+      await setStatus({ data: { org_id: suspendOrgState.id, status: "suspended", notes: "Suspended by Super Admin" } });
+      toast.success("Organization suspended");
+      qc.invalidateQueries({ queryKey: ["admin-all-orgs"] });
+    } catch (e: any) {
+      toast.error(e.message ?? "Suspend failed");
+    } finally {
+      setBusy(null);
+      setSuspendOrgState(null);
+      setSuspendConfirm("");
+    }
+  }
+
 
 
   const orgs = (orgsQ.data?.orgs ?? []) as any[];
@@ -570,7 +604,14 @@ function AllOrganizationsManager() {
 
                   <Select
                     value={status}
-                    onValueChange={(v) => changeStatus(o.id, v as OrgStatus)}
+                    onValueChange={(v) => {
+                      if (v === "suspended") {
+                        setSuspendOrgState(o);
+                        setSuspendConfirm("");
+                      } else {
+                        changeStatus(o.id, v as OrgStatus);
+                      }
+                    }}
                     disabled={busy === o.id}
                   >
                     <SelectTrigger className="h-8 w-full sm:w-[140px] text-xs bg-zinc-900 border-zinc-700 text-white">
@@ -803,7 +844,77 @@ function AllOrganizationsManager() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <SuspendConfirmDialog
+        org={suspendOrgState}
+        open={!!suspendOrgState}
+        confirmText={suspendConfirm}
+        onConfirmTextChange={setSuspendConfirm}
+        onConfirm={confirmSuspend}
+        onOpenChange={(open: boolean) => { if (!open) { setSuspendOrgState(null); setSuspendConfirm(""); } }}
+        busy={busy === suspendOrgState?.id}
+      />
     </>
+  );
+}
+
+function SuspendConfirmDialog({
+  org,
+  open,
+  confirmText,
+  onConfirmTextChange,
+  onConfirm,
+  onOpenChange,
+  busy,
+}: {
+  org: any | null;
+  open: boolean;
+  confirmText: string;
+  onConfirmTextChange: (v: string) => void;
+  onConfirm: () => void;
+  onOpenChange: (open: boolean) => void;
+  busy: boolean;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md bg-zinc-900 border-amber-700 text-white">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-amber-300">
+            <PauseCircle className="h-5 w-5" /> Suspend Organization
+          </DialogTitle>
+          <DialogDescription className="text-xs text-zinc-400">
+            This deactivates <b className="text-white">{org?.name}</b>. Members will lose access, but all data is preserved. You can reactivate anytime.
+          </DialogDescription>
+        </DialogHeader>
+        <Alert className="bg-amber-950/40 border-amber-800 text-amber-100">
+          <AlertTitle className="text-xs">Data is safe</AlertTitle>
+          <AlertDescription className="text-xs">
+            Suspending only changes the status. No records are deleted.
+          </AlertDescription>
+        </Alert>
+        <div className="space-y-1">
+          <Label className="text-xs text-zinc-300">
+            Type org code <span className="font-mono text-amber-300">{org?.org_code}</span> to confirm
+          </Label>
+          <Input
+            value={confirmText}
+            onChange={(e) => onConfirmTextChange(e.target.value.toUpperCase())}
+            placeholder={org?.org_code}
+            className="bg-zinc-950 border-amber-700 text-white font-mono"
+          />
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-white hover:bg-zinc-800">Cancel</Button>
+          <Button
+            className="bg-amber-700 hover:bg-amber-800 text-white"
+            disabled={busy || confirmText.trim().toUpperCase() !== String(org?.org_code ?? "").toUpperCase()}
+            onClick={onConfirm}
+          >
+            <PauseCircle className="h-4 w-4 mr-1" />Suspend Organization
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
