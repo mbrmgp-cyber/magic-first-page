@@ -413,6 +413,49 @@ function AllOrganizationsManager() {
     }
   }
 
+  function openEdit(o: any) {
+    setEditOrg(o);
+    setEditForm({
+      name: o.name ?? "",
+      email: o.email ?? "",
+      phone: o.phone ?? "",
+      slogan: o.slogan ?? "",
+      gov_reg_number: o.gov_reg_number ?? "",
+    });
+  }
+
+  async function saveEdit() {
+    if (!editOrg) return;
+    setBusy(editOrg.id);
+    try {
+      await updateOrg({ data: { org_id: editOrg.id, ...editForm } });
+      toast.success("Organization updated");
+      setEditOrg(null);
+      qc.invalidateQueries({ queryKey: ["admin-all-orgs"] });
+    } catch (e: any) {
+      toast.error(e.message ?? "Update failed");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function confirmDelete() {
+    if (!deleteOrgState) return;
+    setBusy(deleteOrgState.id);
+    try {
+      await deleteOrg({ data: { org_id: deleteOrgState.id, confirm_code: deleteConfirm } });
+      toast.success("Organization deleted");
+      setDeleteOrgState(null);
+      setDeleteConfirm("");
+      qc.invalidateQueries({ queryKey: ["admin-all-orgs"] });
+    } catch (e: any) {
+      toast.error(e.message ?? "Delete failed");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+
 
   const orgs = (orgsQ.data?.orgs ?? []) as any[];
   const q = search.trim().toLowerCase();
