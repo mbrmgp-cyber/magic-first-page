@@ -1,111 +1,95 @@
 
-# Chit Fund Core Rewrite Plan
+# Varadhi (వారధి) — Build Plan
 
-Scope: rewrite the Chit Auction module (`org.auction.tsx`, `auction.functions.ts`, DB schema, RPCs) so every rule below is dynamic, Supabase-backed, and shared live between Admin and Member dashboards.
-
----
-
-## 1. Database (single migration)
-
-Extend `auction_sessions` and add supporting tables:
-
-- `auction_sessions` — add columns:
-  - `foreman_mode` text — `'commission'` | `'free_month'`
-  - `foreman_free_month` int — nullable, used when mode = `free_month`
-  - `terms` text — group terms & conditions
-  - `close_at` timestamptz — auction close time (drives 5-min warning)
-  - `total_members` int — derived at save time (participants + foreman if included)
-  - `foreman_included` boolean — company/owner counted as a member
-- New table `auction_payments` — receipt uploads per member per month
-  - `auction_id`, `org_id`, `member_id`, `month_no`, `amount`, `receipt_url`, `status` (`pending`|`verified`|`rejected`), `note`, `uploaded_by`, timestamps
-  - RLS: member can insert/select own rows; org admin/committee can select/update all.
-  - GRANTs to authenticated + service_role.
-- Storage bucket `chit-receipts` (private) with RLS policies for uploads/reads.
-- RPC `finalize_chit_auction(_org_id, _auction_id)` — picks highest bid, writes winner fields, sets `auction_closed=true`, appends to `past_winners`.
-- RPC `reset_chit_month(_org_id, _auction_id)` — advances `current_month`, clears bids for next round (keeps history in `past_winners`).
-- Keep existing `submit_chit_bid` / `submit_chit_consent`.
-
-## 2. Server functions (`src/lib/auction.functions.ts`)
-
-Extend `AuctionStateDTO` with `foremanMode`, `foremanFreeMonth`, `foremanIncluded`, `terms`, `closeAt`, `totalMembers`. New server fns:
-
-- `saveGroupConfig` — upsert config (name, chit value, months, start date, close time, foreman rules, terms, participants). Never touches `bids`.
-- `deleteGroup` — delete an `auction_sessions` row by id (admin only).
-- `finalizeAuction` — calls `finalize_chit_auction` RPC.
-- `resetToNextMonth` — calls `reset_chit_month` RPC.
-- `uploadPaymentReceipt` — inserts into `auction_payments` (file already in storage).
-- `verifyPayment` — admin updates status.
-- `listPayments` — admin/member scoped view.
-
-## 3. Admin UI (`org.auction.tsx` admin view)
-
-Rebuild into 4 sections:
-
-1. **Group Manager** — card list of all groups (from `groups[]`). Buttons: `Create New Group`, `Edit`, `Delete`. Create/Edit dialog fields:
-   - Group Name, Total Chit Amount, Total Months (free input), Start Date, Close Time (per-round), Terms textarea
-   - Foreman toggle: "Include Company as Member"
-   - Foreman Benefit radio: `Percentage Commission` (%) OR `Free Month` (month number)
-   - Add-member row: search/pick member by ID → append to participants list
-2. **Live Auction Board** (after selecting a group card):
-   - Header: Group name, Current Month, Chit Value, Start Time, Close Time countdown
-   - Member rows with live bid capsule + progress bar (bid / chit value)
-   - Live Metrics panel using the exact formulas below
-   - Buttons: `Start Turn`, `Close / Finalize Winner`, `Reset / Next Month`
-3. **Payments Panel** — table of receipts for current month, verify/reject actions, image preview.
-4. **PDF Print** (footer button) — see §6.
-
-## 4. Member UI
-
-- Group cards visible (A, B, C). Selecting one shows: Current Month, Chit Value, Start/Close time, live metrics, sequential bid table, own bid input + submit, `Approve Winner` consent button when auction closed.
-- Payment upload widget: file picker → `chit-receipts` bucket → `auction_payments` row.
-- 5-minute toast warning driven by `close_at` timer in a `useEffect` interval.
-
-## 5. Calculation module (`src/lib/chit-math.ts`)
-
-Pure functions (no hardcoded values):
-```
-topBid                 = max(bids.amount)
-interestPct            = (topBid / chitValue) * 100
-dividendPool           = topBid
-dividendPerMember      = dividendPool / totalMembers
-netPayPerMember        = (chitValue / totalMembers) - dividendPerMember
-foremanCommissionAmt   = mode === 'commission' ? chitValue * commissionPct/100 : 0
-```
-Called from both admin & member views so numbers always match.
-
-## 6. PDF Report
-
-Client-side `window.print()` with a hidden print template rendering:
-- Org logo + name (from `organizations` row)
-- Group config block (chit value, months, start date, foreman rule, terms)
-- Sequential bid history table for current month
-- Past winners table (from `past_winners`)
-- Payments status table (from `auction_payments`)
-- Two signature lines: "CHS Accountant" / "Society President"
-
-## 7. Realtime
-
-Already subscribed to `auction_sessions` and `bids`. Add subscription to `auction_payments` filtered by `org_id` so payment verifications reflect instantly on member view.
+Marketplace + services platform under `/varadhi/*` on the same MBR Platform project (shared Supabase, shared auth). Telugu-first UI with English toggle. Mobile-first, clean card layout matching the reference mockup (green/blue/orange category tiles, white cards, bottom tab bar).
 
 ---
 
-## Technical notes
+## 1. Branding & shell
 
-- Group cards are the `groups[]` array already returned by `getAuctionState`; no schema change needed for listing.
-- `Start Turn` / `Close` / `Reset` are surgical UPDATE RPCs — they never write `participants`, preventing the member-wipe bug.
-- All formula values recomputed in a `useMemo` from `bids + config`; no stored `interest_rate`.
-- Foreman "free month" logic: on that month number, `Close / Finalize` auto-assigns winner = foreman with amount 0, skipping bidding.
-- File uploads go to private `chit-receipts` bucket; signed URLs generated on read.
+- Route tree under `/varadhi` (rename current placeholder). Public routes: `/varadhi`, `/varadhi/auth`, `/varadhi/browse/*`, `/varadhi/item/$id`, `/varadhi/provider/$id`. Authenticated under `/_authenticated/varadhi.*`.
+- Logo: use the uploaded V/A monogram (orange + navy). Save via lovable-assets.
+- Palette: navy `#1e3a8a`, orange `#f97316`, green `#16a34a` category, off-white bg. Rounded 2xl cards, soft shadows, bottom nav (Home / Search / Post / Chat / Profile).
+- Language: reuse existing `i18n.tsx` (`lt(en, te)`). Default Telugu.
+- Persistent legal disclaimer in footer + auth screen.
+
+## 2. Auth & roles
+
+- Mobile + OTP via Supabase Phone Auth (SMS provider prompt shown to admin — MSG91/Twilio secret). Fallback to email OTP if phone provider not configured.
+- New table `varadhi_profiles`: user_id (PK, FK auth.users), full_name, phone, primary_role (`seller|buyer|provider`), business_name, address, lat, lng, aadhaar_url, license_url, store_photo_url, verification_status (`pending|approved|rejected`), created_at.
+- Onboarding wizard: role → details → proof uploads (Supabase Storage bucket `varadhi-proofs`, private) → Google Maps location picker (existing Google Maps connector) → submit.
+
+## 3. Seller listings
+
+- `varadhi_listings`: id, seller_id, category (`fresh|new|used|realestate`), sub_category, title, description, price, unit, images[] (storage `varadhi-listings`), lat, lng, city, stock_status (`running|closed`), click_count, created_at.
+- Seller dashboard: add/edit listing, toggle RUNNING/CLOSED, view click count, stock hidden from search when closed.
+
+## 4. Transport & service providers
+
+- `varadhi_providers`: id, user_id, provider_type (`transport|service`), sub_type (2w, 3w, 4w, 6w, electrician, plumber, mechanic, tractor, etc.), vehicle_details, service_areas, availability_status (`online|offline`), rating_avg, click_count, subscription_expires_at.
+- Toggle ONLINE/OFFLINE from dashboard. OFFLINE hidden from buyer search.
+
+## 5. Buyer flow
+
+- Home: category grid (Fresh / New / Used / Real Estate / Transport / Services) matching mockup style.
+- List view: thumbnail, title, price, distance (haversine from buyer's lat/lng), category badge. Contact hidden.
+- Detail view: full seller info, call/WhatsApp buttons (`tel:`, `wa.me/`), gallery, map. Increments `click_count` via server fn `logListingClick`.
+- On detail page: nearby ONLINE transport providers within 5 km (SQL `earth_distance` or simple bounding box).
+- Rewards: `varadhi_rewards` (user_id, points, source, created_at). Dashboard with balance + redeem button (redeem = server fn, placeholder for now).
+
+## 6. Subscriptions
+
+- `varadhi_subscriptions`: user_id, plan (`1m|3m|6m|1y`), amount, starts_at, expires_at, payment_ref, status.
+- Plan selector screen (₹300 / ₹800 / ₹1500 / ₹2500 defaults, admin editable).
+- Payment: reuse existing MBR Stripe/Paddle if enabled; otherwise placeholder "Mark as Paid" for admin verification (Razorpay/UPI can be added on request — noting Stripe/Paddle are the built-in options).
+- Middleware: providers/sellers listing hidden once `expires_at < now()`.
+
+## 7. Admin
+
+- `/admin/varadhi` panel (gated by existing super_admin role):
+  - Pending verifications queue (approve/reject proofs).
+  - Listings & providers moderation.
+  - Click/inquiry analytics per listing & provider.
+  - Auto "Top Rated" / "Most Inquired" badges (top 10% by click_count in category).
+  - Subscription expiry tracker.
+
+## 8. Database migration (single file)
+
+Tables above + RLS:
+- `varadhi_profiles`: owner read/write own; approved profiles readable by authenticated for provider search.
+- `varadhi_listings`: owner CRUD; `running` rows selectable by authenticated.
+- `varadhi_providers`: owner CRUD; `online` + subscription-active rows selectable by authenticated.
+- `varadhi_subscriptions`, `varadhi_rewards`: owner read; service_role write.
+- `varadhi_clicks` (id, target_type, target_id, buyer_id, ts) for analytics.
+- GRANTs to authenticated + service_role on every table.
+- Storage buckets: `varadhi-proofs` (private, signed URLs), `varadhi-listings` (public read).
+
+## 9. Server functions (`src/lib/varadhi.functions.ts`)
+
+`upsertVaradhiProfile`, `submitVerification`, `listListings(category, near)`, `getListing(id)`, `logListingClick(id)`, `upsertListing`, `toggleListingStock`, `listProviders(subType, near)`, `toggleProviderAvailability`, `getRewards`, `redeemRewards`, `listPlans`, `createSubscription`, `adminListPending`, `adminApproveProfile`, `adminAnalytics`.
+
+All authenticated via `requireSupabaseAuth`; public browse fn uses server publishable client with narrow anon SELECT policy on `running` listings.
+
+## 10. Deliverables (in order)
+
+1. Supabase migration (schema, RLS, GRANTs, buckets).
+2. `src/lib/varadhi.functions.ts` server fns.
+3. Route tree under `/varadhi/*` (public + `_authenticated/varadhi.*`).
+4. Shell components: bottom nav, category grid, listing card, provider card, map picker.
+5. Onboarding wizard + verification flow.
+6. Seller dashboard (add/edit listing, stock toggle).
+7. Provider dashboard (availability toggle, subscription status).
+8. Buyer browse + detail + nearby-transport suggestion.
+9. Rewards + subscription screens.
+10. Admin `/admin/varadhi` panel.
+11. Playwright smoke: register seller → add listing → buyer browse → click detail → click count logs.
 
 ---
 
-## Deliverables (in order)
+## Open questions before I start
 
-1. Supabase migration — schema, RLS, GRANTs, RPCs, bucket.
-2. `src/lib/chit-math.ts` — pure calc module.
-3. `src/lib/auction.functions.ts` — new/updated server fns.
-4. `src/routes/_authenticated/org.auction.tsx` — admin + member rewrite.
-5. `src/components/ChitPrintSheet.tsx` — printable PDF layout.
-6. Verify via Playwright: create group → add members → place bids → live metrics update → 5-min toast → close → consent → payment upload → PDF print.
+1. **OTP provider**: Do you have an SMS gateway (MSG91 / Twilio) API key? If not, I'll use email OTP with a "phone number to be verified later" field so we can ship now and swap SMS in later.
+2. **Payment gateway**: Use existing MBR Stripe/Paddle, or defer subscription payments to a later "Mark Paid" admin-approval flow?
+3. **Google Maps connector**: The MBR project already has it — okay to reuse the same connection for Varadhi map picker + distance search?
 
-Approve to proceed and I will execute in this order.
+Reply "go" and I'll start with the migration + server fns.
