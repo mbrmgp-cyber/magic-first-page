@@ -9,12 +9,12 @@ export const Route = createFileRoute("/varadhi/subscription")({
   component: SubscriptionPage,
 });
 
-const PLANS = [
+const PLANS: Array<{ id: "1m" | "3m" | "6m" | "1y"; te: string; amt: number; best?: boolean }> = [
   { id: "1m", te: "1 నెల", amt: 300 },
   { id: "3m", te: "3 నెలలు", amt: 800 },
   { id: "6m", te: "6 నెలలు", amt: 1500 },
   { id: "1y", te: "1 సంవత్సరం", amt: 2500, best: true },
-] as const;
+];
 
 function SubscriptionPage() {
   const fetchSubs = useServerFn(listMySubscriptions);
