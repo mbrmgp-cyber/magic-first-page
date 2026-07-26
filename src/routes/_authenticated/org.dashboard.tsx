@@ -475,12 +475,27 @@ function Dashboard() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 pt-2">
+            {isSuperAdmin && (
+              <Button
+                onClick={() => { setSettingsOpen(false); navigate({ to: "/org/admin-access" }); }}
+                className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-semibold border border-zinc-700 justify-start"
+              >
+                <KeyRound className="h-4 w-4 mr-2 text-[#ff8c28]" /> {lt("Admin Role & Access", "అడ్మిన్ పాత్రలు & అనుమతులు")}
+              </Button>
+            )}
+            <Button
+              onClick={() => { setSettingsOpen(false); navigate({ to: "/org/subscription" }); }}
+              className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-semibold border border-zinc-700 justify-start"
+            >
+              <Receipt className="h-4 w-4 mr-2 text-[#ff8c28]" /> {lt("Subscription & Receipts", "సబ్‌స్క్రిప్షన్ & రసీదులు")}
+            </Button>
             <Button
               onClick={() => { setSettingsOpen(false); navigate({ to: "/org/theme" }); }}
-              className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-semibold border border-zinc-700"
+              className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-semibold border border-zinc-700 justify-start"
             >
-              <Settings className="h-4 w-4 mr-1" /> {lt("Design & Theme", "రంగులు & డిజైన్")}
+              <Settings className="h-4 w-4 mr-2 text-[#ff8c28]" /> {lt("Design & Theme", "రంగులు & డిజైన్")}
             </Button>
+
             {/* Admin has no "Leave Organization" — members leave from their own dashboard.
                 Suspending / removing another member is handled in the Disciplinary Committee page. */}
             <Button
