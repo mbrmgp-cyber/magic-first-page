@@ -162,10 +162,16 @@ function VaradhiAuthPage() {
             <input
               inputMode="numeric"
               pattern="[0-9]*"
+              autoComplete="one-time-code"
+              autoFocus
               maxLength={6}
               required
               value={otp}
-              onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+              onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              onPaste={(e) => {
+                const t = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+                if (t) { e.preventDefault(); setOtp(t); }
+              }}
               placeholder="123456"
               className="w-full rounded-xl border border-[#1e3a8a]/20 bg-white px-3 py-3 text-center text-2xl tracking-[0.5em] font-bold text-[#1e3a8a] outline-none focus:border-[#f97316]"
             />
