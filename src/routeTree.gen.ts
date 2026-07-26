@@ -16,11 +16,19 @@ import { Route as MbrRouteImport } from './routes/mbr'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as VaradhiIndexRouteImport } from './routes/varadhi.index'
+import { Route as VaradhiSubscriptionRouteImport } from './routes/varadhi.subscription'
+import { Route as VaradhiRewardsRouteImport } from './routes/varadhi.rewards'
+import { Route as VaradhiOnboardRouteImport } from './routes/varadhi.onboard'
+import { Route as VaradhiDashboardRouteImport } from './routes/varadhi.dashboard'
 import { Route as OrgRegisterRouteImport } from './routes/org.register'
 import { Route as MemberRegisterRouteImport } from './routes/member.register'
 import { Route as MCodeRouteImport } from './routes/m.$code'
 import { Route as DonorRegisterRouteImport } from './routes/donor.register'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as VaradhiProviderIdRouteImport } from './routes/varadhi.provider.$id'
+import { Route as VaradhiItemIdRouteImport } from './routes/varadhi.item.$id'
+import { Route as VaradhiBrowseCategoryRouteImport } from './routes/varadhi.browse.$category'
 import { Route as AuthenticatedOrgThemeRouteImport } from './routes/_authenticated/org.theme'
 import { Route as AuthenticatedOrgSubscriptionRouteImport } from './routes/_authenticated/org.subscription'
 import { Route as AuthenticatedOrgRulesRouteImport } from './routes/_authenticated/org.rules'
@@ -87,6 +95,31 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VaradhiIndexRoute = VaradhiIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => VaradhiRoute,
+} as any)
+const VaradhiSubscriptionRoute = VaradhiSubscriptionRouteImport.update({
+  id: '/subscription',
+  path: '/subscription',
+  getParentRoute: () => VaradhiRoute,
+} as any)
+const VaradhiRewardsRoute = VaradhiRewardsRouteImport.update({
+  id: '/rewards',
+  path: '/rewards',
+  getParentRoute: () => VaradhiRoute,
+} as any)
+const VaradhiOnboardRoute = VaradhiOnboardRouteImport.update({
+  id: '/onboard',
+  path: '/onboard',
+  getParentRoute: () => VaradhiRoute,
+} as any)
+const VaradhiDashboardRoute = VaradhiDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => VaradhiRoute,
+} as any)
 const OrgRegisterRoute = OrgRegisterRouteImport.update({
   id: '/org/register',
   path: '/org/register',
@@ -111,6 +144,21 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const VaradhiProviderIdRoute = VaradhiProviderIdRouteImport.update({
+  id: '/provider/$id',
+  path: '/provider/$id',
+  getParentRoute: () => VaradhiRoute,
+} as any)
+const VaradhiItemIdRoute = VaradhiItemIdRouteImport.update({
+  id: '/item/$id',
+  path: '/item/$id',
+  getParentRoute: () => VaradhiRoute,
+} as any)
+const VaradhiBrowseCategoryRoute = VaradhiBrowseCategoryRouteImport.update({
+  id: '/browse/$category',
+  path: '/browse/$category',
+  getParentRoute: () => VaradhiRoute,
 } as any)
 const AuthenticatedOrgThemeRoute = AuthenticatedOrgThemeRouteImport.update({
   id: '/org/theme',
@@ -295,12 +343,17 @@ export interface FileRoutesByFullPath {
   '/mbr': typeof MbrRoute
   '/new-organization': typeof NewOrganizationRoute
   '/register': typeof RegisterRoute
-  '/varadhi': typeof VaradhiRoute
+  '/varadhi': typeof VaradhiRouteWithChildren
   '/admin': typeof AuthenticatedAdminRoute
   '/donor/register': typeof DonorRegisterRoute
   '/m/$code': typeof MCodeRoute
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
+  '/varadhi/dashboard': typeof VaradhiDashboardRoute
+  '/varadhi/onboard': typeof VaradhiOnboardRoute
+  '/varadhi/rewards': typeof VaradhiRewardsRoute
+  '/varadhi/subscription': typeof VaradhiSubscriptionRoute
+  '/varadhi/': typeof VaradhiIndexRoute
   '/donor/dashboard': typeof AuthenticatedDonorDashboardRoute
   '/member/dashboard': typeof AuthenticatedMemberDashboardRoute
   '/member/events': typeof AuthenticatedMemberEventsRoute
@@ -329,6 +382,9 @@ export interface FileRoutesByFullPath {
   '/org/rules': typeof AuthenticatedOrgRulesRoute
   '/org/subscription': typeof AuthenticatedOrgSubscriptionRoute
   '/org/theme': typeof AuthenticatedOrgThemeRoute
+  '/varadhi/browse/$category': typeof VaradhiBrowseCategoryRoute
+  '/varadhi/item/$id': typeof VaradhiItemIdRoute
+  '/varadhi/provider/$id': typeof VaradhiProviderIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -339,12 +395,16 @@ export interface FileRoutesByTo {
   '/mbr': typeof MbrRoute
   '/new-organization': typeof NewOrganizationRoute
   '/register': typeof RegisterRoute
-  '/varadhi': typeof VaradhiRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/donor/register': typeof DonorRegisterRoute
   '/m/$code': typeof MCodeRoute
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
+  '/varadhi/dashboard': typeof VaradhiDashboardRoute
+  '/varadhi/onboard': typeof VaradhiOnboardRoute
+  '/varadhi/rewards': typeof VaradhiRewardsRoute
+  '/varadhi/subscription': typeof VaradhiSubscriptionRoute
+  '/varadhi': typeof VaradhiIndexRoute
   '/donor/dashboard': typeof AuthenticatedDonorDashboardRoute
   '/member/dashboard': typeof AuthenticatedMemberDashboardRoute
   '/member/events': typeof AuthenticatedMemberEventsRoute
@@ -373,6 +433,9 @@ export interface FileRoutesByTo {
   '/org/rules': typeof AuthenticatedOrgRulesRoute
   '/org/subscription': typeof AuthenticatedOrgSubscriptionRoute
   '/org/theme': typeof AuthenticatedOrgThemeRoute
+  '/varadhi/browse/$category': typeof VaradhiBrowseCategoryRoute
+  '/varadhi/item/$id': typeof VaradhiItemIdRoute
+  '/varadhi/provider/$id': typeof VaradhiProviderIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -385,12 +448,17 @@ export interface FileRoutesById {
   '/mbr': typeof MbrRoute
   '/new-organization': typeof NewOrganizationRoute
   '/register': typeof RegisterRoute
-  '/varadhi': typeof VaradhiRoute
+  '/varadhi': typeof VaradhiRouteWithChildren
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/donor/register': typeof DonorRegisterRoute
   '/m/$code': typeof MCodeRoute
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
+  '/varadhi/dashboard': typeof VaradhiDashboardRoute
+  '/varadhi/onboard': typeof VaradhiOnboardRoute
+  '/varadhi/rewards': typeof VaradhiRewardsRoute
+  '/varadhi/subscription': typeof VaradhiSubscriptionRoute
+  '/varadhi/': typeof VaradhiIndexRoute
   '/_authenticated/donor/dashboard': typeof AuthenticatedDonorDashboardRoute
   '/_authenticated/member/dashboard': typeof AuthenticatedMemberDashboardRoute
   '/_authenticated/member/events': typeof AuthenticatedMemberEventsRoute
@@ -419,6 +487,9 @@ export interface FileRoutesById {
   '/_authenticated/org/rules': typeof AuthenticatedOrgRulesRoute
   '/_authenticated/org/subscription': typeof AuthenticatedOrgSubscriptionRoute
   '/_authenticated/org/theme': typeof AuthenticatedOrgThemeRoute
+  '/varadhi/browse/$category': typeof VaradhiBrowseCategoryRoute
+  '/varadhi/item/$id': typeof VaradhiItemIdRoute
+  '/varadhi/provider/$id': typeof VaradhiProviderIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -437,6 +508,11 @@ export interface FileRouteTypes {
     | '/m/$code'
     | '/member/register'
     | '/org/register'
+    | '/varadhi/dashboard'
+    | '/varadhi/onboard'
+    | '/varadhi/rewards'
+    | '/varadhi/subscription'
+    | '/varadhi/'
     | '/donor/dashboard'
     | '/member/dashboard'
     | '/member/events'
@@ -465,6 +541,9 @@ export interface FileRouteTypes {
     | '/org/rules'
     | '/org/subscription'
     | '/org/theme'
+    | '/varadhi/browse/$category'
+    | '/varadhi/item/$id'
+    | '/varadhi/provider/$id'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -475,12 +554,16 @@ export interface FileRouteTypes {
     | '/mbr'
     | '/new-organization'
     | '/register'
-    | '/varadhi'
     | '/admin'
     | '/donor/register'
     | '/m/$code'
     | '/member/register'
     | '/org/register'
+    | '/varadhi/dashboard'
+    | '/varadhi/onboard'
+    | '/varadhi/rewards'
+    | '/varadhi/subscription'
+    | '/varadhi'
     | '/donor/dashboard'
     | '/member/dashboard'
     | '/member/events'
@@ -509,6 +592,9 @@ export interface FileRouteTypes {
     | '/org/rules'
     | '/org/subscription'
     | '/org/theme'
+    | '/varadhi/browse/$category'
+    | '/varadhi/item/$id'
+    | '/varadhi/provider/$id'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -526,6 +612,11 @@ export interface FileRouteTypes {
     | '/m/$code'
     | '/member/register'
     | '/org/register'
+    | '/varadhi/dashboard'
+    | '/varadhi/onboard'
+    | '/varadhi/rewards'
+    | '/varadhi/subscription'
+    | '/varadhi/'
     | '/_authenticated/donor/dashboard'
     | '/_authenticated/member/dashboard'
     | '/_authenticated/member/events'
@@ -554,6 +645,9 @@ export interface FileRouteTypes {
     | '/_authenticated/org/rules'
     | '/_authenticated/org/subscription'
     | '/_authenticated/org/theme'
+    | '/varadhi/browse/$category'
+    | '/varadhi/item/$id'
+    | '/varadhi/provider/$id'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -566,7 +660,7 @@ export interface RootRouteChildren {
   MbrRoute: typeof MbrRoute
   NewOrganizationRoute: typeof NewOrganizationRoute
   RegisterRoute: typeof RegisterRoute
-  VaradhiRoute: typeof VaradhiRoute
+  VaradhiRoute: typeof VaradhiRouteWithChildren
   DonorRegisterRoute: typeof DonorRegisterRoute
   MCodeRoute: typeof MCodeRoute
   MemberRegisterRoute: typeof MemberRegisterRoute
@@ -627,6 +721,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/varadhi/': {
+      id: '/varadhi/'
+      path: '/'
+      fullPath: '/varadhi/'
+      preLoaderRoute: typeof VaradhiIndexRouteImport
+      parentRoute: typeof VaradhiRoute
+    }
+    '/varadhi/subscription': {
+      id: '/varadhi/subscription'
+      path: '/subscription'
+      fullPath: '/varadhi/subscription'
+      preLoaderRoute: typeof VaradhiSubscriptionRouteImport
+      parentRoute: typeof VaradhiRoute
+    }
+    '/varadhi/rewards': {
+      id: '/varadhi/rewards'
+      path: '/rewards'
+      fullPath: '/varadhi/rewards'
+      preLoaderRoute: typeof VaradhiRewardsRouteImport
+      parentRoute: typeof VaradhiRoute
+    }
+    '/varadhi/onboard': {
+      id: '/varadhi/onboard'
+      path: '/onboard'
+      fullPath: '/varadhi/onboard'
+      preLoaderRoute: typeof VaradhiOnboardRouteImport
+      parentRoute: typeof VaradhiRoute
+    }
+    '/varadhi/dashboard': {
+      id: '/varadhi/dashboard'
+      path: '/dashboard'
+      fullPath: '/varadhi/dashboard'
+      preLoaderRoute: typeof VaradhiDashboardRouteImport
+      parentRoute: typeof VaradhiRoute
+    }
     '/org/register': {
       id: '/org/register'
       path: '/org/register'
@@ -661,6 +790,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin'
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/varadhi/provider/$id': {
+      id: '/varadhi/provider/$id'
+      path: '/provider/$id'
+      fullPath: '/varadhi/provider/$id'
+      preLoaderRoute: typeof VaradhiProviderIdRouteImport
+      parentRoute: typeof VaradhiRoute
+    }
+    '/varadhi/item/$id': {
+      id: '/varadhi/item/$id'
+      path: '/item/$id'
+      fullPath: '/varadhi/item/$id'
+      preLoaderRoute: typeof VaradhiItemIdRouteImport
+      parentRoute: typeof VaradhiRoute
+    }
+    '/varadhi/browse/$category': {
+      id: '/varadhi/browse/$category'
+      path: '/browse/$category'
+      fullPath: '/varadhi/browse/$category'
+      preLoaderRoute: typeof VaradhiBrowseCategoryRouteImport
+      parentRoute: typeof VaradhiRoute
     }
     '/_authenticated/org/theme': {
       id: '/_authenticated/org/theme'
@@ -949,6 +1099,31 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface VaradhiRouteChildren {
+  VaradhiDashboardRoute: typeof VaradhiDashboardRoute
+  VaradhiOnboardRoute: typeof VaradhiOnboardRoute
+  VaradhiRewardsRoute: typeof VaradhiRewardsRoute
+  VaradhiSubscriptionRoute: typeof VaradhiSubscriptionRoute
+  VaradhiIndexRoute: typeof VaradhiIndexRoute
+  VaradhiBrowseCategoryRoute: typeof VaradhiBrowseCategoryRoute
+  VaradhiItemIdRoute: typeof VaradhiItemIdRoute
+  VaradhiProviderIdRoute: typeof VaradhiProviderIdRoute
+}
+
+const VaradhiRouteChildren: VaradhiRouteChildren = {
+  VaradhiDashboardRoute: VaradhiDashboardRoute,
+  VaradhiOnboardRoute: VaradhiOnboardRoute,
+  VaradhiRewardsRoute: VaradhiRewardsRoute,
+  VaradhiSubscriptionRoute: VaradhiSubscriptionRoute,
+  VaradhiIndexRoute: VaradhiIndexRoute,
+  VaradhiBrowseCategoryRoute: VaradhiBrowseCategoryRoute,
+  VaradhiItemIdRoute: VaradhiItemIdRoute,
+  VaradhiProviderIdRoute: VaradhiProviderIdRoute,
+}
+
+const VaradhiRouteWithChildren =
+  VaradhiRoute._addFileChildren(VaradhiRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -956,7 +1131,7 @@ const rootRouteChildren: RootRouteChildren = {
   MbrRoute: MbrRoute,
   NewOrganizationRoute: NewOrganizationRoute,
   RegisterRoute: RegisterRoute,
-  VaradhiRoute: VaradhiRoute,
+  VaradhiRoute: VaradhiRouteWithChildren,
   DonorRegisterRoute: DonorRegisterRoute,
   MCodeRoute: MCodeRoute,
   MemberRegisterRoute: MemberRegisterRoute,
@@ -968,13 +1143,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

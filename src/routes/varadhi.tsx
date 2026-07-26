@@ -1,65 +1,67 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { createFileRoute, Outlet, Link, useLocation } from "@tanstack/react-router";
+import { Home, Search, LayoutDashboard, Gift, User } from "lucide-react";
+import varadhiLogo from "@/assets/varadhi-logo.jpg.asset.json";
 
 export const Route = createFileRoute("/varadhi")({
   head: () => ({
     meta: [
-      { title: "Varadhi App — Coming Soon | MBR Platform" },
-      { name: "description", content: "Varadhi — the next application on the MBR Platform. Coming soon." },
-      { property: "og:title", content: "Varadhi App — Coming Soon" },
-      { property: "og:description", content: "Varadhi — the next application on the MBR Platform. Coming soon." },
+      { title: "Varadhi (వారధి) — Sell, Buy, Transport & Local Services" },
+      { name: "description", content: "Varadhi connects Buyers, Sellers, Transport Providers and Local Service Workers across Andhra Pradesh." },
+      { property: "og:title", content: "Varadhi (వారధి) — Sell, Buy, Transport & Local Services" },
+      { property: "og:description", content: "Varadhi connects Buyers, Sellers, Transport Providers and Local Service Workers across Andhra Pradesh." },
+      { property: "og:image", content: varadhiLogo.url },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: varadhiLogo.url },
     ],
   }),
-  component: VaradhiComingSoon,
+  component: VaradhiLayout,
 });
 
-function VaradhiComingSoon() {
+function VaradhiLayout() {
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[#0f1b3d] text-[#f5f0e0] flex flex-col">
-      {/* Ambient gold glows */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -top-40 -left-40 h-96 w-96 rounded-full bg-[#c9a84c]/20 blur-3xl" />
-        <div className="absolute -bottom-40 -right-40 h-[28rem] w-[28rem] rounded-full bg-[#1e3a5f]/60 blur-3xl" />
-        <div className="absolute top-1/3 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-[#c9a84c]/10 blur-3xl" />
-      </div>
-
-      <header className="relative z-10 px-6 pt-6">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1.5 rounded-full border border-[#c9a84c]/30 bg-[#0f1b3d]/60 backdrop-blur px-3 py-1.5 text-xs text-[#f5f0e0]/90 hover:border-[#c9a84c] hover:bg-[#1e3a5f]/60 transition-colors"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          <span>Back to Platform</span>
-        </Link>
-      </header>
-
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-16 text-center">
-        <div className="inline-flex items-center gap-2 rounded-full border border-[#c9a84c]/40 bg-[#c9a84c]/10 px-4 py-1.5 text-xs uppercase tracking-[0.2em] text-[#c9a84c]">
-          <Sparkles className="h-3.5 w-3.5" />
-          <span>Coming Soon</span>
+    <div className="min-h-screen bg-[#f7f7fb] text-[#1e3a8a] pb-20">
+      <Outlet />
+      <VaradhiBottomNav />
+      <footer className="fixed bottom-16 inset-x-0 z-40 pointer-events-none">
+        <div className="mx-auto max-w-md px-3">
+          <div className="pointer-events-auto rounded-t-lg bg-black/70 text-white text-[10px] leading-tight px-3 py-1.5 backdrop-blur">
+            Varadhi is an informational listing platform. It is not responsible for any monetary transactions, product quality, or business agreements between users.
+          </div>
         </div>
-
-        <h1 className="mt-8 font-serif text-6xl sm:text-7xl md:text-8xl font-semibold tracking-tight">
-          <span className="bg-gradient-to-r from-[#c9a84c] via-[#f0d78c] to-[#c9a84c] bg-clip-text text-transparent">
-            Varadhi
-          </span>
-        </h1>
-
-        <p className="mt-4 text-lg sm:text-xl text-[#f5f0e0]/70 max-w-xl">
-          The next application on the <span className="text-[#c9a84c]">MBR Platform</span>.
-        </p>
-
-        <p className="mt-3 text-sm text-[#f5f0e0]/50 max-w-md">
-          A dedicated experience is being crafted. Details will be shared as we approach launch.
-        </p>
-
-        {/* Ornamental divider */}
-        <div className="mt-14 flex items-center gap-3 text-[#c9a84c]/60">
-          <span className="h-px w-16 bg-gradient-to-r from-transparent to-[#c9a84c]/60" />
-          <span className="text-[10px] uppercase tracking-[0.4em]">MBR Platform</span>
-          <span className="h-px w-16 bg-gradient-to-l from-transparent to-[#c9a84c]/60" />
-        </div>
-      </main>
+      </footer>
     </div>
+  );
+}
+
+function VaradhiBottomNav() {
+  const loc = useLocation();
+  const items = [
+    { to: "/varadhi", icon: Home, label: "హోమ్" },
+    { to: "/varadhi/browse/fresh", icon: Search, label: "వెతకండి" },
+    { to: "/varadhi/dashboard", icon: LayoutDashboard, label: "డాష్‌బోర్డ్" },
+    { to: "/varadhi/rewards", icon: Gift, label: "బహుమతులు" },
+    { to: "/varadhi/onboard", icon: User, label: "ప్రొఫైల్" },
+  ];
+  return (
+    <nav className="fixed bottom-0 inset-x-0 z-50 bg-white border-t border-[#1e3a8a]/10 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
+      <div className="mx-auto max-w-md grid grid-cols-5">
+        {items.map((it) => {
+          const active = it.to === "/varadhi" ? loc.pathname === "/varadhi" : loc.pathname.startsWith(it.to);
+          const Icon = it.icon;
+          return (
+            <Link
+              key={it.to}
+              to={it.to}
+              className={`flex flex-col items-center gap-0.5 py-2 text-[10px] ${
+                active ? "text-[#f97316]" : "text-[#1e3a8a]/70"
+              }`}
+            >
+              <Icon className="h-5 w-5" />
+              <span>{it.label}</span>
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
   );
 }
