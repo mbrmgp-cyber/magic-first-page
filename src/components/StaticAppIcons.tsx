@@ -26,6 +26,11 @@ export function StaticAppIcons() {
 
   useEffect(() => {
     if (typeof document === "undefined") return;
+    // Skip MBR icon/manifest injection on Varadhi routes so magic-link opens
+    // don't flash MBR branding before Varadhi content mounts.
+    if (typeof window !== "undefined" && window.location.pathname.startsWith("/varadhi")) {
+      return;
+    }
     let cancelled = false;
     (async () => {
       const set = await buildPaddedIconSet(MBR_LOGO_URL, "#000000");

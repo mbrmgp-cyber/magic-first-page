@@ -156,27 +156,22 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const [showSplash, setShowSplash] = useState(true);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+  const [showSplash, setShowSplash] = useState(() => {
+    if (typeof window === "undefined") return false;
     const path = window.location.pathname;
-    // Skip splash entirely on public marketing / registration entry points so
-    // unauthenticated users see the page immediately with no loading screen.
     if (
       path === "/" ||
       path.startsWith("/varadhi") ||
       path === "/register" ||
       path === "/member/register"
     ) {
-      setShowSplash(false);
-      return;
+      return false;
     }
+    if (sessionStorage.getItem("mbr_splash_seen")) return false;
+    return true;
+  });
 
-    if (sessionStorage.getItem("mbr_splash_seen")) {
-      setShowSplash(false);
-    }
-  }, []);
+  useEffect(() => {}, []);
 
   const handleSplashDone = () => {
     if (typeof window !== "undefined") sessionStorage.setItem("mbr_splash_seen", "1");
