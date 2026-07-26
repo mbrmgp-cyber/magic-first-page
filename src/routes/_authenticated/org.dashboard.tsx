@@ -440,9 +440,9 @@ function Dashboard() {
       <Dialog open={qrOpen} onOpenChange={setQrOpen}>
         <DialogContent className="max-w-sm bg-zinc-950 border-zinc-800 text-white">
           <DialogHeader>
-            <DialogTitle className="text-white">సొసైటీ QR కోడ్</DialogTitle>
+            <DialogTitle className="text-white">{lt("Society QR Code", "సొసైటీ QR కోడ్")}</DialogTitle>
             <DialogDescription className="text-zinc-400">
-              కొత్త సభ్యులు ఈ QR కోడ్‌ను స్కాన్ చేసి చేరగలరు.
+              {lt("New members can scan this QR code to join.", "కొత్త సభ్యులు ఈ QR కోడ్‌ను స్కాన్ చేసి చేరగలరు.")}
             </DialogDescription>
           </DialogHeader>
           {qrDataUrl ? (
