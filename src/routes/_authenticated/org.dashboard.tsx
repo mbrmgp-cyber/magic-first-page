@@ -303,7 +303,7 @@ function Dashboard() {
               type="button"
               onClick={() => setQrOpen(true)}
               className="w-10 h-10 shrink-0 rounded-md bg-zinc-950 border border-zinc-800 shadow-[0_0_20px_rgba(255,140,40,0.2)] flex items-center justify-center overflow-hidden hover:scale-105 transition"
-              aria-label="సొసైటీ QR కోడ్"
+              aria-label={lt("Society QR Code", "సొసైటీ QR కోడ్")}
             >
               {qrDataUrl ? (
                 <img src={qrDataUrl} alt="Society QR" className="w-full h-full object-contain p-0.5 bg-white" />
