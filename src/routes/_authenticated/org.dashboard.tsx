@@ -433,7 +433,7 @@ function Dashboard() {
           ))}
         </div>
 
-        <p className="text-center pt-2" style={{ color: theme.smallColor, fontSize: theme.smallSize }}>Org Code: <span className="font-mono" style={{ color: theme.icon }}>{org.org_code}</span></p>
+        <p className="text-center pt-2" style={{ color: theme.smallColor, fontSize: theme.smallSize }}>{lt("Org Code:", "Org Code:")} <span className="font-mono" style={{ color: theme.icon }}>{org.org_code}</span></p>
       </div>
 
       {/* QR Dialog */}
