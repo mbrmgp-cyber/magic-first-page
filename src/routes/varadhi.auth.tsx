@@ -53,12 +53,14 @@ function VaradhiAuthPage() {
     toast.success(mode === "otp" ? "OTP sent to your email" : "Login link sent to your email");
   }
 
-  async function verifyOtp(e: React.FormEvent) {
-    e.preventDefault();
+  async function verifyOtp(e?: React.FormEvent, code?: string) {
+    e?.preventDefault();
+    const token = (code ?? otp).trim();
+    if (token.length !== 6) return;
     setVerifying(true);
     const { error } = await supabase.auth.verifyOtp({
       email: email.trim().toLowerCase(),
-      token: otp.trim(),
+      token,
       type: "email",
     });
     setVerifying(false);
@@ -68,6 +70,26 @@ function VaradhiAuthPage() {
     }
     // onAuthStateChange will navigate
   }
+
+  // Auto-verify as soon as 6 digits are entered/pasted
+  useEffect(() => {
+    if (step === "sent" && mode === "otp" && otp.length === 6 && !verifying) {
+      verifyOtp(undefined, otp);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [otp, step, mode]);
+
+  // WebOTP API (SMS on Android Chrome; harmless for email — no-op elsewhere)
+  useEffect(() => {
+    if (step !== "sent" || mode !== "otp") return;
+    if (!("OTPCredential" in window)) return;
+    const ac = new AbortController();
+    (navigator.credentials as any)
+      ?.get({ otp: { transport: ["sms"] }, signal: ac.signal })
+      .then((c: any) => { if (c?.code) setOtp(String(c.code).replace(/\D/g, "").slice(0, 6)); })
+      .catch(() => {});
+    return () => ac.abort();
+  }, [step, mode]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1e3a8a] via-[#1e40af] to-[#3b5bdb] p-6">
@@ -140,10 +162,16 @@ function VaradhiAuthPage() {
             <input
               inputMode="numeric"
               pattern="[0-9]*"
+              autoComplete="one-time-code"
+              autoFocus
               maxLength={6}
               required
               value={otp}
-              onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+              onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              onPaste={(e) => {
+                const t = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+                if (t) { e.preventDefault(); setOtp(t); }
+              }}
               placeholder="123456"
               className="w-full rounded-xl border border-[#1e3a8a]/20 bg-white px-3 py-3 text-center text-2xl tracking-[0.5em] font-bold text-[#1e3a8a] outline-none focus:border-[#f97316]"
             />
