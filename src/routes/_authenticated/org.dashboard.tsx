@@ -225,18 +225,21 @@ function Dashboard() {
       <div className="min-h-screen flex items-center justify-center p-6 bg-black">
         <Card className="p-6 text-center space-y-4 bg-zinc-950 border-zinc-800 text-white max-w-sm">
           <div>
-            <p className="font-semibold">మీకు Organization లేదు.</p>
+            <p className="font-semibold">{lt("You have no Organization.", "మీకు Organization లేదు.")}</p>
             <p className="text-xs text-zinc-400 mt-1">
-              మీరు వేరే email తో login అయి ఉండవచ్చు. సరైన Org Admin email తో మళ్ళీ login అవ్వండి.
+              {lt(
+                "You may be signed in with a different email. Please log in again with the correct Org Admin email.",
+                "మీరు వేరే email తో login అయి ఉండవచ్చు. సరైన Org Admin email తో మళ్ళీ login అవ్వండి."
+              )}
             </p>
           </div>
           <div className="flex flex-col gap-2">
             <Button onClick={reLogin} variant="default" className="!bg-[#ff8c28] hover:!bg-[#ff8c28]/90 !text-white font-bold border-2 !border-white shadow-[0_0_16px_rgba(255,140,40,0.55)]">
               <LogOut className="h-4 w-4 mr-2 text-white" />
-              <span className="text-white">Re-Login / మళ్ళీ లాగిన్</span>
+              <span className="text-white">{lt("Re-Login", "మళ్ళీ లాగిన్")}</span>
             </Button>
             <Button onClick={() => navigate({ to: "/org/register" })} variant="outline" className="border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800">
-              Register New Org
+              {lt("Register New Org", "కొత్త Org నమోదు చేయండి")}
             </Button>
           </div>
         </Card>
@@ -300,7 +303,7 @@ function Dashboard() {
               type="button"
               onClick={() => setQrOpen(true)}
               className="w-10 h-10 shrink-0 rounded-md bg-zinc-950 border border-zinc-800 shadow-[0_0_20px_rgba(255,140,40,0.2)] flex items-center justify-center overflow-hidden hover:scale-105 transition"
-              aria-label="సొసైటీ QR కోడ్"
+              aria-label={lt("Society QR Code", "సొసైటీ QR కోడ్")}
             >
               {qrDataUrl ? (
                 <img src={qrDataUrl} alt="Society QR" className="w-full h-full object-contain p-0.5 bg-white" />
@@ -430,16 +433,16 @@ function Dashboard() {
           ))}
         </div>
 
-        <p className="text-center pt-2" style={{ color: theme.smallColor, fontSize: theme.smallSize }}>Org Code: <span className="font-mono" style={{ color: theme.icon }}>{org.org_code}</span></p>
+        <p className="text-center pt-2" style={{ color: theme.smallColor, fontSize: theme.smallSize }}>{lt("Org Code:", "Org Code:")} <span className="font-mono" style={{ color: theme.icon }}>{org.org_code}</span></p>
       </div>
 
       {/* QR Dialog */}
       <Dialog open={qrOpen} onOpenChange={setQrOpen}>
         <DialogContent className="max-w-sm bg-zinc-950 border-zinc-800 text-white">
           <DialogHeader>
-            <DialogTitle className="text-white">సొసైటీ QR కోడ్</DialogTitle>
+            <DialogTitle className="text-white">{lt("Society QR Code", "సొసైటీ QR కోడ్")}</DialogTitle>
             <DialogDescription className="text-zinc-400">
-              కొత్త సభ్యులు ఈ QR కోడ్‌ను స్కాన్ చేసి చేరగలరు.
+              {lt("New members can scan this QR code to join.", "కొత్త సభ్యులు ఈ QR కోడ్‌ను స్కాన్ చేసి చేరగలరు.")}
             </DialogDescription>
           </DialogHeader>
           {qrDataUrl ? (
