@@ -3,10 +3,13 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { PUBLIC_APP_ORIGIN } from "@/lib/public-url";
 
 // -------- Varadhi-only login (completely independent of MBR auth flow)
+// mode: "link" sends a click-to-login magic link; "otp" sends a 6-digit code
+// the user types on the Varadhi auth page.
 export const sendVaradhiLoginLink = createServerFn({ method: "POST" })
-  .inputValidator((d: { email: string }) => d)
+  .inputValidator((d: { email: string; mode?: "link" | "otp" }) => d)
   .handler(async ({ data }) => {
     const email = data.email.trim().toLowerCase();
+    const mode = data.mode ?? "link";
     if (!email) return { sent: false as const, reason: "missing_email" as const };
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -38,7 +41,9 @@ export const sendVaradhiLoginLink = createServerFn({ method: "POST" })
     });
     if (linkErr) throw new Error(linkErr.message);
     const confirmationUrl = link?.properties?.action_link;
+    const emailOtp = (link?.properties as any)?.email_otp as string | undefined;
     if (!confirmationUrl) throw new Error("Could not generate login link");
+    if (mode === "otp" && !emailOtp) throw new Error("Could not generate OTP");
 
     const [{ sendLovableEmail }, React, { render }, { MagicLinkEmail }] = await Promise.all([
       import("@lovable.dev/email-js"),
@@ -47,7 +52,10 @@ export const sendVaradhiLoginLink = createServerFn({ method: "POST" })
       import("@/lib/email-templates/magic-link"),
     ]);
     const siteName = "Varadhi";
-    const element = React.createElement(MagicLinkEmail, { siteName, confirmationUrl });
+    const note = mode === "otp"
+      ? `Your one-time code / OTP: ${emailOtp}\nమీ OTP కోడ్: ${emailOtp}`
+      : undefined;
+    const element = React.createElement(MagicLinkEmail, { siteName, confirmationUrl, note });
     const html = await render(element);
     const text = await render(element, { plainText: true });
     const apiKey = process.env.LOVABLE_API_KEY;
@@ -58,11 +66,11 @@ export const sendVaradhiLoginLink = createServerFn({ method: "POST" })
         to: email,
         from: `${siteName} <noreply@notify.mbrplatform.com>`,
         sender_domain: "notify.mbrplatform.com",
-        subject: "Varadhi — Login link",
+        subject: mode === "otp" ? `Varadhi — Login code ${emailOtp}` : "Varadhi — Login link",
         html,
         text,
         purpose: "transactional",
-        label: "varadhi_magiclink",
+        label: mode === "otp" ? "varadhi_otp" : "varadhi_magiclink",
         message_id: messageId,
         idempotency_key: messageId,
         unsubscribe_token: `varadhi-${messageId}`,
@@ -70,7 +78,7 @@ export const sendVaradhiLoginLink = createServerFn({ method: "POST" })
       { apiKey, idempotencyKey: messageId }
     );
 
-    return { sent: true as const };
+    return { sent: true as const, mode };
   });
 
 export type VaradhiProfile = {
