@@ -231,8 +231,9 @@ function Dashboard() {
             </p>
           </div>
           <div className="flex flex-col gap-2">
-            <Button onClick={reLogin} className="bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white border-2 border-white">
-              <LogOut className="h-4 w-4 mr-2" />Re-Login / మళ్ళీ లాగిన్
+            <Button onClick={reLogin} variant="default" className="!bg-[#ff8c28] hover:!bg-[#ff8c28]/90 !text-white font-bold border-2 !border-white shadow-[0_0_16px_rgba(255,140,40,0.55)]">
+              <LogOut className="h-4 w-4 mr-2 text-white" />
+              <span className="text-white">Re-Login / మళ్ళీ లాగిన్</span>
             </Button>
             <Button onClick={() => navigate({ to: "/org/register" })} variant="outline" className="border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800">
               Register New Org
