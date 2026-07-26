@@ -2,6 +2,7 @@
 // using the existing print pipeline (native print → Save as PDF).
 import { printDocument, escapeHtml } from "@/lib/print-pdf";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
+import bhaskarSig from "@/assets/bhaskar-signature.png.asset.json";
 
 export type ReceiptOrg = {
   name?: string | null;
