@@ -87,19 +87,16 @@ export function printReceipt(org: ReceiptOrg | null | undefined, r: ReceiptRow) 
       This is a system-generated receipt for the MBR App yearly subscription payment.
       Please retain this document for your records.
     </p>
-    <div style="margin-top:40px;display:flex;justify-content:space-between;align-items:flex-end;gap:24px;font-size:11px;">
+    <div style="margin-top:40px;display:flex;justify-content:flex-start;align-items:flex-end;gap:24px;font-size:11px;">
       <div style="flex:1;">
-        <div style="display:flex;align-items:flex-end;gap:10px;">
-          <img src="${escapeHtml(mbrLogo.url)}" alt="MBR" style="height:44px;width:auto;" crossorigin="anonymous" />
-          <div style="font-family:'Brush Script MT','Segoe Script',cursive;font-size:26px;color:#1e3a8a;line-height:1;border-bottom:1px solid #333;padding:0 12px 2px;">
-            MBR Platform
-          </div>
+        <div style="display:inline-block;background:#000;padding:8px 14px;border-radius:6px;">
+          <img src="${escapeHtml(mbrLogo.url)}" alt="MBR" style="height:44px;width:auto;display:block;" crossorigin="anonymous" />
         </div>
-        <div style="margin-top:6px;"><b>Received By</b><br/>MBR Platform — Authorized Signatory</div>
-      </div>
-      <div style="text-align:center;">
-        <div style="width:110px;height:110px;border:3px double #16a34a;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#16a34a;font-weight:800;font-size:13px;transform:rotate(-12deg);line-height:1.1;text-align:center;">
-          PAID<br/>MBR APP<br/><span style="font-size:9px;">${escapeHtml(new Date(r.paid_on).getFullYear().toString())}</span>
+        <div style="margin-top:10px;">
+          <img src="${escapeHtml(bhaskarSig.url)}" alt="Signature" style="height:48px;width:auto;display:block;" crossorigin="anonymous" />
+          <div style="border-top:1px solid #333;padding-top:2px;margin-top:2px;max-width:220px;">
+            <b>Received By</b><br/>MBR Platform — Authorized Signatory
+          </div>
         </div>
       </div>
     </div>
