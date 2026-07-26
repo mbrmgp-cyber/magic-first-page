@@ -1,6 +1,7 @@
 // Renders a Subscription Payment Receipt as a printable/downloadable PDF
 // using the existing print pipeline (native print → Save as PDF).
 import { printDocument, escapeHtml } from "@/lib/print-pdf";
+import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 
 export type ReceiptOrg = {
   name?: string | null;
