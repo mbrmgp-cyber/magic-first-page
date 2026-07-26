@@ -165,13 +165,14 @@ function RootComponent() {
     // unauthenticated users see the page immediately with no loading screen.
     if (
       path === "/" ||
-      path === "/varadhi" ||
+      path.startsWith("/varadhi") ||
       path === "/register" ||
       path === "/member/register"
     ) {
       setShowSplash(false);
       return;
     }
+
     if (sessionStorage.getItem("mbr_splash_seen")) {
       setShowSplash(false);
     }
