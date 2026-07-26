@@ -24,7 +24,7 @@ function Dashboard() {
   useEffect(() => {
     (async () => {
       const { data } = await supabase.auth.getSession();
-      if (!data.session) { navigate({ to: "/auth" }); return; }
+      if (!data.session) { navigate({ to: "/varadhi/auth" }); return; }
       const r = await getProfile();
       if (!r.profile) { navigate({ to: "/varadhi/onboard" }); return; }
       setRole(r.profile.primary_role);
