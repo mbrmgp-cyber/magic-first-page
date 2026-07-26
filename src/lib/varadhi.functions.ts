@@ -1,5 +1,77 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { PUBLIC_APP_ORIGIN } from "@/lib/public-url";
+
+// -------- Varadhi-only login (completely independent of MBR auth flow)
+export const sendVaradhiLoginLink = createServerFn({ method: "POST" })
+  .inputValidator((d: { email: string }) => d)
+  .handler(async ({ data }) => {
+    const email = data.email.trim().toLowerCase();
+    if (!email) return { sent: false as const, reason: "missing_email" as const };
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Ensure an auth user exists (Varadhi is open sign-up — anyone can register).
+    let userId: string | null = null;
+    for (let page = 1; page <= 20; page += 1) {
+      const { data: list, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 1000 });
+      if (error) throw new Error(error.message);
+      const u = list.users.find((x: any) => x.email?.toLowerCase() === email);
+      if (u) { userId = u.id; break; }
+      if (list.users.length < 1000) break;
+    }
+    if (!userId) {
+      const { error: createError } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password: `VARADHI-${crypto.randomUUID()}`,
+        email_confirm: true,
+        user_metadata: { app: "varadhi" },
+      });
+      if (createError) throw new Error(createError.message);
+    }
+
+    const redirectTo = `${PUBLIC_APP_ORIGIN}/varadhi/auth`;
+    const { data: link, error: linkErr } = await supabaseAdmin.auth.admin.generateLink({
+      type: "magiclink",
+      email,
+      options: { redirectTo },
+    });
+    if (linkErr) throw new Error(linkErr.message);
+    const confirmationUrl = link?.properties?.action_link;
+    if (!confirmationUrl) throw new Error("Could not generate login link");
+
+    const [{ sendLovableEmail }, React, { render }, { MagicLinkEmail }] = await Promise.all([
+      import("@lovable.dev/email-js"),
+      import("react"),
+      import("react-email"),
+      import("@/lib/email-templates/magic-link"),
+    ]);
+    const siteName = "Varadhi";
+    const element = React.createElement(MagicLinkEmail, { siteName, confirmationUrl });
+    const html = await render(element);
+    const text = await render(element, { plainText: true });
+    const apiKey = process.env.LOVABLE_API_KEY;
+    if (!apiKey) throw new Error("Email service is not configured");
+    const messageId = crypto.randomUUID();
+    await sendLovableEmail(
+      {
+        to: email,
+        from: `${siteName} <noreply@notify.mbrplatform.com>`,
+        sender_domain: "notify.mbrplatform.com",
+        subject: "Varadhi — Login link",
+        html,
+        text,
+        purpose: "transactional",
+        label: "varadhi_magiclink",
+        message_id: messageId,
+        idempotency_key: messageId,
+        unsubscribe_token: `varadhi-${messageId}`,
+      },
+      { apiKey, idempotencyKey: messageId }
+    );
+
+    return { sent: true as const };
+  });
 
 export type VaradhiProfile = {
   user_id: string;
