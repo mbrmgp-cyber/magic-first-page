@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as VaradhiRouteImport } from './routes/varadhi'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as NewOrganizationRouteImport } from './routes/new-organization'
 import { Route as MbrRouteImport } from './routes/mbr'
@@ -53,11 +52,6 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 
-const VaradhiRoute = VaradhiRouteImport.update({
-  id: '/varadhi',
-  path: '/varadhi',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -295,7 +289,6 @@ export interface FileRoutesByFullPath {
   '/mbr': typeof MbrRoute
   '/new-organization': typeof NewOrganizationRoute
   '/register': typeof RegisterRoute
-  '/varadhi': typeof VaradhiRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/donor/register': typeof DonorRegisterRoute
   '/m/$code': typeof MCodeRoute
@@ -339,7 +332,6 @@ export interface FileRoutesByTo {
   '/mbr': typeof MbrRoute
   '/new-organization': typeof NewOrganizationRoute
   '/register': typeof RegisterRoute
-  '/varadhi': typeof VaradhiRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/donor/register': typeof DonorRegisterRoute
   '/m/$code': typeof MCodeRoute
@@ -385,7 +377,6 @@ export interface FileRoutesById {
   '/mbr': typeof MbrRoute
   '/new-organization': typeof NewOrganizationRoute
   '/register': typeof RegisterRoute
-  '/varadhi': typeof VaradhiRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/donor/register': typeof DonorRegisterRoute
   '/m/$code': typeof MCodeRoute
@@ -431,7 +422,6 @@ export interface FileRouteTypes {
     | '/mbr'
     | '/new-organization'
     | '/register'
-    | '/varadhi'
     | '/admin'
     | '/donor/register'
     | '/m/$code'
@@ -475,7 +465,6 @@ export interface FileRouteTypes {
     | '/mbr'
     | '/new-organization'
     | '/register'
-    | '/varadhi'
     | '/admin'
     | '/donor/register'
     | '/m/$code'
@@ -520,7 +509,6 @@ export interface FileRouteTypes {
     | '/mbr'
     | '/new-organization'
     | '/register'
-    | '/varadhi'
     | '/_authenticated/admin'
     | '/donor/register'
     | '/m/$code'
@@ -566,7 +554,6 @@ export interface RootRouteChildren {
   MbrRoute: typeof MbrRoute
   NewOrganizationRoute: typeof NewOrganizationRoute
   RegisterRoute: typeof RegisterRoute
-  VaradhiRoute: typeof VaradhiRoute
   DonorRegisterRoute: typeof DonorRegisterRoute
   MCodeRoute: typeof MCodeRoute
   MemberRegisterRoute: typeof MemberRegisterRoute
@@ -578,13 +565,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/varadhi': {
-      id: '/varadhi'
-      path: '/varadhi'
-      fullPath: '/varadhi'
-      preLoaderRoute: typeof VaradhiRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/register': {
       id: '/register'
       path: '/register'
@@ -956,7 +936,6 @@ const rootRouteChildren: RootRouteChildren = {
   MbrRoute: MbrRoute,
   NewOrganizationRoute: NewOrganizationRoute,
   RegisterRoute: RegisterRoute,
-  VaradhiRoute: VaradhiRoute,
   DonorRegisterRoute: DonorRegisterRoute,
   MCodeRoute: MCodeRoute,
   MemberRegisterRoute: MemberRegisterRoute,
