@@ -406,59 +406,8 @@ function Dashboard() {
         </div>
 
 
-        {/* Super Admin: Role & Access Management */}
-        {isSuperAdmin && (
-          <Link to="/org/admin-access" className="block">
-            <Card
-              className="p-3 border-2 flex items-center gap-3 transition-all hover:scale-[1.01]"
-              style={{
-                background: `linear-gradient(135deg, ${theme.icon}22, ${theme.bigBox})`,
-                borderColor: `${theme.icon}80`,
-                boxShadow: `0 0 20px ${theme.icon}33`,
-              }}
-            >
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 border"
-                style={{ background: `${theme.icon}26`, borderColor: `${theme.icon}66` }}>
-                <KeyRound className="w-5 h-5" style={{ color: theme.icon }} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-bold text-sm leading-tight" style={{ color: theme.headColor }}>
-                  {lt("Admin Role & Access", "అడ్మిన్ పాత్రలు & అనుమతులు")}
-                </div>
-                <div className="text-[11px] leading-tight" style={{ color: theme.subColor }}>
-                  {lt("Grant module permissions to committee members", "కమిటీ సభ్యులకు మాడ్యూల్ అనుమతులు ఇవ్వండి")}
-                </div>
-              </div>
-              <span className="text-lg shrink-0" style={{ color: theme.icon }}>→</span>
-            </Card>
-          </Link>
-        )}
 
-        {/* Subscription & Receipts */}
-        <Link to="/org/subscription" className="block">
-          <Card
-            className="p-3 border-2 flex items-center gap-3 transition-all hover:scale-[1.01]"
-            style={{
-              background: `linear-gradient(135deg, ${theme.icon}22, ${theme.bigBox})`,
-              borderColor: `${theme.icon}80`,
-              boxShadow: `0 0 20px ${theme.icon}33`,
-            }}
-          >
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 border"
-              style={{ background: `${theme.icon}26`, borderColor: `${theme.icon}66` }}>
-              <Receipt className="w-5 h-5" style={{ color: theme.icon }} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="font-bold text-sm leading-tight" style={{ color: theme.headColor }}>
-                {lt("Subscription & Receipts", "సబ్‌స్క్రిప్షన్ & రసీదులు")}
-              </div>
-              <div className="text-[11px] leading-tight" style={{ color: theme.subColor }}>
-                {lt("View validity and download payment receipts", "వ్యాలిడిటీ చూడండి, రసీదులు డౌన్‌లోడ్ చేయండి")}
-              </div>
-            </div>
-            <span className="text-lg shrink-0" style={{ color: theme.icon }}>→</span>
-          </Card>
-        </Link>
+
 
         {/* Menu 2-col grid */}
         <div className="grid grid-cols-2 gap-3">
@@ -526,12 +475,27 @@ function Dashboard() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 pt-2">
+            {isSuperAdmin && (
+              <Button
+                onClick={() => { setSettingsOpen(false); navigate({ to: "/org/admin-access" }); }}
+                className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-semibold border border-zinc-700 justify-start"
+              >
+                <KeyRound className="h-4 w-4 mr-2 text-[#ff8c28]" /> {lt("Admin Role & Access", "అడ్మిన్ పాత్రలు & అనుమతులు")}
+              </Button>
+            )}
+            <Button
+              onClick={() => { setSettingsOpen(false); navigate({ to: "/org/subscription" }); }}
+              className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-semibold border border-zinc-700 justify-start"
+            >
+              <Receipt className="h-4 w-4 mr-2 text-[#ff8c28]" /> {lt("Subscription & Receipts", "సబ్‌స్క్రిప్షన్ & రసీదులు")}
+            </Button>
             <Button
               onClick={() => { setSettingsOpen(false); navigate({ to: "/org/theme" }); }}
-              className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-semibold border border-zinc-700"
+              className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-semibold border border-zinc-700 justify-start"
             >
-              <Settings className="h-4 w-4 mr-1" /> {lt("Design & Theme", "రంగులు & డిజైన్")}
+              <Settings className="h-4 w-4 mr-2 text-[#ff8c28]" /> {lt("Design & Theme", "రంగులు & డిజైన్")}
             </Button>
+
             {/* Admin has no "Leave Organization" — members leave from their own dashboard.
                 Suspending / removing another member is handled in the Disciplinary Committee page. */}
             <Button
