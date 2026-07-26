@@ -2221,6 +2221,267 @@ export type Database = {
         }
         Relationships: []
       }
+      varadhi_clicks: {
+        Row: {
+          buyer_id: string | null
+          id: string
+          target_id: string
+          target_type: string
+          ts: string
+        }
+        Insert: {
+          buyer_id?: string | null
+          id?: string
+          target_id: string
+          target_type: string
+          ts?: string
+        }
+        Update: {
+          buyer_id?: string | null
+          id?: string
+          target_id?: string
+          target_type?: string
+          ts?: string
+        }
+        Relationships: []
+      }
+      varadhi_listings: {
+        Row: {
+          category: string
+          city: string | null
+          click_count: number
+          created_at: string
+          description: string | null
+          id: string
+          images: Json
+          lat: number | null
+          lng: number | null
+          price: number | null
+          seller_id: string
+          stock_status: string
+          sub_category: string | null
+          title: string
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          city?: string | null
+          click_count?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: Json
+          lat?: number | null
+          lng?: number | null
+          price?: number | null
+          seller_id: string
+          stock_status?: string
+          sub_category?: string | null
+          title: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          city?: string | null
+          click_count?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: Json
+          lat?: number | null
+          lng?: number | null
+          price?: number | null
+          seller_id?: string
+          stock_status?: string
+          sub_category?: string | null
+          title?: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      varadhi_profiles: {
+        Row: {
+          aadhaar_url: string | null
+          address: string | null
+          business_name: string | null
+          city: string | null
+          created_at: string
+          full_name: string
+          lat: number | null
+          license_url: string | null
+          lng: number | null
+          phone: string | null
+          primary_role: string
+          store_photo_url: string | null
+          updated_at: string
+          user_id: string
+          verification_notes: string | null
+          verification_status: string
+        }
+        Insert: {
+          aadhaar_url?: string | null
+          address?: string | null
+          business_name?: string | null
+          city?: string | null
+          created_at?: string
+          full_name: string
+          lat?: number | null
+          license_url?: string | null
+          lng?: number | null
+          phone?: string | null
+          primary_role: string
+          store_photo_url?: string | null
+          updated_at?: string
+          user_id: string
+          verification_notes?: string | null
+          verification_status?: string
+        }
+        Update: {
+          aadhaar_url?: string | null
+          address?: string | null
+          business_name?: string | null
+          city?: string | null
+          created_at?: string
+          full_name?: string
+          lat?: number | null
+          license_url?: string | null
+          lng?: number | null
+          phone?: string | null
+          primary_role?: string
+          store_photo_url?: string | null
+          updated_at?: string
+          user_id?: string
+          verification_notes?: string | null
+          verification_status?: string
+        }
+        Relationships: []
+      }
+      varadhi_providers: {
+        Row: {
+          availability_status: string
+          city: string | null
+          click_count: number
+          created_at: string
+          description: string | null
+          id: string
+          lat: number | null
+          lng: number | null
+          provider_type: string
+          rating_avg: number
+          service_areas: string | null
+          sub_type: string
+          subscription_expires_at: string | null
+          title: string
+          updated_at: string
+          user_id: string
+          vehicle_details: string | null
+        }
+        Insert: {
+          availability_status?: string
+          city?: string | null
+          click_count?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          provider_type: string
+          rating_avg?: number
+          service_areas?: string | null
+          sub_type: string
+          subscription_expires_at?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+          vehicle_details?: string | null
+        }
+        Update: {
+          availability_status?: string
+          city?: string | null
+          click_count?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          provider_type?: string
+          rating_avg?: number
+          service_areas?: string | null
+          sub_type?: string
+          subscription_expires_at?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          vehicle_details?: string | null
+        }
+        Relationships: []
+      }
+      varadhi_rewards: {
+        Row: {
+          created_at: string
+          id: string
+          note: string | null
+          points: number
+          source: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          points: number
+          source: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          points?: number
+          source?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      varadhi_subscriptions: {
+        Row: {
+          amount: number
+          created_at: string
+          expires_at: string
+          id: string
+          payment_ref: string | null
+          plan: string
+          starts_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          expires_at: string
+          id?: string
+          payment_ref?: string | null
+          plan: string
+          starts_at?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          expires_at?: string
+          id?: string
+          payment_ref?: string | null
+          plan?: string
+          starts_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       wallet_accounts: {
         Row: {
           created_at: string
@@ -2559,6 +2820,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      varadhi_log_click: {
+        Args: { _target_id: string; _target_type: string }
+        Returns: undefined
       }
     }
     Enums: {
