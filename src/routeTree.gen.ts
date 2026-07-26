@@ -21,6 +21,7 @@ import { Route as VaradhiSubscriptionRouteImport } from './routes/varadhi.subscr
 import { Route as VaradhiRewardsRouteImport } from './routes/varadhi.rewards'
 import { Route as VaradhiOnboardRouteImport } from './routes/varadhi.onboard'
 import { Route as VaradhiDashboardRouteImport } from './routes/varadhi.dashboard'
+import { Route as VaradhiAuthRouteImport } from './routes/varadhi.auth'
 import { Route as OrgRegisterRouteImport } from './routes/org.register'
 import { Route as MemberRegisterRouteImport } from './routes/member.register'
 import { Route as MCodeRouteImport } from './routes/m.$code'
@@ -118,6 +119,11 @@ const VaradhiOnboardRoute = VaradhiOnboardRouteImport.update({
 const VaradhiDashboardRoute = VaradhiDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => VaradhiRoute,
+} as any)
+const VaradhiAuthRoute = VaradhiAuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => VaradhiRoute,
 } as any)
 const OrgRegisterRoute = OrgRegisterRouteImport.update({
@@ -349,6 +355,7 @@ export interface FileRoutesByFullPath {
   '/m/$code': typeof MCodeRoute
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
+  '/varadhi/auth': typeof VaradhiAuthRoute
   '/varadhi/dashboard': typeof VaradhiDashboardRoute
   '/varadhi/onboard': typeof VaradhiOnboardRoute
   '/varadhi/rewards': typeof VaradhiRewardsRoute
@@ -400,6 +407,7 @@ export interface FileRoutesByTo {
   '/m/$code': typeof MCodeRoute
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
+  '/varadhi/auth': typeof VaradhiAuthRoute
   '/varadhi/dashboard': typeof VaradhiDashboardRoute
   '/varadhi/onboard': typeof VaradhiOnboardRoute
   '/varadhi/rewards': typeof VaradhiRewardsRoute
@@ -454,6 +462,7 @@ export interface FileRoutesById {
   '/m/$code': typeof MCodeRoute
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
+  '/varadhi/auth': typeof VaradhiAuthRoute
   '/varadhi/dashboard': typeof VaradhiDashboardRoute
   '/varadhi/onboard': typeof VaradhiOnboardRoute
   '/varadhi/rewards': typeof VaradhiRewardsRoute
@@ -508,6 +517,7 @@ export interface FileRouteTypes {
     | '/m/$code'
     | '/member/register'
     | '/org/register'
+    | '/varadhi/auth'
     | '/varadhi/dashboard'
     | '/varadhi/onboard'
     | '/varadhi/rewards'
@@ -559,6 +569,7 @@ export interface FileRouteTypes {
     | '/m/$code'
     | '/member/register'
     | '/org/register'
+    | '/varadhi/auth'
     | '/varadhi/dashboard'
     | '/varadhi/onboard'
     | '/varadhi/rewards'
@@ -612,6 +623,7 @@ export interface FileRouteTypes {
     | '/m/$code'
     | '/member/register'
     | '/org/register'
+    | '/varadhi/auth'
     | '/varadhi/dashboard'
     | '/varadhi/onboard'
     | '/varadhi/rewards'
@@ -754,6 +766,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/varadhi/dashboard'
       preLoaderRoute: typeof VaradhiDashboardRouteImport
+      parentRoute: typeof VaradhiRoute
+    }
+    '/varadhi/auth': {
+      id: '/varadhi/auth'
+      path: '/auth'
+      fullPath: '/varadhi/auth'
+      preLoaderRoute: typeof VaradhiAuthRouteImport
       parentRoute: typeof VaradhiRoute
     }
     '/org/register': {
@@ -1100,6 +1119,7 @@ const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface VaradhiRouteChildren {
+  VaradhiAuthRoute: typeof VaradhiAuthRoute
   VaradhiDashboardRoute: typeof VaradhiDashboardRoute
   VaradhiOnboardRoute: typeof VaradhiOnboardRoute
   VaradhiRewardsRoute: typeof VaradhiRewardsRoute
@@ -1111,6 +1131,7 @@ interface VaradhiRouteChildren {
 }
 
 const VaradhiRouteChildren: VaradhiRouteChildren = {
+  VaradhiAuthRoute: VaradhiAuthRoute,
   VaradhiDashboardRoute: VaradhiDashboardRoute,
   VaradhiOnboardRoute: VaradhiOnboardRoute,
   VaradhiRewardsRoute: VaradhiRewardsRoute,

@@ -90,7 +90,7 @@ function OnboardPage() {
   if (!authed) return (
     <div className="mx-auto max-w-md px-4 pt-8 text-center">
       <p className="text-sm">ముందు లాగిన్ అవ్వండి</p>
-      <button onClick={() => navigate({ to: "/auth" })}
+      <button onClick={() => navigate({ to: "/varadhi/auth" })}
         className="mt-4 rounded-xl bg-[#1e3a8a] px-6 py-2.5 text-white font-semibold">
         లాగిన్
       </button>

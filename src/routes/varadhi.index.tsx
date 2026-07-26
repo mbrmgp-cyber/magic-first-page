@@ -45,7 +45,7 @@ function VaradhiHome() {
           <p className="text-sm font-medium">ప్రారంభించడానికి లాగిన్ అవ్వండి</p>
           <p className="text-[11px] opacity-90 mt-0.5">Aadhaar & లొకేషన్ verify చేసి — అమ్మండి, కొనండి, సర్వీసులు అందించండి.</p>
           <button
-            onClick={() => navigate({ to: "/auth", search: { redirect: "/varadhi/onboard" } as any })}
+            onClick={() => navigate({ to: "/varadhi/auth" })}
             className="mt-3 w-full rounded-xl bg-[#f97316] py-2.5 font-semibold text-white shadow"
           >
             లాగిన్ / సైన్ అప్
