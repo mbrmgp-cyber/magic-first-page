@@ -2307,17 +2307,25 @@ export type Database = {
           aadhaar_url: string | null
           address: string | null
           business_name: string | null
+          certificates_urls: string[] | null
           city: string | null
           created_at: string
+          district: string | null
+          experience_years: number | null
           full_name: string
           lat: number | null
           license_url: string | null
           lng: number | null
+          mandal: string | null
           phone: string | null
+          photo_url: string | null
           primary_role: string
+          provider_sub_type: string | null
+          state: string | null
           store_photo_url: string | null
           updated_at: string
           user_id: string
+          vehicle_photo_url: string | null
           verification_notes: string | null
           verification_status: string
         }
@@ -2325,17 +2333,25 @@ export type Database = {
           aadhaar_url?: string | null
           address?: string | null
           business_name?: string | null
+          certificates_urls?: string[] | null
           city?: string | null
           created_at?: string
+          district?: string | null
+          experience_years?: number | null
           full_name: string
           lat?: number | null
           license_url?: string | null
           lng?: number | null
+          mandal?: string | null
           phone?: string | null
+          photo_url?: string | null
           primary_role: string
+          provider_sub_type?: string | null
+          state?: string | null
           store_photo_url?: string | null
           updated_at?: string
           user_id: string
+          vehicle_photo_url?: string | null
           verification_notes?: string | null
           verification_status?: string
         }
@@ -2343,17 +2359,25 @@ export type Database = {
           aadhaar_url?: string | null
           address?: string | null
           business_name?: string | null
+          certificates_urls?: string[] | null
           city?: string | null
           created_at?: string
+          district?: string | null
+          experience_years?: number | null
           full_name?: string
           lat?: number | null
           license_url?: string | null
           lng?: number | null
+          mandal?: string | null
           phone?: string | null
+          photo_url?: string | null
           primary_role?: string
+          provider_sub_type?: string | null
+          state?: string | null
           store_photo_url?: string | null
           updated_at?: string
           user_id?: string
+          vehicle_photo_url?: string | null
           verification_notes?: string | null
           verification_status?: string
         }
