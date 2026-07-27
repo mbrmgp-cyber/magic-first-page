@@ -240,13 +240,29 @@ function OnboardPage() {
         <>
           <SectionTitle n={3} label="వివరాలు & లొకేషన్" />
           <div className="space-y-3">
-            <Field label="వ్యాపార పేరు / వ్యక్తిగత పేరు">
-              <input className={inp} value={form.business_name ?? ""}
-                onChange={(e) => setForm({ ...form, business_name: e.target.value })} />
-            </Field>
-            <Field label="ఇంటి / వ్యాపార చిరునామా *">
-              <input className={inp} value={form.address ?? ""}
-                onChange={(e) => setForm({ ...form, address: e.target.value })} />
+            <Field label="అడ్రస్ *">
+              <div className="grid grid-cols-2 gap-2 mb-2">
+                {[
+                  { v: "home", te: "ఇల్లు" },
+                  { v: "shop", te: "షాప్" },
+                ].map((a) => (
+                  <button key={a.v}
+                    onClick={() => setForm({ ...form, address_type: a.v as "home" | "shop" })}
+                    className="rounded-xl py-2 text-xs font-semibold text-white"
+                    style={{ background: form.address_type === a.v ? "#1e3a8a" : "#94a3b8" }}>
+                    {a.te}
+                  </button>
+                ))}
+              </div>
+              {form.address_type === "shop" ? (
+                <input className={inp} placeholder="షాప్ పేరు"
+                  value={form.shop_name}
+                  onChange={(e) => setForm({ ...form, shop_name: e.target.value })} />
+              ) : (
+                <input className={inp} placeholder="ఇంటి నెంబర్"
+                  value={form.house_number}
+                  onChange={(e) => setForm({ ...form, house_number: e.target.value })} />
+              )}
             </Field>
             <div className="grid grid-cols-2 gap-3">
               <Field label="ఊరు / Village *">
