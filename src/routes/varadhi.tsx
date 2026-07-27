@@ -18,20 +18,23 @@ export const Route = createFileRoute("/varadhi")({
 });
 
 function VaradhiLayout() {
+  const loc = useLocation();
+  const showDisclaimer = loc.pathname === "/varadhi";
   return (
-    <div className="min-h-screen bg-[#f7f7fb] text-[#1e3a8a] pb-20">
+    <div className="min-h-screen bg-[#f7f7fb] text-[#1e3a8a] pb-16">
       <Outlet />
-      <VaradhiBottomNav />
-      <footer className="fixed bottom-16 inset-x-0 z-40 pointer-events-none">
-        <div className="mx-auto max-w-md px-3">
-          <div className="pointer-events-auto rounded-t-lg bg-black/70 text-white text-[10px] leading-tight px-3 py-1.5 backdrop-blur">
+      {showDisclaimer && (
+        <div className="mx-auto max-w-md px-3 pb-3">
+          <div className="rounded-lg bg-black/70 text-white text-[10px] leading-tight px-3 py-1.5">
             Varadhi is an informational listing platform. It is not responsible for any monetary transactions, product quality, or business agreements between users.
           </div>
         </div>
-      </footer>
+      )}
+      <VaradhiBottomNav />
     </div>
   );
 }
+
 
 function VaradhiBottomNav() {
   const loc = useLocation();
