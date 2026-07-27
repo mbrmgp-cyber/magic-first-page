@@ -157,6 +157,13 @@ function OnboardPage() {
     if (form.primary_role === "provider") {
       if (!form.provider_sub_type) return toast.error("Transport / Technician / Service ఎంచుకోండి");
       if (!form.provider_specialty) return toast.error("స్పెషాలిటీ / కేటగిరీ ఎంచుకోండి");
+      if (form.provider_specialty.startsWith("Other") && !specialtyOther.trim()) {
+        return toast.error("మీ స్పెషాలిటీ రాయండి");
+      }
+      if (form.provider_specialty.startsWith("Other")) {
+        form.provider_specialty = `Other: ${specialtyOther.trim()}`;
+      }
+
       if (form.provider_sub_type === "transport") {
         if (!form.vehicle_photo_url) return toast.error("బండి ఫోటో అప్‌లోడ్ చేయండి");
         if (!form.license_url) return toast.error("డ్రైవింగ్ లైసెన్స్ ఫోటో అప్‌లోడ్ చేయండి");
