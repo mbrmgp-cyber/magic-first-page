@@ -336,8 +336,14 @@ function OnboardPage() {
                         <option key={o} value={o}>{o}</option>
                       ))}
                     </select>
+                    {form.provider_specialty.startsWith("Other") && (
+                      <input className={inp + " mt-2"} placeholder="మీ స్పెషాలిటీ రాయండి"
+                        value={specialtyOther}
+                        onChange={(e) => setSpecialtyOther(e.target.value)} />
+                    )}
                   </Field>
                 )}
+
 
 
                 {form.provider_sub_type === "transport" && (
