@@ -58,6 +58,7 @@ import { Route as AuthenticatedMemberLedgerRouteImport } from './routes/_authent
 import { Route as AuthenticatedMemberEventsRouteImport } from './routes/_authenticated/member.events'
 import { Route as AuthenticatedMemberDashboardRouteImport } from './routes/_authenticated/member.dashboard'
 import { Route as AuthenticatedDonorDashboardRouteImport } from './routes/_authenticated/donor.dashboard'
+import { Route as AuthenticatedAdminVaradhiRouteImport } from './routes/_authenticated/admin.varadhi'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -326,6 +327,12 @@ const AuthenticatedDonorDashboardRoute =
     path: '/donor/dashboard',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminVaradhiRoute =
+  AuthenticatedAdminVaradhiRouteImport.update({
+    id: '/varadhi',
+    path: '/varadhi',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -350,7 +357,7 @@ export interface FileRoutesByFullPath {
   '/new-organization': typeof NewOrganizationRoute
   '/register': typeof RegisterRoute
   '/varadhi': typeof VaradhiRouteWithChildren
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/donor/register': typeof DonorRegisterRoute
   '/m/$code': typeof MCodeRoute
   '/member/register': typeof MemberRegisterRoute
@@ -361,6 +368,7 @@ export interface FileRoutesByFullPath {
   '/varadhi/rewards': typeof VaradhiRewardsRoute
   '/varadhi/subscription': typeof VaradhiSubscriptionRoute
   '/varadhi/': typeof VaradhiIndexRoute
+  '/admin/varadhi': typeof AuthenticatedAdminVaradhiRoute
   '/donor/dashboard': typeof AuthenticatedDonorDashboardRoute
   '/member/dashboard': typeof AuthenticatedMemberDashboardRoute
   '/member/events': typeof AuthenticatedMemberEventsRoute
@@ -402,7 +410,7 @@ export interface FileRoutesByTo {
   '/mbr': typeof MbrRoute
   '/new-organization': typeof NewOrganizationRoute
   '/register': typeof RegisterRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/donor/register': typeof DonorRegisterRoute
   '/m/$code': typeof MCodeRoute
   '/member/register': typeof MemberRegisterRoute
@@ -413,6 +421,7 @@ export interface FileRoutesByTo {
   '/varadhi/rewards': typeof VaradhiRewardsRoute
   '/varadhi/subscription': typeof VaradhiSubscriptionRoute
   '/varadhi': typeof VaradhiIndexRoute
+  '/admin/varadhi': typeof AuthenticatedAdminVaradhiRoute
   '/donor/dashboard': typeof AuthenticatedDonorDashboardRoute
   '/member/dashboard': typeof AuthenticatedMemberDashboardRoute
   '/member/events': typeof AuthenticatedMemberEventsRoute
@@ -457,7 +466,7 @@ export interface FileRoutesById {
   '/new-organization': typeof NewOrganizationRoute
   '/register': typeof RegisterRoute
   '/varadhi': typeof VaradhiRouteWithChildren
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/donor/register': typeof DonorRegisterRoute
   '/m/$code': typeof MCodeRoute
   '/member/register': typeof MemberRegisterRoute
@@ -468,6 +477,7 @@ export interface FileRoutesById {
   '/varadhi/rewards': typeof VaradhiRewardsRoute
   '/varadhi/subscription': typeof VaradhiSubscriptionRoute
   '/varadhi/': typeof VaradhiIndexRoute
+  '/_authenticated/admin/varadhi': typeof AuthenticatedAdminVaradhiRoute
   '/_authenticated/donor/dashboard': typeof AuthenticatedDonorDashboardRoute
   '/_authenticated/member/dashboard': typeof AuthenticatedMemberDashboardRoute
   '/_authenticated/member/events': typeof AuthenticatedMemberEventsRoute
@@ -523,6 +533,7 @@ export interface FileRouteTypes {
     | '/varadhi/rewards'
     | '/varadhi/subscription'
     | '/varadhi/'
+    | '/admin/varadhi'
     | '/donor/dashboard'
     | '/member/dashboard'
     | '/member/events'
@@ -575,6 +586,7 @@ export interface FileRouteTypes {
     | '/varadhi/rewards'
     | '/varadhi/subscription'
     | '/varadhi'
+    | '/admin/varadhi'
     | '/donor/dashboard'
     | '/member/dashboard'
     | '/member/events'
@@ -629,6 +641,7 @@ export interface FileRouteTypes {
     | '/varadhi/rewards'
     | '/varadhi/subscription'
     | '/varadhi/'
+    | '/_authenticated/admin/varadhi'
     | '/_authenticated/donor/dashboard'
     | '/_authenticated/member/dashboard'
     | '/_authenticated/member/events'
@@ -1027,6 +1040,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDonorDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/varadhi': {
+      id: '/_authenticated/admin/varadhi'
+      path: '/varadhi'
+      fullPath: '/admin/varadhi'
+      preLoaderRoute: typeof AuthenticatedAdminVaradhiRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
       path: '/lovable/email/queue/process'
@@ -1051,8 +1071,19 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminVaradhiRoute: typeof AuthenticatedAdminVaradhiRoute
+}
+
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminVaradhiRoute: AuthenticatedAdminVaradhiRoute,
+}
+
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedDonorDashboardRoute: typeof AuthenticatedDonorDashboardRoute
   AuthenticatedMemberDashboardRoute: typeof AuthenticatedMemberDashboardRoute
   AuthenticatedMemberEventsRoute: typeof AuthenticatedMemberEventsRoute
@@ -1084,7 +1115,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedDonorDashboardRoute: AuthenticatedDonorDashboardRoute,
   AuthenticatedMemberDashboardRoute: AuthenticatedMemberDashboardRoute,
   AuthenticatedMemberEventsRoute: AuthenticatedMemberEventsRoute,
