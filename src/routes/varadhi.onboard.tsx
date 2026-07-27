@@ -65,6 +65,9 @@ function OnboardPage() {
     primary_role: "" as "" | Role,
     provider_sub_type: "" as "" | SubType,
     business_name: "",
+    address_type: "home" as "home" | "shop",
+    house_number: "",
+    shop_name: "",
     address: "",
     city: "",
     mandal: "",
@@ -144,7 +147,10 @@ function OnboardPage() {
     if (!step1Ok) return toast.error("పేరు / ఫోన్ / ఫోటో / ఆధార్ కంప్లీట్ చేయండి");
     if (!form.primary_role) return toast.error("పాత్ర ఎంచుకోండి");
     if (form.lat == null || form.lng == null) return toast.error("లొకేషన్ పిన్ చేయండి");
-    if (!form.address.trim() || !form.city.trim()) return toast.error("అడ్రస్ / ఊరు తప్పనిసరి");
+    const addrDetail = form.address_type === "shop" ? form.shop_name : form.house_number;
+    if (!addrDetail.trim() || !form.city.trim()) return toast.error(form.address_type === "shop" ? "షాప్ పేరు / ఊరు తప్పనిసరి" : "ఇంటి నెంబర్ / ఊరు తప్పనిసరి");
+    form.address = addrDetail;
+    form.business_name = form.address_type === "shop" ? form.shop_name : "";
 
     if (form.primary_role === "provider") {
       if (!form.provider_sub_type) return toast.error("Transport / Technician / Service ఎంచుకోండి");
@@ -237,13 +243,29 @@ function OnboardPage() {
         <>
           <SectionTitle n={3} label="వివరాలు & లొకేషన్" />
           <div className="space-y-3">
-            <Field label="వ్యాపార పేరు / వ్యక్తిగత పేరు">
-              <input className={inp} value={form.business_name ?? ""}
-                onChange={(e) => setForm({ ...form, business_name: e.target.value })} />
-            </Field>
-            <Field label="ఇంటి / వ్యాపార చిరునామా *">
-              <input className={inp} value={form.address ?? ""}
-                onChange={(e) => setForm({ ...form, address: e.target.value })} />
+            <Field label="అడ్రస్ *">
+              <div className="grid grid-cols-2 gap-2 mb-2">
+                {[
+                  { v: "home", te: "ఇల్లు" },
+                  { v: "shop", te: "షాప్" },
+                ].map((a) => (
+                  <button key={a.v}
+                    onClick={() => setForm({ ...form, address_type: a.v as "home" | "shop" })}
+                    className="rounded-xl py-2 text-xs font-semibold text-white"
+                    style={{ background: form.address_type === a.v ? "#1e3a8a" : "#94a3b8" }}>
+                    {a.te}
+                  </button>
+                ))}
+              </div>
+              {form.address_type === "shop" ? (
+                <input className={inp} placeholder="షాప్ పేరు"
+                  value={form.shop_name}
+                  onChange={(e) => setForm({ ...form, shop_name: e.target.value })} />
+              ) : (
+                <input className={inp} placeholder="ఇంటి నెంబర్"
+                  value={form.house_number}
+                  onChange={(e) => setForm({ ...form, house_number: e.target.value })} />
+              )}
             </Field>
             <div className="grid grid-cols-2 gap-3">
               <Field label="ఊరు / Village *">
