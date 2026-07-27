@@ -147,7 +147,10 @@ function OnboardPage() {
     if (!step1Ok) return toast.error("పేరు / ఫోన్ / ఫోటో / ఆధార్ కంప్లీట్ చేయండి");
     if (!form.primary_role) return toast.error("పాత్ర ఎంచుకోండి");
     if (form.lat == null || form.lng == null) return toast.error("లొకేషన్ పిన్ చేయండి");
-    if (!form.address.trim() || !form.city.trim()) return toast.error("అడ్రస్ / ఊరు తప్పనిసరి");
+    const addrDetail = form.address_type === "shop" ? form.shop_name : form.house_number;
+    if (!addrDetail.trim() || !form.city.trim()) return toast.error(form.address_type === "shop" ? "షాప్ పేరు / ఊరు తప్పనిసరి" : "ఇంటి నెంబర్ / ఊరు తప్పనిసరి");
+    form.address = addrDetail;
+    form.business_name = form.address_type === "shop" ? form.shop_name : "";
 
     if (form.primary_role === "provider") {
       if (!form.provider_sub_type) return toast.error("Transport / Technician / Service ఎంచుకోండి");
