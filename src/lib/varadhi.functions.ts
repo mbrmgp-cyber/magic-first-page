@@ -320,3 +320,56 @@ export const getSignedListingUrl = createServerFn({ method: "GET" })
       .from("varadhi-listings").createSignedUrl(data.path, 60 * 60);
     return { url: signed?.signedUrl ?? null };
   });
+
+// -------- Admin: list & review Varadhi registrations (MBR super admin only)
+async function assertMbrAdmin(supabase: any, userId: string) {
+  const { data } = await supabase.rpc("has_role", { _user_id: userId, _role: "mbr_admin" });
+  if (!data) throw new Error("Forbidden: MBR Admin only");
+}
+
+export const adminListVaradhiProfiles = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { status?: "pending" | "approved" | "rejected" | "all" } = {}) => d)
+  .handler(async ({ data, context }) => {
+    await assertMbrAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let q = supabaseAdmin.from("varadhi_profiles").select("*").order("created_at", { ascending: false });
+    if (data.status && data.status !== "all") q = q.eq("verification_status", data.status);
+    const { data: rows, error } = await q.limit(500);
+    if (error) throw new Error(error.message);
+
+    // Sign private proof URLs so admin can view them.
+    async function sign(bucket: string, path: string | null) {
+      if (!path) return null;
+      const p = path.includes("/") ? path : path;
+      const { data: s } = await supabaseAdmin.storage.from(bucket).createSignedUrl(p, 60 * 60);
+      return s?.signedUrl ?? null;
+    }
+    const enriched = await Promise.all((rows ?? []).map(async (r: any) => ({
+      ...r,
+      aadhaar_signed_url: await sign("varadhi-proofs", r.aadhaar_url),
+      license_signed_url: await sign("varadhi-proofs", r.license_url),
+      store_photo_signed_url: await sign("varadhi-proofs", r.store_photo_url),
+      vehicle_photo_signed_url: await sign("varadhi-proofs", r.vehicle_photo_url),
+      photo_signed_url: await sign("varadhi-proofs", r.photo_url),
+    })));
+    return { profiles: enriched };
+  });
+
+export const adminReviewVaradhiProfile = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { user_id: string; action: "approve" | "reject"; notes?: string }) => d)
+  .handler(async ({ data, context }) => {
+    await assertMbrAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("varadhi_profiles")
+      .update({
+        verification_status: data.action === "approve" ? "approved" : "rejected",
+        verification_notes: data.notes ?? null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("user_id", data.user_id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
