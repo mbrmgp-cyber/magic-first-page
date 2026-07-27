@@ -2320,6 +2320,7 @@ export type Database = {
           phone: string | null
           photo_url: string | null
           primary_role: string
+          provider_specialty: string | null
           provider_sub_type: string | null
           state: string | null
           store_photo_url: string | null
@@ -2346,6 +2347,7 @@ export type Database = {
           phone?: string | null
           photo_url?: string | null
           primary_role: string
+          provider_specialty?: string | null
           provider_sub_type?: string | null
           state?: string | null
           store_photo_url?: string | null
@@ -2372,6 +2374,7 @@ export type Database = {
           phone?: string | null
           photo_url?: string | null
           primary_role?: string
+          provider_specialty?: string | null
           provider_sub_type?: string | null
           state?: string | null
           store_photo_url?: string | null

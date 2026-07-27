@@ -1,0 +1,1 @@
+ALTER TABLE public.varadhi_profiles ADD COLUMN IF NOT EXISTS provider_specialty text;

@@ -13,6 +13,44 @@ export const Route = createFileRoute("/varadhi/onboard")({
 type Role = "seller" | "buyer" | "provider";
 type SubType = "transport" | "technician" | "service";
 
+const SPECIALTIES: Record<SubType, string[]> = {
+  transport: [
+    "2 Wheeler (బైక్)",
+    "3 Wheeler (ఆటో)",
+    "4 Wheeler (కారు / పికప్)",
+    "6 Wheeler (లారీ)",
+    "8+ Wheeler (పెద్ద లారీ)",
+    "Tractor / ట్రాక్టర్",
+    "Harvester / హార్వెస్టర్",
+    "Other / ఇతర",
+  ],
+  technician: [
+    "Electrician / ఎలక్ట్రీషియన్",
+    "Plumber / ప్లంబర్",
+    "Mechanic / మెకానిక్",
+    "AC / Fridge Repair",
+    "TV / Mobile Repair",
+    "Carpenter / వడ్రంగి",
+    "Welder / వెల్డర్",
+    "Painter / పెయింటర్",
+    "Mason / మేస్త్రీ",
+    "Other / ఇతర",
+  ],
+  service: [
+    "ఇంటి పని (Home / Domestic)",
+    "వ్యవసాయ పని (Farm / Agri labour)",
+    "షాప్ లో పని (Shop worker)",
+    "ఆఫీసు లో పని (Office staff)",
+    "బిల్డింగ్ పని (Construction)",
+    "క్లీనింగ్ / తోట పని",
+    "బేబీ / వృద్ధుల సంరక్షణ",
+    "Cooking / Catering",
+    "Security Guard",
+    "Other / ఇతర",
+  ],
+};
+
+
 function OnboardPage() {
   const navigate = useNavigate();
   const getProfile = useServerFn(getMyVaradhiProfile);
@@ -39,7 +77,9 @@ function OnboardPage() {
     vehicle_photo_url: "",
     experience_years: null as number | null,
     certificates_urls: [] as string[],
+    provider_specialty: "",
   });
+
   const [status, setStatus] = useState<"pending" | "approved" | "rejected" | null>(null);
 
   useEffect(() => {
@@ -107,7 +147,8 @@ function OnboardPage() {
     if (!form.address.trim() || !form.city.trim()) return toast.error("అడ్రస్ / ఊరు తప్పనిసరి");
 
     if (form.primary_role === "provider") {
-      if (!form.provider_sub_type) return toast.error("Transport / Technician ఎంచుకోండి");
+      if (!form.provider_sub_type) return toast.error("Transport / Technician / Service ఎంచుకోండి");
+      if (!form.provider_specialty) return toast.error("స్పెషాలిటీ / కేటగిరీ ఎంచుకోండి");
       if (form.provider_sub_type === "transport") {
         if (!form.vehicle_photo_url) return toast.error("బండి ఫోటో అప్‌లోడ్ చేయండి");
         if (!form.license_url) return toast.error("డ్రైవింగ్ లైసెన్స్ ఫోటో అప్‌లోడ్ చేయండి");
@@ -117,6 +158,7 @@ function OnboardPage() {
         if (form.certificates_urls.length === 0) return toast.error("కనీసం ఒక సర్టిఫికెట్ అప్‌లోడ్ చేయండి");
       }
     }
+
 
     try {
       await upsert({ data: form as any });
@@ -245,7 +287,7 @@ function OnboardPage() {
                       { v: "service", te: "సర్వీస్" },
                     ].map((s) => (
                       <button key={s.v}
-                        onClick={() => setForm({ ...form, provider_sub_type: s.v as SubType })}
+                        onClick={() => setForm({ ...form, provider_sub_type: s.v as SubType, provider_specialty: "" })}
                         className="rounded-xl py-2 text-[11px] font-semibold text-white"
                         style={{ background: form.provider_sub_type === s.v ? "#f97316" : "#94a3b8" }}>
                         {s.te}
@@ -253,6 +295,19 @@ function OnboardPage() {
                     ))}
                   </div>
                 </Field>
+
+                {form.provider_sub_type && (
+                  <Field label="కేటగిరీ / స్పెషాలిటీ ఎంచుకోండి *">
+                    <select className={inp} value={form.provider_specialty}
+                      onChange={(e) => setForm({ ...form, provider_specialty: e.target.value })}>
+                      <option value="">-- ఎంచుకోండి --</option>
+                      {SPECIALTIES[form.provider_sub_type].map((o) => (
+                        <option key={o} value={o}>{o}</option>
+                      ))}
+                    </select>
+                  </Field>
+                )}
+
 
                 {form.provider_sub_type === "transport" && (
                   <>
