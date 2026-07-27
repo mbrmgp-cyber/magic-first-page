@@ -82,6 +82,8 @@ function OnboardPage() {
     certificates_urls: [] as string[],
     provider_specialty: "",
   });
+  const [specialtyOther, setSpecialtyOther] = useState("");
+
 
   const [status, setStatus] = useState<"pending" | "approved" | "rejected" | null>(null);
 
