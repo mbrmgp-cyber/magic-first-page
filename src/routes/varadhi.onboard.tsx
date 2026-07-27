@@ -39,7 +39,9 @@ function OnboardPage() {
     vehicle_photo_url: "",
     experience_years: null as number | null,
     certificates_urls: [] as string[],
+    provider_specialty: "",
   });
+
   const [status, setStatus] = useState<"pending" | "approved" | "rejected" | null>(null);
 
   useEffect(() => {
