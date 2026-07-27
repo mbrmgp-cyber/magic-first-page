@@ -13,6 +13,44 @@ export const Route = createFileRoute("/varadhi/onboard")({
 type Role = "seller" | "buyer" | "provider";
 type SubType = "transport" | "technician" | "service";
 
+const SPECIALTIES: Record<SubType, string[]> = {
+  transport: [
+    "2 Wheeler (బైక్)",
+    "3 Wheeler (ఆటో)",
+    "4 Wheeler (కారు / పికప్)",
+    "6 Wheeler (లారీ)",
+    "8+ Wheeler (పెద్ద లారీ)",
+    "Tractor / ట్రాక్టర్",
+    "Harvester / హార్వెస్టర్",
+    "Other / ఇతర",
+  ],
+  technician: [
+    "Electrician / ఎలక్ట్రీషియన్",
+    "Plumber / ప్లంబర్",
+    "Mechanic / మెకానిక్",
+    "AC / Fridge Repair",
+    "TV / Mobile Repair",
+    "Carpenter / వడ్రంగి",
+    "Welder / వెల్డర్",
+    "Painter / పెయింటర్",
+    "Mason / మేస్త్రీ",
+    "Other / ఇతర",
+  ],
+  service: [
+    "ఇంటి పని (Home / Domestic)",
+    "వ్యవసాయ పని (Farm / Agri labour)",
+    "షాప్ లో పని (Shop worker)",
+    "ఆఫీసు లో పని (Office staff)",
+    "బిల్డింగ్ పని (Construction)",
+    "క్లీనింగ్ / తోట పని",
+    "బేబీ / వృద్ధుల సంరక్షణ",
+    "Cooking / Catering",
+    "Security Guard",
+    "Other / ఇతర",
+  ],
+};
+
+
 function OnboardPage() {
   const navigate = useNavigate();
   const getProfile = useServerFn(getMyVaradhiProfile);
