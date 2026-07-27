@@ -109,7 +109,8 @@ function OnboardPage() {
     if (!form.address.trim() || !form.city.trim()) return toast.error("అడ్రస్ / ఊరు తప్పనిసరి");
 
     if (form.primary_role === "provider") {
-      if (!form.provider_sub_type) return toast.error("Transport / Technician ఎంచుకోండి");
+      if (!form.provider_sub_type) return toast.error("Transport / Technician / Service ఎంచుకోండి");
+      if (!form.provider_specialty) return toast.error("స్పెషాలిటీ / కేటగిరీ ఎంచుకోండి");
       if (form.provider_sub_type === "transport") {
         if (!form.vehicle_photo_url) return toast.error("బండి ఫోటో అప్‌లోడ్ చేయండి");
         if (!form.license_url) return toast.error("డ్రైవింగ్ లైసెన్స్ ఫోటో అప్‌లోడ్ చేయండి");
@@ -119,6 +120,7 @@ function OnboardPage() {
         if (form.certificates_urls.length === 0) return toast.error("కనీసం ఒక సర్టిఫికెట్ అప్‌లోడ్ చేయండి");
       }
     }
+
 
     try {
       await upsert({ data: form as any });
