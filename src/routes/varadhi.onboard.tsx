@@ -249,7 +249,7 @@ function OnboardPage() {
                       { v: "service", te: "సర్వీస్" },
                     ].map((s) => (
                       <button key={s.v}
-                        onClick={() => setForm({ ...form, provider_sub_type: s.v as SubType })}
+                        onClick={() => setForm({ ...form, provider_sub_type: s.v as SubType, provider_specialty: "" })}
                         className="rounded-xl py-2 text-[11px] font-semibold text-white"
                         style={{ background: form.provider_sub_type === s.v ? "#f97316" : "#94a3b8" }}>
                         {s.te}
@@ -257,6 +257,19 @@ function OnboardPage() {
                     ))}
                   </div>
                 </Field>
+
+                {form.provider_sub_type && (
+                  <Field label="కేటగిరీ / స్పెషాలిటీ ఎంచుకోండి *">
+                    <select className={inp} value={form.provider_specialty}
+                      onChange={(e) => setForm({ ...form, provider_specialty: e.target.value })}>
+                      <option value="">-- ఎంచుకోండి --</option>
+                      {SPECIALTIES[form.provider_sub_type].map((o) => (
+                        <option key={o} value={o}>{o}</option>
+                      ))}
+                    </select>
+                  </Field>
+                )}
+
 
                 {form.provider_sub_type === "transport" && (
                   <>
