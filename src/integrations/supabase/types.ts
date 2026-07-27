@@ -2306,6 +2306,7 @@ export type Database = {
         Row: {
           aadhaar_url: string | null
           address: string | null
+          address_type: string | null
           business_name: string | null
           certificates_urls: string[] | null
           city: string | null
@@ -2313,6 +2314,7 @@ export type Database = {
           district: string | null
           experience_years: number | null
           full_name: string
+          house_number: string | null
           lat: number | null
           license_url: string | null
           lng: number | null
@@ -2322,6 +2324,7 @@ export type Database = {
           primary_role: string
           provider_specialty: string | null
           provider_sub_type: string | null
+          shop_name: string | null
           state: string | null
           store_photo_url: string | null
           updated_at: string
@@ -2333,6 +2336,7 @@ export type Database = {
         Insert: {
           aadhaar_url?: string | null
           address?: string | null
+          address_type?: string | null
           business_name?: string | null
           certificates_urls?: string[] | null
           city?: string | null
@@ -2340,6 +2344,7 @@ export type Database = {
           district?: string | null
           experience_years?: number | null
           full_name: string
+          house_number?: string | null
           lat?: number | null
           license_url?: string | null
           lng?: number | null
@@ -2349,6 +2354,7 @@ export type Database = {
           primary_role: string
           provider_specialty?: string | null
           provider_sub_type?: string | null
+          shop_name?: string | null
           state?: string | null
           store_photo_url?: string | null
           updated_at?: string
@@ -2360,6 +2366,7 @@ export type Database = {
         Update: {
           aadhaar_url?: string | null
           address?: string | null
+          address_type?: string | null
           business_name?: string | null
           certificates_urls?: string[] | null
           city?: string | null
@@ -2367,6 +2374,7 @@ export type Database = {
           district?: string | null
           experience_years?: number | null
           full_name?: string
+          house_number?: string | null
           lat?: number | null
           license_url?: string | null
           lng?: number | null
@@ -2376,6 +2384,7 @@ export type Database = {
           primary_role?: string
           provider_specialty?: string | null
           provider_sub_type?: string | null
+          shop_name?: string | null
           state?: string | null
           store_photo_url?: string | null
           updated_at?: string
