@@ -133,7 +133,7 @@ function AdminPanel() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button onClick={() => navigate({ to: "/admin/varadhi" })} size="sm" className="bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-black font-semibold">Varadhi Approvals</Button>
+            
             <Button onClick={logout} variant="ghost" size="sm" className="text-white hover:bg-zinc-800 border border-zinc-700"><LogOut className="h-4 w-4 mr-1" />Logout</Button>
           </div>
         </div>
