@@ -384,7 +384,7 @@ export const adminReviewVaradhiProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { user_id: string; action: "approve" | "reject"; notes?: string }) => d)
   .handler(async ({ data, context }) => {
-    await assertMbrAdmin(context.supabase, context.userId);
+    await assertVaradhiAdmin(context.supabase, context.userId, (context.claims as any)?.email);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("varadhi_profiles")
