@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { amIVaradhiAdmin } from "@/lib/varadhi.functions";
 import varadhiLogo from "@/assets/varadhi-logo.jpg.asset.json";
+import { VaradhiAppIcons } from "@/components/VaradhiAppIcons";
 
 export const Route = createFileRoute("/varadhi")({
   head: () => ({
@@ -43,6 +44,7 @@ function VaradhiLayout() {
 
   return (
     <div className="min-h-screen bg-[#f7f7fb] text-[#1e3a8a] pb-16">
+      <VaradhiAppIcons />
       {isAdmin && !loc.pathname.startsWith("/varadhi/admin") && (
         <Link
           to="/varadhi/admin"
