@@ -324,7 +324,7 @@ export const getSignedListingUrl = createServerFn({ method: "GET" })
 // -------- Admin: Varadhi has its OWN super admin role (varadhi_admin),
 // completely independent from the MBR super admin (mbr_admin).
 // Bootstrap emails automatically receive the role on first admin visit.
-const VARADHI_BOOTSTRAP_ADMINS = ["mbrvaradhi@yahoo.com"];
+const VARADHI_BOOTSTRAP_ADMINS = ["mbrvaradhi@yahoo.com", "mbrproduct@gmail.com"];
 
 async function assertVaradhiAdmin(supabase: any, userId: string, email?: string | null) {
   const { data } = await supabase.rpc("has_role", { _user_id: userId, _role: "varadhi_admin" });
