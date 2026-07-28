@@ -2319,6 +2319,7 @@ export type Database = {
           license_url: string | null
           lng: number | null
           mandal: string | null
+          occupation: string | null
           phone: string | null
           photo_url: string | null
           primary_role: string
@@ -2349,9 +2350,10 @@ export type Database = {
           license_url?: string | null
           lng?: number | null
           mandal?: string | null
+          occupation?: string | null
           phone?: string | null
           photo_url?: string | null
-          primary_role: string
+          primary_role?: string
           provider_specialty?: string | null
           provider_sub_type?: string | null
           shop_name?: string | null
@@ -2379,6 +2381,7 @@ export type Database = {
           license_url?: string | null
           lng?: number | null
           mandal?: string | null
+          occupation?: string | null
           phone?: string | null
           photo_url?: string | null
           primary_role?: string
