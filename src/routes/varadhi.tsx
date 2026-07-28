@@ -1,5 +1,9 @@
 import { createFileRoute, Outlet, Link, useLocation } from "@tanstack/react-router";
-import { Home, Search, LayoutDashboard, Gift, User } from "lucide-react";
+import { Home, Search, LayoutDashboard, Gift, User, ShieldCheck } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { supabase } from "@/integrations/supabase/client";
+import { amIVaradhiAdmin } from "@/lib/varadhi.functions";
 import varadhiLogo from "@/assets/varadhi-logo.jpg.asset.json";
 
 export const Route = createFileRoute("/varadhi")({
@@ -20,8 +24,33 @@ export const Route = createFileRoute("/varadhi")({
 function VaradhiLayout() {
   const loc = useLocation();
   const showDisclaimer = loc.pathname === "/varadhi";
+  const checkAdmin = useServerFn(amIVaradhiAdmin);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) return;
+      try {
+        const res = await checkAdmin();
+        if (active) setIsAdmin(!!res?.isAdmin);
+      } catch { /* not admin */ }
+    })();
+    return () => { active = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loc.pathname]);
+
   return (
     <div className="min-h-screen bg-[#f7f7fb] text-[#1e3a8a] pb-16">
+      {isAdmin && !loc.pathname.startsWith("/varadhi/admin") && (
+        <Link
+          to="/varadhi/admin"
+          className="flex items-center justify-center gap-1.5 bg-[#1e3a8a] py-2 text-xs font-semibold text-white"
+        >
+          <ShieldCheck className="h-4 w-4" /> వారధి అడ్మిన్ ప్యానెల్ తెరవండి
+        </Link>
+      )}
       <Outlet />
       {showDisclaimer && (
         <div className="mx-auto max-w-md px-3 pb-3">
@@ -34,6 +63,7 @@ function VaradhiLayout() {
     </div>
   );
 }
+
 
 
 function VaradhiBottomNav() {
