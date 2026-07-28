@@ -321,17 +321,41 @@ export const getSignedListingUrl = createServerFn({ method: "GET" })
     return { url: signed?.signedUrl ?? null };
   });
 
-// -------- Admin: list & review Varadhi registrations (MBR super admin only)
-async function assertMbrAdmin(supabase: any, userId: string) {
-  const { data } = await supabase.rpc("has_role", { _user_id: userId, _role: "mbr_admin" });
-  if (!data) throw new Error("Forbidden: MBR Admin only");
+// -------- Admin: Varadhi has its OWN super admin role (varadhi_admin),
+// completely independent from the MBR super admin (mbr_admin).
+// Bootstrap emails automatically receive the role on first admin visit.
+const VARADHI_BOOTSTRAP_ADMINS = ["mbrvaradhi@yahoo.com"];
+
+async function assertVaradhiAdmin(supabase: any, userId: string, email?: string | null) {
+  const { data } = await supabase.rpc("has_role", { _user_id: userId, _role: "varadhi_admin" });
+  if (data) return;
+  const mail = (email ?? "").trim().toLowerCase();
+  if (mail && VARADHI_BOOTSTRAP_ADMINS.includes(mail)) {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("user_roles").insert({ user_id: userId, role: "varadhi_admin" });
+    return;
+  }
+  throw new Error("Forbidden: Varadhi Admin only");
 }
+
+// Lightweight check the admin page uses to decide what to render.
+export const amIVaradhiAdmin = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    try {
+      await assertVaradhiAdmin(context.supabase, context.userId, (context.claims as any)?.email);
+      return { isAdmin: true };
+    } catch {
+      return { isAdmin: false };
+    }
+  });
 
 export const adminListVaradhiProfiles = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { status?: "pending" | "approved" | "rejected" | "all" } = {}) => d)
   .handler(async ({ data, context }) => {
-    await assertMbrAdmin(context.supabase, context.userId);
+    await assertVaradhiAdmin(context.supabase, context.userId, (context.claims as any)?.email);
+
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     let q = supabaseAdmin.from("varadhi_profiles").select("*").order("created_at", { ascending: false });
     if (data.status && data.status !== "all") q = q.eq("verification_status", data.status);
