@@ -2,9 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { listListings, listProviders, type VaradhiListing, type VaradhiProvider } from "@/lib/varadhi.functions";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Search } from "lucide-react";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
 
 export const Route = createFileRoute("/varadhi/browse/$category")({
+  validateSearch: zodValidator(z.object({ q: fallback(z.string(), "").default("") })),
   component: BrowsePage,
 });
 
@@ -19,6 +22,9 @@ const CATEGORY_LABEL: Record<string, string> = {
 
 function BrowsePage() {
   const { category } = Route.useParams();
+  const { q } = Route.useSearch();
+  const [term, setTerm] = useState(q);
+  useEffect(() => { setTerm(q); }, [q]);
   const isProviderPage = category === "transport" || category === "services";
   const fetchListings = useServerFn(listListings);
   const fetchProviders = useServerFn(listProviders);
@@ -43,6 +49,16 @@ function BrowsePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category]);
 
+  const needle = term.trim().toLowerCase();
+  const shownListings = needle
+    ? listings.filter((l) =>
+        [l.title, l.description, l.sub_category, l.city].some((v) => (v ?? "").toLowerCase().includes(needle)))
+    : listings;
+  const shownProviders = needle
+    ? providers.filter((p) =>
+        [p.title, p.description, p.sub_type, p.city].some((v) => (v ?? "").toLowerCase().includes(needle)))
+    : providers;
+
   return (
     <div className="mx-auto max-w-md px-4 pt-4">
       <div className="flex items-center gap-2">
@@ -50,12 +66,25 @@ function BrowsePage() {
         <h1 className="text-lg font-bold text-[#1e3a8a]">{CATEGORY_LABEL[category] ?? category}</h1>
       </div>
 
+      <div className="mt-3 flex items-center gap-2 rounded-xl border border-black/10 bg-white px-3 py-2 shadow-sm">
+        <Search className="h-4 w-4 shrink-0 text-[#1e3a8a]/50" />
+        <input
+          value={term}
+          onChange={(e) => setTerm(e.target.value)}
+          placeholder="వెతకండి…"
+          className="min-w-0 flex-1 bg-transparent text-sm text-[#1e3a8a] outline-none placeholder:text-[#1e3a8a]/40"
+        />
+        {term && (
+          <button type="button" onClick={() => setTerm("")} className="text-xs text-[#1e3a8a]/50">✕</button>
+        )}
+      </div>
+
       {loading && <p className="mt-6 text-sm text-center text-[#1e3a8a]/60">లోడ్ అవుతోంది…</p>}
 
       {!loading && !isProviderPage && (
         <div className="mt-4 space-y-3">
-          {listings.length === 0 && <EmptyState msg="ఏ వస్తువులు లేవు" />}
-          {listings.map((l) => (
+          {shownListings.length === 0 && <EmptyState msg="ఏ వస్తువులు లేవు" />}
+          {shownListings.map((l) => (
             <Link key={l.id} to="/varadhi/item/$id" params={{ id: l.id }}
               className="block rounded-2xl bg-white p-3 shadow-sm border border-black/5 active:scale-[.99]">
               <div className="flex gap-3">
@@ -77,8 +106,8 @@ function BrowsePage() {
 
       {!loading && isProviderPage && (
         <div className="mt-4 space-y-3">
-          {providers.length === 0 && <EmptyState msg="ఏ సర్వీసులు లేవు" />}
-          {providers.map((p) => (
+          {shownProviders.length === 0 && <EmptyState msg="ఏ సర్వీసులు లేవు" />}
+          {shownProviders.map((p) => (
             <Link key={p.id} to="/varadhi/provider/$id" params={{ id: p.id }}
               className="block rounded-2xl bg-white p-3 shadow-sm border border-black/5 active:scale-[.99]">
               <div className="flex items-center justify-between">
