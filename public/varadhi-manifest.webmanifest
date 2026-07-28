@@ -4,7 +4,7 @@
   "short_name": "Varadhi",
   "description": "Varadhi — Sell, Buy, Transport & Local Services",
   "start_url": "/varadhi",
-  "scope": "/varadhi/",
+  "scope": "/varadhi",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",

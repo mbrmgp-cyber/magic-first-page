@@ -29,6 +29,10 @@ export function VaradhiAppIcons() {
 
     const themeMeta = document.head.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
     if (themeMeta) themeMeta.content = THEME_COLOR;
+    const appName = document.head.querySelector<HTMLMetaElement>('meta[name="application-name"]');
+    if (appName) appName.content = "Varadhi";
+    const appleTitle = document.head.querySelector<HTMLMetaElement>('meta[name="apple-mobile-web-app-title"]');
+    if (appleTitle) appleTitle.content = "Varadhi";
   }, []);
 
   return null;
