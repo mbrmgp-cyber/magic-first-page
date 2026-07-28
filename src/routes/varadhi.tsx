@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { amIVaradhiAdmin } from "@/lib/varadhi.functions";
 import varadhiLogo from "@/assets/varadhi-logo.jpg.asset.json";
+import { VaradhiAppIcons } from "@/components/VaradhiAppIcons";
 
 export const Route = createFileRoute("/varadhi")({
   head: () => ({
