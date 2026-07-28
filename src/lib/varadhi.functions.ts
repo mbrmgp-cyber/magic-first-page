@@ -326,17 +326,29 @@ export const getSignedListingUrl = createServerFn({ method: "GET" })
 // Bootstrap emails automatically receive the role on first admin visit.
 const VARADHI_BOOTSTRAP_ADMINS = ["mbrvaradhi@yahoo.com", "mbrproduct@gmail.com"];
 
-async function assertVaradhiAdmin(supabase: any, userId: string, email?: string | null) {
-  const { data } = await supabase.rpc("has_role", { _user_id: userId, _role: "varadhi_admin" });
-  if (data) return;
-  const mail = (email ?? "").trim().toLowerCase();
+async function assertVaradhiAdmin(_supabase: any, userId: string, email?: string | null) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+  const { data: roleRow } = await supabaseAdmin
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "varadhi_admin")
+    .maybeSingle();
+  if (roleRow) return;
+
+  let mail = (email ?? "").trim().toLowerCase();
+  if (!mail) {
+    const { data: u } = await supabaseAdmin.auth.admin.getUserById(userId);
+    mail = (u?.user?.email ?? "").trim().toLowerCase();
+  }
   if (mail && VARADHI_BOOTSTRAP_ADMINS.includes(mail)) {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin.from("user_roles").insert({ user_id: userId, role: "varadhi_admin" });
     return;
   }
   throw new Error("Forbidden: Varadhi Admin only");
 }
+
 
 // Lightweight check the admin page uses to decide what to render.
 export const amIVaradhiAdmin = createServerFn({ method: "GET" })
