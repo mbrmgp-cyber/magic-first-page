@@ -44,6 +44,7 @@ function VaradhiLayout() {
 
   return (
     <div className="min-h-screen bg-[#f7f7fb] text-[#1e3a8a] pb-16">
+      <VaradhiAppIcons />
       {isAdmin && !loc.pathname.startsWith("/varadhi/admin") && (
         <Link
           to="/varadhi/admin"
