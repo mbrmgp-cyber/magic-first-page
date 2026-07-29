@@ -31,6 +31,19 @@ const UNITS = ["కేజీలు", "వస్తువులు", "లీట�
 const LAND_UNITS = ["సెంట్లు", "గజాలు", "అంకణాలు"];
 const PROPERTY_TYPES = ["ఇల్లు", "ప్లాట్", "ఇంటి స్థలం", "సాగు భూమి", "ఇతర"];
 
+const SERVICE_CATS = [
+  { id: "doctor", te: "డాక్టర్", color: "#dc2626" },
+  { id: "lawyer", te: "లాయర్", color: "#7c3aed" },
+  { id: "technician", te: "టెక్నీషియన్", color: "#2563eb" },
+  { id: "farmwork", te: "ఎలువ పని కూలి", color: "#16a34a" },
+  { id: "labour", te: "కార్మిక కూలి", color: "#f97316" },
+  { id: "other", te: "ఇతర సేవలు", color: "#0f766e" },
+];
+
+const CHARGE_BASIS = ["1 నిమిషానికి", "1 పనికి", "1 గంటకి", "1 రోజుకి", "1 వారానికి", "1 సంవత్సరానికి"];
+const SERVICE_MODES = ["క్లినిక్ / ఆఫీసు", "హోమ్ సర్వీస్", "ఫోన్ / ఆన్‌లైన్"];
+const SERVICE_AREAS = ["ఊరిలో", "మండలంలో", "జిల్లాలో", "రాష్ట్రంలో"];
+
 type Form = {
   id?: string;
   title: string;
@@ -52,6 +65,11 @@ type Form = {
   stock_status: "running" | "closed";
   item_condition: string;
   description: string;
+  service_cat: string;
+  experience: string;
+  service_mode: string;
+  service_timing: string;
+  service_area: string;
 };
 
 const empty: Form = {
@@ -60,6 +78,7 @@ const empty: Form = {
   house_no: "", street: "", village: "", mandal: "", taluk: "",
   district: "", state: "ఆంధ్రప్రదేశ్", pincode: "", contact_phone: "",
   stock_status: "running", item_condition: "new", description: "",
+  service_cat: "", experience: "", service_mode: "", service_timing: "", service_area: "ఊరిలో",
 };
 
 
