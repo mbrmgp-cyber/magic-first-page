@@ -184,7 +184,9 @@ function PostSection({ postType }: { postType: string }) {
           title: form.title.trim(),
           price: form.price ? Number(form.price) : null,
           unit: form.unit,
-          images: form.photo ? [form.photo] : [],
+          sub_category: form.property_type || null,
+          images: [form.photo, form.location_photo].filter(Boolean),
+
           pickup_location: form.pickup_location.trim() || null,
           house_no: form.house_no.trim() || null,
           street: form.street.trim() || null,
