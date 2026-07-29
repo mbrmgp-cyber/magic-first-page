@@ -219,21 +219,28 @@ function PostSection({ postType }: { postType: string }) {
 
 
   const save = async () => {
-    if (!form.title.trim()) return toast.error("వస్తువు పేరు అవసరం");
+    const isSvc = postType !== "business";
+    if (!form.title.trim()) return toast.error(isSvc ? "చేయగల పని అవసరం" : "వస్తువు పేరు అవసరం");
     if (!form.contact_phone.trim()) return toast.error("కాంటాక్ట్ ఫోన్ నెంబరు అవసరం");
+    if (isSvc && !form.service_cat) return toast.error("సేవ రకం ఎంచుకోండి");
     setSaving(true);
     try {
       await upsert({
         data: {
           ...(form.id ? { id: form.id } : {}),
           post_type: postType,
-          category: postType === "business" ? form.item_condition : "new",
+          category: postType === "business" ? form.item_condition : (form.service_cat || "other"),
           item_condition: postType === "business" ? (form.item_condition === "used" ? "used" : "new") : null,
           title: form.title.trim(),
           price: form.price ? Number(form.price) : null,
           unit: form.unit,
-          sub_category: form.property_type || null,
+          sub_category: (isSvc ? form.service_cat : form.property_type) || null,
           images: [form.photo, form.location_photo].filter(Boolean),
+
+          experience: isSvc ? (form.experience.trim() || null) : null,
+          service_mode: isSvc ? (form.service_mode || null) : null,
+          service_timing: isSvc ? (form.service_timing.trim() || null) : null,
+          service_area: isSvc ? (form.service_area || null) : null,
 
           pickup_location: form.pickup_location.trim() || null,
           house_no: form.house_no.trim() || null,
@@ -255,6 +262,7 @@ function PostSection({ postType }: { postType: string }) {
     } catch (e: any) { toast.error(e.message); }
     finally { setSaving(false); }
   };
+
 
   return (
     <section className="rounded-2xl bg-white p-4 shadow-sm">
