@@ -27,14 +27,18 @@ const BUSINESS_CATS = [
   { id: "used", te: "వాడిన వస్తువులు", color: "#f97316" },
 ];
 
-const UNITS = ["కేజీలు", "వస్తువులు", "లీటర్లు", "సెంట్లు"];
+const UNITS = ["కేజీలు", "వస్తువులు", "లీటర్లు"];
+const LAND_UNITS = ["సెంట్లు", "గజాలు", "అంకణాలు"];
+const PROPERTY_TYPES = ["ఇల్లు", "ప్లాట్", "ఇంటి స్థలం", "సాగు భూమి", "ఇతర"];
 
 type Form = {
   id?: string;
   title: string;
   price: string;
   photo: string;
+  location_photo: string;
   unit: string;
+  property_type: string;
   pickup_location: string;
   house_no: string;
   street: string;
@@ -51,11 +55,13 @@ type Form = {
 };
 
 const empty: Form = {
-  title: "", price: "", photo: "", unit: "కేజీలు", pickup_location: "",
+  title: "", price: "", photo: "", location_photo: "", unit: "కేజీలు", property_type: "",
+  pickup_location: "",
   house_no: "", street: "", village: "", mandal: "", taluk: "",
   district: "", state: "ఆంధ్రప్రదేశ్", pincode: "", contact_phone: "",
   stock_status: "running", item_condition: "new", description: "",
 };
+
 
 function UpdateBoard() {
   const navigate = useNavigate();
