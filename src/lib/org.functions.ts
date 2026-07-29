@@ -695,14 +695,17 @@ export const getMyMembership = createServerFn({ method: "GET" })
           .ilike("email", email);
       } catch {}
     }
-    const { data } = await supabase
+    const { data: rows } = await supabase
       .from("members")
       .select("*, organizations(id, name, admin_user_id, logo_url, slogan, letter_code, org_code, gov_reg_number, phone, email, president_name, president_signature_url, theme_color, theme_font, theme_settings, id_card_design, ad_banners, bank_name, bank_branch, bank_account_number, bank_ifsc, bank_account_holder)")
       .eq("user_id", userId)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    return { membership: data };
+      .order("created_at", { ascending: false });
+    // A member may have more than one row (duplicate/old registration).
+    // Always prefer the approved one so an old rejected duplicate never
+    // blocks a genuinely approved member.
+    const rank = (s: string) => (s === "approved" ? 0 : s === "pending" ? 1 : 2);
+    const list = (rows ?? []).slice().sort((a: any, b: any) => rank(a.status) - rank(b.status));
+    return { membership: list[0] ?? null };
   });
 
 
