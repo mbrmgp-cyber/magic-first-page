@@ -31,6 +31,19 @@ const UNITS = ["కేజీలు", "వస్తువులు", "లీట�
 const LAND_UNITS = ["సెంట్లు", "గజాలు", "అంకణాలు"];
 const PROPERTY_TYPES = ["ఇల్లు", "ప్లాట్", "ఇంటి స్థలం", "సాగు భూమి", "ఇతర"];
 
+const SERVICE_CATS = [
+  { id: "doctor", te: "డాక్టర్", color: "#dc2626" },
+  { id: "lawyer", te: "లాయర్", color: "#7c3aed" },
+  { id: "technician", te: "టెక్నీషియన్", color: "#2563eb" },
+  { id: "farmwork", te: "ఎలువ పని కూలి", color: "#16a34a" },
+  { id: "labour", te: "కార్మిక కూలి", color: "#f97316" },
+  { id: "other", te: "ఇతర సేవలు", color: "#0f766e" },
+];
+
+const CHARGE_BASIS = ["1 నిమిషానికి", "1 పనికి", "1 గంటకి", "1 రోజుకి", "1 వారానికి", "1 సంవత్సరానికి"];
+const SERVICE_MODES = ["క్లినిక్ / ఆఫీసు", "హోమ్ సర్వీస్", "ఫోన్ / ఆన్‌లైన్"];
+const SERVICE_AREAS = ["ఊరిలో", "మండలంలో", "జిల్లాలో", "రాష్ట్రంలో"];
+
 type Form = {
   id?: string;
   title: string;
@@ -52,6 +65,11 @@ type Form = {
   stock_status: "running" | "closed";
   item_condition: string;
   description: string;
+  service_cat: string;
+  experience: string;
+  service_mode: string;
+  service_timing: string;
+  service_area: string;
 };
 
 const empty: Form = {
@@ -60,6 +78,7 @@ const empty: Form = {
   house_no: "", street: "", village: "", mandal: "", taluk: "",
   district: "", state: "ఆంధ్రప్రదేశ్", pincode: "", contact_phone: "",
   stock_status: "running", item_condition: "new", description: "",
+  service_cat: "", experience: "", service_mode: "", service_timing: "", service_area: "ఊరిలో",
 };
 
 
@@ -189,26 +208,39 @@ function PostSection({ postType }: { postType: string }) {
       stock_status: l.stock_status ?? "running",
       item_condition: l.category ?? l.item_condition ?? "new",
       description: l.description ?? "",
+      service_cat: l.post_type !== "business" ? (l.category ?? "") : "",
+      experience: l.experience ?? "",
+      service_mode: l.service_mode ?? "",
+      service_timing: l.service_timing ?? "",
+      service_area: l.service_area ?? "ఊరిలో",
     });
     setOpen(true);
   };
 
+
   const save = async () => {
-    if (!form.title.trim()) return toast.error("వస్తువు పేరు అవసరం");
+    const isSvc = postType !== "business";
+    if (!form.title.trim()) return toast.error(isSvc ? "చేయగల పని అవసరం" : "వస్తువు పేరు అవసరం");
     if (!form.contact_phone.trim()) return toast.error("కాంటాక్ట్ ఫోన్ నెంబరు అవసరం");
+    if (isSvc && !form.service_cat) return toast.error("సేవ రకం ఎంచుకోండి");
     setSaving(true);
     try {
       await upsert({
         data: {
           ...(form.id ? { id: form.id } : {}),
           post_type: postType,
-          category: postType === "business" ? form.item_condition : "new",
+          category: postType === "business" ? form.item_condition : (form.service_cat || "other"),
           item_condition: postType === "business" ? (form.item_condition === "used" ? "used" : "new") : null,
           title: form.title.trim(),
           price: form.price ? Number(form.price) : null,
           unit: form.unit,
-          sub_category: form.property_type || null,
+          sub_category: (isSvc ? form.service_cat : form.property_type) || null,
           images: [form.photo, form.location_photo].filter(Boolean),
+
+          experience: isSvc ? (form.experience.trim() || null) : null,
+          service_mode: isSvc ? (form.service_mode || null) : null,
+          service_timing: isSvc ? (form.service_timing.trim() || null) : null,
+          service_area: isSvc ? (form.service_area || null) : null,
 
           pickup_location: form.pickup_location.trim() || null,
           house_no: form.house_no.trim() || null,
@@ -230,6 +262,7 @@ function PostSection({ postType }: { postType: string }) {
     } catch (e: any) { toast.error(e.message); }
     finally { setSaving(false); }
   };
+
 
   return (
     <section className="rounded-2xl bg-white p-4 shadow-sm">
@@ -253,16 +286,21 @@ function PostSection({ postType }: { postType: string }) {
           ))}
         </div>
       ) : (
-        <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-[#1e3a8a] text-sm">
-            {POST_TYPES.find((p) => p.id === postType)?.te} పోస్టులు
-          </h2>
-          <button onClick={() => { setForm(empty); setOpen(!open); }}
-            className="rounded-xl bg-[#16a34a] text-white px-3 py-1.5 text-xs font-semibold flex items-center gap-1">
-            <Plus className="h-3.5 w-3.5" /> కొత్తది
-          </button>
+        <div className="grid grid-cols-2 gap-2">
+          {SERVICE_CATS.map((c) => (
+            <button key={c.id}
+              onClick={() => {
+                setForm({ ...empty, service_cat: c.id, unit: "1 పనికి" });
+                setOpen(true);
+              }}
+              style={{ background: c.color }}
+              className="rounded-xl py-2.5 text-[11px] font-semibold text-white shadow-sm flex items-center justify-center gap-1 active:scale-[.98]">
+              <Plus className="h-3.5 w-3.5" /> {c.te}
+            </button>
+          ))}
         </div>
       )}
+
 
       {open && (
         <div className="mt-3 space-y-2 p-3 rounded-xl bg-[#f7f7fb]">
@@ -272,6 +310,107 @@ function PostSection({ postType }: { postType: string }) {
               {BUSINESS_CATS.find((c) => c.id === form.item_condition)?.te ?? "కొత్త వస్తువులు"}
             </p>
           )}
+
+          {postType !== "business" ? (
+            <>
+              <p className="text-[11px] font-semibold text-white inline-block rounded-full px-3 py-1"
+                style={{ background: SERVICE_CATS.find((c) => c.id === form.service_cat)?.color ?? "#1e3a8a" }}>
+                {SERVICE_CATS.find((c) => c.id === form.service_cat)?.te ?? "సేవ"}
+              </p>
+
+              <L n="1">చేయగల పని / నైపుణ్యం</L>
+              <input className={inp} placeholder="ఉదా: జనరల్ డాక్టర్, ఎలక్ట్రీషియన్…"
+                value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+
+              <L n="2">అనుభవం & ఆధారాలు</L>
+              <input className={inp} placeholder="అనుభవం (ఉదా: 5 సంవత్సరాలు)"
+                value={form.experience} onChange={(e) => setForm({ ...form, experience: e.target.value })} />
+              <div className="grid grid-cols-2 gap-2">
+                <label className="flex items-center justify-center gap-1.5 rounded-lg border border-dashed border-[#1e3a8a]/30 bg-white px-2 py-2.5 text-[11px] text-[#1e3a8a]">
+                  <Camera className="h-4 w-4" />
+                  {form.photo ? "ఫోటో ✓" : "మీ ఫోటో"}
+                  <input type="file" accept="image/*" className="hidden"
+                    onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0], "photo")} />
+                </label>
+                <label className="flex items-center justify-center gap-1.5 rounded-lg border border-dashed border-[#1e3a8a]/30 bg-white px-2 py-2.5 text-[11px] text-[#1e3a8a]">
+                  <Camera className="h-4 w-4" />
+                  {form.location_photo ? "ఆధారాలు ✓" : "ఆధారాల ఫోటో"}
+                  <input type="file" accept="image/*,application/pdf" className="hidden"
+                    onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0], "location_photo")} />
+                </label>
+              </div>
+
+              <L n="3">{postType === "free" ? "సర్వీస్ ఛార్జి (ఉచితం)" : "సర్వీస్ ఛార్జి (Rs.)"}</L>
+              <input className={inp} type="number" placeholder="Rs." value={form.price}
+                onChange={(e) => setForm({ ...form, price: e.target.value })} />
+              <div className="grid grid-cols-3 gap-1.5">
+                {CHARGE_BASIS.map((b) => (
+                  <button key={b} onClick={() => setForm({ ...form, unit: b })}
+                    className={`rounded-lg py-2 text-[10px] font-semibold border ${
+                      form.unit === b ? "bg-[#1e3a8a] text-white border-[#1e3a8a]" : "bg-white text-[#1e3a8a] border-black/10"
+                    }`}>
+                    {b}
+                  </button>
+                ))}
+              </div>
+
+              <L n="4">సేవా విధానం & సమయం</L>
+              <div className="grid grid-cols-3 gap-1.5">
+                {SERVICE_MODES.map((m) => (
+                  <button key={m} onClick={() => setForm({ ...form, service_mode: m })}
+                    className={`rounded-lg py-2 text-[10px] font-semibold border ${
+                      form.service_mode === m ? "bg-[#16a34a] text-white border-[#16a34a]" : "bg-white text-[#1e3a8a] border-black/10"
+                    }`}>
+                    {m}
+                  </button>
+                ))}
+              </div>
+              <input className={inp} placeholder="సర్వీస్ టైమింగ్ (ఉదా: ఉదయం 9 – రాత్రి 8)"
+                value={form.service_timing} onChange={(e) => setForm({ ...form, service_timing: e.target.value })} />
+
+              <L n="5">లొకేషన్ & కాంటాక్ట్ నెంబర్</L>
+              <input className={inp} placeholder="లొకేషన్ లేదా Google Maps లింక్"
+                value={form.pickup_location} onChange={(e) => setForm({ ...form, pickup_location: e.target.value })} />
+              <button type="button" onClick={useCurrentLocation}
+                className="w-full rounded-lg border border-[#1e3a8a]/20 bg-white px-2 py-2.5 text-[11px] font-semibold text-[#1e3a8a]">
+                📍 ప్రస్తుత లొకేషన్
+              </button>
+              <div className="grid grid-cols-2 gap-2">
+                <input className={inp} placeholder="గ్రామం" value={form.village}
+                  onChange={(e) => setForm({ ...form, village: e.target.value })} />
+                <input className={inp} placeholder="మండలం" value={form.mandal}
+                  onChange={(e) => setForm({ ...form, mandal: e.target.value })} />
+              </div>
+              <input className={inp} inputMode="tel" placeholder="కాంటాక్ట్ ఫోన్ నెంబరు"
+                value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} />
+
+              <L n="6">సేవ పరిధి</L>
+              <div className="grid grid-cols-4 gap-1.5">
+                {SERVICE_AREAS.map((a) => (
+                  <button key={a} onClick={() => setForm({ ...form, service_area: a })}
+                    className={`rounded-lg py-2 text-[10px] font-semibold border ${
+                      form.service_area === a ? "bg-[#7c3aed] text-white border-[#7c3aed]" : "bg-white text-[#1e3a8a] border-black/10"
+                    }`}>
+                    {a}
+                  </button>
+                ))}
+              </div>
+
+              <L n="7">అందుబాటు</L>
+              <div className="grid grid-cols-2 gap-2">
+                {(["running", "closed"] as const).map((s) => (
+                  <button key={s} onClick={() => setForm({ ...form, stock_status: s })}
+                    className={`rounded-lg py-2 text-[11px] font-semibold border ${
+                      form.stock_status === s ? "bg-[#16a34a] text-white border-[#16a34a]" : "bg-white text-[#1e3a8a] border-black/10"
+                    }`}>
+                    {s === "running" ? "అందుబాటులో ఉన్నా" : "అందుబాటులో లేను"}
+                  </button>
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+
 
 
           {isLand && (
@@ -371,9 +510,13 @@ function PostSection({ postType }: { postType: string }) {
               </button>
             ))}
           </div>
+          </>
+          )}
 
           <textarea className={inp} placeholder="వివరణ (ఐచ్ఛికం)" value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })} />
+
+
 
           <button onClick={save} disabled={saving}
             className="w-full rounded-xl bg-[#1e3a8a] py-2.5 text-white font-semibold flex items-center justify-center gap-1 disabled:opacity-60">
