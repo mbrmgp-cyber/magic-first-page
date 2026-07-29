@@ -257,8 +257,39 @@ function PostSection({ postType }: { postType: string }) {
           <input className={inp} type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
 
           <L n="4">కేజీలు / వస్తువులు / లీటర్లు / సెంట్లు</L>
-          <div className="grid grid-cols-4 gap-1.5">
-            {UNITS.map((u) => (
+          {isLand && (
+            <>
+              <L n="1">ఆస్తి రకం</L>
+              <div className="grid grid-cols-3 gap-1.5">
+                {PROPERTY_TYPES.map((p) => (
+                  <button key={p} onClick={() => setForm({ ...form, property_type: p })}
+                    className={`rounded-lg py-2 text-[10px] font-semibold border ${
+                      form.property_type === p ? "bg-[#7c3aed] text-white border-[#7c3aed]" : "bg-white text-[#1e3a8a] border-black/10"
+                    }`}>
+                    {p}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+
+          <L n="1">{isLand ? "ఆస్తి పేరు / వివరం" : "అమ్మ దలిచిన వస్తువు పేరు"}</L>
+          <input className={inp} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+
+          <L n="2">రేటు (Rs.)</L>
+          <input className={inp} type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
+
+          <L n="3">ఫోటో</L>
+          <label className="flex items-center gap-2 rounded-lg border border-dashed border-[#1e3a8a]/30 bg-white px-3 py-3 text-xs text-[#1e3a8a]">
+            <Camera className="h-4 w-4" />
+            {form.photo ? "ఫోటో ఎంపిక అయింది ✓" : "ఫోటో అప్‌లోడ్ చేయండి"}
+            <input type="file" accept="image/*" className="hidden"
+              onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0], "photo")} />
+          </label>
+
+          <L n="4">{unitList.join(" / ")}</L>
+          <div className={`grid gap-1.5 ${unitList.length === 3 ? "grid-cols-3" : "grid-cols-3"}`}>
+            {unitList.map((u) => (
               <button key={u} onClick={() => setForm({ ...form, unit: u })}
                 className={`rounded-lg py-2 text-[10px] font-semibold border ${
                   form.unit === u ? "bg-[#1e3a8a] text-white border-[#1e3a8a]" : "bg-white text-[#1e3a8a] border-black/10"
@@ -270,20 +301,25 @@ function PostSection({ postType }: { postType: string }) {
           <input className={inp} placeholder="ఎంత? / ఇతర యూనిట్ రాయండి"
             value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} />
 
-
-          <L n="3">ఫోటో</L>
-          <label className="flex items-center gap-2 rounded-lg border border-dashed border-[#1e3a8a]/30 bg-white px-3 py-3 text-xs text-[#1e3a8a]">
-            <Camera className="h-4 w-4" />
-            {form.photo ? "ఫోటో ఎంపిక అయింది ✓" : "ఫోటో అప్‌లోడ్ చేయండి"}
-            <input type="file" accept="image/*" className="hidden"
-              onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0])} />
-          </label>
-
-          <L n="5">వస్తువు దొరుకు లొకేషన్</L>
-          <input className={inp} value={form.pickup_location} onChange={(e) => setForm({ ...form, pickup_location: e.target.value })} />
+          <L n="5">{isLand ? "భూమి / ల్యాండ్ లొకేషన్" : "వస్తువు దొరుకు లొకేషన్"}</L>
+          <input className={inp} placeholder="లొకేషన్ లేదా Google Maps లింక్"
+            value={form.pickup_location} onChange={(e) => setForm({ ...form, pickup_location: e.target.value })} />
+          <div className="grid grid-cols-2 gap-2">
+            <label className="flex items-center justify-center gap-1.5 rounded-lg border border-dashed border-[#1e3a8a]/30 bg-white px-2 py-2.5 text-[11px] text-[#1e3a8a]">
+              <Camera className="h-4 w-4" />
+              {form.location_photo ? "లొకేషన్ ఫోటో ✓" : "లొకేషన్ ఫోటో అప్‌లోడ్"}
+              <input type="file" accept="image/*,application/pdf" className="hidden"
+                onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0], "location_photo")} />
+            </label>
+            <button type="button" onClick={useCurrentLocation}
+              className="rounded-lg border border-[#1e3a8a]/20 bg-white px-2 py-2.5 text-[11px] font-semibold text-[#1e3a8a]">
+              📍 ప్రస్తుత లొకేషన్
+            </button>
+          </div>
 
           <L n="6">ఇల్లు / షాప్ నెంబర్</L>
           <input className={inp} value={form.house_no} onChange={(e) => setForm({ ...form, house_no: e.target.value })} />
+
 
           <L n="7">వీధి, గ్రామం & మండలం</L>
           <div className="grid grid-cols-3 gap-2">
