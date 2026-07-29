@@ -2254,6 +2254,7 @@ export type Database = {
           created_at: string
           description: string | null
           district: string | null
+          experience: string | null
           house_no: string | null
           id: string
           images: Json
@@ -2266,6 +2267,9 @@ export type Database = {
           post_type: string
           price: number | null
           seller_id: string
+          service_area: string | null
+          service_mode: string | null
+          service_timing: string | null
           state: string | null
           stock_status: string
           street: string | null
@@ -2284,6 +2288,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           district?: string | null
+          experience?: string | null
           house_no?: string | null
           id?: string
           images?: Json
@@ -2296,6 +2301,9 @@ export type Database = {
           post_type?: string
           price?: number | null
           seller_id: string
+          service_area?: string | null
+          service_mode?: string | null
+          service_timing?: string | null
           state?: string | null
           stock_status?: string
           street?: string | null
@@ -2314,6 +2322,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           district?: string | null
+          experience?: string | null
           house_no?: string | null
           id?: string
           images?: Json
@@ -2326,6 +2335,9 @@ export type Database = {
           post_type?: string
           price?: number | null
           seller_id?: string
+          service_area?: string | null
+          service_mode?: string | null
+          service_timing?: string | null
           state?: string | null
           stock_status?: string
           street?: string | null
