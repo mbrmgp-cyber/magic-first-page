@@ -132,14 +132,14 @@ function PostSection({ postType }: { postType: string }) {
   };
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [postType]);
 
-  const uploadPhoto = async (file: File) => {
+  const uploadPhoto = async (file: File, field: "photo" | "location_photo" = "photo") => {
     const { data: sess } = await supabase.auth.getSession();
     const uid = sess.session?.user.id;
     if (!uid) return;
     const path = `${uid}/listing-${Date.now()}-${file.name}`;
     const { error } = await supabase.storage.from("varadhi-proofs").upload(path, file, { upsert: true });
     if (error) { toast.error(error.message); return; }
-    setForm((f) => ({ ...f, photo: path }));
+    setForm((f) => ({ ...f, [field]: path }));
     toast.success("ఫోటో అప్‌లోడ్ అయింది");
   };
 
@@ -149,8 +149,11 @@ function PostSection({ postType }: { postType: string }) {
       title: l.title ?? "",
       price: l.price != null ? String(l.price) : "",
       photo: Array.isArray(l.images) ? (l.images[0] ?? "") : "",
+      location_photo: Array.isArray(l.images) ? (l.images[1] ?? "") : "",
       unit: l.unit ?? "కిలో",
+      property_type: l.sub_category ?? "",
       pickup_location: l.pickup_location ?? "",
+
       house_no: l.house_no ?? "",
       street: l.street ?? "",
       village: l.village ?? "",
