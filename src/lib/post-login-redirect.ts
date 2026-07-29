@@ -28,15 +28,21 @@ export async function routeAfterLogin(userId: string, navigate: NavigateFn) {
       return;
     }
     const { getMyMembership } = await import("@/lib/org.functions");
-    const res = await getMyMembership().catch(() => ({ membership: null as any }));
-    const m: any = res?.membership;
+    // Retry a couple of times: on a fresh magic-link session the bearer token
+    // may not be attached to the very first server call yet.
+    let m: any = null;
+    for (let i = 0; i < 3 && !m; i += 1) {
+      const res: any = await getMyMembership().catch(() => null);
+      m = res?.membership ?? null;
+      if (!m && i < 2) await new Promise((r) => setTimeout(r, 600));
+    }
     if (m) {
       if (m.status === "approved") navigate({ to: "/member/dashboard", replace: true });
       else navigate({ to: "/member/pending", replace: true });
       return;
     }
-    navigate({ to: "/org/register", replace: true });
+    navigate({ to: "/member/pending", replace: true });
   } catch {
-    navigate({ to: "/mbr", replace: true });
+    navigate({ to: "/member/pending", replace: true });
   }
 }
