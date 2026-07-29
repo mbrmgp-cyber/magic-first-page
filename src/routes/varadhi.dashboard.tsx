@@ -51,7 +51,7 @@ type Form = {
 };
 
 const empty: Form = {
-  title: "", price: "", photo: "", unit: "కిలో", pickup_location: "",
+  title: "", price: "", photo: "", unit: "కేజీలు", pickup_location: "",
   house_no: "", street: "", village: "", mandal: "", taluk: "",
   district: "", state: "ఆంధ్రప్రదేశ్", pincode: "", contact_phone: "",
   stock_status: "running", item_condition: "new", description: "",
