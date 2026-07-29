@@ -2250,55 +2250,91 @@ export type Database = {
           category: string
           city: string | null
           click_count: number
+          contact_phone: string | null
           created_at: string
           description: string | null
+          district: string | null
+          house_no: string | null
           id: string
           images: Json
+          item_condition: string | null
           lat: number | null
           lng: number | null
+          mandal: string | null
+          pickup_location: string | null
+          pincode: string | null
+          post_type: string
           price: number | null
           seller_id: string
+          state: string | null
           stock_status: string
+          street: string | null
           sub_category: string | null
+          taluk: string | null
           title: string
           unit: string | null
           updated_at: string
+          village: string | null
         }
         Insert: {
           category: string
           city?: string | null
           click_count?: number
+          contact_phone?: string | null
           created_at?: string
           description?: string | null
+          district?: string | null
+          house_no?: string | null
           id?: string
           images?: Json
+          item_condition?: string | null
           lat?: number | null
           lng?: number | null
+          mandal?: string | null
+          pickup_location?: string | null
+          pincode?: string | null
+          post_type?: string
           price?: number | null
           seller_id: string
+          state?: string | null
           stock_status?: string
+          street?: string | null
           sub_category?: string | null
+          taluk?: string | null
           title: string
           unit?: string | null
           updated_at?: string
+          village?: string | null
         }
         Update: {
           category?: string
           city?: string | null
           click_count?: number
+          contact_phone?: string | null
           created_at?: string
           description?: string | null
+          district?: string | null
+          house_no?: string | null
           id?: string
           images?: Json
+          item_condition?: string | null
           lat?: number | null
           lng?: number | null
+          mandal?: string | null
+          pickup_location?: string | null
+          pincode?: string | null
+          post_type?: string
           price?: number | null
           seller_id?: string
+          state?: string | null
           stock_status?: string
+          street?: string | null
           sub_category?: string | null
+          taluk?: string | null
           title?: string
           unit?: string | null
           updated_at?: string
+          village?: string | null
         }
         Relationships: []
       }
