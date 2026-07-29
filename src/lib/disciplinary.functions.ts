@@ -1,6 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { sendMemberDashboardMagicLink } from "@/lib/member-notifications.server";
 
 async function resolveOrgId(supabase: any, userId: string): Promise<string | null> {
   const { data: ownOrg } = await supabase
@@ -199,6 +198,7 @@ export const setMemberBehaviorStatus = createServerFn({ method: "POST" })
     let emailError: string | null = null;
     async function notifyMember() {
       try {
+        const { sendMemberDashboardMagicLink } = await import("@/lib/member-notifications.server");
         const sent = await sendMemberDashboardMagicLink({
           memberId: data.target_member_id,
           subject: "MBR APP — Member status updated",

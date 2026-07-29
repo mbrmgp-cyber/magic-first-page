@@ -1,6 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { sendMemberDashboardMagicLink } from "@/lib/member-notifications.server";
 
 // Helper: org admin or committee president/treasurer/VP (treasurer can edit accounts)
 async function getOrgForUser(supabase: any, userId: string) {
@@ -101,6 +100,7 @@ export const adminAddMember = createServerFn({ method: "POST" })
     const email = (data.email || "").trim().toLowerCase();
     if (email && (data.status ?? "approved") === "approved") {
       try {
+        const { sendMemberDashboardMagicLink } = await import("@/lib/member-notifications.server");
         const sent = await sendMemberDashboardMagicLink({
           memberId: row?.id,
           subject: "MBR APP — Member dashboard login link",
@@ -160,6 +160,7 @@ export const updateMemberProfile = createServerFn({ method: "POST" })
         .maybeSingle();
       const email = (m?.email || "").trim().toLowerCase();
       if (send_login_link && email && m?.status === "approved") {
+        const { sendMemberDashboardMagicLink } = await import("@/lib/member-notifications.server");
         const sent = await sendMemberDashboardMagicLink({
           memberId: member_id,
           subject: "MBR APP — Your profile was updated",
@@ -194,6 +195,7 @@ export const setMemberActive = createServerFn({ method: "POST" })
         .maybeSingle();
       const email = (m?.email || "").trim().toLowerCase();
       if (email && m?.status === "approved") {
+        const { sendMemberDashboardMagicLink } = await import("@/lib/member-notifications.server");
         const sent = await sendMemberDashboardMagicLink({
           memberId: data.member_id,
           subject: "MBR APP — Membership status updated",
@@ -223,6 +225,7 @@ export const orgUpdateMemberCode = createServerFn({ method: "POST" })
     try {
       const email = ((row as any)?.email || "").trim().toLowerCase();
       if (email && (row as any)?.status === "approved") {
+        const { sendMemberDashboardMagicLink } = await import("@/lib/member-notifications.server");
         const sent = await sendMemberDashboardMagicLink({
           memberId: (row as any).id,
           subject: "MBR APP — Member ID updated",
@@ -293,6 +296,7 @@ export const addMemberLoan = createServerFn({ method: "POST" })
     let emailSent = false;
     let emailError: string | null = null;
     try {
+      const { sendMemberDashboardMagicLink } = await import("@/lib/member-notifications.server");
       const sent = await sendMemberDashboardMagicLink({
         memberId: data.member_id,
         subject: "MBR APP — Loan / Interest details updated",
@@ -328,6 +332,7 @@ export const addLoanPayment = createServerFn({ method: "POST" })
         .eq("id", data.loan_id)
         .maybeSingle();
       if ((loan as any)?.member_id) {
+        const { sendMemberDashboardMagicLink } = await import("@/lib/member-notifications.server");
         const sent = await sendMemberDashboardMagicLink({
           memberId: (loan as any).member_id,
           subject: "MBR APP — Loan payment updated",
@@ -361,6 +366,7 @@ export const closeLoan = createServerFn({ method: "POST" })
     let emailError: string | null = null;
     try {
       if ((loan as any)?.member_id) {
+        const { sendMemberDashboardMagicLink } = await import("@/lib/member-notifications.server");
         const sent = await sendMemberDashboardMagicLink({
           memberId: (loan as any).member_id,
           subject: "MBR APP — Loan closed",
@@ -391,6 +397,7 @@ export const deleteLoan = createServerFn({ method: "POST" })
     let emailError: string | null = null;
     try {
       if ((loan as any)?.member_id) {
+        const { sendMemberDashboardMagicLink } = await import("@/lib/member-notifications.server");
         const sent = await sendMemberDashboardMagicLink({
           memberId: (loan as any).member_id,
           subject: "MBR APP — Loan details updated",
