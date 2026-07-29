@@ -208,9 +208,15 @@ function PostSection({ postType }: { postType: string }) {
       stock_status: l.stock_status ?? "running",
       item_condition: l.category ?? l.item_condition ?? "new",
       description: l.description ?? "",
+      service_cat: l.post_type !== "business" ? (l.category ?? "") : "",
+      experience: l.experience ?? "",
+      service_mode: l.service_mode ?? "",
+      service_timing: l.service_timing ?? "",
+      service_area: l.service_area ?? "ఊరిలో",
     });
     setOpen(true);
   };
+
 
   const save = async () => {
     if (!form.title.trim()) return toast.error("వస్తువు పేరు అవసరం");
