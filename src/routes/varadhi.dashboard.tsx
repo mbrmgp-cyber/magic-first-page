@@ -126,11 +126,34 @@ function PostSection({ postType }: { postType: string }) {
   const [form, setForm] = useState<Form>(empty);
   const [saving, setSaving] = useState(false);
 
+  const isLand = postType === "business" && form.item_condition === "realestate";
+  const unitList = isLand ? LAND_UNITS : UNITS;
+
+  // ఒక సంవత్సరం లోపు / గరిష్టంగా 50 పోస్టులు
+  const yearAgo = Date.now() - 365 * 24 * 60 * 60 * 1000;
+  const visibleItems = items
+    .filter((l: any) => new Date(l.created_at).getTime() >= yearAgo)
+    .slice(0, 50);
+
   const load = async () => {
     const r = await fetchMy({ data: { mine: true } });
     setItems(r.listings.filter((l: any) => (l.post_type ?? "business") === postType));
   };
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [postType]);
+
+  const useCurrentLocation = () => {
+    if (!navigator.geolocation) return toast.error("లొకేషన్ సపోర్ట్ లేదు");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setForm((f) => ({ ...f, pickup_location: `https://maps.google.com/?q=${latitude},${longitude}` }));
+        toast.success("లొకేషన్ జోడించబడింది");
+      },
+      () => toast.error("లొకేషన్ పొందలేకపోయాం"),
+    );
+  };
+
+
 
   const uploadPhoto = async (file: File, field: "photo" | "location_photo" = "photo") => {
     const { data: sess } = await supabase.auth.getSession();
