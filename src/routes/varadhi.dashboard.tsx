@@ -409,9 +409,13 @@ function PostSection({ postType }: { postType: string }) {
               </button>
             ))}
           </div>
+          </>
+          )}
 
           <textarea className={inp} placeholder="వివరణ (ఐచ్ఛికం)" value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })} />
+
+
 
           <button onClick={save} disabled={saving}
             className="w-full rounded-xl bg-[#1e3a8a] py-2.5 text-white font-semibold flex items-center justify-center gap-1 disabled:opacity-60">
