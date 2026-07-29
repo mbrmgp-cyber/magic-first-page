@@ -170,8 +170,8 @@ function PostSection({ postType }: { postType: string }) {
         data: {
           ...(form.id ? { id: form.id } : {}),
           post_type: postType,
-          category: postType === "business" ? (form.item_condition === "used" ? "used" : "new") : "new",
-          item_condition: postType === "business" ? form.item_condition : null,
+          category: postType === "business" ? form.item_condition : "new",
+          item_condition: postType === "business" ? (form.item_condition === "used" ? "used" : "new") : null,
           title: form.title.trim(),
           price: form.price ? Number(form.price) : null,
           unit: form.unit,
