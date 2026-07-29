@@ -98,11 +98,11 @@ export const adminAddMember = createServerFn({ method: "POST" })
     let emailSent = false;
     let emailError: string | null = null;
     const email = (data.email || "").trim().toLowerCase();
-    if (email && (data.status ?? "approved") === "approved") {
+    if (email && row?.id && (data.status ?? "approved") === "approved") {
       try {
         const { sendMemberDashboardMagicLink } = await import("@/lib/member-notifications.server");
         const sent = await sendMemberDashboardMagicLink({
-          memberId: row?.id,
+          memberId: row.id,
           subject: "MBR APP — Member dashboard login link",
           label: "member_admin_added",
           note: `${data.name}, మీ సభ్యత్వ వివరాలు అడ్మిన్ సేవ్ చేశారు. ఈ లింక్ ఓపెన్ చేస్తే మీ మెంబర్ డాష్‌బోర్డ్ నేరుగా ఓపెన్ అవుతుంది.`,
