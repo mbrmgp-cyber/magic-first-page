@@ -382,16 +382,22 @@ function PostSection({ postType }: { postType: string }) {
         </div>
       )}
 
-      <div className="mt-3 space-y-2">
-        {items.length === 0 && <p className="text-xs text-center text-[#1e3a8a]/50 py-4">ఏ పోస్టు లేదు</p>}
-        {items.map((l: any) => (
+      <div className="mt-4 space-y-2">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs font-bold text-[#1e3a8a]">పాత పోస్టులు</h3>
+          <span className="text-[10px] text-[#1e3a8a]/50">{visibleItems.length} / 50 · 1 సంవత్సరం</span>
+        </div>
+        {visibleItems.length === 0 && <p className="text-xs text-center text-[#1e3a8a]/50 py-4">ఏ పోస్టు లేదు</p>}
+        {visibleItems.map((l: any) => (
           <div key={l.id} className="rounded-xl border border-black/5 p-2.5 flex items-center justify-between">
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold truncate">{l.title}</p>
               <p className="text-[11px] text-[#1e3a8a]/60">
                 Rs. {l.price ?? "—"} / {l.unit ?? "—"} · 👁 {l.click_count}
+                {l.created_at ? ` · ${new Date(l.created_at).toLocaleDateString("te-IN")}` : ""}
               </p>
             </div>
+
             <div className="flex items-center gap-1">
               <button
                 onClick={() => toggle({ data: { id: l.id, status: l.stock_status === "running" ? "closed" : "running" } }).then(load)}
