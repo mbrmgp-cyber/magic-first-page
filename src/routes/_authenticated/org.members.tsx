@@ -890,7 +890,7 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
       if (nf.ccy !== "INR" && Number(nf.fxRate) > 0) {
         purposeParts.push(`FX: ${nf.fxAmt} ${nf.ccy} @ ${nf.fxRate}`);
       }
-      await addL({
+      const r: any = await addL({
         data: {
           org_id: orgId, member_id: member.id,
           principal: Number(nf.principal),
@@ -899,7 +899,8 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
           purpose: purposeParts.join(" | "),
         },
       });
-      toast.success("Loan added");
+      toast.success(r?.emailSent ? "Loan added · లాగిన్ లింక్ ఈమెయిల్‌కు పంపబడింది" : "Loan added");
+      if (r?.emailError) toast.error("లాగిన్ లింక్ పంపడంలో సమస్య: " + r.emailError);
       setShowAdd(false);
       setNf({
         principal: "", interest_rate_monthly: "1.5",
@@ -954,7 +955,7 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
   async function saveStatus() {
     setStatusBusy(true);
     try {
-      await setStatusFn({
+      const r: any = await setStatusFn({
         data: {
           target_member_id: member.id,
           color: statusPickColor,
@@ -967,7 +968,8 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
         .select("category,status,effective_until,reason")
         .eq("target_member_id", member.id);
       setSuspensions((data as any) ?? []);
-      toast.success("స్థితి నవీకరించబడింది");
+      toast.success(r?.emailSent ? "స్థితి నవీకరించబడింది · లాగిన్ లింక్ పంపబడింది" : "స్థితి నవీకరించబడింది");
+      if (r?.emailError) toast.error("లాగిన్ లింక్ పంపడంలో సమస్య: " + r.emailError);
       setStatusOpen(false);
     } catch (e: any) {
       toast.error(e.message ?? "Failed");
@@ -1128,10 +1130,22 @@ function LoansPanel({ member, orgId }: { member: Member; orgId: string }) {
         : loans.length === 0 ? <p className="text-sm text-muted-foreground">Loans లేవు</p>
         : loans.map((l) => (
           <LoanCard key={l.id} loan={l} orgId={orgId} member={member} onChange={refresh}
-            onClose={async () => { await closeL({ data: { loan_id: l.id } }); refresh(); }}
+            onClose={async () => {
+              try {
+                const r: any = await closeL({ data: { loan_id: l.id } });
+                toast.success(r?.emailSent ? "Loan closed · లాగిన్ లింక్ పంపబడింది" : "Loan closed");
+                if (r?.emailError) toast.error("లాగిన్ లింక్ పంపడంలో సమస్య: " + r.emailError);
+                refresh();
+              } catch (e: any) { toast.error(e.message); }
+            }}
             onDelete={async () => {
               if (!confirm("Delete this loan?")) return;
-              await delL({ data: { loan_id: l.id } }); refresh();
+              try {
+                const r: any = await delL({ data: { loan_id: l.id } });
+                toast.success(r?.emailSent ? "Loan deleted · లాగిన్ లింక్ పంపబడింది" : "Loan deleted");
+                if (r?.emailError) toast.error("లాగిన్ లింక్ పంపడంలో సమస్య: " + r.emailError);
+                refresh();
+              } catch (e: any) { toast.error(e.message); }
             }}
           />
         ))}
@@ -1159,9 +1173,10 @@ function LoanCard({ loan, orgId, member, onChange, onClose, onDelete }:
   async function payNow() {
     if (!amt || Number(amt) <= 0) { toast.error("Amount ఇవ్వండి"); return; }
     try {
-      await addP({ data: { loan_id: loan.id, org_id: orgId, amount: Number(amt), payment_date: date } });
+      const r: any = await addP({ data: { loan_id: loan.id, org_id: orgId, amount: Number(amt), payment_date: date } });
       setAmt("");
-      toast.success("Payment recorded");
+      toast.success(r?.emailSent ? "Payment recorded · లాగిన్ లింక్ పంపబడింది" : "Payment recorded");
+      if (r?.emailError) toast.error("లాగిన్ లింక్ పంపడంలో సమస్య: " + r.emailError);
       loadPays(); onChange();
     } catch (e: any) { toast.error(e.message); }
   }

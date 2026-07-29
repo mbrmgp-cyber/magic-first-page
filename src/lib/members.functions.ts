@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { sendMemberDashboardMagicLink } from "@/lib/member-notifications.server";
 
 // Helper: org admin or committee president/treasurer/VP (treasurer can edit accounts)
 async function getOrgForUser(supabase: any, userId: string) {
@@ -100,9 +101,13 @@ export const adminAddMember = createServerFn({ method: "POST" })
     const email = (data.email || "").trim().toLowerCase();
     if (email && (data.status ?? "approved") === "approved") {
       try {
-        const { sendMemberWelcomeEmail } = await import("@/lib/org.functions");
-        await sendMemberWelcomeEmail({ data: { email, name: data.name, member_id: row!.id } });
-        emailSent = true;
+        const sent = await sendMemberDashboardMagicLink({
+          memberId: row?.id,
+          subject: "MBR APP — Member dashboard login link",
+          label: "member_admin_added",
+          note: `${data.name}, మీ సభ్యత్వ వివరాలు అడ్మిన్ సేవ్ చేశారు. ఈ లింక్ ఓపెన్ చేస్తే మీ మెంబర్ డాష్‌బోర్డ్ నేరుగా ఓపెన్ అవుతుంది.`,
+        });
+        emailSent = sent.sent;
       } catch (e) {
         emailError = e instanceof Error ? e.message : String(e);
       }
@@ -155,9 +160,13 @@ export const updateMemberProfile = createServerFn({ method: "POST" })
         .maybeSingle();
       const email = (m?.email || "").trim().toLowerCase();
       if (send_login_link && email && m?.status === "approved") {
-        const { sendMemberProfileUpdatedEmail } = await import("@/lib/org.functions");
-        await sendMemberProfileUpdatedEmail({ data: { email, name: (patch as any).name ?? m?.name ?? null } });
-        emailSent = true;
+        const sent = await sendMemberDashboardMagicLink({
+          memberId: member_id,
+          subject: "MBR APP — Your profile was updated",
+          label: "member_profile_updated",
+          note: `${(patch as any).name ?? m?.name ?? "సభ్యుడు"}, మీ ప్రొఫైల్ వివరాలు అడ్మిన్ అప్‌డేట్ చేశారు. ఈ లింక్ ఓపెన్ చేస్తే మీ డాష్‌బోర్డ్ నేరుగా ఓపెన్ అవుతుంది.`,
+        });
+        emailSent = sent.sent;
       }
     } catch (e) {
       emailError = e instanceof Error ? e.message : String(e);
@@ -185,9 +194,13 @@ export const setMemberActive = createServerFn({ method: "POST" })
         .maybeSingle();
       const email = (m?.email || "").trim().toLowerCase();
       if (email && m?.status === "approved") {
-        const { sendMemberProfileUpdatedEmail } = await import("@/lib/org.functions");
-        await sendMemberProfileUpdatedEmail({ data: { email, name: m?.name ?? null } });
-        emailSent = true;
+        const sent = await sendMemberDashboardMagicLink({
+          memberId: data.member_id,
+          subject: "MBR APP — Membership status updated",
+          label: "member_status_updated",
+          note: `${m?.name ?? "సభ్యుడు"}, మీ సభ్యత్వ స్థితి అడ్మిన్ అప్‌డేట్ చేశారు. ఈ లింక్ ఓపెన్ చేస్తే మీ డాష్‌బోర్డ్ నేరుగా ఓపెన్ అవుతుంది.`,
+        });
+        emailSent = sent.sent;
       }
     } catch (e) {
       emailError = e instanceof Error ? e.message : String(e);
@@ -210,9 +223,13 @@ export const orgUpdateMemberCode = createServerFn({ method: "POST" })
     try {
       const email = ((row as any)?.email || "").trim().toLowerCase();
       if (email && (row as any)?.status === "approved") {
-        const { sendMemberProfileUpdatedEmail } = await import("@/lib/org.functions");
-        await sendMemberProfileUpdatedEmail({ data: { email, name: (row as any)?.name ?? null } });
-        emailSent = true;
+        const sent = await sendMemberDashboardMagicLink({
+          memberId: (row as any).id,
+          subject: "MBR APP — Member ID updated",
+          label: "member_id_updated",
+          note: `${(row as any)?.name ?? "సభ్యుడు"}, మీ మెంబర్ ID అడ్మిన్ అప్‌డేట్ చేశారు. ఈ లింక్ ఓపెన్ చేస్తే మీ డాష్‌బోర్డ్ నేరుగా ఓపెన్ అవుతుంది.`,
+        });
+        emailSent = sent.sent;
       }
     } catch (e) {
       emailError = e instanceof Error ? e.message : String(e);
@@ -273,7 +290,20 @@ export const addMemberLoan = createServerFn({ method: "POST" })
     const { supabase } = context;
     const { error } = await supabase.from("member_loans").insert(data);
     if (error) throw new Error(error.message);
-    return { ok: true };
+    let emailSent = false;
+    let emailError: string | null = null;
+    try {
+      const sent = await sendMemberDashboardMagicLink({
+        memberId: data.member_id,
+        subject: "MBR APP — Loan / Interest details updated",
+        label: "member_loan_updated",
+        note: "మీ Loan / Interest వివరాలు అడ్మిన్ సేవ్ చేశారు. ఈ లింక్ ఓపెన్ చేస్తే మీ మెంబర్ డాష్‌బోర్డ్ నేరుగా ఓపెన్ అవుతుంది.",
+      });
+      emailSent = sent.sent;
+    } catch (e) {
+      emailError = e instanceof Error ? e.message : String(e);
+    }
+    return { ok: true, emailSent, emailError };
   });
 
 export const addLoanPayment = createServerFn({ method: "POST" })
@@ -289,7 +319,27 @@ export const addLoanPayment = createServerFn({ method: "POST" })
     const { supabase } = context;
     const { error } = await supabase.from("member_loan_payments").insert(data);
     if (error) throw new Error(error.message);
-    return { ok: true };
+    let emailSent = false;
+    let emailError: string | null = null;
+    try {
+      const { data: loan } = await supabase
+        .from("member_loans")
+        .select("member_id")
+        .eq("id", data.loan_id)
+        .maybeSingle();
+      if ((loan as any)?.member_id) {
+        const sent = await sendMemberDashboardMagicLink({
+          memberId: (loan as any).member_id,
+          subject: "MBR APP — Loan payment updated",
+          label: "member_loan_payment_updated",
+          note: "మీ Loan / Interest payment వివరాలు అడ్మిన్ సేవ్ చేశారు. ఈ లింక్ ఓపెన్ చేస్తే మీ మెంబర్ డాష్‌బోర్డ్ నేరుగా ఓపెన్ అవుతుంది.",
+        });
+        emailSent = sent.sent;
+      }
+    } catch (e) {
+      emailError = e instanceof Error ? e.message : String(e);
+    }
+    return { ok: true, emailSent, emailError };
   });
 
 export const closeLoan = createServerFn({ method: "POST" })
@@ -297,12 +347,32 @@ export const closeLoan = createServerFn({ method: "POST" })
   .inputValidator((d: { loan_id: string }) => d)
   .handler(async ({ data, context }) => {
     const { supabase } = context;
+    const { data: loan } = await supabase
+      .from("member_loans")
+      .select("member_id")
+      .eq("id", data.loan_id)
+      .maybeSingle();
     const { error } = await supabase
       .from("member_loans")
       .update({ status: "closed", closed_at: new Date().toISOString() })
       .eq("id", data.loan_id);
     if (error) throw new Error(error.message);
-    return { ok: true };
+    let emailSent = false;
+    let emailError: string | null = null;
+    try {
+      if ((loan as any)?.member_id) {
+        const sent = await sendMemberDashboardMagicLink({
+          memberId: (loan as any).member_id,
+          subject: "MBR APP — Loan closed",
+          label: "member_loan_closed",
+          note: "మీ Loan / Interest వివరాలు అడ్మిన్ అప్‌డేట్ చేశారు. ఈ లింక్ ఓపెన్ చేస్తే మీ మెంబర్ డాష్‌బోర్డ్ నేరుగా ఓపెన్ అవుతుంది.",
+        });
+        emailSent = sent.sent;
+      }
+    } catch (e) {
+      emailError = e instanceof Error ? e.message : String(e);
+    }
+    return { ok: true, emailSent, emailError };
   });
 
 export const deleteLoan = createServerFn({ method: "POST" })
@@ -310,7 +380,27 @@ export const deleteLoan = createServerFn({ method: "POST" })
   .inputValidator((d: { loan_id: string }) => d)
   .handler(async ({ data, context }) => {
     const { supabase } = context;
+    const { data: loan } = await supabase
+      .from("member_loans")
+      .select("member_id")
+      .eq("id", data.loan_id)
+      .maybeSingle();
     const { error } = await supabase.from("member_loans").delete().eq("id", data.loan_id);
     if (error) throw new Error(error.message);
-    return { ok: true };
+    let emailSent = false;
+    let emailError: string | null = null;
+    try {
+      if ((loan as any)?.member_id) {
+        const sent = await sendMemberDashboardMagicLink({
+          memberId: (loan as any).member_id,
+          subject: "MBR APP — Loan details updated",
+          label: "member_loan_deleted",
+          note: "మీ Loan / Interest వివరాలు అడ్మిన్ అప్‌డేట్ చేశారు. ఈ లింక్ ఓపెన్ చేస్తే మీ మెంబర్ డాష్‌బోర్డ్ నేరుగా ఓపెన్ అవుతుంది.",
+        });
+        emailSent = sent.sent;
+      }
+    } catch (e) {
+      emailError = e instanceof Error ? e.message : String(e);
+    }
+    return { ok: true, emailSent, emailError };
   });

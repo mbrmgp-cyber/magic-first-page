@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { sendMemberDashboardMagicLink } from "@/lib/member-notifications.server";
 
 async function resolveOrgId(supabase: any, userId: string): Promise<string | null> {
   const { data: ownOrg } = await supabase
@@ -194,7 +195,26 @@ export const setMemberBehaviorStatus = createServerFn({ method: "POST" })
       .eq("target_member_id", data.target_member_id)
       .eq("status", "active");
 
-    if (data.color === "green") return { ok: true };
+    let emailSent = false;
+    let emailError: string | null = null;
+    async function notifyMember() {
+      try {
+        const sent = await sendMemberDashboardMagicLink({
+          memberId: data.target_member_id,
+          subject: "MBR APP — Member status updated",
+          label: "member_behavior_status_updated",
+          note: "మీ సభ్యత్వ / Loan-Interest స్థితి అడ్మిన్ అప్‌డేట్ చేశారు. ఈ లింక్ ఓపెన్ చేస్తే మీ మెంబర్ డాష్‌బోర్డ్ నేరుగా ఓపెన్ అవుతుంది.",
+        });
+        emailSent = sent.sent;
+      } catch (e) {
+        emailError = e instanceof Error ? e.message : String(e);
+      }
+    }
+
+    if (data.color === "green") {
+      await notifyMember();
+      return { ok: true, emailSent, emailError };
+    }
 
     const category = data.color === "yellow" ? "minor" : "major";
     const reason = (data.reason || "").trim() || (data.color === "yellow" ? "Minor behavior issue" : "Major behavior issue");
@@ -207,7 +227,8 @@ export const setMemberBehaviorStatus = createServerFn({ method: "POST" })
       status: "active",
     });
     if (error) throw new Error(error.message);
-    return { ok: true };
+    await notifyMember();
+    return { ok: true, emailSent, emailError };
   });
 
 
