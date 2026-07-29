@@ -155,7 +155,7 @@ function PostSection({ postType }: { postType: string }) {
       pincode: l.pincode ?? "",
       contact_phone: l.contact_phone ?? "",
       stock_status: l.stock_status ?? "running",
-      item_condition: l.item_condition ?? "new",
+      item_condition: l.category ?? l.item_condition ?? "new",
       description: l.description ?? "",
     });
     setOpen(true);
