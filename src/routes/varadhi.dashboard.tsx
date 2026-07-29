@@ -214,7 +214,15 @@ function PostSection({ postType }: { postType: string }) {
         <div className="grid grid-cols-2 gap-2">
           {BUSINESS_CATS.map((c) => (
             <button key={c.id}
-              onClick={() => { setForm({ ...empty, item_condition: c.id }); setOpen(true); }}
+              onClick={() => {
+                setForm({
+                  ...empty,
+                  item_condition: c.id,
+                  unit: c.id === "realestate" ? "సెంట్లు" : "కేజీలు",
+                });
+                setOpen(true);
+              }}
+
               style={{ background: c.color }}
               className="rounded-xl py-2.5 text-[11px] font-semibold text-white shadow-sm flex items-center justify-center gap-1 active:scale-[.98]">
               <Plus className="h-3.5 w-3.5" /> {c.te}
