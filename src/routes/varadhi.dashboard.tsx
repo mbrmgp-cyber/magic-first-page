@@ -20,12 +20,14 @@ const POST_TYPES = [
   { id: "free", te: "ఉచిత సేవలు" },
 ];
 
-const CONDITIONS = [
-  { id: "new", te: "కొత్త వస్తువులు" },
-  { id: "used", te: "వాడిన వస్తువులు" },
+const BUSINESS_CATS = [
+  { id: "realestate", te: "ప్లాట్లు & భూములు", color: "#7c3aed" },
+  { id: "fresh", te: "తాజా వస్తువులు", color: "#16a34a" },
+  { id: "new", te: "కొత్త వస్తువులు", color: "#2563eb" },
+  { id: "used", te: "వాడిన వస్తువులు", color: "#f97316" },
 ];
 
-const UNITS = ["కిలో", "పీస్", "లోడ్", "లీటర్", "బస్తా", "ఇతర"];
+const UNITS = ["కేజీలు", "వస్తువులు", "లీటర్లు", "సెంట్లు"];
 
 type Form = {
   id?: string;
@@ -49,7 +51,7 @@ type Form = {
 };
 
 const empty: Form = {
-  title: "", price: "", photo: "", unit: "కిలో", pickup_location: "",
+  title: "", price: "", photo: "", unit: "కేజీలు", pickup_location: "",
   house_no: "", street: "", village: "", mandal: "", taluk: "",
   district: "", state: "ఆంధ్రప్రదేశ్", pincode: "", contact_phone: "",
   stock_status: "running", item_condition: "new", description: "",
@@ -153,7 +155,7 @@ function PostSection({ postType }: { postType: string }) {
       pincode: l.pincode ?? "",
       contact_phone: l.contact_phone ?? "",
       stock_status: l.stock_status ?? "running",
-      item_condition: l.item_condition ?? "new",
+      item_condition: l.category ?? l.item_condition ?? "new",
       description: l.description ?? "",
     });
     setOpen(true);
@@ -168,8 +170,8 @@ function PostSection({ postType }: { postType: string }) {
         data: {
           ...(form.id ? { id: form.id } : {}),
           post_type: postType,
-          category: postType === "business" ? (form.item_condition === "used" ? "used" : "new") : "new",
-          item_condition: postType === "business" ? form.item_condition : null,
+          category: postType === "business" ? form.item_condition : "new",
+          item_condition: postType === "business" ? (form.item_condition === "used" ? "used" : "new") : null,
           title: form.title.trim(),
           price: form.price ? Number(form.price) : null,
           unit: form.unit,
@@ -197,46 +199,58 @@ function PostSection({ postType }: { postType: string }) {
 
   return (
     <section className="rounded-2xl bg-white p-4 shadow-sm">
-      <div className="flex items-center justify-between">
-        <h2 className="font-semibold text-[#1e3a8a] text-sm">
-          {POST_TYPES.find((p) => p.id === postType)?.te} పోస్టులు
-        </h2>
-        <button onClick={() => { setForm(empty); setOpen(!open); }}
-          className="rounded-xl bg-[#16a34a] text-white px-3 py-1.5 text-xs font-semibold flex items-center gap-1">
-          <Plus className="h-3.5 w-3.5" /> కొత్తది
-        </button>
-      </div>
+      {postType === "business" ? (
+        <div className="grid grid-cols-2 gap-2">
+          {BUSINESS_CATS.map((c) => (
+            <button key={c.id}
+              onClick={() => { setForm({ ...empty, item_condition: c.id }); setOpen(true); }}
+              style={{ background: c.color }}
+              className="rounded-xl py-2.5 text-[11px] font-semibold text-white shadow-sm flex items-center justify-center gap-1 active:scale-[.98]">
+              <Plus className="h-3.5 w-3.5" /> {c.te}
+            </button>
+          ))}
+        </div>
+      ) : (
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold text-[#1e3a8a] text-sm">
+            {POST_TYPES.find((p) => p.id === postType)?.te} పోస్టులు
+          </h2>
+          <button onClick={() => { setForm(empty); setOpen(!open); }}
+            className="rounded-xl bg-[#16a34a] text-white px-3 py-1.5 text-xs font-semibold flex items-center gap-1">
+            <Plus className="h-3.5 w-3.5" /> కొత్తది
+          </button>
+        </div>
+      )}
 
       {open && (
         <div className="mt-3 space-y-2 p-3 rounded-xl bg-[#f7f7fb]">
           {postType === "business" && (
-            <div className="grid grid-cols-2 gap-2">
-              {CONDITIONS.map((c) => (
-                <button key={c.id} onClick={() => setForm({ ...form, item_condition: c.id })}
-                  className={`rounded-lg py-2 text-[11px] font-semibold border ${
-                    form.item_condition === c.id ? "bg-[#1e3a8a] text-white border-[#1e3a8a]" : "bg-white text-[#1e3a8a] border-black/10"
-                  }`}>
-                  {c.te}
-                </button>
-              ))}
-            </div>
+            <p className="text-[11px] font-semibold text-white inline-block rounded-full px-3 py-1"
+              style={{ background: BUSINESS_CATS.find((c) => c.id === form.item_condition)?.color ?? "#1e3a8a" }}>
+              {BUSINESS_CATS.find((c) => c.id === form.item_condition)?.te ?? "కొత్త వస్తువులు"}
+            </p>
           )}
 
           <L n="1">అమ్మ దలిచిన వస్తువు పేరు</L>
           <input className={inp} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
 
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <L n="2">రేటు (Rs.)</L>
-              <input className={inp} type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
-            </div>
-            <div>
-              <L n="4">కిలో / పీస్ / లోడ్</L>
-              <select className={inp} value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })}>
-                {UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
-              </select>
-            </div>
+          <L n="2">రేటు (Rs.)</L>
+          <input className={inp} type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
+
+          <L n="4">కేజీలు / వస్తువులు / లీటర్లు / సెంట్లు</L>
+          <div className="grid grid-cols-4 gap-1.5">
+            {UNITS.map((u) => (
+              <button key={u} onClick={() => setForm({ ...form, unit: u })}
+                className={`rounded-lg py-2 text-[10px] font-semibold border ${
+                  form.unit === u ? "bg-[#1e3a8a] text-white border-[#1e3a8a]" : "bg-white text-[#1e3a8a] border-black/10"
+                }`}>
+                {u}
+              </button>
+            ))}
           </div>
+          <input className={inp} placeholder="ఎంత? / ఇతర యూనిట్ రాయండి"
+            value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} />
+
 
           <L n="3">ఫోటో</L>
           <label className="flex items-center gap-2 rounded-lg border border-dashed border-[#1e3a8a]/30 bg-white px-3 py-3 text-xs text-[#1e3a8a]">
