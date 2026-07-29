@@ -20,12 +20,14 @@ const POST_TYPES = [
   { id: "free", te: "ఉచిత సేవలు" },
 ];
 
-const CONDITIONS = [
-  { id: "new", te: "కొత్త వస్తువులు" },
-  { id: "used", te: "వాడిన వస్తువులు" },
+const BUSINESS_CATS = [
+  { id: "realestate", te: "ప్లాట్లు & భూములు", color: "#7c3aed" },
+  { id: "fresh", te: "తాజా వస్తువులు", color: "#16a34a" },
+  { id: "new", te: "కొత్త వస్తువులు", color: "#2563eb" },
+  { id: "used", te: "వాడిన వస్తువులు", color: "#f97316" },
 ];
 
-const UNITS = ["కిలో", "పీస్", "లోడ్", "లీటర్", "బస్తా", "ఇతర"];
+const UNITS = ["కేజీలు", "వస్తువులు", "లీటర్లు", "సెంట్లు"];
 
 type Form = {
   id?: string;
