@@ -250,13 +250,7 @@ function PostSection({ postType }: { postType: string }) {
             </p>
           )}
 
-          <L n="1">అమ్మ దలిచిన వస్తువు పేరు</L>
-          <input className={inp} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
 
-          <L n="2">రేటు (Rs.)</L>
-          <input className={inp} type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
-
-          <L n="4">కేజీలు / వస్తువులు / లీటర్లు / సెంట్లు</L>
           {isLand && (
             <>
               <L n="1">ఆస్తి రకం</L>
