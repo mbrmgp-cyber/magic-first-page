@@ -3,23 +3,64 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  getMyVaradhiProfile, listListings, listProviders,
+  getMyVaradhiProfile, listListings,
   upsertListing, toggleListingStock, deleteListing,
-  upsertProvider, toggleProviderAvailability,
-  type VaradhiListing, type VaradhiProvider,
+  type VaradhiListing,
 } from "@/lib/varadhi.functions";
 import { toast } from "sonner";
-import { Plus, Trash2, Power, Store, Truck } from "lucide-react";
+import { Plus, Trash2, Camera, Pencil, Save } from "lucide-react";
 
 export const Route = createFileRoute("/varadhi/dashboard")({
-  component: Dashboard,
+  component: UpdateBoard,
 });
 
-function Dashboard() {
+const POST_TYPES = [
+  { id: "business", te: "వ్యాపారం" },
+  { id: "service", te: "సేవలు" },
+  { id: "free", te: "ఉచిత సేవలు" },
+];
+
+const CONDITIONS = [
+  { id: "new", te: "కొత్త వస్తువులు" },
+  { id: "used", te: "వాడిన వస్తువులు" },
+];
+
+const UNITS = ["కిలో", "పీస్", "లోడ్", "లీటర్", "బస్తా", "ఇతర"];
+
+type Form = {
+  id?: string;
+  title: string;
+  price: string;
+  photo: string;
+  unit: string;
+  pickup_location: string;
+  house_no: string;
+  street: string;
+  village: string;
+  mandal: string;
+  taluk: string;
+  district: string;
+  state: string;
+  pincode: string;
+  contact_phone: string;
+  stock_status: "running" | "closed";
+  item_condition: string;
+  description: string;
+};
+
+const empty: Form = {
+  title: "", price: "", photo: "", unit: "కిలో", pickup_location: "",
+  house_no: "", street: "", village: "", mandal: "", taluk: "",
+  district: "", state: "ఆంధ్రప్రదేశ్", pincode: "", contact_phone: "",
+  stock_status: "running", item_condition: "new", description: "",
+};
+
+function UpdateBoard() {
   const navigate = useNavigate();
   const getProfile = useServerFn(getMyVaradhiProfile);
-  const [role, setRole] = useState<string | null>(null);
+  const [name, setName] = useState("");
   const [ready, setReady] = useState(false);
+  const [postType, setPostType] = useState("business");
 
   useEffect(() => {
     (async () => {
@@ -27,7 +68,7 @@ function Dashboard() {
       if (!data.session) { navigate({ to: "/varadhi/auth" }); return; }
       const r = await getProfile();
       if (!r.profile) { navigate({ to: "/varadhi/onboard" }); return; }
-      setRole(r.profile.primary_role);
+      setName(r.profile.full_name ?? "");
       setReady(true);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -36,12 +77,28 @@ function Dashboard() {
   if (!ready) return <p className="p-6 text-center text-sm">లోడ్…</p>;
 
   return (
-    <div className="mx-auto max-w-md px-4 pt-4 space-y-4">
-      <h1 className="text-xl font-bold text-[#1e3a8a]">నా డాష్‌బోర్డ్</h1>
-      <p className="text-xs text-[#1e3a8a]/60">Role: <span className="font-semibold">{role}</span></p>
+    <div className="mx-auto max-w-md px-4 pt-4 pb-8 space-y-4">
+      <h1 className="text-xl font-bold text-[#1e3a8a]">అప్‌డేట్ బోర్డు</h1>
 
-      {(role === "seller" || role === "buyer") && <SellerSection />}
-      {(role === "provider" || role === "buyer") && <ProviderSection />}
+      {/* Greeting */}
+      <div className="rounded-2xl bg-gradient-to-br from-[#1e3a8a] to-[#3b5bdb] p-4 text-white shadow">
+        <p className="text-base font-semibold">🙏 నమస్కారం, {name} గారు</p>
+        <p className="text-[11px] opacity-90 mt-0.5">వారధికి స్వాగతం — మీ వస్తువులు, సేవలు ఇక్కడ అప్‌డేట్ చేయండి.</p>
+      </div>
+
+      {/* Post type */}
+      <div className="grid grid-cols-3 gap-2">
+        {POST_TYPES.map((p) => (
+          <button key={p.id} onClick={() => setPostType(p.id)}
+            className={`rounded-xl py-2 text-xs font-semibold border ${
+              postType === p.id ? "bg-[#1e3a8a] text-white border-[#1e3a8a]" : "bg-white text-[#1e3a8a] border-black/10"
+            }`}>
+            {p.te}
+          </button>
+        ))}
+      </div>
+
+      <PostSection postType={postType} />
 
       <Link to="/varadhi/subscription"
         className="block text-center rounded-xl bg-[#1e3a8a] py-3 text-white font-semibold shadow">
@@ -51,67 +108,202 @@ function Dashboard() {
   );
 }
 
-function SellerSection() {
+function PostSection({ postType }: { postType: string }) {
   const fetchMy = useServerFn(listListings);
   const upsert = useServerFn(upsertListing);
   const toggle = useServerFn(toggleListingStock);
   const del = useServerFn(deleteListing);
   const [items, setItems] = useState<VaradhiListing[]>([]);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState<any>({ category: "fresh", title: "", price: "", unit: "", description: "", city: "" });
+  const [form, setForm] = useState<Form>(empty);
+  const [saving, setSaving] = useState(false);
 
   const load = async () => {
     const r = await fetchMy({ data: { mine: true } });
-    setItems(r.listings);
+    setItems(r.listings.filter((l: any) => (l.post_type ?? "business") === postType));
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [postType]);
+
+  const uploadPhoto = async (file: File) => {
+    const { data: sess } = await supabase.auth.getSession();
+    const uid = sess.session?.user.id;
+    if (!uid) return;
+    const path = `${uid}/listing-${Date.now()}-${file.name}`;
+    const { error } = await supabase.storage.from("varadhi-proofs").upload(path, file, { upsert: true });
+    if (error) { toast.error(error.message); return; }
+    setForm((f) => ({ ...f, photo: path }));
+    toast.success("ఫోటో అప్‌లోడ్ అయింది");
+  };
+
+  const edit = (l: any) => {
+    setForm({
+      id: l.id,
+      title: l.title ?? "",
+      price: l.price != null ? String(l.price) : "",
+      photo: Array.isArray(l.images) ? (l.images[0] ?? "") : "",
+      unit: l.unit ?? "కిలో",
+      pickup_location: l.pickup_location ?? "",
+      house_no: l.house_no ?? "",
+      street: l.street ?? "",
+      village: l.village ?? "",
+      mandal: l.mandal ?? "",
+      taluk: l.taluk ?? "",
+      district: l.district ?? "",
+      state: l.state ?? "ఆంధ్రప్రదేశ్",
+      pincode: l.pincode ?? "",
+      contact_phone: l.contact_phone ?? "",
+      stock_status: l.stock_status ?? "running",
+      item_condition: l.item_condition ?? "new",
+      description: l.description ?? "",
+    });
+    setOpen(true);
+  };
 
   const save = async () => {
-    if (!form.title.trim()) return toast.error("Title అవసరం");
+    if (!form.title.trim()) return toast.error("వస్తువు పేరు అవసరం");
+    if (!form.contact_phone.trim()) return toast.error("కాంటాక్ట్ ఫోన్ నెంబరు అవసరం");
+    setSaving(true);
     try {
-      await upsert({ data: { ...form, price: form.price ? Number(form.price) : null } });
-      toast.success("Saved");
-      setOpen(false); setForm({ category: "fresh", title: "", price: "", unit: "", description: "", city: "" });
-      load();
+      await upsert({
+        data: {
+          ...(form.id ? { id: form.id } : {}),
+          post_type: postType,
+          category: postType === "business" ? (form.item_condition === "used" ? "used" : "new") : "new",
+          item_condition: postType === "business" ? form.item_condition : null,
+          title: form.title.trim(),
+          price: form.price ? Number(form.price) : null,
+          unit: form.unit,
+          images: form.photo ? [form.photo] : [],
+          pickup_location: form.pickup_location.trim() || null,
+          house_no: form.house_no.trim() || null,
+          street: form.street.trim() || null,
+          village: form.village.trim() || null,
+          mandal: form.mandal.trim() || null,
+          taluk: form.taluk.trim() || null,
+          district: form.district.trim() || null,
+          state: form.state.trim() || null,
+          pincode: form.pincode.trim() || null,
+          contact_phone: form.contact_phone.trim(),
+          city: form.village.trim() || form.district.trim() || null,
+          stock_status: form.stock_status,
+          description: form.description.trim() || null,
+        } as any,
+      });
+      toast.success("సేవ్ అయింది");
+      setOpen(false); setForm(empty); load();
     } catch (e: any) { toast.error(e.message); }
+    finally { setSaving(false); }
   };
 
   return (
     <section className="rounded-2xl bg-white p-4 shadow-sm">
       <div className="flex items-center justify-between">
-        <h2 className="font-semibold text-[#1e3a8a] flex items-center gap-1"><Store className="h-4 w-4" /> నా అమ్మకాలు</h2>
-        <button onClick={() => setOpen(!open)} className="rounded-xl bg-[#16a34a] text-white px-3 py-1.5 text-xs font-semibold flex items-center gap-1">
+        <h2 className="font-semibold text-[#1e3a8a] text-sm">
+          {POST_TYPES.find((p) => p.id === postType)?.te} పోస్టులు
+        </h2>
+        <button onClick={() => { setForm(empty); setOpen(!open); }}
+          className="rounded-xl bg-[#16a34a] text-white px-3 py-1.5 text-xs font-semibold flex items-center gap-1">
           <Plus className="h-3.5 w-3.5" /> కొత్తది
         </button>
       </div>
 
       {open && (
         <div className="mt-3 space-y-2 p-3 rounded-xl bg-[#f7f7fb]">
-          <select className={inp} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
-            <option value="fresh">తాజా వస్తువులు</option>
-            <option value="new">కొత్త వస్తువులు</option>
-            <option value="used">వాడిన వస్తువులు</option>
-            <option value="realestate">ఇంటి స్థలాలు</option>
-          </select>
-          <input className={inp} placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+          {postType === "business" && (
+            <div className="grid grid-cols-2 gap-2">
+              {CONDITIONS.map((c) => (
+                <button key={c.id} onClick={() => setForm({ ...form, item_condition: c.id })}
+                  className={`rounded-lg py-2 text-[11px] font-semibold border ${
+                    form.item_condition === c.id ? "bg-[#1e3a8a] text-white border-[#1e3a8a]" : "bg-white text-[#1e3a8a] border-black/10"
+                  }`}>
+                  {c.te}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <L n="1">అమ్మ దలిచిన వస్తువు పేరు</L>
+          <input className={inp} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+
           <div className="grid grid-cols-2 gap-2">
-            <input className={inp} placeholder="Price" type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
-            <input className={inp} placeholder="Unit (kg/pc)" value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} />
+            <div>
+              <L n="2">రేటు (Rs.)</L>
+              <input className={inp} type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
+            </div>
+            <div>
+              <L n="4">కిలో / పీస్ / లోడ్</L>
+              <select className={inp} value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })}>
+                {UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
+              </select>
+            </div>
           </div>
-          <input className={inp} placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
-          <textarea className={inp} placeholder="వివరణ" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-          <button onClick={save} className="w-full rounded-xl bg-[#1e3a8a] py-2 text-white font-semibold">Save</button>
+
+          <L n="3">ఫోటో</L>
+          <label className="flex items-center gap-2 rounded-lg border border-dashed border-[#1e3a8a]/30 bg-white px-3 py-3 text-xs text-[#1e3a8a]">
+            <Camera className="h-4 w-4" />
+            {form.photo ? "ఫోటో ఎంపిక అయింది ✓" : "ఫోటో అప్‌లోడ్ చేయండి"}
+            <input type="file" accept="image/*" className="hidden"
+              onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0])} />
+          </label>
+
+          <L n="5">వస్తువు దొరుకు లొకేషన్</L>
+          <input className={inp} value={form.pickup_location} onChange={(e) => setForm({ ...form, pickup_location: e.target.value })} />
+
+          <L n="6">ఇల్లు / షాప్ నెంబర్</L>
+          <input className={inp} value={form.house_no} onChange={(e) => setForm({ ...form, house_no: e.target.value })} />
+
+          <L n="7">వీధి, గ్రామం & మండలం</L>
+          <div className="grid grid-cols-3 gap-2">
+            <input className={inp} placeholder="వీధి" value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} />
+            <input className={inp} placeholder="గ్రామం" value={form.village} onChange={(e) => setForm({ ...form, village: e.target.value })} />
+            <input className={inp} placeholder="మండలం" value={form.mandal} onChange={(e) => setForm({ ...form, mandal: e.target.value })} />
+          </div>
+
+          <L n="8">తాలూకా & జిల్లా</L>
+          <div className="grid grid-cols-2 gap-2">
+            <input className={inp} placeholder="తాలూకా" value={form.taluk} onChange={(e) => setForm({ ...form, taluk: e.target.value })} />
+            <input className={inp} placeholder="జిల్లా" value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value })} />
+          </div>
+
+          <L n="9">రాష్ట్రం & పిన్‌కోడ్</L>
+          <div className="grid grid-cols-2 gap-2">
+            <input className={inp} placeholder="రాష్ట్రం" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
+            <input className={inp} placeholder="పిన్‌కోడ్" inputMode="numeric" value={form.pincode} onChange={(e) => setForm({ ...form, pincode: e.target.value })} />
+          </div>
+
+          <L n="10">కాంటాక్ట్ ఫోన్ నెంబరు</L>
+          <input className={inp} inputMode="tel" value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} />
+
+          <L n="11">స్టాక్</L>
+          <div className="grid grid-cols-2 gap-2">
+            {(["running", "closed"] as const).map((s) => (
+              <button key={s} onClick={() => setForm({ ...form, stock_status: s })}
+                className={`rounded-lg py-2 text-[11px] font-semibold border ${
+                  form.stock_status === s ? "bg-[#16a34a] text-white border-[#16a34a]" : "bg-white text-[#1e3a8a] border-black/10"
+                }`}>
+                {s === "running" ? "స్టాక్ ఉంది" : "స్టాక్ లేదు"}
+              </button>
+            ))}
+          </div>
+
+          <textarea className={inp} placeholder="వివరణ (ఐచ్ఛికం)" value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })} />
+
+          <button onClick={save} disabled={saving}
+            className="w-full rounded-xl bg-[#1e3a8a] py-2.5 text-white font-semibold flex items-center justify-center gap-1 disabled:opacity-60">
+            <Save className="h-4 w-4" /> {saving ? "సేవ్ అవుతోంది…" : "సేవ్"}
+          </button>
         </div>
       )}
 
       <div className="mt-3 space-y-2">
-        {items.length === 0 && <p className="text-xs text-center text-[#1e3a8a]/50 py-4">ఏ లిస్టింగ్ లేదు</p>}
-        {items.map((l) => (
+        {items.length === 0 && <p className="text-xs text-center text-[#1e3a8a]/50 py-4">ఏ పోస్టు లేదు</p>}
+        {items.map((l: any) => (
           <div key={l.id} className="rounded-xl border border-black/5 p-2.5 flex items-center justify-between">
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold truncate">{l.title}</p>
               <p className="text-[11px] text-[#1e3a8a]/60">
-                {l.category} · Rs. {l.price ?? "—"} · 👁 {l.click_count}
+                Rs. {l.price ?? "—"} / {l.unit ?? "—"} · 👁 {l.click_count}
               </p>
             </div>
             <div className="flex items-center gap-1">
@@ -120,8 +312,9 @@ function SellerSection() {
                 className={`text-[10px] px-2 py-1 rounded-full font-bold ${
                   l.stock_status === "running" ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600"
                 }`}>
-                {l.stock_status === "running" ? "RUNNING" : "CLOSED"}
+                {l.stock_status === "running" ? "స్టాక్ ఉంది" : "స్టాక్ లేదు"}
               </button>
+              <button onClick={() => edit(l)} className="p-1.5 text-[#1e3a8a]"><Pencil className="h-4 w-4" /></button>
               <button onClick={() => del({ data: { id: l.id } }).then(load)} className="p-1.5 text-red-500">
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -133,86 +326,8 @@ function SellerSection() {
   );
 }
 
-function ProviderSection() {
-  const fetchMy = useServerFn(listProviders);
-  const upsert = useServerFn(upsertProvider);
-  const toggle = useServerFn(toggleProviderAvailability);
-  const [items, setItems] = useState<VaradhiProvider[]>([]);
-  const [open, setOpen] = useState(false);
-  const [form, setForm] = useState<any>({
-    provider_type: "transport", sub_type: "2-wheeler", title: "",
-    description: "", vehicle_details: "", city: "", service_areas: "",
-  });
-
-  const load = async () => {
-    const r = await fetchMy({ data: { mine: true } });
-    setItems(r.providers);
-  };
-  useEffect(() => { load(); }, []);
-
-  const save = async () => {
-    if (!form.title.trim()) return toast.error("Title అవసరం");
-    try {
-      await upsert({ data: form });
-      toast.success("Saved");
-      setOpen(false);
-      load();
-    } catch (e: any) { toast.error(e.message); }
-  };
-
-  const subTypes = form.provider_type === "transport"
-    ? ["1-2 wheeler", "1-3 wheeler (auto)", "3-4 wheeler (pickup)", "4-6+ wheeler (lorry)"]
-    : ["Electrician", "Plumber", "Mechanic", "TV/AC Repair", "Tractor Driver", "Harvester Operator", "Farm Labourer"];
-
-  return (
-    <section className="rounded-2xl bg-white p-4 shadow-sm">
-      <div className="flex items-center justify-between">
-        <h2 className="font-semibold text-[#1e3a8a] flex items-center gap-1"><Truck className="h-4 w-4" /> నా సర్వీసులు</h2>
-        <button onClick={() => setOpen(!open)} className="rounded-xl bg-[#f97316] text-white px-3 py-1.5 text-xs font-semibold flex items-center gap-1">
-          <Plus className="h-3.5 w-3.5" /> కొత్తది
-        </button>
-      </div>
-
-      {open && (
-        <div className="mt-3 space-y-2 p-3 rounded-xl bg-[#f7f7fb]">
-          <select className={inp} value={form.provider_type} onChange={(e) => setForm({ ...form, provider_type: e.target.value, sub_type: "" })}>
-            <option value="transport">ట్రాన్స్‌పోర్ట్</option>
-            <option value="service">సర్వీస్ / టెక్నీషియన్</option>
-          </select>
-          <select className={inp} value={form.sub_type} onChange={(e) => setForm({ ...form, sub_type: e.target.value })}>
-            <option value="">-- ఎంచుకోండి --</option>
-            {subTypes.map((s) => <option key={s} value={s}>{s}</option>)}
-          </select>
-          <input className={inp} placeholder="Title (e.g. రాము ఆటో)" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-          <input className={inp} placeholder="Vehicle / Skills details" value={form.vehicle_details} onChange={(e) => setForm({ ...form, vehicle_details: e.target.value })} />
-          <input className={inp} placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
-          <input className={inp} placeholder="Service areas" value={form.service_areas} onChange={(e) => setForm({ ...form, service_areas: e.target.value })} />
-          <textarea className={inp} placeholder="వివరణ" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-          <button onClick={save} className="w-full rounded-xl bg-[#1e3a8a] py-2 text-white font-semibold">Save</button>
-        </div>
-      )}
-
-      <div className="mt-3 space-y-2">
-        {items.length === 0 && <p className="text-xs text-center text-[#1e3a8a]/50 py-4">ఏ సర్వీస్ లేదు</p>}
-        {items.map((p) => (
-          <div key={p.id} className="rounded-xl border border-black/5 p-2.5 flex items-center justify-between">
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold truncate">{p.title}</p>
-              <p className="text-[11px] text-[#1e3a8a]/60">{p.sub_type} · 👁 {p.click_count}</p>
-            </div>
-            <button
-              onClick={() => toggle({ data: { id: p.id, status: p.availability_status === "online" ? "offline" : "online" } }).then(load)}
-              className={`text-[10px] px-2 py-1 rounded-full font-bold flex items-center gap-1 ${
-                p.availability_status === "online" ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600"
-              }`}>
-              <Power className="h-3 w-3" />
-              {p.availability_status === "online" ? "ONLINE" : "OFFLINE"}
-            </button>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
+function L({ n, children }: { n: string; children: React.ReactNode }) {
+  return <p className="text-[11px] font-semibold text-[#1e3a8a]/70 pt-1">{n}. {children}</p>;
 }
 
 const inp = "w-full rounded-lg border border-[#1e3a8a]/15 bg-white px-3 py-2 text-sm outline-none focus:border-[#1e3a8a]";

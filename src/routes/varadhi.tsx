@@ -81,7 +81,7 @@ function VaradhiBottomNav() {
   const items = [
     { to: "/varadhi", icon: Home, label: "హోమ్" },
     { to: "/varadhi/browse/fresh", icon: Search, label: "వెతకండి" },
-    { to: "/varadhi/dashboard", icon: LayoutDashboard, label: "డాష్‌బోర్డ్" },
+    { to: "/varadhi/dashboard", icon: LayoutDashboard, label: "అప్‌డేట్ బోర్డు" },
     { to: "/varadhi/rewards", icon: Gift, label: "బహుమతులు" },
     { to: "/varadhi/onboard", icon: User, label: "ప్రొఫైల్" },
   ];
