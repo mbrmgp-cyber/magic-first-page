@@ -286,16 +286,21 @@ function PostSection({ postType }: { postType: string }) {
           ))}
         </div>
       ) : (
-        <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-[#1e3a8a] text-sm">
-            {POST_TYPES.find((p) => p.id === postType)?.te} పోస్టులు
-          </h2>
-          <button onClick={() => { setForm(empty); setOpen(!open); }}
-            className="rounded-xl bg-[#16a34a] text-white px-3 py-1.5 text-xs font-semibold flex items-center gap-1">
-            <Plus className="h-3.5 w-3.5" /> కొత్తది
-          </button>
+        <div className="grid grid-cols-2 gap-2">
+          {SERVICE_CATS.map((c) => (
+            <button key={c.id}
+              onClick={() => {
+                setForm({ ...empty, service_cat: c.id, unit: "1 పనికి" });
+                setOpen(true);
+              }}
+              style={{ background: c.color }}
+              className="rounded-xl py-2.5 text-[11px] font-semibold text-white shadow-sm flex items-center justify-center gap-1 active:scale-[.98]">
+              <Plus className="h-3.5 w-3.5" /> {c.te}
+            </button>
+          ))}
         </div>
       )}
+
 
       {open && (
         <div className="mt-3 space-y-2 p-3 rounded-xl bg-[#f7f7fb]">
