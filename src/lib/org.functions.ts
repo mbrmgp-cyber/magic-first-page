@@ -158,14 +158,14 @@ export const sendLoginLink = createServerFn({ method: "POST" })
     let userId = await findAuthUserIdByEmail(supabaseAdmin, email);
 
     if (!userId) {
-      const { data: member } = await supabaseAdmin
+      // Any member row saved by the admin (approved or still pending) may log in.
+      const { data: rows } = await supabaseAdmin
         .from("members")
-        .select("id, email, user_id, preferred_lang")
+        .select("id, email, user_id, preferred_lang, status, created_at")
         .ilike("email", email)
-        .eq("status", "approved")
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        .order("created_at", { ascending: false });
+      const rank = (s: string) => (s === "approved" ? 0 : s === "pending" ? 1 : 2);
+      const member: any = (rows ?? []).slice().sort((a: any, b: any) => rank(a.status) - rank(b.status))[0];
 
       if (!member) return { sent: false as const, reason: "not_found" as const };
 
