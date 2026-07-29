@@ -27,14 +27,18 @@ const BUSINESS_CATS = [
   { id: "used", te: "వాడిన వస్తువులు", color: "#f97316" },
 ];
 
-const UNITS = ["కేజీలు", "వస్తువులు", "లీటర్లు", "సెంట్లు"];
+const UNITS = ["కేజీలు", "వస్తువులు", "లీటర్లు"];
+const LAND_UNITS = ["సెంట్లు", "గజాలు", "అంకణాలు"];
+const PROPERTY_TYPES = ["ఇల్లు", "ప్లాట్", "ఇంటి స్థలం", "సాగు భూమి", "ఇతర"];
 
 type Form = {
   id?: string;
   title: string;
   price: string;
   photo: string;
+  location_photo: string;
   unit: string;
+  property_type: string;
   pickup_location: string;
   house_no: string;
   street: string;
@@ -51,11 +55,13 @@ type Form = {
 };
 
 const empty: Form = {
-  title: "", price: "", photo: "", unit: "కేజీలు", pickup_location: "",
+  title: "", price: "", photo: "", location_photo: "", unit: "కేజీలు", property_type: "",
+  pickup_location: "",
   house_no: "", street: "", village: "", mandal: "", taluk: "",
   district: "", state: "ఆంధ్రప్రదేశ్", pincode: "", contact_phone: "",
   stock_status: "running", item_condition: "new", description: "",
 };
+
 
 function UpdateBoard() {
   const navigate = useNavigate();
@@ -120,20 +126,43 @@ function PostSection({ postType }: { postType: string }) {
   const [form, setForm] = useState<Form>(empty);
   const [saving, setSaving] = useState(false);
 
+  const isLand = postType === "business" && form.item_condition === "realestate";
+  const unitList = isLand ? LAND_UNITS : UNITS;
+
+  // ఒక సంవత్సరం లోపు / గరిష్టంగా 50 పోస్టులు
+  const yearAgo = Date.now() - 365 * 24 * 60 * 60 * 1000;
+  const visibleItems = items
+    .filter((l: any) => new Date(l.created_at).getTime() >= yearAgo)
+    .slice(0, 50);
+
   const load = async () => {
     const r = await fetchMy({ data: { mine: true } });
     setItems(r.listings.filter((l: any) => (l.post_type ?? "business") === postType));
   };
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [postType]);
 
-  const uploadPhoto = async (file: File) => {
+  const useCurrentLocation = () => {
+    if (!navigator.geolocation) return toast.error("లొకేషన్ సపోర్ట్ లేదు");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setForm((f) => ({ ...f, pickup_location: `https://maps.google.com/?q=${latitude},${longitude}` }));
+        toast.success("లొకేషన్ జోడించబడింది");
+      },
+      () => toast.error("లొకేషన్ పొందలేకపోయాం"),
+    );
+  };
+
+
+
+  const uploadPhoto = async (file: File, field: "photo" | "location_photo" = "photo") => {
     const { data: sess } = await supabase.auth.getSession();
     const uid = sess.session?.user.id;
     if (!uid) return;
     const path = `${uid}/listing-${Date.now()}-${file.name}`;
     const { error } = await supabase.storage.from("varadhi-proofs").upload(path, file, { upsert: true });
     if (error) { toast.error(error.message); return; }
-    setForm((f) => ({ ...f, photo: path }));
+    setForm((f) => ({ ...f, [field]: path }));
     toast.success("ఫోటో అప్‌లోడ్ అయింది");
   };
 
@@ -143,8 +172,11 @@ function PostSection({ postType }: { postType: string }) {
       title: l.title ?? "",
       price: l.price != null ? String(l.price) : "",
       photo: Array.isArray(l.images) ? (l.images[0] ?? "") : "",
+      location_photo: Array.isArray(l.images) ? (l.images[1] ?? "") : "",
       unit: l.unit ?? "కిలో",
+      property_type: l.sub_category ?? "",
       pickup_location: l.pickup_location ?? "",
+
       house_no: l.house_no ?? "",
       street: l.street ?? "",
       village: l.village ?? "",
@@ -175,7 +207,9 @@ function PostSection({ postType }: { postType: string }) {
           title: form.title.trim(),
           price: form.price ? Number(form.price) : null,
           unit: form.unit,
-          images: form.photo ? [form.photo] : [],
+          sub_category: form.property_type || null,
+          images: [form.photo, form.location_photo].filter(Boolean),
+
           pickup_location: form.pickup_location.trim() || null,
           house_no: form.house_no.trim() || null,
           street: form.street.trim() || null,
@@ -203,7 +237,15 @@ function PostSection({ postType }: { postType: string }) {
         <div className="grid grid-cols-2 gap-2">
           {BUSINESS_CATS.map((c) => (
             <button key={c.id}
-              onClick={() => { setForm({ ...empty, item_condition: c.id }); setOpen(true); }}
+              onClick={() => {
+                setForm({
+                  ...empty,
+                  item_condition: c.id,
+                  unit: c.id === "realestate" ? "సెంట్లు" : "కేజీలు",
+                });
+                setOpen(true);
+              }}
+
               style={{ background: c.color }}
               className="rounded-xl py-2.5 text-[11px] font-semibold text-white shadow-sm flex items-center justify-center gap-1 active:scale-[.98]">
               <Plus className="h-3.5 w-3.5" /> {c.te}
@@ -231,15 +273,40 @@ function PostSection({ postType }: { postType: string }) {
             </p>
           )}
 
-          <L n="1">అమ్మ దలిచిన వస్తువు పేరు</L>
+
+          {isLand && (
+            <>
+              <L n="1">ఆస్తి రకం</L>
+              <div className="grid grid-cols-3 gap-1.5">
+                {PROPERTY_TYPES.map((p) => (
+                  <button key={p} onClick={() => setForm({ ...form, property_type: p })}
+                    className={`rounded-lg py-2 text-[10px] font-semibold border ${
+                      form.property_type === p ? "bg-[#7c3aed] text-white border-[#7c3aed]" : "bg-white text-[#1e3a8a] border-black/10"
+                    }`}>
+                    {p}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+
+          <L n="1">{isLand ? "ఆస్తి పేరు / వివరం" : "అమ్మ దలిచిన వస్తువు పేరు"}</L>
           <input className={inp} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
 
           <L n="2">రేటు (Rs.)</L>
           <input className={inp} type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
 
-          <L n="4">కేజీలు / వస్తువులు / లీటర్లు / సెంట్లు</L>
-          <div className="grid grid-cols-4 gap-1.5">
-            {UNITS.map((u) => (
+          <L n="3">ఫోటో</L>
+          <label className="flex items-center gap-2 rounded-lg border border-dashed border-[#1e3a8a]/30 bg-white px-3 py-3 text-xs text-[#1e3a8a]">
+            <Camera className="h-4 w-4" />
+            {form.photo ? "ఫోటో ఎంపిక అయింది ✓" : "ఫోటో అప్‌లోడ్ చేయండి"}
+            <input type="file" accept="image/*" className="hidden"
+              onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0], "photo")} />
+          </label>
+
+          <L n="4">{unitList.join(" / ")}</L>
+          <div className={`grid gap-1.5 ${unitList.length === 3 ? "grid-cols-3" : "grid-cols-3"}`}>
+            {unitList.map((u) => (
               <button key={u} onClick={() => setForm({ ...form, unit: u })}
                 className={`rounded-lg py-2 text-[10px] font-semibold border ${
                   form.unit === u ? "bg-[#1e3a8a] text-white border-[#1e3a8a]" : "bg-white text-[#1e3a8a] border-black/10"
@@ -251,20 +318,25 @@ function PostSection({ postType }: { postType: string }) {
           <input className={inp} placeholder="ఎంత? / ఇతర యూనిట్ రాయండి"
             value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} />
 
-
-          <L n="3">ఫోటో</L>
-          <label className="flex items-center gap-2 rounded-lg border border-dashed border-[#1e3a8a]/30 bg-white px-3 py-3 text-xs text-[#1e3a8a]">
-            <Camera className="h-4 w-4" />
-            {form.photo ? "ఫోటో ఎంపిక అయింది ✓" : "ఫోటో అప్‌లోడ్ చేయండి"}
-            <input type="file" accept="image/*" className="hidden"
-              onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0])} />
-          </label>
-
-          <L n="5">వస్తువు దొరుకు లొకేషన్</L>
-          <input className={inp} value={form.pickup_location} onChange={(e) => setForm({ ...form, pickup_location: e.target.value })} />
+          <L n="5">{isLand ? "భూమి / ల్యాండ్ లొకేషన్" : "వస్తువు దొరుకు లొకేషన్"}</L>
+          <input className={inp} placeholder="లొకేషన్ లేదా Google Maps లింక్"
+            value={form.pickup_location} onChange={(e) => setForm({ ...form, pickup_location: e.target.value })} />
+          <div className="grid grid-cols-2 gap-2">
+            <label className="flex items-center justify-center gap-1.5 rounded-lg border border-dashed border-[#1e3a8a]/30 bg-white px-2 py-2.5 text-[11px] text-[#1e3a8a]">
+              <Camera className="h-4 w-4" />
+              {form.location_photo ? "లొకేషన్ ఫోటో ✓" : "లొకేషన్ ఫోటో అప్‌లోడ్"}
+              <input type="file" accept="image/*,application/pdf" className="hidden"
+                onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0], "location_photo")} />
+            </label>
+            <button type="button" onClick={useCurrentLocation}
+              className="rounded-lg border border-[#1e3a8a]/20 bg-white px-2 py-2.5 text-[11px] font-semibold text-[#1e3a8a]">
+              📍 ప్రస్తుత లొకేషన్
+            </button>
+          </div>
 
           <L n="6">ఇల్లు / షాప్ నెంబర్</L>
           <input className={inp} value={form.house_no} onChange={(e) => setForm({ ...form, house_no: e.target.value })} />
+
 
           <L n="7">వీధి, గ్రామం & మండలం</L>
           <div className="grid grid-cols-3 gap-2">
@@ -310,16 +382,22 @@ function PostSection({ postType }: { postType: string }) {
         </div>
       )}
 
-      <div className="mt-3 space-y-2">
-        {items.length === 0 && <p className="text-xs text-center text-[#1e3a8a]/50 py-4">ఏ పోస్టు లేదు</p>}
-        {items.map((l: any) => (
+      <div className="mt-4 space-y-2">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs font-bold text-[#1e3a8a]">పాత పోస్టులు</h3>
+          <span className="text-[10px] text-[#1e3a8a]/50">{visibleItems.length} / 50 · 1 సంవత్సరం</span>
+        </div>
+        {visibleItems.length === 0 && <p className="text-xs text-center text-[#1e3a8a]/50 py-4">ఏ పోస్టు లేదు</p>}
+        {visibleItems.map((l: any) => (
           <div key={l.id} className="rounded-xl border border-black/5 p-2.5 flex items-center justify-between">
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold truncate">{l.title}</p>
               <p className="text-[11px] text-[#1e3a8a]/60">
                 Rs. {l.price ?? "—"} / {l.unit ?? "—"} · 👁 {l.click_count}
+                {l.created_at ? ` · ${new Date(l.created_at).toLocaleDateString("te-IN")}` : ""}
               </p>
             </div>
+
             <div className="flex items-center gap-1">
               <button
                 onClick={() => toggle({ data: { id: l.id, status: l.stock_status === "running" ? "closed" : "running" } }).then(load)}
