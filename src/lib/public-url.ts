@@ -1,4 +1,7 @@
-export const PUBLIC_APP_ORIGIN = "https://magic-first-page.lovable.app";
+// Magic-link / QR links must point at the domain members actually use,
+// otherwise the session is created on a different origin and the app keeps
+// asking for the email again.
+export const PUBLIC_APP_ORIGIN = "https://mbrplatform.com";
 
 export function memberRegistrationUrl(orgCode?: string | null) {
   const code = (orgCode || "").trim();
