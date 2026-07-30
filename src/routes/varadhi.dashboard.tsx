@@ -284,7 +284,7 @@ function PostSection({ postType }: { postType: string }) {
           category: postType === "business" ? form.item_condition : (form.service_cat || "other"),
           item_condition: postType === "business" ? (form.item_condition === "used" ? "used" : "new") : null,
           title: form.title.trim(),
-          price: form.price ? Number(form.price) : null,
+          price: postType === "free" ? null : (form.price ? Number(form.price) : null),
           unit: form.unit,
           sub_category: (isSvc ? form.service_cat : form.property_type) || null,
           images: [form.photo, form.location_photo].filter(Boolean),
