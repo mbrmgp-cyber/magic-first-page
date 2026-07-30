@@ -49,15 +49,36 @@ function BrowsePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category]);
 
+  const [state, setState] = useState("");
+  const [district, setDistrict] = useState("");
+  const [mandal, setMandal] = useState("");
+
+  const uniq = (vals: (string | null | undefined)[]) =>
+    Array.from(new Set(vals.filter((v): v is string => !!v && v.trim() !== ""))).sort();
+
+  const states = uniq(listings.map((l) => l.state));
+  const districts = uniq(listings.filter((l) => !state || l.state === state).map((l) => l.district));
+  const mandals = uniq(
+    listings.filter((l) => (!state || l.state === state) && (!district || l.district === district)).map((l) => l.mandal),
+  );
+
   const needle = term.trim().toLowerCase();
-  const shownListings = needle
-    ? listings.filter((l) =>
-        [l.title, l.description, l.sub_category, l.city].some((v) => (v ?? "").toLowerCase().includes(needle)))
-    : listings;
-  const shownProviders = needle
-    ? providers.filter((p) =>
-        [p.title, p.description, p.sub_type, p.city].some((v) => (v ?? "").toLowerCase().includes(needle)))
-    : providers;
+  const shownListings = listings
+    .filter((l) => (!state || l.state === state) && (!district || l.district === district) && (!mandal || l.mandal === mandal))
+    .filter((l) =>
+      !needle ||
+      [l.title, l.description, l.sub_category, l.city, l.village, l.mandal, l.district, l.state].some((v) =>
+        (v ?? "").toLowerCase().includes(needle)));
+  const shownProviders = providers
+    .filter((p) => {
+      const hay = `${p.city ?? ""} ${p.service_areas ?? ""}`.toLowerCase();
+      return [state, district, mandal].every((v) => !v || hay.includes(v.toLowerCase()));
+    })
+    .filter((p) =>
+      !needle || [p.title, p.description, p.sub_type, p.city].some((v) => (v ?? "").toLowerCase().includes(needle)));
+
+  const selectCls =
+    "min-w-0 flex-1 rounded-xl border border-black/10 bg-white px-2 py-1.5 text-[11px] text-[#1e3a8a] outline-none";
 
   return (
     <div className="mx-auto max-w-md px-4 pt-4">
@@ -78,6 +99,32 @@ function BrowsePage() {
           <button type="button" onClick={() => setTerm("")} className="text-xs text-[#1e3a8a]/50">✕</button>
         )}
       </div>
+
+      {/* Area filters */}
+      <div className="mt-2 flex gap-2">
+        <select className={selectCls} value={state} onChange={(e) => { setState(e.target.value); setDistrict(""); setMandal(""); }}>
+          <option value="">రాష్ట్రం</option>
+          {states.map((s) => <option key={s} value={s}>{s}</option>)}
+        </select>
+        <select className={selectCls} value={district} onChange={(e) => { setDistrict(e.target.value); setMandal(""); }}>
+          <option value="">జిల్లా</option>
+          {districts.map((d) => <option key={d} value={d}>{d}</option>)}
+        </select>
+        <select className={selectCls} value={mandal} onChange={(e) => setMandal(e.target.value)}>
+          <option value="">మండలం</option>
+          {mandals.map((m) => <option key={m} value={m}>{m}</option>)}
+        </select>
+      </div>
+      {(state || district || mandal) && (
+        <button
+          type="button"
+          onClick={() => { setState(""); setDistrict(""); setMandal(""); }}
+          className="mt-2 text-[11px] font-semibold text-[#f97316]"
+        >
+          ఫిల్టర్లు తీసేయండి ✕
+        </button>
+      )}
+
 
       {loading && <p className="mt-6 text-sm text-center text-[#1e3a8a]/60">లోడ్ అవుతోంది…</p>}
 

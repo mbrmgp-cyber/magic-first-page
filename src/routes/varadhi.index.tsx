@@ -1,8 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { listListings, type VaradhiListing } from "@/lib/varadhi.functions";
+import { LanguageToggle } from "@/components/LanguageToggle";
 import varadhiLogo from "@/assets/varadhi-logo.jpg.asset.json";
-import { Apple, Package, Recycle, MapPin, Truck, Wrench, Search, ChevronDown } from "lucide-react";
+import { Apple, Package, Recycle, MapPin, Truck, Wrench, Search, ChevronDown, Navigation } from "lucide-react";
 
 export const Route = createFileRoute("/varadhi/")({
   component: VaradhiHome,
@@ -125,6 +128,94 @@ function BoxCard({ box }: { box: Box }) {
   );
 }
 
+function distanceKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
+  const R = 6371;
+  const dLat = ((b.lat - a.lat) * Math.PI) / 180;
+  const dLng = ((b.lng - a.lng) * Math.PI) / 180;
+  const la1 = (a.lat * Math.PI) / 180;
+  const la2 = (b.lat * Math.PI) / 180;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(la1) * Math.cos(la2) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+function NearbyFeed({ signedIn }: { signedIn: boolean | null }) {
+  const fetchListings = useServerFn(listListings);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [denied, setDenied] = useState(false);
+  const [items, setItems] = useState<Array<VaradhiListing & { km: number }>>([]);
+  const [loading, setLoading] = useState(false);
+
+  const ask = () => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) { setDenied(true); return; }
+    navigator.geolocation.getCurrentPosition(
+      (p) => setCoords({ lat: p.coords.latitude, lng: p.coords.longitude }),
+      () => setDenied(true),
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
+    );
+  };
+
+  useEffect(() => { if (signedIn) ask(); /* eslint-disable-next-line */ }, [signedIn]);
+
+  useEffect(() => {
+    if (!coords || !signedIn) return;
+    (async () => {
+      setLoading(true);
+      try {
+        const r = await fetchListings({ data: {} });
+        const near = (r.listings ?? [])
+          .filter((l) => l.lat != null && l.lng != null)
+          .map((l) => ({ ...l, km: distanceKm(coords, { lat: l.lat as number, lng: l.lng as number }) }))
+          .filter((l) => l.km <= 100)
+          .sort((a, b) => a.km - b.km)
+          .slice(0, 20);
+        setItems(near);
+      } catch { /* ignore */ }
+      setLoading(false);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [coords, signedIn]);
+
+  if (!signedIn) return null;
+
+  return (
+    <div className="mt-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-[#1e3a8a]/80">మీ చుట్టూ 100 కి.మీ. అప్‌డేట్‌లు</h2>
+        <button onClick={ask} className="flex items-center gap-1 text-[11px] font-semibold text-[#f97316]">
+          <Navigation className="h-3.5 w-3.5" /> లొకేషన్
+        </button>
+      </div>
+
+      {!coords && !denied && <p className="mt-2 text-[11px] text-[#1e3a8a]/60">లొకేషన్ కోసం అనుమతి ఇవ్వండి…</p>}
+      {denied && <p className="mt-2 text-[11px] text-[#1e3a8a]/60">లొకేషన్ అనుమతి లేదు. “లొకేషన్” నొక్కి మళ్లీ ప్రయత్నించండి.</p>}
+      {loading && <p className="mt-2 text-[11px] text-[#1e3a8a]/60">లోడ్ అవుతోంది…</p>}
+      {coords && !loading && items.length === 0 && (
+        <p className="mt-2 text-[11px] text-[#1e3a8a]/60">మీ చుట్టూ 100 కి.మీ. లోపు అప్‌డేట్‌లు లేవు.</p>
+      )}
+
+      <div className="mt-3 space-y-2">
+        {items.map((l) => (
+          <Link key={l.id} to="/varadhi/item/$id" params={{ id: l.id }}
+            className="flex gap-3 rounded-2xl bg-white p-3 shadow-sm border border-black/5 active:scale-[.99]">
+            <div className="h-14 w-14 shrink-0 rounded-xl bg-[#f7f7fb] flex items-center justify-center overflow-hidden">
+              {l.images?.[0] ? <img src={l.images[0]} alt="" className="h-full w-full object-cover" /> : <span className="text-xl">🛒</span>}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-[#1e3a8a]">{l.title}</p>
+              <p className="text-[11px] text-[#1e3a8a]/60">
+                📍 {[l.village, l.mandal, l.district].filter(Boolean).join(", ") || l.city || ""} · {l.km.toFixed(0)} కి.మీ.
+              </p>
+              <p className="mt-0.5 text-sm font-bold text-[#16a34a]">
+                {l.price != null ? `Rs. ${l.price}${l.unit ? ` / ${l.unit}` : ""}` : "ధర సంప్రదించండి"}
+              </p>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function VaradhiHome() {
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const navigate = useNavigate();
@@ -138,10 +229,11 @@ function VaradhiHome() {
       {/* Header */}
       <div className="flex items-center gap-3">
         <img src={varadhiLogo.url} alt="Varadhi" className="h-14 w-14 rounded-2xl object-contain bg-white shadow-sm p-1" />
-        <div>
+        <div className="min-w-0 flex-1">
           <h1 className="text-2xl font-bold tracking-tight text-[#1e3a8a]">వారధి</h1>
           <p className="text-xs text-[#1e3a8a]/70">Sell, Buy, Transport & Local Services</p>
         </div>
+        <LanguageToggle />
       </div>
 
       {/* CTA */}
@@ -158,6 +250,9 @@ function VaradhiHome() {
         </div>
       )}
 
+      {/* Nearby feed */}
+      <NearbyFeed signedIn={signedIn} />
+
       {/* Categories */}
       <h2 className="mt-6 text-sm font-semibold text-[#1e3a8a]/80">వర్గాలు — Categories</h2>
       <div className="mt-3 grid grid-cols-2 gap-3">
@@ -169,6 +264,7 @@ function VaradhiHome() {
       <div className="mt-3 grid grid-cols-2 gap-3">
         {SERVICES.map((s) => <BoxCard key={s.id} box={s} />)}
       </div>
+
 
       <p className="mt-8 text-center text-[10px] text-[#1e3a8a]/50">
         © MBR Platform · <Link to="/" className="underline">Back to Portal</Link>
