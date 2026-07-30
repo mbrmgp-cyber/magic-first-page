@@ -339,7 +339,7 @@ function PostSection({ postType }: { postType: string }) {
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-2">
-          {SERVICE_CATS.map((c) => (
+          {(postType === "free" ? FREE_CATS : SERVICE_CATS).map((c) => (
             <button key={c.id}
               onClick={() => {
                 setForm({ ...empty, service_cat: c.id, unit: "1 పనికి" });
@@ -365,20 +365,30 @@ function PostSection({ postType }: { postType: string }) {
 
           {postType !== "business" ? (
             <>
-              <p className="text-[11px] font-semibold text-white inline-block rounded-full px-3 py-1"
-                style={{ background: SERVICE_CATS.find((c) => c.id === form.service_cat)?.color ?? "#1e3a8a" }}>
-                {SERVICE_CATS.find((c) => c.id === form.service_cat)?.te ?? "సేవ"}
-              </p>
+              {(() => {
+                const cats = postType === "free" ? FREE_CATS : SERVICE_CATS;
+                const ex = postType === "free" ? FREE_EXAMPLES : SERVICE_EXAMPLES;
+                const cat = cats.find((c) => c.id === form.service_cat);
+                return (
+                  <>
+                    <p className="text-[11px] font-semibold text-white inline-block rounded-full px-3 py-1"
+                      style={{ background: cat?.color ?? "#1e3a8a" }}>
+                      {cat?.te ?? "సేవ"}
+                    </p>
 
-              <L n="1">చేయగల పని / నైపుణ్యం</L>
-              <input className={inp}
-                placeholder={SERVICE_EXAMPLES[form.service_cat] ?? "ఉదా: జనరల్ డాక్టర్, ఎలక్ట్రీషియన్…"}
-                value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-              {form.service_cat && (
-                <p className="-mt-1 text-[10px] leading-snug text-[#1e3a8a]/70">
-                  {SERVICE_EXAMPLES[form.service_cat]}
-                </p>
-              )}
+                    <L n="1">{postType === "free" ? "చేయగల ఉచిత సేవ" : "చేయగల పని / నైపుణ్యం"}</L>
+                    <input className={inp}
+                      placeholder={ex[form.service_cat] ?? "ఉదా: జనరల్ డాక్టర్, ఎలక్ట్రీషియన్…"}
+                      value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+                    {form.service_cat && ex[form.service_cat] && (
+                      <p className="-mt-1 text-[10px] leading-snug text-[#1e3a8a]/70">
+                        {ex[form.service_cat]}
+                      </p>
+                    )}
+                  </>
+                );
+              })()}
+
 
 
               <L n="2">అనుభవం & ఆధారాలు</L>
