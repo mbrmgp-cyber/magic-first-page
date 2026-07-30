@@ -1,8 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { listListings, type VaradhiListing } from "@/lib/varadhi.functions";
+import { LanguageToggle } from "@/components/LanguageToggle";
 import varadhiLogo from "@/assets/varadhi-logo.jpg.asset.json";
-import { Apple, Package, Recycle, MapPin, Truck, Wrench, Search, ChevronDown } from "lucide-react";
+import { Apple, Package, Recycle, MapPin, Truck, Wrench, Search, ChevronDown, Navigation } from "lucide-react";
 
 export const Route = createFileRoute("/varadhi/")({
   component: VaradhiHome,
