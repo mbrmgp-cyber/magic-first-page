@@ -50,7 +50,20 @@ const SERVICE_EXAMPLES: Record<string, string> = {
   other: "ఉదా: టైలర్, క్షౌరశాల, వంట మనిషి, డ్రైవర్, ట్యూషన్, ఈవెంట్/డెకరేషన్, ఫోటోగ్రఫీ…",
 };
 
-const SERVICE_MODES = ["క్లినిక్ / ఆఫీసు", "హోమ్ సర్వీస్", "ఫోన్ / ఆన్‌లైన్"];
+// వృత్తిని బట్టి "వారి స్థలం" పేరు మారుతుంది
+const OWN_PLACE_LABEL: Record<string, string> = {
+  doctor: "క్లినిక్‌లో మాత్రమే",
+  lawyer: "ఆఫీసులో మాత్రమే",
+  technician: "వర్క్‌షాప్‌లో మాత్రమే",
+  farmwork: "మా స్థలంలో మాత్రమే",
+  labour: "మా స్థలంలో మాత్రమే",
+  other: "మా స్థలంలో మాత్రమే",
+};
+const CUSTOMER_PLACE_LABEL = "కస్టమర్ చెప్పిన చోటికి వస్తాం";
+const serviceModes = (cat: string) => [
+  OWN_PLACE_LABEL[cat] ?? "మా స్థలంలో మాత్రమే",
+  CUSTOMER_PLACE_LABEL,
+];
 const SERVICE_AREAS = ["మండలంలో", "MLA పరిధిలో", "జిల్లాలో", "ఎక్కడైనా"];
 
 
