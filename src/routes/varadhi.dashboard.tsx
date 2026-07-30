@@ -59,10 +59,17 @@ const OWN_PLACE_LABEL: Record<string, string> = {
   labour: "మా స్థలంలో మాత్రమే",
   other: "మా స్థలంలో మాత్రమే",
 };
-const CUSTOMER_PLACE_LABEL = "కస్టమర్ చెప్పిన చోటికి వస్తాం";
+const CUSTOMER_PLACE_LABEL: Record<string, string> = {
+  doctor: "పేషెంట్ వున్న చోటికి రాగలము",
+  lawyer: "కస్టమర్ చెప్పిన చోటికి వస్తాం",
+  technician: "కస్టమర్ చెప్పిన చోటికి వస్తాం",
+  farmwork: "కస్టమర్ చెప్పిన చోటికి వస్తాం",
+  labour: "కస్టమర్ చెప్పిన చోటికి వస్తాం",
+  other: "కస్టమర్ చెప్పిన చోటికి వస్తాం",
+};
 const serviceModes = (cat: string) => [
   OWN_PLACE_LABEL[cat] ?? "మా స్థలంలో మాత్రమే",
-  CUSTOMER_PLACE_LABEL,
+  CUSTOMER_PLACE_LABEL[cat] ?? "కస్టమర్ చెప్పిన చోటికి వస్తాం",
 ];
 const SERVICE_AREAS = ["మండలంలో", "MLA పరిధిలో", "జిల్లాలో", "ఎక్కడైనా"];
 
