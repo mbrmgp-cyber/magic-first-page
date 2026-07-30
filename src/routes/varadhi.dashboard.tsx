@@ -279,6 +279,7 @@ function PostSection({ postType }: { postType: string }) {
       service_mode: l.service_mode ?? "",
       service_timing: l.service_timing ?? "",
       service_area: l.service_area ?? "మండలంలో",
+      blood_group: l.blood_group ?? "",
     });
     setOpen(true);
   };
