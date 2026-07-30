@@ -88,7 +88,7 @@ const empty: Form = {
   house_no: "", street: "", village: "", mandal: "", taluk: "",
   district: "", state: "ఆంధ్రప్రదేశ్", pincode: "", contact_phone: "",
   stock_status: "running", item_condition: "new", description: "",
-  service_cat: "", experience: "", service_mode: "", service_timing: "", service_area: "ఊరిలో",
+  service_cat: "", experience: "", service_mode: "", service_timing: "", service_area: "మండలంలో",
 };
 
 
@@ -222,7 +222,7 @@ function PostSection({ postType }: { postType: string }) {
       experience: l.experience ?? "",
       service_mode: l.service_mode ?? "",
       service_timing: l.service_timing ?? "",
-      service_area: l.service_area ?? "ఊరిలో",
+      service_area: l.service_area ?? "మండలంలో",
     });
     setOpen(true);
   };
