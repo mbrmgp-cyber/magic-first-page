@@ -308,6 +308,7 @@ function PostSection({ postType }: { postType: string }) {
           service_mode: isSvc ? (form.service_mode || null) : null,
           service_timing: isSvc ? (form.service_timing.trim() || null) : null,
           service_area: isSvc ? (form.service_area || null) : null,
+          blood_group: postType === "free" && form.service_cat === "blood" ? (form.blood_group.trim() || null) : null,
 
           pickup_location: form.pickup_location.trim() || null,
           house_no: form.house_no.trim() || null,
