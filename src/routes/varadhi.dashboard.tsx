@@ -72,6 +72,8 @@ const FREE_EXAMPLES: Record<string, string> = {
 const FREE_TIMINGS = ["24/7", "వారాంతాల్లో మాత్రమే", "ఉదయం మాత్రమే", "సాయంత్రం మాత్రమే", "అత్యవసర సమయంలో"];
 
 
+const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
+
 // వృత్తిని బట్టి "వారి స్థలం" పేరు మారుతుంది
 const OWN_PLACE_LABEL: Record<string, string> = {
   doctor: "క్లినిక్‌లో మాత్రమే",
@@ -80,6 +82,11 @@ const OWN_PLACE_LABEL: Record<string, string> = {
   farmwork: "మా స్థలంలో మాత్రమే",
   labour: "మా స్థలంలో మాత్రమే",
   other: "మా స్థలంలో మాత్రమే",
+  blood: "బ్లడ్ బ్యాంక్ / సేవా కేంద్రంలో",
+  medical: "మా వద్ద మాత్రమే",
+  education: "మా వద్ద మాత్రమే",
+  food: "మా కేంద్రంలో",
+  emergency: "మా కేంద్రంలో",
 };
 const CUSTOMER_PLACE_LABEL: Record<string, string> = {
   doctor: "పేషెంట్ వున్న చోటికి రాగలము",
@@ -88,10 +95,15 @@ const CUSTOMER_PLACE_LABEL: Record<string, string> = {
   farmwork: "కస్టమర్ చెప్పిన చోటికి వస్తాం",
   labour: "కస్టమర్ చెప్పిన చోటికి వస్తాం",
   other: "కస్టమర్ చెప్పిన చోటికి వస్తాం",
+  blood: "అవసరమైన చోటికి వస్తాం",
+  medical: "అవసరమైన చోటికి వస్తాం",
+  education: "అవసరమైన చోటికి వస్తాం",
+  food: "అవసరమైన చోటికి వస్తాం",
+  emergency: "అవసరమైన చోటికి వస్తాం",
 };
 const serviceModes = (cat: string) => [
   OWN_PLACE_LABEL[cat] ?? "మా స్థలంలో మాత్రమే",
-  CUSTOMER_PLACE_LABEL[cat] ?? "కస్టమర్ చెప్పిన చోటికి వస్తాం",
+  CUSTOMER_PLACE_LABEL[cat] ?? "అవసరమైన చోటికి వస్తాం",
 ];
 const SERVICE_AREAS = ["మండలంలో", "MLA పరిధిలో", "జిల్లాలో", "ఎక్కడైనా"];
 
@@ -122,6 +134,7 @@ type Form = {
   service_mode: string;
   service_timing: string;
   service_area: string;
+  blood_group: string;
 };
 
 const empty: Form = {
@@ -131,6 +144,7 @@ const empty: Form = {
   district: "", state: "ఆంధ్రప్రదేశ్", pincode: "", contact_phone: "",
   stock_status: "running", item_condition: "new", description: "",
   service_cat: "", experience: "", service_mode: "", service_timing: "", service_area: "మండలంలో",
+  blood_group: "",
 };
 
 
@@ -265,6 +279,7 @@ function PostSection({ postType }: { postType: string }) {
       service_mode: l.service_mode ?? "",
       service_timing: l.service_timing ?? "",
       service_area: l.service_area ?? "మండలంలో",
+      blood_group: l.blood_group ?? "",
     });
     setOpen(true);
   };
@@ -293,6 +308,7 @@ function PostSection({ postType }: { postType: string }) {
           service_mode: isSvc ? (form.service_mode || null) : null,
           service_timing: isSvc ? (form.service_timing.trim() || null) : null,
           service_area: isSvc ? (form.service_area || null) : null,
+          blood_group: postType === "free" && form.service_cat === "blood" ? (form.blood_group.trim() || null) : null,
 
           pickup_location: form.pickup_location.trim() || null,
           house_no: form.house_no.trim() || null,
@@ -426,6 +442,22 @@ function PostSection({ postType }: { postType: string }) {
                       </button>
                     ))}
                   </div>
+
+                  {form.service_cat === "blood" && (
+                    <>
+                      <L n="3b">బ్లడ్ గ్రూప్</L>
+                      <select
+                        className={inp}
+                        value={form.blood_group}
+                        onChange={(e) => setForm({ ...form, blood_group: e.target.value })}
+                      >
+                        <option value="">బ్లడ్ గ్రూప్ ఎంచుకోండి</option>
+                        {BLOOD_GROUPS.map((g) => (
+                          <option key={g} value={g}>{g}</option>
+                        ))}
+                      </select>
+                    </>
+                  )}
 
                   <L n="4">సేవా విధానం</L>
                   <div className="grid grid-cols-2 gap-1.5">

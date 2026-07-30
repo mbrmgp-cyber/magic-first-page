@@ -2247,6 +2247,7 @@ export type Database = {
       }
       varadhi_listings: {
         Row: {
+          blood_group: string | null
           category: string
           city: string | null
           click_count: number
@@ -2281,6 +2282,7 @@ export type Database = {
           village: string | null
         }
         Insert: {
+          blood_group?: string | null
           category: string
           city?: string | null
           click_count?: number
@@ -2315,6 +2317,7 @@ export type Database = {
           village?: string | null
         }
         Update: {
+          blood_group?: string | null
           category?: string
           city?: string | null
           click_count?: number

@@ -113,6 +113,7 @@ export type VaradhiListing = {
   stock_status: "running" | "closed";
   click_count: number;
   created_at: string;
+  blood_group?: string | null;
 };
 
 export type VaradhiProvider = {
