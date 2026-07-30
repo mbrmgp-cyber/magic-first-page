@@ -50,7 +50,20 @@ const SERVICE_EXAMPLES: Record<string, string> = {
   other: "ఉదా: టైలర్, క్షౌరశాల, వంట మనిషి, డ్రైవర్, ట్యూషన్, ఈవెంట్/డెకరేషన్, ఫోటోగ్రఫీ…",
 };
 
-const SERVICE_MODES = ["క్లినిక్ / ఆఫీసు", "హోమ్ సర్వీస్", "ఫోన్ / ఆన్‌లైన్"];
+// వృత్తిని బట్టి "వారి స్థలం" పేరు మారుతుంది
+const OWN_PLACE_LABEL: Record<string, string> = {
+  doctor: "క్లినిక్‌లో మాత్రమే",
+  lawyer: "ఆఫీసులో మాత్రమే",
+  technician: "వర్క్‌షాప్‌లో మాత్రమే",
+  farmwork: "మా స్థలంలో మాత్రమే",
+  labour: "మా స్థలంలో మాత్రమే",
+  other: "మా స్థలంలో మాత్రమే",
+};
+const CUSTOMER_PLACE_LABEL = "కస్టమర్ చెప్పిన చోటికి వస్తాం";
+const serviceModes = (cat: string) => [
+  OWN_PLACE_LABEL[cat] ?? "మా స్థలంలో మాత్రమే",
+  CUSTOMER_PLACE_LABEL,
+];
 const SERVICE_AREAS = ["మండలంలో", "MLA పరిధిలో", "జిల్లాలో", "ఎక్కడైనా"];
 
 
@@ -367,10 +380,10 @@ function PostSection({ postType }: { postType: string }) {
 
 
               <L n="4">సేవా విధానం & సమయం</L>
-              <div className="grid grid-cols-3 gap-1.5">
-                {SERVICE_MODES.map((m) => (
+              <div className="grid grid-cols-2 gap-1.5">
+                {serviceModes(form.service_cat).map((m) => (
                   <button key={m} onClick={() => setForm({ ...form, service_mode: m })}
-                    className={`rounded-lg py-2 text-[10px] font-semibold border ${
+                    className={`rounded-lg px-2 py-2.5 text-[10px] font-semibold border leading-snug ${
                       form.service_mode === m ? "bg-[#16a34a] text-white border-[#16a34a]" : "bg-white text-[#1e3a8a] border-black/10"
                     }`}>
                     {m}
@@ -392,6 +405,12 @@ function PostSection({ postType }: { postType: string }) {
                   onChange={(e) => setForm({ ...form, village: e.target.value })} />
                 <input className={inp} placeholder="మండలం" value={form.mandal}
                   onChange={(e) => setForm({ ...form, mandal: e.target.value })} />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <input className={inp} placeholder="జిల్లా" value={form.district}
+                  onChange={(e) => setForm({ ...form, district: e.target.value })} />
+                <input className={inp} placeholder="రాష్ట్రం" value={form.state}
+                  onChange={(e) => setForm({ ...form, state: e.target.value })} />
               </div>
               <input className={inp} inputMode="tel" placeholder="కాంటాక్ట్ ఫోన్ నెంబరు"
                 value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} />
