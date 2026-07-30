@@ -50,6 +50,28 @@ const SERVICE_EXAMPLES: Record<string, string> = {
   other: "ఉదా: టైలర్, క్షౌరశాల, వంట మనిషి, డ్రైవర్, ట్యూషన్, ఈవెంట్/డెకరేషన్, ఫోటోగ్రఫీ…",
 };
 
+// ఉచిత / సామాజిక సేవల కేటగిరీలు
+const FREE_CATS = [
+  { id: "blood", te: "రక్తదాత", color: "#dc2626" },
+  { id: "medical", te: "ఉచిత వైద్య సహాయం", color: "#0ea5e9" },
+  { id: "education", te: "ఉచిత విద్య", color: "#7c3aed" },
+  { id: "food", te: "అన్నదానం", color: "#16a34a" },
+  { id: "emergency", te: "అత్యవసర వాలంటీర్", color: "#f97316" },
+  { id: "other", te: "ఇతర ఉచిత సేవలు", color: "#0f766e" },
+];
+
+const FREE_EXAMPLES: Record<string, string> = {
+  blood: "ఉదా: B+ రక్తదానం, ప్లేట్‌లెట్స్, రక్తదాన శిబిరం…",
+  medical: "ఉదా: ఉచిత వైద్య పరీక్షలు, మందుల సహాయం, అంబులెన్స్, ఆసుపత్రికి తోడు…",
+  education: "ఉదా: ఉచిత ట్యూషన్, పుస్తకాలు, పోటీ పరీక్షల శిక్షణ, కంప్యూటర్ క్లాసులు…",
+  food: "ఉదా: అన్నదానం, ఆహార పంపిణీ, మంచినీటి సదుపాయం…",
+  emergency: "ఉదా: ప్రమాద సమయంలో సహాయం, వరద/అగ్ని ప్రమాద సేవలు, రెస్క్యూ…",
+  other: "ఉదా: వృద్ధులకు సహాయం, దుస్తుల పంపిణీ, శ్రమదానం, పర్యావరణ సేవలు…",
+};
+
+const FREE_TIMINGS = ["24/7", "వారాంతాల్లో మాత్రమే", "ఉదయం మాత్రమే", "సాయంత్రం మాత్రమే", "అత్యవసర సమయంలో"];
+
+
 // వృత్తిని బట్టి "వారి స్థలం" పేరు మారుతుంది
 const OWN_PLACE_LABEL: Record<string, string> = {
   doctor: "క్లినిక్‌లో మాత్రమే",
@@ -262,7 +284,7 @@ function PostSection({ postType }: { postType: string }) {
           category: postType === "business" ? form.item_condition : (form.service_cat || "other"),
           item_condition: postType === "business" ? (form.item_condition === "used" ? "used" : "new") : null,
           title: form.title.trim(),
-          price: form.price ? Number(form.price) : null,
+          price: postType === "free" ? null : (form.price ? Number(form.price) : null),
           unit: form.unit,
           sub_category: (isSvc ? form.service_cat : form.property_type) || null,
           images: [form.photo, form.location_photo].filter(Boolean),
@@ -317,7 +339,7 @@ function PostSection({ postType }: { postType: string }) {
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-2">
-          {SERVICE_CATS.map((c) => (
+          {(postType === "free" ? FREE_CATS : SERVICE_CATS).map((c) => (
             <button key={c.id}
               onClick={() => {
                 setForm({ ...empty, service_cat: c.id, unit: "1 పనికి" });
@@ -343,20 +365,30 @@ function PostSection({ postType }: { postType: string }) {
 
           {postType !== "business" ? (
             <>
-              <p className="text-[11px] font-semibold text-white inline-block rounded-full px-3 py-1"
-                style={{ background: SERVICE_CATS.find((c) => c.id === form.service_cat)?.color ?? "#1e3a8a" }}>
-                {SERVICE_CATS.find((c) => c.id === form.service_cat)?.te ?? "సేవ"}
-              </p>
+              {(() => {
+                const cats = postType === "free" ? FREE_CATS : SERVICE_CATS;
+                const ex = postType === "free" ? FREE_EXAMPLES : SERVICE_EXAMPLES;
+                const cat = cats.find((c) => c.id === form.service_cat);
+                return (
+                  <>
+                    <p className="text-[11px] font-semibold text-white inline-block rounded-full px-3 py-1"
+                      style={{ background: cat?.color ?? "#1e3a8a" }}>
+                      {cat?.te ?? "సేవ"}
+                    </p>
 
-              <L n="1">చేయగల పని / నైపుణ్యం</L>
-              <input className={inp}
-                placeholder={SERVICE_EXAMPLES[form.service_cat] ?? "ఉదా: జనరల్ డాక్టర్, ఎలక్ట్రీషియన్…"}
-                value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-              {form.service_cat && (
-                <p className="-mt-1 text-[10px] leading-snug text-[#1e3a8a]/70">
-                  {SERVICE_EXAMPLES[form.service_cat]}
-                </p>
-              )}
+                    <L n="1">{postType === "free" ? "చేయగల ఉచిత సేవ" : "చేయగల పని / నైపుణ్యం"}</L>
+                    <input className={inp}
+                      placeholder={ex[form.service_cat] ?? "ఉదా: జనరల్ డాక్టర్, ఎలక్ట్రీషియన్…"}
+                      value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+                    {form.service_cat && ex[form.service_cat] && (
+                      <p className="-mt-1 text-[10px] leading-snug text-[#1e3a8a]/70">
+                        {ex[form.service_cat]}
+                      </p>
+                    )}
+                  </>
+                );
+              })()}
+
 
 
               <L n="2">అనుభవం & ఆధారాలు</L>
@@ -377,28 +409,62 @@ function PostSection({ postType }: { postType: string }) {
                 </label>
               </div>
 
-              <L n="3">{postType === "free" ? "సర్వీస్ ఛార్జి (ఉచితం)" : "సర్వీస్ ఛార్జి (Rs.)"}</L>
-              <input className={inp} type="number" placeholder="Rs." value={form.price}
-                onChange={(e) => setForm({ ...form, price: e.target.value })} />
-              <input className={inp}
-                placeholder="ఏ పద్ధతిలో ఛార్జి తీసుకుంటారు? (ఉదా: ఒక్కో పనికి, గంటకి, రోజుకి…)"
-                value={UNITS.includes(form.unit) || LAND_UNITS.includes(form.unit) ? "" : form.unit}
-                onChange={(e) => setForm({ ...form, unit: e.target.value })} />
+              {postType === "free" ? (
+                <>
+                  <L n="3">సేవ సమయం / అందుబాటు</L>
+                  <input className={inp}
+                    placeholder="ఉదా: 24/7, వారాంతాల్లో మాత్రమే, ఉదయం 9 – రాత్రి 8"
+                    value={form.service_timing}
+                    onChange={(e) => setForm({ ...form, service_timing: e.target.value })} />
+                  <div className="flex flex-wrap gap-1.5">
+                    {FREE_TIMINGS.map((t) => (
+                      <button key={t} type="button" onClick={() => setForm({ ...form, service_timing: t })}
+                        className={`rounded-full px-2.5 py-1.5 text-[10px] font-semibold border ${
+                          form.service_timing === t ? "bg-[#16a34a] text-white border-[#16a34a]" : "bg-white text-[#1e3a8a] border-black/10"
+                        }`}>
+                        {t}
+                      </button>
+                    ))}
+                  </div>
 
+                  <L n="4">సేవా విధానం</L>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {serviceModes(form.service_cat).map((m) => (
+                      <button key={m} onClick={() => setForm({ ...form, service_mode: m })}
+                        className={`rounded-lg px-2 py-2.5 text-[10px] font-semibold border leading-snug ${
+                          form.service_mode === m ? "bg-[#16a34a] text-white border-[#16a34a]" : "bg-white text-[#1e3a8a] border-black/10"
+                        }`}>
+                        {m}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <L n="3">సర్వీస్ ఛార్జి (Rs.)</L>
+                  <input className={inp} type="number" placeholder="Rs." value={form.price}
+                    onChange={(e) => setForm({ ...form, price: e.target.value })} />
+                  <input className={inp}
+                    placeholder="ఏ పద్ధతిలో ఛార్జి తీసుకుంటారు? (ఉదా: ఒక్కో పనికి, గంటకి, రోజుకి…)"
+                    value={UNITS.includes(form.unit) || LAND_UNITS.includes(form.unit) ? "" : form.unit}
+                    onChange={(e) => setForm({ ...form, unit: e.target.value })} />
 
-              <L n="4">సేవా విధానం & సమయం</L>
-              <div className="grid grid-cols-2 gap-1.5">
-                {serviceModes(form.service_cat).map((m) => (
-                  <button key={m} onClick={() => setForm({ ...form, service_mode: m })}
-                    className={`rounded-lg px-2 py-2.5 text-[10px] font-semibold border leading-snug ${
-                      form.service_mode === m ? "bg-[#16a34a] text-white border-[#16a34a]" : "bg-white text-[#1e3a8a] border-black/10"
-                    }`}>
-                    {m}
-                  </button>
-                ))}
-              </div>
-              <input className={inp} placeholder="సర్వీస్ టైమింగ్ (ఉదా: ఉదయం 9 – రాత్రి 8)"
-                value={form.service_timing} onChange={(e) => setForm({ ...form, service_timing: e.target.value })} />
+                  <L n="4">సేవా విధానం & సమయం</L>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {serviceModes(form.service_cat).map((m) => (
+                      <button key={m} onClick={() => setForm({ ...form, service_mode: m })}
+                        className={`rounded-lg px-2 py-2.5 text-[10px] font-semibold border leading-snug ${
+                          form.service_mode === m ? "bg-[#16a34a] text-white border-[#16a34a]" : "bg-white text-[#1e3a8a] border-black/10"
+                        }`}>
+                        {m}
+                      </button>
+                    ))}
+                  </div>
+                  <input className={inp} placeholder="సర్వీస్ టైమింగ్ (ఉదా: ఉదయం 9 – రాత్రి 8)"
+                    value={form.service_timing} onChange={(e) => setForm({ ...form, service_timing: e.target.value })} />
+                </>
+              )}
+
 
               <L n="5">లొకేషన్ & కాంటాక్ట్ నెంబర్</L>
               <input className={inp} placeholder="లొకేషన్ లేదా Google Maps లింక్"
