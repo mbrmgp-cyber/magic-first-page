@@ -442,6 +442,22 @@ function PostSection({ postType }: { postType: string }) {
                     ))}
                   </div>
 
+                  {form.service_cat === "blood" && (
+                    <>
+                      <L n="3b">బ్లడ్ గ్రూప్</L>
+                      <select
+                        className={inp}
+                        value={form.blood_group}
+                        onChange={(e) => setForm({ ...form, blood_group: e.target.value })}
+                      >
+                        <option value="">బ్లడ్ గ్రూప్ ఎంచుకోండి</option>
+                        {BLOOD_GROUPS.map((g) => (
+                          <option key={g} value={g}>{g}</option>
+                        ))}
+                      </select>
+                    </>
+                  )}
+
                   <L n="4">సేవా విధానం</L>
                   <div className="grid grid-cols-2 gap-1.5">
                     {serviceModes(form.service_cat).map((m) => (
