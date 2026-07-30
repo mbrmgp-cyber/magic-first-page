@@ -380,10 +380,10 @@ function PostSection({ postType }: { postType: string }) {
 
 
               <L n="4">సేవా విధానం & సమయం</L>
-              <div className="grid grid-cols-3 gap-1.5">
-                {SERVICE_MODES.map((m) => (
+              <div className="grid grid-cols-2 gap-1.5">
+                {serviceModes(form.service_cat).map((m) => (
                   <button key={m} onClick={() => setForm({ ...form, service_mode: m })}
-                    className={`rounded-lg py-2 text-[10px] font-semibold border ${
+                    className={`rounded-lg px-2 py-2.5 text-[10px] font-semibold border leading-snug ${
                       form.service_mode === m ? "bg-[#16a34a] text-white border-[#16a34a]" : "bg-white text-[#1e3a8a] border-black/10"
                     }`}>
                     {m}
