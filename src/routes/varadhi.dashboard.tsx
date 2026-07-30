@@ -72,6 +72,8 @@ const FREE_EXAMPLES: Record<string, string> = {
 const FREE_TIMINGS = ["24/7", "వారాంతాల్లో మాత్రమే", "ఉదయం మాత్రమే", "సాయంత్రం మాత్రమే", "అత్యవసర సమయంలో"];
 
 
+const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
+
 // వృత్తిని బట్టి "వారి స్థలం" పేరు మారుతుంది
 const OWN_PLACE_LABEL: Record<string, string> = {
   doctor: "క్లినిక్‌లో మాత్రమే",
@@ -80,6 +82,11 @@ const OWN_PLACE_LABEL: Record<string, string> = {
   farmwork: "మా స్థలంలో మాత్రమే",
   labour: "మా స్థలంలో మాత్రమే",
   other: "మా స్థలంలో మాత్రమే",
+  blood: "బ్లడ్ బ్యాంక్ / సేవా కేంద్రంలో",
+  medical: "మా వద్ద మాత్రమే",
+  education: "మా వద్ద మాత్రమే",
+  food: "మా కేంద్రంలో",
+  emergency: "మా కేంద్రంలో",
 };
 const CUSTOMER_PLACE_LABEL: Record<string, string> = {
   doctor: "పేషెంట్ వున్న చోటికి రాగలము",
@@ -88,10 +95,15 @@ const CUSTOMER_PLACE_LABEL: Record<string, string> = {
   farmwork: "కస్టమర్ చెప్పిన చోటికి వస్తాం",
   labour: "కస్టమర్ చెప్పిన చోటికి వస్తాం",
   other: "కస్టమర్ చెప్పిన చోటికి వస్తాం",
+  blood: "అవసరమైన చోటికి వస్తాం",
+  medical: "అవసరమైన చోటికి వస్తాం",
+  education: "అవసరమైన చోటికి వస్తాం",
+  food: "అవసరమైన చోటికి వస్తాం",
+  emergency: "అవసరమైన చోటికి వస్తాం",
 };
 const serviceModes = (cat: string) => [
   OWN_PLACE_LABEL[cat] ?? "మా స్థలంలో మాత్రమే",
-  CUSTOMER_PLACE_LABEL[cat] ?? "కస్టమర్ చెప్పిన చోటికి వస్తాం",
+  CUSTOMER_PLACE_LABEL[cat] ?? "అవసరమైన చోటికి వస్తాం",
 ];
 const SERVICE_AREAS = ["మండలంలో", "MLA పరిధిలో", "జిల్లాలో", "ఎక్కడైనా"];
 
