@@ -5,7 +5,7 @@ import { DynamicAppManifest } from "@/components/DynamicAppManifest";
 import { SubscriptionGate } from "@/components/SubscriptionGate";
 import { RbacProvider } from "@/lib/rbac";
 import { GlobalAdBar } from "@/components/GlobalAdBar";
-import { AutoTransliterate } from "@/components/AutoTransliterate";
+
 import { ModuleRouteGuard } from "@/components/ModuleRouteGuard";
 
 
@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated")({
     <RbacProvider>
       <GlobalThemeApplier />
       <DynamicAppManifest />
-      <AutoTransliterate />
+      
       <div className="mbr-themed-app min-h-screen bg-background text-foreground pb-[90px]">
         <SubscriptionGate>
           <ModuleRouteGuard>

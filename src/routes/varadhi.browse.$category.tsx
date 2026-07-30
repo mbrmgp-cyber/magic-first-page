@@ -1,53 +1,58 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { listListings, listProviders, type VaradhiListing, type VaradhiProvider } from "@/lib/varadhi.functions";
-import { ArrowLeft, Search } from "lucide-react";
+import { ArrowLeft, Search, Apple, Package, Recycle, MapPin, Truck, Wrench } from "lucide-react";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
+import { STATES, districtsFor } from "@/lib/ap-locations";
 
 export const Route = createFileRoute("/varadhi/browse/$category")({
   validateSearch: zodValidator(z.object({ q: fallback(z.string(), "").default("") })),
   component: BrowsePage,
 });
 
-const CATEGORY_LABEL: Record<string, string> = {
-  fresh: "తాజా వస్తువులు",
-  new: "కొత్త వస్తువులు",
-  used: "వాడిన వస్తువులు",
-  realestate: "ఇంటి స్థలాలు & భూములు",
-  transport: "ట్రాన్స్‌పోర్ట్",
-  services: "సర్వీసులు",
-};
+const BOXES = [
+  { id: "fresh", te: "తాజా వస్తువులు", color: "#16a34a", Icon: Apple },
+  { id: "new", te: "కొత్త వస్తువులు", color: "#2563eb", Icon: Package },
+  { id: "used", te: "వాడిన వస్తువులు", color: "#f97316", Icon: Recycle },
+  { id: "realestate", te: "ఇంటి స్థలాలు & భూములు", color: "#7c3aed", Icon: MapPin },
+  { id: "transport", te: "ట్రాన్స్‌పోర్ట్", color: "#0ea5e9", Icon: Truck },
+  { id: "services", te: "సర్వీసులు", color: "#dc2626", Icon: Wrench },
+];
 
 function BrowsePage() {
   const { category } = Route.useParams();
   const { q } = Route.useSearch();
+  const navigate = useNavigate();
   const [term, setTerm] = useState(q);
   useEffect(() => { setTerm(q); }, [q]);
-  const isProviderPage = category === "transport" || category === "services";
+
   const fetchListings = useServerFn(listListings);
   const fetchProviders = useServerFn(listProviders);
-  const [listings, setListings] = useState<VaradhiListing[]>([]);
-  const [providers, setProviders] = useState<VaradhiProvider[]>([]);
+  const [allListings, setAllListings] = useState<VaradhiListing[]>([]);
+  const [allProviders, setAllProviders] = useState<VaradhiProvider[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
       setLoading(true);
       try {
-        if (isProviderPage) {
-          const r = await fetchProviders({ data: { provider_type: category === "transport" ? "transport" : "service" } });
-          setProviders(r.providers);
-        } else {
-          const r = await fetchListings({ data: { category } });
-          setListings(r.listings);
-        }
-      } catch {}
+        const [l, t, s] = await Promise.all([
+          fetchListings({ data: {} }),
+          fetchProviders({ data: { provider_type: "transport" } }),
+          fetchProviders({ data: { provider_type: "service" } }),
+        ]);
+        setAllListings(l.listings ?? []);
+        setAllProviders([...(t.providers ?? []), ...(s.providers ?? [])]);
+      } catch { /* ignore */ }
       setLoading(false);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category]);
+  }, []);
+
+  const isProviderPage = category === "transport" || category === "services";
+  const providerType = category === "transport" ? "transport" : "service";
 
   const [state, setState] = useState("");
   const [district, setDistrict] = useState("");
@@ -56,24 +61,51 @@ function BrowsePage() {
   const uniq = (vals: (string | null | undefined)[]) =>
     Array.from(new Set(vals.filter((v): v is string => !!v && v.trim() !== ""))).sort();
 
-  const states = uniq(listings.map((l) => l.state));
-  const districts = uniq(listings.filter((l) => !state || l.state === state).map((l) => l.district));
-  const mandals = uniq(
-    listings.filter((l) => (!state || l.state === state) && (!district || l.district === district)).map((l) => l.mandal),
+  // States/districts come from a static list merged with whatever the data has.
+  const states = useMemo(
+    () => uniq([...STATES, ...allListings.map((l) => l.state)]),
+    [allListings],
+  );
+  const districts = useMemo(
+    () => uniq([
+      ...districtsFor(state),
+      ...allListings.filter((l) => !state || l.state === state).map((l) => l.district),
+    ]),
+    [allListings, state],
+  );
+  const mandals = useMemo(
+    () => uniq(
+      allListings
+        .filter((l) => (!state || l.state === state) && (!district || l.district === district))
+        .map((l) => l.mandal),
+    ),
+    [allListings, state, district],
   );
 
+  const inArea = (l: VaradhiListing) =>
+    (!state || l.state === state) && (!district || l.district === district) && (!mandal || l.mandal === mandal);
+  const providerInArea = (p: VaradhiProvider) => {
+    const hay = `${p.city ?? ""} ${p.service_areas ?? ""}`.toLowerCase();
+    return [state, district, mandal].every((v) => !v || hay.includes(v.toLowerCase()));
+  };
+
   const needle = term.trim().toLowerCase();
-  const shownListings = listings
-    .filter((l) => (!state || l.state === state) && (!district || l.district === district) && (!mandal || l.mandal === mandal))
+  const areaListings = allListings.filter(inArea);
+  const areaProviders = allProviders.filter(providerInArea);
+
+  const countFor = (id: string) =>
+    id === "transport" || id === "services"
+      ? areaProviders.filter((p) => p.provider_type === (id === "transport" ? "transport" : "service")).length
+      : areaListings.filter((l) => l.category === id).length;
+
+  const shownListings = areaListings
+    .filter((l) => l.category === category)
     .filter((l) =>
       !needle ||
       [l.title, l.description, l.sub_category, l.city, l.village, l.mandal, l.district, l.state].some((v) =>
         (v ?? "").toLowerCase().includes(needle)));
-  const shownProviders = providers
-    .filter((p) => {
-      const hay = `${p.city ?? ""} ${p.service_areas ?? ""}`.toLowerCase();
-      return [state, district, mandal].every((v) => !v || hay.includes(v.toLowerCase()));
-    })
+  const shownProviders = areaProviders
+    .filter((p) => p.provider_type === providerType)
     .filter((p) =>
       !needle || [p.title, p.description, p.sub_type, p.city].some((v) => (v ?? "").toLowerCase().includes(needle)));
 
@@ -84,7 +116,7 @@ function BrowsePage() {
     <div className="mx-auto max-w-md px-4 pt-4">
       <div className="flex items-center gap-2">
         <Link to="/varadhi" className="p-1"><ArrowLeft className="h-5 w-5" /></Link>
-        <h1 className="text-lg font-bold text-[#1e3a8a]">{CATEGORY_LABEL[category] ?? category}</h1>
+        <h1 className="text-lg font-bold text-[#1e3a8a]">ఎక్కడ ఏమి కావాలో వెతకండి</h1>
       </div>
 
       <div className="mt-3 flex items-center gap-2 rounded-xl border border-black/10 bg-white px-3 py-2 shadow-sm">
@@ -125,12 +157,33 @@ function BrowsePage() {
         </button>
       )}
 
+      {/* 6 category boxes — counts reflect the selected area */}
+      <div className="mt-3 grid grid-cols-3 gap-2">
+        {BOXES.map((b) => {
+          const active = b.id === category;
+          return (
+            <button
+              key={b.id}
+              type="button"
+              onClick={() => navigate({ to: "/varadhi/browse/$category", params: { category: b.id }, search: { q: term.trim() } })}
+              className={`rounded-2xl border p-2 text-left transition active:scale-[.98] ${
+                active ? "border-transparent text-white shadow" : "border-black/5 bg-white text-[#1e3a8a]"
+              }`}
+              style={active ? { background: b.color } : undefined}
+            >
+              <b.Icon className="h-4 w-4" style={active ? undefined : { color: b.color }} />
+              <p className="mt-1 text-[10px] font-semibold leading-tight">{b.te}</p>
+              <p className={`text-[10px] ${active ? "text-white/80" : "text-[#1e3a8a]/50"}`}>{countFor(b.id)}</p>
+            </button>
+          );
+        })}
+      </div>
 
       {loading && <p className="mt-6 text-sm text-center text-[#1e3a8a]/60">లోడ్ అవుతోంది…</p>}
 
       {!loading && !isProviderPage && (
         <div className="mt-4 space-y-3">
-          {shownListings.length === 0 && <EmptyState msg="ఏ వస్తువులు లేవు" />}
+          {shownListings.length === 0 && <EmptyState msg="ఈ ఏరియాలో ఏ వస్తువులు లేవు" />}
           {shownListings.map((l) => (
             <Link key={l.id} to="/varadhi/item/$id" params={{ id: l.id }}
               className="block rounded-2xl bg-white p-3 shadow-sm border border-black/5 active:scale-[.99]">
@@ -140,7 +193,11 @@ function BrowsePage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-[#1e3a8a] truncate">{l.title}</p>
-                  {l.city && <p className="text-[11px] text-[#1e3a8a]/60">📍 {l.city}</p>}
+                  {(l.village || l.mandal || l.district || l.city) && (
+                    <p className="text-[11px] text-[#1e3a8a]/60">
+                      📍 {[l.village, l.mandal, l.district].filter(Boolean).join(", ") || l.city}
+                    </p>
+                  )}
                   <p className="text-sm font-bold text-[#16a34a] mt-0.5">
                     {l.price != null ? `Rs. ${l.price}${l.unit ? ` / ${l.unit}` : ""}` : "ధర సంప్రదించండి"}
                   </p>
@@ -153,7 +210,7 @@ function BrowsePage() {
 
       {!loading && isProviderPage && (
         <div className="mt-4 space-y-3">
-          {shownProviders.length === 0 && <EmptyState msg="ఏ సర్వీసులు లేవు" />}
+          {shownProviders.length === 0 && <EmptyState msg="ఈ ఏరియాలో ఏ సర్వీసులు లేవు" />}
           {shownProviders.map((p) => (
             <Link key={p.id} to="/varadhi/provider/$id" params={{ id: p.id }}
               className="block rounded-2xl bg-white p-3 shadow-sm border border-black/5 active:scale-[.99]">

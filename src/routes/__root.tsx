@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { LanguageProvider } from "@/lib/i18n";
+import { AutoTransliterate } from "@/components/AutoTransliterate";
 import { CurrencyProvider } from "@/lib/currency-context";
 import { SplashScreen } from "@/components/SplashScreen";
 import { Toaster } from "@/components/ui/sonner";
@@ -183,6 +184,7 @@ function RootComponent() {
       <LanguageProvider>
         <CurrencyProvider>
           <StaticAppIcons />
+          <AutoTransliterate />
           {showSplash && <SplashScreen onDone={handleSplashDone} />}
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
