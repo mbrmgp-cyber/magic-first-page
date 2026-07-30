@@ -353,16 +353,11 @@ function PostSection({ postType }: { postType: string }) {
               <L n="3">{postType === "free" ? "సర్వీస్ ఛార్జి (ఉచితం)" : "సర్వీస్ ఛార్జి (Rs.)"}</L>
               <input className={inp} type="number" placeholder="Rs." value={form.price}
                 onChange={(e) => setForm({ ...form, price: e.target.value })} />
-              <div className="grid grid-cols-3 gap-1.5">
-                {CHARGE_BASIS.map((b) => (
-                  <button key={b} onClick={() => setForm({ ...form, unit: b })}
-                    className={`rounded-lg py-2 text-[10px] font-semibold border ${
-                      form.unit === b ? "bg-[#1e3a8a] text-white border-[#1e3a8a]" : "bg-white text-[#1e3a8a] border-black/10"
-                    }`}>
-                    {b}
-                  </button>
-                ))}
-              </div>
+              <input className={inp}
+                placeholder="ఏ పద్ధతిలో ఛార్జి తీసుకుంటారు? (ఉదా: ఒక్కో పనికి, గంటకి, రోజుకి…)"
+                value={UNITS.includes(form.unit) || LAND_UNITS.includes(form.unit) ? "" : form.unit}
+                onChange={(e) => setForm({ ...form, unit: e.target.value })} />
+
 
               <L n="4">సేవా విధానం & సమయం</L>
               <div className="grid grid-cols-3 gap-1.5">
