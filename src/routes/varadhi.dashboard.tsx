@@ -134,6 +134,7 @@ type Form = {
   service_mode: string;
   service_timing: string;
   service_area: string;
+  blood_group: string;
 };
 
 const empty: Form = {
@@ -143,6 +144,7 @@ const empty: Form = {
   district: "", state: "ఆంధ్రప్రదేశ్", pincode: "", contact_phone: "",
   stock_status: "running", item_condition: "new", description: "",
   service_cat: "", experience: "", service_mode: "", service_timing: "", service_area: "మండలంలో",
+  blood_group: "",
 };
 
 
