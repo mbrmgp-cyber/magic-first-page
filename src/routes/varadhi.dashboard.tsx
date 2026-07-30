@@ -329,8 +329,15 @@ function PostSection({ postType }: { postType: string }) {
               </p>
 
               <L n="1">చేయగల పని / నైపుణ్యం</L>
-              <input className={inp} placeholder="ఉదా: జనరల్ డాక్టర్, ఎలక్ట్రీషియన్…"
+              <input className={inp}
+                placeholder={SERVICE_EXAMPLES[form.service_cat] ?? "ఉదా: జనరల్ డాక్టర్, ఎలక్ట్రీషియన్…"}
                 value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+              {form.service_cat && (
+                <p className="-mt-1 text-[10px] leading-snug text-[#1e3a8a]/70">
+                  {SERVICE_EXAMPLES[form.service_cat]}
+                </p>
+              )}
+
 
               <L n="2">అనుభవం & ఆధారాలు</L>
               <input className={inp} placeholder="అనుభవం (ఉదా: 5 సంవత్సరాలు)"
