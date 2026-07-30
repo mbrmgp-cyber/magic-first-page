@@ -35,14 +35,24 @@ const SERVICE_CATS = [
   { id: "doctor", te: "డాక్టర్", color: "#dc2626" },
   { id: "lawyer", te: "లాయర్", color: "#7c3aed" },
   { id: "technician", te: "టెక్నీషియన్", color: "#2563eb" },
-  { id: "farmwork", te: "ఎలువ పని కూలి", color: "#16a34a" },
+  { id: "farmwork", te: "వ్యవసాయ పని కూలి", color: "#16a34a" },
   { id: "labour", te: "కార్మిక కూలి", color: "#f97316" },
   { id: "other", te: "ఇతర సేవలు", color: "#0f766e" },
 ];
 
-const CHARGE_BASIS = ["1 నిమిషానికి", "1 పనికి", "1 గంటకి", "1 రోజుకి", "1 వారానికి", "1 సంవత్సరానికి"];
+// ఏ వృత్తి సెలెక్ట్ చేస్తే ఆ వృత్తికి సంబంధించిన పనులు ఉదాహరణగా చూపిస్తాయి
+const SERVICE_EXAMPLES: Record<string, string> = {
+  doctor: "ఉదా: జనరల్ డాక్టర్, RMP, దంత వైద్యుడు, ఆయుర్వేద వైద్యుడు, నర్సు, ఫిజియోథెరపీ…",
+  lawyer: "ఉదా: సివిల్ లాయర్, క్రిమినల్ లాయర్, భూమి రిజిస్ట్రేషన్, డాక్యుమెంట్ రైటర్, నోటరీ…",
+  technician: "ఉదా: ఎలక్ట్రీషియన్, ప్లంబర్, మెకానిక్, AC/ఫ్రిజ్ రిపేర్, మొబైల్ రిపేర్, వెల్డింగ్, కంప్యూటర్…",
+  farmwork: "ఉదా: నాట్లు, కలుపు తీయడం, పంట కోత, ట్రాక్టర్ దుక్కి, స్ప్రేయింగ్, బోరు/మోటార్ పని…",
+  labour: "ఉదా: మేస్త్రీ, తాపీ పని, సెంట్రింగ్, పెయింటింగ్, కూలి పని, లోడింగ్/అన్‌లోడింగ్, వడ్రంగి…",
+  other: "ఉదా: టైలర్, క్షౌరశాల, వంట మనిషి, డ్రైవర్, ట్యూషన్, ఈవెంట్/డెకరేషన్, ఫోటోగ్రఫీ…",
+};
+
 const SERVICE_MODES = ["క్లినిక్ / ఆఫీసు", "హోమ్ సర్వీస్", "ఫోన్ / ఆన్‌లైన్"];
-const SERVICE_AREAS = ["ఊరిలో", "మండలంలో", "జిల్లాలో", "రాష్ట్రంలో"];
+const SERVICE_AREAS = ["మండలంలో", "MLA పరిధిలో", "జిల్లాలో", "ఎక్కడైనా"];
+
 
 type Form = {
   id?: string;
@@ -78,7 +88,7 @@ const empty: Form = {
   house_no: "", street: "", village: "", mandal: "", taluk: "",
   district: "", state: "ఆంధ్రప్రదేశ్", pincode: "", contact_phone: "",
   stock_status: "running", item_condition: "new", description: "",
-  service_cat: "", experience: "", service_mode: "", service_timing: "", service_area: "ఊరిలో",
+  service_cat: "", experience: "", service_mode: "", service_timing: "", service_area: "మండలంలో",
 };
 
 
@@ -212,7 +222,7 @@ function PostSection({ postType }: { postType: string }) {
       experience: l.experience ?? "",
       service_mode: l.service_mode ?? "",
       service_timing: l.service_timing ?? "",
-      service_area: l.service_area ?? "ఊరిలో",
+      service_area: l.service_area ?? "మండలంలో",
     });
     setOpen(true);
   };
@@ -319,8 +329,15 @@ function PostSection({ postType }: { postType: string }) {
               </p>
 
               <L n="1">చేయగల పని / నైపుణ్యం</L>
-              <input className={inp} placeholder="ఉదా: జనరల్ డాక్టర్, ఎలక్ట్రీషియన్…"
+              <input className={inp}
+                placeholder={SERVICE_EXAMPLES[form.service_cat] ?? "ఉదా: జనరల్ డాక్టర్, ఎలక్ట్రీషియన్…"}
                 value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+              {form.service_cat && (
+                <p className="-mt-1 text-[10px] leading-snug text-[#1e3a8a]/70">
+                  {SERVICE_EXAMPLES[form.service_cat]}
+                </p>
+              )}
+
 
               <L n="2">అనుభవం & ఆధారాలు</L>
               <input className={inp} placeholder="అనుభవం (ఉదా: 5 సంవత్సరాలు)"
@@ -343,16 +360,11 @@ function PostSection({ postType }: { postType: string }) {
               <L n="3">{postType === "free" ? "సర్వీస్ ఛార్జి (ఉచితం)" : "సర్వీస్ ఛార్జి (Rs.)"}</L>
               <input className={inp} type="number" placeholder="Rs." value={form.price}
                 onChange={(e) => setForm({ ...form, price: e.target.value })} />
-              <div className="grid grid-cols-3 gap-1.5">
-                {CHARGE_BASIS.map((b) => (
-                  <button key={b} onClick={() => setForm({ ...form, unit: b })}
-                    className={`rounded-lg py-2 text-[10px] font-semibold border ${
-                      form.unit === b ? "bg-[#1e3a8a] text-white border-[#1e3a8a]" : "bg-white text-[#1e3a8a] border-black/10"
-                    }`}>
-                    {b}
-                  </button>
-                ))}
-              </div>
+              <input className={inp}
+                placeholder="ఏ పద్ధతిలో ఛార్జి తీసుకుంటారు? (ఉదా: ఒక్కో పనికి, గంటకి, రోజుకి…)"
+                value={UNITS.includes(form.unit) || LAND_UNITS.includes(form.unit) ? "" : form.unit}
+                onChange={(e) => setForm({ ...form, unit: e.target.value })} />
+
 
               <L n="4">సేవా విధానం & సమయం</L>
               <div className="grid grid-cols-3 gap-1.5">
