@@ -406,6 +406,12 @@ function PostSection({ postType }: { postType: string }) {
                 <input className={inp} placeholder="మండలం" value={form.mandal}
                   onChange={(e) => setForm({ ...form, mandal: e.target.value })} />
               </div>
+              <div className="grid grid-cols-2 gap-2">
+                <input className={inp} placeholder="జిల్లా" value={form.district}
+                  onChange={(e) => setForm({ ...form, district: e.target.value })} />
+                <input className={inp} placeholder="రాష్ట్రం" value={form.state}
+                  onChange={(e) => setForm({ ...form, state: e.target.value })} />
+              </div>
               <input className={inp} inputMode="tel" placeholder="కాంటాక్ట్ ఫోన్ నెంబరు"
                 value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} />
 
