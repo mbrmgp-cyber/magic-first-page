@@ -27,8 +27,8 @@ const BUSINESS_CATS = [
   { id: "used", te: "వాడిన వస్తువులు", color: "#f97316" },
 ];
 
-const UNITS = ["కేజీలు", "వస్తువులు", "లీటర్లు"];
-const LAND_UNITS = ["సెంట్లు", "గజాలు", "అంకణాలు"];
+const UNITS = ["కేజీ", "వస్తువు", "లీటర్"];
+const LAND_UNITS = ["సెంటు", "గజం", "అంకణం"];
 const PROPERTY_TYPES = ["ఇల్లు", "ప్లాట్", "ఇంటి స్థలం", "సాగు భూమి", "ఇతర"];
 
 const SERVICE_CATS = [
