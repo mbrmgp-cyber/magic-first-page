@@ -593,8 +593,12 @@ function PostSection({ postType }: { postType: string }) {
               </button>
             ))}
           </div>
-          <input className={inp} placeholder="ఎంత? / ఇతర యూనిట్ రాయండి"
+          <input className={inp} placeholder="ఇతర యూనిట్ రాయండి"
             value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} />
+
+          <L n="4b">ఎంత స్టాక్ ఉంది?</L>
+          <input className={inp} placeholder={`ఉదా: 50 ${form.unit || ""}`}
+            value={form.stock_qty} onChange={(e) => setForm({ ...form, stock_qty: e.target.value })} />
 
           <L n="5">{isLand ? "భూమి / ల్యాండ్ లొకేషన్" : "వస్తువు దొరుకు లొకేషన్"}</L>
           <input className={inp} placeholder="లొకేషన్ లేదా Google Maps లింక్"
