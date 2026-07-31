@@ -10,7 +10,7 @@
 // perfect control. This component is the safety net for pages that still have
 // hardcoded Telugu strings.
 import { useEffect } from "react";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, transliterateText } from "@/lib/i18n";
 
 // Telugu → English phrase dictionary. Order does not matter; matching is done
 // on the *trimmed* text content of individual DOM text nodes.
@@ -576,6 +576,72 @@ const TE_EN: Record<string, string> = {
   "బహుమతులు": "Rewards",
 };
 
+// Varadhi — home categories, subtitles and option lists
+const VARADHI_TE_EN: Record<string, string> = {
+  "తాజా వస్తువులు": "Fresh Items",
+  "కొత్త వస్తువులు": "New Items",
+  "వాడిన వస్తువులు": "Used Items",
+  "ఇంటి స్థలాలు & భూములు": "Real Estate",
+  "ట్రాన్స్‌పోర్ట్": "Transport",
+  "సర్వీసులు": "Local Services",
+  "కూరగాయలు, పండ్లు, పాలు": "Vegetables, Fruits, Milk",
+  "ఎలక్ట్రానిక్స్, ఫ్యాషన్": "Electronics, Fashion",
+  "సెకండ్ హ్యాండ్": "Second Hand",
+  "ప్లాట్లు, వ్యవసాయ భూములు": "Plots, Farm Lands",
+  "బండ్లు & రవాణా": "Vehicles & Transport",
+  "టెక్నీషియన్లు & పనులు": "Technicians & Work",
+  "కూరగాయలు": "Vegetables",
+  "పండ్లు": "Fruits",
+  "ఆకుకూరలు": "Leafy Greens",
+  "పాలు & పాల ఉత్పత్తులు": "Milk & Dairy",
+  "చేపలు & మాంసం": "Fish & Meat",
+  "కోడిగుడ్లు": "Eggs",
+  "ధాన్యం & పప్పులు": "Grains & Pulses",
+  "పూలు": "Flowers",
+  "మొబైల్స్": "Mobiles",
+  "ఎలక్ట్రానిక్స్": "Electronics",
+  "గృహోపకరణాలు": "Home Appliances",
+  "ఫర్నిచర్": "Furniture",
+  "బట్టలు & ఫ్యాషన్": "Clothes & Fashion",
+  "వ్యవసాయ పరికరాలు": "Farm Equipment",
+  "బిల్డింగ్ మెటీరియల్": "Building Material",
+  "ఇతర": "Other",
+  "సెకండ్ హ్యాండ్ బండ్లు": "Second Hand Vehicles",
+  "ఇంటి స్థలాలు (ప్లాట్లు)": "House Plots",
+  "వ్యవసాయ భూములు": "Farm Lands",
+  "ఇళ్లు / అపార్ట్‌మెంట్లు": "Houses / Apartments",
+  "షాపులు / కమర్షియల్": "Shops / Commercial",
+  "అద్దెకు": "For Rent",
+  "2 వీలర్": "2 Wheeler",
+  "3 వీలర్ (ఆటో)": "3 Wheeler (Auto)",
+  "4 వీలర్": "4 Wheeler",
+  "6 వీలర్": "6 Wheeler",
+  "8+ వీలర్ లారీ": "8+ Wheeler Lorry",
+  "ట్రాక్టర్": "Tractor",
+  "హార్వెస్టర్": "Harvester",
+  "ఎలక్ట్రీషియన్": "Electrician",
+  "ప్లంబర్": "Plumber",
+  "కార్పెంటర్": "Carpenter",
+  "మేస్త్రీ / బిల్డింగ్ పని": "Mason / Building Work",
+  "పెయింటర్": "Painter",
+  "మెకానిక్": "Mechanic",
+  "ఇంటి పని": "House Work",
+  "వ్యవసాయ పని": "Farm Work",
+  "షాప్ పని": "Shop Work",
+  "ఆఫీసు పని": "Office Work",
+  "వర్గాలు": "Categories",
+  "సేవలు": "Services",
+  "మీ చుట్టూ 100 కి.మీ. అప్‌డేట్‌లు": "Updates within 100 km",
+  "మొదలుపెట్టడానికి లాగిన్ చేయండి": "Login to get started",
+};
+
+// Merge Varadhi terms without clobbering existing entries.
+for (const [k, v] of Object.entries(VARADHI_TE_EN)) {
+  if (!TE_EN[k]) TE_EN[k] = v;
+}
+
+
+
 
 const TE_ONLY: Record<string, string> = {
   "కొత్త సమావేశం / New Meeting": "కొత్త సమావేశం",
@@ -792,6 +858,17 @@ function lookupPhrase(trimmed: string, lang: string): string | undefined {
 function translateValue(value: string, lang: string): string {
   const trimmed = value.trim();
   if (!trimmed) return value;
+  // Any language other than Telugu/English: first collapse the string to a
+  // single Telugu version (dictionary + mixed-string cleanup), then convert
+  // that Telugu into the target script. This makes hi/ta/kn/ml/bn/… behave
+  // like the other two instead of staying bilingual.
+  if (lang !== "en" && lang !== "te") {
+    const teVal = translateValue(value, "te");
+    const lead = teVal.match(/^\s*/)?.[0] ?? "";
+    const tail = teVal.match(/\s*$/)?.[0] ?? "";
+    const converted = transliterateText(teVal.trim(), lang);
+    return converted ? lead + converted + tail : teVal;
+  }
   const hit = lookupPhrase(trimmed, lang);
   if (!hit) {
     const mixed = translateMixedValue(value, lang);
@@ -949,10 +1026,14 @@ export function AutoTransliterate() {
         applyTimer = window.setTimeout(() => { applying = false; }, 0);
       }
     };
-    apply(() => {
-      translateDocumentTitle(lang);
-      walk(document.body, lang);
-    });
+    // Defer the first pass so React finishes hydrating before we mutate text
+    // nodes (mutating during hydration causes a mismatch warning).
+    const initialTimer = window.setTimeout(() => {
+      apply(() => {
+        translateDocumentTitle(lang);
+        walk(document.body, lang);
+      });
+    }, 0);
 
     // Force a full repaint so off-screen content reflects the new language
     // immediately, without requiring the user to scroll. Some mobile browsers
@@ -991,6 +1072,7 @@ export function AutoTransliterate() {
     obs.observe(document.body, { childList: true, subtree: true, characterData: true });
     return () => {
       obs.disconnect();
+      window.clearTimeout(initialTimer);
       if (applyTimer) window.clearTimeout(applyTimer);
     };
   }, [lang]);
