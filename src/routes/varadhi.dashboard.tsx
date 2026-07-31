@@ -259,7 +259,7 @@ function PostSection({ postType }: { postType: string }) {
       price: l.price != null ? String(l.price) : "",
       photo: Array.isArray(l.images) ? (l.images[0] ?? "") : "",
       location_photo: Array.isArray(l.images) ? (l.images[1] ?? "") : "",
-      unit: l.unit ?? "కిలో",
+      unit: l.unit ?? "కేజీ",
       property_type: l.sub_category ?? "",
       pickup_location: l.pickup_location ?? "",
 
