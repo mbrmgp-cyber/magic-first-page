@@ -127,6 +127,7 @@ type Form = {
   pincode: string;
   contact_phone: string;
   stock_status: "running" | "closed";
+  stock_qty: string;
   item_condition: string;
   description: string;
   service_cat: string;
@@ -138,11 +139,11 @@ type Form = {
 };
 
 const empty: Form = {
-  title: "", price: "", photo: "", location_photo: "", unit: "కేజీలు", property_type: "",
+  title: "", price: "", photo: "", location_photo: "", unit: "కేజీ", property_type: "",
   pickup_location: "",
   house_no: "", street: "", village: "", mandal: "", taluk: "",
   district: "", state: "ఆంధ్రప్రదేశ్", pincode: "", contact_phone: "",
-  stock_status: "running", item_condition: "new", description: "",
+  stock_status: "running", stock_qty: "", item_condition: "new", description: "",
   service_cat: "", experience: "", service_mode: "", service_timing: "", service_area: "మండలంలో",
   blood_group: "",
 };
