@@ -228,7 +228,7 @@ function VaradhiHome() {
     <div className="mx-auto max-w-md px-4 pt-6 pb-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <img src={varadhiLogo.url} alt="Varadhi" className="h-14 w-14 rounded-2xl object-contain bg-white shadow-sm p-1" />
+        <img src={varadhiLogo.url} alt="Vaaradhi" className="h-14 w-14 rounded-2xl object-contain bg-white shadow-sm p-1" />
         <div className="min-w-0 flex-1">
           <h1 className="text-2xl font-bold tracking-tight text-[#1e3a8a]">వారధి</h1>
           <p className="text-xs text-[#1e3a8a]/70">Sell, Buy, Transport & Local Services</p>

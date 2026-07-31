@@ -316,13 +316,13 @@ const TE_EN: Record<string, string> = {
   "చిన్న లోగో": "Small Logo",
 
   // ===== VARADHI APP =====
-  "వారధి": "Varadhi",
-  "వారధి రిజిస్ట్రేషన్": "Varadhi Registration",
-  "వారధి అడ్మిన్ — రిజిస్ట్రేషన్లు": "Varadhi Admin — Registrations",
-  "వారధి అడ్మిన్ ప్యానెల్ తెరవండి": "Open Varadhi Admin Panel",
-  "వారధి హోమ్‌కి తిరిగి": "Back to Varadhi Home",
+  "వారధి": "Vaaradhi",
+  "వారధి రిజిస్ట్రేషన్": "Vaaradhi Registration",
+  "వారధి అడ్మిన్ — రిజిస్ట్రేషన్లు": "Vaaradhi Admin — Registrations",
+  "వారధి అడ్మిన్ ప్యానెల్ తెరవండి": "Open Vaaradhi Admin Panel",
+  "వారధి హోమ్‌కి తిరిగి": "Back to Vaaradhi Home",
   "వారధికి స్వాగతం — మీ వస్తువులు, సేవలు ఇక్కడ అప్‌డేట్ చేయండి.":
-    "Welcome to Varadhi — update your goods and services here.",
+    "Welcome to Vaaradhi — update your goods and services here.",
   "హోమ్": "Home",
   "హోమ్‌కు వెళ్ళండి": "Go Home",
   "వెతకండి": "Search",
@@ -549,7 +549,7 @@ const TE_EN: Record<string, string> = {
   "వేరే ఈమెయిల్": "Different Email",
   "వేరే ఈమెయిల్ ఉపయోగించండి": "Use a different email",
   "మీ ఈమెయిల్ చెక్ చేయండి": "Check your email",
-  "ఈ పేజీ Varadhi సూపర్ అడ్మిన్‌కు మాత్రమే.": "This page is only for the Varadhi super admin.",
+  "ఈ పేజీ Vaaradhi సూపర్ అడ్మిన్‌కు మాత్రమే.": "This page is only for the Vaaradhi super admin.",
   "ఈ ఫిల్టర్‌లో రిజిస్ట్రేషన్లు లేవు.": "No registrations in this filter.",
   "నోట్స్ (ఐచ్ఛికం)": "Notes (optional)",
   "పెండింగ్": "Pending",
@@ -561,8 +561,8 @@ const TE_EN: Record<string, string> = {
   "మీ ఆధార్ & వివరాలను Admin పరిశీలించి ఆమోదిస్తారు.":
     "The admin will review and approve your Aadhaar and details.",
   "వారధి యాప్‌లో మీ పేరు, ఫోటో, అడ్రస్, ఆధార్, ఫోన్ నెంబర్ మరియు వృత్తి వివరాలతో రిజిస్టర్ అవ్వండి.":
-    "Register on Varadhi with your name, photo, address, Aadhaar, phone number and occupation.",
-  "వారధి యాప్‌లో సులభంగా రిజిస్టర్ అవ్వండి.": "Register easily on the Varadhi app.",
+    "Register on Vaaradhi with your name, photo, address, Aadhaar, phone number and occupation.",
+  "వారధి యాప్‌లో సులభంగా రిజిస్టర్ అవ్వండి.": "Register easily on the Vaaradhi app.",
   "సబ్‌స్క్రిప్షన్ & రిన్యూవల్": "Subscription & Renewal",
   "సబ్‌స్క్రిప్షన్": "Subscription",
   "ఒక సంవత్సరం లోపు / గరిష్టంగా 50 పోస్టులు": "Within one year / maximum 50 posts",
@@ -576,7 +576,7 @@ const TE_EN: Record<string, string> = {
   "బహుమతులు": "Rewards",
 };
 
-// Varadhi — home categories, subtitles and option lists
+// Vaaradhi — home categories, subtitles and option lists
 const VARADHI_TE_EN: Record<string, string> = {
   "తాజా వస్తువులు": "Fresh Items",
   "కొత్త వస్తువులు": "New Items",
@@ -635,7 +635,7 @@ const VARADHI_TE_EN: Record<string, string> = {
   "మొదలుపెట్టడానికి లాగిన్ చేయండి": "Login to get started",
 };
 
-// Merge Varadhi terms without clobbering existing entries.
+// Merge Vaaradhi terms without clobbering existing entries.
 for (const [k, v] of Object.entries(VARADHI_TE_EN)) {
   if (!TE_EN[k]) TE_EN[k] = v;
 }

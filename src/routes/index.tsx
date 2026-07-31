@@ -13,13 +13,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "The MBR Platform hosts a suite of institutional applications — MBR App for society & committee administration, and Varadhi (coming soon).",
+          "The MBR Platform hosts a suite of institutional applications — MBR App for society & committee administration, and Vaaradhi (coming soon).",
       },
       { property: "og:title", content: "MBR Platform — Management of Board Resources" },
       {
         property: "og:description",
         content:
-          "A premium platform for institutional software. MBR App and Varadhi, unified under mbrplatform.com.",
+          "A premium platform for institutional software. MBR App and Vaaradhi, unified under mbrplatform.com.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -133,7 +133,7 @@ function PlatformPortal() {
             to="/varadhi"
             className="group inline-flex items-center justify-center gap-2 rounded-lg border border-[#c9a84c]/40 bg-[#0f1b3d]/40 backdrop-blur px-6 py-3.5 text-sm font-semibold text-[#f5f0e0] hover:border-[#c9a84c] hover:bg-[#1e3a5f]/60 transition-all"
           >
-            <span>Go to Varadhi App</span>
+            <span>Go to Vaaradhi App</span>
             <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
@@ -173,7 +173,7 @@ function PlatformPortal() {
             </div>
           </Link>
 
-          {/* Varadhi card */}
+          {/* Vaaradhi card */}
           <Link
             to="/varadhi"
             className="group relative rounded-2xl border border-[#c9a84c]/15 bg-gradient-to-br from-[#0f1b3d]/80 to-[#1e3a5f]/30 backdrop-blur p-8 hover:border-[#c9a84c]/50 transition-all overflow-hidden"
@@ -189,7 +189,7 @@ function PlatformPortal() {
                 </div>
               </div>
               <h3 className="mt-6 font-serif text-3xl font-semibold text-[#f5f0e0]/90">
-                Varadhi
+                Vaaradhi
               </h3>
               <p className="mt-1 text-sm text-[#f5f0e0]/50">
                 The next MBR Platform application
@@ -199,7 +199,7 @@ function PlatformPortal() {
                 Details will follow closer to launch.
               </p>
               <div className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-[#f5f0e0]/70 group-hover:text-[#c9a84c] transition-colors">
-                Preview Varadhi
+                Preview Vaaradhi
                 <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
               </div>
             </div>
@@ -252,7 +252,7 @@ function PlatformPortal() {
           <div>© {new Date().getFullYear()} MBR Platform. All rights reserved.</div>
           <div className="flex items-center gap-4">
             <Link to="/mbr" className="hover:text-[#c9a84c] transition-colors">MBR App</Link>
-            <Link to="/varadhi" className="hover:text-[#c9a84c] transition-colors">Varadhi</Link>
+            <Link to="/varadhi" className="hover:text-[#c9a84c] transition-colors">Vaaradhi</Link>
           </div>
         </div>
       </footer>
