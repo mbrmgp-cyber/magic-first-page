@@ -10,7 +10,7 @@
 // perfect control. This component is the safety net for pages that still have
 // hardcoded Telugu strings.
 import { useEffect } from "react";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, transliterateText } from "@/lib/i18n";
 
 // Telugu → English phrase dictionary. Order does not matter; matching is done
 // on the *trimmed* text content of individual DOM text nodes.
