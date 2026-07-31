@@ -574,8 +574,10 @@ const TE_EN: Record<string, string> = {
   "చరిత్ర": "History",
   "ఇంకా పాయింట్స్ లేవు": "No points yet",
   "బహుమతులు": "Rewards",
+};
 
-  // Varadhi — home categories, subtitles and option lists
+// Varadhi — home categories, subtitles and option lists
+const VARADHI_TE_EN: Record<string, string> = {
   "తాజా వస్తువులు": "Fresh Items",
   "కొత్త వస్తువులు": "New Items",
   "వాడిన వస్తువులు": "Used Items",
