@@ -432,7 +432,6 @@ const TE_EN: Record<string, string> = {
   "రాష్ట్రం": "State",
   "జిల్లా": "District",
   "మండలం": "Mandal",
-  "గ్రామం": "Village",
   "కాంటాక్ట్ ఫోన్ నెంబరు": "Contact Phone Number",
   "కాంటాక్ట్ ఫోన్ నెంబరు అవసరం": "Contact phone number required",
   "వస్తువు పేరు అవసరం": "Item name required",
