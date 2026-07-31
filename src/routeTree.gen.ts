@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VaradhiRouteImport } from './routes/varadhi'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as NewOrganizationRouteImport } from './routes/new-organization'
 import { Route as MbrRouteImport } from './routes/mbr'
@@ -66,6 +67,11 @@ import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/em
 const VaradhiRoute = VaradhiRouteImport.update({
   id: '/varadhi',
   path: '/varadhi',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoute = RegisterRouteImport.update({
@@ -355,6 +361,7 @@ export interface FileRoutesByFullPath {
   '/mbr': typeof MbrRoute
   '/new-organization': typeof NewOrganizationRoute
   '/register': typeof RegisterRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/varadhi': typeof VaradhiRouteWithChildren
   '/admin': typeof AuthenticatedAdminRoute
   '/donor/register': typeof DonorRegisterRoute
@@ -409,6 +416,7 @@ export interface FileRoutesByTo {
   '/mbr': typeof MbrRoute
   '/new-organization': typeof NewOrganizationRoute
   '/register': typeof RegisterRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/donor/register': typeof DonorRegisterRoute
   '/m/$code': typeof MCodeRoute
@@ -464,6 +472,7 @@ export interface FileRoutesById {
   '/mbr': typeof MbrRoute
   '/new-organization': typeof NewOrganizationRoute
   '/register': typeof RegisterRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/varadhi': typeof VaradhiRouteWithChildren
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/donor/register': typeof DonorRegisterRoute
@@ -520,6 +529,7 @@ export interface FileRouteTypes {
     | '/mbr'
     | '/new-organization'
     | '/register'
+    | '/sitemap.xml'
     | '/varadhi'
     | '/admin'
     | '/donor/register'
@@ -574,6 +584,7 @@ export interface FileRouteTypes {
     | '/mbr'
     | '/new-organization'
     | '/register'
+    | '/sitemap.xml'
     | '/admin'
     | '/donor/register'
     | '/m/$code'
@@ -628,6 +639,7 @@ export interface FileRouteTypes {
     | '/mbr'
     | '/new-organization'
     | '/register'
+    | '/sitemap.xml'
     | '/varadhi'
     | '/_authenticated/admin'
     | '/donor/register'
@@ -684,6 +696,7 @@ export interface RootRouteChildren {
   MbrRoute: typeof MbrRoute
   NewOrganizationRoute: typeof NewOrganizationRoute
   RegisterRoute: typeof RegisterRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   VaradhiRoute: typeof VaradhiRouteWithChildren
   DonorRegisterRoute: typeof DonorRegisterRoute
   MCodeRoute: typeof MCodeRoute
@@ -701,6 +714,13 @@ declare module '@tanstack/react-router' {
       path: '/varadhi'
       fullPath: '/varadhi'
       preLoaderRoute: typeof VaradhiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -1173,6 +1193,7 @@ const rootRouteChildren: RootRouteChildren = {
   MbrRoute: MbrRoute,
   NewOrganizationRoute: NewOrganizationRoute,
   RegisterRoute: RegisterRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   VaradhiRoute: VaradhiRouteWithChildren,
   DonorRegisterRoute: DonorRegisterRoute,
   MCodeRoute: MCodeRoute,
