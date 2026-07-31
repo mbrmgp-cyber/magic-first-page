@@ -8,7 +8,19 @@ import { Mail, ExternalLink, KeyRound, Link2 } from "lucide-react";
 import varadhiLogo from "@/assets/varadhi-logo.jpg.asset.json";
 
 export const Route = createFileRoute("/varadhi/auth")({
-  head: () => ({ meta: [{ title: "Vaaradhi — Login" }] }),
+  head: () => ({
+    meta: [
+      { title: "Vaaradhi — Login" },
+      { name: "description", content: "Sign in to Vaaradhi (వారధి) to post, browse and connect with local buyers, sellers, transport and services." },
+      { property: "og:title", content: "Vaaradhi — Login" },
+      { property: "og:description", content: "Sign in to Vaaradhi (వారధి) with a secure magic link." },
+      { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Vaaradhi" },
+      { property: "og:url", content: "https://mbrplatform.com/varadhi/auth" },
+      { name: "twitter:card", content: "summary" },
+    ],
+    links: [{ rel: "canonical", href: "https://mbrplatform.com/varadhi/auth" }],
+  }),
   component: VaradhiAuthPage,
 });
 
