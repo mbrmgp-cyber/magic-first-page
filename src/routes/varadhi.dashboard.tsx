@@ -324,6 +324,7 @@ function PostSection({ postType }: { postType: string }) {
           contact_phone: form.contact_phone.trim(),
           city: form.village.trim() || form.district.trim() || null,
           stock_status: form.stock_status,
+          stock_qty: form.stock_qty.trim() || null,
           description: form.description.trim() || null,
         } as any,
       });
