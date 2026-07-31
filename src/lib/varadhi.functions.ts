@@ -111,6 +111,7 @@ export type VaradhiListing = {
   lat: number | null;
   lng: number | null;
   stock_status: "running" | "closed";
+  stock_qty?: string | null;
   click_count: number;
   created_at: string;
   blood_group?: string | null;

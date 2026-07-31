@@ -27,8 +27,8 @@ const BUSINESS_CATS = [
   { id: "used", te: "వాడిన వస్తువులు", color: "#f97316" },
 ];
 
-const UNITS = ["కేజీలు", "వస్తువులు", "లీటర్లు"];
-const LAND_UNITS = ["సెంట్లు", "గజాలు", "అంకణాలు"];
+const UNITS = ["కేజీ", "వస్తువు", "లీటర్"];
+const LAND_UNITS = ["సెంటు", "గజం", "అంకణం"];
 const PROPERTY_TYPES = ["ఇల్లు", "ప్లాట్", "ఇంటి స్థలం", "సాగు భూమి", "ఇతర"];
 
 const SERVICE_CATS = [
@@ -127,6 +127,7 @@ type Form = {
   pincode: string;
   contact_phone: string;
   stock_status: "running" | "closed";
+  stock_qty: string;
   item_condition: string;
   description: string;
   service_cat: string;
@@ -138,11 +139,11 @@ type Form = {
 };
 
 const empty: Form = {
-  title: "", price: "", photo: "", location_photo: "", unit: "కేజీలు", property_type: "",
+  title: "", price: "", photo: "", location_photo: "", unit: "కేజీ", property_type: "",
   pickup_location: "",
   house_no: "", street: "", village: "", mandal: "", taluk: "",
   district: "", state: "ఆంధ్రప్రదేశ్", pincode: "", contact_phone: "",
-  stock_status: "running", item_condition: "new", description: "",
+  stock_status: "running", stock_qty: "", item_condition: "new", description: "",
   service_cat: "", experience: "", service_mode: "", service_timing: "", service_area: "మండలంలో",
   blood_group: "",
 };
@@ -258,7 +259,7 @@ function PostSection({ postType }: { postType: string }) {
       price: l.price != null ? String(l.price) : "",
       photo: Array.isArray(l.images) ? (l.images[0] ?? "") : "",
       location_photo: Array.isArray(l.images) ? (l.images[1] ?? "") : "",
-      unit: l.unit ?? "కిలో",
+      unit: l.unit ?? "కేజీ",
       property_type: l.sub_category ?? "",
       pickup_location: l.pickup_location ?? "",
 
@@ -272,6 +273,7 @@ function PostSection({ postType }: { postType: string }) {
       pincode: l.pincode ?? "",
       contact_phone: l.contact_phone ?? "",
       stock_status: l.stock_status ?? "running",
+      stock_qty: l.stock_qty ?? "",
       item_condition: l.category ?? l.item_condition ?? "new",
       description: l.description ?? "",
       service_cat: l.post_type !== "business" ? (l.category ?? "") : "",
@@ -322,6 +324,7 @@ function PostSection({ postType }: { postType: string }) {
           contact_phone: form.contact_phone.trim(),
           city: form.village.trim() || form.district.trim() || null,
           stock_status: form.stock_status,
+          stock_qty: form.stock_qty.trim() || null,
           description: form.description.trim() || null,
         } as any,
       });
@@ -342,7 +345,7 @@ function PostSection({ postType }: { postType: string }) {
                 setForm({
                   ...empty,
                   item_condition: c.id,
-                  unit: c.id === "realestate" ? "సెంట్లు" : "కేజీలు",
+                  unit: c.id === "realestate" ? "సెంటు" : "కేజీ",
                 });
                 setOpen(true);
               }}
@@ -590,8 +593,12 @@ function PostSection({ postType }: { postType: string }) {
               </button>
             ))}
           </div>
-          <input className={inp} placeholder="ఎంత? / ఇతర యూనిట్ రాయండి"
+          <input className={inp} placeholder="ఇతర యూనిట్ రాయండి"
             value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} />
+
+          <L n="4b">ఎంత స్టాక్ ఉంది?</L>
+          <input className={inp} placeholder={`ఉదా: 50 ${form.unit || ""}`}
+            value={form.stock_qty} onChange={(e) => setForm({ ...form, stock_qty: e.target.value })} />
 
           <L n="5">{isLand ? "భూమి / ల్యాండ్ లొకేషన్" : "వస్తువు దొరుకు లొకేషన్"}</L>
           <input className={inp} placeholder="లొకేషన్ లేదా Google Maps లింక్"

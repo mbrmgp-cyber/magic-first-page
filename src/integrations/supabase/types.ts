@@ -2272,6 +2272,7 @@ export type Database = {
           service_mode: string | null
           service_timing: string | null
           state: string | null
+          stock_qty: string | null
           stock_status: string
           street: string | null
           sub_category: string | null
@@ -2307,6 +2308,7 @@ export type Database = {
           service_mode?: string | null
           service_timing?: string | null
           state?: string | null
+          stock_qty?: string | null
           stock_status?: string
           street?: string | null
           sub_category?: string | null
@@ -2342,6 +2344,7 @@ export type Database = {
           service_mode?: string | null
           service_timing?: string | null
           state?: string | null
+          stock_qty?: string | null
           stock_status?: string
           street?: string | null
           sub_category?: string | null
