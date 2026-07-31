@@ -792,6 +792,17 @@ function lookupPhrase(trimmed: string, lang: string): string | undefined {
 function translateValue(value: string, lang: string): string {
   const trimmed = value.trim();
   if (!trimmed) return value;
+  // Any language other than Telugu/English: first collapse the string to a
+  // single Telugu version (dictionary + mixed-string cleanup), then convert
+  // that Telugu into the target script. This makes hi/ta/kn/ml/bn/… behave
+  // like the other two instead of staying bilingual.
+  if (lang !== "en" && lang !== "te") {
+    const teVal = translateValue(value, "te");
+    const lead = teVal.match(/^\s*/)?.[0] ?? "";
+    const tail = teVal.match(/\s*$/)?.[0] ?? "";
+    const converted = transliterateText(teVal.trim(), lang);
+    return converted ? lead + converted + tail : teVal;
+  }
   const hit = lookupPhrase(trimmed, lang);
   if (!hit) {
     const mixed = translateMixedValue(value, lang);
