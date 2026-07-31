@@ -345,7 +345,7 @@ function PostSection({ postType }: { postType: string }) {
                 setForm({
                   ...empty,
                   item_condition: c.id,
-                  unit: c.id === "realestate" ? "సెంట్లు" : "కేజీలు",
+                  unit: c.id === "realestate" ? "సెంటు" : "కేజీ",
                 });
                 setOpen(true);
               }}
