@@ -1026,10 +1026,14 @@ export function AutoTransliterate() {
         applyTimer = window.setTimeout(() => { applying = false; }, 0);
       }
     };
-    apply(() => {
-      translateDocumentTitle(lang);
-      walk(document.body, lang);
-    });
+    // Defer the first pass so React finishes hydrating before we mutate text
+    // nodes (mutating during hydration causes a mismatch warning).
+    const initialTimer = window.setTimeout(() => {
+      apply(() => {
+        translateDocumentTitle(lang);
+        walk(document.body, lang);
+      });
+    }, 0);
 
     // Force a full repaint so off-screen content reflects the new language
     // immediately, without requiring the user to scroll. Some mobile browsers
