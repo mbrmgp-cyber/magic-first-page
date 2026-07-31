@@ -73,18 +73,18 @@ function BoxCard({ box }: { box: Box }) {
 
   return (
     <div className="rounded-2xl bg-white p-4 shadow-sm border border-black/5">
-      <Link
-        to="/varadhi/browse/$category"
-        params={{ category: box.id }}
-        search={{ q: "" }}
-        className="block active:scale-[.98] transition"
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="block w-full text-left active:scale-[.98] transition"
       >
         <div className="h-10 w-10 rounded-xl flex items-center justify-center text-white" style={{ background: box.color }}>
           <box.Icon className="h-5 w-5" />
         </div>
         <p className="mt-2 text-sm font-semibold text-[#1e3a8a]">{box.te}</p>
         <p className="text-[10px] text-[#1e3a8a]/60">{box.sub}</p>
-      </Link>
+      </button>
+
 
       {/* Search bar */}
       <div className="mt-3 flex items-center gap-1 rounded-xl border border-black/10 bg-[#f7f8fc] px-2 py-1.5">
