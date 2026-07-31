@@ -10,10 +10,10 @@ import { VaradhiAppIcons } from "@/components/VaradhiAppIcons";
 export const Route = createFileRoute("/varadhi")({
   head: () => ({
     meta: [
-      { title: "Varadhi (వారధి) — Sell, Buy, Transport & Local Services" },
-      { name: "description", content: "Varadhi connects Buyers, Sellers, Transport Providers and Local Service Workers across Andhra Pradesh." },
-      { property: "og:title", content: "Varadhi (వారధి) — Sell, Buy, Transport & Local Services" },
-      { property: "og:description", content: "Varadhi connects Buyers, Sellers, Transport Providers and Local Service Workers across Andhra Pradesh." },
+      { title: "Vaaradhi (వారధి) — Sell, Buy, Transport & Local Services" },
+      { name: "description", content: "Vaaradhi connects Buyers, Sellers, Transport Providers and Local Service Workers across Andhra Pradesh." },
+      { property: "og:title", content: "Vaaradhi (వారధి) — Sell, Buy, Transport & Local Services" },
+      { property: "og:description", content: "Vaaradhi connects Buyers, Sellers, Transport Providers and Local Service Workers across Andhra Pradesh." },
       { property: "og:image", content: varadhiLogo.url },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -65,7 +65,7 @@ function VaradhiLayout() {
       {showDisclaimer && (
         <div className="mx-auto max-w-md px-3 pb-3">
           <div className="rounded-lg bg-black/70 text-white text-[10px] leading-tight px-3 py-1.5">
-            Varadhi is an informational listing platform. It is not responsible for any monetary transactions, product quality, or business agreements between users.
+            Vaaradhi is an informational listing platform. It is not responsible for any monetary transactions, product quality, or business agreements between users.
           </div>
         </div>
       )}

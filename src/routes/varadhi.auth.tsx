@@ -8,7 +8,7 @@ import { Mail, ExternalLink, KeyRound, Link2 } from "lucide-react";
 import varadhiLogo from "@/assets/varadhi-logo.jpg.asset.json";
 
 export const Route = createFileRoute("/varadhi/auth")({
-  head: () => ({ meta: [{ title: "Varadhi — Login" }] }),
+  head: () => ({ meta: [{ title: "Vaaradhi — Login" }] }),
   component: VaradhiAuthPage,
 });
 
@@ -95,9 +95,9 @@ function VaradhiAuthPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1e3a8a] via-[#1e40af] to-[#3b5bdb] p-6">
       <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
         <div className="text-center">
-          <img src={varadhiLogo.url} alt="Varadhi" className="mx-auto h-16 w-16 rounded-2xl object-contain bg-white p-1 shadow" />
+          <img src={varadhiLogo.url} alt="Vaaradhi" className="mx-auto h-16 w-16 rounded-2xl object-contain bg-white p-1 shadow" />
           <h1 className="mt-3 text-2xl font-bold text-[#1e3a8a]">వారధి</h1>
-          <p className="text-xs text-[#1e3a8a]/70">Varadhi Login</p>
+          <p className="text-xs text-[#1e3a8a]/70">Vaaradhi Login</p>
           <div className="mx-auto mt-2 h-1 w-16 rounded-full bg-[#f97316]" />
         </div>
 
@@ -149,7 +149,7 @@ function VaradhiAuthPage() {
                 : "లాగిన్ లింక్ పంపండి"}
             </button>
             <p className="text-center text-[11px] text-[#1e3a8a]/60">
-              Varadhi has its own login — separate from MBR App.
+              Vaaradhi has its own login — separate from MBR App.
             </p>
           </form>
         ) : mode === "otp" ? (

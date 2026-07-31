@@ -9,9 +9,9 @@ import { Upload, Check } from "lucide-react";
 export const Route = createFileRoute("/varadhi/onboard")({
   head: () => ({
     meta: [
-      { title: "Varadhi Registration — వారధి రిజిస్ట్రేషన్" },
+      { title: "Vaaradhi Registration — వారధి రిజిస్ట్రేషన్" },
       { name: "description", content: "వారధి యాప్‌లో మీ పేరు, ఫోటో, అడ్రస్, ఆధార్, ఫోన్ నెంబర్ మరియు వృత్తి వివరాలతో రిజిస్టర్ అవ్వండి." },
-      { property: "og:title", content: "Varadhi Registration — వారధి రిజిస్ట్రేషన్" },
+      { property: "og:title", content: "Vaaradhi Registration — వారధి రిజిస్ట్రేషన్" },
       { property: "og:description", content: "వారధి యాప్‌లో సులభంగా రిజిస్టర్ అవ్వండి." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

@@ -1,8 +1,8 @@
 {
   "id": "/varadhi",
-  "name": "VARADHI (వారధి)",
-  "short_name": "Varadhi",
-  "description": "Varadhi — Sell, Buy, Transport & Local Services",
+  "name": "VAARADHI (వారధి)",
+  "short_name": "Vaaradhi",
+  "description": "Vaaradhi — Sell, Buy, Transport & Local Services",
   "start_url": "/varadhi",
   "scope": "/varadhi",
   "display": "standalone",

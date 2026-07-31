@@ -15,10 +15,10 @@ export const Route = createFileRoute("/varadhi/admin")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Varadhi Admin — Registrations & Approvals" },
-      { name: "description", content: "Varadhi super admin panel to review and approve seller, buyer, transport and service registrations." },
-      { property: "og:title", content: "Varadhi Admin — Registrations & Approvals" },
-      { property: "og:description", content: "Varadhi super admin panel to review and approve registrations." },
+      { title: "Vaaradhi Admin — Registrations & Approvals" },
+      { name: "description", content: "Vaaradhi super admin panel to review and approve seller, buyer, transport and service registrations." },
+      { property: "og:title", content: "Vaaradhi Admin — Registrations & Approvals" },
+      { property: "og:description", content: "Vaaradhi super admin panel to review and approve registrations." },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -75,7 +75,7 @@ function VaradhiAdmin() {
       <div className="mx-auto max-w-md px-4 pt-10">
         <Card className="p-6 space-y-3 text-center">
           <ShieldCheck className="h-10 w-10 mx-auto text-[#1e3a8a]/50" />
-          <p className="text-sm">ఈ పేజీ Varadhi సూపర్ అడ్మిన్‌కు మాత్రమే.</p>
+          <p className="text-sm">ఈ పేజీ Vaaradhi సూపర్ అడ్మిన్‌కు మాత్రమే.</p>
           <Button variant="outline" onClick={() => navigate({ to: "/varadhi" })}>హోమ్‌కు వెళ్ళండి</Button>
         </Card>
       </div>
