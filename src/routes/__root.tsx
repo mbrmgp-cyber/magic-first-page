@@ -104,6 +104,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "google-site-verification", content: "KtwmdwYueuvCfSG7MN_9xeycXzmmCW3UIDY_J7NLXyE" },
       { title: "MBR APP" },
       { name: "description", content: "MBR APP — Member Based Registry" },
       { name: "author", content: "MBR APP" },
