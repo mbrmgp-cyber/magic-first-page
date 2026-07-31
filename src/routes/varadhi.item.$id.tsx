@@ -38,6 +38,10 @@ function ItemDetail() {
   const waLink = phone ? `https://wa.me/${phone.replace(/\D/g, "")}` : "#";
   const telLink = phone ? `tel:${phone}` : "#";
 
+  const place = [(item as any).village, (item as any).mandal, (item as any).district, (item as any).state]
+    .filter(Boolean).join(", ") || item.city || "";
+  const inStock = item.stock_status !== "closed";
+
   return (
     <div className="mx-auto max-w-md px-4 pt-4 pb-8">
       <div className="flex items-center gap-2">
@@ -45,17 +49,61 @@ function ItemDetail() {
         <h1 className="text-base font-bold text-[#1e3a8a] truncate">{item.title}</h1>
       </div>
 
-      {item.images?.[0] && (
-        <img src={item.images[0]} alt={item.title} className="mt-3 w-full aspect-video rounded-2xl object-cover" />
+      {item.images?.[0] ? (
+        <img src={item.images[0]} alt={item.title} className="mt-3 w-full aspect-square rounded-2xl object-cover bg-white" />
+      ) : (
+        <div className="mt-3 w-full aspect-square rounded-2xl bg-white flex items-center justify-center text-5xl">🛒</div>
+      )}
+      {item.images?.[1] && (
+        <img src={item.images[1]} alt="లొకేషన్" className="mt-2 w-full aspect-video rounded-2xl object-cover bg-white" />
       )}
 
-      <div className="mt-3 rounded-2xl bg-white p-4 shadow-sm">
-        <p className="text-lg font-bold text-[#16a34a]">
-          {item.price != null ? `Rs. ${item.price}${item.unit ? ` / ${item.unit}` : ""}` : "ధర సంప్రదించండి"}
+      <div className="mt-3 rounded-2xl bg-white p-4 shadow-sm space-y-2">
+        <p className="text-base font-bold text-[#1e3a8a]">{item.title}</p>
+        <p className="text-2xl font-bold text-[#16a34a]">
+          {item.price != null ? `Rs. ${item.price}` : "ధర సంప్రదించండి"}
+          {item.price != null && item.unit ? <span className="text-sm font-semibold text-[#1e3a8a]/70"> / {item.unit}</span> : null}
         </p>
-        {item.description && <p className="mt-2 text-sm text-[#1e3a8a]/80 whitespace-pre-wrap">{item.description}</p>}
-        {item.city && <p className="mt-1 text-xs text-[#1e3a8a]/60">📍 {item.city}</p>}
+
+        <div className="flex flex-wrap gap-1.5">
+          <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${inStock ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600"}`}>
+            {inStock ? "స్టాక్ ఉంది" : "స్టాక్ లేదు"}
+          </span>
+          {(item as any).stock_qty && (
+            <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-[#1e3a8a]">
+              స్టాక్: {(item as any).stock_qty}{item.unit ? ` ${item.unit}` : ""}
+            </span>
+          )}
+          {item.sub_category && (
+            <span className="rounded-full bg-orange-50 px-2.5 py-1 text-[11px] font-semibold text-[#f97316]">{item.sub_category}</span>
+          )}
+        </div>
+
+        <dl className="mt-1 divide-y divide-black/5 text-sm">
+          {place && (
+            <div className="flex justify-between gap-3 py-1.5">
+              <dt className="text-[#1e3a8a]/60">📍 ప్రాంతం</dt><dd className="text-right font-medium">{place}</dd>
+            </div>
+          )}
+          {(item as any).pickup_location && (
+            <div className="flex justify-between gap-3 py-1.5">
+              <dt className="text-[#1e3a8a]/60">దొరుకు చోటు</dt><dd className="text-right font-medium">{(item as any).pickup_location}</dd>
+            </div>
+          )}
+          {(item as any).pincode && (
+            <div className="flex justify-between gap-3 py-1.5">
+              <dt className="text-[#1e3a8a]/60">పిన్ కోడ్</dt><dd className="text-right font-medium">{(item as any).pincode}</dd>
+            </div>
+          )}
+          <div className="flex justify-between gap-3 py-1.5">
+            <dt className="text-[#1e3a8a]/60">పోస్ట్ చేసిన తేదీ</dt>
+            <dd className="text-right font-medium">{new Date(item.created_at).toLocaleDateString("te-IN")}</dd>
+          </div>
+        </dl>
+
+        {item.description && <p className="pt-1 text-sm text-[#1e3a8a]/80 whitespace-pre-wrap">{item.description}</p>}
       </div>
+
 
       {seller && (
         <div className="mt-3 rounded-2xl bg-white p-4 shadow-sm">
