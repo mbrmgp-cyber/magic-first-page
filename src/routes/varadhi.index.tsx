@@ -122,6 +122,14 @@ function BoxCard({ box }: { box: Box }) {
               {o}
             </button>
           ))}
+          <Link
+            to="/varadhi/browse/$category"
+            params={{ category: box.id }}
+            search={{ q: "" }}
+            className="block w-full px-2 py-1.5 text-left text-[11px] font-semibold text-[#f97316] border-t border-black/5"
+          >
+            అన్నీ చూడండి →
+          </Link>
         </div>
       )}
     </div>
