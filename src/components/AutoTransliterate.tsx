@@ -633,6 +633,12 @@ const TE_EN: Record<string, string> = {
   "మొదలుపెట్టడానికి లాగిన్ చేయండి": "Login to get started",
 };
 
+// Merge Varadhi terms without clobbering existing entries.
+for (const [k, v] of Object.entries(VARADHI_TE_EN)) {
+  if (!TE_EN[k]) TE_EN[k] = v;
+}
+
+
 
 
 const TE_ONLY: Record<string, string> = {
