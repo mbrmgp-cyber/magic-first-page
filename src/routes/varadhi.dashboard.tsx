@@ -273,6 +273,7 @@ function PostSection({ postType }: { postType: string }) {
       pincode: l.pincode ?? "",
       contact_phone: l.contact_phone ?? "",
       stock_status: l.stock_status ?? "running",
+      stock_qty: l.stock_qty ?? "",
       item_condition: l.category ?? l.item_condition ?? "new",
       description: l.description ?? "",
       service_cat: l.post_type !== "business" ? (l.category ?? "") : "",
