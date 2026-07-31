@@ -1072,6 +1072,7 @@ export function AutoTransliterate() {
     obs.observe(document.body, { childList: true, subtree: true, characterData: true });
     return () => {
       obs.disconnect();
+      window.clearTimeout(initialTimer);
       if (applyTimer) window.clearTimeout(applyTimer);
     };
   }, [lang]);
