@@ -14,8 +14,11 @@ export const Route = createFileRoute("/varadhi/onboard")({
       { property: "og:title", content: "Vaaradhi Registration — వారధి రిజిస్ట్రేషన్" },
       { property: "og:description", content: "వారధి యాప్‌లో సులభంగా రిజిస్టర్ అవ్వండి." },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Vaaradhi" },
+      { property: "og:url", content: "https://mbrplatform.com/varadhi/onboard" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "https://mbrplatform.com/varadhi/onboard" }],
   }),
   component: OnboardPage,
 });
