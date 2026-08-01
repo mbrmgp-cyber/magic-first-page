@@ -57,10 +57,13 @@ const SERVICES: Box[] = [
   },
 ];
 
-function BoxCard({ box }: { box: Box }) {
+function BoxCard({ box, isCategory }: { box: Box; isCategory: boolean }) {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const navigate = useNavigate();
+  const fetchListings = useServerFn(listListings);
+  const [rows, setRows] = useState<VaradhiListing[] | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const go = (term: string) =>
     navigate({
@@ -69,7 +72,23 @@ function BoxCard({ box }: { box: Box }) {
       search: { q: term.trim() },
     });
 
-  const filtered = box.options.filter((o) => o.toLowerCase().includes(q.trim().toLowerCase()));
+  useEffect(() => {
+    if (!open || !isCategory || rows !== null) return;
+    setLoading(true);
+    fetchListings({ data: { category: box.id } })
+      .then((r) => setRows(r.listings ?? []))
+      .catch(() => setRows([]))
+      .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, isCategory]);
+
+  const term = q.trim().toLowerCase();
+  const filteredOptions = box.options.filter((o) => o.toLowerCase().includes(term));
+  const filteredRows = (rows ?? []).filter((l) =>
+    !term ||
+    l.title?.toLowerCase().includes(term) ||
+    (l.sub_category ?? "").toLowerCase().includes(term),
+  );
 
   return (
     <div className="rounded-2xl bg-white p-4 shadow-sm border border-black/5">
@@ -107,12 +126,62 @@ function BoxCard({ box }: { box: Box }) {
         </button>
       </div>
 
-      {open && (
+      {open && isCategory && (
+        <div className="mt-2 rounded-xl border border-black/10 bg-white">
+          <p className="px-2 pt-2 text-[10px] font-semibold text-[#1e3a8a]/70">కొత్తగా అప్‌డేట్ చేసినవి</p>
+          <div className="mt-1 max-h-72 overflow-y-auto">
+            {loading && <p className="px-2 py-2 text-[10px] text-[#1e3a8a]/50">లోడ్ అవుతోంది…</p>}
+            {!loading && filteredRows.length === 0 && (
+              <p className="px-2 py-2 text-[10px] text-[#1e3a8a]/50">ఏమీ లేదు</p>
+            )}
+            {filteredRows.slice(0, 20).map((l) => (
+              <Link
+                key={l.id}
+                to="/varadhi/item/$id"
+                params={{ id: l.id }}
+                className="flex gap-2 border-b border-black/5 px-2 py-2 last:border-0 active:bg-[#f2f4fb]"
+              >
+                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-[#f7f7fb] flex items-center justify-center">
+                  {l.images?.[0]
+                    ? <img src={l.images[0]} alt={l.title} className="h-full w-full object-cover" />
+                    : <span className="text-[9px] text-[#1e3a8a]/40">ఫోటో</span>}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[11px] font-semibold text-[#1e3a8a]">
+                    {l.title}{l.sub_category ? ` (${l.sub_category})` : ""}
+                  </p>
+                  <p className="text-[10px] font-bold text-[#16a34a]">
+                    {l.price != null ? `${l.unit ? `${l.unit} / ` : ""}Rs. ${l.price}` : "ధర సంప్రదించండి"}
+                  </p>
+                  <p className="text-[10px] text-[#1e3a8a]/70">
+                    {l.stock_status === "closed"
+                      ? "స్టాక్ అయిపోయింది"
+                      : `స్టాక్: ${l.stock_qty ? `${l.stock_qty}${l.unit ? ` ${l.unit}` : ""}` : "ఉంది"}`}
+                  </p>
+                  <p className="truncate text-[10px] text-[#1e3a8a]/60">
+                    📍 {[l.village, l.mandal, l.district].filter(Boolean).join(", ") || l.city || "—"}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+          <Link
+            to="/varadhi/browse/$category"
+            params={{ category: box.id }}
+            search={{ q: "" }}
+            className="block w-full border-t border-black/5 px-2 py-1.5 text-left text-[11px] font-semibold text-[#f97316]"
+          >
+            అన్నీ చూడండి →
+          </Link>
+        </div>
+      )}
+
+      {open && !isCategory && (
         <div className="mt-2 max-h-40 overflow-y-auto rounded-xl border border-black/10 bg-white">
-          {filtered.length === 0 && (
+          {filteredOptions.length === 0 && (
             <p className="px-2 py-2 text-[10px] text-[#1e3a8a]/50">ఏమీ లేదు</p>
           )}
-          {filtered.map((o) => (
+          {filteredOptions.map((o) => (
             <button
               key={o}
               type="button"
@@ -135,6 +204,7 @@ function BoxCard({ box }: { box: Box }) {
     </div>
   );
 }
+
 
 function distanceKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
   const R = 6371;
@@ -264,13 +334,13 @@ function VaradhiHome() {
       {/* Categories */}
       <h2 className="mt-6 text-sm font-semibold text-[#1e3a8a]/80">వర్గాలు — Categories</h2>
       <div className="mt-3 grid grid-cols-2 gap-3">
-        {CATEGORIES.map((c) => <BoxCard key={c.id} box={c} />)}
+        {CATEGORIES.map((c) => <BoxCard key={c.id} box={c} isCategory />)}
       </div>
 
       {/* Services */}
       <h2 className="mt-6 text-sm font-semibold text-[#1e3a8a]/80">సర్వీసులు — Services</h2>
       <div className="mt-3 grid grid-cols-2 gap-3">
-        {SERVICES.map((s) => <BoxCard key={s.id} box={s} />)}
+        {SERVICES.map((s) => <BoxCard key={s.id} box={s} isCategory={false} />)}
       </div>
 
 
