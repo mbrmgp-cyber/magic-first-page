@@ -334,13 +334,13 @@ function VaradhiHome() {
       {/* Categories */}
       <h2 className="mt-6 text-sm font-semibold text-[#1e3a8a]/80">వర్గాలు — Categories</h2>
       <div className="mt-3 grid grid-cols-2 gap-3">
-        {CATEGORIES.map((c) => <BoxCard key={c.id} box={c} />)}
+        {CATEGORIES.map((c) => <BoxCard key={c.id} box={c} isCategory />)}
       </div>
 
       {/* Services */}
       <h2 className="mt-6 text-sm font-semibold text-[#1e3a8a]/80">సర్వీసులు — Services</h2>
       <div className="mt-3 grid grid-cols-2 gap-3">
-        {SERVICES.map((s) => <BoxCard key={s.id} box={s} />)}
+        {SERVICES.map((s) => <BoxCard key={s.id} box={s} isCategory={false} />)}
       </div>
 
 
