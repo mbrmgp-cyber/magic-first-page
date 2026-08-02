@@ -7,7 +7,8 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   getMyVaradhiProfile, listListings,
   upsertListing, toggleListingStock, deleteListing,
-  type VaradhiListing,
+  listProviders, upsertProvider, toggleProviderAvailability,
+  type VaradhiListing, type VaradhiProvider,
 } from "@/lib/varadhi.functions";
 import { toast } from "sonner";
 import { Plus, Trash2, Camera, Pencil, Save } from "lucide-react";
@@ -20,7 +21,19 @@ const POST_TYPES = [
   { id: "business", te: "వ్యాపారం" },
   { id: "service", te: "సేవలు" },
   { id: "free", te: "ఉచిత సేవలు" },
+  { id: "transport", te: "ట్రాన్స్‌పోర్ట్" },
 ];
+
+const TRANSPORT_TYPES = [
+  { id: "auto", te: "ఆటో", color: "#0ea5e9" },
+  { id: "tractor", te: "ట్రాక్టర్", color: "#16a34a" },
+  { id: "lorry", te: "లారీ / DCM", color: "#f97316" },
+  { id: "car", te: "ట్యాక్సీ / కారు", color: "#7c3aed" },
+  { id: "bike", te: "బైక్ డెలివరీ", color: "#dc2626" },
+  { id: "jcb", te: "JCB / ప్రొక్లెయిన్", color: "#0f766e" },
+];
+
+const TRANSPORT_AREAS = ["మండలంలో", "జిల్లాలో", "రాష్ట్రంలో", "ఎక్కడైనా"];
 
 const BUSINESS_CATS = [
   { id: "realestate", te: "ప్లాట్లు & భూములు", color: "#7c3aed" },
@@ -183,10 +196,10 @@ function UpdateBoard() {
       </div>
 
       {/* Post type */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-4 gap-1.5">
         {POST_TYPES.map((p) => (
           <button key={p.id} onClick={() => setPostType(p.id)}
-            className={`rounded-xl py-2 text-xs font-semibold border ${
+            className={`rounded-xl py-2 text-[11px] font-semibold border leading-tight ${
               postType === p.id ? "bg-[#1e3a8a] text-white border-[#1e3a8a]" : "bg-white text-[#1e3a8a] border-black/10"
             }`}>
             {p.te}
@@ -194,7 +207,7 @@ function UpdateBoard() {
         ))}
       </div>
 
-      <PostSection postType={postType} />
+      {postType === "transport" ? <TransportSection /> : <PostSection postType={postType} />}
 
       <Link to="/varadhi/subscription"
         className="block text-center rounded-xl bg-[#1e3a8a] py-3 text-white font-semibold shadow">
@@ -712,3 +725,163 @@ function L({ n, children }: { n: string; children: React.ReactNode }) {
 }
 
 const inp = "w-full rounded-lg border border-[#1e3a8a]/15 bg-white px-3 py-2 text-sm outline-none focus:border-[#1e3a8a]";
+
+type TForm = {
+  id?: string;
+  sub_type: string;
+  title: string;
+  vehicle_details: string;
+  service_areas: string;
+  city: string;
+  description: string;
+};
+
+const emptyT: TForm = {
+  sub_type: "auto", title: "", vehicle_details: "", service_areas: "మండలంలో", city: "", description: "",
+};
+
+function TransportSection() {
+  const fetchMine = useServerFn(listProviders);
+  const upsert = useServerFn(upsertProvider);
+  const toggle = useServerFn(toggleProviderAvailability);
+  const [items, setItems] = useState<VaradhiProvider[]>([]);
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState<TForm>(emptyT);
+  const [saving, setSaving] = useState(false);
+
+  const load = async () => {
+    const r = await fetchMine({ data: { mine: true, provider_type: "transport" } });
+    setItems(r.providers);
+  };
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, []);
+
+  const edit = (p: VaradhiProvider) => {
+    setForm({
+      id: p.id,
+      sub_type: p.sub_type ?? "auto",
+      title: p.title ?? "",
+      vehicle_details: p.vehicle_details ?? "",
+      service_areas: p.service_areas ?? "మండలంలో",
+      city: p.city ?? "",
+      description: p.description ?? "",
+    });
+    setOpen(true);
+  };
+
+  const save = async () => {
+    if (!form.title.trim()) return toast.error("వాహనం / సర్వీస్ పేరు అవసరం");
+    if (!form.vehicle_details.trim()) return toast.error("వాహనం వివరాలు అవసరం");
+    setSaving(true);
+    try {
+      await upsert({
+        data: {
+          ...(form.id ? { id: form.id } : {}),
+          provider_type: "transport",
+          sub_type: form.sub_type,
+          title: form.title.trim(),
+          vehicle_details: form.vehicle_details.trim(),
+          service_areas: form.service_areas || null,
+          city: form.city.trim() || null,
+          description: form.description.trim() || null,
+        } as any,
+      });
+      toast.success("సేవ్ అయింది");
+      setOpen(false); setForm(emptyT); load();
+    } catch (e: any) { toast.error(e.message); }
+    finally { setSaving(false); }
+  };
+
+  return (
+    <section className="rounded-2xl bg-white p-4 shadow-sm">
+      <div className="grid grid-cols-2 gap-2">
+        {TRANSPORT_TYPES.map((t) => (
+          <button key={t.id}
+            onClick={() => { setForm({ ...emptyT, sub_type: t.id }); setOpen(true); }}
+            style={{ background: t.color }}
+            className="rounded-xl py-2.5 text-[11px] font-semibold text-white shadow-sm flex items-center justify-center gap-1 active:scale-[.98]">
+            <Plus className="h-3.5 w-3.5" /> {t.te}
+          </button>
+        ))}
+      </div>
+
+      {open && (
+        <div className="mt-3 space-y-2 p-3 rounded-xl bg-[#f7f7fb]">
+          <p className="text-[11px] font-semibold text-white inline-block rounded-full px-3 py-1"
+            style={{ background: TRANSPORT_TYPES.find((t) => t.id === form.sub_type)?.color ?? "#0ea5e9" }}>
+            {TRANSPORT_TYPES.find((t) => t.id === form.sub_type)?.te ?? "ట్రాన్స్‌పోర్ట్"}
+          </p>
+
+          <L n="1">వాహన రకం</L>
+          <div className="grid grid-cols-3 gap-1.5">
+            {TRANSPORT_TYPES.map((t) => (
+              <button key={t.id} onClick={() => setForm({ ...form, sub_type: t.id })}
+                className={`rounded-lg py-2 text-[10px] font-semibold border leading-tight ${
+                  form.sub_type === t.id ? "bg-[#0ea5e9] text-white border-[#0ea5e9]" : "bg-white text-[#1e3a8a] border-black/10"
+                }`}>
+                {t.te}
+              </button>
+            ))}
+          </div>
+
+          <L n="2">సర్వీస్ పేరు</L>
+          <input className={inp} placeholder="ఉదా: శ్రీనివాస ట్రాన్స్‌పోర్ట్"
+            value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+
+          <L n="3">వాహనం వివరాలు</L>
+          <input className={inp} placeholder="ఉదా: టాటా ఏస్, 1 టన్ను, AP07 XX 1234"
+            value={form.vehicle_details} onChange={(e) => setForm({ ...form, vehicle_details: e.target.value })} />
+
+          <L n="4">ఊరు / ప్రాంతం</L>
+          <input className={inp} placeholder="గ్రామం / పట్టణం"
+            value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
+
+          <L n="5">సర్వీస్ పరిధి</L>
+          <div className="grid grid-cols-4 gap-1.5">
+            {TRANSPORT_AREAS.map((a) => (
+              <button key={a} onClick={() => setForm({ ...form, service_areas: a })}
+                className={`rounded-lg py-2 text-[10px] font-semibold border ${
+                  form.service_areas === a ? "bg-[#7c3aed] text-white border-[#7c3aed]" : "bg-white text-[#1e3a8a] border-black/10"
+                }`}>
+                {a}
+              </button>
+            ))}
+          </div>
+
+          <textarea className={inp} placeholder="వివరణ / ఛార్జీలు (ఐచ్ఛికం)"
+            value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+
+          <button onClick={save} disabled={saving}
+            className="w-full rounded-xl bg-[#1e3a8a] py-2.5 text-white font-semibold flex items-center justify-center gap-1 disabled:opacity-60">
+            <Save className="h-4 w-4" /> {saving ? "సేవ్ అవుతోంది…" : "సేవ్"}
+          </button>
+        </div>
+      )}
+
+      <div className="mt-4 space-y-2">
+        <h3 className="text-xs font-bold text-[#1e3a8a]">నా ట్రాన్స్‌పోర్ట్ పోస్టులు</h3>
+        {items.length === 0 && <p className="text-xs text-center text-[#1e3a8a]/50 py-4">ఏ పోస్టు లేదు</p>}
+        {items.map((p) => (
+          <div key={p.id} className="rounded-xl border border-black/5 p-2.5 flex items-center justify-between">
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold truncate">{p.title}</p>
+              <p className="text-[11px] text-[#1e3a8a]/60 truncate">
+                {TRANSPORT_TYPES.find((t) => t.id === p.sub_type)?.te ?? p.sub_type}
+                {p.city ? ` · ${p.city}` : ""} · 👁 {p.click_count}
+              </p>
+            </div>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => toggle({ data: { id: p.id, status: p.availability_status === "online" ? "offline" : "online" } }).then(load)}
+                className={`text-[10px] px-2 py-1 rounded-full font-bold ${
+                  p.availability_status === "online" ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600"
+                }`}>
+                {p.availability_status === "online" ? "అందుబాటులో" : "ఖాళీ లేదు"}
+              </button>
+              <button onClick={() => edit(p)} className="p-1.5 text-[#1e3a8a]"><Pencil className="h-4 w-4" /></button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
