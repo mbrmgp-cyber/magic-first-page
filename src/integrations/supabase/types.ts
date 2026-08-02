@@ -2464,6 +2464,7 @@ export type Database = {
           lat: number | null
           lng: number | null
           photo_url: string | null
+          price_per_km: number | null
           provider_type: string
           rating_avg: number
           service_areas: string | null
@@ -2485,6 +2486,7 @@ export type Database = {
           lat?: number | null
           lng?: number | null
           photo_url?: string | null
+          price_per_km?: number | null
           provider_type: string
           rating_avg?: number
           service_areas?: string | null
@@ -2506,6 +2508,7 @@ export type Database = {
           lat?: number | null
           lng?: number | null
           photo_url?: string | null
+          price_per_km?: number | null
           provider_type?: string
           rating_avg?: number
           service_areas?: string | null

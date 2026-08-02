@@ -1,0 +1,1 @@
+ALTER TABLE public.varadhi_providers ADD COLUMN IF NOT EXISTS price_per_km numeric;

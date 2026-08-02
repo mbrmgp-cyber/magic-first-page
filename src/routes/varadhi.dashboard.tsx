@@ -736,12 +736,14 @@ type TForm = {
   description: string;
   contact_phone: string;
   photo_url: string;
+  price_per_km: string;
 };
 
 const emptyT: TForm = {
   sub_type: "auto", title: "", vehicle_details: "", service_areas: "మండలంలో", city: "", description: "",
-  contact_phone: "", photo_url: "",
+  contact_phone: "", photo_url: "", price_per_km: "",
 };
+
 
 function TransportSection() {
   const fetchMine = useServerFn(listProviders);
@@ -769,6 +771,8 @@ function TransportSection() {
       description: p.description ?? "",
       contact_phone: (p as any).contact_phone ?? "",
       photo_url: (p as any).photo_url ?? "",
+      price_per_km: (p as any).price_per_km != null ? String((p as any).price_per_km) : "",
+
     });
     setOpen(true);
   };
@@ -804,6 +808,8 @@ function TransportSection() {
           description: form.description.trim() || null,
           contact_phone: form.contact_phone.replace(/\D/g, "").slice(-10),
           photo_url: form.photo_url || null,
+          price_per_km: form.price_per_km.trim() ? Number(form.price_per_km) : null,
+
         } as any,
       });
       toast.success("సేవ్ అయింది");
@@ -846,6 +852,12 @@ function TransportSection() {
 
           <input className={inp} placeholder="వాహనం వివరాలు (ఉదా: టాటా ఏస్, 1 టన్ను, AP07 XX 1234)"
             value={form.vehicle_details} onChange={(e) => setForm({ ...form, vehicle_details: e.target.value })} />
+
+          <input className={inp} inputMode="decimal" placeholder="ధర — కిలోమీటరుకు (Rs. / కి.మీ.)"
+            value={form.price_per_km}
+            onChange={(e) => setForm({ ...form, price_per_km: e.target.value.replace(/[^\d.]/g, "") })} />
+
+
 
           <div className="grid grid-cols-2 gap-2">
             <input className={inp} inputMode="numeric" maxLength={10} placeholder="ఫోన్ / వాట్సాప్ నంబర్"

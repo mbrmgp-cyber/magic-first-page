@@ -139,7 +139,10 @@ export type VaradhiProvider = {
   subscription_expires_at: string | null;
   contact_phone?: string | null;
   photo_url?: string | null;
+  price_per_km?: number | string | null;
+  location_full?: string | null;
 };
+
 
 // -------- Profile
 export const getMyVaradhiProfile = createServerFn({ method: "GET" })
@@ -252,8 +255,28 @@ export const listProviders = createServerFn({ method: "GET" })
     if (data.sub_type) q = q.eq("sub_type", data.sub_type);
     const { data: rows, error } = await q.limit(200);
     if (error) throw new Error(error.message);
-    return { providers: (rows ?? []) as VaradhiProvider[] };
+    const list = (rows ?? []) as VaradhiProvider[];
+    const ids = [...new Set(list.map((p) => p.user_id))];
+    let byUser = new Map<string, any>();
+    if (ids.length) {
+      const { data: profs } = await context.supabase
+        .from("varadhi_profiles")
+        .select("user_id, village, mandal, district, state, pincode")
+        .in("user_id", ids);
+      byUser = new Map((profs ?? []).map((p: any) => [p.user_id, p]));
+    }
+    return {
+      providers: list.map((p) => {
+        const pr = byUser.get(p.user_id);
+        const parts = [pr?.village || p.city, pr?.mandal, pr?.district, pr?.state].filter(Boolean);
+        return {
+          ...p,
+          location_full: parts.join(", ") + (pr?.pincode ? ` - ${pr.pincode}` : ""),
+        };
+      }) as VaradhiProvider[],
+    };
   });
+
 
 export const upsertProvider = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
