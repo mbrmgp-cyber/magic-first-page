@@ -195,10 +195,10 @@ function UpdateBoard() {
       </div>
 
       {/* Post type */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-4 gap-1.5">
         {POST_TYPES.map((p) => (
           <button key={p.id} onClick={() => setPostType(p.id)}
-            className={`rounded-xl py-2 text-xs font-semibold border ${
+            className={`rounded-xl py-2 text-[11px] font-semibold border leading-tight ${
               postType === p.id ? "bg-[#1e3a8a] text-white border-[#1e3a8a]" : "bg-white text-[#1e3a8a] border-black/10"
             }`}>
             {p.te}
@@ -206,7 +206,7 @@ function UpdateBoard() {
         ))}
       </div>
 
-      <PostSection postType={postType} />
+      {postType === "transport" ? <TransportSection /> : <PostSection postType={postType} />}
 
       <Link to="/varadhi/subscription"
         className="block text-center rounded-xl bg-[#1e3a8a] py-3 text-white font-semibold shadow">
