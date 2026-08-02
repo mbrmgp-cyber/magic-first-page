@@ -342,14 +342,31 @@ function VaradhiHome() {
       {/* Categories */}
       <h2 className="mt-6 text-sm font-semibold text-[#1e3a8a]/80">వర్గాలు — Categories</h2>
       <div className="mt-3 grid grid-cols-2 gap-3">
-        {CATEGORIES.map((c) => <BoxCard key={c.id} box={c} isCategory />)}
+        <GroupCard
+          te="వస్తువులు"
+          sub="తాజా, కొత్త, వాడిన"
+          color="#1e3a8a"
+          Icon={Boxes}
+          boxes={ITEM_BOXES}
+          isCategory
+        />
+        <BoxCard box={REAL_ESTATE} isCategory />
       </div>
 
       {/* Services */}
       <h2 className="mt-6 text-sm font-semibold text-[#1e3a8a]/80">సర్వీసులు — Services</h2>
       <div className="mt-3 grid grid-cols-2 gap-3">
-        {SERVICES.map((s) => <BoxCard key={s.id} box={s} isCategory={false} />)}
+        <BoxCard box={TRANSPORT} isCategory={false} />
+        <GroupCard
+          te="సర్వీసులు"
+          sub="పే సర్వీస్, ఫ్రీ సర్వీస్"
+          color="#dc2626"
+          Icon={Wrench}
+          boxes={SERVICE_BOXES}
+          isCategory={false}
+        />
       </div>
+
 
 
       <p className="mt-8 text-center text-[10px] text-[#1e3a8a]/50">
