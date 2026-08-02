@@ -1,4 +1,6 @@
 import { useListingImage } from "@/lib/varadhi-image";
+import { formatPrice } from "@/lib/varadhi-format";
+
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -268,7 +270,7 @@ function BrowsePage() {
                   )}
                   <div className="mt-0.5 flex items-center gap-2">
                     <p className="text-[13px] font-bold text-[#16a34a]">
-                      {l.price != null ? `Rs. ${l.price}${l.unit ? ` / ${l.unit}` : ""}` : "ధర సంప్రదించండి"}
+                      {formatPrice(l.price, l.unit)}
                     </p>
                     {l.stock_status === "closed" && (
                       <span className="rounded-full bg-gray-200 px-1.5 py-0.5 text-[9px] font-semibold text-gray-600">స్టాక్ లేదు</span>
