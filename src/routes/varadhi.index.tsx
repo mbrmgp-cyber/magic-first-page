@@ -1,5 +1,5 @@
 import { useListingImage } from "@/lib/varadhi-image";
-import { formatPrice } from "@/lib/varadhi-format";
+import { formatAmount } from "@/lib/varadhi-format";
 
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
@@ -124,7 +124,8 @@ function ListingCard({ l, note }: { l: VaradhiListing; note?: string }) {
   const [failed, setFailed] = useState(false);
   const src = useListingImage(l.images?.[0]);
   const showImg = !!src && !failed;
-  const priceText = formatPrice(l.price, l.unit);
+  const amount = formatAmount(l.price);
+  const unit = l.unit === "కేజీలు" ? "కేజీ" : l.unit;
 
   const stockQty = (l as unknown as { stock_qty?: number | string | null }).stock_qty;
   const inStock = l.stock_status !== "closed";
@@ -154,7 +155,9 @@ function ListingCard({ l, note }: { l: VaradhiListing; note?: string }) {
             {new Date(l.created_at).toLocaleDateString("te-IN", { day: "2-digit", month: "short" })}
           </span>
         </div>
-        <p className="text-[11px] font-bold text-[#16a34a]">{priceText}</p>
+        <p className="text-[11px] font-extrabold text-[#16a34a]">
+          రేటు: {amount ? `Rs. ${amount}${unit ? ` / ${unit}` : ""}` : "ధర సంప్రదించండి"}
+        </p>
         <div className="mt-0.5 flex flex-wrap items-center gap-1">
           <span
             className={`rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${
@@ -163,7 +166,7 @@ function ListingCard({ l, note }: { l: VaradhiListing; note?: string }) {
           >
             {inStock
               ? stockQty
-                ? `స్టాక్: ${stockQty}${l.unit ? ` ${l.unit}` : ""}`
+                ? `స్టాక్: ${stockQty}${unit ? ` ${unit}` : ""}`
                 : "స్టాక్ ఉంది"
               : "స్టాక్ లేదు"}
           </span>
