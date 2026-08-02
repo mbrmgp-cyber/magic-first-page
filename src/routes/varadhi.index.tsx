@@ -21,7 +21,7 @@ type Box = {
   options: string[];
 };
 
-const CATEGORIES: Box[] = [
+const ITEM_BOXES: Box[] = [
   {
     id: "fresh", te: "తాజా వస్తువులు", en: "Fresh Items", color: "#16a34a", Icon: Apple,
     sub: "కూరగాయలు, పండ్లు, పాలు",
@@ -37,25 +37,33 @@ const CATEGORIES: Box[] = [
     sub: "సెకండ్ హ్యాండ్",
     options: ["సెకండ్ హ్యాండ్ బండ్లు", "మొబైల్స్", "ఫర్నిచర్", "ఎలక్ట్రానిక్స్", "వ్యవసాయ పరికరాలు", "ఇతర"],
   },
-  {
-    id: "realestate", te: "ఇంటి స్థలాలు & భూములు", en: "Real Estate", color: "#7c3aed", Icon: MapPin,
-    sub: "ప్లాట్లు, వ్యవసాయ భూములు",
-    options: ["ఇంటి స్థలాలు (ప్లాట్లు)", "వ్యవసాయ భూములు", "ఇళ్లు / అపార్ట్‌మెంట్లు", "షాపులు / కమర్షియల్", "అద్దెకు"],
-  },
 ];
 
-const SERVICES: Box[] = [
+const REAL_ESTATE: Box = {
+  id: "realestate", te: "ఇంటి స్థలాలు & భూములు", en: "Real Estate", color: "#7c3aed", Icon: MapPin,
+  sub: "ప్లాట్లు, వ్యవసాయ భూములు",
+  options: ["ఇంటి స్థలాలు (ప్లాట్లు)", "వ్యవసాయ భూములు", "ఇళ్లు / అపార్ట్‌మెంట్లు", "షాపులు / కమర్షియల్", "అద్దెకు"],
+};
+
+const TRANSPORT: Box = {
+  id: "transport", te: "ట్రాన్స్‌పోర్ట్", en: "Transport", color: "#0ea5e9", Icon: Truck,
+  sub: "బండ్లు & రవాణా",
+  options: ["2 వీలర్", "3 వీలర్ (ఆటో)", "4 వీలర్", "6 వీలర్", "8+ వీలర్ లారీ", "ట్రాక్టర్", "హార్వెస్టర్", "ఇతర"],
+};
+
+const SERVICE_BOXES: Box[] = [
   {
-    id: "transport", te: "ట్రాన్స్‌పోర్ట్", en: "Transport", color: "#0ea5e9", Icon: Truck,
-    sub: "బండ్లు & రవాణా",
-    options: ["2 వీలర్", "3 వీలర్ (ఆటో)", "4 వీలర్", "6 వీలర్", "8+ వీలర్ లారీ", "ట్రాక్టర్", "హార్వెస్టర్", "ఇతర"],
-  },
-  {
-    id: "services", te: "సర్వీసులు", en: "Local Services", color: "#dc2626", Icon: Wrench,
+    id: "services", te: "పే సర్వీస్", en: "Paid Services", color: "#dc2626", Icon: Wrench,
     sub: "టెక్నీషియన్లు & పనులు",
     options: ["ఎలక్ట్రీషియన్", "ప్లంబర్", "కార్పెంటర్", "మేస్త్రీ / బిల్డింగ్ పని", "పెయింటర్", "మెకానిక్", "ఇంటి పని", "వ్యవసాయ పని", "షాప్ పని", "ఆఫీసు పని", "ఇతర"],
   },
+  {
+    id: "freeservices", te: "ఫ్రీ సర్వీస్", en: "Free Services", color: "#0f9d58", Icon: HeartHandshake,
+    sub: "ఉచిత సేవలు",
+    options: ["రక్తదాత", "ఉచిత వైద్య సహాయం", "ఉచిత విద్య / ట్యూషన్", "అంబులెన్స్ సహాయం", "ఆపద సహాయం", "ఇతర"],
+  },
 ];
+
 
 function BoxCard({ box, isCategory }: { box: Box; isCategory: boolean }) {
   const [open, setOpen] = useState(false);
