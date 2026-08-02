@@ -734,10 +734,13 @@ type TForm = {
   service_areas: string;
   city: string;
   description: string;
+  contact_phone: string;
+  photo_url: string;
 };
 
 const emptyT: TForm = {
   sub_type: "auto", title: "", vehicle_details: "", service_areas: "మండలంలో", city: "", description: "",
+  contact_phone: "", photo_url: "",
 };
 
 function TransportSection() {
