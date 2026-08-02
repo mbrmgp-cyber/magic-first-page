@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { getListing, logClick, type VaradhiListing, type VaradhiProvider, type VaradhiProfile } from "@/lib/varadhi.functions";
 import { useListingImage } from "@/lib/varadhi-image";
-import { formatPrice } from "@/lib/varadhi-format";
+import { formatAmount, formatPrice } from "@/lib/varadhi-format";
 
 import { ArrowLeft, Phone, MessageCircle, Truck, Share2 } from "lucide-react";
 
@@ -47,6 +47,8 @@ function ItemDetail() {
   const place = [(item as any).village, (item as any).mandal, (item as any).district, (item as any).state]
     .filter(Boolean).join(", ") || item.city || "";
   const inStock = item.stock_status !== "closed";
+  const amount = formatAmount(item.price);
+  const unit = item.unit === "కేజీలు" ? "కేజీ" : item.unit;
 
   return (
     <div className="mx-auto max-w-md px-4 pt-4 pb-8">
@@ -66,9 +68,12 @@ function ItemDetail() {
 
       <div className="mt-3 rounded-2xl bg-white p-4 shadow-sm space-y-2">
         <p className="text-base font-bold text-[#1e3a8a]">{item.title}</p>
-        <p className="text-2xl font-bold text-[#16a34a]">
-          {formatPrice(item.price, item.unit)}
-        </p>
+        <div className="rounded-xl border border-green-200 bg-green-50 px-3 py-2">
+          <p className="text-xs font-semibold text-green-700">వస్తువు రేటు</p>
+          <p className="mt-0.5 text-2xl font-extrabold text-[#16a34a]">
+            {amount ? `Rs. ${amount}${unit ? ` / ${unit}` : ""}` : "ధర సంప్రదించండి"}
+          </p>
+        </div>
 
 
         <div className="flex flex-wrap gap-1.5">
@@ -77,7 +82,7 @@ function ItemDetail() {
           </span>
           {(item as any).stock_qty && (
             <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-[#1e3a8a]">
-              స్టాక్: {(item as any).stock_qty}{item.unit ? ` ${item.unit}` : ""}
+              స్టాక్: {(item as any).stock_qty}{unit ? ` ${unit}` : ""}
             </span>
           )}
           {item.sub_category && (
