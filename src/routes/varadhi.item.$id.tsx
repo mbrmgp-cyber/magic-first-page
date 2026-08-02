@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { getListing, logClick, type VaradhiListing, type VaradhiProvider, type VaradhiProfile } from "@/lib/varadhi.functions";
 import { useListingImage } from "@/lib/varadhi-image";
+import { formatPrice } from "@/lib/varadhi-format";
+
 import { ArrowLeft, Phone, MessageCircle, Truck } from "lucide-react";
 
 export const Route = createFileRoute("/varadhi/item/$id")({
