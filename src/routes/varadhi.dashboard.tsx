@@ -20,7 +20,19 @@ const POST_TYPES = [
   { id: "business", te: "వ్యాపారం" },
   { id: "service", te: "సేవలు" },
   { id: "free", te: "ఉచిత సేవలు" },
+  { id: "transport", te: "ట్రాన్స్‌పోర్ట్" },
 ];
+
+const TRANSPORT_TYPES = [
+  { id: "auto", te: "ఆటో", color: "#0ea5e9" },
+  { id: "tractor", te: "ట్రాక్టర్", color: "#16a34a" },
+  { id: "lorry", te: "లారీ / DCM", color: "#f97316" },
+  { id: "car", te: "ట్యాక్సీ / కారు", color: "#7c3aed" },
+  { id: "bike", te: "బైక్ డెలివరీ", color: "#dc2626" },
+  { id: "jcb", te: "JCB / ప్రొక్లెయిన్", color: "#0f766e" },
+];
+
+const TRANSPORT_AREAS = ["మండలంలో", "జిల్లాలో", "రాష్ట్రంలో", "ఎక్కడైనా"];
 
 const BUSINESS_CATS = [
   { id: "realestate", te: "ప్లాట్లు & భూములు", color: "#7c3aed" },
