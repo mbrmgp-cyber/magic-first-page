@@ -7,7 +7,8 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   getMyVaradhiProfile, listListings,
   upsertListing, toggleListingStock, deleteListing,
-  type VaradhiListing,
+  listProviders, upsertProvider, toggleProviderAvailability,
+  type VaradhiListing, type VaradhiProvider,
 } from "@/lib/varadhi.functions";
 import { toast } from "sonner";
 import { Plus, Trash2, Camera, Pencil, Save } from "lucide-react";
