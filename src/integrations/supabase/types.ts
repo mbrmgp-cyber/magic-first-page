@@ -2457,11 +2457,13 @@ export type Database = {
           availability_status: string
           city: string | null
           click_count: number
+          contact_phone: string | null
           created_at: string
           description: string | null
           id: string
           lat: number | null
           lng: number | null
+          photo_url: string | null
           provider_type: string
           rating_avg: number
           service_areas: string | null
@@ -2476,11 +2478,13 @@ export type Database = {
           availability_status?: string
           city?: string | null
           click_count?: number
+          contact_phone?: string | null
           created_at?: string
           description?: string | null
           id?: string
           lat?: number | null
           lng?: number | null
+          photo_url?: string | null
           provider_type: string
           rating_avg?: number
           service_areas?: string | null
@@ -2495,11 +2499,13 @@ export type Database = {
           availability_status?: string
           city?: string | null
           click_count?: number
+          contact_phone?: string | null
           created_at?: string
           description?: string | null
           id?: string
           lat?: number | null
           lng?: number | null
+          photo_url?: string | null
           provider_type?: string
           rating_avg?: number
           service_areas?: string | null

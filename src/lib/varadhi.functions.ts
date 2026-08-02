@@ -137,6 +137,8 @@ export type VaradhiProvider = {
   rating_avg: number;
   click_count: number;
   subscription_expires_at: string | null;
+  contact_phone?: string | null;
+  photo_url?: string | null;
 };
 
 // -------- Profile
