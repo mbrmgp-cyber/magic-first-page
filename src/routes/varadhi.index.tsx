@@ -1,11 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { listListings, type VaradhiListing } from "@/lib/varadhi.functions";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import varadhiLogo from "@/assets/varadhi-logo.jpg.asset.json";
-import { Apple, Package, Recycle, MapPin, Truck, Wrench, Search, ChevronDown, Navigation, HeartHandshake, Boxes } from "lucide-react";
+import banner1 from "@/assets/varadhi-banner-1.jpg";
+import banner2 from "@/assets/varadhi-banner-2.jpg";
+import banner3 from "@/assets/varadhi-banner-3.jpg";
+import { Apple, Package, Recycle, MapPin, Truck, Wrench, Search, ChevronDown, Navigation, HeartHandshake, Boxes, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/varadhi/")({
   component: VaradhiHome,
@@ -14,235 +17,95 @@ export const Route = createFileRoute("/varadhi/")({
 type Box = {
   id: string;
   te: string;
-  en: string;
   color: string;
   Icon: typeof Apple;
   sub: string;
-  options: string[];
 };
 
 const ITEM_BOXES: Box[] = [
-  {
-    id: "fresh", te: "తాజా వస్తువులు", en: "Fresh Items", color: "#16a34a", Icon: Apple,
-    sub: "కూరగాయలు, పండ్లు, పాలు",
-    options: ["కూరగాయలు", "పండ్లు", "ఆకుకూరలు", "పాలు & పాల ఉత్పత్తులు", "చేపలు & మాంసం", "కోడిగుడ్లు", "ధాన్యం & పప్పులు", "పూలు"],
-  },
-  {
-    id: "new", te: "కొత్త వస్తువులు", en: "New Items", color: "#2563eb", Icon: Package,
-    sub: "ఎలక్ట్రానిక్స్, ఫ్యాషన్",
-    options: ["మొబైల్స్", "ఎలక్ట్రానిక్స్", "గృహోపకరణాలు", "ఫర్నిచర్", "బట్టలు & ఫ్యాషన్", "వ్యవసాయ పరికరాలు", "బిల్డింగ్ మెటీరియల్", "ఇతర"],
-  },
-  {
-    id: "used", te: "వాడిన వస్తువులు", en: "Used Items", color: "#f97316", Icon: Recycle,
-    sub: "సెకండ్ హ్యాండ్",
-    options: ["సెకండ్ హ్యాండ్ బండ్లు", "మొబైల్స్", "ఫర్నిచర్", "ఎలక్ట్రానిక్స్", "వ్యవసాయ పరికరాలు", "ఇతర"],
-  },
+  { id: "fresh", te: "తాజా వస్తువులు", color: "#16a34a", Icon: Apple, sub: "కూరగాయలు, పండ్లు, పాలు" },
+  { id: "new", te: "కొత్త వస్తువులు", color: "#2563eb", Icon: Package, sub: "ఎలక్ట్రానిక్స్, ఫ్యాషన్" },
+  { id: "used", te: "వాడిన వస్తువులు", color: "#f97316", Icon: Recycle, sub: "సెకండ్ హ్యాండ్" },
+];
+
+const SERVICE_BOXES: Box[] = [
+  { id: "services", te: "పే సర్వీస్", color: "#dc2626", Icon: Wrench, sub: "టెక్నీషియన్లు & పనులు" },
+  { id: "freeservices", te: "ఫ్రీ సర్వీస్", color: "#0f9d58", Icon: HeartHandshake, sub: "ఉచిత సేవలు" },
 ];
 
 const REAL_ESTATE: Box = {
-  id: "realestate", te: "ఇంటి స్థలాలు & భూములు", en: "Real Estate", color: "#7c3aed", Icon: MapPin,
-  sub: "ప్లాట్లు, వ్యవసాయ భూములు",
-  options: ["ఇంటి స్థలాలు (ప్లాట్లు)", "వ్యవసాయ భూములు", "ఇళ్లు / అపార్ట్‌మెంట్లు", "షాపులు / కమర్షియల్", "అద్దెకు"],
+  id: "realestate", te: "ఇంటి స్థలాలు & భూములు", color: "#7c3aed", Icon: MapPin, sub: "ప్లాట్లు, భూములు",
 };
 
 const TRANSPORT: Box = {
-  id: "transport", te: "ట్రాన్స్‌పోర్ట్", en: "Transport", color: "#0ea5e9", Icon: Truck,
-  sub: "బండ్లు & రవాణా",
-  options: ["2 వీలర్", "3 వీలర్ (ఆటో)", "4 వీలర్", "6 వీలర్", "8+ వీలర్ లారీ", "ట్రాక్టర్", "హార్వెస్టర్", "ఇతర"],
+  id: "transport", te: "ట్రాన్స్‌పోర్ట్", color: "#0ea5e9", Icon: Truck, sub: "బండ్లు & రవాణా",
 };
 
-const SERVICE_BOXES: Box[] = [
-  {
-    id: "services", te: "పే సర్వీస్", en: "Paid Services", color: "#dc2626", Icon: Wrench,
-    sub: "టెక్నీషియన్లు & పనులు",
-    options: ["ఎలక్ట్రీషియన్", "ప్లంబర్", "కార్పెంటర్", "మేస్త్రీ / బిల్డింగ్ పని", "పెయింటర్", "మెకానిక్", "ఇంటి పని", "వ్యవసాయ పని", "షాప్ పని", "ఆఫీసు పని", "ఇతర"],
-  },
-  {
-    id: "freeservices", te: "ఫ్రీ సర్వీస్", en: "Free Services", color: "#0f9d58", Icon: HeartHandshake,
-    sub: "ఉచిత సేవలు",
-    options: ["రక్తదాత", "ఉచిత వైద్య సహాయం", "ఉచిత విద్య / ట్యూషన్", "అంబులెన్స్ సహాయం", "ఆపద సహాయం", "ఇతర"],
-  },
+const BANNERS = [
+  { src: banner1, te: "తాజా వస్తువులు మీ ఊరిలోనే", color: "#16a34a" },
+  { src: banner2, te: "ట్రాన్స్‌పోర్ట్ ఇప్పుడు సులభం", color: "#0ea5e9" },
+  { src: banner3, te: "సర్వీసులు — ఒక్క టచ్‌లో", color: "#7c3aed" },
 ];
 
-
-function BoxCard({ box, isCategory }: { box: Box; isCategory: boolean }) {
-  const [open, setOpen] = useState(false);
-  const [q, setQ] = useState("");
-  const navigate = useNavigate();
-  const fetchListings = useServerFn(listListings);
-  const [rows, setRows] = useState<VaradhiListing[] | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const go = (term: string) =>
-    navigate({
-      to: "/varadhi/browse/$category",
-      params: { category: box.id },
-      search: { q: term.trim() },
-    });
+function BannerCarousel() {
+  const [i, setI] = useState(0);
+  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    if (!open || !isCategory || rows !== null) return;
-    setLoading(true);
-    fetchListings({ data: { category: box.id } })
-      .then((r) => setRows(r.listings ?? []))
-      .catch(() => setRows([]))
-      .finally(() => setLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, isCategory]);
-
-  const term = q.trim().toLowerCase();
-  const filteredOptions = box.options.filter((o) => o.toLowerCase().includes(term));
-  const filteredRows = (rows ?? []).filter((l) =>
-    !term ||
-    l.title?.toLowerCase().includes(term) ||
-    (l.sub_category ?? "").toLowerCase().includes(term),
-  );
+    timer.current = setInterval(() => setI((v) => (v + 1) % BANNERS.length), 3500);
+    return () => { if (timer.current) clearInterval(timer.current); };
+  }, []);
 
   return (
-    <div className="rounded-2xl bg-white p-4 shadow-sm border border-black/5">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="block w-full text-left active:scale-[.98] transition"
+    <div className="relative mt-4 overflow-hidden rounded-3xl shadow-lg">
+      <div
+        className="flex transition-transform duration-700 ease-out"
+        style={{ transform: `translateX(-${i * 100}%)` }}
       >
-        <div className="h-10 w-10 rounded-xl flex items-center justify-center text-white" style={{ background: box.color }}>
-          <box.Icon className="h-5 w-5" />
-        </div>
-        <p className="mt-2 text-sm font-semibold text-[#1e3a8a]">{box.te}</p>
-        <p className="text-[10px] text-[#1e3a8a]/60">{box.sub}</p>
-      </button>
-
-
-      {/* Search bar */}
-      <div className="mt-3 flex items-center gap-1 rounded-xl border border-black/10 bg-[#f7f8fc] px-2 py-1.5">
-        <Search className="h-3.5 w-3.5 shrink-0 text-[#1e3a8a]/50" />
-        <input
-          value={q}
-          onChange={(e) => { setQ(e.target.value); setOpen(true); }}
-          onFocus={() => setOpen(true)}
-          onKeyDown={(e) => { if (e.key === "Enter") go(q); }}
-          placeholder="వెతకండి…"
-          className="min-w-0 flex-1 bg-transparent text-[11px] text-[#1e3a8a] outline-none placeholder:text-[#1e3a8a]/40"
-        />
-        <button
-          type="button"
-          aria-label="ఆప్షన్లు చూపించు"
-          onClick={() => setOpen((v) => !v)}
-          className="shrink-0 rounded-lg p-0.5 text-[#1e3a8a]/70 active:scale-90"
-        >
-          <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} />
-        </button>
+        {BANNERS.map((b) => (
+          <div key={b.src} className="relative w-full shrink-0">
+            <img src={b.src} alt={b.te} width={1200} height={600} className="h-36 w-full object-cover" />
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-3 pb-2 pt-8">
+              <p className="text-sm font-bold text-white drop-shadow">{b.te}</p>
+            </div>
+          </div>
+        ))}
       </div>
-
-      {open && isCategory && (
-        <div className="mt-2 rounded-xl border border-black/10 bg-white">
-          <p className="px-2 pt-2 text-[10px] font-semibold text-[#1e3a8a]/70">కొత్తగా అప్‌డేట్ చేసినవి</p>
-          <div className="mt-1 max-h-72 overflow-y-auto">
-            {loading && <p className="px-2 py-2 text-[10px] text-[#1e3a8a]/50">లోడ్ అవుతోంది…</p>}
-            {!loading && filteredRows.length === 0 && (
-              <p className="px-2 py-2 text-[10px] text-[#1e3a8a]/50">ఏమీ లేదు</p>
-            )}
-            {filteredRows.slice(0, 20).map((l) => (
-              <Link
-                key={l.id}
-                to="/varadhi/item/$id"
-                params={{ id: l.id }}
-                className="flex gap-2 border-b border-black/5 px-2 py-2 last:border-0 active:bg-[#f2f4fb]"
-              >
-                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-[#f7f7fb] flex items-center justify-center">
-                  {l.images?.[0]
-                    ? <img src={l.images[0]} alt={l.title} className="h-full w-full object-cover" />
-                    : <span className="text-[9px] text-[#1e3a8a]/40">ఫోటో</span>}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-[11px] font-semibold text-[#1e3a8a]">
-                    {l.title}{l.sub_category ? ` (${l.sub_category})` : ""}
-                  </p>
-                  <p className="text-[10px] font-bold text-[#16a34a]">
-                    {l.price != null ? `${l.unit ? `${l.unit} / ` : ""}Rs. ${l.price}` : "ధర సంప్రదించండి"}
-                  </p>
-                  <p className="text-[10px] text-[#1e3a8a]/70">
-                    {l.stock_status === "closed"
-                      ? "స్టాక్ అయిపోయింది"
-                      : `స్టాక్: ${l.stock_qty ? `${l.stock_qty}${l.unit ? ` ${l.unit}` : ""}` : "ఉంది"}`}
-                  </p>
-                  <p className="truncate text-[10px] text-[#1e3a8a]/60">
-                    📍 {[l.village, l.mandal, l.district].filter(Boolean).join(", ") || l.city || "—"}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
-          <Link
-            to="/varadhi/browse/$category"
-            params={{ category: box.id }}
-            search={{ q: "" }}
-            className="block w-full border-t border-black/5 px-2 py-1.5 text-left text-[11px] font-semibold text-[#f97316]"
-          >
-            అన్నీ చూడండి →
-          </Link>
-        </div>
-      )}
-
-      {open && !isCategory && (
-        <div className="mt-2 max-h-40 overflow-y-auto rounded-xl border border-black/10 bg-white">
-          {filteredOptions.length === 0 && (
-            <p className="px-2 py-2 text-[10px] text-[#1e3a8a]/50">ఏమీ లేదు</p>
-          )}
-          {filteredOptions.map((o) => (
-            <button
-              key={o}
-              type="button"
-              onClick={() => go(o)}
-              className="block w-full truncate px-2 py-1.5 text-left text-[11px] text-[#1e3a8a] hover:bg-[#f2f4fb]"
-            >
-              {o}
-            </button>
-          ))}
-          <Link
-            to="/varadhi/browse/$category"
-            params={{ category: box.id }}
-            search={{ q: "" }}
-            className="block w-full px-2 py-1.5 text-left text-[11px] font-semibold text-[#f97316] border-t border-black/5"
-          >
-            అన్నీ చూడండి →
-          </Link>
-        </div>
-      )}
+      <div className="absolute bottom-2 right-3 flex gap-1.5">
+        {BANNERS.map((b, idx) => (
+          <button
+            key={b.src}
+            type="button"
+            aria-label={`banner ${idx + 1}`}
+            onClick={() => setI(idx)}
+            className={`h-1.5 rounded-full transition-all ${idx === i ? "w-5 bg-white" : "w-1.5 bg-white/60"}`}
+          />
+        ))}
+      </div>
     </div>
   );
 }
 
-function GroupCard({
-  te, sub, color, Icon, boxes, isCategory,
-}: { te: string; sub: string; color: string; Icon: typeof Apple; boxes: Box[]; isCategory: boolean }) {
-  const [open, setOpen] = useState(false);
+function CategoryTile({ box, onClick, open }: { box: Box; onClick: () => void; open?: boolean }) {
   return (
-    <div className={open ? "col-span-2" : ""}>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="w-full rounded-2xl bg-white p-4 text-left shadow-sm border border-black/5 active:scale-[.98] transition"
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex flex-col items-center gap-1.5 rounded-2xl bg-white p-2.5 shadow-sm border border-black/5 active:scale-95 transition"
+    >
+      <span
+        className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-white shadow-sm"
+        style={{ background: `linear-gradient(135deg, ${box.color}, ${box.color}cc)` }}
       >
-        <div className="flex items-center justify-between">
-          <div className="h-10 w-10 rounded-xl flex items-center justify-center text-white" style={{ background: color }}>
-            <Icon className="h-5 w-5" />
-          </div>
-          <ChevronDown className={`h-4 w-4 text-[#1e3a8a]/60 transition-transform ${open ? "rotate-180" : ""}`} />
-        </div>
-        <p className="mt-2 text-sm font-semibold text-[#1e3a8a]">{te}</p>
-        <p className="text-[10px] text-[#1e3a8a]/60">{sub}</p>
-      </button>
-
-      {open && (
-        <div className="mt-3 grid grid-cols-2 gap-3">
-          {boxes.map((b) => <BoxCard key={b.id} box={b} isCategory={isCategory} />)}
-        </div>
+        <box.Icon className="h-6 w-6" />
+      </span>
+      <span className="line-clamp-2 text-center text-[10px] font-semibold leading-tight text-[#1e3a8a]">{box.te}</span>
+      {open !== undefined && (
+        <ChevronDown className={`h-3 w-3 text-[#1e3a8a]/50 transition-transform ${open ? "rotate-180" : ""}`} />
       )}
-    </div>
+    </button>
   );
 }
-
 
 function distanceKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
   const R = 6371;
@@ -254,109 +117,130 @@ function distanceKm(a: { lat: number; lng: number }, b: { lat: number; lng: numb
   return 2 * R * Math.asin(Math.sqrt(h));
 }
 
-function NearbyFeed({ signedIn }: { signedIn: boolean | null }) {
-  const fetchListings = useServerFn(listListings);
-  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [denied, setDenied] = useState(false);
-  const [items, setItems] = useState<Array<VaradhiListing & { km: number }>>([]);
-  const [loading, setLoading] = useState(false);
-
-  const ask = () => {
-    if (typeof navigator === "undefined" || !navigator.geolocation) { setDenied(true); return; }
-    navigator.geolocation.getCurrentPosition(
-      (p) => setCoords({ lat: p.coords.latitude, lng: p.coords.longitude }),
-      () => setDenied(true),
-      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
-    );
-  };
-
-  useEffect(() => { if (signedIn) ask(); /* eslint-disable-next-line */ }, [signedIn]);
-
-  useEffect(() => {
-    if (!coords || !signedIn) return;
-    (async () => {
-      setLoading(true);
-      try {
-        const r = await fetchListings({ data: {} });
-        const near = (r.listings ?? [])
-          .filter((l) => l.lat != null && l.lng != null)
-          .map((l) => ({ ...l, km: distanceKm(coords, { lat: l.lat as number, lng: l.lng as number }) }))
-          .filter((l) => l.km <= 100)
-          .sort((a, b) => a.km - b.km)
-          .slice(0, 20);
-        setItems(near);
-      } catch { /* ignore */ }
-      setLoading(false);
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [coords, signedIn]);
-
-  if (!signedIn) return null;
-
+function ListingCard({ l, note }: { l: VaradhiListing; note?: string }) {
   return (
-    <div className="mt-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-[#1e3a8a]/80">మీ చుట్టూ 100 కి.మీ. అప్‌డేట్‌లు</h2>
-        <button onClick={ask} className="flex items-center gap-1 text-[11px] font-semibold text-[#f97316]">
-          <Navigation className="h-3.5 w-3.5" /> లొకేషన్
-        </button>
+    <Link
+      to="/varadhi/item/$id"
+      params={{ id: l.id }}
+      className="overflow-hidden rounded-2xl bg-white shadow-sm border border-black/5 active:scale-[.98] transition"
+    >
+      <div className="h-24 w-full bg-[#f2f4fb]">
+        {l.images?.[0]
+          ? <img src={l.images[0]} alt={l.title} loading="lazy" className="h-full w-full object-cover" />
+          : <div className="flex h-full items-center justify-center text-2xl">🛒</div>}
       </div>
-
-      {!coords && !denied && <p className="mt-2 text-[11px] text-[#1e3a8a]/60">లొకేషన్ కోసం అనుమతి ఇవ్వండి…</p>}
-      {denied && <p className="mt-2 text-[11px] text-[#1e3a8a]/60">లొకేషన్ అనుమతి లేదు. “లొకేషన్” నొక్కి మళ్లీ ప్రయత్నించండి.</p>}
-      {loading && <p className="mt-2 text-[11px] text-[#1e3a8a]/60">లోడ్ అవుతోంది…</p>}
-      {coords && !loading && items.length === 0 && (
-        <p className="mt-2 text-[11px] text-[#1e3a8a]/60">మీ చుట్టూ 100 కి.మీ. లోపు అప్‌డేట్‌లు లేవు.</p>
-      )}
-
-      <div className="mt-3 space-y-2">
-        {items.map((l) => (
-          <Link key={l.id} to="/varadhi/item/$id" params={{ id: l.id }}
-            className="flex gap-3 rounded-2xl bg-white p-3 shadow-sm border border-black/5 active:scale-[.99]">
-            <div className="h-14 w-14 shrink-0 rounded-xl bg-[#f7f7fb] flex items-center justify-center overflow-hidden">
-              {l.images?.[0] ? <img src={l.images[0]} alt="" className="h-full w-full object-cover" /> : <span className="text-xl">🛒</span>}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-[#1e3a8a]">{l.title}</p>
-              <p className="text-[11px] text-[#1e3a8a]/60">
-                📍 {[l.village, l.mandal, l.district].filter(Boolean).join(", ") || l.city || ""} · {l.km.toFixed(0)} కి.మీ.
-              </p>
-              <p className="mt-0.5 text-sm font-bold text-[#16a34a]">
-                {l.price != null ? `Rs. ${l.price}${l.unit ? ` / ${l.unit}` : ""}` : "ధర సంప్రదించండి"}
-              </p>
-            </div>
-          </Link>
-        ))}
+      <div className="p-2">
+        <p className="truncate text-[11px] font-semibold text-[#1e3a8a]">{l.title}</p>
+        <p className="text-[11px] font-bold text-[#16a34a]">
+          {l.price != null ? `Rs. ${l.price}${l.unit ? ` / ${l.unit}` : ""}` : "ధర సంప్రదించండి"}
+        </p>
+        <p className="truncate text-[10px] text-[#1e3a8a]/60">
+          📍 {[l.village, l.mandal, l.district].filter(Boolean).join(", ") || l.city || "—"}
+          {note ? ` · ${note}` : ""}
+        </p>
       </div>
-    </div>
+    </Link>
   );
 }
 
 function VaradhiHome() {
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  const [q, setQ] = useState("");
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
   const navigate = useNavigate();
+  const fetchListings = useServerFn(listListings);
+
+  const [recent, setRecent] = useState<VaradhiListing[]>([]);
+  const [nearby, setNearby] = useState<Array<VaradhiListing & { km: number }>>([]);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
   }, []);
 
+  const askLocation = () => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (p) => setCoords({ lat: p.coords.latitude, lng: p.coords.longitude }),
+      () => undefined,
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
+    );
+  };
+
+  useEffect(() => { if (signedIn) askLocation(); }, [signedIn]);
+
+  useEffect(() => {
+    if (!signedIn) return;
+    (async () => {
+      setLoading(true);
+      try {
+        const r = await fetchListings({ data: {} });
+        setRecent((r.listings ?? []).slice(0, 12));
+      } catch { /* ignore */ }
+      setLoading(false);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signedIn]);
+
+  useEffect(() => {
+    if (!coords || recent.length === 0) return;
+    const near = recent
+      .filter((l) => l.lat != null && l.lng != null)
+      .map((l) => ({ ...l, km: distanceKm(coords, { lat: l.lat as number, lng: l.lng as number }) }))
+      .filter((l) => l.km <= 100)
+      .sort((a, b) => a.km - b.km)
+      .slice(0, 6);
+    setNearby(near);
+  }, [coords, recent]);
+
+  const search = () =>
+    navigate({ to: "/varadhi/browse/$category", params: { category: "fresh" }, search: { q: q.trim() } });
+
+  const goto = (id: string) =>
+    navigate({ to: "/varadhi/browse/$category", params: { category: id }, search: { q: "" } });
+
   return (
-    <div className="mx-auto max-w-md px-4 pt-6 pb-6">
+    <div className="mx-auto max-w-md px-4 pt-5 pb-8">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <img src={varadhiLogo.url} alt="Vaaradhi" className="h-14 w-14 rounded-2xl object-contain bg-white shadow-sm p-1" />
-        <div className="min-w-0 flex-1">
-          <h1 className="text-2xl font-bold tracking-tight text-[#1e3a8a]">వారధి</h1>
-          <p className="text-xs text-[#1e3a8a]/70">Sell, Buy, Transport & Local Services</p>
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <img src={varadhiLogo.url} alt="Vaaradhi" className="h-12 w-12 shrink-0 rounded-2xl object-contain bg-white shadow-sm p-1" />
+          <div className="min-w-0">
+            <h1 className="truncate text-xl font-bold tracking-tight text-[#1e3a8a]">వారధి</h1>
+            <p className="truncate text-[11px] text-[#1e3a8a]/70">Sell, Buy, Transport & Services</p>
+          </div>
         </div>
         <LanguageToggle />
       </div>
 
+      {/* Banner carousel */}
+      <BannerCarousel />
+
+      {/* Main search bar */}
+      <div className="mt-4 flex items-center gap-2 rounded-2xl border border-black/10 bg-white px-3 py-2.5 shadow-md">
+        <Search className="h-4 w-4 shrink-0 text-[#1e3a8a]/50" />
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") search(); }}
+          placeholder="ఏమి కావాలి? వెతకండి…"
+          className="min-w-0 flex-1 bg-transparent text-sm text-[#1e3a8a] outline-none placeholder:text-[#1e3a8a]/40"
+        />
+        <button
+          type="button"
+          onClick={search}
+          className="shrink-0 rounded-xl bg-[#f97316] px-3 py-1.5 text-[11px] font-semibold text-white shadow active:scale-95"
+        >
+          వెతకండి
+        </button>
+      </div>
+
       {/* CTA */}
       {signedIn === false && (
-        <div className="mt-5 rounded-2xl bg-gradient-to-br from-[#1e3a8a] to-[#3b5bdb] p-4 text-white shadow-md">
+        <div className="mt-4 rounded-2xl bg-gradient-to-br from-[#1e3a8a] to-[#3b5bdb] p-4 text-white shadow-md">
           <p className="text-sm font-medium">ప్రారంభించడానికి లాగిన్ అవ్వండి</p>
-          <p className="text-[11px] opacity-90 mt-0.5">Aadhaar & లొకేషన్ verify చేసి — అమ్మండి, కొనండి, సర్వీసులు అందించండి.</p>
+          <p className="mt-0.5 text-[11px] opacity-90">Aadhaar & లొకేషన్ verify చేసి — అమ్మండి, కొనండి, సర్వీసులు అందించండి.</p>
           <button
             onClick={() => navigate({ to: "/varadhi/auth" })}
             className="mt-3 w-full rounded-xl bg-[#f97316] py-2.5 font-semibold text-white shadow"
@@ -366,38 +250,67 @@ function VaradhiHome() {
         </div>
       )}
 
-      {/* Nearby feed */}
-      <NearbyFeed signedIn={signedIn} />
-
-      {/* Categories */}
+      {/* Categories — icon grid */}
       <h2 className="mt-6 text-sm font-semibold text-[#1e3a8a]/80">వర్గాలు — Categories</h2>
-      <div className="mt-3 grid grid-cols-2 gap-3">
-        <GroupCard
-          te="వస్తువులు"
-          sub="తాజా, కొత్త, వాడిన"
-          color="#1e3a8a"
-          Icon={Boxes}
-          boxes={ITEM_BOXES}
-          isCategory
+      <div className="mt-3 grid grid-cols-4 gap-2">
+        <CategoryTile
+          box={{ id: "items", te: "వస్తువులు", color: "#1e3a8a", Icon: Boxes, sub: "" }}
+          open={openGroup === "items"}
+          onClick={() => setOpenGroup(openGroup === "items" ? null : "items")}
         />
-        <BoxCard box={REAL_ESTATE} isCategory />
-      </div>
-
-      {/* Services */}
-      <h2 className="mt-6 text-sm font-semibold text-[#1e3a8a]/80">సర్వీసులు — Services</h2>
-      <div className="mt-3 grid grid-cols-2 gap-3">
-        <BoxCard box={TRANSPORT} isCategory={false} />
-        <GroupCard
-          te="సర్వీసులు"
-          sub="పే సర్వీస్, ఫ్రీ సర్వీస్"
-          color="#dc2626"
-          Icon={Wrench}
-          boxes={SERVICE_BOXES}
-          isCategory={false}
+        <CategoryTile box={REAL_ESTATE} onClick={() => goto(REAL_ESTATE.id)} />
+        <CategoryTile box={TRANSPORT} onClick={() => goto(TRANSPORT.id)} />
+        <CategoryTile
+          box={{ id: "svc", te: "సర్వీసులు", color: "#dc2626", Icon: Wrench, sub: "" }}
+          open={openGroup === "svc"}
+          onClick={() => setOpenGroup(openGroup === "svc" ? null : "svc")}
         />
       </div>
 
+      {openGroup && (
+        <div className="mt-2 grid grid-cols-3 gap-2 rounded-2xl bg-white/70 p-2">
+          {(openGroup === "items" ? ITEM_BOXES : SERVICE_BOXES).map((b) => (
+            <CategoryTile key={b.id} box={b} onClick={() => goto(b.id)} />
+          ))}
+        </div>
+      )}
 
+      {/* Nearby */}
+      {signedIn && (
+        <div className="mt-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-[#1e3a8a]/80">మీ చుట్టూ 100 కి.మీ.</h2>
+            <button onClick={askLocation} className="flex items-center gap-1 text-[11px] font-semibold text-[#f97316]">
+              <Navigation className="h-3.5 w-3.5" /> లొకేషన్
+            </button>
+          </div>
+          {nearby.length === 0
+            ? <p className="mt-2 text-[11px] text-[#1e3a8a]/60">మీ చుట్టూ అప్‌డేట్‌లు లేవు.</p>
+            : (
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                {nearby.map((l) => <ListingCard key={l.id} l={l} note={`${l.km.toFixed(0)} కి.మీ.`} />)}
+              </div>
+            )}
+        </div>
+      )}
+
+      {/* Recent listings */}
+      <div className="mt-6">
+        <div className="flex items-center gap-1.5">
+          <Sparkles className="h-4 w-4 text-[#f97316]" />
+          <h2 className="text-sm font-semibold text-[#1e3a8a]/80">కొత్త అప్‌డేట్‌లు — Recent Listings</h2>
+        </div>
+        {!signedIn && <p className="mt-2 text-[11px] text-[#1e3a8a]/60">లాగిన్ అయితే కొత్త అప్‌డేట్‌లు కనిపిస్తాయి.</p>}
+        {signedIn && loading && <p className="mt-2 text-[11px] text-[#1e3a8a]/60">లోడ్ అవుతోంది…</p>}
+        {signedIn && !loading && recent.length === 0 && (
+          <p className="mt-2 text-[11px] text-[#1e3a8a]/60">ఇంకా అప్‌డేట్‌లు లేవు.</p>
+        )}
+        {signedIn && recent.length > 0 && (
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            {recent.map((l) => <ListingCard key={l.id} l={l} />)}
+          </div>
+        )}
+      </div>
 
       <p className="mt-8 text-center text-[10px] text-[#1e3a8a]/50">
         © MBR Platform · <Link to="/" className="underline">Back to Portal</Link>
