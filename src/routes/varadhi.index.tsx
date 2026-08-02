@@ -8,7 +8,7 @@ import varadhiLogo from "@/assets/varadhi-logo.jpg.asset.json";
 import banner1 from "@/assets/varadhi-banner-1.jpg";
 import banner2 from "@/assets/varadhi-banner-2.jpg";
 import banner3 from "@/assets/varadhi-banner-3.jpg";
-import { Apple, Package, Recycle, MapPin, Truck, Wrench, Search, ChevronDown, Navigation, HeartHandshake, Boxes, Sparkles } from "lucide-react";
+import { Apple, Package, Recycle, MapPin, Truck, Wrench, Search, ChevronDown, Navigation, HeartHandshake, Boxes, Sparkles, ImageOff } from "lucide-react";
 
 export const Route = createFileRoute("/varadhi/")({
   component: VaradhiHome,
@@ -118,22 +118,53 @@ function distanceKm(a: { lat: number; lng: number }, b: { lat: number; lng: numb
 }
 
 function ListingCard({ l, note }: { l: VaradhiListing; note?: string }) {
+  const [failed, setFailed] = useState(false);
+  const src = l.images?.[0];
+  const showImg = !!src && !failed;
+  const priceText =
+    l.price != null ? `Rs. ${l.price}${l.unit ? ` / ${l.unit}` : ""}` : "ధర సంప్రదించండి";
+  const stockQty = (l as unknown as { stock_qty?: number | string | null }).stock_qty;
+  const inStock = l.stock_status !== "closed";
   return (
     <Link
       to="/varadhi/item/$id"
       params={{ id: l.id }}
       className="overflow-hidden rounded-2xl bg-white shadow-sm border border-black/5 active:scale-[.98] transition"
     >
-      <div className="h-24 w-full bg-[#f2f4fb]">
-        {l.images?.[0]
-          ? <img src={l.images[0]} alt={l.title} loading="lazy" className="h-full w-full object-cover" />
-          : <div className="flex h-full items-center justify-center text-2xl">🛒</div>}
+      <div className="h-24 w-full bg-[#f2f4fb] flex items-center justify-center overflow-hidden">
+        {showImg ? (
+          <img
+            src={src}
+            alt={l.title}
+            loading="lazy"
+            onError={() => setFailed(true)}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <ImageOff className="h-6 w-6 text-[#1e3a8a]/30" />
+        )}
       </div>
       <div className="p-2">
-        <p className="truncate text-[11px] font-semibold text-[#1e3a8a]">{l.title}</p>
-        <p className="text-[11px] font-bold text-[#16a34a]">
-          {l.price != null ? `Rs. ${l.price}${l.unit ? ` / ${l.unit}` : ""}` : "ధర సంప్రదించండి"}
-        </p>
+        <div className="flex items-start justify-between gap-1">
+          <p className="truncate text-[11px] font-semibold text-[#1e3a8a]">{l.title}</p>
+          <span className="shrink-0 text-[9px] text-[#1e3a8a]/45">
+            {new Date(l.created_at).toLocaleDateString("te-IN", { day: "2-digit", month: "short" })}
+          </span>
+        </div>
+        <p className="text-[11px] font-bold text-[#16a34a]">{priceText}</p>
+        <div className="mt-0.5 flex flex-wrap items-center gap-1">
+          <span
+            className={`rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${
+              inStock ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600"
+            }`}
+          >
+            {inStock
+              ? stockQty
+                ? `స్టాక్: ${stockQty}${l.unit ? ` ${l.unit}` : ""}`
+                : "స్టాక్ ఉంది"
+              : "స్టాక్ లేదు"}
+          </span>
+        </div>
         <p className="truncate text-[10px] text-[#1e3a8a]/60">
           📍 {[l.village, l.mandal, l.district].filter(Boolean).join(", ") || l.city || "—"}
           {note ? ` · ${note}` : ""}
@@ -142,6 +173,7 @@ function ListingCard({ l, note }: { l: VaradhiListing; note?: string }) {
     </Link>
   );
 }
+
 
 function VaradhiHome() {
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
