@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { listListings, listProviders, type VaradhiListing, type VaradhiProvider } from "@/lib/varadhi.functions";
-import { ArrowLeft, Search, Apple, Package, Recycle, MapPin, Truck, Wrench } from "lucide-react";
+import { ArrowLeft, Search, Apple, Package, Recycle, MapPin, Truck, Wrench, HeartHandshake, Boxes, ChevronDown } from "lucide-react";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { STATES, districtsFor } from "@/lib/ap-locations";
