@@ -317,3 +317,47 @@ function ListingThumb({ src, alt }: { src?: string | null; alt?: string }) {
     </div>
   );
 }
+
+function ProviderCard({ p }: { p: VaradhiProvider }) {
+  const [failed, setFailed] = useState(false);
+  const photo = useListingImage(p.photo_url);
+  const showImg = !!photo && !failed;
+  const rate = formatAmount(p.price_per_km as any);
+  const online = p.availability_status === "online";
+  const place = p.location_full || p.city || "—";
+
+  return (
+    <Link
+      to="/varadhi/provider/$id"
+      params={{ id: p.id }}
+      className="flex gap-3 overflow-hidden rounded-2xl bg-white p-2.5 shadow-md border border-black/5 active:scale-[.99] transition"
+    >
+      <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-[#e8f0ff] to-[#f7f7fb] flex items-center justify-center border border-black/5">
+        {showImg ? (
+          <img src={photo ?? undefined} alt={p.title} loading="lazy" onError={() => setFailed(true)} className="h-full w-full object-cover" />
+        ) : (
+          <Truck className="h-8 w-8 text-[#1e3a8a]/30" />
+        )}
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <div className="flex items-start justify-between gap-2">
+          <p className="truncate text-sm font-bold text-[#1e3a8a]">{p.title}</p>
+          <span className={`shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold ${online ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600"}`}>
+            {online ? "అందుబాటులో" : "ఖాళీ లేదు"}
+          </span>
+        </div>
+
+        <p className="mt-0.5 truncate text-[10px] font-medium uppercase tracking-wide text-[#0ea5e9]">
+          {p.sub_type}{p.vehicle_details ? ` · ${p.vehicle_details}` : ""}
+        </p>
+
+        <p className="mt-1 text-[12px] font-extrabold text-[#16a34a]">
+          {rate ? `ధర: Rs. ${rate} / కి.మీ.` : "ధర సంప్రదించండి"}
+        </p>
+
+        <p className="mt-0.5 line-clamp-2 text-[10px] leading-tight text-[#1e3a8a]/65">📍 {place}</p>
+      </div>
+    </Link>
+  );
+}
