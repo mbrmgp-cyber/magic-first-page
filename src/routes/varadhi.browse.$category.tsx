@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { listListings, listProviders, type VaradhiListing, type VaradhiProvider } from "@/lib/varadhi.functions";
-import { ArrowLeft, Search, Apple, Package, Recycle, MapPin, Truck, Wrench, HeartHandshake, Boxes, ChevronDown } from "lucide-react";
+import { ArrowLeft, Search, Apple, Package, Recycle, MapPin, Truck, Wrench, HeartHandshake, Boxes, ChevronDown, ImageOff } from "lucide-react";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { STATES, districtsFor } from "@/lib/ap-locations";
@@ -250,21 +250,29 @@ function BrowsePage() {
           {shownListings.length === 0 && <EmptyState msg="ఈ ఏరియాలో ఏ వస్తువులు లేవు" />}
           {shownListings.map((l) => (
             <Link key={l.id} to="/varadhi/item/$id" params={{ id: l.id }}
-              className="block rounded-2xl bg-white p-3 shadow-sm border border-black/5 active:scale-[.99]">
-              <div className="flex gap-3">
-                <div className="h-16 w-16 rounded-xl bg-[#f7f7fb] flex items-center justify-center overflow-hidden">
-                  {l.images?.[0] ? <img src={l.images[0]} alt="" className="h-full w-full object-cover" /> : <span className="text-2xl">🛒</span>}
-                </div>
+              className="block rounded-2xl bg-white p-2.5 shadow-sm border border-black/5 active:scale-[.99]">
+              <div className="flex gap-2.5">
+                <ListingThumb src={l.images?.[0]} alt={l.title} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-[#1e3a8a] truncate">{l.title}</p>
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-[13px] font-semibold text-[#1e3a8a] truncate">{l.title}</p>
+                    <span className="shrink-0 text-[10px] text-[#1e3a8a]/45">
+                      {new Date(l.created_at).toLocaleDateString("te-IN", { day: "2-digit", month: "short" })}
+                    </span>
+                  </div>
                   {(l.village || l.mandal || l.district || l.city) && (
-                    <p className="text-[11px] text-[#1e3a8a]/60">
+                    <p className="text-[11px] text-[#1e3a8a]/60 truncate">
                       📍 {[l.village, l.mandal, l.district].filter(Boolean).join(", ") || l.city}
                     </p>
                   )}
-                  <p className="text-sm font-bold text-[#16a34a] mt-0.5">
-                    {l.price != null ? `Rs. ${l.price}${l.unit ? ` / ${l.unit}` : ""}` : "ధర సంప్రదించండి"}
-                  </p>
+                  <div className="mt-0.5 flex items-center gap-2">
+                    <p className="text-[13px] font-bold text-[#16a34a]">
+                      {l.price != null ? `Rs. ${l.price}${l.unit ? ` / ${l.unit}` : ""}` : "ధర సంప్రదించండి"}
+                    </p>
+                    {l.stock_status === "closed" && (
+                      <span className="rounded-full bg-gray-200 px-1.5 py-0.5 text-[9px] font-semibold text-gray-600">స్టాక్ లేదు</span>
+                    )}
+                  </div>
                 </div>
               </div>
             </Link>
@@ -295,4 +303,18 @@ function BrowsePage() {
 
 function EmptyState({ msg }: { msg: string }) {
   return <div className="mt-8 text-center text-sm text-[#1e3a8a]/60">{msg}</div>;
+}
+
+function ListingThumb({ src, alt }: { src?: string | null; alt?: string }) {
+  const [failed, setFailed] = useState(false);
+  const show = src && !failed;
+  return (
+    <div className="h-14 w-14 shrink-0 rounded-xl bg-[#f7f7fb] flex items-center justify-center overflow-hidden border border-black/5">
+      {show ? (
+        <img src={src} alt={alt ?? ""} loading="lazy" onError={() => setFailed(true)} className="h-full w-full object-cover" />
+      ) : (
+        <ImageOff className="h-5 w-5 text-[#1e3a8a]/30" />
+      )}
+    </div>
+  );
 }
