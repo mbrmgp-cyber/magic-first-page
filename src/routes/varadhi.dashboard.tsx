@@ -814,49 +814,52 @@ function TransportSection() {
 
   return (
     <section className="rounded-2xl bg-white p-4 shadow-sm">
-      <div className="grid grid-cols-2 gap-2">
-        {TRANSPORT_TYPES.map((t) => (
-          <button key={t.id}
-            onClick={() => { setForm({ ...emptyT, sub_type: t.id }); setOpen(true); }}
-            style={{ background: t.color }}
-            className="rounded-xl py-2.5 text-[11px] font-semibold text-white shadow-sm flex items-center justify-center gap-1 active:scale-[.98]">
-            <Plus className="h-3.5 w-3.5" /> {t.te}
-          </button>
-        ))}
-      </div>
+      {!open && (
+        <button
+          onClick={() => { setForm(emptyT); setOpen(true); }}
+          className="w-full rounded-xl bg-[#0ea5e9] py-2.5 text-sm font-semibold text-white shadow-sm flex items-center justify-center gap-1 active:scale-[.98]">
+          <Plus className="h-4 w-4" /> కొత్త ట్రాన్స్‌పోర్ట్ పోస్టు
+        </button>
+      )}
 
       {open && (
-        <div className="mt-3 space-y-2 p-3 rounded-xl bg-[#f7f7fb]">
-          <p className="text-[11px] font-semibold text-white inline-block rounded-full px-3 py-1"
-            style={{ background: TRANSPORT_TYPES.find((t) => t.id === form.sub_type)?.color ?? "#0ea5e9" }}>
-            {TRANSPORT_TYPES.find((t) => t.id === form.sub_type)?.te ?? "ట్రాన్స్‌పోర్ట్"}
-          </p>
-
+        <div className="space-y-2 p-3 rounded-xl bg-[#f7f7fb]">
           <L n="1">వాహన రకం</L>
           <div className="grid grid-cols-3 gap-1.5">
             {TRANSPORT_TYPES.map((t) => (
               <button key={t.id} onClick={() => setForm({ ...form, sub_type: t.id })}
+                style={form.sub_type === t.id ? { background: t.color, borderColor: t.color } : undefined}
                 className={`rounded-lg py-2 text-[10px] font-semibold border leading-tight ${
-                  form.sub_type === t.id ? "bg-[#0ea5e9] text-white border-[#0ea5e9]" : "bg-white text-[#1e3a8a] border-black/10"
+                  form.sub_type === t.id ? "text-white" : "bg-white text-[#1e3a8a] border-black/10"
                 }`}>
                 {t.te}
               </button>
             ))}
           </div>
 
-          <L n="2">సర్వీస్ పేరు</L>
-          <input className={inp} placeholder="ఉదా: శ్రీనివాస ట్రాన్స్‌పోర్ట్"
-            value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+          <div className="grid grid-cols-2 gap-2">
+            <input className={inp} placeholder="సర్వీస్ పేరు"
+              value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+            <input className={inp} placeholder="ఊరు / ప్రాంతం"
+              value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
+          </div>
 
-          <L n="3">వాహనం వివరాలు</L>
-          <input className={inp} placeholder="ఉదా: టాటా ఏస్, 1 టన్ను, AP07 XX 1234"
+          <input className={inp} placeholder="వాహనం వివరాలు (ఉదా: టాటా ఏస్, 1 టన్ను, AP07 XX 1234)"
             value={form.vehicle_details} onChange={(e) => setForm({ ...form, vehicle_details: e.target.value })} />
 
-          <L n="4">ఊరు / ప్రాంతం</L>
-          <input className={inp} placeholder="గ్రామం / పట్టణం"
-            value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
+          <div className="grid grid-cols-2 gap-2">
+            <input className={inp} inputMode="numeric" maxLength={10} placeholder="ఫోన్ / వాట్సాప్ నంబర్"
+              value={form.contact_phone}
+              onChange={(e) => setForm({ ...form, contact_phone: e.target.value.replace(/\D/g, "").slice(0, 10) })} />
+            <label className="flex items-center justify-center gap-1.5 rounded-lg border border-dashed border-[#1e3a8a]/30 bg-white px-2 py-2 text-[11px] text-[#1e3a8a]">
+              <Camera className="h-4 w-4" />
+              {form.photo_url ? "వాహనం ఫోటో ✓" : "వాహనం ఫోటో"}
+              <input type="file" accept="image/*" className="hidden"
+                onChange={(e) => e.target.files?.[0] && uploadVehiclePhoto(e.target.files[0])} />
+            </label>
+          </div>
 
-          <L n="5">సర్వీస్ పరిధి</L>
+          <L n="2">సర్వీస్ పరిధి</L>
           <div className="grid grid-cols-4 gap-1.5">
             {TRANSPORT_AREAS.map((a) => (
               <button key={a} onClick={() => setForm({ ...form, service_areas: a })}
@@ -871,12 +874,19 @@ function TransportSection() {
           <textarea className={inp} placeholder="వివరణ / ఛార్జీలు (ఐచ్ఛికం)"
             value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
 
-          <button onClick={save} disabled={saving}
-            className="w-full rounded-xl bg-[#1e3a8a] py-2.5 text-white font-semibold flex items-center justify-center gap-1 disabled:opacity-60">
-            <Save className="h-4 w-4" /> {saving ? "సేవ్ అవుతోంది…" : "సేవ్"}
-          </button>
+          <div className="grid grid-cols-3 gap-2">
+            <button onClick={() => { setOpen(false); setForm(emptyT); }}
+              className="rounded-xl border border-black/10 py-2.5 text-sm font-semibold text-[#1e3a8a]">
+              రద్దు
+            </button>
+            <button onClick={save} disabled={saving}
+              className="col-span-2 rounded-xl bg-[#1e3a8a] py-2.5 text-white font-semibold flex items-center justify-center gap-1 disabled:opacity-60">
+              <Save className="h-4 w-4" /> {saving ? "సేవ్ అవుతోంది…" : "సేవ్"}
+            </button>
+          </div>
         </div>
       )}
+
 
       <div className="mt-4 space-y-2">
         <h3 className="text-xs font-bold text-[#1e3a8a]">నా ట్రాన్స్‌పోర్ట్ పోస్టులు</h3>
