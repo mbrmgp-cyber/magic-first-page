@@ -8,7 +8,7 @@ import varadhiLogo from "@/assets/varadhi-logo.jpg.asset.json";
 import banner1 from "@/assets/varadhi-banner-1.jpg";
 import banner2 from "@/assets/varadhi-banner-2.jpg";
 import banner3 from "@/assets/varadhi-banner-3.jpg";
-import { Apple, Package, Recycle, MapPin, Truck, Wrench, Search, ChevronDown, Navigation, HeartHandshake, Boxes, Sparkles } from "lucide-react";
+import { Apple, Package, Recycle, MapPin, Truck, Wrench, Search, ChevronDown, Navigation, HeartHandshake, Boxes, Sparkles, ImageOff } from "lucide-react";
 
 export const Route = createFileRoute("/varadhi/")({
   component: VaradhiHome,
