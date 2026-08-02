@@ -914,8 +914,12 @@ function cleanSeparators(s: string): string {
 function translateMixedValue(value: string, lang: string): string | undefined {
   const trimmed = value.trim();
   if (!TELUGU_RE.test(trimmed) || !LATIN_RE.test(trimmed)) return undefined;
+  // Never rewrite strings that carry numeric data (prices, rates, quantities):
+  // the piece-filtering below can drop the number and leave only the unit.
+  if (/\d/.test(trimmed)) return undefined;
   const lead = value.match(/^\s*/)?.[0] ?? "";
   const tail = value.match(/\s*$/)?.[0] ?? "";
+
 
   if (lang === "en") {
     let out = trimmed.replace(/\s*[([{][^()[\]{}]*[\u0C00-\u0C7F][^()[\]{}]*[)\]}]/g, "");
