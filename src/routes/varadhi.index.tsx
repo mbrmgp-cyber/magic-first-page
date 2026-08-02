@@ -155,9 +155,15 @@ function ListingCard({ l, note }: { l: VaradhiListing; note?: string }) {
             {new Date(l.created_at).toLocaleDateString("te-IN", { day: "2-digit", month: "short" })}
           </span>
         </div>
-        <p className="text-[11px] font-extrabold text-[#16a34a]">
-          రేటు: {amount ? `Rs. ${amount}${unit ? ` / ${unit}` : ""}` : "ధర సంప్రదించండి"}
-        </p>
+        <div className="mt-0.5 flex flex-wrap items-baseline gap-x-1">
+          <p className="text-[12px] font-extrabold text-[#16a34a]">
+            రేటు: {amount ? `Rs. ${amount}` : "ధర సంప్రదించండి"}
+          </p>
+          {amount && unit && (
+            <span className="text-[10px] font-semibold text-[#16a34a]">/ {unit}</span>
+          )}
+        </div>
+
         <div className="mt-0.5 flex flex-wrap items-center gap-1">
           <span
             className={`rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${
