@@ -853,6 +853,12 @@ function TransportSection() {
           <input className={inp} placeholder="వాహనం వివరాలు (ఉదా: టాటా ఏస్, 1 టన్ను, AP07 XX 1234)"
             value={form.vehicle_details} onChange={(e) => setForm({ ...form, vehicle_details: e.target.value })} />
 
+          <input className={inp} inputMode="decimal" placeholder="ధర — కిలోమీటరుకు (Rs. / కి.మీ.)"
+            value={form.price_per_km}
+            onChange={(e) => setForm({ ...form, price_per_km: e.target.value.replace(/[^\d.]/g, "") })} />
+
+
+
           <div className="grid grid-cols-2 gap-2">
             <input className={inp} inputMode="numeric" maxLength={10} placeholder="ఫోన్ / వాట్సాప్ నంబర్"
               value={form.contact_phone}
