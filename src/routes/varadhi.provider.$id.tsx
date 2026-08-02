@@ -101,9 +101,15 @@ function ProviderDetail() {
           </span>
         </div>
         {p.description && <p className="text-sm">{p.description}</p>}
+        <p className="text-base font-extrabold text-[#16a34a]">
+          {p.price_per_km != null && p.price_per_km !== ""
+            ? `ధర: Rs. ${p.price_per_km} / కి.మీ.`
+            : "ధర సంప్రదించండి"}
+        </p>
         {p.vehicle_details && <p className="text-xs text-[#1e3a8a]/70">🚚 {p.vehicle_details}</p>}
         {place && <p className="text-sm font-medium text-[#1e3a8a]">📍 {place}</p>}
         {p.service_areas && <p className="text-xs text-[#1e3a8a]/70">సర్వీస్ పరిధి: {p.service_areas}</p>}
+
 
         <div className="mt-2 grid grid-cols-2 gap-2">
           <a href={tel} className="rounded-xl bg-[#16a34a] py-2.5 text-white text-sm font-semibold flex items-center justify-center gap-1">
