@@ -2,7 +2,8 @@
 
 export function formatAmount(price: number | string | null | undefined): string | null {
   if (price === null || price === undefined || price === "") return null;
-  const n = Number(price);
+  const raw = typeof price === "string" ? price.replace(/[^\d.-]/g, "") : price;
+  const n = Number(raw);
   if (!Number.isFinite(n)) return null;
   return Number.isInteger(n) ? String(n) : n.toFixed(2).replace(/\.00$/, "");
 }
