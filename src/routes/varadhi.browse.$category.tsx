@@ -73,6 +73,12 @@ function BrowsePage() {
   const [state, setState] = useState("");
   const [district, setDistrict] = useState("");
   const [mandal, setMandal] = useState("");
+  const [openGroup, setOpenGroup] = useState<string | null>(() =>
+    ITEM_BOXES.some((b) => b.id === category) ? "items"
+      : SERVICE_BOXES.some((b) => b.id === category) ? "svc"
+        : null,
+  );
+
 
   const uniq = (vals: (string | null | undefined)[]) =>
     Array.from(new Set(vals.filter((v): v is string => !!v && v.trim() !== ""))).sort();
