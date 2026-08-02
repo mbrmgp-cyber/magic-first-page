@@ -65,9 +65,9 @@ function ItemDetail() {
       <div className="mt-3 rounded-2xl bg-white p-4 shadow-sm space-y-2">
         <p className="text-base font-bold text-[#1e3a8a]">{item.title}</p>
         <p className="text-2xl font-bold text-[#16a34a]">
-          {item.price != null ? `Rs. ${item.price}` : "ధర సంప్రదించండి"}
-          {item.price != null && item.unit ? <span className="text-sm font-semibold text-[#1e3a8a]/70"> / {item.unit}</span> : null}
+          {formatPrice(item.price, item.unit)}
         </p>
+
 
         <div className="flex flex-wrap gap-1.5">
           <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${inStock ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600"}`}>
