@@ -1,5 +1,5 @@
 import { useListingImage } from "@/lib/varadhi-image";
-import { formatPrice } from "@/lib/varadhi-format";
+import { formatAmount } from "@/lib/varadhi-format";
 
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
@@ -268,10 +268,13 @@ function BrowsePage() {
                       📍 {[l.village, l.mandal, l.district].filter(Boolean).join(", ") || l.city}
                     </p>
                   )}
-                  <div className="mt-0.5 flex items-center gap-2">
-                    <p className="text-[13px] font-bold text-[#16a34a]">
-                      {formatPrice(l.price, l.unit)}
-                    </p>
+                   <div className="mt-1 flex flex-wrap items-baseline gap-x-1.5">
+                     <p className="text-[13px] font-extrabold text-[#16a34a]">
+                       రేటు: {formatAmount(l.price) ? `Rs. ${formatAmount(l.price)}` : "ధర సంప్రదించండి"}
+                     </p>
+                     {formatAmount(l.price) && l.unit && (
+                       <span className="text-[11px] font-semibold text-[#16a34a]">/ {l.unit === "కేజీలు" ? "కేజీ" : l.unit}</span>
+                     )}
                     {l.stock_status === "closed" && (
                       <span className="rounded-full bg-gray-200 px-1.5 py-0.5 text-[9px] font-semibold text-gray-600">స్టాక్ లేదు</span>
                     )}

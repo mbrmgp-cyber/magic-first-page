@@ -292,6 +292,7 @@ function PostSection({ postType }: { postType: string }) {
   const save = async () => {
     const isSvc = postType !== "business";
     if (!form.title.trim()) return toast.error(isSvc ? "చేయగల పని అవసరం" : "వస్తువు పేరు అవసరం");
+    if (postType === "business" && (!form.price.trim() || Number(form.price) <= 0)) return toast.error("వస్తువు రేటు తప్పనిసరిగా నమోదు చేయండి");
     if (!form.contact_phone.trim()) return toast.error("కాంటాక్ట్ ఫోన్ నెంబరు అవసరం");
     if (isSvc && !form.service_cat) return toast.error("సేవ రకం ఎంచుకోండి");
     setSaving(true);
