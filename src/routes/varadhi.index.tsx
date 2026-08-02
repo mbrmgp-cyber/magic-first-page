@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { listListings, type VaradhiListing } from "@/lib/varadhi.functions";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import varadhiLogo from "@/assets/varadhi-logo.jpg.asset.json";
-import { Apple, Package, Recycle, MapPin, Truck, Wrench, Search, ChevronDown, Navigation } from "lucide-react";
+import { Apple, Package, Recycle, MapPin, Truck, Wrench, Search, ChevronDown, Navigation, HeartHandshake, Boxes } from "lucide-react";
 
 export const Route = createFileRoute("/varadhi/")({
   component: VaradhiHome,
@@ -21,7 +21,7 @@ type Box = {
   options: string[];
 };
 
-const CATEGORIES: Box[] = [
+const ITEM_BOXES: Box[] = [
   {
     id: "fresh", te: "తాజా వస్తువులు", en: "Fresh Items", color: "#16a34a", Icon: Apple,
     sub: "కూరగాయలు, పండ్లు, పాలు",
@@ -37,25 +37,33 @@ const CATEGORIES: Box[] = [
     sub: "సెకండ్ హ్యాండ్",
     options: ["సెకండ్ హ్యాండ్ బండ్లు", "మొబైల్స్", "ఫర్నిచర్", "ఎలక్ట్రానిక్స్", "వ్యవసాయ పరికరాలు", "ఇతర"],
   },
-  {
-    id: "realestate", te: "ఇంటి స్థలాలు & భూములు", en: "Real Estate", color: "#7c3aed", Icon: MapPin,
-    sub: "ప్లాట్లు, వ్యవసాయ భూములు",
-    options: ["ఇంటి స్థలాలు (ప్లాట్లు)", "వ్యవసాయ భూములు", "ఇళ్లు / అపార్ట్‌మెంట్లు", "షాపులు / కమర్షియల్", "అద్దెకు"],
-  },
 ];
 
-const SERVICES: Box[] = [
+const REAL_ESTATE: Box = {
+  id: "realestate", te: "ఇంటి స్థలాలు & భూములు", en: "Real Estate", color: "#7c3aed", Icon: MapPin,
+  sub: "ప్లాట్లు, వ్యవసాయ భూములు",
+  options: ["ఇంటి స్థలాలు (ప్లాట్లు)", "వ్యవసాయ భూములు", "ఇళ్లు / అపార్ట్‌మెంట్లు", "షాపులు / కమర్షియల్", "అద్దెకు"],
+};
+
+const TRANSPORT: Box = {
+  id: "transport", te: "ట్రాన్స్‌పోర్ట్", en: "Transport", color: "#0ea5e9", Icon: Truck,
+  sub: "బండ్లు & రవాణా",
+  options: ["2 వీలర్", "3 వీలర్ (ఆటో)", "4 వీలర్", "6 వీలర్", "8+ వీలర్ లారీ", "ట్రాక్టర్", "హార్వెస్టర్", "ఇతర"],
+};
+
+const SERVICE_BOXES: Box[] = [
   {
-    id: "transport", te: "ట్రాన్స్‌పోర్ట్", en: "Transport", color: "#0ea5e9", Icon: Truck,
-    sub: "బండ్లు & రవాణా",
-    options: ["2 వీలర్", "3 వీలర్ (ఆటో)", "4 వీలర్", "6 వీలర్", "8+ వీలర్ లారీ", "ట్రాక్టర్", "హార్వెస్టర్", "ఇతర"],
-  },
-  {
-    id: "services", te: "సర్వీసులు", en: "Local Services", color: "#dc2626", Icon: Wrench,
+    id: "services", te: "పే సర్వీస్", en: "Paid Services", color: "#dc2626", Icon: Wrench,
     sub: "టెక్నీషియన్లు & పనులు",
     options: ["ఎలక్ట్రీషియన్", "ప్లంబర్", "కార్పెంటర్", "మేస్త్రీ / బిల్డింగ్ పని", "పెయింటర్", "మెకానిక్", "ఇంటి పని", "వ్యవసాయ పని", "షాప్ పని", "ఆఫీసు పని", "ఇతర"],
   },
+  {
+    id: "freeservices", te: "ఫ్రీ సర్వీస్", en: "Free Services", color: "#0f9d58", Icon: HeartHandshake,
+    sub: "ఉచిత సేవలు",
+    options: ["రక్తదాత", "ఉచిత వైద్య సహాయం", "ఉచిత విద్య / ట్యూషన్", "అంబులెన్స్ సహాయం", "ఆపద సహాయం", "ఇతర"],
+  },
 ];
+
 
 function BoxCard({ box, isCategory }: { box: Box; isCategory: boolean }) {
   const [open, setOpen] = useState(false);
@@ -205,6 +213,36 @@ function BoxCard({ box, isCategory }: { box: Box; isCategory: boolean }) {
   );
 }
 
+function GroupCard({
+  te, sub, color, Icon, boxes, isCategory,
+}: { te: string; sub: string; color: string; Icon: typeof Apple; boxes: Box[]; isCategory: boolean }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className={open ? "col-span-2" : ""}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="w-full rounded-2xl bg-white p-4 text-left shadow-sm border border-black/5 active:scale-[.98] transition"
+      >
+        <div className="flex items-center justify-between">
+          <div className="h-10 w-10 rounded-xl flex items-center justify-center text-white" style={{ background: color }}>
+            <Icon className="h-5 w-5" />
+          </div>
+          <ChevronDown className={`h-4 w-4 text-[#1e3a8a]/60 transition-transform ${open ? "rotate-180" : ""}`} />
+        </div>
+        <p className="mt-2 text-sm font-semibold text-[#1e3a8a]">{te}</p>
+        <p className="text-[10px] text-[#1e3a8a]/60">{sub}</p>
+      </button>
+
+      {open && (
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          {boxes.map((b) => <BoxCard key={b.id} box={b} isCategory={isCategory} />)}
+        </div>
+      )}
+    </div>
+  );
+}
+
 
 function distanceKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
   const R = 6371;
@@ -334,14 +372,31 @@ function VaradhiHome() {
       {/* Categories */}
       <h2 className="mt-6 text-sm font-semibold text-[#1e3a8a]/80">వర్గాలు — Categories</h2>
       <div className="mt-3 grid grid-cols-2 gap-3">
-        {CATEGORIES.map((c) => <BoxCard key={c.id} box={c} isCategory />)}
+        <GroupCard
+          te="వస్తువులు"
+          sub="తాజా, కొత్త, వాడిన"
+          color="#1e3a8a"
+          Icon={Boxes}
+          boxes={ITEM_BOXES}
+          isCategory
+        />
+        <BoxCard box={REAL_ESTATE} isCategory />
       </div>
 
       {/* Services */}
       <h2 className="mt-6 text-sm font-semibold text-[#1e3a8a]/80">సర్వీసులు — Services</h2>
       <div className="mt-3 grid grid-cols-2 gap-3">
-        {SERVICES.map((s) => <BoxCard key={s.id} box={s} isCategory={false} />)}
+        <BoxCard box={TRANSPORT} isCategory={false} />
+        <GroupCard
+          te="సర్వీసులు"
+          sub="పే సర్వీస్, ఫ్రీ సర్వీస్"
+          color="#dc2626"
+          Icon={Wrench}
+          boxes={SERVICE_BOXES}
+          isCategory={false}
+        />
       </div>
+
 
 
       <p className="mt-8 text-center text-[10px] text-[#1e3a8a]/50">

@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { listListings, listProviders, type VaradhiListing, type VaradhiProvider } from "@/lib/varadhi.functions";
-import { ArrowLeft, Search, Apple, Package, Recycle, MapPin, Truck, Wrench } from "lucide-react";
+import { ArrowLeft, Search, Apple, Package, Recycle, MapPin, Truck, Wrench, HeartHandshake, Boxes, ChevronDown } from "lucide-react";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { STATES, districtsFor } from "@/lib/ap-locations";
@@ -12,14 +12,30 @@ export const Route = createFileRoute("/varadhi/browse/$category")({
   component: BrowsePage,
 });
 
-const BOXES = [
+type Box = { id: string; te: string; color: string; Icon: typeof Apple };
+
+const ITEM_BOXES: Box[] = [
   { id: "fresh", te: "తాజా వస్తువులు", color: "#16a34a", Icon: Apple },
   { id: "new", te: "కొత్త వస్తువులు", color: "#2563eb", Icon: Package },
   { id: "used", te: "వాడిన వస్తువులు", color: "#f97316", Icon: Recycle },
-  { id: "realestate", te: "ఇంటి స్థలాలు & భూములు", color: "#7c3aed", Icon: MapPin },
-  { id: "transport", te: "ట్రాన్స్‌పోర్ట్", color: "#0ea5e9", Icon: Truck },
-  { id: "services", te: "సర్వీసులు", color: "#dc2626", Icon: Wrench },
 ];
+
+const SERVICE_BOXES: Box[] = [
+  { id: "services", te: "పే సర్వీస్", color: "#dc2626", Icon: Wrench },
+  { id: "freeservices", te: "ఫ్రీ సర్వీస్", color: "#0f9d58", Icon: HeartHandshake },
+];
+
+type Group =
+  | { kind: "single"; box: Box }
+  | { kind: "group"; id: string; te: string; color: string; Icon: typeof Apple; boxes: Box[] };
+
+const GROUPS: Group[] = [
+  { kind: "group", id: "items", te: "వస్తువులు", color: "#1e3a8a", Icon: Boxes, boxes: ITEM_BOXES },
+  { kind: "single", box: { id: "realestate", te: "ఇంటి స్థలాలు & భూములు", color: "#7c3aed", Icon: MapPin } },
+  { kind: "single", box: { id: "transport", te: "ట్రాన్స్‌పోర్ట్", color: "#0ea5e9", Icon: Truck } },
+  { kind: "group", id: "svc", te: "సర్వీసులు", color: "#dc2626", Icon: Wrench, boxes: SERVICE_BOXES },
+];
+
 
 function BrowsePage() {
   const { category } = Route.useParams();
@@ -57,6 +73,12 @@ function BrowsePage() {
   const [state, setState] = useState("");
   const [district, setDistrict] = useState("");
   const [mandal, setMandal] = useState("");
+  const [openGroup, setOpenGroup] = useState<string | null>(() =>
+    ITEM_BOXES.some((b) => b.id === category) ? "items"
+      : SERVICE_BOXES.some((b) => b.id === category) ? "svc"
+        : null,
+  );
+
 
   const uniq = (vals: (string | null | undefined)[]) =>
     Array.from(new Set(vals.filter((v): v is string => !!v && v.trim() !== ""))).sort();
@@ -93,17 +115,23 @@ function BrowsePage() {
   const areaListings = allListings.filter(inArea);
   const areaProviders = allProviders.filter(providerInArea);
 
-  const countFor = (id: string) =>
-    id === "transport" || id === "services"
-      ? areaProviders.filter((p) => p.provider_type === (id === "transport" ? "transport" : "service")).length
-      : areaListings.filter((l) => l.category === id).length;
+  const isFree = (l: VaradhiListing) => ((l as unknown as { post_type?: string }).post_type ?? "business") === "free";
+
+  const countFor = (id: string) => {
+    if (id === "transport" || id === "services") {
+      return areaProviders.filter((p) => p.provider_type === (id === "transport" ? "transport" : "service")).length;
+    }
+    if (id === "freeservices") return areaListings.filter(isFree).length;
+    return areaListings.filter((l) => l.category === id && !isFree(l)).length;
+  };
 
   const shownListings = areaListings
-    .filter((l) => l.category === category)
+    .filter((l) => (category === "freeservices" ? isFree(l) : l.category === category && !isFree(l)))
     .filter((l) =>
       !needle ||
       [l.title, l.description, l.sub_category, l.city, l.village, l.mandal, l.district, l.state].some((v) =>
         (v ?? "").toLowerCase().includes(needle)));
+
   const shownProviders = areaProviders
     .filter((p) => p.provider_type === providerType)
     .filter((p) =>
@@ -157,9 +185,9 @@ function BrowsePage() {
         </button>
       )}
 
-      {/* 6 category boxes — counts reflect the selected area */}
-      <div className="mt-3 grid grid-cols-3 gap-2">
-        {BOXES.map((b) => {
+      {/* Grouped category boxes — counts reflect the selected area */}
+      {(() => {
+        const boxBtn = (b: Box) => {
           const active = b.id === category;
           return (
             <button
@@ -176,8 +204,44 @@ function BrowsePage() {
               <p className={`text-[10px] ${active ? "text-white/80" : "text-[#1e3a8a]/50"}`}>{countFor(b.id)}</p>
             </button>
           );
-        })}
-      </div>
+        };
+        return (
+          <div className="mt-3 space-y-2">
+            <div className="grid grid-cols-3 gap-2">
+              {GROUPS.map((g) => {
+                if (g.kind === "single") return boxBtn(g.box);
+                const isOpen = openGroup === g.id;
+                const total = g.boxes.reduce((n, b) => n + countFor(b.id), 0);
+                return (
+                  <button
+                    key={g.id}
+                    type="button"
+                    onClick={() => setOpenGroup(isOpen ? null : g.id)}
+                    className={`rounded-2xl border p-2 text-left transition active:scale-[.98] ${
+                      isOpen ? "border-transparent text-white shadow" : "border-black/5 bg-white text-[#1e3a8a]"
+                    }`}
+                    style={isOpen ? { background: g.color } : undefined}
+                  >
+                    <div className="flex items-center justify-between">
+                      <g.Icon className="h-4 w-4" style={isOpen ? undefined : { color: g.color }} />
+                      <ChevronDown className={`h-3.5 w-3.5 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                    </div>
+                    <p className="mt-1 text-[10px] font-semibold leading-tight">{g.te}</p>
+                    <p className={`text-[10px] ${isOpen ? "text-white/80" : "text-[#1e3a8a]/50"}`}>{total}</p>
+                  </button>
+                );
+              })}
+            </div>
+
+            {GROUPS.filter((g): g is Extract<Group, { kind: "group" }> => g.kind === "group" && openGroup === g.id).map((g) => (
+              <div key={g.id} className="grid grid-cols-3 gap-2 rounded-2xl bg-white/60 p-2">
+                {g.boxes.map(boxBtn)}
+              </div>
+            ))}
+          </div>
+        );
+      })()}
+
 
       {loading && <p className="mt-6 text-sm text-center text-[#1e3a8a]/60">లోడ్ అవుతోంది…</p>}
 
