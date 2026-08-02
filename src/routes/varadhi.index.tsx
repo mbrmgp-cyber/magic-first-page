@@ -213,6 +213,36 @@ function BoxCard({ box, isCategory }: { box: Box; isCategory: boolean }) {
   );
 }
 
+function GroupCard({
+  te, sub, color, Icon, boxes, isCategory,
+}: { te: string; sub: string; color: string; Icon: typeof Apple; boxes: Box[]; isCategory: boolean }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className={open ? "col-span-2" : ""}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="w-full rounded-2xl bg-white p-4 text-left shadow-sm border border-black/5 active:scale-[.98] transition"
+      >
+        <div className="flex items-center justify-between">
+          <div className="h-10 w-10 rounded-xl flex items-center justify-center text-white" style={{ background: color }}>
+            <Icon className="h-5 w-5" />
+          </div>
+          <ChevronDown className={`h-4 w-4 text-[#1e3a8a]/60 transition-transform ${open ? "rotate-180" : ""}`} />
+        </div>
+        <p className="mt-2 text-sm font-semibold text-[#1e3a8a]">{te}</p>
+        <p className="text-[10px] text-[#1e3a8a]/60">{sub}</p>
+      </button>
+
+      {open && (
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          {boxes.map((b) => <BoxCard key={b.id} box={b} isCategory={isCategory} />)}
+        </div>
+      )}
+    </div>
+  );
+}
+
 
 function distanceKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
   const R = 6371;
