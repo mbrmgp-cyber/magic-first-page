@@ -179,9 +179,9 @@ function BrowsePage() {
         </button>
       )}
 
-      {/* 6 category boxes — counts reflect the selected area */}
-      <div className="mt-3 grid grid-cols-3 gap-2">
-        {BOXES.map((b) => {
+      {/* Grouped category boxes — counts reflect the selected area */}
+      {(() => {
+        const boxBtn = (b: Box) => {
           const active = b.id === category;
           return (
             <button
@@ -198,8 +198,44 @@ function BrowsePage() {
               <p className={`text-[10px] ${active ? "text-white/80" : "text-[#1e3a8a]/50"}`}>{countFor(b.id)}</p>
             </button>
           );
-        })}
-      </div>
+        };
+        return (
+          <div className="mt-3 space-y-2">
+            <div className="grid grid-cols-3 gap-2">
+              {GROUPS.map((g) => {
+                if (g.kind === "single") return boxBtn(g.box);
+                const isOpen = openGroup === g.id;
+                const total = g.boxes.reduce((n, b) => n + countFor(b.id), 0);
+                return (
+                  <button
+                    key={g.id}
+                    type="button"
+                    onClick={() => setOpenGroup(isOpen ? null : g.id)}
+                    className={`rounded-2xl border p-2 text-left transition active:scale-[.98] ${
+                      isOpen ? "border-transparent text-white shadow" : "border-black/5 bg-white text-[#1e3a8a]"
+                    }`}
+                    style={isOpen ? { background: g.color } : undefined}
+                  >
+                    <div className="flex items-center justify-between">
+                      <g.Icon className="h-4 w-4" style={isOpen ? undefined : { color: g.color }} />
+                      <ChevronDown className={`h-3.5 w-3.5 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                    </div>
+                    <p className="mt-1 text-[10px] font-semibold leading-tight">{g.te}</p>
+                    <p className={`text-[10px] ${isOpen ? "text-white/80" : "text-[#1e3a8a]/50"}`}>{total}</p>
+                  </button>
+                );
+              })}
+            </div>
+
+            {GROUPS.filter((g): g is Extract<Group, { kind: "group" }> => g.kind === "group" && openGroup === g.id).map((g) => (
+              <div key={g.id} className="grid grid-cols-3 gap-2 rounded-2xl bg-white/60 p-2">
+                {g.boxes.map(boxBtn)}
+              </div>
+            ))}
+          </div>
+        );
+      })()}
+
 
       {loading && <p className="mt-6 text-sm text-center text-[#1e3a8a]/60">లోడ్ అవుతోంది…</p>}
 
