@@ -767,13 +767,29 @@ function TransportSection() {
       service_areas: p.service_areas ?? "మండలంలో",
       city: p.city ?? "",
       description: p.description ?? "",
+      contact_phone: (p as any).contact_phone ?? "",
+      photo_url: (p as any).photo_url ?? "",
     });
     setOpen(true);
+  };
+
+  const uploadVehiclePhoto = async (file: File) => {
+    const { data: sess } = await supabase.auth.getSession();
+    const uid = sess.session?.user.id;
+    if (!uid) return;
+    const path = `${uid}/listing-transport-${Date.now()}-${file.name}`;
+    const { error } = await supabase.storage.from("varadhi-listings").upload(path, file, { upsert: true });
+    if (error) { toast.error(error.message); return; }
+    setForm((f) => ({ ...f, photo_url: path }));
+    toast.success("ఫోటో అప్‌లోడ్ అయింది");
   };
 
   const save = async () => {
     if (!form.title.trim()) return toast.error("వాహనం / సర్వీస్ పేరు అవసరం");
     if (!form.vehicle_details.trim()) return toast.error("వాహనం వివరాలు అవసరం");
+    if (!/^\d{10}$/.test(form.contact_phone.replace(/\D/g, "").slice(-10))) {
+      return toast.error("సరైన 10 అంకెల ఫోన్ నంబర్ ఇవ్వండి");
+    }
     setSaving(true);
     try {
       await upsert({
@@ -786,6 +802,8 @@ function TransportSection() {
           service_areas: form.service_areas || null,
           city: form.city.trim() || null,
           description: form.description.trim() || null,
+          contact_phone: form.contact_phone.replace(/\D/g, "").slice(-10),
+          photo_url: form.photo_url || null,
         } as any,
       });
       toast.success("సేవ్ అయింది");
