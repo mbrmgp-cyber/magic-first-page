@@ -1,0 +1,1 @@
+ALTER TABLE public.varadhi_listings DROP CONSTRAINT IF EXISTS varadhi_listings_category_check;
