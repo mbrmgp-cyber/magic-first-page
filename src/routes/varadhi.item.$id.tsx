@@ -5,7 +5,7 @@ import { getListing, logClick, type VaradhiListing, type VaradhiProvider, type V
 import { useListingImage } from "@/lib/varadhi-image";
 import { formatPrice } from "@/lib/varadhi-format";
 
-import { ArrowLeft, Phone, MessageCircle, Truck } from "lucide-react";
+import { ArrowLeft, Phone, MessageCircle, Truck, Share2 } from "lucide-react";
 
 export const Route = createFileRoute("/varadhi/item/$id")({
   component: ItemDetail,
@@ -124,6 +124,28 @@ function ItemDetail() {
               <MessageCircle className="h-4 w-4" /> WhatsApp
             </a>
           </div>
+          <button
+            type="button"
+            onClick={() => {
+              const text = [
+                item.title,
+                `రేటు: ${formatPrice(item.price, item.unit)}`,
+                place ? `📍 ${place}` : "",
+                phone ? `📞 ${phone}` : "",
+                typeof window !== "undefined" ? window.location.href : "",
+              ].filter(Boolean).join("\n");
+              if (typeof navigator !== "undefined" && (navigator as any).share) {
+                (navigator as any).share({ title: item.title, text }).catch(() => {
+                  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+                });
+                return;
+              }
+              window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+            }}
+            className="mt-2 w-full rounded-xl bg-[#1e3a8a] py-2.5 text-white text-sm font-semibold flex items-center justify-center gap-1"
+          >
+            <Share2 className="h-4 w-4" /> షేర్ చేయండి
+          </button>
         </div>
       )}
 
