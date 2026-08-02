@@ -109,17 +109,23 @@ function BrowsePage() {
   const areaListings = allListings.filter(inArea);
   const areaProviders = allProviders.filter(providerInArea);
 
-  const countFor = (id: string) =>
-    id === "transport" || id === "services"
-      ? areaProviders.filter((p) => p.provider_type === (id === "transport" ? "transport" : "service")).length
-      : areaListings.filter((l) => l.category === id).length;
+  const isFree = (l: VaradhiListing) => ((l as unknown as { post_type?: string }).post_type ?? "business") === "free";
+
+  const countFor = (id: string) => {
+    if (id === "transport" || id === "services") {
+      return areaProviders.filter((p) => p.provider_type === (id === "transport" ? "transport" : "service")).length;
+    }
+    if (id === "freeservices") return areaListings.filter(isFree).length;
+    return areaListings.filter((l) => l.category === id && !isFree(l)).length;
+  };
 
   const shownListings = areaListings
-    .filter((l) => l.category === category)
+    .filter((l) => (category === "freeservices" ? isFree(l) : l.category === category && !isFree(l)))
     .filter((l) =>
       !needle ||
       [l.title, l.description, l.sub_category, l.city, l.village, l.mandal, l.district, l.state].some((v) =>
         (v ?? "").toLowerCase().includes(needle)));
+
   const shownProviders = areaProviders
     .filter((p) => p.provider_type === providerType)
     .filter((p) =>
