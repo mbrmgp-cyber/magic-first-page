@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { getListing, logClick, type VaradhiListing, type VaradhiProvider, type VaradhiProfile } from "@/lib/varadhi.functions";
+import { useListingImage } from "@/lib/varadhi-image";
 import { ArrowLeft, Phone, MessageCircle, Truck } from "lucide-react";
 
 export const Route = createFileRoute("/varadhi/item/$id")({
@@ -31,6 +32,9 @@ function ItemDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+  const img0 = useListingImage(item?.images?.[0]);
+  const img1 = useListingImage(item?.images?.[1]);
+
   if (loading) return <p className="p-6 text-center text-sm">లోడ్ అవుతోంది…</p>;
   if (!item) return <p className="p-6 text-center text-sm">వస్తువు దొరకలేదు</p>;
 
@@ -49,13 +53,13 @@ function ItemDetail() {
         <h1 className="text-base font-bold text-[#1e3a8a] truncate">{item.title}</h1>
       </div>
 
-      {item.images?.[0] ? (
-        <img src={item.images[0]} alt={item.title} className="mt-3 w-full aspect-square rounded-2xl object-cover bg-white" />
+      {img0 ? (
+        <img src={img0} alt={item.title} className="mt-3 w-full aspect-square rounded-2xl object-cover bg-white" />
       ) : (
         <div className="mt-3 w-full aspect-square rounded-2xl bg-white flex items-center justify-center text-5xl">🛒</div>
       )}
-      {item.images?.[1] && (
-        <img src={item.images[1]} alt="లొకేషన్" className="mt-2 w-full aspect-video rounded-2xl object-cover bg-white" />
+      {img1 && (
+        <img src={img1} alt="లొకేషన్" className="mt-2 w-full aspect-video rounded-2xl object-cover bg-white" />
       )}
 
       <div className="mt-3 rounded-2xl bg-white p-4 shadow-sm space-y-2">

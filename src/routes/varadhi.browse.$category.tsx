@@ -1,3 +1,4 @@
+import { useListingImage } from "@/lib/varadhi-image";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -307,11 +308,12 @@ function EmptyState({ msg }: { msg: string }) {
 
 function ListingThumb({ src, alt }: { src?: string | null; alt?: string }) {
   const [failed, setFailed] = useState(false);
-  const show = src && !failed;
+  const resolved = useListingImage(src);
+  const show = resolved && !failed;
   return (
     <div className="h-14 w-14 shrink-0 rounded-xl bg-[#f7f7fb] flex items-center justify-center overflow-hidden border border-black/5">
       {show ? (
-        <img src={src} alt={alt ?? ""} loading="lazy" onError={() => setFailed(true)} className="h-full w-full object-cover" />
+        <img src={resolved ?? undefined} alt={alt ?? ""} loading="lazy" onError={() => setFailed(true)} className="h-full w-full object-cover" />
       ) : (
         <ImageOff className="h-5 w-5 text-[#1e3a8a]/30" />
       )}

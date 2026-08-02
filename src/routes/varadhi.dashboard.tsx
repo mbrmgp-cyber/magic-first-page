@@ -246,7 +246,7 @@ function PostSection({ postType }: { postType: string }) {
     const uid = sess.session?.user.id;
     if (!uid) return;
     const path = `${uid}/listing-${Date.now()}-${file.name}`;
-    const { error } = await supabase.storage.from("varadhi-proofs").upload(path, file, { upsert: true });
+    const { error } = await supabase.storage.from("varadhi-listings").upload(path, file, { upsert: true });
     if (error) { toast.error(error.message); return; }
     setForm((f) => ({ ...f, [field]: path }));
     toast.success("ఫోటో అప్‌లోడ్ అయింది");
