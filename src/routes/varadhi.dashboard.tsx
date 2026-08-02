@@ -771,6 +771,8 @@ function TransportSection() {
       description: p.description ?? "",
       contact_phone: (p as any).contact_phone ?? "",
       photo_url: (p as any).photo_url ?? "",
+      price_per_km: (p as any).price_per_km != null ? String((p as any).price_per_km) : "",
+
     });
     setOpen(true);
   };
