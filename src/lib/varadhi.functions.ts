@@ -139,7 +139,10 @@ export type VaradhiProvider = {
   subscription_expires_at: string | null;
   contact_phone?: string | null;
   photo_url?: string | null;
+  price_per_km?: number | string | null;
+  location_full?: string | null;
 };
+
 
 // -------- Profile
 export const getMyVaradhiProfile = createServerFn({ method: "GET" })
