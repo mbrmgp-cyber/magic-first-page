@@ -290,19 +290,11 @@ function BrowsePage() {
         <div className="mt-4 space-y-3">
           {shownProviders.length === 0 && <EmptyState msg="ఈ ఏరియాలో ఏ సర్వీసులు లేవు" />}
           {shownProviders.map((p) => (
-            <Link key={p.id} to="/varadhi/provider/$id" params={{ id: p.id }}
-              className="block rounded-2xl bg-white p-3 shadow-sm border border-black/5 active:scale-[.99]">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-[#1e3a8a]">{p.title}</p>
-                  <p className="text-[11px] text-[#1e3a8a]/60">{p.sub_type} · {p.city ?? ""}</p>
-                </div>
-                <span className="text-[10px] rounded-full bg-green-100 text-green-700 px-2 py-0.5 font-semibold">ONLINE</span>
-              </div>
-            </Link>
+            <ProviderCard key={p.id} p={p} />
           ))}
         </div>
       )}
+
     </div>
   );
 }
