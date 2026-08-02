@@ -808,6 +808,8 @@ function TransportSection() {
           description: form.description.trim() || null,
           contact_phone: form.contact_phone.replace(/\D/g, "").slice(-10),
           photo_url: form.photo_url || null,
+          price_per_km: form.price_per_km.trim() ? Number(form.price_per_km) : null,
+
         } as any,
       });
       toast.success("సేవ్ అయింది");
