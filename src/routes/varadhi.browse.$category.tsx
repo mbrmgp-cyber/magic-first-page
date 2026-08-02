@@ -12,14 +12,30 @@ export const Route = createFileRoute("/varadhi/browse/$category")({
   component: BrowsePage,
 });
 
-const BOXES = [
+type Box = { id: string; te: string; color: string; Icon: typeof Apple };
+
+const ITEM_BOXES: Box[] = [
   { id: "fresh", te: "తాజా వస్తువులు", color: "#16a34a", Icon: Apple },
   { id: "new", te: "కొత్త వస్తువులు", color: "#2563eb", Icon: Package },
   { id: "used", te: "వాడిన వస్తువులు", color: "#f97316", Icon: Recycle },
-  { id: "realestate", te: "ఇంటి స్థలాలు & భూములు", color: "#7c3aed", Icon: MapPin },
-  { id: "transport", te: "ట్రాన్స్‌పోర్ట్", color: "#0ea5e9", Icon: Truck },
-  { id: "services", te: "సర్వీసులు", color: "#dc2626", Icon: Wrench },
 ];
+
+const SERVICE_BOXES: Box[] = [
+  { id: "services", te: "పే సర్వీస్", color: "#dc2626", Icon: Wrench },
+  { id: "freeservices", te: "ఫ్రీ సర్వీస్", color: "#0f9d58", Icon: HeartHandshake },
+];
+
+type Group =
+  | { kind: "single"; box: Box }
+  | { kind: "group"; id: string; te: string; color: string; Icon: typeof Apple; boxes: Box[] };
+
+const GROUPS: Group[] = [
+  { kind: "group", id: "items", te: "వస్తువులు", color: "#1e3a8a", Icon: Boxes, boxes: ITEM_BOXES },
+  { kind: "single", box: { id: "realestate", te: "ఇంటి స్థలాలు & భూములు", color: "#7c3aed", Icon: MapPin } },
+  { kind: "single", box: { id: "transport", te: "ట్రాన్స్‌పోర్ట్", color: "#0ea5e9", Icon: Truck } },
+  { kind: "group", id: "svc", te: "సర్వీసులు", color: "#dc2626", Icon: Wrench, boxes: SERVICE_BOXES },
+];
+
 
 function BrowsePage() {
   const { category } = Route.useParams();
