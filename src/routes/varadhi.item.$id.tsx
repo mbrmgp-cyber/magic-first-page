@@ -5,7 +5,7 @@ import { getListing, logClick, type VaradhiListing, type VaradhiProvider, type V
 import { useListingImage } from "@/lib/varadhi-image";
 import { formatPrice } from "@/lib/varadhi-format";
 
-import { ArrowLeft, Phone, MessageCircle, Truck } from "lucide-react";
+import { ArrowLeft, Phone, MessageCircle, Truck, Share2 } from "lucide-react";
 
 export const Route = createFileRoute("/varadhi/item/$id")({
   component: ItemDetail,
