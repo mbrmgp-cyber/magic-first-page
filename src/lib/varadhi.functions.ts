@@ -318,6 +318,22 @@ export const getMyRewards = createServerFn({ method: "GET" })
   });
 
 // -------- Upload helper (signed URL for private buckets)
+// Listing photos live in private buckets; anyone browsing Vaaradhi needs to see
+// them, so we sign the path server-side. Restricted to listing image paths only.
+export const resolveListingImage = createServerFn({ method: "GET" })
+  .inputValidator((d: { path: string }) => d)
+  .handler(async ({ data }) => {
+    const path = (data.path ?? "").trim();
+    if (!path || path.startsWith("http")) return { url: path || null };
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    for (const bucket of ["varadhi-listings", "varadhi-proofs"]) {
+      if (bucket === "varadhi-proofs" && !path.includes("listing-")) continue;
+      const { data: s } = await supabaseAdmin.storage.from(bucket).createSignedUrl(path, 60 * 60 * 6);
+      if (s?.signedUrl) return { url: s.signedUrl };
+    }
+    return { url: null };
+  });
+
 export const getSignedListingUrl = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { path: string }) => d)
