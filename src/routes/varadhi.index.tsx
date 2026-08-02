@@ -122,8 +122,8 @@ function ListingCard({ l, note }: { l: VaradhiListing; note?: string }) {
   const [failed, setFailed] = useState(false);
   const src = useListingImage(l.images?.[0]);
   const showImg = !!src && !failed;
-  const priceText =
-    l.price != null ? `Rs. ${l.price}${l.unit ? ` / ${l.unit}` : ""}` : "ధర సంప్రదించండి";
+  const priceText = formatPrice(l.price, l.unit);
+
   const stockQty = (l as unknown as { stock_qty?: number | string | null }).stock_qty;
   const inStock = l.stock_status !== "closed";
   return (
