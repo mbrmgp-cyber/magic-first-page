@@ -2356,6 +2356,66 @@ export type Database = {
         }
         Relationships: []
       }
+      varadhi_point_events: {
+        Row: {
+          actor_user_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          note: string | null
+          points: number
+          ref_id: string | null
+          ref_type: string | null
+          user_id: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          note?: string | null
+          points?: number
+          ref_id?: string | null
+          ref_type?: string | null
+          user_id: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          note?: string | null
+          points?: number
+          ref_id?: string | null
+          ref_type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      varadhi_point_settings: {
+        Row: {
+          enforce_limit: boolean
+          free_monthly_points: number
+          id: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          enforce_limit?: boolean
+          free_monthly_points?: number
+          id?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          enforce_limit?: boolean
+          free_monthly_points?: number
+          id?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       varadhi_profiles: {
         Row: {
           aadhaar_url: string | null
@@ -2923,10 +2983,20 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      varadhi_award_point: {
+        Args: {
+          _event_type: string
+          _ref_id?: string
+          _ref_type?: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
       varadhi_log_click: {
         Args: { _target_id: string; _target_type: string }
         Returns: undefined
       }
+      varadhi_month_points: { Args: { _user_id: string }; Returns: number }
     }
     Enums: {
       app_role: "mbr_admin" | "varadhi_admin"
