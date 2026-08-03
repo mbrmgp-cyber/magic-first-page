@@ -3,13 +3,23 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { amIVaradhiAdmin, adminListVaradhiProfiles, adminReviewVaradhiProfile } from "@/lib/varadhi.functions";
+import {
+  amIVaradhiAdmin,
+  adminListVaradhiProfiles,
+  adminReviewVaradhiProfile,
+  adminGetPointSettings,
+  adminUpdatePointSettings,
+  adminPointsOverview,
+} from "@/lib/varadhi.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { CheckCircle2, XCircle, Clock, ExternalLink, ShieldCheck } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, ExternalLink, ShieldCheck, Coins, Upload, Phone } from "lucide-react";
+
 
 export const Route = createFileRoute("/varadhi/admin")({
   ssr: false,
