@@ -28,3 +28,9 @@ export function formatPrice(
   if (!amt) return free ? "సంప్రదించండి" : unit ? `ధర సంప్రదించండి (${unit})` : "ధర సంప్రదించండి";
   return unit ? `Rs. ${amt} / ${unit}` : `Rs. ${amt}`;
 }
+
+/** Free services show availability wording instead of stock wording. */
+export function stockLabel(inStock: boolean, free?: boolean): string {
+  if (free) return inStock ? "అందుబాటులో ఉంది" : "అందుబాటులో లేదు";
+  return inStock ? "స్టాక్ ఉంది" : "స్టాక్ లేదు";
+}
