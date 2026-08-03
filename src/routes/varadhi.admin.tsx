@@ -10,7 +10,9 @@ import {
   adminGetPointSettings,
   adminUpdatePointSettings,
   adminPointsOverview,
+  adminUserPointHistory,
 } from "@/lib/varadhi.functions";
+import { STATES, districtsFor } from "@/lib/ap-locations";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +20,8 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { CheckCircle2, XCircle, Clock, ExternalLink, ShieldCheck, Coins, Upload, Phone } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, ExternalLink, ShieldCheck, Coins, Upload, Phone, MapPin, History as HistoryIcon } from "lucide-react";
+
 
 
 export const Route = createFileRoute("/varadhi/admin")({
