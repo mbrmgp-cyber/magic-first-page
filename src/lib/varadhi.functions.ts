@@ -296,10 +296,13 @@ export const upsertProvider = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: Partial<VaradhiProvider> & { id?: string }) => d)
   .handler(async ({ data, context }) => {
+    const points = await import("@/lib/varadhi-points.server");
+    await points.assertPointsAvailable(context.supabase, context.userId);
     const row = { ...data, user_id: context.userId };
     const { data: out, error } = await context.supabase
       .from("varadhi_providers").upsert(row as any).select().single();
     if (error) throw new Error(error.message);
+    await points.awardPoint(context.supabase, context.userId, "upload", "provider", (out as any)?.id);
     return { provider: out };
   });
 
