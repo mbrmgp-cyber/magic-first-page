@@ -55,6 +55,7 @@ function VaradhiAdmin() {
   const adminQ = useQuery({ queryKey: ["varadhi-am-i-admin"], queryFn: () => checkAdmin(), enabled: authed === true });
   const isAdmin = adminQ.data?.isAdmin ?? false;
 
+  const [tab, setTab] = useState<"reg" | "points">("reg");
   const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "all">("pending");
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
