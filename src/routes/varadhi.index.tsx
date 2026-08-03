@@ -189,6 +189,96 @@ function ListingCard({ l, note }: { l: VaradhiListing; note?: string }) {
 }
 
 
+const VARADHI_SHARE_URL = `${PUBLIC_APP_ORIGIN}/varadhi`;
+
+function ShareApp() {
+  const [qrUrl, setQrUrl] = useState<string>("");
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    QRCode.toDataURL(VARADHI_SHARE_URL, {
+      width: 240,
+      margin: 1,
+      color: { dark: "#1e3a8a", light: "#ffffff" },
+    })
+      .then(setQrUrl)
+      .catch(() => undefined);
+  }, []);
+
+  const shareText = `వారధి — అమ్మండి, కొనండి, రవాణా & సర్వీసులు. ఇప్పుడే ట్రై చేయండి: ${VARADHI_SHARE_URL}`;
+
+  const share = async () => {
+    if (typeof navigator !== "undefined" && (navigator as any).share) {
+      try {
+        await (navigator as any).share({ title: "వారధి", text: shareText, url: VARADHI_SHARE_URL });
+        return;
+      } catch {
+        /* cancelled → fall through */
+      }
+    }
+    window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank");
+  };
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(VARADHI_SHARE_URL);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch { /* ignore */ }
+  };
+
+  return (
+    <div className="mt-6 rounded-2xl border border-[#1e3a8a]/15 bg-white p-4 shadow-sm">
+      <div className="flex items-center gap-1.5">
+        <Share2 className="h-4 w-4 text-[#f97316]" />
+        <h2 className="text-sm font-semibold text-[#1e3a8a]/80">ఫ్రెండ్స్‌కు షేర్ చేయండి</h2>
+      </div>
+
+      <div className="mt-3 flex flex-col items-center gap-3">
+        {qrUrl ? (
+          <div className="rounded-xl border-2 border-[#1e3a8a]/10 p-2 bg-white">
+            <img src={qrUrl} alt="Vaaradhi QR" width={160} height={160} className="h-40 w-40" />
+          </div>
+        ) : (
+          <div className="h-40 w-40 animate-pulse rounded-xl bg-[#1e3a8a]/5" />
+        )}
+        <p className="text-center text-[11px] text-[#1e3a8a]/60">
+          స్కాన్ చేసి వారధి ఆప్ ఓపెన్ చేయండి
+        </p>
+      </div>
+
+      <div className="mt-3 flex items-center gap-2 rounded-xl bg-[#f2f4fb] px-3 py-2">
+        <span className="min-w-0 flex-1 truncate text-[11px] font-medium text-[#1e3a8a]">{VARADHI_SHARE_URL}</span>
+        <button
+          type="button"
+          onClick={copy}
+          className="shrink-0 rounded-lg bg-[#1e3a8a] px-2.5 py-1.5 text-[11px] font-semibold text-white active:scale-95"
+        >
+          {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+        </button>
+      </div>
+
+      <div className="mt-2.5 grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={share}
+          className="flex items-center justify-center gap-1.5 rounded-xl bg-[#16a34a] py-2.5 text-sm font-semibold text-white active:scale-95"
+        >
+          <Share2 className="h-4 w-4" /> షేర్
+        </button>
+        <a
+          href={`https://wa.me/?text=${encodeURIComponent(shareText)}`}
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center justify-center gap-1.5 rounded-xl bg-[#25d366] py-2.5 text-sm font-semibold text-white active:scale-95"
+        >
+          <MessageCircle className="h-4 w-4" /> WhatsApp
+        </a>
+      </div>
+    </div>
+  );
+}
+
 function VaradhiHome() {
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [q, setQ] = useState("");
