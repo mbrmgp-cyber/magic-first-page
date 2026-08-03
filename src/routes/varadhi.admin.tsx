@@ -399,7 +399,7 @@ function PointsPanel() {
                   className="h-7 px-2 text-[11px] ml-auto"
                   onClick={() => setOpenUser(openUser === r.user_id ? null : r.user_id)}
                 >
-                  <History className="h-3 w-3 mr-1" />
+                  <HistoryIcon className="h-3 w-3 mr-1" />
                   {openUser === r.user_id ? "హిస్టరీ మూసివేయి" : "పాయింట్ల హిస్టరీ"}
                 </Button>
               </div>
