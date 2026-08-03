@@ -706,7 +706,7 @@ function PostSection({ postType }: { postType: string }) {
                 className={`text-[10px] px-2 py-1 rounded-full font-bold ${
                   l.stock_status === "running" ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600"
                 }`}>
-                {l.stock_status === "running" ? "స్టాక్ ఉంది" : "స్టాక్ లేదు"}
+                {stockLabel(l.stock_status === "running", isFreeListing(l))}
               </button>
               <button onClick={() => edit(l)} className="p-1.5 text-[#1e3a8a]"><Pencil className="h-4 w-4" /></button>
               <button onClick={() => del({ data: { id: l.id } }).then(load)} className="p-1.5 text-red-500">

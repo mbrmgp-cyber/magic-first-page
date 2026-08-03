@@ -172,11 +172,9 @@ function ListingCard({ l, note }: { l: VaradhiListing; note?: string }) {
               inStock ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600"
             }`}
           >
-            {inStock
-              ? stockQty
-                ? `స్టాక్: ${stockQty}${unit ? ` ${unit}` : ""}`
-                : "స్టాక్ ఉంది"
-              : "స్టాక్ లేదు"}
+            {inStock && stockQty && !isFreeListing(l)
+              ? `స్టాక్: ${stockQty}${unit ? ` ${unit}` : ""}`
+              : stockLabel(inStock, isFreeListing(l))}
           </span>
         </div>
         <p className="truncate text-[10px] text-[#1e3a8a]/60">
