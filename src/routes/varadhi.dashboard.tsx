@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { formatPrice, isFreeListing } from "@/lib/varadhi-format";
+import { formatPrice, isFreeListing, stockLabel } from "@/lib/varadhi-format";
 
 import { useServerFn } from "@tanstack/react-start";
 import {

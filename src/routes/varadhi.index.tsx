@@ -1,5 +1,5 @@
 import { useListingImage } from "@/lib/varadhi-image";
-import { formatAmount, isFreeListing } from "@/lib/varadhi-format";
+import { formatAmount, isFreeListing, stockLabel } from "@/lib/varadhi-format";
 
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
