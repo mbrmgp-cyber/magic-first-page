@@ -3,13 +3,23 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { amIVaradhiAdmin, adminListVaradhiProfiles, adminReviewVaradhiProfile } from "@/lib/varadhi.functions";
+import {
+  amIVaradhiAdmin,
+  adminListVaradhiProfiles,
+  adminReviewVaradhiProfile,
+  adminGetPointSettings,
+  adminUpdatePointSettings,
+  adminPointsOverview,
+} from "@/lib/varadhi.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { CheckCircle2, XCircle, Clock, ExternalLink, ShieldCheck } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, ExternalLink, ShieldCheck, Coins, Upload, Phone } from "lucide-react";
+
 
 export const Route = createFileRoute("/varadhi/admin")({
   ssr: false,
@@ -45,6 +55,7 @@ function VaradhiAdmin() {
   const adminQ = useQuery({ queryKey: ["varadhi-am-i-admin"], queryFn: () => checkAdmin(), enabled: authed === true });
   const isAdmin = adminQ.data?.isAdmin ?? false;
 
+  const [tab, setTab] = useState<"reg" | "points">("reg");
   const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "all">("pending");
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
@@ -93,10 +104,23 @@ function VaradhiAdmin() {
   return (
     <div className="mx-auto max-w-2xl px-4 pt-4 space-y-4">
       <header className="flex items-center justify-between gap-2">
-        <h1 className="text-xl font-bold text-[#1e3a8a]">వారధి అడ్మిన్ — రిజిస్ట్రేషన్లు</h1>
+        <h1 className="text-xl font-bold text-[#1e3a8a]">వారధి అడ్మిన్ ప్యానెల్</h1>
         <Link to="/varadhi" className="text-xs underline text-[#1e3a8a]/70">హోమ్</Link>
       </header>
 
+      <div className="flex gap-2">
+        <Button size="sm" variant={tab === "reg" ? "default" : "outline"} onClick={() => setTab("reg")}>
+          రిజిస్ట్రేషన్లు
+        </Button>
+        <Button size="sm" variant={tab === "points" ? "default" : "outline"} onClick={() => setTab("points")}>
+          <Coins className="h-4 w-4 mr-1" /> పాయింట్లు
+        </Button>
+      </div>
+
+      {tab === "points" && <PointsPanel />}
+
+      {tab === "reg" && (
+      <>
       <div className="flex flex-wrap gap-2">
         {filters.map((f) => (
           <Button key={f.k} size="sm" variant={filter === f.k ? "default" : "outline"} onClick={() => setFilter(f.k)}>
@@ -104,6 +128,7 @@ function VaradhiAdmin() {
           </Button>
         ))}
       </div>
+
 
       {listQ.isLoading ? (
         <p className="text-center text-sm py-8">లోడ్…</p>
@@ -197,6 +222,124 @@ function VaradhiAdmin() {
           })}
         </div>
       )}
+      </>
+      )}
     </div>
   );
 }
+
+function PointsPanel() {
+  const qc = useQueryClient();
+  const getSettings = useServerFn(adminGetPointSettings);
+  const saveSettings = useServerFn(adminUpdatePointSettings);
+  const getOverview = useServerFn(adminPointsOverview);
+
+  const settingsQ = useQuery({ queryKey: ["varadhi-point-settings"], queryFn: () => getSettings() });
+  const overviewQ = useQuery({ queryKey: ["varadhi-points-overview"], queryFn: () => getOverview() });
+
+  const [limit, setLimit] = useState<string>("");
+  const [enforce, setEnforce] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const s: any = settingsQ.data?.settings;
+    if (s) {
+      setLimit(String(s.free_monthly_points ?? 10));
+      setEnforce(!!s.enforce_limit);
+    }
+  }, [settingsQ.data]);
+
+  async function save() {
+    setSaving(true);
+    try {
+      await saveSettings({ data: { free_monthly_points: Number(limit) || 0, enforce_limit: enforce } });
+      toast.success("సెట్టింగ్‌లు సేవ్ అయ్యాయి");
+      qc.invalidateQueries({ queryKey: ["varadhi-point-settings"] });
+      qc.invalidateQueries({ queryKey: ["varadhi-points-overview"] });
+    } catch (e: any) {
+      toast.error(e.message ?? "విఫలమైంది");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const ov: any = overviewQ.data;
+  const rows: any[] = ov?.rows ?? [];
+
+  return (
+    <div className="space-y-4">
+      <Card className="p-4 space-y-3">
+        <h2 className="font-semibold text-[#1e3a8a] flex items-center gap-2">
+          <Coins className="h-4 w-4" /> ఉచిత పాయింట్ల సెట్టింగ్
+        </h2>
+        <p className="text-xs text-muted-foreground">
+          అప్‌లోడ్ / ఎడిట్ సేవ్ చేసినప్పుడు 1 పాయింట్, ట్రాన్స్‌పోర్ట్ లేదా సర్వీస్ పోస్టును క్లయింట్ సంప్రదించడానికి ఓపెన్ చేసినప్పుడు 1 పాయింట్ నమోదవుతుంది.
+        </p>
+        <div className="flex items-end gap-3 flex-wrap">
+          <div>
+            <label className="text-xs text-muted-foreground">నెలకు ఉచిత పాయింట్లు</label>
+            <Input
+              type="number"
+              min={0}
+              value={limit}
+              onChange={(e) => setLimit(e.target.value)}
+              className="w-28"
+            />
+          </div>
+          <div className="flex gap-1">
+            {[5, 10, 15].map((n) => (
+              <Button key={n} size="sm" variant="outline" onClick={() => setLimit(String(n))}>{n}</Button>
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <Switch checked={enforce} onCheckedChange={setEnforce} id="enforce" />
+            <label htmlFor="enforce" className="text-xs">పరిమితి దాటితే సబ్‌స్క్రిప్షన్ అడగాలి</label>
+          </div>
+          <Button size="sm" onClick={save} disabled={saving}>సేవ్</Button>
+        </div>
+      </Card>
+
+      <Card className="p-4">
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold text-[#1e3a8a]">ఈ నెల వినియోగం</h2>
+          <span className="text-xs text-muted-foreground">మొత్తం {ov?.total_points ?? 0} పాయింట్లు</span>
+        </div>
+      </Card>
+
+      {overviewQ.isLoading ? (
+        <p className="text-center text-sm py-8">లోడ్…</p>
+      ) : rows.length === 0 ? (
+        <Card className="p-8 text-center text-sm text-muted-foreground">ఈ నెలలో పాయింట్ల కదలిక లేదు.</Card>
+      ) : (
+        <div className="space-y-2">
+          {rows.map((r) => (
+            <Card key={r.user_id} className="p-3 space-y-1">
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="font-semibold truncate">{r.profile?.full_name ?? r.user_id.slice(0, 8)}</p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {[r.profile?.phone, r.profile?.village, r.profile?.mandal, r.profile?.district].filter(Boolean).join(" · ")}
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="font-bold text-[#1e3a8a]">{r.used} / {ov?.free_limit}</p>
+                  <p className="text-[10px] text-muted-foreground">మిగిలినవి {r.remaining}</p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2 text-[11px]">
+                <Badge variant="secondary"><Upload className="h-3 w-3 mr-1" />అప్‌లోడ్ {r.upload}</Badge>
+                <Badge variant="secondary"><Phone className="h-3 w-3 mr-1" />సంప్రదింపు {r.contact}</Badge>
+                {r.subscribed ? (
+                  <Badge className="bg-green-100 text-green-700 hover:bg-green-100">సబ్‌స్క్రయిబ్డ్ ({r.subscription?.plan})</Badge>
+                ) : r.over_limit ? (
+                  <Badge variant="destructive">పరిమితి దాటింది — సబ్‌స్క్రిప్షన్ అవసరం</Badge>
+                ) : null}
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+

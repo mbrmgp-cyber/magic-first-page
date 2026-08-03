@@ -206,10 +206,13 @@ export const upsertListing = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: Partial<VaradhiListing> & { id?: string }) => d)
   .handler(async ({ data, context }) => {
+    const points = await import("@/lib/varadhi-points.server");
+    await points.assertPointsAvailable(context.supabase, context.userId);
     const row = { ...data, seller_id: context.userId };
     const { data: out, error } = await context.supabase
       .from("varadhi_listings").upsert(row as any).select().single();
     if (error) throw new Error(error.message);
+    await points.awardPoint(context.supabase, context.userId, "upload", "listing", (out as any)?.id);
     return { listing: out };
   });
 
@@ -241,8 +244,19 @@ export const logClick = createServerFn({ method: "POST" })
     await context.supabase.rpc("varadhi_log_click" as any, {
       _target_type: data.target_type, _target_id: data.target_id,
     });
+    // Contact-open costs the post owner one point (not the viewer).
+    const table = data.target_type === "listing" ? "varadhi_listings" : "varadhi_providers";
+    const col = data.target_type === "listing" ? "seller_id" : "user_id";
+    const { data: owner } = await context.supabase
+      .from(table as any).select(col).eq("id", data.target_id).maybeSingle();
+    const ownerId = (owner as any)?.[col] as string | undefined;
+    if (ownerId && ownerId !== context.userId) {
+      const points = await import("@/lib/varadhi-points.server");
+      await points.awardPoint(context.supabase, ownerId, "contact", data.target_type, data.target_id);
+    }
     return { ok: true };
   });
+
 
 // -------- Providers
 export const listProviders = createServerFn({ method: "GET" })
@@ -282,10 +296,13 @@ export const upsertProvider = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: Partial<VaradhiProvider> & { id?: string }) => d)
   .handler(async ({ data, context }) => {
+    const points = await import("@/lib/varadhi-points.server");
+    await points.assertPointsAvailable(context.supabase, context.userId);
     const row = { ...data, user_id: context.userId };
     const { data: out, error } = await context.supabase
       .from("varadhi_providers").upsert(row as any).select().single();
     if (error) throw new Error(error.message);
+    await points.awardPoint(context.supabase, context.userId, "upload", "provider", (out as any)?.id);
     return { provider: out };
   });
 
@@ -455,4 +472,106 @@ export const adminReviewVaradhiProfile = createServerFn({ method: "POST" })
       .eq("user_id", data.user_id);
     if (error) throw new Error(error.message);
     return { ok: true };
+  });
+
+// -------- Points / free monthly quota
+export const getMyPointStatus = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const points = await import("@/lib/varadhi-points.server");
+    const status = await points.getPointStatus(context.supabase, context.userId);
+    const { data: events } = await context.supabase
+      .from("varadhi_point_events").select("*")
+      .eq("user_id", context.userId)
+      .gte("created_at", points.monthStartIso())
+      .order("created_at", { ascending: false }).limit(100);
+    return { status, events: events ?? [] };
+  });
+
+export const adminGetPointSettings = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertVaradhiAdmin(context.supabase, context.userId, (context.claims as any)?.email);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin.from("varadhi_point_settings").select("*").eq("id", 1).maybeSingle();
+    return { settings: data ?? { free_monthly_points: 10, enforce_limit: true } };
+  });
+
+export const adminUpdatePointSettings = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { free_monthly_points: number; enforce_limit: boolean }) => d)
+  .handler(async ({ data, context }) => {
+    await assertVaradhiAdmin(context.supabase, context.userId, (context.claims as any)?.email);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("varadhi_point_settings").upsert({
+      id: 1,
+      free_monthly_points: Math.max(0, Math.min(1000, Math.round(data.free_monthly_points))),
+      enforce_limit: !!data.enforce_limit,
+      updated_by: context.userId,
+      updated_at: new Date().toISOString(),
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminPointsOverview = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertVaradhiAdmin(context.supabase, context.userId, (context.claims as any)?.email);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const pts = await import("@/lib/varadhi-points.server");
+    const since = pts.monthStartIso();
+
+    const { data: settings } = await supabaseAdmin
+      .from("varadhi_point_settings").select("*").eq("id", 1).maybeSingle();
+    const freeLimit = (settings as any)?.free_monthly_points ?? 10;
+
+    const { data: events } = await supabaseAdmin
+      .from("varadhi_point_events").select("user_id, points, event_type, created_at")
+      .gte("created_at", since).limit(5000);
+
+    const agg = new Map<string, { used: number; upload: number; contact: number; last: string }>();
+    for (const e of (events ?? []) as any[]) {
+      const cur = agg.get(e.user_id) ?? { used: 0, upload: 0, contact: 0, last: e.created_at };
+      cur.used += e.points || 0;
+      if (e.event_type === "upload") cur.upload += e.points || 0;
+      else cur.contact += e.points || 0;
+      if (e.created_at > cur.last) cur.last = e.created_at;
+      agg.set(e.user_id, cur);
+    }
+    const ids = [...agg.keys()];
+    let profiles = new Map<string, any>();
+    let subs = new Map<string, any>();
+    if (ids.length) {
+      const { data: profs } = await supabaseAdmin
+        .from("varadhi_profiles")
+        .select("user_id, full_name, phone, primary_role, village, mandal, district")
+        .in("user_id", ids);
+      profiles = new Map((profs ?? []).map((p: any) => [p.user_id, p]));
+      const { data: srows } = await supabaseAdmin
+        .from("varadhi_subscriptions").select("user_id, plan, status, expires_at")
+        .in("user_id", ids).eq("status", "active").gt("expires_at", new Date().toISOString());
+      subs = new Map((srows ?? []).map((s: any) => [s.user_id, s]));
+    }
+    const rows = ids.map((id) => {
+      const a = agg.get(id)!;
+      const sub = subs.get(id);
+      return {
+        user_id: id,
+        ...a,
+        remaining: Math.max(0, freeLimit - a.used),
+        over_limit: a.used >= freeLimit,
+        subscribed: !!sub,
+        subscription: sub ?? null,
+        profile: profiles.get(id) ?? null,
+      };
+    }).sort((x, y) => y.used - x.used);
+
+    return {
+      free_limit: freeLimit,
+      enforce_limit: (settings as any)?.enforce_limit ?? true,
+      month_start: since,
+      total_points: rows.reduce((s, r) => s + r.used, 0),
+      rows,
+    };
   });
