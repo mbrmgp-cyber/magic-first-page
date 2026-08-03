@@ -695,7 +695,7 @@ function PostSection({ postType }: { postType: string }) {
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold truncate">{l.title}</p>
               <p className="text-[11px] text-[#1e3a8a]/60">
-                {formatPrice(l.price, l.unit)} · 👁 {l.click_count}
+                {formatPrice(l.price, l.unit, isFreeListing(l))} · 👁 {l.click_count}
                 {l.created_at ? ` · ${new Date(l.created_at).toLocaleDateString("te-IN")}` : ""}
               </p>
             </div>
