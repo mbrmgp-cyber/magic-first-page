@@ -234,12 +234,21 @@ function PointsPanel() {
   const saveSettings = useServerFn(adminUpdatePointSettings);
   const getOverview = useServerFn(adminPointsOverview);
 
+  const [state, setState] = useState("");
+  const [district, setDistrict] = useState("");
+  const [mandal, setMandal] = useState("");
+  const [q, setQ] = useState("");
+
   const settingsQ = useQuery({ queryKey: ["varadhi-point-settings"], queryFn: () => getSettings() });
-  const overviewQ = useQuery({ queryKey: ["varadhi-points-overview"], queryFn: () => getOverview() });
+  const overviewQ = useQuery({
+    queryKey: ["varadhi-points-overview", state, district, mandal, q],
+    queryFn: () => getOverview({ data: { state, district, mandal, q } }),
+  });
 
   const [limit, setLimit] = useState<string>("");
   const [enforce, setEnforce] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [openUser, setOpenUser] = useState<string | null>(null);
 
   useEffect(() => {
     const s: any = settingsQ.data?.settings;
@@ -265,6 +274,11 @@ function PointsPanel() {
 
   const ov: any = overviewQ.data;
   const rows: any[] = ov?.rows ?? [];
+  const areas = ov?.areas ?? { states: [], districts: [], mandals: [] };
+  const stateOptions: string[] = Array.from(new Set([...(areas.states ?? []), ...STATES]));
+
+  const selectCls =
+    "h-9 w-full rounded-md border border-input bg-background px-2 text-sm";
 
   return (
     <div className="space-y-4">
@@ -299,26 +313,67 @@ function PointsPanel() {
         </div>
       </Card>
 
+      <Card className="p-4 space-y-3">
+        <h2 className="font-semibold text-[#1e3a8a] flex items-center gap-2">
+          <MapPin className="h-4 w-4" /> ప్రాంతం వారీగా వెతకండి
+        </h2>
+        <div className="grid grid-cols-3 gap-2">
+          <select
+            className={selectCls}
+            value={state}
+            onChange={(e) => { setState(e.target.value); setDistrict(""); setMandal(""); }}
+          >
+            <option value="">రాష్ట్రం (అన్నీ)</option>
+            {stateOptions.map((s) => <option key={s} value={s}>{s}</option>)}
+          </select>
+          <select
+            className={selectCls}
+            value={district}
+            onChange={(e) => { setDistrict(e.target.value); setMandal(""); }}
+          >
+            <option value="">జిల్లా (అన్నీ)</option>
+            {Array.from(new Set([...(areas.districts ?? []), ...districtsFor(state)])).map((d) => (
+              <option key={d} value={d}>{d}</option>
+            ))}
+          </select>
+          <select className={selectCls} value={mandal} onChange={(e) => setMandal(e.target.value)}>
+            <option value="">మండలం (అన్నీ)</option>
+            {(areas.mandals ?? []).map((m: string) => <option key={m} value={m}>{m}</option>)}
+          </select>
+        </div>
+        <div className="flex gap-2">
+          <Input placeholder="పేరు లేదా ఫోన్ వెతకండి" value={q} onChange={(e) => setQ(e.target.value)} />
+          {(state || district || mandal || q) && (
+            <Button size="sm" variant="outline" onClick={() => { setState(""); setDistrict(""); setMandal(""); setQ(""); }}>
+              క్లియర్
+            </Button>
+          )}
+        </div>
+      </Card>
+
       <Card className="p-4">
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-[#1e3a8a]">ఈ నెల వినియోగం</h2>
-          <span className="text-xs text-muted-foreground">మొత్తం {ov?.total_points ?? 0} పాయింట్లు</span>
+          <span className="text-xs text-muted-foreground">
+            {rows.length} మంది · మొత్తం {ov?.total_points ?? 0} పాయింట్లు
+          </span>
         </div>
       </Card>
 
       {overviewQ.isLoading ? (
         <p className="text-center text-sm py-8">లోడ్…</p>
       ) : rows.length === 0 ? (
-        <Card className="p-8 text-center text-sm text-muted-foreground">ఈ నెలలో పాయింట్ల కదలిక లేదు.</Card>
+        <Card className="p-8 text-center text-sm text-muted-foreground">ఈ ప్రాంతంలో రిజిస్టర్ అయినవారు లేరు.</Card>
       ) : (
         <div className="space-y-2">
           {rows.map((r) => (
-            <Card key={r.user_id} className="p-3 space-y-1">
+            <Card key={r.user_id} className="p-3 space-y-2">
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
                   <p className="font-semibold truncate">{r.profile?.full_name ?? r.user_id.slice(0, 8)}</p>
                   <p className="text-xs text-muted-foreground truncate">
-                    {[r.profile?.phone, r.profile?.village, r.profile?.mandal, r.profile?.district].filter(Boolean).join(" · ")}
+                    {[r.profile?.phone, r.profile?.village, r.profile?.mandal, r.profile?.district, r.profile?.state]
+                      .filter(Boolean).join(" · ")}
                   </p>
                 </div>
                 <div className="text-right shrink-0">
@@ -326,15 +381,26 @@ function PointsPanel() {
                   <p className="text-[10px] text-muted-foreground">మిగిలినవి {r.remaining}</p>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-2 text-[11px]">
+              <div className="flex flex-wrap items-center gap-2 text-[11px]">
                 <Badge variant="secondary"><Upload className="h-3 w-3 mr-1" />అప్‌లోడ్ {r.upload}</Badge>
                 <Badge variant="secondary"><Phone className="h-3 w-3 mr-1" />సంప్రదింపు {r.contact}</Badge>
+                <Badge variant="outline">మొత్తం (అన్ని నెలలు) {r.total_all_time}</Badge>
                 {r.subscribed ? (
                   <Badge className="bg-green-100 text-green-700 hover:bg-green-100">సబ్‌స్క్రయిబ్డ్ ({r.subscription?.plan})</Badge>
                 ) : r.over_limit ? (
                   <Badge variant="destructive">పరిమితి దాటింది — సబ్‌స్క్రిప్షన్ అవసరం</Badge>
                 ) : null}
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 px-2 text-[11px] ml-auto"
+                  onClick={() => setOpenUser(openUser === r.user_id ? null : r.user_id)}
+                >
+                  <History className="h-3 w-3 mr-1" />
+                  {openUser === r.user_id ? "హిస్టరీ మూసివేయి" : "పాయింట్ల హిస్టరీ"}
+                </Button>
               </div>
+              {openUser === r.user_id && <UserPointHistory userId={r.user_id} />}
             </Card>
           ))}
         </div>
@@ -342,4 +408,41 @@ function PointsPanel() {
     </div>
   );
 }
+
+function UserPointHistory({ userId }: { userId: string }) {
+  const getHistory = useServerFn(adminUserPointHistory);
+  const q = useQuery({
+    queryKey: ["varadhi-point-history", userId],
+    queryFn: () => getHistory({ data: { user_id: userId } }),
+  });
+
+  if (q.isLoading) return <p className="text-xs text-muted-foreground py-2">లోడ్…</p>;
+  const events: any[] = (q.data as any)?.events ?? [];
+  if (events.length === 0) return <p className="text-xs text-muted-foreground py-2">పాయింట్ల చరిత్ర లేదు.</p>;
+
+  return (
+    <div className="rounded-md border divide-y">
+      <div className="px-2 py-1.5 text-[11px] font-semibold bg-muted/50">
+        మొత్తం {(q.data as any)?.total ?? 0} పాయింట్లు · {events.length} నమోదులు
+      </div>
+      <div className="max-h-64 overflow-auto">
+        {events.map((e) => (
+          <div key={e.id} className="flex items-start justify-between gap-2 px-2 py-1.5 text-[11px] border-b last:border-0">
+            <div className="min-w-0">
+              <p className="font-medium">
+                {e.event_type === "upload" ? "అప్‌లోడ్ / ఎడిట్" : "క్లయింట్ సంప్రదింపు"}
+                {e.ref_title ? ` — ${e.ref_title}` : ""}
+              </p>
+              <p className="text-muted-foreground">
+                {new Date(e.created_at).toLocaleString("te-IN")}
+              </p>
+            </div>
+            <span className="shrink-0 font-bold text-[#1e3a8a]">+{e.points}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 
