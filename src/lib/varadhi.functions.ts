@@ -516,7 +516,8 @@ export const adminUpdatePointSettings = createServerFn({ method: "POST" })
 
 export const adminPointsOverview = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((d: { state?: string; district?: string; mandal?: string; q?: string } | undefined) => d ?? {})
+  .handler(async ({ context, data }) => {
     await assertVaradhiAdmin(context.supabase, context.userId, (context.claims as any)?.email);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const pts = await import("@/lib/varadhi-points.server");
@@ -526,46 +527,71 @@ export const adminPointsOverview = createServerFn({ method: "GET" })
       .from("varadhi_point_settings").select("*").eq("id", 1).maybeSingle();
     const freeLimit = (settings as any)?.free_monthly_points ?? 10;
 
-    const { data: events } = await supabaseAdmin
-      .from("varadhi_point_events").select("user_id, points, event_type, created_at")
-      .gte("created_at", since).limit(5000);
+    // Every registered Vaaradhi user (area filters applied server-side).
+    let pq = supabaseAdmin
+      .from("varadhi_profiles")
+      .select("user_id, full_name, phone, primary_role, village, mandal, district, state, verification_status")
+      .limit(2000);
+    if (data.state) pq = pq.eq("state", data.state);
+    if (data.district) pq = pq.eq("district", data.district);
+    if (data.mandal) pq = pq.eq("mandal", data.mandal);
+    if (data.q) pq = pq.or(`full_name.ilike.%${data.q}%,phone.ilike.%${data.q}%`);
+    const { data: profs } = await pq;
+    const profiles = (profs ?? []) as any[];
+    const ids = profiles.map((p) => p.user_id);
 
-    const agg = new Map<string, { used: number; upload: number; contact: number; last: string }>();
-    for (const e of (events ?? []) as any[]) {
-      const cur = agg.get(e.user_id) ?? { used: 0, upload: 0, contact: 0, last: e.created_at };
-      cur.used += e.points || 0;
-      if (e.event_type === "upload") cur.upload += e.points || 0;
-      else cur.contact += e.points || 0;
-      if (e.created_at > cur.last) cur.last = e.created_at;
-      agg.set(e.user_id, cur);
+    const agg = new Map<string, { used: number; upload: number; contact: number; last: string | null }>();
+    const allTime = new Map<string, number>();
+    if (ids.length) {
+      const { data: events } = await supabaseAdmin
+        .from("varadhi_point_events").select("user_id, points, event_type, created_at")
+        .in("user_id", ids).limit(20000);
+      for (const e of (events ?? []) as any[]) {
+        allTime.set(e.user_id, (allTime.get(e.user_id) ?? 0) + (e.points || 0));
+        if (e.created_at < since) continue;
+        const cur = agg.get(e.user_id) ?? { used: 0, upload: 0, contact: 0, last: e.created_at };
+        cur.used += e.points || 0;
+        if (e.event_type === "upload") cur.upload += e.points || 0;
+        else cur.contact += e.points || 0;
+        if (!cur.last || e.created_at > cur.last) cur.last = e.created_at;
+        agg.set(e.user_id, cur);
+      }
     }
-    const ids = [...agg.keys()];
-    let profiles = new Map<string, any>();
+
     let subs = new Map<string, any>();
     if (ids.length) {
-      const { data: profs } = await supabaseAdmin
-        .from("varadhi_profiles")
-        .select("user_id, full_name, phone, primary_role, village, mandal, district")
-        .in("user_id", ids);
-      profiles = new Map((profs ?? []).map((p: any) => [p.user_id, p]));
       const { data: srows } = await supabaseAdmin
         .from("varadhi_subscriptions").select("user_id, plan, status, expires_at")
         .in("user_id", ids).eq("status", "active").gt("expires_at", new Date().toISOString());
       subs = new Map((srows ?? []).map((s: any) => [s.user_id, s]));
     }
-    const rows = ids.map((id) => {
-      const a = agg.get(id)!;
-      const sub = subs.get(id);
+
+    const rows = profiles.map((p) => {
+      const a = agg.get(p.user_id) ?? { used: 0, upload: 0, contact: 0, last: null };
+      const sub = subs.get(p.user_id);
       return {
-        user_id: id,
+        user_id: p.user_id,
         ...a,
+        total_all_time: allTime.get(p.user_id) ?? 0,
         remaining: Math.max(0, freeLimit - a.used),
         over_limit: a.used >= freeLimit,
         subscribed: !!sub,
         subscription: sub ?? null,
-        profile: profiles.get(id) ?? null,
+        profile: p,
       };
-    }).sort((x, y) => y.used - x.used);
+    }).sort((x, y) => y.used - x.used || (x.profile.full_name ?? "").localeCompare(y.profile.full_name ?? ""));
+
+    // Distinct area values for filter dropdowns (unfiltered by mandal/district).
+    const { data: areaRows } = await supabaseAdmin
+      .from("varadhi_profiles").select("state, district, mandal").limit(5000);
+    const areas = { states: new Set<string>(), districts: new Set<string>(), mandals: new Set<string>() };
+    for (const r of (areaRows ?? []) as any[]) {
+      if (r.state) areas.states.add(r.state);
+      if (r.district && (!data.state || r.state === data.state)) areas.districts.add(r.district);
+      if (r.mandal && (!data.state || r.state === data.state) && (!data.district || r.district === data.district)) {
+        areas.mandals.add(r.mandal);
+      }
+    }
 
     return {
       free_limit: freeLimit,
@@ -573,5 +599,44 @@ export const adminPointsOverview = createServerFn({ method: "GET" })
       month_start: since,
       total_points: rows.reduce((s, r) => s + r.used, 0),
       rows,
+      areas: {
+        states: [...areas.states].sort(),
+        districts: [...areas.districts].sort(),
+        mandals: [...areas.mandals].sort(),
+      },
     };
   });
+
+export const adminUserPointHistory = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { user_id: string }) => d)
+  .handler(async ({ context, data }) => {
+    await assertVaradhiAdmin(context.supabase, context.userId, (context.claims as any)?.email);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: events } = await supabaseAdmin
+      .from("varadhi_point_events")
+      .select("id, points, event_type, ref_type, ref_id, note, created_at")
+      .eq("user_id", data.user_id)
+      .order("created_at", { ascending: false })
+      .limit(300);
+    const rows = (events ?? []) as any[];
+
+    const listingIds = rows.filter((r) => r.ref_type === "listing" && r.ref_id).map((r) => r.ref_id);
+    const providerIds = rows.filter((r) => r.ref_type === "provider" && r.ref_id).map((r) => r.ref_id);
+    const titles = new Map<string, string>();
+    if (listingIds.length) {
+      const { data: l } = await supabaseAdmin.from("varadhi_listings").select("id, title").in("id", listingIds);
+      for (const x of (l ?? []) as any[]) titles.set(x.id, x.title);
+    }
+    if (providerIds.length) {
+      const { data: p } = await supabaseAdmin.from("varadhi_providers").select("id, title").in("id", providerIds);
+      for (const x of (p ?? []) as any[]) titles.set(x.id, x.title);
+    }
+
+    return {
+      events: rows.map((r) => ({ ...r, ref_title: r.ref_id ? (titles.get(r.ref_id) ?? null) : null })),
+      total: rows.reduce((s, r) => s + (r.points || 0), 0),
+    };
+  });
+
