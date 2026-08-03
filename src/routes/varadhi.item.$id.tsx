@@ -134,7 +134,7 @@ function ItemDetail() {
             onClick={() => {
               const text = [
                 item.title,
-                `రేటు: ${formatPrice(item.price, item.unit)}`,
+                isFreeListing(item) ? "సంప్రదించండి" : `రేటు: ${formatPrice(item.price, item.unit)}`,
                 place ? `📍 ${place}` : "",
                 phone ? `📞 ${phone}` : "",
                 typeof window !== "undefined" ? window.location.href : "",
