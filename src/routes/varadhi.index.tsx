@@ -1,5 +1,5 @@
 import { useListingImage } from "@/lib/varadhi-image";
-import { formatAmount } from "@/lib/varadhi-format";
+import { formatAmount, isFreeListing } from "@/lib/varadhi-format";
 
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
@@ -159,7 +159,7 @@ function ListingCard({ l, note }: { l: VaradhiListing; note?: string }) {
         </div>
         <div className="mt-0.5 flex flex-wrap items-baseline gap-x-1">
           <p className="text-[12px] font-extrabold text-[#16a34a]">
-            రేటు: {amount ? `Rs. ${amount}` : "ధర సంప్రదించండి"}
+            {amount ? `రేటు: Rs. ${amount}` : isFreeListing(l) ? "సంప్రదించండి" : "రేటు: ధర సంప్రదించండి"}
           </p>
           {amount && unit && (
             <span className="text-[10px] font-semibold text-[#16a34a]">/ {unit}</span>

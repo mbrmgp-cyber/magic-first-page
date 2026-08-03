@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { getListing, logClick, type VaradhiListing, type VaradhiProvider, type VaradhiProfile } from "@/lib/varadhi.functions";
 import { useListingImage } from "@/lib/varadhi-image";
-import { formatAmount, formatPrice } from "@/lib/varadhi-format";
+import { formatAmount, formatPrice, isFreeListing, noPriceLabel } from "@/lib/varadhi-format";
 
 import { ArrowLeft, Phone, MessageCircle, Truck, Share2 } from "lucide-react";
 
@@ -69,9 +69,9 @@ function ItemDetail() {
       <div className="mt-3 rounded-2xl bg-white p-4 shadow-sm space-y-2">
         <p className="text-base font-bold text-[#1e3a8a]">{item.title}</p>
         <div className="rounded-xl border border-green-200 bg-green-50 px-3 py-2">
-          <p className="text-xs font-semibold text-green-700">వస్తువు రేటు</p>
+          <p className="text-xs font-semibold text-green-700">{isFreeListing(item) ? "ఉచిత సేవ" : "వస్తువు రేటు"}</p>
           <p className="mt-0.5 text-2xl font-extrabold text-[#16a34a]">
-            {amount ? `Rs. ${amount}${unit ? ` / ${unit}` : ""}` : "ధర సంప్రదించండి"}
+            {amount ? `Rs. ${amount}${unit ? ` / ${unit}` : ""}` : noPriceLabel(isFreeListing(item))}
           </p>
         </div>
 
@@ -134,7 +134,7 @@ function ItemDetail() {
             onClick={() => {
               const text = [
                 item.title,
-                `రేటు: ${formatPrice(item.price, item.unit)}`,
+                isFreeListing(item) ? "సంప్రదించండి" : `రేటు: ${formatPrice(item.price, item.unit)}`,
                 place ? `📍 ${place}` : "",
                 phone ? `📞 ${phone}` : "",
                 typeof window !== "undefined" ? window.location.href : "",

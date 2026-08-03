@@ -270,7 +270,11 @@ function BrowsePage() {
                   )}
                    <div className="mt-1 flex flex-wrap items-baseline gap-x-1.5">
                      <p className="text-[13px] font-extrabold text-[#16a34a]">
-                       రేటు: {formatAmount(l.price) ? `Rs. ${formatAmount(l.price)}` : "ధర సంప్రదించండి"}
+                       {formatAmount(l.price)
+                         ? `రేటు: Rs. ${formatAmount(l.price)}`
+                         : ((l as any).post_type ?? "business") === "free"
+                           ? "సంప్రదించండి"
+                           : "రేటు: ధర సంప్రదించండి"}
                      </p>
                      {formatAmount(l.price) && l.unit && (
                        <span className="text-[11px] font-semibold text-[#16a34a]">/ {l.unit === "కేజీలు" ? "కేజీ" : l.unit}</span>
