@@ -103,10 +103,23 @@ function VaradhiAdmin() {
   return (
     <div className="mx-auto max-w-2xl px-4 pt-4 space-y-4">
       <header className="flex items-center justify-between gap-2">
-        <h1 className="text-xl font-bold text-[#1e3a8a]">వారధి అడ్మిన్ — రిజిస్ట్రేషన్లు</h1>
+        <h1 className="text-xl font-bold text-[#1e3a8a]">వారధి అడ్మిన్ ప్యానెల్</h1>
         <Link to="/varadhi" className="text-xs underline text-[#1e3a8a]/70">హోమ్</Link>
       </header>
 
+      <div className="flex gap-2">
+        <Button size="sm" variant={tab === "reg" ? "default" : "outline"} onClick={() => setTab("reg")}>
+          రిజిస్ట్రేషన్లు
+        </Button>
+        <Button size="sm" variant={tab === "points" ? "default" : "outline"} onClick={() => setTab("points")}>
+          <Coins className="h-4 w-4 mr-1" /> పాయింట్లు
+        </Button>
+      </div>
+
+      {tab === "points" && <PointsPanel />}
+
+      {tab === "reg" && (
+      <>
       <div className="flex flex-wrap gap-2">
         {filters.map((f) => (
           <Button key={f.k} size="sm" variant={filter === f.k ? "default" : "outline"} onClick={() => setFilter(f.k)}>
@@ -114,6 +127,7 @@ function VaradhiAdmin() {
           </Button>
         ))}
       </div>
+
 
       {listQ.isLoading ? (
         <p className="text-center text-sm py-8">లోడ్…</p>
