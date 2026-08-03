@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { getListing, logClick, type VaradhiListing, type VaradhiProvider, type VaradhiProfile } from "@/lib/varadhi.functions";
 import { useListingImage } from "@/lib/varadhi-image";
-import { formatAmount, formatPrice, isFreeListing, noPriceLabel } from "@/lib/varadhi-format";
+import { formatAmount, formatPrice, isFreeListing, noPriceLabel, stockLabel } from "@/lib/varadhi-format";
 
 import { ArrowLeft, Phone, MessageCircle, Truck, Share2 } from "lucide-react";
 
@@ -78,7 +78,7 @@ function ItemDetail() {
 
         <div className="flex flex-wrap gap-1.5">
           <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${inStock ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600"}`}>
-            {inStock ? "స్టాక్ ఉంది" : "స్టాక్ లేదు"}
+            {stockLabel(inStock, isFreeListing(item))}
           </span>
           {(item as any).stock_qty && (
             <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-[#1e3a8a]">

@@ -280,7 +280,7 @@ function BrowsePage() {
                        <span className="text-[11px] font-semibold text-[#16a34a]">/ {l.unit === "కేజీలు" ? "కేజీ" : l.unit}</span>
                      )}
                     {l.stock_status === "closed" && (
-                      <span className="rounded-full bg-gray-200 px-1.5 py-0.5 text-[9px] font-semibold text-gray-600">స్టాక్ లేదు</span>
+                      <span className="rounded-full bg-gray-200 px-1.5 py-0.5 text-[9px] font-semibold text-gray-600">{isFree(l) ? "అందుబాటులో లేదు" : "స్టాక్ లేదు"}</span>
                     )}
                   </div>
                 </div>
