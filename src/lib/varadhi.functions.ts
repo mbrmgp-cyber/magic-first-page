@@ -206,10 +206,13 @@ export const upsertListing = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: Partial<VaradhiListing> & { id?: string }) => d)
   .handler(async ({ data, context }) => {
+    const points = await import("@/lib/varadhi-points.server");
+    await points.assertPointsAvailable(context.supabase, context.userId);
     const row = { ...data, seller_id: context.userId };
     const { data: out, error } = await context.supabase
       .from("varadhi_listings").upsert(row as any).select().single();
     if (error) throw new Error(error.message);
+    await points.awardPoint(context.supabase, context.userId, "upload", "listing", (out as any)?.id);
     return { listing: out };
   });
 
@@ -241,8 +244,19 @@ export const logClick = createServerFn({ method: "POST" })
     await context.supabase.rpc("varadhi_log_click" as any, {
       _target_type: data.target_type, _target_id: data.target_id,
     });
+    // Contact-open costs the post owner one point (not the viewer).
+    const table = data.target_type === "listing" ? "varadhi_listings" : "varadhi_providers";
+    const col = data.target_type === "listing" ? "seller_id" : "user_id";
+    const { data: owner } = await context.supabase
+      .from(table as any).select(col).eq("id", data.target_id).maybeSingle();
+    const ownerId = (owner as any)?.[col] as string | undefined;
+    if (ownerId && ownerId !== context.userId) {
+      const points = await import("@/lib/varadhi-points.server");
+      await points.awardPoint(context.supabase, ownerId, "contact", data.target_type, data.target_id);
+    }
     return { ok: true };
   });
+
 
 // -------- Providers
 export const listProviders = createServerFn({ method: "GET" })
