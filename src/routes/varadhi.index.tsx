@@ -328,11 +328,34 @@ function VaradhiHome() {
     setNearby(near);
   }, [coords, recent]);
 
+  const [selectedCat, setSelectedCat] = useState<Box | null>(null);
+  const [catItems, setCatItems] = useState<VaradhiListing[]>([]);
+  const [catLoading, setCatLoading] = useState(false);
+  const catRef = useRef<HTMLDivElement | null>(null);
+
   const search = () =>
     navigate({ to: "/varadhi/browse/$category", params: { category: "fresh" }, search: { q: q.trim() } });
 
-  const goto = (id: string) =>
-    navigate({ to: "/varadhi/browse/$category", params: { category: id }, search: { q: "" } });
+  const ALL_BOXES: Box[] = [...ITEM_BOXES, ...SERVICE_BOXES, REAL_ESTATE, TRANSPORT];
+
+  const goto = async (id: string) => {
+    // Providers (transport / paid services) live on their own page
+    if (id === "transport" || id === "services") {
+      navigate({ to: "/varadhi/browse/$category", params: { category: id }, search: { q: "" } });
+      return;
+    }
+    const box = ALL_BOXES.find((b) => b.id === id) ?? null;
+    setSelectedCat(box);
+    setCatItems([]);
+    setTimeout(() => catRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+    if (!signedIn) return;
+    setCatLoading(true);
+    try {
+      const r = await fetchListings({ data: { category: id } });
+      setCatItems(r.listings ?? []);
+    } catch { /* ignore */ }
+    setCatLoading(false);
+  };
 
   return (
     <div className="mx-auto max-w-md px-4 pt-5 pb-8">
