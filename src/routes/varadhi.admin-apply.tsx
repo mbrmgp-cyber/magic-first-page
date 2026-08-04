@@ -4,14 +4,14 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { submitVaradhiAdminRequest, myVaradhiAdminRequests } from "@/lib/varadhi.functions";
-import { STATES, districtsFor } from "@/lib/ap-locations";
+import { INDIA_STATES, indiaDistrictsFor } from "@/lib/india-locations";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { ShieldCheck, Send } from "lucide-react";
+import { ShieldCheck, Send, Upload, Check } from "lucide-react";
 
 export const Route = createFileRoute("/varadhi/admin-apply")({
   ssr: false,
