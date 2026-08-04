@@ -23,6 +23,7 @@ import { Route as VaradhiRewardsRouteImport } from './routes/varadhi.rewards'
 import { Route as VaradhiOnboardRouteImport } from './routes/varadhi.onboard'
 import { Route as VaradhiDashboardRouteImport } from './routes/varadhi.dashboard'
 import { Route as VaradhiAuthRouteImport } from './routes/varadhi.auth'
+import { Route as VaradhiAdminApplyRouteImport } from './routes/varadhi.admin-apply'
 import { Route as VaradhiAdminRouteImport } from './routes/varadhi.admin'
 import { Route as OrgRegisterRouteImport } from './routes/org.register'
 import { Route as MemberRegisterRouteImport } from './routes/member.register'
@@ -131,6 +132,11 @@ const VaradhiDashboardRoute = VaradhiDashboardRouteImport.update({
 const VaradhiAuthRoute = VaradhiAuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => VaradhiRoute,
+} as any)
+const VaradhiAdminApplyRoute = VaradhiAdminApplyRouteImport.update({
+  id: '/admin-apply',
+  path: '/admin-apply',
   getParentRoute: () => VaradhiRoute,
 } as any)
 const VaradhiAdminRoute = VaradhiAdminRouteImport.update({
@@ -369,6 +375,7 @@ export interface FileRoutesByFullPath {
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
   '/varadhi/admin': typeof VaradhiAdminRoute
+  '/varadhi/admin-apply': typeof VaradhiAdminApplyRoute
   '/varadhi/auth': typeof VaradhiAuthRoute
   '/varadhi/dashboard': typeof VaradhiDashboardRoute
   '/varadhi/onboard': typeof VaradhiOnboardRoute
@@ -423,6 +430,7 @@ export interface FileRoutesByTo {
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
   '/varadhi/admin': typeof VaradhiAdminRoute
+  '/varadhi/admin-apply': typeof VaradhiAdminApplyRoute
   '/varadhi/auth': typeof VaradhiAuthRoute
   '/varadhi/dashboard': typeof VaradhiDashboardRoute
   '/varadhi/onboard': typeof VaradhiOnboardRoute
@@ -480,6 +488,7 @@ export interface FileRoutesById {
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
   '/varadhi/admin': typeof VaradhiAdminRoute
+  '/varadhi/admin-apply': typeof VaradhiAdminApplyRoute
   '/varadhi/auth': typeof VaradhiAuthRoute
   '/varadhi/dashboard': typeof VaradhiDashboardRoute
   '/varadhi/onboard': typeof VaradhiOnboardRoute
@@ -537,6 +546,7 @@ export interface FileRouteTypes {
     | '/member/register'
     | '/org/register'
     | '/varadhi/admin'
+    | '/varadhi/admin-apply'
     | '/varadhi/auth'
     | '/varadhi/dashboard'
     | '/varadhi/onboard'
@@ -591,6 +601,7 @@ export interface FileRouteTypes {
     | '/member/register'
     | '/org/register'
     | '/varadhi/admin'
+    | '/varadhi/admin-apply'
     | '/varadhi/auth'
     | '/varadhi/dashboard'
     | '/varadhi/onboard'
@@ -647,6 +658,7 @@ export interface FileRouteTypes {
     | '/member/register'
     | '/org/register'
     | '/varadhi/admin'
+    | '/varadhi/admin-apply'
     | '/varadhi/auth'
     | '/varadhi/dashboard'
     | '/varadhi/onboard'
@@ -805,6 +817,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/varadhi/auth'
       preLoaderRoute: typeof VaradhiAuthRouteImport
+      parentRoute: typeof VaradhiRoute
+    }
+    '/varadhi/admin-apply': {
+      id: '/varadhi/admin-apply'
+      path: '/admin-apply'
+      fullPath: '/varadhi/admin-apply'
+      preLoaderRoute: typeof VaradhiAdminApplyRouteImport
       parentRoute: typeof VaradhiRoute
     }
     '/varadhi/admin': {
@@ -1159,6 +1178,7 @@ const AuthenticatedRouteRouteWithChildren =
 
 interface VaradhiRouteChildren {
   VaradhiAdminRoute: typeof VaradhiAdminRoute
+  VaradhiAdminApplyRoute: typeof VaradhiAdminApplyRoute
   VaradhiAuthRoute: typeof VaradhiAuthRoute
   VaradhiDashboardRoute: typeof VaradhiDashboardRoute
   VaradhiOnboardRoute: typeof VaradhiOnboardRoute
@@ -1172,6 +1192,7 @@ interface VaradhiRouteChildren {
 
 const VaradhiRouteChildren: VaradhiRouteChildren = {
   VaradhiAdminRoute: VaradhiAdminRoute,
+  VaradhiAdminApplyRoute: VaradhiAdminApplyRoute,
   VaradhiAuthRoute: VaradhiAuthRoute,
   VaradhiDashboardRoute: VaradhiDashboardRoute,
   VaradhiOnboardRoute: VaradhiOnboardRoute,
