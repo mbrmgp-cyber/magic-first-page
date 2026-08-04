@@ -29,7 +29,7 @@ function RewardsPage() {
         <p className="mt-2 text-xs opacity-90">నా పాయింట్స్</p>
         <p className="text-4xl font-bold">{total}</p>
         <button className="mt-3 rounded-xl bg-white text-[#f97316] px-4 py-2 text-sm font-bold">
-          Redeem Points
+          పాయింట్లు వాడండి
         </button>
       </div>
 
