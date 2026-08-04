@@ -465,8 +465,19 @@ export const adminReviewVaradhiProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { user_id: string; action: "approve" | "reject"; notes?: string }) => d)
   .handler(async ({ data, context }) => {
-    await assertVaradhiAdmin(context.supabase, context.userId, (context.claims as any)?.email);
+    const scope = await loadAreaScope(context.userId, (context.claims as any)?.email);
+    if (!scope.level) throw new Error("Forbidden: Varadhi Admin only");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (!scope.isSuper) {
+      const { data: target } = await supabaseAdmin
+        .from("varadhi_profiles").select("state, district").eq("user_id", data.user_id).maybeSingle();
+      const t = (target ?? {}) as any;
+      if (scope.state && t.state !== scope.state) throw new Error("మీ ప్రాంతం కాదు");
+      if (scope.level === "district_admin" && scope.district && t.district !== scope.district) {
+        throw new Error("మీ జిల్లా కాదు");
+      }
+    }
+
     const { error } = await supabaseAdmin
       .from("varadhi_profiles")
       .update({
