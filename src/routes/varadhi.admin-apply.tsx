@@ -204,3 +204,28 @@ function AdminApply() {
     </div>
   );
 }
+
+function UploadField({
+  label, done, busy, accept, onFile,
+}: {
+  label: string; done: boolean; busy: boolean; accept: string; onFile: (f: File) => void;
+}) {
+  return (
+    <div className="space-y-1">
+      <label className="text-xs font-medium">{label}</label>
+      <label className={`flex cursor-pointer items-center justify-between rounded-md border border-dashed px-3 py-3 text-xs ${done ? "border-green-500/60 bg-green-50" : "border-input bg-background"}`}>
+        <span className="truncate">
+          {busy ? "అప్‌లోడ్ అవుతోంది…" : done ? "అప్‌లోడ్ అయింది" : "ఫైల్ ఎంచుకోండి"}
+        </span>
+        {done ? <Check className="h-4 w-4 text-green-600" /> : <Upload className="h-4 w-4" />}
+        <input
+          type="file"
+          accept={accept}
+          hidden
+          onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f); }}
+        />
+      </label>
+    </div>
+  );
+}
+
