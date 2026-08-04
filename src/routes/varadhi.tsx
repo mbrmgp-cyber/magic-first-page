@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { amIVaradhiAdmin } from "@/lib/varadhi.functions";
+import { amIVaradhiAdmin, getMyVaradhiScope } from "@/lib/varadhi.functions";
 import varadhiLogo from "@/assets/varadhi-logo.jpg.asset.json";
 import { VaradhiAppIcons } from "@/components/VaradhiAppIcons";
 
@@ -40,6 +40,7 @@ function VaradhiLayout() {
   const loc = useLocation();
   const showDisclaimer = loc.pathname === "/varadhi";
   const checkAdmin = useServerFn(amIVaradhiAdmin);
+  const checkScope = useServerFn(getMyVaradhiScope);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
@@ -48,8 +49,8 @@ function VaradhiLayout() {
       const { data } = await supabase.auth.getSession();
       if (!data.session) return;
       try {
-        const res = await checkAdmin();
-        if (active) setIsAdmin(!!res?.isAdmin);
+        const [res, sc] = await Promise.all([checkAdmin(), checkScope()]);
+        if (active) setIsAdmin(!!res?.isAdmin || !!sc?.level);
       } catch { /* not admin */ }
     })();
     return () => { active = false; };
