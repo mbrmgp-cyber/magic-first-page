@@ -1220,6 +1220,7 @@ export function AutoTransliterate() {
     return () => {
       obs.disconnect();
       window.clearTimeout(initialTimer);
+      for (const t of sweepTimers) window.clearTimeout(t);
       if (applyTimer) window.clearTimeout(applyTimer);
     };
   }, [lang]);
