@@ -1184,6 +1184,14 @@ export function AutoTransliterate() {
       sweepTimers.push(window.setTimeout(fullPass, delay));
     }
 
+    // Debounced full re-scan: incremental per-mutation handling misses content
+    // React re-creates during route changes or reveals on scroll, which is how
+    // pages fell back to Telugu after navigating away and back.
+    let fullTimer: number | undefined;
+    const scheduleFull = () => {
+      if (fullTimer) window.clearTimeout(fullTimer);
+      fullTimer = window.setTimeout(fullPass, 80);
+    };
 
     const obs = new MutationObserver((muts) => {
       if (applying) return;
@@ -1201,14 +1209,28 @@ export function AutoTransliterate() {
           }
         }
       });
+      scheduleFull();
     });
     obs.observe(document.body, { childList: true, subtree: true, characterData: true });
+
+    // Safety nets: scroll reveals lazily rendered rows, and navigation can swap
+    // whole subtrees while a batch is being applied.
+    const onScroll = () => scheduleFull();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("popstate", scheduleFull);
+    const interval = window.setInterval(fullPass, 2000);
+
     return () => {
       obs.disconnect();
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("popstate", scheduleFull);
+      window.clearInterval(interval);
+      if (fullTimer) window.clearTimeout(fullTimer);
       window.clearTimeout(initialTimer);
       for (const t of sweepTimers) window.clearTimeout(t);
       if (applyTimer) window.clearTimeout(applyTimer);
     };
+
   }, [lang]);
   return null;
 }
