@@ -2221,6 +2221,107 @@ export type Database = {
         }
         Relationships: []
       }
+      varadhi_admin_requests: {
+        Row: {
+          created_at: string
+          district: string | null
+          email: string | null
+          full_name: string
+          id: string
+          message: string | null
+          phone: string | null
+          requested_level: string
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          state: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          district?: string | null
+          email?: string | null
+          full_name: string
+          id?: string
+          message?: string | null
+          phone?: string | null
+          requested_level?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          state: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          district?: string | null
+          email?: string | null
+          full_name?: string
+          id?: string
+          message?: string | null
+          phone?: string | null
+          requested_level?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          state?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      varadhi_area_admins: {
+        Row: {
+          assigned_by: string | null
+          created_at: string
+          district: string | null
+          id: string
+          is_active: boolean
+          level: string
+          parent_admin_id: string | null
+          state: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_by?: string | null
+          created_at?: string
+          district?: string | null
+          id?: string
+          is_active?: boolean
+          level: string
+          parent_admin_id?: string | null
+          state: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_by?: string | null
+          created_at?: string
+          district?: string | null
+          id?: string
+          is_active?: boolean
+          level?: string
+          parent_admin_id?: string | null
+          state?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "varadhi_area_admins_parent_admin_id_fkey"
+            columns: ["parent_admin_id"]
+            isOneToOne: false
+            referencedRelation: "varadhi_area_admins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       varadhi_clicks: {
         Row: {
           buyer_id: string | null

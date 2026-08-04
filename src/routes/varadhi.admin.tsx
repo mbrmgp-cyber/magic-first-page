@@ -11,7 +11,9 @@ import {
   adminUpdatePointSettings,
   adminPointsOverview,
   adminUserPointHistory,
+  getMyVaradhiScope,
 } from "@/lib/varadhi.functions";
+import { AdminRequestsPanel, AdminHierarchyPanel } from "@/components/varadhi/AdminHierarchyPanel";
 import { STATES, districtsFor } from "@/lib/ap-locations";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -44,6 +46,7 @@ function VaradhiAdmin() {
   const checkAdmin = useServerFn(amIVaradhiAdmin);
   const fetchProfiles = useServerFn(adminListVaradhiProfiles);
   const review = useServerFn(adminReviewVaradhiProfile);
+  const getScope = useServerFn(getMyVaradhiScope);
 
   const [authed, setAuthed] = useState<boolean | null>(null);
   useEffect(() => {
@@ -55,10 +58,14 @@ function VaradhiAdmin() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const scopeQ = useQuery({ queryKey: ["varadhi-my-scope"], queryFn: () => getScope(), enabled: authed === true });
   const adminQ = useQuery({ queryKey: ["varadhi-am-i-admin"], queryFn: () => checkAdmin(), enabled: authed === true });
-  const isAdmin = adminQ.data?.isAdmin ?? false;
+  const isSuper = adminQ.data?.isAdmin ?? false;
+  const scope = scopeQ.data;
+  const isAdmin = isSuper || !!scope?.level;
 
-  const [tab, setTab] = useState<"reg" | "points">("reg");
+  const [tab, setTab] = useState<"reg" | "points" | "requests" | "hierarchy">("reg");
+
   const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "all">("pending");
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
@@ -82,14 +89,15 @@ function VaradhiAdmin() {
     }
   }
 
-  if (authed === null || adminQ.isLoading) return <p className="p-8 text-center text-sm">లోడ్…</p>;
+  if (authed === null || adminQ.isLoading || scopeQ.isLoading) return <p className="p-8 text-center text-sm">లోడ్…</p>;
 
   if (!isAdmin) {
     return (
       <div className="mx-auto max-w-md px-4 pt-10">
         <Card className="p-6 space-y-3 text-center">
           <ShieldCheck className="h-10 w-10 mx-auto text-[#1e3a8a]/50" />
-          <p className="text-sm">ఈ పేజీ Vaaradhi సూపర్ అడ్మిన్‌కు మాత్రమే.</p>
+          <p className="text-sm">ఈ పేజీ Vaaradhi అడ్మిన్‌లకు మాత్రమే.</p>
+          <Button variant="secondary" onClick={() => navigate({ to: "/varadhi/admin-apply" })}>అడ్మిన్‌గా దరఖాస్తు చేయండి</Button>
           <Button variant="outline" onClick={() => navigate({ to: "/varadhi" })}>హోమ్‌కు వెళ్ళండి</Button>
         </Card>
       </div>
@@ -115,12 +123,30 @@ function VaradhiAdmin() {
         <Button size="sm" variant={tab === "reg" ? "default" : "outline"} onClick={() => setTab("reg")}>
           రిజిస్ట్రేషన్లు
         </Button>
-        <Button size="sm" variant={tab === "points" ? "default" : "outline"} onClick={() => setTab("points")}>
-          <Coins className="h-4 w-4 mr-1" /> పాయింట్లు
+        {isSuper && (
+          <Button size="sm" variant={tab === "points" ? "default" : "outline"} onClick={() => setTab("points")}>
+            <Coins className="h-4 w-4 mr-1" /> పాయింట్లు
+          </Button>
+        )}
+        {(isSuper || scope?.level === "state_admin") && (
+          <Button size="sm" variant={tab === "requests" ? "default" : "outline"} onClick={() => setTab("requests")}>
+            అడ్మిన్ దరఖాస్తులు
+          </Button>
+        )}
+        <Button size="sm" variant={tab === "hierarchy" ? "default" : "outline"} onClick={() => setTab("hierarchy")}>
+          అడ్మిన్ హైరార్కీ
         </Button>
       </div>
 
-      {tab === "points" && <PointsPanel />}
+      {scope?.level && scope.level !== "super_admin" && (
+        <p className="text-[11px] text-muted-foreground">
+          మీ పరిధి: {scope.level === "state_admin" ? "రాష్ట్ర అడ్మిన్" : "జిల్లా అడ్మిన్"} · {[scope.state, scope.district].filter(Boolean).join(" / ")}
+        </p>
+      )}
+
+      {tab === "points" && isSuper && <PointsPanel />}
+      {tab === "requests" && <AdminRequestsPanel isSuper={isSuper} />}
+      {tab === "hierarchy" && <AdminHierarchyPanel isSuper={isSuper} />}
 
       {tab === "reg" && (
       <>
