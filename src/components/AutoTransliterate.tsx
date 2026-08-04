@@ -957,7 +957,9 @@ Object.assign(EN_TE, {
   "Pick — e.g., A / 0003": "ఎంచుకోండి — ఉదా., A / 0003",
 });
 
-const SKIP_TAGS = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEXTAREA", "INPUT", "SELECT", "OPTION", "CODE", "PRE"]);
+// OPTION text is translated (its `value` attribute is untouched) so dropdown
+// lists like state/district never show a second language.
+const SKIP_TAGS = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEXTAREA", "INPUT", "CODE", "PRE"]);
 const ORIG_ATTR = "data-mbr-orig";
 const ATTR_ORIG_PREFIX = "__mbrOrigAttr_";
 const TRANSLATABLE_ATTRS = ["placeholder", "title", "aria-label"] as const;
