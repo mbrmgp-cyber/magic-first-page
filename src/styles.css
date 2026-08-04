@@ -143,6 +143,11 @@
 }
 
 @layer base {
+  html,
+  body {
+    transform: none;
+  }
+
   * {
     border-color: var(--color-border);
   }
