@@ -55,10 +55,14 @@ function VaradhiAdmin() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const scopeQ = useQuery({ queryKey: ["varadhi-my-scope"], queryFn: () => getScope(), enabled: authed === true });
   const adminQ = useQuery({ queryKey: ["varadhi-am-i-admin"], queryFn: () => checkAdmin(), enabled: authed === true });
-  const isAdmin = adminQ.data?.isAdmin ?? false;
+  const isSuper = adminQ.data?.isAdmin ?? false;
+  const scope = scopeQ.data;
+  const isAdmin = isSuper || !!scope?.level;
 
-  const [tab, setTab] = useState<"reg" | "points">("reg");
+  const [tab, setTab] = useState<"reg" | "points" | "requests" | "hierarchy">("reg");
+
   const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "all">("pending");
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
