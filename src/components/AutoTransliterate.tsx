@@ -1167,12 +1167,20 @@ export function AutoTransliterate() {
     };
     // Defer the first pass so React finishes hydrating before we mutate text
     // nodes (mutating during hydration causes a mismatch warning).
-    const initialTimer = window.setTimeout(() => {
+    const sweepTimers: number[] = [];
+    const fullPass = () =>
       apply(() => {
         translateDocumentTitle(lang);
         walk(document.body, lang);
       });
-    }, 0);
+    const initialTimer = window.setTimeout(fullPass, 0);
+    // Content that appears after async work (session checks, data fetches) can
+    // land while a mutation batch is being applied, so sweep again shortly
+    // after mount to guarantee a single-language UI.
+    for (const delay of [300, 1000, 2500]) {
+      sweepTimers.push(window.setTimeout(fullPass, delay));
+    }
+
 
     // Force a full repaint so off-screen content reflects the new language
     // immediately, without requiring the user to scroll. Some mobile browsers
