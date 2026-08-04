@@ -84,20 +84,34 @@ export function AdminRequestsPanel({ isSuper }: { isSuper: boolean }) {
         rows.map((r: any) => (
           <Card key={r.id} className="p-4 space-y-2">
             <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <p className="font-semibold truncate">{r.full_name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {r.requested_level === "state_admin" ? "రాష్ట్ర అడ్మిన్" : "జిల్లా అడ్మిన్"} · {r.state}
-                  {r.district ? ` / ${r.district}` : ""}
-                </p>
-                {r.phone && <p className="text-xs text-muted-foreground">📞 {r.phone}</p>}
-                {r.email && <p className="text-xs text-muted-foreground">✉️ {r.email}</p>}
-                {r.message && <p className="text-xs mt-1">{r.message}</p>}
+              <div className="flex min-w-0 gap-3">
+                {r.photo_signed_url ? (
+                  <img src={r.photo_signed_url} alt={r.full_name} className="h-14 w-14 shrink-0 rounded-full border object-cover" />
+                ) : (
+                  <div className="h-14 w-14 shrink-0 rounded-full border bg-muted" />
+                )}
+                <div className="min-w-0">
+                  <p className="font-semibold truncate">{r.full_name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {r.requested_level === "state_admin" ? "రాష్ట్ర అడ్మిన్" : "జిల్లా అడ్మిన్"} · {r.state}
+                    {r.district ? ` / ${r.district}` : ""}
+                  </p>
+                  {r.phone && <p className="text-xs text-muted-foreground">📞 {r.phone}</p>}
+                  {r.email && <p className="text-xs text-muted-foreground">✉️ {r.email}</p>}
+                  {r.aadhaar_signed_url && (
+                    <a href={r.aadhaar_signed_url} target="_blank" rel="noreferrer"
+                      className="text-xs underline text-[#1e3a8a] inline-flex items-center gap-1">
+                      ఆధార్ కార్డు చూడండి
+                    </a>
+                  )}
+                  {r.message && <p className="text-xs mt-1">{r.message}</p>}
+                </div>
               </div>
               <Badge variant={r.status === "approved" ? "default" : r.status === "rejected" ? "destructive" : "secondary"}>
                 {r.status}
               </Badge>
             </div>
+
 
             {isSuper && r.status === "pending" && (
               <div className="space-y-2">
