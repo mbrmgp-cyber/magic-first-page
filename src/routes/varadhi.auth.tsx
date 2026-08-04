@@ -109,7 +109,7 @@ function VaradhiAuthPage() {
         <div className="text-center">
           <img src={varadhiLogo.url} alt="Vaaradhi" className="mx-auto h-16 w-16 rounded-2xl object-contain bg-white p-1 shadow" />
           <h1 className="mt-3 text-2xl font-bold text-[#1e3a8a]">వారధి</h1>
-          <p className="text-xs text-[#1e3a8a]/70">Vaaradhi Login</p>
+          <p className="text-xs text-[#1e3a8a]/70">వారధి లాగిన్</p>
           <div className="mx-auto mt-2 h-1 w-16 rounded-full bg-[#f97316]" />
         </div>
 
@@ -124,7 +124,7 @@ function VaradhiAuthPage() {
                   mode === "otp" ? "bg-[#f97316] text-white shadow" : "text-[#1e3a8a]/70"
                 }`}
               >
-                <KeyRound className="h-3.5 w-3.5" /> OTP కోడ్
+                <KeyRound className="h-3.5 w-3.5" /> కోడ్‌తో లాగిన్
               </button>
               <button
                 type="button"
@@ -133,11 +133,11 @@ function VaradhiAuthPage() {
                   mode === "link" ? "bg-[#f97316] text-white shadow" : "text-[#1e3a8a]/70"
                 }`}
               >
-                <Link2 className="h-3.5 w-3.5" /> Magic Link
+                <Link2 className="h-3.5 w-3.5" /> లింక్‌తో లాగిన్
               </button>
             </div>
 
-            <label className="block text-xs font-medium text-[#1e3a8a]/80">ఈమెయిల్ / Email</label>
+            <label className="block text-xs font-medium text-[#1e3a8a]/80">ఈమెయిల్</label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#1e3a8a]/50" />
               <input
@@ -157,18 +157,18 @@ function VaradhiAuthPage() {
               {loading
                 ? "పంపిస్తున్నాం…"
                 : mode === "otp"
-                ? "OTP కోడ్ పంపండి"
+                ? "కోడ్ పంపండి"
                 : "లాగిన్ లింక్ పంపండి"}
             </button>
             <p className="text-center text-[11px] text-[#1e3a8a]/60">
-              Vaaradhi has its own login — separate from MBR App.
+              వారధికి సొంత లాగిన్ — ఎంబీఆర్ యాప్‌తో సంబంధం లేదు.
             </p>
           </form>
         ) : mode === "otp" ? (
           <form onSubmit={verifyOtp} className="mt-6 space-y-4">
             <div className="rounded-xl border border-[#f97316]/30 bg-[#f97316]/10 p-3 text-center text-[#1e3a8a]">
               <p className="text-xs">
-                6-digit OTP sent to <b>{email}</b>
+                6 అంకెల కోడ్ పంపాం — <b>{email}</b>
               </p>
             </div>
             <input
@@ -204,12 +204,12 @@ function VaradhiAuthPage() {
                   setLoading(true);
                   const res = await sendLink({ data: { email, mode: "otp" } }).catch(() => ({ sent: false as const }));
                   setLoading(false);
-                  if (res?.sent) toast.success("New OTP sent");
-                  else toast.error("Failed to resend");
+                  if (res?.sent) toast.success("కొత్త కోడ్ పంపాం");
+                  else toast.error("మళ్లీ పంపడం విఫలమైంది");
                 }}
                 className="text-[#f97316] font-semibold"
               >
-                Resend OTP
+                మళ్లీ కోడ్ పంపండి
               </button>
             </div>
           </form>
@@ -218,7 +218,7 @@ function VaradhiAuthPage() {
             <div className="rounded-xl border border-[#f97316]/30 bg-[#f97316]/10 p-4 text-[#1e3a8a]">
               <ExternalLink className="mx-auto mb-2 h-6 w-6 text-[#f97316]" />
               <p className="font-semibold">మీ ఈమెయిల్ చెక్ చేయండి</p>
-              <p className="mt-1 text-xs">Click the login link we sent to <b>{email}</b>.</p>
+              <p className="mt-1 text-xs">మేము <b>{email}</b> కు పంపిన లాగిన్ లింక్‌ను క్లిక్ చేయండి.</p>
             </div>
             <button
               onClick={() => { setStep("email"); }}
