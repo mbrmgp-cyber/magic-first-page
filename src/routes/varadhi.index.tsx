@@ -531,14 +531,6 @@ function VaradhiHome() {
       {/* Share app */}
       <ShareApp />
 
-      <div className="mt-6 text-center">
-        <Link
-          to="/varadhi/admin-apply"
-          className="inline-block rounded-full border border-[#1e3a8a]/25 px-4 py-1.5 text-[11px] font-medium text-[#1e3a8a]"
-        >
-          మీ ప్రాంతానికి అడ్మిన్‌గా దరఖాస్తు చేయండి
-        </Link>
-      </div>
 
       <p className="mt-8 text-center text-[10px] text-[#1e3a8a]/50">
         © MBR Platform · <Link to="/" className="underline">పోర్టల్‌కి తిరిగి</Link>
