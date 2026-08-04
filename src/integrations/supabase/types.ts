@@ -2223,6 +2223,7 @@ export type Database = {
       }
       varadhi_admin_requests: {
         Row: {
+          aadhaar_url: string | null
           created_at: string
           district: string | null
           email: string | null
@@ -2230,6 +2231,7 @@ export type Database = {
           id: string
           message: string | null
           phone: string | null
+          photo_url: string | null
           requested_level: string
           review_notes: string | null
           reviewed_at: string | null
@@ -2240,6 +2242,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          aadhaar_url?: string | null
           created_at?: string
           district?: string | null
           email?: string | null
@@ -2247,6 +2250,7 @@ export type Database = {
           id?: string
           message?: string | null
           phone?: string | null
+          photo_url?: string | null
           requested_level?: string
           review_notes?: string | null
           reviewed_at?: string | null
@@ -2257,6 +2261,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          aadhaar_url?: string | null
           created_at?: string
           district?: string | null
           email?: string | null
@@ -2264,6 +2269,7 @@ export type Database = {
           id?: string
           message?: string | null
           phone?: string | null
+          photo_url?: string | null
           requested_level?: string
           review_notes?: string | null
           reviewed_at?: string | null

@@ -374,6 +374,19 @@ function VaradhiHome() {
       {/* Banner carousel */}
       <BannerCarousel />
 
+      {/* Apply as area admin — prominent, top placement */}
+      <Link
+        to="/varadhi/admin-apply"
+        className="mt-3 flex items-center justify-between gap-2 rounded-2xl bg-gradient-to-r from-[#1e3a8a] to-[#0ea5e9] px-4 py-3 text-white shadow-md active:scale-[0.99]"
+      >
+        <span className="min-w-0">
+          <span className="block text-sm font-bold">మీ ప్రాంతానికి అడ్మిన్‌గా దరఖాస్తు చేయండి</span>
+          <span className="block text-[11px] opacity-90">రాష్ట్ర / జిల్లా అడ్మిన్ — ఫోటో & ఆధార్‌తో దరఖాస్తు</span>
+        </span>
+        <span className="shrink-0 rounded-full bg-white/20 px-3 py-1 text-[11px] font-semibold">దరఖాస్తు</span>
+      </Link>
+
+
       {/* Main search bar */}
       <div className="mt-4 flex items-center gap-2 rounded-2xl border border-black/10 bg-white px-3 py-2.5 shadow-md">
         <Search className="h-4 w-4 shrink-0 text-[#1e3a8a]/50" />
@@ -518,14 +531,6 @@ function VaradhiHome() {
       {/* Share app */}
       <ShareApp />
 
-      <div className="mt-6 text-center">
-        <Link
-          to="/varadhi/admin-apply"
-          className="inline-block rounded-full border border-[#1e3a8a]/25 px-4 py-1.5 text-[11px] font-medium text-[#1e3a8a]"
-        >
-          మీ ప్రాంతానికి అడ్మిన్‌గా దరఖాస్తు చేయండి
-        </Link>
-      </div>
 
       <p className="mt-8 text-center text-[10px] text-[#1e3a8a]/50">
         © MBR Platform · <Link to="/" className="underline">పోర్టల్‌కి తిరిగి</Link>
