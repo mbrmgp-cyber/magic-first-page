@@ -365,7 +365,7 @@ function VaradhiHome() {
           <img src={varadhiLogo.url} alt="Vaaradhi" className="h-12 w-12 shrink-0 rounded-2xl object-contain bg-white shadow-sm p-1" />
           <div className="min-w-0">
             <h1 className="truncate text-xl font-bold tracking-tight text-[#1e3a8a]">వారధి</h1>
-            <p className="truncate text-[11px] text-[#1e3a8a]/70">Sell, Buy, Transport & Services</p>
+            <p className="truncate text-[11px] text-[#1e3a8a]/70">అమ్మండి, కొనండి, రవాణా & సేవలు</p>
           </div>
         </div>
         <LanguageToggle />
@@ -397,7 +397,7 @@ function VaradhiHome() {
       {signedIn === false && (
         <div className="mt-4 rounded-2xl bg-gradient-to-br from-[#1e3a8a] to-[#3b5bdb] p-4 text-white shadow-md">
           <p className="text-sm font-medium">ప్రారంభించడానికి లాగిన్ అవ్వండి</p>
-          <p className="mt-0.5 text-[11px] opacity-90">Aadhaar & లొకేషన్ verify చేసి — అమ్మండి, కొనండి, సర్వీసులు అందించండి.</p>
+          <p className="mt-0.5 text-[11px] opacity-90">ఆధార్ & లొకేషన్ ధృవీకరించి — అమ్మండి, కొనండి, సేవలు అందించండి.</p>
           <button
             onClick={() => navigate({ to: "/varadhi/auth" })}
             className="mt-3 w-full rounded-xl bg-[#f97316] py-2.5 font-semibold text-white shadow"
@@ -408,7 +408,7 @@ function VaradhiHome() {
       )}
 
       {/* Categories — icon grid */}
-      <h2 className="mt-6 text-sm font-semibold text-[#1e3a8a]/80">వర్గాలు — Categories</h2>
+      <h2 className="mt-6 text-sm font-semibold text-[#1e3a8a]/80">వర్గాలు</h2>
       <div className="mt-3 grid grid-cols-4 gap-2">
         <CategoryTile
           box={{ id: "items", te: "వస్తువులు", color: "#1e3a8a", Icon: Boxes, sub: "" }}
@@ -501,7 +501,7 @@ function VaradhiHome() {
       <div className="mt-6">
         <div className="flex items-center gap-1.5">
           <Sparkles className="h-4 w-4 text-[#f97316]" />
-          <h2 className="text-sm font-semibold text-[#1e3a8a]/80">కొత్త అప్‌డేట్‌లు — Recent Listings</h2>
+          <h2 className="text-sm font-semibold text-[#1e3a8a]/80">కొత్త అప్‌డేట్‌లు</h2>
         </div>
         {!signedIn && <p className="mt-2 text-[11px] text-[#1e3a8a]/60">లాగిన్ అయితే కొత్త అప్‌డేట్‌లు కనిపిస్తాయి.</p>}
         {signedIn && loading && <p className="mt-2 text-[11px] text-[#1e3a8a]/60">లోడ్ అవుతోంది…</p>}
@@ -519,7 +519,7 @@ function VaradhiHome() {
       <ShareApp />
 
       <p className="mt-8 text-center text-[10px] text-[#1e3a8a]/50">
-        © MBR Platform · <Link to="/" className="underline">Back to Portal</Link>
+        © MBR Platform · <Link to="/" className="underline">పోర్టల్‌కి తిరిగి</Link>
       </p>
     </div>
   );
