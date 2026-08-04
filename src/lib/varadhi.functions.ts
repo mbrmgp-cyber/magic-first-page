@@ -702,12 +702,15 @@ export const submitVaradhiAdminRequest = createServerFn({ method: "POST" })
   .inputValidator((d: {
     full_name: string; phone?: string; requested_level: "state_admin" | "district_admin";
     state: string; district?: string; message?: string;
+    photo_url?: string; aadhaar_url?: string;
   }) => d)
   .handler(async ({ data, context }) => {
     const name = (data.full_name ?? "").trim();
     if (name.length < 2 || name.length > 100) throw new Error("పేరు సరిగా ఇవ్వండి");
     if (!data.state) throw new Error("రాష్ట్రం ఎంచుకోండి");
     if (data.requested_level === "district_admin" && !data.district) throw new Error("జిల్లా ఎంచుకోండి");
+    if (!(data.photo_url ?? "").trim()) throw new Error("ఫోటో అప్‌లోడ్ చేయండి");
+    if (!(data.aadhaar_url ?? "").trim()) throw new Error("ఆధార్ కార్డు అప్‌లోడ్ చేయండి");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: pending } = await supabaseAdmin
       .from("varadhi_admin_requests")
@@ -722,6 +725,8 @@ export const submitVaradhiAdminRequest = createServerFn({ method: "POST" })
       state: data.state,
       district: data.requested_level === "district_admin" ? data.district : (data.district ?? null),
       message: (data.message ?? "").trim().slice(0, 1000) || null,
+      photo_url: (data.photo_url ?? "").trim() || null,
+      aadhaar_url: (data.aadhaar_url ?? "").trim() || null,
     });
     if (error) throw new Error(error.message);
     return { ok: true };
