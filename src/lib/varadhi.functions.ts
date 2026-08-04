@@ -640,3 +640,219 @@ export const adminUserPointHistory = createServerFn({ method: "GET" })
     };
   });
 
+
+// -------- Admin hierarchy: Super Admin → State Admin → District Admin --------
+
+async function isSuperVaradhiAdmin(userId: string, email?: string | null) {
+  try {
+    await assertVaradhiAdmin(null, userId, email);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function loadAreaScope(userId: string, email?: string | null) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const isSuper = await isSuperVaradhiAdmin(userId, email);
+  const { data: seats } = await supabaseAdmin
+    .from("varadhi_area_admins")
+    .select("id, level, state, district, is_active")
+    .eq("user_id", userId)
+    .eq("is_active", true);
+  const rows = (seats ?? []) as any[];
+  const state = rows.find((r) => r.level === "state_admin") ?? null;
+  const district = rows.find((r) => r.level === "district_admin") ?? null;
+  return {
+    isSuper,
+    level: (isSuper ? "super_admin" : state ? "state_admin" : district ? "district_admin" : null) as
+      | "super_admin" | "state_admin" | "district_admin" | null,
+    state: (state?.state ?? district?.state ?? null) as string | null,
+    district: (district?.district ?? null) as string | null,
+    seats: rows,
+  };
+}
+
+// Any signed-in user can read their own scope; the panel renders from this.
+export const getMyVaradhiScope = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const scope = await loadAreaScope(context.userId, (context.claims as any)?.email);
+    return { ...scope, canOpenPanel: scope.level !== null };
+  });
+
+export const submitVaradhiAdminRequest = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: {
+    full_name: string; phone?: string; requested_level: "state_admin" | "district_admin";
+    state: string; district?: string; message?: string;
+  }) => d)
+  .handler(async ({ data, context }) => {
+    const name = (data.full_name ?? "").trim();
+    if (name.length < 2 || name.length > 100) throw new Error("పేరు సరిగా ఇవ్వండి");
+    if (!data.state) throw new Error("రాష్ట్రం ఎంచుకోండి");
+    if (data.requested_level === "district_admin" && !data.district) throw new Error("జిల్లా ఎంచుకోండి");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: pending } = await supabaseAdmin
+      .from("varadhi_admin_requests")
+      .select("id").eq("user_id", context.userId).eq("status", "pending").maybeSingle();
+    if (pending) throw new Error("మీ దరఖాస్తు ఇప్పటికే పరిశీలనలో ఉంది");
+    const { error } = await supabaseAdmin.from("varadhi_admin_requests").insert({
+      user_id: context.userId,
+      full_name: name,
+      phone: (data.phone ?? "").trim().slice(0, 20) || null,
+      email: ((context.claims as any)?.email ?? null),
+      requested_level: data.requested_level,
+      state: data.state,
+      district: data.requested_level === "district_admin" ? data.district : (data.district ?? null),
+      message: (data.message ?? "").trim().slice(0, 1000) || null,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const myVaradhiAdminRequests = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data } = await context.supabase
+      .from("varadhi_admin_requests")
+      .select("*").eq("user_id", context.userId)
+      .order("created_at", { ascending: false });
+    return { requests: data ?? [] };
+  });
+
+export const adminListAdminRequests = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { status?: "pending" | "approved" | "rejected" | "all" } = {}) => d)
+  .handler(async ({ data, context }) => {
+    const scope = await loadAreaScope(context.userId, (context.claims as any)?.email);
+    if (!scope.isSuper && scope.level !== "state_admin") throw new Error("Forbidden");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let q = supabaseAdmin.from("varadhi_admin_requests").select("*").order("created_at", { ascending: false });
+    if (data.status && data.status !== "all") q = q.eq("status", data.status);
+    if (!scope.isSuper && scope.state) q = q.eq("state", scope.state);
+    const { data: rows, error } = await q.limit(300);
+    if (error) throw new Error(error.message);
+    return { requests: rows ?? [], canApprove: scope.isSuper };
+  });
+
+// Only the Super Admin can approve / reject and thereby create an area seat.
+export const adminReviewAdminRequest = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: {
+    request_id: string; action: "approve" | "reject"; notes?: string;
+    grant_level?: "state_admin" | "district_admin"; parent_admin_id?: string | null;
+  }) => d)
+  .handler(async ({ data, context }) => {
+    await assertVaradhiAdmin(context.supabase, context.userId, (context.claims as any)?.email);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: req } = await supabaseAdmin
+      .from("varadhi_admin_requests").select("*").eq("id", data.request_id).maybeSingle();
+    if (!req) throw new Error("దరఖాస్తు కనిపించలేదు");
+    if ((req as any).status !== "pending") throw new Error("ఇప్పటికే పరిష్కరించబడింది");
+
+    if (data.action === "approve") {
+      const level = data.grant_level ?? (req as any).requested_level;
+      if (level === "district_admin" && !(req as any).district) throw new Error("జిల్లా లేదు");
+      const { error: seatErr } = await supabaseAdmin.from("varadhi_area_admins").insert({
+        user_id: (req as any).user_id,
+        level,
+        state: (req as any).state,
+        district: level === "district_admin" ? (req as any).district : null,
+        parent_admin_id: level === "district_admin" ? (data.parent_admin_id ?? null) : null,
+        assigned_by: context.userId,
+      });
+      if (seatErr && !seatErr.message.includes("duplicate")) throw new Error(seatErr.message);
+    }
+
+    const { error } = await supabaseAdmin.from("varadhi_admin_requests").update({
+      status: data.action === "approve" ? "approved" : "rejected",
+      review_notes: (data.notes ?? "").slice(0, 500) || null,
+      reviewed_by: context.userId,
+      reviewed_at: new Date().toISOString(),
+    }).eq("id", data.request_id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminListAreaAdmins = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const scope = await loadAreaScope(context.userId, (context.claims as any)?.email);
+    if (!scope.level) throw new Error("Forbidden");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let q = supabaseAdmin.from("varadhi_area_admins").select("*").order("created_at", { ascending: false });
+    if (!scope.isSuper && scope.state) q = q.eq("state", scope.state);
+    const { data: rows } = await q.limit(500);
+    const list = (rows ?? []) as any[];
+    const ids = Array.from(new Set(list.map((r) => r.user_id)));
+    const profiles = new Map<string, any>();
+    if (ids.length) {
+      const { data: p } = await supabaseAdmin
+        .from("varadhi_profiles").select("user_id, full_name, phone, city, mandal, district, state").in("user_id", ids);
+      for (const x of (p ?? []) as any[]) profiles.set(x.user_id, x);
+    }
+    return {
+      admins: list.map((r) => ({ ...r, profile: profiles.get(r.user_id) ?? null })),
+      isSuper: scope.isSuper,
+      scope: { level: scope.level, state: scope.state, district: scope.district },
+    };
+  });
+
+// Super Admin assigns a District Admin under a chosen State Admin.
+export const adminAssignDistrictAdmin = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { user_id: string; state: string; district: string; parent_admin_id?: string | null }) => d)
+  .handler(async ({ data, context }) => {
+    await assertVaradhiAdmin(context.supabase, context.userId, (context.claims as any)?.email);
+    if (!data.user_id || !data.state || !data.district) throw new Error("వివరాలు అసంపూర్ణం");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (data.parent_admin_id) {
+      const { data: parent } = await supabaseAdmin
+        .from("varadhi_area_admins").select("id, level, state").eq("id", data.parent_admin_id).maybeSingle();
+      if (!parent || (parent as any).level !== "state_admin" || (parent as any).state !== data.state) {
+        throw new Error("ఎంచుకున్న రాష్ట్ర అడ్మిన్ ఈ రాష్ట్రానికి చెందినవారు కాదు");
+      }
+    }
+    const { error } = await supabaseAdmin.from("varadhi_area_admins").insert({
+      user_id: data.user_id,
+      level: "district_admin",
+      state: data.state,
+      district: data.district,
+      parent_admin_id: data.parent_admin_id ?? null,
+      assigned_by: context.userId,
+    });
+    if (error) throw new Error(error.message.includes("duplicate") ? "ఇప్పటికే కేటాయించబడింది" : error.message);
+    return { ok: true };
+  });
+
+export const adminSetAreaAdminActive = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; is_active: boolean }) => d)
+  .handler(async ({ data, context }) => {
+    await assertVaradhiAdmin(context.supabase, context.userId, (context.claims as any)?.email);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("varadhi_area_admins").update({ is_active: data.is_active }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// Candidate users (registered Vaaradhi profiles) the Super Admin can promote.
+export const adminSearchVaradhiUsers = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { q?: string; state?: string; district?: string } = {}) => d)
+  .handler(async ({ data, context }) => {
+    await assertVaradhiAdmin(context.supabase, context.userId, (context.claims as any)?.email);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let q = supabaseAdmin
+      .from("varadhi_profiles")
+      .select("user_id, full_name, phone, state, district, mandal, city")
+      .order("created_at", { ascending: false });
+    if (data.state) q = q.eq("state", data.state);
+    if (data.district) q = q.eq("district", data.district);
+    if (data.q) q = q.or(`full_name.ilike.%${data.q}%,phone.ilike.%${data.q}%`);
+    const { data: rows, error } = await q.limit(50);
+    if (error) throw new Error(error.message);
+    return { users: rows ?? [] };
+  });
