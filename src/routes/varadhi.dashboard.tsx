@@ -191,8 +191,8 @@ function UpdateBoard() {
 
       {/* Greeting */}
       <div className="rounded-2xl bg-gradient-to-br from-[#1e3a8a] to-[#3b5bdb] p-4 text-white shadow">
-        <p className="text-base font-semibold">🙏 నమస్కారం, {name} గారు</p>
-        <p className="text-[11px] opacity-90 mt-0.5">వారధికి స్వాగతం — మీ వస్తువులు, సేవలు ఇక్కడ అప్‌డేట్ చేయండి.</p>
+        <p className="text-base font-semibold">🙏 స్వాగతం, {name} గారు</p>
+        <p className="text-[11px] opacity-90 mt-0.5">మీ వస్తువులు, సేవలు ఇక్కడ అప్‌డేట్ చేయండి.</p>
       </div>
 
       {/* Post type */}
