@@ -131,14 +131,14 @@ function AdminApply() {
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs font-medium">రాష్ట్రం *</label>
+          <label className="text-xs font-medium">రాష్ట్రం / కేంద్రపాలిత ప్రాంతం *</label>
           <select
             className="w-full h-10 rounded-md border bg-background px-3 text-sm"
             value={state}
             onChange={(e) => { setState(e.target.value); setDistrict(""); }}
           >
             <option value="">ఎంచుకోండి</option>
-            {STATES.map((s) => <option key={s} value={s}>{s}</option>)}
+            {INDIA_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
 
@@ -150,15 +150,31 @@ function AdminApply() {
             onChange={(e) => setDistrict(e.target.value)}
             disabled={!state}
           >
-            <option value="">ఎంచుకోండి</option>
-            {districtsFor(state).map((d) => <option key={d} value={d}>{d}</option>)}
+            <option value="">{state ? "ఎంచుకోండి" : "ముందు రాష్ట్రం ఎంచుకోండి"}</option>
+            {indiaDistrictsFor(state).map((d) => <option key={d} value={d}>{d}</option>)}
           </select>
         </div>
+
+        <UploadField
+          label="ప్రొఫైల్ ఫోటో *"
+          done={!!photoUrl}
+          busy={uploading === "photo"}
+          accept="image/*"
+          onFile={(f) => uploadTo(f, "photo")}
+        />
+        <UploadField
+          label="ఆధార్ కార్డు (ఫోటో / PDF) *"
+          done={!!aadhaarUrl}
+          busy={uploading === "aadhaar"}
+          accept="image/*,application/pdf"
+          onFile={(f) => uploadTo(f, "aadhaar")}
+        />
 
         <div className="space-y-1">
           <label className="text-xs font-medium">మీ గురించి / అనుభవం</label>
           <Textarea rows={3} value={message} onChange={(e) => setMessage(e.target.value)} maxLength={1000} />
         </div>
+
 
         <Button className="w-full" disabled={!valid || busy} onClick={send}>
           <Send className="h-4 w-4 mr-1" /> {busy ? "పంపుతోంది…" : "దరఖాస్తు పంపండి"}
