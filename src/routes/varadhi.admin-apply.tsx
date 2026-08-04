@@ -50,14 +50,35 @@ function AdminApply() {
   const [state, setState] = useState("");
   const [district, setDistrict] = useState("");
   const [message, setMessage] = useState("");
+  const [photoUrl, setPhotoUrl] = useState("");
+  const [aadhaarUrl, setAadhaarUrl] = useState("");
+  const [uploading, setUploading] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const listQ = useQuery({ queryKey: ["varadhi-my-admin-requests"], queryFn: () => mine(), enabled: authed === true });
 
+  async function uploadTo(file: File, field: "photo" | "aadhaar") {
+    setUploading(field);
+    try {
+      const { data: sess } = await supabase.auth.getSession();
+      const uid = sess.session?.user.id;
+      if (!uid) throw new Error("లాగిన్ అవ్వండి");
+      const path = `${uid}/admin-${field}-${Date.now()}-${file.name.replace(/[^\w.-]/g, "_")}`;
+      const { error } = await supabase.storage.from("varadhi-proofs").upload(path, file, { upsert: true });
+      if (error) throw new Error(error.message);
+      if (field === "photo") setPhotoUrl(path); else setAadhaarUrl(path);
+      toast.success("అప్‌లోడ్ అయింది");
+    } catch (e: any) {
+      toast.error(e.message ?? "అప్‌లోడ్ విఫలమైంది");
+    } finally {
+      setUploading(null);
+    }
+  }
+
   async function send() {
     setBusy(true);
     try {
-      await submit({ data: { full_name: fullName, phone, requested_level: level, state, district, message } });
+      await submit({ data: { full_name: fullName, phone, requested_level: level, state, district, message, photo_url: photoUrl, aadhaar_url: aadhaarUrl } });
       toast.success("దరఖాస్తు పంపబడింది");
       setMessage("");
       qc.invalidateQueries({ queryKey: ["varadhi-my-admin-requests"] });
@@ -68,7 +89,10 @@ function AdminApply() {
     }
   }
 
-  const valid = fullName.trim().length >= 2 && !!state && (level === "state_admin" || !!district);
+  const valid =
+    fullName.trim().length >= 2 && !!state &&
+    (level === "state_admin" || !!district) &&
+    !!photoUrl && !!aadhaarUrl;
   if (authed === null) return <p className="p-8 text-center text-sm">లోడ్…</p>;
 
   return (
