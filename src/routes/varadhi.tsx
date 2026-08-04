@@ -95,8 +95,8 @@ function VaradhiBottomNav() {
   ];
   const nav = (
     <nav
-      className="fixed bottom-0 inset-x-0 z-50 bg-white border-t border-[#1e3a8a]/10 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]"
-      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      className="fixed inset-x-0 bottom-0 z-50 bg-white border-t border-[#1e3a8a]/10 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]"
+      style={{ position: "fixed", insetInline: 0, bottom: 0, paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <div className="mx-auto max-w-md grid grid-cols-5">
         {items.map((it) => {

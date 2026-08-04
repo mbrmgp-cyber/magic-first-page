@@ -1185,23 +1185,6 @@ export function AutoTransliterate() {
     }
 
 
-    // Force a full repaint so off-screen content reflects the new language
-    // immediately, without requiring the user to scroll. Some mobile browsers
-    // keep painted tiles cached and skip repaint when only text nodes change
-    // off-screen, which made language changes appear "stuck" until scrolling.
-    try {
-      const root = document.documentElement;
-      const prev = root.style.transform;
-      root.style.transform = "translateZ(0)";
-      // Read a layout property to flush styles, then restore.
-      void root.offsetHeight;
-      requestAnimationFrame(() => {
-        root.style.transform = prev;
-      });
-    } catch {
-      /* ignore */
-    }
-
     const obs = new MutationObserver((muts) => {
       if (applying) return;
       apply(() => {

@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice, isFreeListing, stockLabel } from "@/lib/varadhi-format";
+import { useI18n } from "@/lib/i18n";
 
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -166,6 +167,7 @@ const empty: Form = {
 
 function UpdateBoard() {
   const navigate = useNavigate();
+  const { lang, t } = useI18n();
   const getProfile = useServerFn(getMyVaradhiProfile);
   const [name, setName] = useState("");
   const [ready, setReady] = useState(false);
@@ -191,7 +193,7 @@ function UpdateBoard() {
 
       {/* Greeting */}
       <div className="rounded-2xl bg-gradient-to-br from-[#1e3a8a] to-[#3b5bdb] p-4 text-white shadow">
-        <p className="text-base font-semibold">🙏 స్వాగతం, {name} గారు</p>
+        <p className="text-base font-semibold">🙏 {t("welcome")}, {name}{lang === "te" ? " గారు" : ""}</p>
         <p className="text-[11px] opacity-90 mt-0.5">మీ వస్తువులు, సేవలు ఇక్కడ అప్‌డేట్ చేయండి.</p>
       </div>
 
