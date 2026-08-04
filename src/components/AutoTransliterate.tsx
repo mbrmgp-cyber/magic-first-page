@@ -527,6 +527,9 @@ const TE_EN: Record<string, string> = {
 
   // Home / feed
   "మీ చుట్టూ 100 కి.మీ. అప్‌డేట్‌లు": "Updates within 100 km of you",
+  "మీ చుట్టూ 100 కి.మీ.": "Within 100 km of you",
+  "మీ చుట్టూ అప్‌డేట్‌లు లేవు.": "No updates around you.",
+  "🙏 స్వాగతం": "🙏 Welcome",
   "మీ చుట్టూ 100 కి.మీ. లోపు అప్‌డేట్‌లు లేవు.": "No updates within 100 km of you.",
   "లొకేషన్ కోసం అనుమతి ఇవ్వండి…": "Please allow location access…",
   "లొకేషన్ అనుమతి లేదు. “లొకేషన్” నొక్కి మళ్లీ ప్రయత్నించండి.":

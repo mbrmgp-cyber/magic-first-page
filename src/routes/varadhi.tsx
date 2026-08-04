@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, Link, useLocation } from "@tanstack/react-router";
 import { Home, Search, LayoutDashboard, Gift, User, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { amIVaradhiAdmin } from "@/lib/varadhi.functions";
@@ -83,6 +84,8 @@ function VaradhiLayout() {
 
 function VaradhiBottomNav() {
   const loc = useLocation();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const items = [
     { to: "/varadhi", icon: Home, label: "హోమ్" },
     { to: "/varadhi/browse/fresh", icon: Search, label: "వెతకండి" },
@@ -90,8 +93,11 @@ function VaradhiBottomNav() {
     { to: "/varadhi/rewards", icon: Gift, label: "బహుమతులు" },
     { to: "/varadhi/onboard", icon: User, label: "ప్రొఫైల్" },
   ];
-  return (
-    <nav className="fixed bottom-0 inset-x-0 z-50 bg-white border-t border-[#1e3a8a]/10 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
+  const nav = (
+    <nav
+      className="fixed bottom-0 inset-x-0 z-50 bg-white border-t border-[#1e3a8a]/10 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+    >
       <div className="mx-auto max-w-md grid grid-cols-5">
         {items.map((it) => {
           const active = it.to === "/varadhi" ? loc.pathname === "/varadhi" : loc.pathname.startsWith(it.to);
@@ -112,4 +118,6 @@ function VaradhiBottomNav() {
       </div>
     </nav>
   );
+  if (!mounted) return nav;
+  return createPortal(nav, document.body);
 }
