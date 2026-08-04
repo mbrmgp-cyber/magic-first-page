@@ -430,13 +430,18 @@ export const adminListVaradhiProfiles = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { status?: "pending" | "approved" | "rejected" | "all" } = {}) => d)
   .handler(async ({ data, context }) => {
-    await assertVaradhiAdmin(context.supabase, context.userId, (context.claims as any)?.email);
+    const scope = await loadAreaScope(context.userId, (context.claims as any)?.email);
+    if (!scope.level) throw new Error("Forbidden: Varadhi Admin only");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     let q = supabaseAdmin.from("varadhi_profiles").select("*").order("created_at", { ascending: false });
     if (data.status && data.status !== "all") q = q.eq("verification_status", data.status);
+    // State admins see only their state; district admins only their district.
+    if (!scope.isSuper && scope.state) q = q.eq("state", scope.state);
+    if (!scope.isSuper && scope.level === "district_admin" && scope.district) q = q.eq("district", scope.district);
     const { data: rows, error } = await q.limit(500);
     if (error) throw new Error(error.message);
+
 
     // Sign private proof URLs so admin can view them.
     async function sign(bucket: string, path: string | null) {
