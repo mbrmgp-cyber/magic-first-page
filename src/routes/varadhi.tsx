@@ -70,7 +70,7 @@ function VaradhiLayout() {
       {showDisclaimer && (
         <div className="mx-auto max-w-md px-3 pb-3">
           <div className="rounded-lg bg-black/70 text-white text-[10px] leading-tight px-3 py-1.5">
-            Vaaradhi is an informational listing platform. It is not responsible for any monetary transactions, product quality, or business agreements between users.
+            వారధి కేవలం సమాచార వేదిక. వినియోగదారుల మధ్య జరిగే డబ్బు లావాదేవీలు, వస్తువుల నాణ్యత లేదా ఒప్పందాలకు వారధి బాధ్యత వహించదు.
           </div>
         </div>
       )}
