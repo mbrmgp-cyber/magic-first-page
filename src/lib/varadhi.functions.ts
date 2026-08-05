@@ -784,7 +784,8 @@ export const adminReviewAdminRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: {
     request_id: string; action: "approve" | "reject"; notes?: string;
-    grant_level?: "state_admin" | "district_admin"; parent_admin_id?: string | null;
+    grant_level?: "state_admin" | "district_admin" | "mandal_admin";
+    parent_admin_id?: string | null; mandal?: string | null;
   }) => d)
   .handler(async ({ data, context }) => {
     await assertVaradhiAdmin(context.supabase, context.userId, (context.claims as any)?.email);
@@ -796,15 +797,18 @@ export const adminReviewAdminRequest = createServerFn({ method: "POST" })
 
     if (data.action === "approve") {
       const level = data.grant_level ?? (req as any).requested_level;
-      if (level === "district_admin" && !(req as any).district) throw new Error("జిల్లా లేదు");
+      const mandal = (data.mandal ?? (req as any).mandal ?? "") || null;
+      if (level !== "state_admin" && !(req as any).district) throw new Error("జిల్లా లేదు");
+      if (level === "mandal_admin" && !mandal) throw new Error("మండలం లేదు");
       const { error: seatErr } = await supabaseAdmin.from("varadhi_area_admins").insert({
         user_id: (req as any).user_id,
         level,
         state: (req as any).state,
-        district: level === "district_admin" ? (req as any).district : null,
-        parent_admin_id: level === "district_admin" ? (data.parent_admin_id ?? null) : null,
+        district: level === "state_admin" ? null : (req as any).district,
+        mandal: level === "mandal_admin" ? mandal : null,
+        parent_admin_id: level === "state_admin" ? null : (data.parent_admin_id ?? null),
         assigned_by: context.userId,
-      });
+      } as any);
       if (seatErr && !seatErr.message.includes("duplicate")) throw new Error(seatErr.message);
     }
 
