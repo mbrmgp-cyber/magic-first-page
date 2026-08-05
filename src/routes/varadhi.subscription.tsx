@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { listMySubscriptions, createSubscription } from "@/lib/varadhi.functions";
-import { ArrowLeft, Check } from "lucide-react";
+import { listMySubscriptions, createSubscription, getSubscriptionReceipt } from "@/lib/varadhi.functions";
+import { printVaradhiReceipt } from "@/lib/varadhi-receipt";
+import { ArrowLeft, Download } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/varadhi/subscription")({
