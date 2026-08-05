@@ -461,8 +461,8 @@ function VaradhiHome() {
         )}
       </div>
 
-      {/* Share app */}
-      <ShareApp />
+
+
 
 
       <p className="mt-8 text-center text-[10px] text-[#1e3a8a]/50">
