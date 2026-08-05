@@ -79,7 +79,7 @@ function AdminApply() {
   async function send() {
     setBusy(true);
     try {
-      await submit({ data: { full_name: fullName, phone, requested_level: level, state, district, message, photo_url: photoUrl, aadhaar_url: aadhaarUrl } });
+      await submit({ data: { full_name: fullName, phone, requested_level: level, state, district, mandal, message, photo_url: photoUrl, aadhaar_url: aadhaarUrl } });
       toast.success("దరఖాస్తు పంపబడింది");
       setMessage("");
       qc.invalidateQueries({ queryKey: ["varadhi-my-admin-requests"] });
@@ -93,6 +93,7 @@ function AdminApply() {
   const valid =
     fullName.trim().length >= 2 && !!state &&
     (level === "state_admin" || !!district) &&
+    (level !== "mandal_admin" || !!mandal.trim()) &&
     !!photoUrl && !!aadhaarUrl;
   if (authed === null) return <p className="p-8 text-center text-sm">లోడ్…</p>;
 
