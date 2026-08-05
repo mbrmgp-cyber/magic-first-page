@@ -11,40 +11,16 @@ import varadhiLogo from "@/assets/varadhi-logo.jpg.asset.json";
 import banner1 from "@/assets/varadhi-banner-1.jpg";
 import banner2 from "@/assets/varadhi-banner-2.jpg";
 import banner3 from "@/assets/varadhi-banner-3.jpg";
-import { Apple, Package, Recycle, MapPin, Truck, Wrench, Search, ChevronDown, Navigation, HeartHandshake, Boxes, Sparkles, ImageOff, Share2, Copy, Check, MessageCircle } from "lucide-react";
-import QRCode from "qrcode";
-import { PUBLIC_APP_ORIGIN } from "@/lib/public-url";
+import { Search, Navigation, Sparkles, ImageOff } from "lucide-react";
 
 export const Route = createFileRoute("/varadhi/")({
   component: VaradhiHome,
 });
 
-type Box = {
-  id: string;
-  te: string;
-  color: string;
-  Icon: typeof Apple;
-  sub: string;
-};
 
-const ITEM_BOXES: Box[] = [
-  { id: "fresh", te: "తాజా వస్తువులు", color: "#16a34a", Icon: Apple, sub: "కూరగాయలు, పండ్లు, పాలు" },
-  { id: "new", te: "కొత్త వస్తువులు", color: "#2563eb", Icon: Package, sub: "ఎలక్ట్రానిక్స్, ఫ్యాషన్" },
-  { id: "used", te: "వాడిన వస్తువులు", color: "#f97316", Icon: Recycle, sub: "సెకండ్ హ్యాండ్" },
-];
 
-const SERVICE_BOXES: Box[] = [
-  { id: "services", te: "పే సర్వీస్", color: "#dc2626", Icon: Wrench, sub: "టెక్నీషియన్లు & పనులు" },
-  { id: "freeservices", te: "ఫ్రీ సర్వీస్", color: "#0f9d58", Icon: HeartHandshake, sub: "ఉచిత సేవలు" },
-];
 
-const REAL_ESTATE: Box = {
-  id: "realestate", te: "ఇంటి స్థలాలు & భూములు", color: "#7c3aed", Icon: MapPin, sub: "ప్లాట్లు, భూములు",
-};
 
-const TRANSPORT: Box = {
-  id: "transport", te: "ట్రాన్స్‌పోర్ట్", color: "#0ea5e9", Icon: Truck, sub: "బండ్లు & రవాణా",
-};
 
 const BANNERS = [
   { src: banner1, te: "తాజా వస్తువులు మీ ఊరిలోనే", color: "#16a34a" },
@@ -88,27 +64,6 @@ function BannerCarousel() {
         ))}
       </div>
     </div>
-  );
-}
-
-function CategoryTile({ box, onClick, open }: { box: Box; onClick: () => void; open?: boolean }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex flex-col items-center gap-1.5 rounded-2xl bg-white p-2.5 shadow-sm border border-black/5 active:scale-95 transition"
-    >
-      <span
-        className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-white shadow-sm"
-        style={{ background: `linear-gradient(135deg, ${box.color}, ${box.color}cc)` }}
-      >
-        <box.Icon className="h-6 w-6" />
-      </span>
-      <span className="line-clamp-2 text-center text-[10px] font-semibold leading-tight text-[#1e3a8a]">{box.te}</span>
-      {open !== undefined && (
-        <ChevronDown className={`h-3 w-3 text-[#1e3a8a]/50 transition-transform ${open ? "rotate-180" : ""}`} />
-      )}
-    </button>
   );
 }
 
@@ -187,100 +142,9 @@ function ListingCard({ l, note }: { l: VaradhiListing; note?: string }) {
 }
 
 
-const VARADHI_SHARE_URL = `${PUBLIC_APP_ORIGIN}/varadhi`;
-
-function ShareApp() {
-  const [qrUrl, setQrUrl] = useState<string>("");
-  const [copied, setCopied] = useState(false);
-
-  useEffect(() => {
-    QRCode.toDataURL(VARADHI_SHARE_URL, {
-      width: 240,
-      margin: 1,
-      color: { dark: "#1e3a8a", light: "#ffffff" },
-    })
-      .then(setQrUrl)
-      .catch(() => undefined);
-  }, []);
-
-  const shareText = `వారధి — అమ్మండి, కొనండి, రవాణా & సర్వీసులు. ఇప్పుడే ట్రై చేయండి: ${VARADHI_SHARE_URL}`;
-
-  const share = async () => {
-    if (typeof navigator !== "undefined" && (navigator as any).share) {
-      try {
-        await (navigator as any).share({ title: "వారధి", text: shareText, url: VARADHI_SHARE_URL });
-        return;
-      } catch {
-        /* cancelled → fall through */
-      }
-    }
-    window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank");
-  };
-
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(VARADHI_SHARE_URL);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch { /* ignore */ }
-  };
-
-  return (
-    <div className="mt-6 rounded-2xl border border-[#1e3a8a]/15 bg-white p-4 shadow-sm">
-      <div className="flex items-center gap-1.5">
-        <Share2 className="h-4 w-4 text-[#f97316]" />
-        <h2 className="text-sm font-semibold text-[#1e3a8a]/80">ఫ్రెండ్స్‌కు షేర్ చేయండి</h2>
-      </div>
-
-      <div className="mt-3 flex flex-col items-center gap-3">
-        {qrUrl ? (
-          <div className="rounded-xl border-2 border-[#1e3a8a]/10 p-2 bg-white">
-            <img src={qrUrl} alt="Vaaradhi QR" width={160} height={160} className="h-40 w-40" />
-          </div>
-        ) : (
-          <div className="h-40 w-40 animate-pulse rounded-xl bg-[#1e3a8a]/5" />
-        )}
-        <p className="text-center text-[11px] text-[#1e3a8a]/60">
-          స్కాన్ చేసి వారధి ఆప్ ఓపెన్ చేయండి
-        </p>
-      </div>
-
-      <div className="mt-3 flex items-center gap-2 rounded-xl bg-[#f2f4fb] px-3 py-2">
-        <span className="min-w-0 flex-1 truncate text-[11px] font-medium text-[#1e3a8a]">{VARADHI_SHARE_URL}</span>
-        <button
-          type="button"
-          onClick={copy}
-          className="shrink-0 rounded-lg bg-[#1e3a8a] px-2.5 py-1.5 text-[11px] font-semibold text-white active:scale-95"
-        >
-          {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-        </button>
-      </div>
-
-      <div className="mt-2.5 grid grid-cols-2 gap-2">
-        <button
-          type="button"
-          onClick={share}
-          className="flex items-center justify-center gap-1.5 rounded-xl bg-[#16a34a] py-2.5 text-sm font-semibold text-white active:scale-95"
-        >
-          <Share2 className="h-4 w-4" /> షేర్
-        </button>
-        <a
-          href={`https://wa.me/?text=${encodeURIComponent(shareText)}`}
-          target="_blank"
-          rel="noreferrer"
-          className="flex items-center justify-center gap-1.5 rounded-xl bg-[#25d366] py-2.5 text-sm font-semibold text-white active:scale-95"
-        >
-          <MessageCircle className="h-4 w-4" /> WhatsApp
-        </a>
-      </div>
-    </div>
-  );
-}
-
 function VaradhiHome() {
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [q, setQ] = useState("");
-  const [openGroup, setOpenGroup] = useState<string | null>(null);
   const navigate = useNavigate();
   const fetchListings = useServerFn(listListings);
 
@@ -328,34 +192,9 @@ function VaradhiHome() {
     setNearby(near);
   }, [coords, recent]);
 
-  const [selectedCat, setSelectedCat] = useState<Box | null>(null);
-  const [catItems, setCatItems] = useState<VaradhiListing[]>([]);
-  const [catLoading, setCatLoading] = useState(false);
-  const catRef = useRef<HTMLDivElement | null>(null);
-
   const search = () =>
     navigate({ to: "/varadhi/browse/$category", params: { category: "fresh" }, search: { q: q.trim() } });
 
-  const ALL_BOXES: Box[] = [...ITEM_BOXES, ...SERVICE_BOXES, REAL_ESTATE, TRANSPORT];
-
-  const goto = async (id: string) => {
-    // Providers (transport / paid services) live on their own page
-    if (id === "transport" || id === "services") {
-      navigate({ to: "/varadhi/browse/$category", params: { category: id }, search: { q: "" } });
-      return;
-    }
-    const box = ALL_BOXES.find((b) => b.id === id) ?? null;
-    setSelectedCat(box);
-    setCatItems([]);
-    setTimeout(() => catRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
-    if (!signedIn) return;
-    setCatLoading(true);
-    try {
-      const r = await fetchListings({ data: { category: id } });
-      setCatItems(r.listings ?? []);
-    } catch { /* ignore */ }
-    setCatLoading(false);
-  };
 
   return (
     <div className="mx-auto max-w-md px-4 pt-5 pb-8">
@@ -420,75 +259,8 @@ function VaradhiHome() {
         </div>
       )}
 
-      {/* Categories — icon grid */}
-      <h2 className="mt-6 text-sm font-semibold text-[#1e3a8a]/80">వర్గాలు</h2>
-      <div className="mt-3 grid grid-cols-4 gap-2">
-        <CategoryTile
-          box={{ id: "items", te: "వస్తువులు", color: "#1e3a8a", Icon: Boxes, sub: "" }}
-          open={openGroup === "items"}
-          onClick={() => setOpenGroup(openGroup === "items" ? null : "items")}
-        />
-        <CategoryTile box={REAL_ESTATE} onClick={() => goto(REAL_ESTATE.id)} />
-        <CategoryTile box={TRANSPORT} onClick={() => goto(TRANSPORT.id)} />
-        <CategoryTile
-          box={{ id: "svc", te: "సర్వీసులు", color: "#dc2626", Icon: Wrench, sub: "" }}
-          open={openGroup === "svc"}
-          onClick={() => setOpenGroup(openGroup === "svc" ? null : "svc")}
-        />
-      </div>
 
-      {openGroup && (
-        <div className="mt-2 grid grid-cols-3 gap-2 rounded-2xl bg-white/70 p-2">
-          {(openGroup === "items" ? ITEM_BOXES : SERVICE_BOXES).map((b) => (
-            <CategoryTile key={b.id} box={b} onClick={() => goto(b.id)} />
-          ))}
-        </div>
-      )}
 
-      {/* Inline category results */}
-      {selectedCat && (
-        <div ref={catRef} className="mt-5 rounded-2xl border border-black/5 bg-white p-3 shadow-sm">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex min-w-0 items-center gap-2">
-              <span
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-xl text-white"
-                style={{ background: `linear-gradient(135deg, ${selectedCat.color}, ${selectedCat.color}cc)` }}
-              >
-                <selectedCat.Icon className="h-4 w-4" />
-              </span>
-              <p className="truncate text-sm font-bold text-[#1e3a8a]">{selectedCat.te}</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setSelectedCat(null)}
-              className="shrink-0 text-[11px] font-semibold text-[#1e3a8a]/50"
-            >
-              మూసివేయి
-            </button>
-          </div>
-
-          {!signedIn && <p className="mt-3 text-[11px] text-[#1e3a8a]/60">లాగిన్ అయితే ఇవి కనిపిస్తాయి.</p>}
-          {signedIn && catLoading && <p className="mt-3 text-[11px] text-[#1e3a8a]/60">లోడ్ అవుతోంది…</p>}
-          {signedIn && !catLoading && catItems.length === 0 && (
-            <p className="mt-3 text-[11px] text-[#1e3a8a]/60">ఈ వర్గంలో ఇంకా అప్‌డేట్‌లు లేవు.</p>
-          )}
-          {signedIn && catItems.length > 0 && (
-            <>
-              <div className="mt-3 grid grid-cols-2 gap-3">
-                {catItems.slice(0, 8).map((l) => <ListingCard key={l.id} l={l} />)}
-              </div>
-              <Link
-                to="/varadhi/browse/$category"
-                params={{ category: selectedCat.id }}
-                search={{ q: "" }}
-                className="mt-3 block rounded-xl bg-[#1e3a8a] py-2 text-center text-[12px] font-semibold text-white"
-              >
-                అన్నీ చూడండి ({catItems.length})
-              </Link>
-            </>
-          )}
-        </div>
-      )}
 
 
       {/* Nearby */}
@@ -528,8 +300,8 @@ function VaradhiHome() {
         )}
       </div>
 
-      {/* Share app */}
-      <ShareApp />
+
+
 
 
       <p className="mt-8 text-center text-[10px] text-[#1e3a8a]/50">

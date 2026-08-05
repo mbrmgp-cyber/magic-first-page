@@ -1174,3 +1174,82 @@ export const adminListAdminAudit = createServerFn({ method: "GET" })
       })),
     };
   });
+
+// -------- User → Admin messages --------
+export const sendVaradhiAdminMessage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { message: string; phone?: string }) => d)
+  .handler(async ({ data, context }) => {
+    const message = (data.message ?? "").trim();
+    if (!message) throw new Error("సందేశం రాయండి");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: prof } = await supabaseAdmin
+      .from("varadhi_profiles")
+      .select("state, district, mandal, phone")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    const { error } = await supabaseAdmin.from("varadhi_admin_messages").insert({
+      user_id: context.userId,
+      message,
+      phone: (data.phone ?? "").trim() || (prof as any)?.phone || null,
+      state: (prof as any)?.state ?? null,
+      district: (prof as any)?.district ?? null,
+      mandal: (prof as any)?.mandal ?? null,
+    } as any);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+export const listMyVaradhiAdminMessages = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("varadhi_admin_messages")
+      .select("*")
+      .eq("user_id", context.userId)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) throw new Error(error.message);
+    return { messages: (data ?? []) as any[] };
+  });
+
+export const adminListVaradhiMessages = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { limit?: number } = {}) => d)
+  .handler(async ({ data, context }) => {
+    const scope = await loadAreaScope(context.userId, (context.claims as any)?.email);
+    if (!scope.isSuper && !scope.level) throw new Error("Forbidden");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let q = supabaseAdmin
+      .from("varadhi_admin_messages").select("*").order("created_at", { ascending: false });
+    if (!scope.isSuper && scope.state) q = q.eq("state", scope.state);
+    if (!scope.isSuper && scope.district) q = q.eq("district", scope.district);
+    const { data: rows, error } = await q.limit(Math.min(data.limit ?? 100, 300));
+    if (error) throw new Error(error.message);
+    const list = (rows ?? []) as any[];
+    const ids = Array.from(new Set(list.map((r) => r.user_id).filter(Boolean)));
+    const names = new Map<string, string>();
+    if (ids.length) {
+      const { data: p } = await supabaseAdmin
+        .from("varadhi_profiles").select("user_id, full_name").in("user_id", ids);
+      for (const x of (p ?? []) as any[]) names.set(x.user_id, x.full_name);
+    }
+    return { messages: list.map((r) => ({ ...r, sender_name: names.get(r.user_id) ?? null })) };
+  });
+
+export const adminReplyVaradhiMessage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; reply?: string; status?: string }) => d)
+  .handler(async ({ data, context }) => {
+    const scope = await loadAreaScope(context.userId, (context.claims as any)?.email);
+    if (!scope.isSuper && !scope.level) throw new Error("Forbidden");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const patch: Record<string, unknown> = {};
+    if (data.reply !== undefined) patch.admin_reply = data.reply.trim() || null;
+    if (data.status) patch.status = data.status;
+    const { error } = await supabaseAdmin
+      .from("varadhi_admin_messages").update(patch as any).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });

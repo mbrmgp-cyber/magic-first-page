@@ -157,6 +157,15 @@ function OnboardPage() {
   return (
     <div className="mx-auto max-w-md px-4 pt-6 pb-24">
       <h1 className="text-xl font-bold text-[#1e3a8a]">వారధి రిజిస్ట్రేషన్</h1>
+
+      <a
+        href="/varadhi/rewards"
+        className="mt-3 flex items-center justify-between gap-2 rounded-2xl bg-gradient-to-r from-[#f97316] to-[#dc2626] px-4 py-3 text-white shadow-md active:scale-[0.99]"
+      >
+        <span className="text-sm font-bold">🎁 బహుమతులు & పాయింట్లు</span>
+        <span className="rounded-full bg-white/20 px-3 py-1 text-[11px] font-semibold">చూడండి</span>
+      </a>
+
       {status && (
         <div className={`mt-2 inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ${
           status === "approved" ? "bg-green-100 text-green-700" :
