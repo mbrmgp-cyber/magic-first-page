@@ -161,16 +161,25 @@ export function AdminRequestsPanel({ isSuper }: { isSuper: boolean }) {
             {isSuper && r.status === "pending" && (
               <div className="space-y-2">
                 {r.requested_level === "district_admin" && (
-                  <select
-                    className="w-full h-9 rounded-md border bg-background px-2 text-xs"
-                    value={parent[r.id] ?? ""}
-                    onChange={(e) => setParent((p) => ({ ...p, [r.id]: e.target.value }))}
-                  >
-                    <option value="">ఏ రాష్ట్ర అడ్మిన్ కింద? (ఐచ్ఛికం)</option>
-                    {stateAdmins.filter((a: any) => a.state === r.state).map((a: any) => (
-                      <option key={a.id} value={a.id}>{a.profile?.full_name ?? a.user_id.slice(0, 8)} · {a.state}</option>
-                    ))}
-                  </select>
+                  <>
+                    <select
+                      className="w-full h-9 rounded-md border bg-background px-2 text-xs"
+                      value={parent[r.id] ?? ""}
+                      onChange={(e) => setParent((p) => ({ ...p, [r.id]: e.target.value }))}
+                    >
+                      <option value="">ఏ రాష్ట్ర అడ్మిన్ కింద? (ఐచ్ఛికం)</option>
+                      {stateAdminsFor(r.state).map((a: any) => (
+                        <option key={a.id} value={a.id}>
+                          {a.profile?.full_name ?? a.user_id.slice(0, 8)} · {a.state}
+                        </option>
+                      ))}
+                    </select>
+                    {stateAdminsFor(r.state).length === 0 && (
+                      <p className="text-[11px] text-muted-foreground">
+                        {r.state} రాష్ట్రానికి ఇంకా యాక్టివ్ రాష్ట్ర అడ్మిన్ లేరు — ముందు రాష్ట్ర అడ్మిన్‌ను ఆమోదించండి.
+                      </p>
+                    )}
+                  </>
                 )}
                 <Input
                   className="h-9 text-xs"
@@ -188,6 +197,70 @@ export function AdminRequestsPanel({ isSuper }: { isSuper: boolean }) {
                 </div>
               </div>
             )}
+
+            {isSuper && r.status === "approved" && (() => {
+              const seat = seatFor(r.user_id);
+              const parentSeat = seat?.parent_admin_id
+                ? stateAdmins.find((a: any) => a.id === seat.parent_admin_id)
+                : null;
+              return editing === r.id ? (
+                <div className="space-y-2 rounded-md border p-2">
+                  <select
+                    className="w-full h-9 rounded-md border bg-background px-2 text-xs"
+                    value={editLevel}
+                    onChange={(e) => setEditLevel(e.target.value as any)}
+                  >
+                    <option value="state_admin">రాష్ట్ర అడ్మిన్</option>
+                    <option value="district_admin">జిల్లా అడ్మిన్</option>
+                  </select>
+                  {editLevel === "district_admin" && (
+                    <>
+                      <select
+                        className="w-full h-9 rounded-md border bg-background px-2 text-xs"
+                        value={editDistrict}
+                        onChange={(e) => setEditDistrict(e.target.value)}
+                      >
+                        <option value="">జిల్లా ఎంచుకోండి</option>
+                        {indiaDistrictsFor(r.state).map((x: string) => (
+                          <option key={x} value={x}>{x}</option>
+                        ))}
+                      </select>
+                      <select
+                        className="w-full h-9 rounded-md border bg-background px-2 text-xs"
+                        value={editParent}
+                        onChange={(e) => setEditParent(e.target.value)}
+                      >
+                        <option value="">ఏ రాష్ట్ర అడ్మిన్ కింద? (ఐచ్ఛికం)</option>
+                        {stateAdminsFor(r.state)
+                          .filter((a: any) => a.user_id !== r.user_id)
+                          .map((a: any) => (
+                            <option key={a.id} value={a.id}>
+                              {a.profile?.full_name ?? a.user_id.slice(0, 8)} · {a.state}
+                            </option>
+                          ))}
+                      </select>
+                    </>
+                  )}
+                  <div className="flex gap-2">
+                    <Button size="sm" disabled={busy === r.id} onClick={() => saveEdit(r)}>
+                      <Check className="h-4 w-4 mr-1" /> సేవ్
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => setEditing(null)}>రద్దు</Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between gap-2 rounded-md border p-2">
+                  <p className="text-[11px] text-muted-foreground">
+                    ప్రస్తుతం: {seat ? (seat.level === "state_admin" ? "రాష్ట్ర అడ్మిన్" : `జిల్లా అడ్మిన్ · ${seat.district ?? "—"}`) : "సీటు లేదు"}
+                    {parentSeat ? ` · కింద: ${parentSeat.profile?.full_name ?? parentSeat.user_id.slice(0, 8)}` : ""}
+                  </p>
+                  <Button size="sm" variant="outline" onClick={() => startEdit(r)}>
+                    <Pencil className="h-3.5 w-3.5 mr-1" /> మార్చు
+                  </Button>
+                </div>
+              );
+            })()}
+
           </Card>
         ))
       )}
