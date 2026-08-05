@@ -6,11 +6,12 @@ import {
   adminReviewAdminRequest,
   adminListAreaAdmins,
   adminAssignDistrictAdmin,
+  adminAssignMandalAdmin,
+  adminListMandalOptions,
   adminSetAreaAdminActive,
   adminSearchVaradhiUsers,
   adminUpdateAreaSeat,
 } from "@/lib/varadhi.functions";
-import { STATES, districtsFor } from "@/lib/ap-locations";
 import { indiaDistrictsFor } from "@/lib/india-locations";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,11 @@ import { toast } from "sonner";
 import { Check, X, UserPlus, Crown, MapPin, Pencil } from "lucide-react";
 
 const norm = (s?: string | null) => (s ?? "").trim().toLowerCase();
+const LEVEL_TE: Record<string, string> = {
+  state_admin: "రాష్ట్ర అడ్మిన్",
+  district_admin: "జిల్లా అడ్మిన్",
+  mandal_admin: "మండల అడ్మిన్",
+};
 
 export function AdminRequestsPanel({ isSuper }: { isSuper: boolean }) {
   const qc = useQueryClient();
