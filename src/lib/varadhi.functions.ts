@@ -891,3 +891,51 @@ export const adminSearchVaradhiUsers = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return { users: rows ?? [] };
   });
+
+// Super Admin edits an existing area seat: change level / district / parent state admin.
+export const adminUpdateAreaSeat = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: {
+    user_id: string;
+    state: string;
+    level: "state_admin" | "district_admin";
+    district?: string | null;
+    parent_admin_id?: string | null;
+  }) => d)
+  .handler(async ({ data, context }) => {
+    await assertVaradhiAdmin(context.supabase, context.userId, (context.claims as any)?.email);
+    if (!data.user_id || !data.state) throw new Error("వివరాలు అసంపూర్ణం");
+    if (data.level === "district_admin" && !data.district) throw new Error("జిల్లా ఎంచుకోండి");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    if (data.level === "district_admin" && data.parent_admin_id) {
+      const { data: parent } = await supabaseAdmin
+        .from("varadhi_area_admins").select("id, level, state").eq("id", data.parent_admin_id).maybeSingle();
+      if (!parent || (parent as any).level !== "state_admin" || (parent as any).state !== data.state) {
+        throw new Error("ఎంచుకున్న రాష్ట్ర అడ్మిన్ ఈ రాష్ట్రానికి చెందినవారు కాదు");
+      }
+    }
+
+    const patch = {
+      level: data.level,
+      state: data.state,
+      district: data.level === "district_admin" ? data.district : null,
+      parent_admin_id: data.level === "district_admin" ? (data.parent_admin_id ?? null) : null,
+      is_active: true,
+      assigned_by: context.userId,
+    };
+
+    const { data: existing } = await supabaseAdmin
+      .from("varadhi_area_admins").select("id").eq("user_id", data.user_id).limit(1).maybeSingle();
+
+    if (existing) {
+      const { error } = await supabaseAdmin
+        .from("varadhi_area_admins").update(patch).eq("id", (existing as any).id);
+      if (error) throw new Error(error.message);
+    } else {
+      const { error } = await supabaseAdmin
+        .from("varadhi_area_admins").insert({ user_id: data.user_id, ...patch });
+      if (error) throw new Error(error.message);
+    }
+    return { ok: true };
+  });
