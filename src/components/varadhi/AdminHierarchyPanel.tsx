@@ -8,29 +8,74 @@ import {
   adminAssignDistrictAdmin,
   adminSetAreaAdminActive,
   adminSearchVaradhiUsers,
+  adminUpdateAreaSeat,
 } from "@/lib/varadhi.functions";
 import { STATES, districtsFor } from "@/lib/ap-locations";
+import { indiaDistrictsFor } from "@/lib/india-locations";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Check, X, UserPlus, Crown, MapPin } from "lucide-react";
+import { Check, X, UserPlus, Crown, MapPin, Pencil } from "lucide-react";
+
+const norm = (s?: string | null) => (s ?? "").trim().toLowerCase();
 
 export function AdminRequestsPanel({ isSuper }: { isSuper: boolean }) {
   const qc = useQueryClient();
   const list = useServerFn(adminListAdminRequests);
   const review = useServerFn(adminReviewAdminRequest);
   const areaList = useServerFn(adminListAreaAdmins);
+  const updateSeat = useServerFn(adminUpdateAreaSeat);
 
   const [status, setStatus] = useState<"pending" | "approved" | "rejected" | "all">("pending");
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [parent, setParent] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
+  const [editing, setEditing] = useState<string | null>(null);
+  const [editLevel, setEditLevel] = useState<"state_admin" | "district_admin">("district_admin");
+  const [editDistrict, setEditDistrict] = useState("");
+  const [editParent, setEditParent] = useState("");
 
   const q = useQuery({ queryKey: ["varadhi-admin-requests", status], queryFn: () => list({ data: { status } }) });
   const areaQ = useQuery({ queryKey: ["varadhi-area-admins"], queryFn: () => areaList() });
-  const stateAdmins = (areaQ.data?.admins ?? []).filter((a: any) => a.level === "state_admin" && a.is_active);
+  const allAdmins = (areaQ.data?.admins ?? []) as any[];
+  const stateAdmins = allAdmins.filter((a: any) => a.level === "state_admin" && a.is_active);
+  const stateAdminsFor = (state?: string | null) =>
+    stateAdmins.filter((a: any) => norm(a.state) === norm(state));
+  const seatFor = (userId: string) => allAdmins.find((a: any) => a.user_id === userId) ?? null;
+
+  function startEdit(r: any) {
+    const seat = seatFor(r.user_id);
+    setEditing(r.id);
+    setEditLevel((seat?.level ?? r.requested_level ?? "district_admin") as any);
+    setEditDistrict(seat?.district ?? r.district ?? "");
+    setEditParent(seat?.parent_admin_id ?? "");
+  }
+
+  async function saveEdit(r: any) {
+    setBusy(r.id);
+    try {
+      await updateSeat({
+        data: {
+          user_id: r.user_id,
+          state: r.state,
+          level: editLevel,
+          district: editLevel === "district_admin" ? editDistrict : null,
+          parent_admin_id: editLevel === "district_admin" ? (editParent || null) : null,
+        },
+      });
+      toast.success("అప్‌డేట్ అయ్యింది");
+      setEditing(null);
+      qc.invalidateQueries({ queryKey: ["varadhi-area-admins"] });
+      qc.invalidateQueries({ queryKey: ["varadhi-admin-requests"] });
+    } catch (e: any) {
+      toast.error(e.message ?? "విఫలమైంది");
+    } finally {
+      setBusy(null);
+    }
+  }
+
 
   async function act(r: any, action: "approve" | "reject") {
     setBusy(r.id);
