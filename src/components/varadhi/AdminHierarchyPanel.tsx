@@ -150,8 +150,9 @@ export function AdminRequestsPanel({ isSuper }: { isSuper: boolean }) {
                 <div className="min-w-0">
                   <p className="font-semibold truncate">{r.full_name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {r.requested_level === "state_admin" ? "రాష్ట్ర అడ్మిన్" : "జిల్లా అడ్మిన్"} · {r.state}
+                    {LEVEL_TE[r.requested_level] ?? r.requested_level} · {r.state}
                     {r.district ? ` / ${r.district}` : ""}
+                    {r.mandal ? ` / ${r.mandal}` : ""}
                   </p>
                   {r.phone && <p className="text-xs text-muted-foreground">📞 {r.phone}</p>}
                   {r.email && <p className="text-xs text-muted-foreground">✉️ {r.email}</p>}
