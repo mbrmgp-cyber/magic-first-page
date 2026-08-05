@@ -236,45 +236,70 @@ export function AdminRequestsPanel({ isSuper }: { isSuper: boolean }) {
             {isSuper && r.status === "approved" && (() => {
               const seat = seatFor(r.user_id);
               const parentSeat = seat?.parent_admin_id
-                ? stateAdmins.find((a: any) => a.id === seat.parent_admin_id)
+                ? allAdmins.find((a: any) => a.id === seat.parent_admin_id)
                 : null;
               return editing === r.id ? (
                 <div className="space-y-2 rounded-md border p-2">
                   <select
                     className="w-full h-9 rounded-md border bg-background px-2 text-xs"
                     value={editLevel}
-                    onChange={(e) => setEditLevel(e.target.value as any)}
+                    onChange={(e) => { setEditLevel(e.target.value as any); setEditParent(""); }}
                   >
                     <option value="state_admin">రాష్ట్ర అడ్మిన్</option>
                     <option value="district_admin">జిల్లా అడ్మిన్</option>
+                    <option value="mandal_admin">మండల అడ్మిన్</option>
                   </select>
+                  {editLevel !== "state_admin" && (
+                    <select
+                      className="w-full h-9 rounded-md border bg-background px-2 text-xs"
+                      value={editDistrict}
+                      onChange={(e) => setEditDistrict(e.target.value)}
+                    >
+                      <option value="">జిల్లా ఎంచుకోండి</option>
+                      {indiaDistrictsFor(r.state).map((x: string) => (
+                        <option key={x} value={x}>{x}</option>
+                      ))}
+                    </select>
+                  )}
+                  {editLevel === "mandal_admin" && (
+                    <Input
+                      className="h-9 text-xs"
+                      placeholder="మండలం పేరు"
+                      value={editMandal}
+                      onChange={(e) => setEditMandal(e.target.value)}
+                    />
+                  )}
                   {editLevel === "district_admin" && (
-                    <>
-                      <select
-                        className="w-full h-9 rounded-md border bg-background px-2 text-xs"
-                        value={editDistrict}
-                        onChange={(e) => setEditDistrict(e.target.value)}
-                      >
-                        <option value="">జిల్లా ఎంచుకోండి</option>
-                        {indiaDistrictsFor(r.state).map((x: string) => (
-                          <option key={x} value={x}>{x}</option>
+                    <select
+                      className="w-full h-9 rounded-md border bg-background px-2 text-xs"
+                      value={editParent}
+                      onChange={(e) => setEditParent(e.target.value)}
+                    >
+                      <option value="">ఏ రాష్ట్ర అడ్మిన్ కింద? (ఐచ్ఛికం)</option>
+                      {stateAdminsFor(r.state)
+                        .filter((a: any) => a.user_id !== r.user_id)
+                        .map((a: any) => (
+                          <option key={a.id} value={a.id}>
+                            {a.profile?.full_name ?? a.user_id.slice(0, 8)} · {a.state}
+                          </option>
                         ))}
-                      </select>
-                      <select
-                        className="w-full h-9 rounded-md border bg-background px-2 text-xs"
-                        value={editParent}
-                        onChange={(e) => setEditParent(e.target.value)}
-                      >
-                        <option value="">ఏ రాష్ట్ర అడ్మిన్ కింద? (ఐచ్ఛికం)</option>
-                        {stateAdminsFor(r.state)
-                          .filter((a: any) => a.user_id !== r.user_id)
-                          .map((a: any) => (
-                            <option key={a.id} value={a.id}>
-                              {a.profile?.full_name ?? a.user_id.slice(0, 8)} · {a.state}
-                            </option>
-                          ))}
-                      </select>
-                    </>
+                    </select>
+                  )}
+                  {editLevel === "mandal_admin" && (
+                    <select
+                      className="w-full h-9 rounded-md border bg-background px-2 text-xs"
+                      value={editParent}
+                      onChange={(e) => setEditParent(e.target.value)}
+                    >
+                      <option value="">ఏ జిల్లా అడ్మిన్ కింద? (ఐచ్ఛికం)</option>
+                      {districtAdminsFor(r.state, editDistrict)
+                        .filter((a: any) => a.user_id !== r.user_id)
+                        .map((a: any) => (
+                          <option key={a.id} value={a.id}>
+                            {a.profile?.full_name ?? a.user_id.slice(0, 8)} · {a.district}
+                          </option>
+                        ))}
+                    </select>
                   )}
                   <div className="flex gap-2">
                     <Button size="sm" disabled={busy === r.id} onClick={() => saveEdit(r)}>
@@ -286,7 +311,9 @@ export function AdminRequestsPanel({ isSuper }: { isSuper: boolean }) {
               ) : (
                 <div className="flex items-center justify-between gap-2 rounded-md border p-2">
                   <p className="text-[11px] text-muted-foreground">
-                    ప్రస్తుతం: {seat ? (seat.level === "state_admin" ? "రాష్ట్ర అడ్మిన్" : `జిల్లా అడ్మిన్ · ${seat.district ?? "—"}`) : "సీటు లేదు"}
+                    ప్రస్తుతం: {seat
+                      ? `${LEVEL_TE[seat.level] ?? seat.level}${seat.level !== "state_admin" ? ` · ${seat.mandal ? `${seat.mandal}, ` : ""}${seat.district ?? "—"}` : ""}`
+                      : "సీటు లేదు"}
                     {parentSeat ? ` · కింద: ${parentSeat.profile?.full_name ?? parentSeat.user_id.slice(0, 8)}` : ""}
                   </p>
                   <Button size="sm" variant="outline" onClick={() => startEdit(r)}>
@@ -294,6 +321,7 @@ export function AdminRequestsPanel({ isSuper }: { isSuper: boolean }) {
                   </Button>
                 </div>
               );
+            })()}
             })()}
 
           </Card>
