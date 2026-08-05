@@ -673,18 +673,24 @@ async function loadAreaScope(userId: string, email?: string | null) {
   const isSuper = await isSuperVaradhiAdmin(userId, email);
   const { data: seats } = await supabaseAdmin
     .from("varadhi_area_admins")
-    .select("id, level, state, district, is_active")
+    .select("id, level, state, district, mandal, is_active")
     .eq("user_id", userId)
     .eq("is_active", true);
   const rows = (seats ?? []) as any[];
   const state = rows.find((r) => r.level === "state_admin") ?? null;
   const district = rows.find((r) => r.level === "district_admin") ?? null;
+  const mandal = rows.find((r) => r.level === "mandal_admin") ?? null;
   return {
     isSuper,
-    level: (isSuper ? "super_admin" : state ? "state_admin" : district ? "district_admin" : null) as
-      | "super_admin" | "state_admin" | "district_admin" | null,
-    state: (state?.state ?? district?.state ?? null) as string | null,
-    district: (district?.district ?? null) as string | null,
+    level: (isSuper
+      ? "super_admin"
+      : state ? "state_admin"
+      : district ? "district_admin"
+      : mandal ? "mandal_admin"
+      : null) as "super_admin" | "state_admin" | "district_admin" | "mandal_admin" | null,
+    state: (state?.state ?? district?.state ?? mandal?.state ?? null) as string | null,
+    district: (district?.district ?? mandal?.district ?? null) as string | null,
+    mandal: (mandal?.mandal ?? null) as string | null,
     seats: rows,
   };
 }
