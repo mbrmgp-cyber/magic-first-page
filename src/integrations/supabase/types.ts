@@ -2229,6 +2229,7 @@ export type Database = {
           email: string | null
           full_name: string
           id: string
+          mandal: string | null
           message: string | null
           phone: string | null
           photo_url: string | null
@@ -2248,6 +2249,7 @@ export type Database = {
           email?: string | null
           full_name: string
           id?: string
+          mandal?: string | null
           message?: string | null
           phone?: string | null
           photo_url?: string | null
@@ -2267,6 +2269,7 @@ export type Database = {
           email?: string | null
           full_name?: string
           id?: string
+          mandal?: string | null
           message?: string | null
           phone?: string | null
           photo_url?: string | null
@@ -2289,6 +2292,7 @@ export type Database = {
           id: string
           is_active: boolean
           level: string
+          mandal: string | null
           parent_admin_id: string | null
           state: string
           updated_at: string
@@ -2301,6 +2305,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           level: string
+          mandal?: string | null
           parent_admin_id?: string | null
           state: string
           updated_at?: string
@@ -2313,6 +2318,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           level?: string
+          mandal?: string | null
           parent_admin_id?: string | null
           state?: string
           updated_at?: string
