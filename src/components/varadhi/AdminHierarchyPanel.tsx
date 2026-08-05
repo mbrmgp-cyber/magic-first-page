@@ -194,6 +194,28 @@ export function AdminRequestsPanel({ isSuper }: { isSuper: boolean }) {
                     )}
                   </>
                 )}
+                {r.requested_level === "mandal_admin" && (
+                  <>
+                    <select
+                      className="w-full h-9 rounded-md border bg-background px-2 text-xs"
+                      value={parent[r.id] ?? ""}
+                      onChange={(e) => setParent((p) => ({ ...p, [r.id]: e.target.value }))}
+                    >
+                      <option value="">ఏ జిల్లా అడ్మిన్ కింద? (ఐచ్ఛికం)</option>
+                      {districtAdminsFor(r.state, r.district).map((a: any) => (
+                        <option key={a.id} value={a.id}>
+                          {a.profile?.full_name ?? a.user_id.slice(0, 8)} · {a.district}
+                        </option>
+                      ))}
+                    </select>
+                    {districtAdminsFor(r.state, r.district).length === 0 && (
+                      <p className="text-[11px] text-muted-foreground">
+                        {r.district} జిల్లాకు ఇంకా యాక్టివ్ జిల్లా అడ్మిన్ లేరు — ముందు జిల్లా అడ్మిన్‌ను ఆమోదించండి.
+                      </p>
+                    )}
+                  </>
+                )}
+
                 <Input
                   className="h-9 text-xs"
                   placeholder="గమనిక (ఐచ్ఛికం)"
