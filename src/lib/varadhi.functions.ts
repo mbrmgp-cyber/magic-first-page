@@ -893,6 +893,15 @@ export const adminAssignDistrictAdmin = createServerFn({ method: "POST" })
       assigned_by: context.userId,
     });
     if (error) throw new Error(error.message.includes("duplicate") ? "ఇప్పటికే కేటాయించబడింది" : error.message);
+    const { logAdminAudit } = await import("@/lib/varadhi-audit.server");
+    await logAdminAudit({
+      action: "district_admin_assigned",
+      actor_user_id: context.userId,
+      target_user_id: data.user_id,
+      state: data.state,
+      district: data.district,
+      after_data: { level: "district_admin", parent_admin_id: data.parent_admin_id ?? null },
+    });
     return { ok: true };
   });
 
@@ -902,11 +911,26 @@ export const adminSetAreaAdminActive = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertVaradhiAdmin(context.supabase, context.userId, (context.claims as any)?.email);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: before } = await supabaseAdmin
+      .from("varadhi_area_admins").select("*").eq("id", data.id).maybeSingle();
     const { error } = await supabaseAdmin
       .from("varadhi_area_admins").update({ is_active: data.is_active }).eq("id", data.id);
     if (error) throw new Error(error.message);
+    const { logAdminAudit } = await import("@/lib/varadhi-audit.server");
+    await logAdminAudit({
+      action: data.is_active ? "seat_activated" : "seat_deactivated",
+      actor_user_id: context.userId,
+      seat_id: data.id,
+      target_user_id: (before as any)?.user_id ?? null,
+      state: (before as any)?.state ?? null,
+      district: (before as any)?.district ?? null,
+      mandal: (before as any)?.mandal ?? null,
+      before_data: { is_active: (before as any)?.is_active ?? null },
+      after_data: { is_active: data.is_active },
+    });
     return { ok: true };
   });
+
 
 // Candidate users (registered Vaaradhi profiles) the Super Admin can promote.
 export const adminSearchVaradhiUsers = createServerFn({ method: "GET" })
