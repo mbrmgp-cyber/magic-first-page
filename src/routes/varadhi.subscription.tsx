@@ -76,16 +76,26 @@ function SubscriptionPage() {
       <div className="mt-2 space-y-2">
         {subs.length === 0 && <p className="text-xs text-center text-[#1e3a8a]/50 py-4">ఏ చెల్లింపు లేదు</p>}
         {subs.map((s) => (
-          <div key={s.id} className="rounded-xl bg-white p-3 shadow-sm text-xs flex justify-between">
-            <div>
-              <p className="font-semibold">{s.plan} · Rs. {s.amount}</p>
-              <p className="text-[#1e3a8a]/60">Expires {new Date(s.expires_at).toLocaleDateString()}</p>
+          <div key={s.id} className="rounded-xl bg-white p-3 shadow-sm text-xs">
+            <div className="flex justify-between">
+              <div>
+                <p className="font-semibold">{s.plan} · Rs. {s.amount}</p>
+                <p className="text-[#1e3a8a]/60">Expires {new Date(s.expires_at).toLocaleDateString()}</p>
+              </div>
+              <span className={`px-2 py-0.5 h-fit rounded-full text-[10px] font-bold ${
+                s.status === "active" ? "bg-green-100 text-green-700" :
+                s.status === "expired" ? "bg-gray-200 text-gray-600" :
+                "bg-yellow-100 text-yellow-800"
+              }`}>{s.status}</span>
             </div>
-            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-              s.status === "active" ? "bg-green-100 text-green-700" :
-              s.status === "expired" ? "bg-gray-200 text-gray-600" :
-              "bg-yellow-100 text-yellow-800"
-            }`}>{s.status}</span>
+            {s.status !== "pending" && (
+              <button
+                onClick={() => downloadReceipt(s.id)}
+                className="mt-2 w-full flex items-center justify-center gap-1.5 rounded-lg border border-[#1e3a8a]/20 bg-[#1e3a8a]/5 py-2 font-semibold text-[#1e3a8a]"
+              >
+                <Download className="h-3.5 w-3.5" /> రసీదు డౌన్‌లోడ్
+              </button>
+            )}
           </div>
         ))}
       </div>
