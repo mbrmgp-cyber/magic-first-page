@@ -842,7 +842,7 @@ export const adminListAreaAdmins = createServerFn({ method: "GET" })
     return {
       admins: list.map((r) => ({ ...r, profile: profiles.get(r.user_id) ?? null })),
       isSuper: scope.isSuper,
-      scope: { level: scope.level, state: scope.state, district: scope.district },
+      scope: { level: scope.level, state: scope.state, district: scope.district, mandal: scope.mandal },
     };
   });
 
