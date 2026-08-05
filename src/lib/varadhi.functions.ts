@@ -1053,19 +1053,45 @@ export const adminUpdateAreaSeat = createServerFn({ method: "POST" })
     };
 
     const { data: existing } = await supabaseAdmin
-      .from("varadhi_area_admins").select("id").eq("user_id", data.user_id).limit(1).maybeSingle();
+      .from("varadhi_area_admins").select("*").eq("user_id", data.user_id).limit(1).maybeSingle();
 
+    let seatId: string | null = (existing as any)?.id ?? null;
     if (existing) {
       const { error } = await supabaseAdmin
         .from("varadhi_area_admins").update(patch as any).eq("id", (existing as any).id);
       if (error) throw new Error(error.message);
     } else {
-      const { error } = await supabaseAdmin
-        .from("varadhi_area_admins").insert({ user_id: data.user_id, ...patch } as any);
+      const { data: created, error } = await supabaseAdmin
+        .from("varadhi_area_admins").insert({ user_id: data.user_id, ...patch } as any)
+        .select("id").maybeSingle();
       if (error) throw new Error(error.message);
+      seatId = (created as any)?.id ?? null;
     }
+
+    const { logAdminAudit } = await import("@/lib/varadhi-audit.server");
+    await logAdminAudit({
+      action: existing ? "seat_reassigned" : "seat_created",
+      actor_user_id: context.userId,
+      seat_id: seatId,
+      target_user_id: data.user_id,
+      state: patch.state,
+      district: patch.district ?? null,
+      mandal: patch.mandal ?? null,
+      before_data: existing
+        ? {
+            level: (existing as any).level,
+            state: (existing as any).state,
+            district: (existing as any).district,
+            mandal: (existing as any).mandal,
+            parent_admin_id: (existing as any).parent_admin_id,
+            is_active: (existing as any).is_active,
+          }
+        : null,
+      after_data: patch,
+    });
     return { ok: true };
   });
+
 
 // -------- Subscription receipt (Super Admin + District Admin signatures)
 export const getSubscriptionReceipt = createServerFn({ method: "POST" })
