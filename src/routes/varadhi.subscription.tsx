@@ -20,6 +20,7 @@ const PLANS: Array<{ id: "1m" | "3m" | "6m" | "1y"; te: string; amt: number; bes
 function SubscriptionPage() {
   const fetchSubs = useServerFn(listMySubscriptions);
   const create = useServerFn(createSubscription);
+  const receiptFn = useServerFn(getSubscriptionReceipt);
   const [subs, setSubs] = useState<any[]>([]);
 
   const load = async () => setSubs((await fetchSubs()).subscriptions);
@@ -32,6 +33,14 @@ function SubscriptionPage() {
       load();
     } catch (e: any) { toast.error(e.message); }
   };
+
+  const downloadReceipt = async (id: string) => {
+    try {
+      const res: any = await receiptFn({ data: { subscription_id: id } });
+      printVaradhiReceipt(res.receipt);
+    } catch (e: any) { toast.error(e.message); }
+  };
+
 
   const active = subs.find((s) => s.status === "active" && new Date(s.expires_at) > new Date());
 
