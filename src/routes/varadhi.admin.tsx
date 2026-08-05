@@ -15,6 +15,8 @@ import {
 } from "@/lib/varadhi.functions";
 import { AdminRequestsPanel, AdminHierarchyPanel } from "@/components/varadhi/AdminHierarchyPanel";
 import { AdminAuditPanel } from "@/components/varadhi/AdminAuditPanel";
+import { AdminMessagesPanel } from "@/components/varadhi/AdminMessagesPanel";
+import { ContactAdminForm } from "@/components/varadhi/ContactAdminForm";
 import { STATES, districtsFor } from "@/lib/ap-locations";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,7 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { CheckCircle2, XCircle, Clock, ExternalLink, ShieldCheck, Coins, Upload, Phone, MapPin, History as HistoryIcon } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, ExternalLink, ShieldCheck, Coins, Upload, Phone, MapPin, Menu, ChevronDown } from "lucide-react";
 
 
 
@@ -65,7 +67,9 @@ function VaradhiAdmin() {
   const scope = scopeQ.data;
   const isAdmin = isSuper || !!scope?.level;
 
-  const [tab, setTab] = useState<"reg" | "points" | "requests" | "hierarchy" | "audit">("reg");
+  type AdminTab = "reg" | "points" | "requests" | "hierarchy" | "messages" | "audit";
+  const [tab, setTab] = useState<AdminTab>("reg");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "all">("pending");
   const [notes, setNotes] = useState<Record<string, string>>({});
@@ -123,7 +127,7 @@ function VaradhiAdmin() {
       </header>
 
       {(() => {
-        const items: Array<{ k: typeof tab; label: string }> = [
+        const items: Array<{ k: AdminTab; label: string }> = [
           { k: "reg", label: "రిజిస్ట్రేషన్లు" },
           ...(isSuper ? [{ k: "points" as const, label: "పాయింట్లు" }] : []),
           ...(isSuper || scope?.level === "state_admin"
@@ -132,7 +136,7 @@ function VaradhiAdmin() {
           { k: "messages", label: "యూజర్ సందేశాలు" },
           { k: "audit", label: "మార్పుల చరిత్ర" },
         ];
-        const current = items.find((i) => i.k === tab) ?? items[0];
+        const current = items.find((i) => i.k === tab) ?? items[0]!;
         return (
           <div className="relative">
             <Button
