@@ -11,40 +11,16 @@ import varadhiLogo from "@/assets/varadhi-logo.jpg.asset.json";
 import banner1 from "@/assets/varadhi-banner-1.jpg";
 import banner2 from "@/assets/varadhi-banner-2.jpg";
 import banner3 from "@/assets/varadhi-banner-3.jpg";
-import { Apple, Package, Recycle, MapPin, Truck, Wrench, Search, ChevronDown, Navigation, HeartHandshake, Boxes, Sparkles, ImageOff, Share2, Copy, Check, MessageCircle } from "lucide-react";
-import QRCode from "qrcode";
-import { PUBLIC_APP_ORIGIN } from "@/lib/public-url";
+import { Search, Navigation, Sparkles, ImageOff } from "lucide-react";
 
 export const Route = createFileRoute("/varadhi/")({
   component: VaradhiHome,
 });
 
-type Box = {
-  id: string;
-  te: string;
-  color: string;
-  Icon: typeof Apple;
-  sub: string;
-};
 
-const ITEM_BOXES: Box[] = [
-  { id: "fresh", te: "తాజా వస్తువులు", color: "#16a34a", Icon: Apple, sub: "కూరగాయలు, పండ్లు, పాలు" },
-  { id: "new", te: "కొత్త వస్తువులు", color: "#2563eb", Icon: Package, sub: "ఎలక్ట్రానిక్స్, ఫ్యాషన్" },
-  { id: "used", te: "వాడిన వస్తువులు", color: "#f97316", Icon: Recycle, sub: "సెకండ్ హ్యాండ్" },
-];
 
-const SERVICE_BOXES: Box[] = [
-  { id: "services", te: "పే సర్వీస్", color: "#dc2626", Icon: Wrench, sub: "టెక్నీషియన్లు & పనులు" },
-  { id: "freeservices", te: "ఫ్రీ సర్వీస్", color: "#0f9d58", Icon: HeartHandshake, sub: "ఉచిత సేవలు" },
-];
 
-const REAL_ESTATE: Box = {
-  id: "realestate", te: "ఇంటి స్థలాలు & భూములు", color: "#7c3aed", Icon: MapPin, sub: "ప్లాట్లు, భూములు",
-};
 
-const TRANSPORT: Box = {
-  id: "transport", te: "ట్రాన్స్‌పోర్ట్", color: "#0ea5e9", Icon: Truck, sub: "బండ్లు & రవాణా",
-};
 
 const BANNERS = [
   { src: banner1, te: "తాజా వస్తువులు మీ ఊరిలోనే", color: "#16a34a" },
@@ -88,27 +64,6 @@ function BannerCarousel() {
         ))}
       </div>
     </div>
-  );
-}
-
-function CategoryTile({ box, onClick, open }: { box: Box; onClick: () => void; open?: boolean }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex flex-col items-center gap-1.5 rounded-2xl bg-white p-2.5 shadow-sm border border-black/5 active:scale-95 transition"
-    >
-      <span
-        className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-white shadow-sm"
-        style={{ background: `linear-gradient(135deg, ${box.color}, ${box.color}cc)` }}
-      >
-        <box.Icon className="h-6 w-6" />
-      </span>
-      <span className="line-clamp-2 text-center text-[10px] font-semibold leading-tight text-[#1e3a8a]">{box.te}</span>
-      {open !== undefined && (
-        <ChevronDown className={`h-3 w-3 text-[#1e3a8a]/50 transition-transform ${open ? "rotate-180" : ""}`} />
-      )}
-    </button>
   );
 }
 
@@ -187,100 +142,9 @@ function ListingCard({ l, note }: { l: VaradhiListing; note?: string }) {
 }
 
 
-const VARADHI_SHARE_URL = `${PUBLIC_APP_ORIGIN}/varadhi`;
-
-function ShareApp() {
-  const [qrUrl, setQrUrl] = useState<string>("");
-  const [copied, setCopied] = useState(false);
-
-  useEffect(() => {
-    QRCode.toDataURL(VARADHI_SHARE_URL, {
-      width: 240,
-      margin: 1,
-      color: { dark: "#1e3a8a", light: "#ffffff" },
-    })
-      .then(setQrUrl)
-      .catch(() => undefined);
-  }, []);
-
-  const shareText = `వారధి — అమ్మండి, కొనండి, రవాణా & సర్వీసులు. ఇప్పుడే ట్రై చేయండి: ${VARADHI_SHARE_URL}`;
-
-  const share = async () => {
-    if (typeof navigator !== "undefined" && (navigator as any).share) {
-      try {
-        await (navigator as any).share({ title: "వారధి", text: shareText, url: VARADHI_SHARE_URL });
-        return;
-      } catch {
-        /* cancelled → fall through */
-      }
-    }
-    window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank");
-  };
-
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(VARADHI_SHARE_URL);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch { /* ignore */ }
-  };
-
-  return (
-    <div className="mt-6 rounded-2xl border border-[#1e3a8a]/15 bg-white p-4 shadow-sm">
-      <div className="flex items-center gap-1.5">
-        <Share2 className="h-4 w-4 text-[#f97316]" />
-        <h2 className="text-sm font-semibold text-[#1e3a8a]/80">ఫ్రెండ్స్‌కు షేర్ చేయండి</h2>
-      </div>
-
-      <div className="mt-3 flex flex-col items-center gap-3">
-        {qrUrl ? (
-          <div className="rounded-xl border-2 border-[#1e3a8a]/10 p-2 bg-white">
-            <img src={qrUrl} alt="Vaaradhi QR" width={160} height={160} className="h-40 w-40" />
-          </div>
-        ) : (
-          <div className="h-40 w-40 animate-pulse rounded-xl bg-[#1e3a8a]/5" />
-        )}
-        <p className="text-center text-[11px] text-[#1e3a8a]/60">
-          స్కాన్ చేసి వారధి ఆప్ ఓపెన్ చేయండి
-        </p>
-      </div>
-
-      <div className="mt-3 flex items-center gap-2 rounded-xl bg-[#f2f4fb] px-3 py-2">
-        <span className="min-w-0 flex-1 truncate text-[11px] font-medium text-[#1e3a8a]">{VARADHI_SHARE_URL}</span>
-        <button
-          type="button"
-          onClick={copy}
-          className="shrink-0 rounded-lg bg-[#1e3a8a] px-2.5 py-1.5 text-[11px] font-semibold text-white active:scale-95"
-        >
-          {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-        </button>
-      </div>
-
-      <div className="mt-2.5 grid grid-cols-2 gap-2">
-        <button
-          type="button"
-          onClick={share}
-          className="flex items-center justify-center gap-1.5 rounded-xl bg-[#16a34a] py-2.5 text-sm font-semibold text-white active:scale-95"
-        >
-          <Share2 className="h-4 w-4" /> షేర్
-        </button>
-        <a
-          href={`https://wa.me/?text=${encodeURIComponent(shareText)}`}
-          target="_blank"
-          rel="noreferrer"
-          className="flex items-center justify-center gap-1.5 rounded-xl bg-[#25d366] py-2.5 text-sm font-semibold text-white active:scale-95"
-        >
-          <MessageCircle className="h-4 w-4" /> WhatsApp
-        </a>
-      </div>
-    </div>
-  );
-}
-
 function VaradhiHome() {
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [q, setQ] = useState("");
-  const [openGroup, setOpenGroup] = useState<string | null>(null);
   const navigate = useNavigate();
   const fetchListings = useServerFn(listListings);
 
