@@ -64,7 +64,7 @@ function VaradhiAdmin() {
   const scope = scopeQ.data;
   const isAdmin = isSuper || !!scope?.level;
 
-  const [tab, setTab] = useState<"reg" | "points" | "requests" | "hierarchy">("reg");
+  const [tab, setTab] = useState<"reg" | "points" | "requests" | "hierarchy" | "audit">("reg");
 
   const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "all">("pending");
   const [notes, setNotes] = useState<Record<string, string>>({});
