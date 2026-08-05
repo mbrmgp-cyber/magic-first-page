@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, Link, useLocation } from "@tanstack/react-router";
-import { Home, Search, LayoutDashboard, Gift, User, ShieldCheck } from "lucide-react";
+import { Home, Search, LayoutDashboard, User, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useServerFn } from "@tanstack/react-start";
