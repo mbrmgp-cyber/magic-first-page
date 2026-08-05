@@ -94,16 +94,18 @@ function VaradhiAdmin() {
 
   if (!isAdmin) {
     return (
-      <div className="mx-auto max-w-md px-4 pt-10">
-        <Card className="p-6 space-y-3 text-center">
-          <ShieldCheck className="h-10 w-10 mx-auto text-[#1e3a8a]/50" />
-          <p className="text-sm">ఈ పేజీ Vaaradhi అడ్మిన్‌లకు మాత్రమే.</p>
+      <div className="mx-auto max-w-md px-4 pt-6 pb-24 space-y-3">
+        <ContactAdminForm />
+        <Card className="p-4 space-y-3 text-center">
+          <ShieldCheck className="h-8 w-8 mx-auto text-[#1e3a8a]/50" />
+          <p className="text-xs text-muted-foreground">మీ ప్రాంతానికి అడ్మిన్ కావాలనుకుంటున్నారా?</p>
           <Button variant="secondary" onClick={() => navigate({ to: "/varadhi/admin-apply" })}>అడ్మిన్‌గా దరఖాస్తు చేయండి</Button>
           <Button variant="outline" onClick={() => navigate({ to: "/varadhi" })}>హోమ్‌కు వెళ్ళండి</Button>
         </Card>
       </div>
     );
   }
+
 
   const rows = listQ.data?.profiles ?? [];
   const filters: Array<{ k: typeof filter; label: string }> = [
