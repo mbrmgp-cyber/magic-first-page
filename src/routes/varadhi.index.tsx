@@ -11,7 +11,7 @@ import varadhiLogo from "@/assets/varadhi-logo.jpg.asset.json";
 import banner1 from "@/assets/varadhi-banner-1.jpg";
 import banner2 from "@/assets/varadhi-banner-2.jpg";
 import banner3 from "@/assets/varadhi-banner-3.jpg";
-import { Search, Navigation, Sparkles, ImageOff } from "lucide-react";
+import { Sparkles, ImageOff } from "lucide-react";
 
 export const Route = createFileRoute("/varadhi/")({
   component: VaradhiHome,
@@ -144,7 +144,6 @@ function ListingCard({ l, note }: { l: VaradhiListing; note?: string }) {
 
 function VaradhiHome() {
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
-  const [q, setQ] = useState("");
   const navigate = useNavigate();
   const fetchListings = useServerFn(listListings);
 
@@ -187,7 +186,7 @@ function VaradhiHome() {
       .filter((l) => l.lat != null && l.lng != null)
       .map((l) => ({ ...l, km: distanceKm(coords, { lat: l.lat as number, lng: l.lng as number }) }))
       .filter((l) => l.km <= 100)
-      .sort((a, b) => a.km - b.km)
+      .sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at))
       .slice(0, 6);
     setNearby(near);
   }, [coords, recent]);
