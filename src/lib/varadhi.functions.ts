@@ -673,18 +673,24 @@ async function loadAreaScope(userId: string, email?: string | null) {
   const isSuper = await isSuperVaradhiAdmin(userId, email);
   const { data: seats } = await supabaseAdmin
     .from("varadhi_area_admins")
-    .select("id, level, state, district, is_active")
+    .select("id, level, state, district, mandal, is_active")
     .eq("user_id", userId)
     .eq("is_active", true);
   const rows = (seats ?? []) as any[];
   const state = rows.find((r) => r.level === "state_admin") ?? null;
   const district = rows.find((r) => r.level === "district_admin") ?? null;
+  const mandal = rows.find((r) => r.level === "mandal_admin") ?? null;
   return {
     isSuper,
-    level: (isSuper ? "super_admin" : state ? "state_admin" : district ? "district_admin" : null) as
-      | "super_admin" | "state_admin" | "district_admin" | null,
-    state: (state?.state ?? district?.state ?? null) as string | null,
-    district: (district?.district ?? null) as string | null,
+    level: (isSuper
+      ? "super_admin"
+      : state ? "state_admin"
+      : district ? "district_admin"
+      : mandal ? "mandal_admin"
+      : null) as "super_admin" | "state_admin" | "district_admin" | "mandal_admin" | null,
+    state: (state?.state ?? district?.state ?? mandal?.state ?? null) as string | null,
+    district: (district?.district ?? mandal?.district ?? null) as string | null,
+    mandal: (mandal?.mandal ?? null) as string | null,
     seats: rows,
   };
 }
@@ -700,15 +706,16 @@ export const getMyVaradhiScope = createServerFn({ method: "GET" })
 export const submitVaradhiAdminRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: {
-    full_name: string; phone?: string; requested_level: "state_admin" | "district_admin";
-    state: string; district?: string; message?: string;
+    full_name: string; phone?: string; requested_level: "state_admin" | "district_admin" | "mandal_admin";
+    state: string; district?: string; mandal?: string; message?: string;
     photo_url?: string; aadhaar_url?: string;
   }) => d)
   .handler(async ({ data, context }) => {
     const name = (data.full_name ?? "").trim();
     if (name.length < 2 || name.length > 100) throw new Error("పేరు సరిగా ఇవ్వండి");
     if (!data.state) throw new Error("రాష్ట్రం ఎంచుకోండి");
-    if (data.requested_level === "district_admin" && !data.district) throw new Error("జిల్లా ఎంచుకోండి");
+    if (data.requested_level !== "state_admin" && !data.district) throw new Error("జిల్లా ఎంచుకోండి");
+    if (data.requested_level === "mandal_admin" && !(data.mandal ?? "").trim()) throw new Error("మండలం ఇవ్వండి");
     if (!(data.photo_url ?? "").trim()) throw new Error("ఫోటో అప్‌లోడ్ చేయండి");
     if (!(data.aadhaar_url ?? "").trim()) throw new Error("ఆధార్ కార్డు అప్‌లోడ్ చేయండి");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -723,11 +730,12 @@ export const submitVaradhiAdminRequest = createServerFn({ method: "POST" })
       email: ((context.claims as any)?.email ?? null),
       requested_level: data.requested_level,
       state: data.state,
-      district: data.requested_level === "district_admin" ? data.district : (data.district ?? null),
+      district: data.district ?? null,
+      mandal: data.requested_level === "mandal_admin" ? (data.mandal ?? "").trim() : ((data.mandal ?? "").trim() || null),
       message: (data.message ?? "").trim().slice(0, 1000) || null,
       photo_url: (data.photo_url ?? "").trim() || null,
       aadhaar_url: (data.aadhaar_url ?? "").trim() || null,
-    });
+    } as any);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -776,7 +784,8 @@ export const adminReviewAdminRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: {
     request_id: string; action: "approve" | "reject"; notes?: string;
-    grant_level?: "state_admin" | "district_admin"; parent_admin_id?: string | null;
+    grant_level?: "state_admin" | "district_admin" | "mandal_admin";
+    parent_admin_id?: string | null; mandal?: string | null;
   }) => d)
   .handler(async ({ data, context }) => {
     await assertVaradhiAdmin(context.supabase, context.userId, (context.claims as any)?.email);
@@ -788,15 +797,18 @@ export const adminReviewAdminRequest = createServerFn({ method: "POST" })
 
     if (data.action === "approve") {
       const level = data.grant_level ?? (req as any).requested_level;
-      if (level === "district_admin" && !(req as any).district) throw new Error("జిల్లా లేదు");
+      const mandal = (data.mandal ?? (req as any).mandal ?? "") || null;
+      if (level !== "state_admin" && !(req as any).district) throw new Error("జిల్లా లేదు");
+      if (level === "mandal_admin" && !mandal) throw new Error("మండలం లేదు");
       const { error: seatErr } = await supabaseAdmin.from("varadhi_area_admins").insert({
         user_id: (req as any).user_id,
         level,
         state: (req as any).state,
-        district: level === "district_admin" ? (req as any).district : null,
-        parent_admin_id: level === "district_admin" ? (data.parent_admin_id ?? null) : null,
+        district: level === "state_admin" ? null : (req as any).district,
+        mandal: level === "mandal_admin" ? mandal : null,
+        parent_admin_id: level === "state_admin" ? null : (data.parent_admin_id ?? null),
         assigned_by: context.userId,
-      });
+      } as any);
       if (seatErr && !seatErr.message.includes("duplicate")) throw new Error(seatErr.message);
     }
 
@@ -830,7 +842,7 @@ export const adminListAreaAdmins = createServerFn({ method: "GET" })
     return {
       admins: list.map((r) => ({ ...r, profile: profiles.get(r.user_id) ?? null })),
       isSuper: scope.isSuper,
-      scope: { level: scope.level, state: scope.state, district: scope.district },
+      scope: { level: scope.level, state: scope.state, district: scope.district, mandal: scope.mandal },
     };
   });
 
@@ -892,35 +904,92 @@ export const adminSearchVaradhiUsers = createServerFn({ method: "GET" })
     return { users: rows ?? [] };
   });
 
-// Super Admin edits an existing area seat: change level / district / parent state admin.
+// Super Admin assigns a Mandal Admin under a chosen District Admin.
+export const adminAssignMandalAdmin = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { user_id: string; state: string; district: string; mandal: string; parent_admin_id: string }) => d)
+  .handler(async ({ data, context }) => {
+    await assertVaradhiAdmin(context.supabase, context.userId, (context.claims as any)?.email);
+    if (!data.user_id || !data.state || !data.district || !(data.mandal ?? "").trim()) {
+      throw new Error("వివరాలు అసంపూర్ణం");
+    }
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: parent } = await supabaseAdmin
+      .from("varadhi_area_admins").select("id, level, state, district").eq("id", data.parent_admin_id).maybeSingle();
+    if (!parent || (parent as any).level !== "district_admin" || (parent as any).district !== data.district) {
+      throw new Error("ఎంచుకున్న జిల్లా అడ్మిన్ ఈ జిల్లాకు చెందినవారు కాదు");
+    }
+    const { error } = await supabaseAdmin.from("varadhi_area_admins").insert({
+      user_id: data.user_id,
+      level: "mandal_admin",
+      state: data.state,
+      district: data.district,
+      mandal: data.mandal.trim(),
+      parent_admin_id: data.parent_admin_id,
+      assigned_by: context.userId,
+    } as any);
+    if (error) throw new Error(error.message.includes("duplicate") ? "ఇప్పటికే కేటాయించబడింది" : error.message);
+    return { ok: true };
+  });
+
+// Mandal suggestions for a district, gathered from live profiles + listings.
+export const adminListMandalOptions = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { state?: string; district?: string } = {}) => d)
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const out = new Set<string>();
+    let pq = supabaseAdmin.from("varadhi_profiles").select("mandal").not("mandal", "is", null);
+    if (data.state) pq = pq.eq("state", data.state);
+    if (data.district) pq = pq.eq("district", data.district);
+    const { data: p } = await pq.limit(1000);
+    for (const r of (p ?? []) as any[]) if (r.mandal?.trim()) out.add(r.mandal.trim());
+
+    let lq = supabaseAdmin.from("varadhi_listings").select("mandal").not("mandal", "is", null);
+    if (data.state) lq = lq.eq("state", data.state);
+    if (data.district) lq = lq.eq("district", data.district);
+    const { data: l } = await lq.limit(1000);
+    for (const r of (l ?? []) as any[]) if (r.mandal?.trim()) out.add(r.mandal.trim());
+
+    return { mandals: Array.from(out).sort((a, b) => a.localeCompare(b)) };
+  });
+
+// Super Admin edits an existing area seat: change level / district / mandal / parent.
 export const adminUpdateAreaSeat = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: {
     user_id: string;
     state: string;
-    level: "state_admin" | "district_admin";
+    level: "state_admin" | "district_admin" | "mandal_admin";
     district?: string | null;
+    mandal?: string | null;
     parent_admin_id?: string | null;
   }) => d)
   .handler(async ({ data, context }) => {
     await assertVaradhiAdmin(context.supabase, context.userId, (context.claims as any)?.email);
     if (!data.user_id || !data.state) throw new Error("వివరాలు అసంపూర్ణం");
-    if (data.level === "district_admin" && !data.district) throw new Error("జిల్లా ఎంచుకోండి");
+    if (data.level !== "state_admin" && !data.district) throw new Error("జిల్లా ఎంచుకోండి");
+    if (data.level === "mandal_admin" && !(data.mandal ?? "").trim()) throw new Error("మండలం ఇవ్వండి");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    if (data.level === "district_admin" && data.parent_admin_id) {
+    if (data.level !== "state_admin" && data.parent_admin_id) {
+      const wantParent = data.level === "district_admin" ? "state_admin" : "district_admin";
       const { data: parent } = await supabaseAdmin
-        .from("varadhi_area_admins").select("id, level, state").eq("id", data.parent_admin_id).maybeSingle();
-      if (!parent || (parent as any).level !== "state_admin" || (parent as any).state !== data.state) {
-        throw new Error("ఎంచుకున్న రాష్ట్ర అడ్మిన్ ఈ రాష్ట్రానికి చెందినవారు కాదు");
+        .from("varadhi_area_admins").select("id, level, state, district").eq("id", data.parent_admin_id).maybeSingle();
+      if (!parent || (parent as any).level !== wantParent || (parent as any).state !== data.state) {
+        throw new Error("ఎంచుకున్న పై అడ్మిన్ సరిపోలడం లేదు");
+      }
+      if (wantParent === "district_admin" && (parent as any).district !== data.district) {
+        throw new Error("ఎంచుకున్న జిల్లా అడ్మిన్ ఈ జిల్లాకు చెందినవారు కాదు");
       }
     }
 
     const patch = {
       level: data.level,
       state: data.state,
-      district: data.level === "district_admin" ? data.district : null,
-      parent_admin_id: data.level === "district_admin" ? (data.parent_admin_id ?? null) : null,
+      district: data.level === "state_admin" ? null : data.district,
+      mandal: data.level === "mandal_admin" ? (data.mandal ?? "").trim() : null,
+      parent_admin_id: data.level === "state_admin" ? null : (data.parent_admin_id ?? null),
       is_active: true,
       assigned_by: context.userId,
     };
@@ -930,12 +999,62 @@ export const adminUpdateAreaSeat = createServerFn({ method: "POST" })
 
     if (existing) {
       const { error } = await supabaseAdmin
-        .from("varadhi_area_admins").update(patch).eq("id", (existing as any).id);
+        .from("varadhi_area_admins").update(patch as any).eq("id", (existing as any).id);
       if (error) throw new Error(error.message);
     } else {
       const { error } = await supabaseAdmin
-        .from("varadhi_area_admins").insert({ user_id: data.user_id, ...patch });
+        .from("varadhi_area_admins").insert({ user_id: data.user_id, ...patch } as any);
       if (error) throw new Error(error.message);
     }
     return { ok: true };
+  });
+
+// -------- Subscription receipt (Super Admin + District Admin signatures)
+export const getSubscriptionReceipt = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { subscription_id: string }) => d)
+  .handler(async ({ data, context }) => {
+    const { data: sub, error } = await context.supabase
+      .from("varadhi_subscriptions").select("*").eq("id", data.subscription_id).maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!sub) throw new Error("సబ్‌స్క్రిప్షన్ కనిపించలేదు");
+
+    const { data: profile } = await context.supabase
+      .from("varadhi_profiles")
+      .select("full_name, phone, state, district, mandal, city, address")
+      .eq("user_id", context.userId).maybeSingle();
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let districtAdminName: string | null = null;
+    const p: any = profile ?? {};
+    if (p.state && p.district) {
+      const { data: seats } = await supabaseAdmin
+        .from("varadhi_area_admins")
+        .select("user_id, level, state, district, is_active")
+        .eq("level", "district_admin").eq("state", p.state).eq("district", p.district)
+        .eq("is_active", true).limit(1);
+      const seat = (seats ?? [])[0] as any;
+      if (seat) {
+        const { data: dp } = await supabaseAdmin
+          .from("varadhi_profiles").select("full_name").eq("user_id", seat.user_id).maybeSingle();
+        districtAdminName = (dp as any)?.full_name ?? null;
+      }
+    }
+
+    const receiptNo = `VRD-${String((sub as any).id).slice(0, 8).toUpperCase()}`;
+    return {
+      receipt: {
+        receipt_no: receiptNo,
+        plan: (sub as any).plan,
+        amount: Number((sub as any).amount ?? 0),
+        status: (sub as any).status,
+        starts_at: (sub as any).starts_at,
+        expires_at: (sub as any).expires_at,
+        payment_ref: (sub as any).payment_ref ?? null,
+        payer_name: p.full_name ?? null,
+        payer_phone: p.phone ?? null,
+        area: [p.mandal, p.district, p.state].filter(Boolean).join(", ") || null,
+        district_admin_name: districtAdminName,
+      },
+    };
   });

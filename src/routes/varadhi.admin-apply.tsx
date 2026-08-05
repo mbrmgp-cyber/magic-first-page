@@ -46,9 +46,10 @@ function AdminApply() {
 
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
-  const [level, setLevel] = useState<"state_admin" | "district_admin">("state_admin");
+  const [level, setLevel] = useState<"state_admin" | "district_admin" | "mandal_admin">("state_admin");
   const [state, setState] = useState("");
   const [district, setDistrict] = useState("");
+  const [mandal, setMandal] = useState("");
   const [message, setMessage] = useState("");
   const [photoUrl, setPhotoUrl] = useState("");
   const [aadhaarUrl, setAadhaarUrl] = useState("");
@@ -78,7 +79,7 @@ function AdminApply() {
   async function send() {
     setBusy(true);
     try {
-      await submit({ data: { full_name: fullName, phone, requested_level: level, state, district, message, photo_url: photoUrl, aadhaar_url: aadhaarUrl } });
+      await submit({ data: { full_name: fullName, phone, requested_level: level, state, district, mandal, message, photo_url: photoUrl, aadhaar_url: aadhaarUrl } });
       toast.success("దరఖాస్తు పంపబడింది");
       setMessage("");
       qc.invalidateQueries({ queryKey: ["varadhi-my-admin-requests"] });
@@ -92,6 +93,7 @@ function AdminApply() {
   const valid =
     fullName.trim().length >= 2 && !!state &&
     (level === "state_admin" || !!district) &&
+    (level !== "mandal_admin" || !!mandal.trim()) &&
     !!photoUrl && !!aadhaarUrl;
   if (authed === null) return <p className="p-8 text-center text-sm">లోడ్…</p>;
 
@@ -120,12 +122,15 @@ function AdminApply() {
 
         <div className="space-y-1">
           <label className="text-xs font-medium">ఏ స్థాయి?</label>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             <Button type="button" size="sm" variant={level === "state_admin" ? "default" : "outline"} onClick={() => setLevel("state_admin")}>
-              రాష్ట్ర అడ్మిన్
+              రాష్ట్ర
             </Button>
             <Button type="button" size="sm" variant={level === "district_admin" ? "default" : "outline"} onClick={() => setLevel("district_admin")}>
-              జిల్లా అడ్మిన్
+              జిల్లా
+            </Button>
+            <Button type="button" size="sm" variant={level === "mandal_admin" ? "default" : "outline"} onClick={() => setLevel("mandal_admin")}>
+              మండల
             </Button>
           </div>
         </div>
@@ -135,7 +140,7 @@ function AdminApply() {
           <select
             className="w-full h-10 rounded-md border bg-background px-3 text-sm"
             value={state}
-            onChange={(e) => { setState(e.target.value); setDistrict(""); }}
+            onChange={(e) => { setState(e.target.value); setDistrict(""); setMandal(""); }}
           >
             <option value="">ఎంచుకోండి</option>
             {INDIA_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
@@ -143,17 +148,32 @@ function AdminApply() {
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs font-medium">జిల్లా {level === "district_admin" ? "*" : ""}</label>
+          <label className="text-xs font-medium">జిల్లా {level !== "state_admin" ? "*" : ""}</label>
           <select
             className="w-full h-10 rounded-md border bg-background px-3 text-sm"
             value={district}
-            onChange={(e) => setDistrict(e.target.value)}
+            onChange={(e) => { setDistrict(e.target.value); setMandal(""); }}
             disabled={!state}
+            size={1}
           >
             <option value="">{state ? "ఎంచుకోండి" : "ముందు రాష్ట్రం ఎంచుకోండి"}</option>
             {indiaDistrictsFor(state).map((d) => <option key={d} value={d}>{d}</option>)}
           </select>
         </div>
+
+        {level === "mandal_admin" && (
+          <div className="space-y-1">
+            <label className="text-xs font-medium">మండలం *</label>
+            <Input
+              value={mandal}
+              onChange={(e) => setMandal(e.target.value)}
+              disabled={!district}
+              placeholder={district ? "మండలం పేరు టైప్ చేయండి" : "ముందు జిల్లా ఎంచుకోండి"}
+            />
+            <p className="text-[10px] text-muted-foreground">మండల అడ్మిన్ — జిల్లా అడ్మిన్ ఆధీనంలో పని చేస్తారు.</p>
+          </div>
+        )}
+
 
         <UploadField
           label="ప్రొఫైల్ ఫోటో *"
