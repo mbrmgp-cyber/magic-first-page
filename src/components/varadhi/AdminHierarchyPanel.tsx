@@ -278,33 +278,72 @@ export function AdminHierarchyPanel({ isSuper }: { isSuper: boolean }) {
   const qc = useQueryClient();
   const areaList = useServerFn(adminListAreaAdmins);
   const assign = useServerFn(adminAssignDistrictAdmin);
+  const assignMandal = useServerFn(adminAssignMandalAdmin);
+  const mandalOpts = useServerFn(adminListMandalOptions);
   const setActive = useServerFn(adminSetAreaAdminActive);
   const searchUsers = useServerFn(adminSearchVaradhiUsers);
 
   const areaQ = useQuery({ queryKey: ["varadhi-area-admins"], queryFn: () => areaList() });
-  const admins = areaQ.data?.admins ?? [];
+  const admins = (areaQ.data?.admins ?? []) as any[];
   const stateAdmins = admins.filter((a: any) => a.level === "state_admin");
   const districtAdmins = admins.filter((a: any) => a.level === "district_admin");
+  const mandalAdmins = admins.filter((a: any) => a.level === "mandal_admin");
 
+  // "state:<id>" → assign district admin, "district:<id>" → assign mandal admin
   const [openFor, setOpenFor] = useState<string | null>(null);
   const [district, setDistrict] = useState("");
+  const [mandal, setMandal] = useState("");
   const [term, setTerm] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const parentSeat = stateAdmins.find((a: any) => a.id === openFor) ?? null;
+  const [kind, seatId] = (openFor ?? ":").split(":");
+  const parentSeat = admins.find((a: any) => a.id === seatId) ?? null;
+
   const usersQ = useQuery({
-    queryKey: ["varadhi-user-search", parentSeat?.state ?? "", term],
-    queryFn: () => searchUsers({ data: { q: term || undefined, state: parentSeat?.state } }),
+    queryKey: ["varadhi-user-search", parentSeat?.state ?? "", kind === "district" ? parentSeat?.district ?? "" : "", term],
+    queryFn: () =>
+      searchUsers({
+        data: {
+          q: term || undefined,
+          state: parentSeat?.state,
+          district: kind === "district" ? parentSeat?.district : undefined,
+        },
+      }),
     enabled: !!parentSeat,
   });
 
+  const mandalQ = useQuery({
+    queryKey: ["varadhi-mandal-options", parentSeat?.state ?? "", parentSeat?.district ?? ""],
+    queryFn: () => mandalOpts({ data: { state: parentSeat?.state, district: parentSeat?.district } }),
+    enabled: kind === "district" && !!parentSeat,
+  });
+
+  function closePanel() {
+    setOpenFor(null); setDistrict(""); setMandal(""); setTerm("");
+  }
+
   async function doAssign(userId: string) {
-    if (!parentSeat || !district) { toast.error("జిల్లా ఎంచుకోండి"); return; }
+    if (!parentSeat) return;
     setBusy(true);
     try {
-      await assign({ data: { user_id: userId, state: parentSeat.state, district, parent_admin_id: parentSeat.id } });
-      toast.success("జిల్లా అడ్మిన్ కేటాయించబడ్డారు");
-      setOpenFor(null); setDistrict(""); setTerm("");
+      if (kind === "state") {
+        if (!district) { toast.error("జిల్లా ఎంచుకోండి"); setBusy(false); return; }
+        await assign({ data: { user_id: userId, state: parentSeat.state, district, parent_admin_id: parentSeat.id } });
+        toast.success("జిల్లా అడ్మిన్ కేటాయించబడ్డారు");
+      } else {
+        if (!mandal.trim()) { toast.error("మండలం ఇవ్వండి"); setBusy(false); return; }
+        await assignMandal({
+          data: {
+            user_id: userId,
+            state: parentSeat.state,
+            district: parentSeat.district,
+            mandal: mandal.trim(),
+            parent_admin_id: parentSeat.id,
+          },
+        });
+        toast.success("మండల అడ్మిన్ కేటాయించబడ్డారు");
+      }
+      closePanel();
       qc.invalidateQueries({ queryKey: ["varadhi-area-admins"] });
     } catch (e: any) {
       toast.error(e.message ?? "విఫలమైంది");
@@ -322,6 +361,52 @@ export function AdminHierarchyPanel({ isSuper }: { isSuper: boolean }) {
     }
   }
 
+  const AssignBox = ({ forKind }: { forKind: "state" | "district" }) => (
+    <div className="space-y-2 pt-2">
+      {forKind === "state" ? (
+        <select
+          className="w-full h-9 rounded-md border bg-background px-2 text-xs"
+          value={district}
+          onChange={(e) => setDistrict(e.target.value)}
+        >
+          <option value="">జిల్లా ఎంచుకోండి</option>
+          {indiaDistrictsFor(parentSeat?.state ?? "").map((x: string) => <option key={x} value={x}>{x}</option>)}
+        </select>
+      ) : (
+        <>
+          <Input
+            className="h-9 text-xs"
+            list="mandal-options"
+            placeholder="మండలం పేరు"
+            value={mandal}
+            onChange={(e) => setMandal(e.target.value)}
+          />
+          <datalist id="mandal-options">
+            {(mandalQ.data?.mandals ?? []).map((m: string) => <option key={m} value={m} />)}
+          </datalist>
+        </>
+      )}
+      <Input className="h-9 text-xs" placeholder="పేరు / ఫోన్ వెతకండి" value={term} onChange={(e) => setTerm(e.target.value)} />
+      <div className="max-h-52 overflow-auto space-y-1">
+        {(usersQ.data?.users ?? []).map((u: any) => (
+          <button
+            key={u.user_id}
+            disabled={busy}
+            onClick={() => doAssign(u.user_id)}
+            className="w-full text-left px-2 py-1.5 rounded-md border hover:bg-muted text-xs"
+          >
+            <span className="font-medium">{u.full_name}</span>
+            <span className="text-muted-foreground"> · {[u.district, u.mandal].filter(Boolean).join(", ")}</span>
+          </button>
+        ))}
+        {(usersQ.data?.users ?? []).length === 0 && (
+          <p className="text-[11px] text-muted-foreground">వినియోగదారులు కనిపించలేదు.</p>
+        )}
+      </div>
+      <Button size="sm" variant="ghost" onClick={closePanel}>రద్దు</Button>
+    </div>
+  );
+
   if (areaQ.isLoading) return <p className="text-center text-sm py-8">లోడ్…</p>;
 
   return (
@@ -331,7 +416,7 @@ export function AdminHierarchyPanel({ isSuper }: { isSuper: boolean }) {
       )}
 
       {stateAdmins.map((s: any) => {
-        const kids = districtAdmins.filter((d: any) => d.parent_admin_id === s.id || (!d.parent_admin_id && d.state === s.state));
+        const kids = districtAdmins.filter((d: any) => d.parent_admin_id === s.id || (!d.parent_admin_id && norm(d.state) === norm(s.state)));
         return (
           <Card key={s.id} className="p-4 space-y-3">
             <div className="flex items-start justify-between gap-2">
@@ -353,61 +438,75 @@ export function AdminHierarchyPanel({ isSuper }: { isSuper: boolean }) {
               </div>
             </div>
 
-            <div className="pl-3 border-l-2 border-[#1e3a8a]/15 space-y-2">
+            <div className="pl-3 border-l-2 border-[#1e3a8a]/15 space-y-3">
               {kids.length === 0 && <p className="text-xs text-muted-foreground">జిల్లా అడ్మిన్లు లేరు.</p>}
-              {kids.map((d: any) => (
-                <div key={d.id} className="flex items-center justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{d.profile?.full_name ?? d.user_id.slice(0, 8)}</p>
-                    <p className="text-[11px] text-muted-foreground flex items-center gap-1">
-                      <MapPin className="h-3 w-3" /> {d.district}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={d.is_active ? "outline" : "secondary"} className="text-[10px]">
-                      {d.is_active ? "యాక్టివ్" : "నిలిపివేత"}
-                    </Badge>
-                    {isSuper && (
-                      <Button size="sm" variant="ghost" onClick={() => toggle(d.id, !d.is_active)}>
-                        {d.is_active ? "తీసివేయి" : "యాక్టివ్"}
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ))}
+              {kids.map((d: any) => {
+                const mkids = mandalAdmins.filter(
+                  (m: any) => m.parent_admin_id === d.id || (!m.parent_admin_id && norm(m.district) === norm(d.district)),
+                );
+                return (
+                  <div key={d.id} className="space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium truncate">{d.profile?.full_name ?? d.user_id.slice(0, 8)}</p>
+                        <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                          <MapPin className="h-3 w-3" /> జిల్లా అడ్మిన్ · {d.district}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={d.is_active ? "outline" : "secondary"} className="text-[10px]">
+                          {d.is_active ? "యాక్టివ్" : "నిలిపివేత"}
+                        </Badge>
+                        {isSuper && (
+                          <Button size="sm" variant="ghost" onClick={() => toggle(d.id, !d.is_active)}>
+                            {d.is_active ? "తీసివేయి" : "యాక్టివ్"}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
 
-              {isSuper && (
-                openFor === s.id ? (
-                  <div className="space-y-2 pt-2">
-                    <select
-                      className="w-full h-9 rounded-md border bg-background px-2 text-xs"
-                      value={district}
-                      onChange={(e) => setDistrict(e.target.value)}
-                    >
-                      <option value="">జిల్లా ఎంచుకోండి</option>
-                      {districtsFor(s.state).map((x) => <option key={x} value={x}>{x}</option>)}
-                    </select>
-                    <Input className="h-9 text-xs" placeholder="పేరు / ఫోన్ వెతకండి" value={term} onChange={(e) => setTerm(e.target.value)} />
-                    <div className="max-h-52 overflow-auto space-y-1">
-                      {(usersQ.data?.users ?? []).map((u: any) => (
-                        <button
-                          key={u.user_id}
-                          disabled={busy}
-                          onClick={() => doAssign(u.user_id)}
-                          className="w-full text-left px-2 py-1.5 rounded-md border hover:bg-muted text-xs"
-                        >
-                          <span className="font-medium">{u.full_name}</span>
-                          <span className="text-muted-foreground"> · {[u.district, u.mandal].filter(Boolean).join(", ")}</span>
-                        </button>
+                    <div className="pl-3 border-l-2 border-[#f97316]/25 space-y-1.5">
+                      {mkids.length === 0 && <p className="text-[11px] text-muted-foreground">మండల అడ్మిన్లు లేరు.</p>}
+                      {mkids.map((m: any) => (
+                        <div key={m.id} className="flex items-center justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="text-xs font-medium truncate">{m.profile?.full_name ?? m.user_id.slice(0, 8)}</p>
+                            <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                              <MapPin className="h-3 w-3" /> మండల అడ్మిన్ · {m.mandal}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={m.is_active ? "outline" : "secondary"} className="text-[10px]">
+                              {m.is_active ? "యాక్టివ్" : "నిలిపివేత"}
+                            </Badge>
+                            {isSuper && (
+                              <Button size="sm" variant="ghost" onClick={() => toggle(m.id, !m.is_active)}>
+                                {m.is_active ? "తీసివేయి" : "యాక్టివ్"}
+                              </Button>
+                            )}
+                          </div>
+                        </div>
                       ))}
-                      {(usersQ.data?.users ?? []).length === 0 && (
-                        <p className="text-[11px] text-muted-foreground">వినియోగదారులు కనిపించలేదు.</p>
+
+                      {isSuper && (
+                        openFor === `district:${d.id}` ? (
+                          <AssignBox forKind="district" />
+                        ) : (
+                          <Button size="sm" variant="outline" onClick={() => { closePanel(); setOpenFor(`district:${d.id}`); }}>
+                            <UserPlus className="h-4 w-4 mr-1" /> మండల అడ్మిన్‌ను కేటాయించండి
+                          </Button>
+                        )
                       )}
                     </div>
-                    <Button size="sm" variant="ghost" onClick={() => { setOpenFor(null); setDistrict(""); setTerm(""); }}>రద్దు</Button>
                   </div>
+                );
+              })}
+
+              {isSuper && (
+                openFor === `state:${s.id}` ? (
+                  <AssignBox forKind="state" />
                 ) : (
-                  <Button size="sm" variant="outline" onClick={() => setOpenFor(s.id)}>
+                  <Button size="sm" variant="outline" onClick={() => { closePanel(); setOpenFor(`state:${s.id}`); }}>
                     <UserPlus className="h-4 w-4 mr-1" /> జిల్లా అడ్మిన్‌ను కేటాయించండి
                   </Button>
                 )
@@ -420,8 +519,6 @@ export function AdminHierarchyPanel({ isSuper }: { isSuper: boolean }) {
       {!isSuper && (
         <p className="text-[11px] text-muted-foreground">కేటాయింపులు సూపర్ అడ్మిన్ మాత్రమే చేయగలరు.</p>
       )}
-
-      {STATES.length === 0 && null}
     </div>
   );
 }
