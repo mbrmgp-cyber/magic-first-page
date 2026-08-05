@@ -2221,6 +2221,54 @@ export type Database = {
         }
         Relationships: []
       }
+      varadhi_admin_audit: {
+        Row: {
+          action: string
+          actor_user_id: string
+          after_data: Json | null
+          before_data: Json | null
+          created_at: string
+          district: string | null
+          id: string
+          mandal: string | null
+          notes: string | null
+          request_id: string | null
+          seat_id: string | null
+          state: string | null
+          target_user_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_user_id: string
+          after_data?: Json | null
+          before_data?: Json | null
+          created_at?: string
+          district?: string | null
+          id?: string
+          mandal?: string | null
+          notes?: string | null
+          request_id?: string | null
+          seat_id?: string | null
+          state?: string | null
+          target_user_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string
+          after_data?: Json | null
+          before_data?: Json | null
+          created_at?: string
+          district?: string | null
+          id?: string
+          mandal?: string | null
+          notes?: string | null
+          request_id?: string | null
+          seat_id?: string | null
+          state?: string | null
+          target_user_id?: string | null
+        }
+        Relationships: []
+      }
       varadhi_admin_requests: {
         Row: {
           aadhaar_url: string | null

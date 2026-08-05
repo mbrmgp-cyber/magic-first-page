@@ -14,6 +14,7 @@ import {
   getMyVaradhiScope,
 } from "@/lib/varadhi.functions";
 import { AdminRequestsPanel, AdminHierarchyPanel } from "@/components/varadhi/AdminHierarchyPanel";
+import { AdminAuditPanel } from "@/components/varadhi/AdminAuditPanel";
 import { STATES, districtsFor } from "@/lib/ap-locations";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -64,7 +65,7 @@ function VaradhiAdmin() {
   const scope = scopeQ.data;
   const isAdmin = isSuper || !!scope?.level;
 
-  const [tab, setTab] = useState<"reg" | "points" | "requests" | "hierarchy">("reg");
+  const [tab, setTab] = useState<"reg" | "points" | "requests" | "hierarchy" | "audit">("reg");
 
   const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "all">("pending");
   const [notes, setNotes] = useState<Record<string, string>>({});
@@ -136,6 +137,10 @@ function VaradhiAdmin() {
         <Button size="sm" variant={tab === "hierarchy" ? "default" : "outline"} onClick={() => setTab("hierarchy")}>
           అడ్మిన్ హైరార్కీ
         </Button>
+        <Button size="sm" variant={tab === "audit" ? "default" : "outline"} onClick={() => setTab("audit")}>
+          <HistoryIcon className="h-4 w-4 mr-1" /> మార్పుల చరిత్ర
+        </Button>
+
       </div>
 
       {scope?.level && scope.level !== "super_admin" && (
@@ -147,6 +152,7 @@ function VaradhiAdmin() {
       {tab === "points" && isSuper && <PointsPanel />}
       {tab === "requests" && <AdminRequestsPanel isSuper={isSuper} />}
       {tab === "hierarchy" && <AdminHierarchyPanel isSuper={isSuper} />}
+      {tab === "audit" && <AdminAuditPanel />}
 
       {tab === "reg" && (
       <>

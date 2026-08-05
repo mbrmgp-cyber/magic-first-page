@@ -795,9 +795,13 @@ export const adminReviewAdminRequest = createServerFn({ method: "POST" })
     if (!req) throw new Error("దరఖాస్తు కనిపించలేదు");
     if ((req as any).status !== "pending") throw new Error("ఇప్పటికే పరిష్కరించబడింది");
 
+    let grantedLevel: string | null = null;
+    let grantedMandal: string | null = null;
     if (data.action === "approve") {
       const level = data.grant_level ?? (req as any).requested_level;
       const mandal = (data.mandal ?? (req as any).mandal ?? "") || null;
+      grantedLevel = level;
+      grantedMandal = level === "mandal_admin" ? mandal : null;
       if (level !== "state_admin" && !(req as any).district) throw new Error("జిల్లా లేదు");
       if (level === "mandal_admin" && !mandal) throw new Error("మండలం లేదు");
       const { error: seatErr } = await supabaseAdmin.from("varadhi_area_admins").insert({
@@ -819,8 +823,27 @@ export const adminReviewAdminRequest = createServerFn({ method: "POST" })
       reviewed_at: new Date().toISOString(),
     }).eq("id", data.request_id);
     if (error) throw new Error(error.message);
+
+    const { logAdminAudit } = await import("@/lib/varadhi-audit.server");
+    await logAdminAudit({
+      action: data.action === "approve" ? "request_approved" : "request_rejected",
+      actor_user_id: context.userId,
+      request_id: data.request_id,
+      target_user_id: (req as any).user_id,
+      state: (req as any).state,
+      district: (req as any).district,
+      mandal: grantedMandal ?? (req as any).mandal ?? null,
+      before_data: { status: (req as any).status, requested_level: (req as any).requested_level },
+      after_data: {
+        status: data.action === "approve" ? "approved" : "rejected",
+        granted_level: grantedLevel,
+        parent_admin_id: data.parent_admin_id ?? null,
+      },
+      notes: data.notes ?? null,
+    });
     return { ok: true };
   });
+
 
 export const adminListAreaAdmins = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -870,6 +893,15 @@ export const adminAssignDistrictAdmin = createServerFn({ method: "POST" })
       assigned_by: context.userId,
     });
     if (error) throw new Error(error.message.includes("duplicate") ? "ఇప్పటికే కేటాయించబడింది" : error.message);
+    const { logAdminAudit } = await import("@/lib/varadhi-audit.server");
+    await logAdminAudit({
+      action: "district_admin_assigned",
+      actor_user_id: context.userId,
+      target_user_id: data.user_id,
+      state: data.state,
+      district: data.district,
+      after_data: { level: "district_admin", parent_admin_id: data.parent_admin_id ?? null },
+    });
     return { ok: true };
   });
 
@@ -879,11 +911,26 @@ export const adminSetAreaAdminActive = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertVaradhiAdmin(context.supabase, context.userId, (context.claims as any)?.email);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: before } = await supabaseAdmin
+      .from("varadhi_area_admins").select("*").eq("id", data.id).maybeSingle();
     const { error } = await supabaseAdmin
       .from("varadhi_area_admins").update({ is_active: data.is_active }).eq("id", data.id);
     if (error) throw new Error(error.message);
+    const { logAdminAudit } = await import("@/lib/varadhi-audit.server");
+    await logAdminAudit({
+      action: data.is_active ? "seat_activated" : "seat_deactivated",
+      actor_user_id: context.userId,
+      seat_id: data.id,
+      target_user_id: (before as any)?.user_id ?? null,
+      state: (before as any)?.state ?? null,
+      district: (before as any)?.district ?? null,
+      mandal: (before as any)?.mandal ?? null,
+      before_data: { is_active: (before as any)?.is_active ?? null },
+      after_data: { is_active: data.is_active },
+    });
     return { ok: true };
   });
+
 
 // Candidate users (registered Vaaradhi profiles) the Super Admin can promote.
 export const adminSearchVaradhiUsers = createServerFn({ method: "GET" })
@@ -929,8 +976,19 @@ export const adminAssignMandalAdmin = createServerFn({ method: "POST" })
       assigned_by: context.userId,
     } as any);
     if (error) throw new Error(error.message.includes("duplicate") ? "ఇప్పటికే కేటాయించబడింది" : error.message);
+    const { logAdminAudit } = await import("@/lib/varadhi-audit.server");
+    await logAdminAudit({
+      action: "mandal_admin_assigned",
+      actor_user_id: context.userId,
+      target_user_id: data.user_id,
+      state: data.state,
+      district: data.district,
+      mandal: data.mandal.trim(),
+      after_data: { level: "mandal_admin", parent_admin_id: data.parent_admin_id },
+    });
     return { ok: true };
   });
+
 
 // Mandal suggestions for a district, gathered from live profiles + listings.
 export const adminListMandalOptions = createServerFn({ method: "GET" })
@@ -995,19 +1053,45 @@ export const adminUpdateAreaSeat = createServerFn({ method: "POST" })
     };
 
     const { data: existing } = await supabaseAdmin
-      .from("varadhi_area_admins").select("id").eq("user_id", data.user_id).limit(1).maybeSingle();
+      .from("varadhi_area_admins").select("*").eq("user_id", data.user_id).limit(1).maybeSingle();
 
+    let seatId: string | null = (existing as any)?.id ?? null;
     if (existing) {
       const { error } = await supabaseAdmin
         .from("varadhi_area_admins").update(patch as any).eq("id", (existing as any).id);
       if (error) throw new Error(error.message);
     } else {
-      const { error } = await supabaseAdmin
-        .from("varadhi_area_admins").insert({ user_id: data.user_id, ...patch } as any);
+      const { data: created, error } = await supabaseAdmin
+        .from("varadhi_area_admins").insert({ user_id: data.user_id, ...patch } as any)
+        .select("id").maybeSingle();
       if (error) throw new Error(error.message);
+      seatId = (created as any)?.id ?? null;
     }
+
+    const { logAdminAudit } = await import("@/lib/varadhi-audit.server");
+    await logAdminAudit({
+      action: existing ? "seat_reassigned" : "seat_created",
+      actor_user_id: context.userId,
+      seat_id: seatId,
+      target_user_id: data.user_id,
+      state: patch.state,
+      district: patch.district ?? null,
+      mandal: patch.mandal ?? null,
+      before_data: existing
+        ? {
+            level: (existing as any).level,
+            state: (existing as any).state,
+            district: (existing as any).district,
+            mandal: (existing as any).mandal,
+            parent_admin_id: (existing as any).parent_admin_id,
+            is_active: (existing as any).is_active,
+          }
+        : null,
+      after_data: patch,
+    });
     return { ok: true };
   });
+
 
 // -------- Subscription receipt (Super Admin + District Admin signatures)
 export const getSubscriptionReceipt = createServerFn({ method: "POST" })
@@ -1056,5 +1140,37 @@ export const getSubscriptionReceipt = createServerFn({ method: "POST" })
         area: [p.mandal, p.district, p.state].filter(Boolean).join(", ") || null,
         district_admin_name: districtAdminName,
       },
+    };
+  });
+
+// -------- Admin audit trail (who changed what, and when)
+export const adminListAdminAudit = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { limit?: number } = {}) => d)
+  .handler(async ({ data, context }) => {
+    const scope = await loadAreaScope(context.userId, (context.claims as any)?.email);
+    if (!scope.isSuper && !scope.level) throw new Error("Forbidden");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    let q = supabaseAdmin
+      .from("varadhi_admin_audit").select("*").order("created_at", { ascending: false });
+    if (!scope.isSuper && scope.state) q = q.eq("state", scope.state);
+    const { data: rows, error } = await q.limit(Math.min(data.limit ?? 100, 300));
+    if (error) throw new Error(error.message);
+
+    const list = (rows ?? []) as any[];
+    const ids = Array.from(new Set(list.flatMap((r) => [r.actor_user_id, r.target_user_id]).filter(Boolean)));
+    const names = new Map<string, string>();
+    if (ids.length) {
+      const { data: p } = await supabaseAdmin
+        .from("varadhi_profiles").select("user_id, full_name").in("user_id", ids);
+      for (const x of (p ?? []) as any[]) names.set(x.user_id, x.full_name);
+    }
+    return {
+      entries: list.map((r) => ({
+        ...r,
+        actor_name: names.get(r.actor_user_id) ?? null,
+        target_name: r.target_user_id ? names.get(r.target_user_id) ?? null : null,
+      })),
     };
   });
