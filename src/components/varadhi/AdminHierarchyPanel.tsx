@@ -322,7 +322,6 @@ export function AdminRequestsPanel({ isSuper }: { isSuper: boolean }) {
                 </div>
               );
             })()}
-            })()}
 
           </Card>
         ))
