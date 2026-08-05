@@ -99,16 +99,30 @@ function VaradhiAdmin() {
   if (!isAdmin) {
     return (
       <div className="mx-auto max-w-md px-4 pt-6 pb-24 space-y-3">
-        <ContactAdminForm />
-        <Card className="p-4 space-y-3 text-center">
-          <ShieldCheck className="h-8 w-8 mx-auto text-[#1e3a8a]/50" />
-          <p className="text-xs text-muted-foreground">మీ ప్రాంతానికి అడ్మిన్ కావాలనుకుంటున్నారా?</p>
-          <Button variant="secondary" onClick={() => navigate({ to: "/varadhi/admin-apply" })}>అడ్మిన్‌గా దరఖాస్తు చేయండి</Button>
-          <Button variant="outline" onClick={() => navigate({ to: "/varadhi" })}>హోమ్‌కు వెళ్ళండి</Button>
+        <Card className="p-4 space-y-3 border-[#f97316]/40 bg-[#fff7ed]">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="h-5 w-5 text-[#f97316]" />
+            <h2 className="text-sm font-bold text-[#1e3a8a]">అడ్మిన్ దరఖాస్తు</h2>
+          </div>
+          <p className="text-xs text-[#1e3a8a]/80">
+            రాష్ట్రం, జిల్లా లేదా మండలం స్థాయిలో వారధి అడ్మిన్ కావాలనుకునేవారు ఇక్కడ దరఖాస్తు చేసుకోవచ్చు.
+            ఫోటో, ఆధార్, ప్రాంతం వివరాలు ఇచ్చి పంపండి — సూపర్ అడ్మిన్ పరిశీలించి ఆమోదిస్తారు.
+          </p>
+          <ul className="text-[11px] text-[#1e3a8a]/70 space-y-0.5">
+            <li>• రాష్ట్ర అడ్మిన్ — మొత్తం రాష్ట్రానికి</li>
+            <li>• జిల్లా అడ్మిన్ — ఒక జిల్లాకు</li>
+            <li>• మండల అడ్మిన్ — ఒక మండలానికి</li>
+          </ul>
+          <Button className="w-full bg-[#f97316] hover:bg-[#ea6a06]" onClick={() => navigate({ to: "/varadhi/admin-apply" })}>
+            దరఖాస్తు ఫారం తెరవండి
+          </Button>
         </Card>
+        <ContactAdminForm />
+        <Button variant="outline" className="w-full" onClick={() => navigate({ to: "/varadhi" })}>హోమ్‌కు వెళ్ళండి</Button>
       </div>
     );
   }
+
 
 
   const rows = listQ.data?.profiles ?? [];
