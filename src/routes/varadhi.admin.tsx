@@ -137,7 +137,7 @@ function VaradhiAdmin() {
           అడ్మిన్ హైరార్కీ
         </Button>
         <Button size="sm" variant={tab === "audit" ? "default" : "outline"} onClick={() => setTab("audit")}>
-          <History className="h-4 w-4 mr-1" /> మార్పుల చరిత్ర
+          <HistoryIcon className="h-4 w-4 mr-1" /> మార్పుల చరిత్ర
         </Button>
 
       </div>
