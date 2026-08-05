@@ -420,75 +420,8 @@ function VaradhiHome() {
         </div>
       )}
 
-      {/* Categories — icon grid */}
-      <h2 className="mt-6 text-sm font-semibold text-[#1e3a8a]/80">వర్గాలు</h2>
-      <div className="mt-3 grid grid-cols-4 gap-2">
-        <CategoryTile
-          box={{ id: "items", te: "వస్తువులు", color: "#1e3a8a", Icon: Boxes, sub: "" }}
-          open={openGroup === "items"}
-          onClick={() => setOpenGroup(openGroup === "items" ? null : "items")}
-        />
-        <CategoryTile box={REAL_ESTATE} onClick={() => goto(REAL_ESTATE.id)} />
-        <CategoryTile box={TRANSPORT} onClick={() => goto(TRANSPORT.id)} />
-        <CategoryTile
-          box={{ id: "svc", te: "సర్వీసులు", color: "#dc2626", Icon: Wrench, sub: "" }}
-          open={openGroup === "svc"}
-          onClick={() => setOpenGroup(openGroup === "svc" ? null : "svc")}
-        />
-      </div>
 
-      {openGroup && (
-        <div className="mt-2 grid grid-cols-3 gap-2 rounded-2xl bg-white/70 p-2">
-          {(openGroup === "items" ? ITEM_BOXES : SERVICE_BOXES).map((b) => (
-            <CategoryTile key={b.id} box={b} onClick={() => goto(b.id)} />
-          ))}
-        </div>
-      )}
 
-      {/* Inline category results */}
-      {selectedCat && (
-        <div ref={catRef} className="mt-5 rounded-2xl border border-black/5 bg-white p-3 shadow-sm">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex min-w-0 items-center gap-2">
-              <span
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-xl text-white"
-                style={{ background: `linear-gradient(135deg, ${selectedCat.color}, ${selectedCat.color}cc)` }}
-              >
-                <selectedCat.Icon className="h-4 w-4" />
-              </span>
-              <p className="truncate text-sm font-bold text-[#1e3a8a]">{selectedCat.te}</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setSelectedCat(null)}
-              className="shrink-0 text-[11px] font-semibold text-[#1e3a8a]/50"
-            >
-              మూసివేయి
-            </button>
-          </div>
-
-          {!signedIn && <p className="mt-3 text-[11px] text-[#1e3a8a]/60">లాగిన్ అయితే ఇవి కనిపిస్తాయి.</p>}
-          {signedIn && catLoading && <p className="mt-3 text-[11px] text-[#1e3a8a]/60">లోడ్ అవుతోంది…</p>}
-          {signedIn && !catLoading && catItems.length === 0 && (
-            <p className="mt-3 text-[11px] text-[#1e3a8a]/60">ఈ వర్గంలో ఇంకా అప్‌డేట్‌లు లేవు.</p>
-          )}
-          {signedIn && catItems.length > 0 && (
-            <>
-              <div className="mt-3 grid grid-cols-2 gap-3">
-                {catItems.slice(0, 8).map((l) => <ListingCard key={l.id} l={l} />)}
-              </div>
-              <Link
-                to="/varadhi/browse/$category"
-                params={{ category: selectedCat.id }}
-                search={{ q: "" }}
-                className="mt-3 block rounded-xl bg-[#1e3a8a] py-2 text-center text-[12px] font-semibold text-white"
-              >
-                అన్నీ చూడండి ({catItems.length})
-              </Link>
-            </>
-          )}
-        </div>
-      )}
 
 
       {/* Nearby */}
