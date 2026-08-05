@@ -11,7 +11,7 @@ import varadhiLogo from "@/assets/varadhi-logo.jpg.asset.json";
 import banner1 from "@/assets/varadhi-banner-1.jpg";
 import banner2 from "@/assets/varadhi-banner-2.jpg";
 import banner3 from "@/assets/varadhi-banner-3.jpg";
-import { Search, Navigation, Sparkles, ImageOff } from "lucide-react";
+import { Sparkles, ImageOff } from "lucide-react";
 
 export const Route = createFileRoute("/varadhi/")({
   component: VaradhiHome,
@@ -144,7 +144,6 @@ function ListingCard({ l, note }: { l: VaradhiListing; note?: string }) {
 
 function VaradhiHome() {
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
-  const [q, setQ] = useState("");
   const navigate = useNavigate();
   const fetchListings = useServerFn(listListings);
 
@@ -187,14 +186,13 @@ function VaradhiHome() {
       .filter((l) => l.lat != null && l.lng != null)
       .map((l) => ({ ...l, km: distanceKm(coords, { lat: l.lat as number, lng: l.lng as number }) }))
       .filter((l) => l.km <= 100)
-      .sort((a, b) => a.km - b.km)
+      .sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at))
       .slice(0, 6);
     setNearby(near);
   }, [coords, recent]);
 
-  const search = () =>
-    navigate({ to: "/varadhi/browse/$category", params: { category: "fresh" }, search: { q: q.trim() } });
-
+  const nearbyIds = new Set(nearby.map((l) => l.id));
+  const others = recent.filter((l) => !nearbyIds.has(l.id));
 
   return (
     <div className="mx-auto max-w-md px-4 pt-5 pb-8">
@@ -213,36 +211,14 @@ function VaradhiHome() {
       {/* Banner carousel */}
       <BannerCarousel />
 
-      {/* Apply as area admin — prominent, top placement */}
-      <Link
-        to="/varadhi/admin-apply"
-        className="mt-3 flex items-center justify-between gap-2 rounded-2xl bg-gradient-to-r from-[#1e3a8a] to-[#0ea5e9] px-4 py-3 text-white shadow-md active:scale-[0.99]"
-      >
-        <span className="min-w-0">
-          <span className="block text-sm font-bold">మీ ప్రాంతానికి అడ్మిన్‌గా దరఖాస్తు చేయండి</span>
-          <span className="block text-[11px] opacity-90">రాష్ట్ర / జిల్లా అడ్మిన్ — ఫోటో & ఆధార్‌తో దరఖాస్తు</span>
-        </span>
-        <span className="shrink-0 rounded-full bg-white/20 px-3 py-1 text-[11px] font-semibold">దరఖాస్తు</span>
-      </Link>
-
-
-      {/* Main search bar */}
-      <div className="mt-4 flex items-center gap-2 rounded-2xl border border-black/10 bg-white px-3 py-2.5 shadow-md">
-        <Search className="h-4 w-4 shrink-0 text-[#1e3a8a]/50" />
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") search(); }}
-          placeholder="ఏమి కావాలి? వెతకండి…"
-          className="min-w-0 flex-1 bg-transparent text-sm text-[#1e3a8a] outline-none placeholder:text-[#1e3a8a]/40"
-        />
-        <button
-          type="button"
-          onClick={search}
-          className="shrink-0 rounded-xl bg-[#f97316] px-3 py-1.5 text-[11px] font-semibold text-white shadow active:scale-95"
+      {/* Small admin apply button */}
+      <div className="mt-3 flex justify-end">
+        <Link
+          to="/varadhi/admin-apply"
+          className="rounded-full bg-[#1e3a8a] px-3 py-1.5 text-[11px] font-semibold text-white shadow active:scale-95"
         >
-          వెతకండి
-        </button>
+          అడ్మిన్‌గా దరఖాస్తు చేయండి
+        </Link>
       </div>
 
       {/* CTA */}
@@ -259,30 +235,7 @@ function VaradhiHome() {
         </div>
       )}
 
-
-
-
-
-      {/* Nearby */}
-      {signedIn && (
-        <div className="mt-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-[#1e3a8a]/80">మీ చుట్టూ 100 కి.మీ.</h2>
-            <button onClick={askLocation} className="flex items-center gap-1 text-[11px] font-semibold text-[#f97316]">
-              <Navigation className="h-3.5 w-3.5" /> లొకేషన్
-            </button>
-          </div>
-          {nearby.length === 0
-            ? <p className="mt-2 text-[11px] text-[#1e3a8a]/60">మీ చుట్టూ అప్‌డేట్‌లు లేవు.</p>
-            : (
-              <div className="mt-3 grid grid-cols-2 gap-3">
-                {nearby.map((l) => <ListingCard key={l.id} l={l} note={`${l.km.toFixed(0)} కి.మీ.`} />)}
-              </div>
-            )}
-        </div>
-      )}
-
-      {/* Recent listings */}
+      {/* Updates: nearby first (newest on top), then the rest */}
       <div className="mt-6">
         <div className="flex items-center gap-1.5">
           <Sparkles className="h-4 w-4 text-[#f97316]" />
@@ -295,10 +248,12 @@ function VaradhiHome() {
         )}
         {signedIn && recent.length > 0 && (
           <div className="mt-3 grid grid-cols-2 gap-3">
-            {recent.map((l) => <ListingCard key={l.id} l={l} />)}
+            {nearby.map((l) => <ListingCard key={l.id} l={l} note={`${l.km.toFixed(0)} కి.మీ.`} />)}
+            {others.map((l) => <ListingCard key={l.id} l={l} />)}
           </div>
         )}
       </div>
+
 
 
 
