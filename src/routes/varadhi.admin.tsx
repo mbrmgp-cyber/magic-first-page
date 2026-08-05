@@ -14,6 +14,7 @@ import {
   getMyVaradhiScope,
 } from "@/lib/varadhi.functions";
 import { AdminRequestsPanel, AdminHierarchyPanel } from "@/components/varadhi/AdminHierarchyPanel";
+import { AdminAuditPanel } from "@/components/varadhi/AdminAuditPanel";
 import { STATES, districtsFor } from "@/lib/ap-locations";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -151,6 +152,7 @@ function VaradhiAdmin() {
       {tab === "points" && isSuper && <PointsPanel />}
       {tab === "requests" && <AdminRequestsPanel isSuper={isSuper} />}
       {tab === "hierarchy" && <AdminHierarchyPanel isSuper={isSuper} />}
+      {tab === "audit" && <AdminAuditPanel />}
 
       {tab === "reg" && (
       <>
