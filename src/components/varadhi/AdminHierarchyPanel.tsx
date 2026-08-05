@@ -72,8 +72,9 @@ export function AdminRequestsPanel({ isSuper }: { isSuper: boolean }) {
           user_id: r.user_id,
           state: r.state,
           level: editLevel,
-          district: editLevel === "district_admin" ? editDistrict : null,
-          parent_admin_id: editLevel === "district_admin" ? (editParent || null) : null,
+          district: editLevel === "state_admin" ? null : editDistrict,
+          mandal: editLevel === "mandal_admin" ? editMandal : null,
+          parent_admin_id: editLevel === "state_admin" ? null : (editParent || null),
         },
       });
       toast.success("అప్‌డేట్ అయ్యింది");
@@ -97,7 +98,7 @@ export function AdminRequestsPanel({ isSuper }: { isSuper: boolean }) {
           action,
           notes: notes[r.id],
           grant_level: r.requested_level,
-          parent_admin_id: r.requested_level === "district_admin" ? (parent[r.id] || null) : null,
+          parent_admin_id: r.requested_level === "state_admin" ? null : (parent[r.id] || null),
         },
       });
       toast.success(action === "approve" ? "ఆమోదించబడింది" : "తిరస్కరించబడింది");
