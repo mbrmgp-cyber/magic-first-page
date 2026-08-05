@@ -122,28 +122,48 @@ function VaradhiAdmin() {
         <Link to="/varadhi" className="text-xs underline text-[#1e3a8a]/70">హోమ్</Link>
       </header>
 
-      <div className="flex gap-2">
-        <Button size="sm" variant={tab === "reg" ? "default" : "outline"} onClick={() => setTab("reg")}>
-          రిజిస్ట్రేషన్లు
-        </Button>
-        {isSuper && (
-          <Button size="sm" variant={tab === "points" ? "default" : "outline"} onClick={() => setTab("points")}>
-            <Coins className="h-4 w-4 mr-1" /> పాయింట్లు
-          </Button>
-        )}
-        {(isSuper || scope?.level === "state_admin") && (
-          <Button size="sm" variant={tab === "requests" ? "default" : "outline"} onClick={() => setTab("requests")}>
-            అడ్మిన్ దరఖాస్తులు
-          </Button>
-        )}
-        <Button size="sm" variant={tab === "hierarchy" ? "default" : "outline"} onClick={() => setTab("hierarchy")}>
-          అడ్మిన్ హైరార్కీ
-        </Button>
-        <Button size="sm" variant={tab === "audit" ? "default" : "outline"} onClick={() => setTab("audit")}>
-          <HistoryIcon className="h-4 w-4 mr-1" /> మార్పుల చరిత్ర
-        </Button>
-
-      </div>
+      {(() => {
+        const items: Array<{ k: typeof tab; label: string }> = [
+          { k: "reg", label: "రిజిస్ట్రేషన్లు" },
+          ...(isSuper ? [{ k: "points" as const, label: "పాయింట్లు" }] : []),
+          ...(isSuper || scope?.level === "state_admin"
+            ? [{ k: "requests" as const, label: "అడ్మిన్ దరఖాస్తులు" }] : []),
+          { k: "hierarchy", label: "అడ్మిన్ హైరార్కీ" },
+          { k: "messages", label: "యూజర్ సందేశాలు" },
+          { k: "audit", label: "మార్పుల చరిత్ర" },
+        ];
+        const current = items.find((i) => i.k === tab) ?? items[0];
+        return (
+          <div className="relative">
+            <Button
+              variant="outline"
+              className="w-full justify-between"
+              onClick={() => setMenuOpen((v) => !v)}
+            >
+              <span className="flex items-center gap-2">
+                <Menu className="h-4 w-4" /> {current.label}
+              </span>
+              <ChevronDown className={`h-4 w-4 transition-transform ${menuOpen ? "rotate-180" : ""}`} />
+            </Button>
+            {menuOpen && (
+              <div className="absolute z-40 mt-1 w-full overflow-hidden rounded-xl border border-black/10 bg-white shadow-lg">
+                {items.map((i) => (
+                  <button
+                    key={i.k}
+                    type="button"
+                    onClick={() => { setTab(i.k); setMenuOpen(false); }}
+                    className={`block w-full px-4 py-2.5 text-left text-sm ${
+                      i.k === tab ? "bg-[#1e3a8a] text-white font-semibold" : "text-[#1e3a8a] hover:bg-[#1e3a8a]/5"
+                    }`}
+                  >
+                    {i.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {scope?.level && scope.level !== "super_admin" && (
         <p className="text-[11px] text-muted-foreground">
@@ -154,7 +174,9 @@ function VaradhiAdmin() {
       {tab === "points" && isSuper && <PointsPanel />}
       {tab === "requests" && <AdminRequestsPanel isSuper={isSuper} />}
       {tab === "hierarchy" && <AdminHierarchyPanel isSuper={isSuper} />}
+      {tab === "messages" && <AdminMessagesPanel />}
       {tab === "audit" && <AdminAuditPanel />}
+
 
       {tab === "reg" && (
       <>
