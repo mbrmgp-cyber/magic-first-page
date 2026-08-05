@@ -2269,6 +2269,48 @@ export type Database = {
         }
         Relationships: []
       }
+      varadhi_admin_messages: {
+        Row: {
+          admin_reply: string | null
+          created_at: string
+          district: string | null
+          id: string
+          mandal: string | null
+          message: string
+          phone: string | null
+          state: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_reply?: string | null
+          created_at?: string
+          district?: string | null
+          id?: string
+          mandal?: string | null
+          message: string
+          phone?: string | null
+          state?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_reply?: string | null
+          created_at?: string
+          district?: string | null
+          id?: string
+          mandal?: string | null
+          message?: string
+          phone?: string | null
+          state?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       varadhi_admin_requests: {
         Row: {
           aadhaar_url: string | null
