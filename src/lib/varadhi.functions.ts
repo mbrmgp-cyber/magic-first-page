@@ -795,9 +795,13 @@ export const adminReviewAdminRequest = createServerFn({ method: "POST" })
     if (!req) throw new Error("దరఖాస్తు కనిపించలేదు");
     if ((req as any).status !== "pending") throw new Error("ఇప్పటికే పరిష్కరించబడింది");
 
+    let grantedLevel: string | null = null;
+    let grantedMandal: string | null = null;
     if (data.action === "approve") {
       const level = data.grant_level ?? (req as any).requested_level;
       const mandal = (data.mandal ?? (req as any).mandal ?? "") || null;
+      grantedLevel = level;
+      grantedMandal = level === "mandal_admin" ? mandal : null;
       if (level !== "state_admin" && !(req as any).district) throw new Error("జిల్లా లేదు");
       if (level === "mandal_admin" && !mandal) throw new Error("మండలం లేదు");
       const { error: seatErr } = await supabaseAdmin.from("varadhi_area_admins").insert({
@@ -819,8 +823,27 @@ export const adminReviewAdminRequest = createServerFn({ method: "POST" })
       reviewed_at: new Date().toISOString(),
     }).eq("id", data.request_id);
     if (error) throw new Error(error.message);
+
+    const { logAdminAudit } = await import("@/lib/varadhi-audit.server");
+    await logAdminAudit({
+      action: data.action === "approve" ? "request_approved" : "request_rejected",
+      actor_user_id: context.userId,
+      request_id: data.request_id,
+      target_user_id: (req as any).user_id,
+      state: (req as any).state,
+      district: (req as any).district,
+      mandal: grantedMandal ?? (req as any).mandal ?? null,
+      before_data: { status: (req as any).status, requested_level: (req as any).requested_level },
+      after_data: {
+        status: data.action === "approve" ? "approved" : "rejected",
+        granted_level: grantedLevel,
+        parent_admin_id: data.parent_admin_id ?? null,
+      },
+      notes: data.notes ?? null,
+    });
     return { ok: true };
   });
+
 
 export const adminListAreaAdmins = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
