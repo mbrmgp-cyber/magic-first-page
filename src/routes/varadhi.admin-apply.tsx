@@ -46,9 +46,10 @@ function AdminApply() {
 
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
-  const [level, setLevel] = useState<"state_admin" | "district_admin">("state_admin");
+  const [level, setLevel] = useState<"state_admin" | "district_admin" | "mandal_admin">("state_admin");
   const [state, setState] = useState("");
   const [district, setDistrict] = useState("");
+  const [mandal, setMandal] = useState("");
   const [message, setMessage] = useState("");
   const [photoUrl, setPhotoUrl] = useState("");
   const [aadhaarUrl, setAadhaarUrl] = useState("");
