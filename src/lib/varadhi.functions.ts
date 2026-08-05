@@ -976,8 +976,19 @@ export const adminAssignMandalAdmin = createServerFn({ method: "POST" })
       assigned_by: context.userId,
     } as any);
     if (error) throw new Error(error.message.includes("duplicate") ? "ఇప్పటికే కేటాయించబడింది" : error.message);
+    const { logAdminAudit } = await import("@/lib/varadhi-audit.server");
+    await logAdminAudit({
+      action: "mandal_admin_assigned",
+      actor_user_id: context.userId,
+      target_user_id: data.user_id,
+      state: data.state,
+      district: data.district,
+      mandal: data.mandal.trim(),
+      after_data: { level: "mandal_admin", parent_admin_id: data.parent_admin_id },
+    });
     return { ok: true };
   });
+
 
 // Mandal suggestions for a district, gathered from live profiles + listings.
 export const adminListMandalOptions = createServerFn({ method: "GET" })
