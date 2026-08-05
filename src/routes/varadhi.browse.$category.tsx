@@ -87,14 +87,15 @@ function BrowsePage() {
   const uniq = (vals: (string | null | undefined)[]) =>
     Array.from(new Set(vals.filter((v): v is string => !!v && v.trim() !== ""))).sort();
 
-  // States/districts come from a static list merged with whatever the data has.
+  // Full India list (28 states + 8 UTs) merged with Telugu names and live data.
   const states = useMemo(
-    () => uniq([...STATES, ...allListings.map((l) => l.state)]),
+    () => uniq([...STATES, ...INDIA_STATES, ...allListings.map((l) => l.state)]),
     [allListings],
   );
   const districts = useMemo(
     () => uniq([
       ...districtsFor(state),
+      ...indiaDistrictsFor(state),
       ...allListings.filter((l) => !state || l.state === state).map((l) => l.district),
     ]),
     [allListings, state],
@@ -102,11 +103,12 @@ function BrowsePage() {
   const mandals = useMemo(
     () => uniq(
       allListings
-        .filter((l) => (!state || l.state === state) && (!district || l.district === district))
+        .filter((l) => (!state || !l.state || l.state === state) && (!district || !l.district || l.district === district))
         .map((l) => l.mandal),
     ),
     [allListings, state, district],
   );
+
 
   const inArea = (l: VaradhiListing) =>
     (!state || l.state === state) && (!district || l.district === district) && (!mandal || l.mandal === mandal);
