@@ -706,15 +706,16 @@ export const getMyVaradhiScope = createServerFn({ method: "GET" })
 export const submitVaradhiAdminRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: {
-    full_name: string; phone?: string; requested_level: "state_admin" | "district_admin";
-    state: string; district?: string; message?: string;
+    full_name: string; phone?: string; requested_level: "state_admin" | "district_admin" | "mandal_admin";
+    state: string; district?: string; mandal?: string; message?: string;
     photo_url?: string; aadhaar_url?: string;
   }) => d)
   .handler(async ({ data, context }) => {
     const name = (data.full_name ?? "").trim();
     if (name.length < 2 || name.length > 100) throw new Error("పేరు సరిగా ఇవ్వండి");
     if (!data.state) throw new Error("రాష్ట్రం ఎంచుకోండి");
-    if (data.requested_level === "district_admin" && !data.district) throw new Error("జిల్లా ఎంచుకోండి");
+    if (data.requested_level !== "state_admin" && !data.district) throw new Error("జిల్లా ఎంచుకోండి");
+    if (data.requested_level === "mandal_admin" && !(data.mandal ?? "").trim()) throw new Error("మండలం ఇవ్వండి");
     if (!(data.photo_url ?? "").trim()) throw new Error("ఫోటో అప్‌లోడ్ చేయండి");
     if (!(data.aadhaar_url ?? "").trim()) throw new Error("ఆధార్ కార్డు అప్‌లోడ్ చేయండి");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -729,11 +730,12 @@ export const submitVaradhiAdminRequest = createServerFn({ method: "POST" })
       email: ((context.claims as any)?.email ?? null),
       requested_level: data.requested_level,
       state: data.state,
-      district: data.requested_level === "district_admin" ? data.district : (data.district ?? null),
+      district: data.district ?? null,
+      mandal: data.requested_level === "mandal_admin" ? (data.mandal ?? "").trim() : ((data.mandal ?? "").trim() || null),
       message: (data.message ?? "").trim().slice(0, 1000) || null,
       photo_url: (data.photo_url ?? "").trim() || null,
       aadhaar_url: (data.aadhaar_url ?? "").trim() || null,
-    });
+    } as any);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
