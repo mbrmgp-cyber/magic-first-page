@@ -1142,3 +1142,35 @@ export const getSubscriptionReceipt = createServerFn({ method: "POST" })
       },
     };
   });
+
+// -------- Admin audit trail (who changed what, and when)
+export const adminListAdminAudit = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { limit?: number } = {}) => d)
+  .handler(async ({ data, context }) => {
+    const scope = await loadAreaScope(context.userId, (context.claims as any)?.email);
+    if (!scope.isSuper && !scope.level) throw new Error("Forbidden");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    let q = supabaseAdmin
+      .from("varadhi_admin_audit").select("*").order("created_at", { ascending: false });
+    if (!scope.isSuper && scope.state) q = q.eq("state", scope.state);
+    const { data: rows, error } = await q.limit(Math.min(data.limit ?? 100, 300));
+    if (error) throw new Error(error.message);
+
+    const list = (rows ?? []) as any[];
+    const ids = Array.from(new Set(list.flatMap((r) => [r.actor_user_id, r.target_user_id]).filter(Boolean)));
+    const names = new Map<string, string>();
+    if (ids.length) {
+      const { data: p } = await supabaseAdmin
+        .from("varadhi_profiles").select("user_id, full_name").in("user_id", ids);
+      for (const x of (p ?? []) as any[]) names.set(x.user_id, x.full_name);
+    }
+    return {
+      entries: list.map((r) => ({
+        ...r,
+        actor_name: names.get(r.actor_user_id) ?? null,
+        target_name: r.target_user_id ? names.get(r.target_user_id) ?? null : null,
+      })),
+    };
+  });
