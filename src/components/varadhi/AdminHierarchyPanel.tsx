@@ -39,16 +39,20 @@ export function AdminRequestsPanel({ isSuper }: { isSuper: boolean }) {
   const [parent, setParent] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
-  const [editLevel, setEditLevel] = useState<"state_admin" | "district_admin">("district_admin");
+  const [editLevel, setEditLevel] = useState<"state_admin" | "district_admin" | "mandal_admin">("district_admin");
   const [editDistrict, setEditDistrict] = useState("");
+  const [editMandal, setEditMandal] = useState("");
   const [editParent, setEditParent] = useState("");
 
   const q = useQuery({ queryKey: ["varadhi-admin-requests", status], queryFn: () => list({ data: { status } }) });
   const areaQ = useQuery({ queryKey: ["varadhi-area-admins"], queryFn: () => areaList() });
   const allAdmins = (areaQ.data?.admins ?? []) as any[];
   const stateAdmins = allAdmins.filter((a: any) => a.level === "state_admin" && a.is_active);
+  const districtAdmins = allAdmins.filter((a: any) => a.level === "district_admin" && a.is_active);
   const stateAdminsFor = (state?: string | null) =>
     stateAdmins.filter((a: any) => norm(a.state) === norm(state));
+  const districtAdminsFor = (state?: string | null, district?: string | null) =>
+    districtAdmins.filter((a: any) => norm(a.state) === norm(state) && norm(a.district) === norm(district));
   const seatFor = (userId: string) => allAdmins.find((a: any) => a.user_id === userId) ?? null;
 
   function startEdit(r: any) {
@@ -56,6 +60,7 @@ export function AdminRequestsPanel({ isSuper }: { isSuper: boolean }) {
     setEditing(r.id);
     setEditLevel((seat?.level ?? r.requested_level ?? "district_admin") as any);
     setEditDistrict(seat?.district ?? r.district ?? "");
+    setEditMandal(seat?.mandal ?? r.mandal ?? "");
     setEditParent(seat?.parent_admin_id ?? "");
   }
 
