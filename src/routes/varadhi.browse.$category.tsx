@@ -36,10 +36,10 @@ type Group =
   | { kind: "group"; id: string; te: string; color: string; Icon: typeof Apple; boxes: Box[] };
 
 const GROUPS: Group[] = [
+  { kind: "single", box: { id: "realestate", te: "ప్లాట్లు & భూములు", color: "#7c3aed", Icon: MapPin } },
   { kind: "group", id: "items", te: "వస్తువులు", color: "#1e3a8a", Icon: Boxes, boxes: ITEM_BOXES },
-  { kind: "single", box: { id: "realestate", te: "ఇంటి స్థలాలు & భూములు", color: "#7c3aed", Icon: MapPin } },
-  { kind: "single", box: { id: "transport", te: "ట్రాన్స్‌పోర్ట్", color: "#0ea5e9", Icon: Truck } },
   { kind: "group", id: "svc", te: "సర్వీసులు", color: "#dc2626", Icon: Wrench, boxes: SERVICE_BOXES },
+  { kind: "single", box: { id: "transport", te: "ట్రాన్స్‌పోర్ట్", color: "#0ea5e9", Icon: Truck } },
 ];
 
 
