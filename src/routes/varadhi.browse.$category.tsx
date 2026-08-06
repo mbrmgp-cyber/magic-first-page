@@ -8,8 +8,9 @@ import { listListings, listProviders, type VaradhiListing, type VaradhiProvider 
 import { ArrowLeft, Search, Apple, Package, Recycle, MapPin, Truck, Wrench, HeartHandshake, Boxes, ChevronDown, ImageOff } from "lucide-react";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import { STATES, districtsFor } from "@/lib/ap-locations";
 import { INDIA_STATES, indiaDistrictsFor } from "@/lib/india-locations";
+import { enState } from "@/lib/state-alias";
+
 import { indiaMandalsFor } from "@/lib/india-mandals";
 
 export const Route = createFileRoute("/varadhi/browse/$category")({
