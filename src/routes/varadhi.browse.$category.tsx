@@ -36,10 +36,10 @@ type Group =
   | { kind: "group"; id: string; te: string; color: string; Icon: typeof Apple; boxes: Box[] };
 
 const GROUPS: Group[] = [
+  { kind: "single", box: { id: "realestate", te: "ప్లాట్లు & భూములు", color: "#7c3aed", Icon: MapPin } },
   { kind: "group", id: "items", te: "వస్తువులు", color: "#1e3a8a", Icon: Boxes, boxes: ITEM_BOXES },
-  { kind: "single", box: { id: "realestate", te: "ఇంటి స్థలాలు & భూములు", color: "#7c3aed", Icon: MapPin } },
-  { kind: "single", box: { id: "transport", te: "ట్రాన్స్‌పోర్ట్", color: "#0ea5e9", Icon: Truck } },
   { kind: "group", id: "svc", te: "సర్వీసులు", color: "#dc2626", Icon: Wrench, boxes: SERVICE_BOXES },
+  { kind: "single", box: { id: "transport", te: "ట్రాన్స్‌పోర్ట్", color: "#0ea5e9", Icon: Truck } },
 ];
 
 
@@ -88,17 +88,19 @@ function BrowsePage() {
 
   const uniq = (vals: (string | null | undefined)[]) =>
     Array.from(new Set(vals.filter((v): v is string => !!v && v.trim() !== ""))).sort();
+  // Keep every dropdown in one language (English dataset names only).
+  const isEn = (v: string) => /^[\x00-\x7F\s]+$/.test(v);
 
   // One canonical list: 28 states + 8 UTs (English names only, no duplicates).
   const states = useMemo(() => [...INDIA_STATES].sort(), []);
-  const districts = useMemo(() => uniq(indiaDistrictsFor(state)), [state]);
+  const districts = useMemo(() => uniq(indiaDistrictsFor(state)).filter(isEn), [state]);
   const mandals = useMemo(
     () => uniq([
       ...indiaMandalsFor(state, district),
       ...allListings
         .filter((l) => (!state || !l.state || enState(l.state) === state) && (!district || !l.district || l.district === district))
         .map((l) => l.mandal),
-    ]),
+    ]).filter(isEn),
     [allListings, state, district],
   );
 
@@ -209,7 +211,7 @@ function BrowsePage() {
         };
         return (
           <div className="mt-3 space-y-2">
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-4 gap-2">
               {GROUPS.map((g) => {
                 if (g.kind === "single") return boxBtn(g.box);
                 const isOpen = openGroup === g.id;
