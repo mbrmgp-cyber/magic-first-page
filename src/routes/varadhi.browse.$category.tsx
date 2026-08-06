@@ -178,19 +178,12 @@ function BrowsePage() {
           <option value="">జిల్లా</option>
           {districts.map((d) => <option key={d} value={d}>{d}</option>)}
         </select>
-        <div className="min-w-0 flex-1">
-          <input
-            list="varadhi-mandals"
-            value={mandal}
-            onChange={(e) => setMandal(e.target.value)}
-            placeholder="మండలం"
-            className={selectCls}
-          />
-          <datalist id="varadhi-mandals">
-            {mandals.map((m) => <option key={m} value={m} />)}
-          </datalist>
-        </div>
+        <select className={selectCls} value={mandal} onChange={(e) => setMandal(e.target.value)}>
+          <option value="">మండలం</option>
+          {mandals.map((m) => <option key={m} value={m}>{m}</option>)}
+        </select>
       </div>
+
 
       {(state || district || mandal) && (
         <button
