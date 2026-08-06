@@ -88,24 +88,14 @@ function BrowsePage() {
   const uniq = (vals: (string | null | undefined)[]) =>
     Array.from(new Set(vals.filter((v): v is string => !!v && v.trim() !== ""))).sort();
 
-  // Full India list (28 states + 8 UTs) merged with Telugu names and live data.
-  const states = useMemo(
-    () => uniq([...STATES, ...INDIA_STATES, ...allListings.map((l) => l.state)]),
-    [allListings],
-  );
-  const districts = useMemo(
-    () => uniq([
-      ...districtsFor(state),
-      ...indiaDistrictsFor(state),
-      ...allListings.filter((l) => !state || l.state === state).map((l) => l.district),
-    ]),
-    [allListings, state],
-  );
+  // One canonical list: 28 states + 8 UTs (English names only, no duplicates).
+  const states = useMemo(() => [...INDIA_STATES].sort(), []);
+  const districts = useMemo(() => uniq(indiaDistrictsFor(state)), [state]);
   const mandals = useMemo(
     () => uniq([
       ...indiaMandalsFor(state, district),
       ...allListings
-        .filter((l) => (!state || !l.state || l.state === state) && (!district || !l.district || l.district === district))
+        .filter((l) => (!state || !l.state || enState(l.state) === state) && (!district || !l.district || l.district === district))
         .map((l) => l.mandal),
     ]),
     [allListings, state, district],
@@ -113,11 +103,12 @@ function BrowsePage() {
 
 
   const inArea = (l: VaradhiListing) =>
-    (!state || l.state === state) && (!district || l.district === district) && (!mandal || l.mandal === mandal);
+    (!state || enState(l.state) === state) && (!district || l.district === district) && (!mandal || l.mandal === mandal);
   const providerInArea = (p: VaradhiProvider) => {
     const hay = `${p.city ?? ""} ${p.service_areas ?? ""}`.toLowerCase();
     return [state, district, mandal].every((v) => !v || hay.includes(v.toLowerCase()));
   };
+
 
   const needle = term.trim().toLowerCase();
   const areaListings = allListings.filter(inArea);
