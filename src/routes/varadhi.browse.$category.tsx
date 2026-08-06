@@ -140,8 +140,6 @@ function BrowsePage() {
     .filter((p) =>
       !needle || [p.title, p.description, p.sub_type, p.city].some((v) => (v ?? "").toLowerCase().includes(needle)));
 
-  const selectCls =
-    "min-w-0 flex-1 rounded-xl border border-black/10 bg-white px-2 py-1.5 text-[11px] text-[#1e3a8a] outline-none";
 
   return (
     <div className="mx-auto max-w-md px-4 pt-4">
