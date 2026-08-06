@@ -10,6 +10,7 @@ import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { STATES, districtsFor } from "@/lib/ap-locations";
 import { INDIA_STATES, indiaDistrictsFor } from "@/lib/india-locations";
+import { indiaMandalsFor } from "@/lib/india-mandals";
 
 export const Route = createFileRoute("/varadhi/browse/$category")({
   validateSearch: zodValidator(z.object({ q: fallback(z.string(), "").default("") })),
