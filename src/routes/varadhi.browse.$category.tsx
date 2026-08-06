@@ -10,6 +10,7 @@ import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { STATES, districtsFor } from "@/lib/ap-locations";
 import { INDIA_STATES, indiaDistrictsFor } from "@/lib/india-locations";
+import { indiaMandalsFor } from "@/lib/india-mandals";
 
 export const Route = createFileRoute("/varadhi/browse/$category")({
   validateSearch: zodValidator(z.object({ q: fallback(z.string(), "").default("") })),
@@ -101,11 +102,12 @@ function BrowsePage() {
     [allListings, state],
   );
   const mandals = useMemo(
-    () => uniq(
-      allListings
+    () => uniq([
+      ...indiaMandalsFor(state, district),
+      ...allListings
         .filter((l) => (!state || !l.state || l.state === state) && (!district || !l.district || l.district === district))
         .map((l) => l.mandal),
-    ),
+    ]),
     [allListings, state, district],
   );
 
@@ -176,19 +178,12 @@ function BrowsePage() {
           <option value="">జిల్లా</option>
           {districts.map((d) => <option key={d} value={d}>{d}</option>)}
         </select>
-        <div className="min-w-0 flex-1">
-          <input
-            list="varadhi-mandals"
-            value={mandal}
-            onChange={(e) => setMandal(e.target.value)}
-            placeholder="మండలం"
-            className={selectCls}
-          />
-          <datalist id="varadhi-mandals">
-            {mandals.map((m) => <option key={m} value={m} />)}
-          </datalist>
-        </div>
+        <select className={selectCls} value={mandal} onChange={(e) => setMandal(e.target.value)}>
+          <option value="">మండలం</option>
+          {mandals.map((m) => <option key={m} value={m}>{m}</option>)}
+        </select>
       </div>
+
 
       {(state || district || mandal) && (
         <button
