@@ -88,17 +88,19 @@ function BrowsePage() {
 
   const uniq = (vals: (string | null | undefined)[]) =>
     Array.from(new Set(vals.filter((v): v is string => !!v && v.trim() !== ""))).sort();
+  // Keep every dropdown in one language (English dataset names only).
+  const isEn = (v: string) => /^[\x00-\x7F\s]+$/.test(v);
 
   // One canonical list: 28 states + 8 UTs (English names only, no duplicates).
   const states = useMemo(() => [...INDIA_STATES].sort(), []);
-  const districts = useMemo(() => uniq(indiaDistrictsFor(state)), [state]);
+  const districts = useMemo(() => uniq(indiaDistrictsFor(state)).filter(isEn), [state]);
   const mandals = useMemo(
     () => uniq([
       ...indiaMandalsFor(state, district),
       ...allListings
         .filter((l) => (!state || !l.state || enState(l.state) === state) && (!district || !l.district || l.district === district))
         .map((l) => l.mandal),
-    ]),
+    ]).filter(isEn),
     [allListings, state, district],
   );
 
