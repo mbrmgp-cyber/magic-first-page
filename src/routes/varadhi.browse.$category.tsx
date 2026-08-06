@@ -101,11 +101,12 @@ function BrowsePage() {
     [allListings, state],
   );
   const mandals = useMemo(
-    () => uniq(
-      allListings
+    () => uniq([
+      ...indiaMandalsFor(state, district),
+      ...allListings
         .filter((l) => (!state || !l.state || l.state === state) && (!district || !l.district || l.district === district))
         .map((l) => l.mandal),
-    ),
+    ]),
     [allListings, state, district],
   );
 
