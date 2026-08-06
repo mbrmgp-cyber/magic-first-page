@@ -12,6 +12,7 @@ import { INDIA_STATES, indiaDistrictsFor } from "@/lib/india-locations";
 import { enState } from "@/lib/state-alias";
 
 import { indiaMandalsFor } from "@/lib/india-mandals";
+import { SearchSelect } from "@/components/varadhi/SearchSelect";
 
 export const Route = createFileRoute("/varadhi/browse/$category")({
   validateSearch: zodValidator(z.object({ q: fallback(z.string(), "").default("") })),
@@ -139,8 +140,6 @@ function BrowsePage() {
     .filter((p) =>
       !needle || [p.title, p.description, p.sub_type, p.city].some((v) => (v ?? "").toLowerCase().includes(needle)));
 
-  const selectCls =
-    "min-w-0 flex-1 rounded-xl border border-black/10 bg-white px-2 py-1.5 text-[11px] text-[#1e3a8a] outline-none";
 
   return (
     <div className="mx-auto max-w-md px-4 pt-4">
@@ -162,20 +161,26 @@ function BrowsePage() {
         )}
       </div>
 
-      {/* Area filters */}
+      {/* Area filters — type to search */}
       <div className="mt-2 flex gap-2">
-        <select className={selectCls} value={state} onChange={(e) => { setState(e.target.value); setDistrict(""); setMandal(""); }}>
-          <option value="">రాష్ట్రం</option>
-          {states.map((s) => <option key={s} value={s}>{s}</option>)}
-        </select>
-        <select className={selectCls} value={district} onChange={(e) => { setDistrict(e.target.value); setMandal(""); }}>
-          <option value="">జిల్లా</option>
-          {districts.map((d) => <option key={d} value={d}>{d}</option>)}
-        </select>
-        <select className={selectCls} value={mandal} onChange={(e) => setMandal(e.target.value)}>
-          <option value="">మండలం</option>
-          {mandals.map((m) => <option key={m} value={m}>{m}</option>)}
-        </select>
+        <SearchSelect
+          value={state}
+          options={states}
+          placeholder="రాష్ట్రం"
+          onChange={(v) => { setState(v); setDistrict(""); setMandal(""); }}
+        />
+        <SearchSelect
+          value={district}
+          options={districts}
+          placeholder="జిల్లా"
+          onChange={(v) => { setDistrict(v); setMandal(""); }}
+        />
+        <SearchSelect
+          value={mandal}
+          options={mandals}
+          placeholder="మండలం"
+          onChange={setMandal}
+        />
       </div>
 
 
