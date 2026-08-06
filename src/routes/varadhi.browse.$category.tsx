@@ -211,7 +211,7 @@ function BrowsePage() {
         };
         return (
           <div className="mt-3 space-y-2">
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-4 gap-2">
               {GROUPS.map((g) => {
                 if (g.kind === "single") return boxBtn(g.box);
                 const isOpen = openGroup === g.id;
