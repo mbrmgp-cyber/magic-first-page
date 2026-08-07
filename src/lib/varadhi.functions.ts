@@ -51,7 +51,7 @@ export const sendVaradhiLoginLink = createServerFn({ method: "POST" })
       import("react-email"),
       import("@/lib/email-templates/magic-link"),
     ]);
-    const siteName = "Varadhi";
+    const siteName = "VAARADHI APP";
     const note = mode === "otp"
       ? `Your one-time code / OTP: ${emailOtp}\nమీ OTP కోడ్: ${emailOtp}`
       : undefined;
@@ -66,7 +66,7 @@ export const sendVaradhiLoginLink = createServerFn({ method: "POST" })
         to: email,
         from: `${siteName} <noreply@notify.mbrplatform.com>`,
         sender_domain: "notify.mbrplatform.com",
-        subject: mode === "otp" ? `Varadhi — Login code ${emailOtp}` : "Varadhi — Login link",
+        subject: mode === "otp" ? `VAARADHI APP — Login code ${emailOtp}` : "VAARADHI APP — Login link",
         html,
         text,
         purpose: "transactional",
