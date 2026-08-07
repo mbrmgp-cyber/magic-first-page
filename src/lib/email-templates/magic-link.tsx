@@ -1,3 +1,22 @@
+import * as React from 'react'
+
+import {
+  Body,
+  Button,
+  Container,
+  Head,
+  Heading,
+  Html,
+  Preview,
+  Text,
+} from '@react-email/components'
+
+interface MagicLinkEmailProps {
+  siteName: string
+  confirmationUrl: string
+  note?: string
+}
+
 export const MagicLinkEmail = ({
   siteName,
   confirmationUrl,
@@ -40,3 +59,34 @@ export const MagicLinkEmail = ({
   </Html>
   )
 }
+
+export default MagicLinkEmail
+
+const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
+const container = { maxWidth: '560px', margin: '0 auto', padding: '28px 26px', borderTop: '6px solid #f97316' }
+const brand = { fontSize: '18px', fontWeight: 'bold' as const, color: '#9a3412', margin: '0 0 14px', letterSpacing: '1px' }
+const h1 = {
+  fontSize: '24px',
+  fontWeight: 'bold' as const,
+  color: '#111827',
+  margin: '0 0 20px',
+}
+const text = {
+  fontSize: '14px',
+  color: '#55575d',
+  lineHeight: '1.5',
+  margin: '0 0 25px',
+}
+const button = {
+  backgroundColor: '#f97316',
+  color: '#ffffff',
+  fontSize: '14px',
+  borderRadius: '8px',
+  padding: '12px 20px',
+  textDecoration: 'none',
+}
+const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
+const hidden = { display: 'none', overflow: 'hidden', lineHeight: '1px', opacity: 0, maxHeight: 0, maxWidth: 0, fontSize: '1px', color: '#ffffff' as const }
+const sentAtStyle = { fontSize: '11px', color: '#b0b0b0', margin: '18px 0 0' }
+const refStyle = { fontSize: '10px', color: '#cccccc' }
+const noteStyle = { fontSize: '14px', color: '#1f2937', lineHeight: '1.5', margin: '0 0 18px', padding: '10px 12px', backgroundColor: '#fff7ed', borderLeft: '3px solid #f97316', borderRadius: '4px' }
