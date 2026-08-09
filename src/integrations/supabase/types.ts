@@ -2811,6 +2811,30 @@ export type Database = {
         }
         Relationships: []
       }
+      varadhi_site_settings: {
+        Row: {
+          id: number
+          ticker_en: string
+          ticker_te: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          id?: number
+          ticker_en?: string
+          ticker_te?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          id?: number
+          ticker_en?: string
+          ticker_te?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       varadhi_subscriptions: {
         Row: {
           amount: number

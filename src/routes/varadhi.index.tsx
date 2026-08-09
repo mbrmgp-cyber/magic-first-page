@@ -5,7 +5,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { listListings, type VaradhiListing } from "@/lib/varadhi.functions";
+import { listListings, getVaradhiTicker, type VaradhiListing } from "@/lib/varadhi.functions";
+import { useI18n, bi } from "@/lib/i18n";
+import { VARADHI_DEFAULT_TICKER } from "@/lib/varadhi-ticker-defaults";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import varadhiLogo from "@/assets/varadhi-logo.jpg.asset.json";
 import banner1 from "@/assets/varadhi-banner-1.jpg";
@@ -145,6 +147,17 @@ function ListingCard({ l, note }: { l: VaradhiListing; note?: string }) {
 function VaradhiHome() {
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const navigate = useNavigate();
+  const { lang } = useI18n();
+  const loadTicker = useServerFn(getVaradhiTicker);
+  const [ticker, setTicker] = useState(VARADHI_DEFAULT_TICKER);
+  const tickerText = lang === "te" ? ticker.te : ticker.en;
+
+  useEffect(() => {
+    loadTicker()
+      .then((r) => setTicker({ te: r.ticker_te, en: r.ticker_en }))
+      .catch(() => undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const fetchListings = useServerFn(listListings);
 
   const [recent, setRecent] = useState<VaradhiListing[]>([]);
@@ -214,17 +227,19 @@ function VaradhiHome() {
       {/* Running disclaimer ticker + small admin apply button */}
       <div className="mt-3 flex items-center gap-2">
         <div className="relative min-w-0 flex-1 overflow-hidden rounded-full bg-[#fff7ed] px-2 py-1.5 ring-1 ring-[#f97316]/25">
-          <div className="varadhi-marquee whitespace-nowrap text-[11px] font-semibold text-[#9a3412]">
-            వారధి కేవలం సమాచార వేదిక. వినియోగదారుల మధ్య జరిగే డబ్బు లావాదేవీలు, వస్తువుల నాణ్యత లేదా ఒప్పందాలకు వారధి బాధ్యత వహించదు
+          <div className="varadhi-marquee whitespace-nowrap text-[11px] font-semibold text-[#9a3412]" data-notranslit>
+            {tickerText}
           </div>
         </div>
         <Link
           to="/varadhi/admin-apply"
+          data-notranslit
           className="shrink-0 rounded-full bg-[#1e3a8a] px-3 py-1.5 text-[11px] font-semibold text-white shadow active:scale-95"
         >
-          అడ్మిన్‌గా దరఖాస్తు చేయండి
+          {bi("అడ్మిన్‌గా దరఖాస్తు చేయండి", "Apply as Admin", lang)}
         </Link>
       </div>
+
 
 
       {/* CTA */}

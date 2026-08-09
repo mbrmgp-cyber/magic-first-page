@@ -1253,3 +1253,36 @@ export const adminReplyVaradhiMessage = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
+
+// -------- Home page ticker (live text) --------
+export const getVaradhiTicker = createServerFn({ method: "GET" }).handler(async () => {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { VARADHI_DEFAULT_TICKER } = await import("@/lib/varadhi-ticker-defaults");
+  const { data } = await supabaseAdmin
+    .from("varadhi_site_settings")
+    .select("ticker_te, ticker_en")
+    .eq("id", 1)
+    .maybeSingle();
+  return {
+    ticker_te: (data as any)?.ticker_te || VARADHI_DEFAULT_TICKER.te,
+    ticker_en: (data as any)?.ticker_en || VARADHI_DEFAULT_TICKER.en,
+  };
+});
+
+export const adminUpdateVaradhiTicker = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { ticker_te: string; ticker_en: string }) => d)
+  .handler(async ({ data, context }) => {
+    await assertVaradhiAdmin(context.supabase, context.userId, (context.claims as any)?.email);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { VARADHI_DEFAULT_TICKER } = await import("@/lib/varadhi-ticker-defaults");
+    const { error } = await supabaseAdmin.from("varadhi_site_settings").upsert({
+      id: 1,
+      ticker_te: data.ticker_te.trim().slice(0, 500) || VARADHI_DEFAULT_TICKER.te,
+      ticker_en: data.ticker_en.trim().slice(0, 500) || VARADHI_DEFAULT_TICKER.en,
+      updated_by: context.userId,
+      updated_at: new Date().toISOString(),
+    } as any);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
