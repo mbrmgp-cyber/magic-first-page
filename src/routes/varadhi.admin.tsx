@@ -137,7 +137,10 @@ function VaradhiAdmin() {
     <div className="mx-auto max-w-2xl px-4 pt-4 space-y-4">
       <header className="flex items-center justify-between gap-2">
         <h1 className="text-xl font-bold text-[#1e3a8a]">వారధి అడ్మిన్ ప్యానెల్</h1>
-        <Link to="/varadhi" className="text-xs underline text-[#1e3a8a]/70">హోమ్</Link>
+        <div className="flex items-center gap-2">
+          <LanguageToggle className="!border-[#1e3a8a]/25 !bg-white !text-[#1e3a8a]" />
+          <Link to="/varadhi" className="text-xs underline text-[#1e3a8a]/70">హోమ్</Link>
+        </div>
       </header>
 
       {(() => {
