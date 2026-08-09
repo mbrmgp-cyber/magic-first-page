@@ -1,4 +1,5 @@
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { useI18n, bi } from "@/lib/i18n";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -9,6 +10,8 @@ import {
   adminListVaradhiProfiles,
   adminReviewVaradhiProfile,
   adminGetPointSettings,
+  getVaradhiTicker,
+  adminUpdateVaradhiTicker,
   adminUpdatePointSettings,
   adminPointsOverview,
   adminUserPointHistory,
@@ -47,6 +50,7 @@ export const Route = createFileRoute("/varadhi/admin")({
 function VaradhiAdmin() {
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const { lang } = useI18n();
   const checkAdmin = useServerFn(amIVaradhiAdmin);
   const fetchProfiles = useServerFn(adminListVaradhiProfiles);
   const review = useServerFn(adminReviewVaradhiProfile);
@@ -68,7 +72,7 @@ function VaradhiAdmin() {
   const scope = scopeQ.data;
   const isAdmin = isSuper || !!scope?.level;
 
-  type AdminTab = "reg" | "points" | "requests" | "hierarchy" | "messages" | "audit";
+  type AdminTab = "reg" | "points" | "ticker" | "requests" | "hierarchy" | "messages" | "audit";
   const [tab, setTab] = useState<AdminTab>("reg");
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -148,6 +152,7 @@ function VaradhiAdmin() {
         const items: Array<{ k: AdminTab; label: string }> = [
           { k: "reg", label: "రిజిస్ట్రేషన్లు" },
           ...(isSuper ? [{ k: "points" as const, label: "పాయింట్లు" }] : []),
+          ...(isSuper ? [{ k: "ticker" as const, label: bi("లైవ్ టెక్స్ట్", "Live Text", lang) }] : []),
           ...(isSuper || scope?.level === "state_admin"
             ? [{ k: "requests" as const, label: "అడ్మిన్ దరఖాస్తులు" }] : []),
           { k: "hierarchy", label: "అడ్మిన్ హైరార్కీ" },
@@ -194,6 +199,7 @@ function VaradhiAdmin() {
       )}
 
       {tab === "points" && isSuper && <PointsPanel />}
+      {tab === "ticker" && isSuper && <TickerPanel />}
       {tab === "requests" && <AdminRequestsPanel isSuper={isSuper} />}
       {tab === "hierarchy" && <AdminHierarchyPanel isSuper={isSuper} />}
       {tab === "messages" && <AdminMessagesPanel />}
@@ -527,3 +533,51 @@ function UserPointHistory({ userId }: { userId: string }) {
 }
 
 
+
+function TickerPanel() {
+  const { lang } = useI18n();
+  const load = useServerFn(getVaradhiTicker);
+  const save = useServerFn(adminUpdateVaradhiTicker);
+  const [te, setTe] = useState("");
+  const [en, setEn] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const q = useQuery({ queryKey: ["varadhi-ticker"], queryFn: () => load() });
+  useEffect(() => {
+    if (q.data) { setTe(q.data.ticker_te); setEn(q.data.ticker_en); }
+  }, [q.data]);
+
+  async function submit() {
+    setBusy(true);
+    try {
+      await save({ data: { ticker_te: te, ticker_en: en } });
+      toast.success(bi("సేవ్ అయ్యింది", "Saved", lang));
+    } catch (e: any) {
+      toast.error(e?.message ?? bi("విఫలమైంది", "Failed", lang));
+    } finally { setBusy(false); }
+  }
+
+  return (
+    <Card className="p-4 space-y-3">
+      <h2 className="text-sm font-bold text-[#1e3a8a]" data-notranslit>
+        {bi("హోమ్ పేజీ లైవ్ టెక్స్ట్", "Home page live text", lang)}
+      </h2>
+      <div className="space-y-1">
+        <label className="text-xs font-medium text-[#1e3a8a]/80" data-notranslit>తెలుగు</label>
+        <Textarea value={te} onChange={(e) => setTe(e.target.value)} rows={3} maxLength={500} />
+      </div>
+      <div className="space-y-1">
+        <label className="text-xs font-medium text-[#1e3a8a]/80" data-notranslit>English</label>
+        <Textarea value={en} onChange={(e) => setEn(e.target.value)} rows={3} maxLength={500} />
+      </div>
+      <div className="overflow-hidden rounded-full bg-[#fff7ed] px-2 py-1.5 ring-1 ring-[#f97316]/25">
+        <div className="varadhi-marquee whitespace-nowrap text-[11px] font-semibold text-[#9a3412]" data-notranslit>
+          {lang === "te" ? te : en}
+        </div>
+      </div>
+      <Button className="w-full" disabled={busy} onClick={submit} data-notranslit>
+        {bi("సేవ్ చేయండి", "Save", lang)}
+      </Button>
+    </Card>
+  );
+}
