@@ -1255,23 +1255,17 @@ export const adminReplyVaradhiMessage = createServerFn({ method: "POST" })
   });
 
 // -------- Home page ticker (live text) --------
-const DEFAULT_TICKER = {
-  ticker_te:
-    "వారధి కేవలం సమాచార వేదిక. వినియోగదారుల మధ్య జరిగే డబ్బు లావాదేవీలు, వస్తువుల నాణ్యత లేదా ఒప్పందాలకు వారధి బాధ్యత వహించదు",
-  ticker_en:
-    "Vaaradhi is only an information platform. Vaaradhi is not responsible for money transactions, product quality or agreements between users.",
-};
-
 export const getVaradhiTicker = createServerFn({ method: "GET" }).handler(async () => {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { VARADHI_DEFAULT_TICKER } = await import("@/lib/varadhi-ticker-defaults");
   const { data } = await supabaseAdmin
     .from("varadhi_site_settings")
     .select("ticker_te, ticker_en")
     .eq("id", 1)
     .maybeSingle();
   return {
-    ticker_te: (data as any)?.ticker_te || DEFAULT_TICKER.ticker_te,
-    ticker_en: (data as any)?.ticker_en || DEFAULT_TICKER.ticker_en,
+    ticker_te: (data as any)?.ticker_te || VARADHI_DEFAULT_TICKER.te,
+    ticker_en: (data as any)?.ticker_en || VARADHI_DEFAULT_TICKER.en,
   };
 });
 
@@ -1281,10 +1275,11 @@ export const adminUpdateVaradhiTicker = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertVaradhiAdmin(context.supabase, context.userId, (context.claims as any)?.email);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { VARADHI_DEFAULT_TICKER } = await import("@/lib/varadhi-ticker-defaults");
     const { error } = await supabaseAdmin.from("varadhi_site_settings").upsert({
       id: 1,
-      ticker_te: data.ticker_te.trim().slice(0, 500) || DEFAULT_TICKER.ticker_te,
-      ticker_en: data.ticker_en.trim().slice(0, 500) || DEFAULT_TICKER.ticker_en,
+      ticker_te: data.ticker_te.trim().slice(0, 500) || VARADHI_DEFAULT_TICKER.te,
+      ticker_en: data.ticker_en.trim().slice(0, 500) || VARADHI_DEFAULT_TICKER.en,
       updated_by: context.userId,
       updated_at: new Date().toISOString(),
     } as any);
