@@ -148,7 +148,14 @@ export const adminCreatePartner = createServerFn({ method: "POST" })
     const { assertVaradhiAdminClient } = await import("@/lib/varadhi-partner.server");
     const admin = await assertVaradhiAdminClient(context.userId, (context.claims as any)?.email);
     const email = (data.email ?? "").trim().toLowerCase();
-    if (!email && !data.user_id) throw new Error("Select a user or enter an email");
+    if (!data.user_id) throw new Error("Select an appointed admin first");
+    const { data: seat } = await admin
+      .from("varadhi_area_admins")
+      .select("id")
+      .eq("user_id", data.user_id)
+      .eq("is_active", true)
+      .maybeSingle();
+    if (!seat) throw new Error("Only appointed area admins can be made partners/in-charges");
     if (!data.state?.trim()) throw new Error("State required");
     if (data.level !== "state" && !data.district?.trim()) throw new Error("District required");
     if (data.level === "mandal" && !data.mandal?.trim()) throw new Error("Mandal required");
@@ -263,24 +270,66 @@ export const adminUpdatePayoutStatus = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-// -------- Admin: pick an existing registered user as partner
+// -------- Admin: only already-appointed area admins can become partners/in-charges
 export const adminSearchPartnerCandidates = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { q?: string; state?: string; district?: string } = {}) => d)
   .handler(async ({ data, context }) => {
     const { assertVaradhiAdminClient } = await import("@/lib/varadhi-partner.server");
     const admin = await assertVaradhiAdminClient(context.userId, (context.claims as any)?.email);
-    let q = admin
+
+    let sq = admin
+      .from("varadhi_area_admins")
+      .select("user_id, level, state, district, mandal")
+      .eq("is_active", true)
+      .order("created_at", { ascending: false });
+    if (data.state) sq = sq.eq("state", data.state);
+    if (data.district) sq = sq.eq("district", data.district);
+    const { data: seats, error } = await sq.limit(300);
+    if (error) throw new Error(error.message);
+
+    const ids = [...new Set((seats ?? []).map((s: any) => s.user_id))];
+    if (!ids.length) return { users: [] };
+
+    // exclude users who are already partners
+    const { data: existing } = await admin
+      .from("varadhi_partners")
+      .select("user_id")
+      .in("user_id", ids);
+    const taken = new Set((existing ?? []).map((p: any) => p.user_id));
+
+    const { data: profiles } = await admin
       .from("varadhi_profiles")
       .select("user_id, full_name, phone, state, district, mandal, city")
-      .order("created_at", { ascending: false });
-    if (data.state) q = q.eq("state", data.state);
-    if (data.district) q = q.eq("district", data.district);
-    if (data.q) q = q.or(`full_name.ilike.%${data.q}%,phone.ilike.%${data.q}%`);
-    const { data: rows, error } = await q.limit(50);
-    if (error) throw new Error(error.message);
-    return { users: rows ?? [] };
+      .in("user_id", ids);
+    const byUser = new Map((profiles ?? []).map((p: any) => [p.user_id, p]));
+
+    const term = (data.q ?? "").trim().toLowerCase();
+    const users = (seats ?? [])
+      .filter((s: any) => !taken.has(s.user_id))
+      .map((s: any) => {
+        const p: any = byUser.get(s.user_id) ?? {};
+        return {
+          user_id: s.user_id,
+          full_name: p.full_name ?? null,
+          phone: p.phone ?? null,
+          city: p.city ?? null,
+          state: s.state ?? p.state ?? null,
+          district: s.district ?? p.district ?? null,
+          mandal: s.mandal ?? p.mandal ?? null,
+          admin_level: s.level,
+        };
+      })
+      .filter((u) =>
+        !term ||
+        (u.full_name ?? "").toLowerCase().includes(term) ||
+        (u.phone ?? "").toLowerCase().includes(term),
+      )
+      .slice(0, 50);
+
+    return { users };
   });
+
 
 // -------- Area admin's own dashboard counts
 export const getMyAreaAdminStats = createServerFn({ method: "GET" })
