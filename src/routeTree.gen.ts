@@ -20,6 +20,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as VaradhiIndexRouteImport } from './routes/varadhi.index'
 import { Route as VaradhiSubscriptionRouteImport } from './routes/varadhi.subscription'
 import { Route as VaradhiRewardsRouteImport } from './routes/varadhi.rewards'
+import { Route as VaradhiPartnerRouteImport } from './routes/varadhi.partner'
 import { Route as VaradhiOnboardRouteImport } from './routes/varadhi.onboard'
 import { Route as VaradhiDashboardRouteImport } from './routes/varadhi.dashboard'
 import { Route as VaradhiAuthRouteImport } from './routes/varadhi.auth'
@@ -117,6 +118,11 @@ const VaradhiSubscriptionRoute = VaradhiSubscriptionRouteImport.update({
 const VaradhiRewardsRoute = VaradhiRewardsRouteImport.update({
   id: '/rewards',
   path: '/rewards',
+  getParentRoute: () => VaradhiRoute,
+} as any)
+const VaradhiPartnerRoute = VaradhiPartnerRouteImport.update({
+  id: '/partner',
+  path: '/partner',
   getParentRoute: () => VaradhiRoute,
 } as any)
 const VaradhiOnboardRoute = VaradhiOnboardRouteImport.update({
@@ -379,6 +385,7 @@ export interface FileRoutesByFullPath {
   '/varadhi/auth': typeof VaradhiAuthRoute
   '/varadhi/dashboard': typeof VaradhiDashboardRoute
   '/varadhi/onboard': typeof VaradhiOnboardRoute
+  '/varadhi/partner': typeof VaradhiPartnerRoute
   '/varadhi/rewards': typeof VaradhiRewardsRoute
   '/varadhi/subscription': typeof VaradhiSubscriptionRoute
   '/varadhi/': typeof VaradhiIndexRoute
@@ -434,6 +441,7 @@ export interface FileRoutesByTo {
   '/varadhi/auth': typeof VaradhiAuthRoute
   '/varadhi/dashboard': typeof VaradhiDashboardRoute
   '/varadhi/onboard': typeof VaradhiOnboardRoute
+  '/varadhi/partner': typeof VaradhiPartnerRoute
   '/varadhi/rewards': typeof VaradhiRewardsRoute
   '/varadhi/subscription': typeof VaradhiSubscriptionRoute
   '/varadhi': typeof VaradhiIndexRoute
@@ -492,6 +500,7 @@ export interface FileRoutesById {
   '/varadhi/auth': typeof VaradhiAuthRoute
   '/varadhi/dashboard': typeof VaradhiDashboardRoute
   '/varadhi/onboard': typeof VaradhiOnboardRoute
+  '/varadhi/partner': typeof VaradhiPartnerRoute
   '/varadhi/rewards': typeof VaradhiRewardsRoute
   '/varadhi/subscription': typeof VaradhiSubscriptionRoute
   '/varadhi/': typeof VaradhiIndexRoute
@@ -550,6 +559,7 @@ export interface FileRouteTypes {
     | '/varadhi/auth'
     | '/varadhi/dashboard'
     | '/varadhi/onboard'
+    | '/varadhi/partner'
     | '/varadhi/rewards'
     | '/varadhi/subscription'
     | '/varadhi/'
@@ -605,6 +615,7 @@ export interface FileRouteTypes {
     | '/varadhi/auth'
     | '/varadhi/dashboard'
     | '/varadhi/onboard'
+    | '/varadhi/partner'
     | '/varadhi/rewards'
     | '/varadhi/subscription'
     | '/varadhi'
@@ -662,6 +673,7 @@ export interface FileRouteTypes {
     | '/varadhi/auth'
     | '/varadhi/dashboard'
     | '/varadhi/onboard'
+    | '/varadhi/partner'
     | '/varadhi/rewards'
     | '/varadhi/subscription'
     | '/varadhi/'
@@ -796,6 +808,13 @@ declare module '@tanstack/react-router' {
       path: '/rewards'
       fullPath: '/varadhi/rewards'
       preLoaderRoute: typeof VaradhiRewardsRouteImport
+      parentRoute: typeof VaradhiRoute
+    }
+    '/varadhi/partner': {
+      id: '/varadhi/partner'
+      path: '/partner'
+      fullPath: '/varadhi/partner'
+      preLoaderRoute: typeof VaradhiPartnerRouteImport
       parentRoute: typeof VaradhiRoute
     }
     '/varadhi/onboard': {
@@ -1182,6 +1201,7 @@ interface VaradhiRouteChildren {
   VaradhiAuthRoute: typeof VaradhiAuthRoute
   VaradhiDashboardRoute: typeof VaradhiDashboardRoute
   VaradhiOnboardRoute: typeof VaradhiOnboardRoute
+  VaradhiPartnerRoute: typeof VaradhiPartnerRoute
   VaradhiRewardsRoute: typeof VaradhiRewardsRoute
   VaradhiSubscriptionRoute: typeof VaradhiSubscriptionRoute
   VaradhiIndexRoute: typeof VaradhiIndexRoute
@@ -1196,6 +1216,7 @@ const VaradhiRouteChildren: VaradhiRouteChildren = {
   VaradhiAuthRoute: VaradhiAuthRoute,
   VaradhiDashboardRoute: VaradhiDashboardRoute,
   VaradhiOnboardRoute: VaradhiOnboardRoute,
+  VaradhiPartnerRoute: VaradhiPartnerRoute,
   VaradhiRewardsRoute: VaradhiRewardsRoute,
   VaradhiSubscriptionRoute: VaradhiSubscriptionRoute,
   VaradhiIndexRoute: VaradhiIndexRoute,

@@ -215,6 +215,11 @@ function UpdateBoard() {
         className="block text-center rounded-xl bg-[#1e3a8a] py-3 text-white font-semibold shadow">
         సబ్‌స్క్రిప్షన్ & రిన్యూవల్
       </Link>
+
+      <Link to="/varadhi/partner"
+        className="mt-2 block text-center rounded-xl bg-gradient-to-r from-[#16a34a] to-[#0d9488] py-3 text-white font-semibold shadow">
+        పార్ట్‌నర్ డాష్‌బోర్డ్ (రెఫరల్ & కమిషన్)
+      </Link>
     </div>
   );
 }

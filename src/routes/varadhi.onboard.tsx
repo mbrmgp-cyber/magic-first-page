@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import { getMyVaradhiProfile, upsertVaradhiProfile } from "@/lib/varadhi.functions";
+import { validateReferralCode } from "@/lib/varadhi-partner.functions";
 import { toast } from "sonner";
 import { Upload, Check } from "lucide-react";
 
@@ -40,6 +41,7 @@ function OnboardPage() {
   const navigate = useNavigate();
   const getProfile = useServerFn(getMyVaradhiProfile);
   const upsert = useServerFn(upsertVaradhiProfile);
+  const checkReferral = useServerFn(validateReferralCode);
   const [authed, setAuthed] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -54,6 +56,7 @@ function OnboardPage() {
     district: "",
     state: "Andhra Pradesh",
     occupation: "",
+    referral_code: "",
   });
   const [occupationOther, setOccupationOther] = useState("");
   const [status, setStatus] = useState<"pending" | "approved" | "rejected" | null>(null);
@@ -79,6 +82,7 @@ function OnboardPage() {
             district: p.district ?? "",
             state: p.state ?? "Andhra Pradesh",
             occupation: p.occupation?.startsWith("ఇతర") ? "ఇతర" : (p.occupation ?? ""),
+            referral_code: p.referral_code_used ?? "",
           }));
           if (p.occupation?.startsWith("ఇతర:")) setOccupationOther(p.occupation.slice(5).trim());
           setStatus(p.verification_status);
@@ -117,6 +121,13 @@ function OnboardPage() {
     if (!complete) return toast.error("అన్ని వివరాలు పూర్తి చేయండి");
     setSaving(true);
     try {
+      let referred_partner_id: string | null = null;
+      const refCode = form.referral_code.trim().toUpperCase();
+      if (refCode) {
+        const r: any = await checkReferral({ data: { code: refCode } });
+        if (!r.valid) { toast.error("రెఫరల్ కోడ్ చెల్లదు"); setSaving(false); return; }
+        referred_partner_id = r.partner.id;
+      }
       await upsert({
         data: {
           full_name: form.full_name.trim(),
@@ -132,6 +143,8 @@ function OnboardPage() {
           state: form.state.trim(),
           occupation: form.occupation === "ఇతర" ? `ఇతర: ${occupationOther.trim()}` : form.occupation,
           primary_role: "buyer",
+          referral_code_used: refCode || null,
+          referred_partner_id,
         } as any,
       });
       toast.success("రిజిస్ట్రేషన్ పంపబడింది. అడ్మిన్ ఆమోదం కోసం వేచి ఉండండి.");
@@ -230,6 +243,15 @@ function OnboardPage() {
               value={occupationOther}
               onChange={(e) => setOccupationOther(e.target.value)} />
           )}
+        </Field>
+
+        <Field label="రెఫరల్ కోడ్ (ఉంటే)">
+          <input className={inp} placeholder="ఉదా: MCHIT1234"
+            value={form.referral_code}
+            onChange={(e) => setForm({ ...form, referral_code: e.target.value.toUpperCase() })} />
+          <p className="mt-1 text-[10px] text-[#1e3a8a]/60">
+            మండల / జిల్లా / రాష్ట్ర ఇన్‌ఛార్జ్ ఇచ్చిన కోడ్ ఉంటే ఇక్కడ ఇవ్వండి.
+          </p>
         </Field>
       </div>
 
