@@ -133,7 +133,8 @@ export const adminListPartners = createServerFn({ method: "GET" })
 export const adminCreatePartner = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: {
-    email: string;
+    email?: string;
+    user_id?: string;
     level: PartnerLevel;
     state: string;
     district?: string;
@@ -147,19 +148,21 @@ export const adminCreatePartner = createServerFn({ method: "POST" })
     const { assertVaradhiAdminClient } = await import("@/lib/varadhi-partner.server");
     const admin = await assertVaradhiAdminClient(context.userId, (context.claims as any)?.email);
     const email = (data.email ?? "").trim().toLowerCase();
-    if (!email) throw new Error("Email required");
+    if (!email && !data.user_id) throw new Error("Select a user or enter an email");
     if (!data.state?.trim()) throw new Error("State required");
     if (data.level !== "state" && !data.district?.trim()) throw new Error("District required");
     if (data.level === "mandal" && !data.mandal?.trim()) throw new Error("Mandal required");
 
-    // find or create the auth user for this partner
-    let userId: string | null = null;
-    for (let page = 1; page <= 20; page += 1) {
-      const { data: list, error } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
-      if (error) throw new Error(error.message);
-      const u = list.users.find((x: any) => x.email?.toLowerCase() === email);
-      if (u) { userId = u.id; break; }
-      if (list.users.length < 1000) break;
+    // resolve the auth user for this partner
+    let userId: string | null = data.user_id ?? null;
+    if (!userId) {
+      for (let page = 1; page <= 20; page += 1) {
+        const { data: list, error } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
+        if (error) throw new Error(error.message);
+        const u = list.users.find((x: any) => x.email?.toLowerCase() === email);
+        if (u) { userId = u.id; break; }
+        if (list.users.length < 1000) break;
+      }
     }
     if (!userId) {
       const { data: created, error } = await admin.auth.admin.createUser({
@@ -172,6 +175,8 @@ export const adminCreatePartner = createServerFn({ method: "POST" })
       userId = created.user?.id ?? null;
     }
     if (!userId) throw new Error("Could not resolve partner user");
+
+
 
     const { buildReferralCode } = await import("@/lib/varadhi-partner.server");
     const { PARTNER_DEFAULT_PCT } = await import("@/lib/varadhi-partner");
@@ -256,4 +261,63 @@ export const adminUpdatePayoutStatus = createServerFn({ method: "POST" })
         .eq("payout_id", data.payout_id);
     }
     return { ok: true };
+  });
+
+// -------- Admin: pick an existing registered user as partner
+export const adminSearchPartnerCandidates = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { q?: string; state?: string; district?: string } = {}) => d)
+  .handler(async ({ data, context }) => {
+    const { assertVaradhiAdminClient } = await import("@/lib/varadhi-partner.server");
+    const admin = await assertVaradhiAdminClient(context.userId, (context.claims as any)?.email);
+    let q = admin
+      .from("varadhi_profiles")
+      .select("user_id, full_name, phone, state, district, mandal, city")
+      .order("created_at", { ascending: false });
+    if (data.state) q = q.eq("state", data.state);
+    if (data.district) q = q.eq("district", data.district);
+    if (data.q) q = q.or(`full_name.ilike.%${data.q}%,phone.ilike.%${data.q}%`);
+    const { data: rows, error } = await q.limit(50);
+    if (error) throw new Error(error.message);
+    return { users: rows ?? [] };
+  });
+
+// -------- Area admin's own dashboard counts
+export const getMyAreaAdminStats = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: seat } = await supabaseAdmin
+      .from("varadhi_area_admins")
+      .select("*")
+      .eq("user_id", context.userId)
+      .eq("is_active", true)
+      .maybeSingle();
+    if (!seat) return { seat: null };
+    const s: any = seat;
+
+    let pq = supabaseAdmin.from("varadhi_profiles").select("user_id").eq("state", s.state);
+    if (s.district) pq = pq.eq("district", s.district);
+    if (s.mandal) pq = pq.eq("mandal", s.mandal);
+    const { data: profiles } = await pq.limit(5000);
+    const ids = (profiles ?? []).map((p: any) => p.user_id);
+
+    let listings = 0;
+    let providers = 0;
+    let subscriptions = 0;
+    if (ids.length) {
+      const [l, pr, sub] = await Promise.all([
+        supabaseAdmin.from("varadhi_listings").select("id", { count: "exact", head: true }).in("user_id", ids),
+        supabaseAdmin.from("varadhi_providers").select("id", { count: "exact", head: true }).in("user_id", ids),
+        supabaseAdmin
+          .from("varadhi_subscriptions")
+          .select("id", { count: "exact", head: true })
+          .in("user_id", ids)
+          .eq("status", "active"),
+      ]);
+      listings = l.count ?? 0;
+      providers = pr.count ?? 0;
+      subscriptions = sub.count ?? 0;
+    }
+    return { seat: s, counts: { users: ids.length, listings, providers, subscriptions } };
   });

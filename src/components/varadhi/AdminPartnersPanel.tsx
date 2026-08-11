@@ -12,6 +12,7 @@ import {
   adminSetPartnerActive,
   adminListPayoutRequests,
   adminUpdatePayoutStatus,
+  adminSearchPartnerCandidates,
 } from "@/lib/varadhi-partner.functions";
 import { PARTNER_DEFAULT_PCT, PARTNER_LEVEL_LABEL, type PartnerLevel } from "@/lib/varadhi-partner";
 
@@ -28,7 +29,16 @@ export function AdminPartnersPanel() {
   const partnersQ = useQuery({ queryKey: ["varadhi-partners"], queryFn: () => listPartners() });
   const payoutsQ = useQuery({ queryKey: ["varadhi-payouts"], queryFn: () => listPayouts() });
 
+  const searchUsers = useServerFn(adminSearchPartnerCandidates);
+  const [uq, setUq] = useState("");
+  const [picked, setPicked] = useState<any>(null);
+  const usersQ = useQuery({
+    queryKey: ["varadhi-partner-candidates", uq],
+    queryFn: () => searchUsers({ data: { q: uq || undefined } }),
+  });
+
   const [f, setF] = useState({
+    user_id: "" as string,
     email: "", full_name: "", phone: "", level: "mandal" as PartnerLevel,
     state: "Andhra Pradesh", district: "", mandal: "", commission_pct: "",
   });
@@ -38,12 +48,14 @@ export function AdminPartnersPanel() {
     setSaving(true);
     try {
       await createPartner({ data: {
-        email: f.email, full_name: f.full_name, phone: f.phone, level: f.level,
+        email: f.email || undefined,
+        user_id: f.user_id || undefined, full_name: f.full_name, phone: f.phone, level: f.level,
         state: f.state, district: f.district, mandal: f.mandal,
         commission_pct: f.commission_pct ? Number(f.commission_pct) : PARTNER_DEFAULT_PCT[f.level],
       }});
       toast.success("పార్ట్‌నర్ జోడించబడ్డారు");
-      setF({ ...f, email: "", full_name: "", phone: "", district: "", mandal: "", commission_pct: "" });
+      setF({ ...f, user_id: "", email: "", full_name: "", phone: "", district: "", mandal: "", commission_pct: "" });
+      setPicked(null); setUq("");
       qc.invalidateQueries({ queryKey: ["varadhi-partners"] });
     } catch (e: any) { toast.error(e.message ?? "విఫలమైంది"); }
     finally { setSaving(false); }
@@ -65,8 +77,50 @@ export function AdminPartnersPanel() {
     <div className="space-y-4">
       <Card className="p-4 space-y-2">
         <h2 className="text-sm font-bold text-[#1e3a8a]">కొత్త పార్ట్‌నర్ (ఇన్‌ఛార్జ్) జోడించండి</h2>
+        <div className="rounded-lg border p-2 space-y-2">
+          <p className="text-[11px] font-semibold text-[#1e3a8a]">రిజిస్టర్ అయిన వినియోగదారుల నుంచి అడ్మిన్‌ను ఎంపిక చేయండి</p>
+          {picked ? (
+            <div className="flex items-center justify-between gap-2 rounded-md bg-[#1e3a8a]/5 p-2 text-xs">
+              <span className="truncate">
+                ✅ {picked.full_name ?? "—"} · {picked.phone ?? ""}
+                <span className="text-muted-foreground"> · {[picked.mandal, picked.district, picked.state].filter(Boolean).join(", ")}</span>
+              </span>
+              <Button size="sm" variant="outline" onClick={() => { setPicked(null); setF({ ...f, user_id: "" }); }}>మార్చు</Button>
+            </div>
+          ) : (
+            <>
+              <Input placeholder="పేరు / ఫోన్ ద్వారా వెతకండి" value={uq} onChange={(e) => setUq(e.target.value)} />
+              <div className="max-h-40 overflow-y-auto divide-y">
+                {(((usersQ.data as any)?.users ?? []) as any[]).map((u) => (
+                  <button
+                    key={u.user_id}
+                    className="w-full px-1 py-1.5 text-left text-xs hover:bg-muted"
+                    onClick={() => {
+                      setPicked(u);
+                      setF({
+                        ...f,
+                        user_id: u.user_id,
+                        full_name: u.full_name ?? "",
+                        phone: u.phone ?? "",
+                        state: u.state ?? f.state,
+                        district: u.district ?? "",
+                        mandal: u.mandal ?? "",
+                      });
+                    }}
+                  >
+                    <span className="font-medium">{u.full_name ?? "—"}</span>{" "}
+                    <span className="text-muted-foreground">{u.phone ?? ""} · {[u.mandal, u.district].filter(Boolean).join(", ")}</span>
+                  </button>
+                ))}
+                {(((usersQ.data as any)?.users ?? []) as any[]).length === 0 && (
+                  <p className="py-2 text-[11px] text-muted-foreground">వినియోగదారులు కనబడలేదు.</p>
+                )}
+              </div>
+            </>
+          )}
+        </div>
         <div className="grid grid-cols-2 gap-2">
-          <Input placeholder="Email *" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} />
+          <Input placeholder="Email (ఎంపిక చేయకపోతే)" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} />
           <Input placeholder="పేరు" value={f.full_name} onChange={(e) => setF({ ...f, full_name: e.target.value })} />
           <Input placeholder="ఫోన్" value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} />
           <select
@@ -91,7 +145,7 @@ export function AdminPartnersPanel() {
             onChange={(e) => setF({ ...f, commission_pct: e.target.value })}
           />
         </div>
-        <Button className="w-full" disabled={saving || !f.email} onClick={add}>
+        <Button className="w-full" disabled={saving || (!f.email && !f.user_id)} onClick={add}>
           {saving ? "సేవ్…" : "పార్ట్‌నర్ జోడించు"}
         </Button>
       </Card>
