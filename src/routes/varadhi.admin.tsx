@@ -73,7 +73,7 @@ function VaradhiAdmin() {
   const scope = scopeQ.data;
   const isAdmin = isSuper || !!scope?.level;
 
-  type AdminTab = "reg" | "points" | "ticker" | "requests" | "hierarchy" | "messages" | "audit";
+  type AdminTab = "reg" | "points" | "ticker" | "requests" | "hierarchy" | "partners" | "messages" | "audit";
   const [tab, setTab] = useState<AdminTab>("reg");
   const [menuOpen, setMenuOpen] = useState(false);
 
