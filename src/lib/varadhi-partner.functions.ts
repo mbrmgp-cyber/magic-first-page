@@ -1,29 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-
-export const PARTNER_DEFAULT_PCT: Record<PartnerLevel, number> = {
-  mandal: 25,
-  district: 15,
-  state: 10,
-};
-
-export type PartnerLevel = "mandal" | "district" | "state";
-
-const BOOTSTRAP_ADMINS = ["mbrvaradhi@yahoo.com", "mbrproduct@gmail.com"];
-
-async function assertAdmin(userId: string, email?: string | null) {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data: roleRow } = await supabaseAdmin
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId)
-    .eq("role", "varadhi_admin")
-    .maybeSingle();
-  if (roleRow) return supabaseAdmin;
-  const mail = (email ?? "").trim().toLowerCase();
-  if (mail && BOOTSTRAP_ADMINS.includes(mail)) return supabaseAdmin;
-  throw new Error("Forbidden: Varadhi Admin only");
-}
+import type { PartnerLevel } from "@/lib/varadhi-partner";
 
 // -------- Referral code (used at signup / onboarding)
 export const validateReferralCode = createServerFn({ method: "POST" })
@@ -123,7 +100,8 @@ export const requestPartnerPayout = createServerFn({ method: "POST" })
 export const adminListPartners = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const admin = await assertAdmin(context.userId, (context.claims as any)?.email);
+    const { assertVaradhiAdminClient } = await import("@/lib/varadhi-partner.server");
+    const admin = await assertVaradhiAdminClient(context.userId, (context.claims as any)?.email);
     const { data: partners } = await admin
       .from("varadhi_partners")
       .select("*")
@@ -166,7 +144,8 @@ export const adminCreatePartner = createServerFn({ method: "POST" })
     referral_code?: string;
   }) => d)
   .handler(async ({ data, context }) => {
-    const admin = await assertAdmin(context.userId, (context.claims as any)?.email);
+    const { assertVaradhiAdminClient } = await import("@/lib/varadhi-partner.server");
+    const admin = await assertVaradhiAdminClient(context.userId, (context.claims as any)?.email);
     const email = (data.email ?? "").trim().toLowerCase();
     if (!email) throw new Error("Email required");
     if (!data.state?.trim()) throw new Error("State required");
@@ -194,12 +173,11 @@ export const adminCreatePartner = createServerFn({ method: "POST" })
     }
     if (!userId) throw new Error("Could not resolve partner user");
 
+    const { buildReferralCode } = await import("@/lib/varadhi-partner.server");
+    const { PARTNER_DEFAULT_PCT } = await import("@/lib/varadhi-partner");
     const code =
       (data.referral_code ?? "").trim().toUpperCase() ||
-      `${data.level[0]!.toUpperCase()}${(data.mandal || data.district || data.state)
-        .replace(/[^A-Za-z]/g, "")
-        .slice(0, 4)
-        .toUpperCase()}${Math.floor(1000 + Math.random() * 9000)}`;
+      buildReferralCode(data.level, data.mandal || data.district || data.state);
 
     const { data: row, error } = await admin
       .from("varadhi_partners")
@@ -225,7 +203,8 @@ export const adminSetPartnerActive = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { partner_id: string; is_active: boolean }) => d)
   .handler(async ({ data, context }) => {
-    const admin = await assertAdmin(context.userId, (context.claims as any)?.email);
+    const { assertVaradhiAdminClient } = await import("@/lib/varadhi-partner.server");
+    const admin = await assertVaradhiAdminClient(context.userId, (context.claims as any)?.email);
     const { error } = await admin
       .from("varadhi_partners")
       .update({ is_active: data.is_active })
@@ -237,7 +216,8 @@ export const adminSetPartnerActive = createServerFn({ method: "POST" })
 export const adminListPayoutRequests = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const admin = await assertAdmin(context.userId, (context.claims as any)?.email);
+    const { assertVaradhiAdminClient } = await import("@/lib/varadhi-partner.server");
+    const admin = await assertVaradhiAdminClient(context.userId, (context.claims as any)?.email);
     const { data: rows } = await admin
       .from("varadhi_payout_requests")
       .select("*, varadhi_partners(full_name, level, state, district, mandal, referral_code)")
@@ -250,7 +230,8 @@ export const adminUpdatePayoutStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { payout_id: string; status: "approved" | "paid" | "rejected"; admin_note?: string }) => d)
   .handler(async ({ data, context }) => {
-    const admin = await assertAdmin(context.userId, (context.claims as any)?.email);
+    const { assertVaradhiAdminClient } = await import("@/lib/varadhi-partner.server");
+    const admin = await assertVaradhiAdminClient(context.userId, (context.claims as any)?.email);
     const { error } = await admin
       .from("varadhi_payout_requests")
       .update({
