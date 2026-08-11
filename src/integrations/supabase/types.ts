@@ -2448,6 +2448,73 @@ export type Database = {
         }
         Relationships: []
       }
+      varadhi_commissions: {
+        Row: {
+          amount: number
+          base_amount: number
+          created_at: string
+          id: string
+          level: string
+          partner_id: string
+          payout_id: string | null
+          pct: number
+          referred_user_id: string | null
+          status: string
+          subscription_id: string | null
+          unlock_at: string
+        }
+        Insert: {
+          amount: number
+          base_amount: number
+          created_at?: string
+          id?: string
+          level: string
+          partner_id: string
+          payout_id?: string | null
+          pct: number
+          referred_user_id?: string | null
+          status?: string
+          subscription_id?: string | null
+          unlock_at?: string
+        }
+        Update: {
+          amount?: number
+          base_amount?: number
+          created_at?: string
+          id?: string
+          level?: string
+          partner_id?: string
+          payout_id?: string | null
+          pct?: number
+          referred_user_id?: string | null
+          status?: string
+          subscription_id?: string | null
+          unlock_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "varadhi_commissions_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "varadhi_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "varadhi_commissions_payout_fk"
+            columns: ["payout_id"]
+            isOneToOne: false
+            referencedRelation: "varadhi_payout_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "varadhi_commissions_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "varadhi_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       varadhi_listings: {
         Row: {
           blood_group: string | null
@@ -2559,6 +2626,104 @@ export type Database = {
         }
         Relationships: []
       }
+      varadhi_partners: {
+        Row: {
+          commission_pct: number
+          created_at: string
+          created_by: string | null
+          district: string | null
+          full_name: string | null
+          id: string
+          is_active: boolean
+          level: string
+          mandal: string | null
+          phone: string | null
+          referral_code: string
+          state: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          commission_pct?: number
+          created_at?: string
+          created_by?: string | null
+          district?: string | null
+          full_name?: string | null
+          id?: string
+          is_active?: boolean
+          level: string
+          mandal?: string | null
+          phone?: string | null
+          referral_code: string
+          state: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          commission_pct?: number
+          created_at?: string
+          created_by?: string | null
+          district?: string | null
+          full_name?: string | null
+          id?: string
+          is_active?: boolean
+          level?: string
+          mandal?: string | null
+          phone?: string | null
+          referral_code?: string
+          state?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      varadhi_payout_requests: {
+        Row: {
+          admin_note: string | null
+          amount: number
+          created_at: string
+          id: string
+          note: string | null
+          partner_id: string
+          processed_at: string | null
+          processed_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_note?: string | null
+          amount: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          partner_id: string
+          processed_at?: string | null
+          processed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_note?: string | null
+          amount?: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          partner_id?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "varadhi_payout_requests_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "varadhi_partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       varadhi_point_events: {
         Row: {
           actor_user_id: string | null
@@ -2642,6 +2807,8 @@ export type Database = {
           primary_role: string
           provider_specialty: string | null
           provider_sub_type: string | null
+          referral_code_used: string | null
+          referred_partner_id: string | null
           shop_name: string | null
           state: string | null
           store_photo_url: string | null
@@ -2673,6 +2840,8 @@ export type Database = {
           primary_role?: string
           provider_specialty?: string | null
           provider_sub_type?: string | null
+          referral_code_used?: string | null
+          referred_partner_id?: string | null
           shop_name?: string | null
           state?: string | null
           store_photo_url?: string | null
@@ -2704,6 +2873,8 @@ export type Database = {
           primary_role?: string
           provider_specialty?: string | null
           provider_sub_type?: string | null
+          referral_code_used?: string | null
+          referred_partner_id?: string | null
           shop_name?: string | null
           state?: string | null
           store_photo_url?: string | null
@@ -2713,7 +2884,15 @@ export type Database = {
           verification_notes?: string | null
           verification_status?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "varadhi_profiles_referred_partner_id_fkey"
+            columns: ["referred_partner_id"]
+            isOneToOne: false
+            referencedRelation: "varadhi_partners"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       varadhi_providers: {
         Row: {
@@ -3224,6 +3403,27 @@ export type Database = {
         Returns: undefined
       }
       varadhi_month_points: { Args: { _user_id: string }; Returns: number }
+      varadhi_request_payout: {
+        Args: { _note?: string }
+        Returns: {
+          admin_note: string | null
+          amount: number
+          created_at: string
+          id: string
+          note: string | null
+          partner_id: string
+          processed_at: string | null
+          processed_by: string | null
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "varadhi_payout_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       app_role: "mbr_admin" | "varadhi_admin"
