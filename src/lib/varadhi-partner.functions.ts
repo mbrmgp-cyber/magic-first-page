@@ -148,7 +148,14 @@ export const adminCreatePartner = createServerFn({ method: "POST" })
     const { assertVaradhiAdminClient } = await import("@/lib/varadhi-partner.server");
     const admin = await assertVaradhiAdminClient(context.userId, (context.claims as any)?.email);
     const email = (data.email ?? "").trim().toLowerCase();
-    if (!email && !data.user_id) throw new Error("Select a user or enter an email");
+    if (!data.user_id) throw new Error("Select an appointed admin first");
+    const { data: seat } = await admin
+      .from("varadhi_area_admins")
+      .select("id")
+      .eq("user_id", data.user_id)
+      .eq("is_active", true)
+      .maybeSingle();
+    if (!seat) throw new Error("Only appointed area admins can be made partners/in-charges");
     if (!data.state?.trim()) throw new Error("State required");
     if (data.level !== "state" && !data.district?.trim()) throw new Error("District required");
     if (data.level === "mandal" && !data.mandal?.trim()) throw new Error("Mandal required");

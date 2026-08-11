@@ -78,7 +78,7 @@ export function AdminPartnersPanel() {
       <Card className="p-4 space-y-2">
         <h2 className="text-sm font-bold text-[#1e3a8a]">కొత్త పార్ట్‌నర్ (ఇన్‌ఛార్జ్) జోడించండి</h2>
         <div className="rounded-lg border p-2 space-y-2">
-          <p className="text-[11px] font-semibold text-[#1e3a8a]">రిజిస్టర్ అయిన వినియోగదారుల నుంచి అడ్మిన్‌ను ఎంపిక చేయండి</p>
+          <p className="text-[11px] font-semibold text-[#1e3a8a]">ఇప్పటికే నియమితులైన అడ్మిన్‌ల నుంచి మాత్రమే ఇన్‌ఛార్జ్ / పార్ట్‌నర్‌ను ఎంపిక చేయండి</p>
           {picked ? (
             <div className="flex items-center justify-between gap-2 rounded-md bg-[#1e3a8a]/5 p-2 text-xs">
               <span className="truncate">
@@ -89,7 +89,7 @@ export function AdminPartnersPanel() {
             </div>
           ) : (
             <>
-              <Input placeholder="పేరు / ఫోన్ ద్వారా వెతకండి" value={uq} onChange={(e) => setUq(e.target.value)} />
+              <Input placeholder="అడ్మిన్ పేరు / ఫోన్ ద్వారా వెతకండి" value={uq} onChange={(e) => setUq(e.target.value)} />
               <div className="max-h-40 overflow-y-auto divide-y">
                 {(((usersQ.data as any)?.users ?? []) as any[]).map((u) => (
                   <button
@@ -109,18 +109,17 @@ export function AdminPartnersPanel() {
                     }}
                   >
                     <span className="font-medium">{u.full_name ?? "—"}</span>{" "}
-                    <span className="text-muted-foreground">{u.phone ?? ""} · {[u.mandal, u.district].filter(Boolean).join(", ")}</span>
+                    <span className="text-muted-foreground">{u.phone ?? ""} · {u.admin_level} · {[u.mandal, u.district].filter(Boolean).join(", ")}</span>
                   </button>
                 ))}
                 {(((usersQ.data as any)?.users ?? []) as any[]).length === 0 && (
-                  <p className="py-2 text-[11px] text-muted-foreground">వినియోగదారులు కనబడలేదు.</p>
+                  <p className="py-2 text-[11px] text-muted-foreground">అందుబాటులో ఉన్న అడ్మిన్‌లు లేరు (ముందుగా అడ్మిన్‌గా నియమించండి).</p>
                 )}
               </div>
             </>
           )}
         </div>
         <div className="grid grid-cols-2 gap-2">
-          <Input placeholder="Email (ఎంపిక చేయకపోతే)" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} />
           <Input placeholder="పేరు" value={f.full_name} onChange={(e) => setF({ ...f, full_name: e.target.value })} />
           <Input placeholder="ఫోన్" value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} />
           <select
@@ -145,7 +144,7 @@ export function AdminPartnersPanel() {
             onChange={(e) => setF({ ...f, commission_pct: e.target.value })}
           />
         </div>
-        <Button className="w-full" disabled={saving || (!f.email && !f.user_id)} onClick={add}>
+        <Button className="w-full" disabled={saving || !f.user_id} onClick={add}>
           {saving ? "సేవ్…" : "పార్ట్‌నర్ జోడించు"}
         </Button>
       </Card>
