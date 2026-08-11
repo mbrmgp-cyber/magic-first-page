@@ -11,6 +11,8 @@ import {
   listProviders, upsertProvider, toggleProviderAvailability,
   type VaradhiListing, type VaradhiProvider,
 } from "@/lib/varadhi.functions";
+import { useQuery } from "@tanstack/react-query";
+import { getMyAreaAdminStats } from "@/lib/varadhi-partner.functions";
 import { toast } from "sonner";
 import { Plus, Trash2, Camera, Pencil, Save } from "lucide-react";
 
@@ -197,6 +199,8 @@ function UpdateBoard() {
         <p className="text-[11px] opacity-90 mt-0.5">మీ వస్తువులు, సేవలు ఇక్కడ అప్‌డేట్ చేయండి.</p>
       </div>
 
+      <AreaAdminCounts />
+
       {/* Post type */}
       <div className="grid grid-cols-4 gap-1.5">
         {POST_TYPES.map((p) => (
@@ -220,6 +224,38 @@ function UpdateBoard() {
         className="mt-2 block text-center rounded-xl bg-gradient-to-r from-[#16a34a] to-[#0d9488] py-3 text-white font-semibold shadow">
         పార్ట్‌నర్ డాష్‌బోర్డ్ (రెఫరల్ & కమిషన్)
       </Link>
+    </div>
+  );
+}
+
+function AreaAdminCounts() {
+  const fetchStats = useServerFn(getMyAreaAdminStats);
+  const q = useQuery({ queryKey: ["varadhi-area-admin-stats"], queryFn: () => fetchStats() });
+  const d: any = q.data;
+  if (!d?.seat) return null;
+  const s = d.seat;
+  const c = d.counts;
+  const levelTe: Record<string, string> = {
+    state_admin: "రాష్ట్ర అడ్మిన్",
+    district_admin: "జిల్లా అడ్మిన్",
+    mandal_admin: "మండల అడ్మిన్",
+  };
+  const cell = (label: string, value: number) => (
+    <div className="rounded-xl bg-white/15 px-2 py-2 text-center">
+      <p className="text-lg font-extrabold leading-none">{value}</p>
+      <p className="mt-1 text-[10px] opacity-90">{label}</p>
+    </div>
+  );
+  return (
+    <div className="rounded-2xl bg-gradient-to-br from-[#0f766e] to-[#16a34a] p-4 text-white shadow">
+      <p className="text-sm font-bold">{levelTe[s.level] ?? s.level}</p>
+      <p className="text-[11px] opacity-90">📍 {[s.mandal, s.district, s.state].filter(Boolean).join(", ")}</p>
+      <div className="mt-3 grid grid-cols-4 gap-1.5">
+        {cell("వినియోగదారులు", c.users)}
+        {cell("పోస్టులు", c.listings)}
+        {cell("ట్రాన్స్‌పోర్ట్", c.providers)}
+        {cell("సబ్‌స్క్రిప్షన్లు", c.subscriptions)}
+      </div>
     </div>
   );
 }
