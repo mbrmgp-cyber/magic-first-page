@@ -20,6 +20,7 @@ import {
 import { AdminRequestsPanel, AdminHierarchyPanel } from "@/components/varadhi/AdminHierarchyPanel";
 import { AdminAuditPanel } from "@/components/varadhi/AdminAuditPanel";
 import { AdminMessagesPanel } from "@/components/varadhi/AdminMessagesPanel";
+import { AdminPartnersPanel } from "@/components/varadhi/AdminPartnersPanel";
 import { ContactAdminForm } from "@/components/varadhi/ContactAdminForm";
 import { STATES, districtsFor } from "@/lib/ap-locations";
 import { Card } from "@/components/ui/card";
@@ -156,6 +157,7 @@ function VaradhiAdmin() {
           ...(isSuper || scope?.level === "state_admin"
             ? [{ k: "requests" as const, label: "అడ్మిన్ దరఖాస్తులు" }] : []),
           { k: "hierarchy", label: "అడ్మిన్ హైరార్కీ" },
+          ...(isSuper ? [{ k: "partners" as const, label: bi("పార్ట్‌నర్లు & పేఅవుట్లు", "Partners & Payouts", lang) }] : []),
           { k: "messages", label: "యూజర్ సందేశాలు" },
           { k: "audit", label: "మార్పుల చరిత్ర" },
         ];
@@ -202,6 +204,7 @@ function VaradhiAdmin() {
       {tab === "ticker" && isSuper && <TickerPanel />}
       {tab === "requests" && <AdminRequestsPanel isSuper={isSuper} />}
       {tab === "hierarchy" && <AdminHierarchyPanel isSuper={isSuper} />}
+      {tab === "partners" && isSuper && <AdminPartnersPanel />}
       {tab === "messages" && <AdminMessagesPanel />}
       {tab === "audit" && <AdminAuditPanel />}
 
