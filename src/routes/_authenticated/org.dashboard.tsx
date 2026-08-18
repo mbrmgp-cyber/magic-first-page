@@ -21,6 +21,7 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { resolveTheme } from "@/lib/theme";
 import { memberRegistrationUrl } from "@/lib/public-url";
 import { useSimRole, canAccess, ROUTE_ACCESS, ROLE_LABELS } from "@/lib/rbac";
+import { MEMBER_SAFE_COLUMNS } from "@/lib/db-columns";
 
 export const Route = createFileRoute("/_authenticated/org/dashboard")({
   head: () => ({ meta: [{ title: "Society Dashboard — MBR App" }] }),
@@ -141,7 +142,7 @@ function Dashboard() {
     try {
       const orgId = orgQ.data.org.id;
       const [members, committee, rules, events] = await Promise.all([
-        supabase.from("members").select("*").eq("org_id", orgId),
+        supabase.from("members").select(MEMBER_SAFE_COLUMNS as "*").eq("org_id", orgId),
         supabase.from("committee_members").select("*").eq("org_id", orgId),
         supabase.from("org_rules").select("*").eq("org_id", orgId),
         supabase.from("org_milestones").select("*").eq("org_id", orgId),

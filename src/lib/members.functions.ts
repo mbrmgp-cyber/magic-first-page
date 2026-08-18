@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { MEMBER_SAFE_COLUMNS } from "@/lib/db-columns";
 
 // Helper: org admin or committee president/treasurer/VP (treasurer can edit accounts)
 async function getOrgForUser(supabase: any, userId: string) {
@@ -26,7 +27,7 @@ export const listOrgMembersFull = createServerFn({ method: "GET" })
     if (!orgId) return { members: [], orgId: null, org: null };
     const { data, error } = await supabase
       .from("members")
-      .select("*, introducer:introducer_member_id(id,name)")
+      .select(`${MEMBER_SAFE_COLUMNS}, introducer:introducer_member_id(id,name)` as "*")
       .eq("org_id", orgId)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
