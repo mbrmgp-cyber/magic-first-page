@@ -3,6 +3,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { PUBLIC_APP_ORIGIN, memberRegistrationUrl } from "@/lib/public-url";
 import QRCode from "qrcode";
 import { MEMBER_SAFE_COLUMNS } from "@/lib/db-columns";
+import { findOrgByCode, parseSafeImageDataUrl } from "@/lib/org-code";
 
 function normalizeOrgCode(input: string) {
   const raw = (input || "").trim();
@@ -221,12 +222,8 @@ export const sendMemberWelcomeEmail = createServerFn({ method: "POST" })
 
 async function uploadImageDataUrl(supabaseAdmin: any, dataUrl: string | undefined | null, folder: string) {
   if (!dataUrl?.startsWith("data:image/")) return dataUrl ?? null;
-  const match = dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
-  if (!match) throw new Error("Invalid image file");
-  const contentType = match[1];
-  const bytes = Uint8Array.from(atob(match[2]), (char) => char.charCodeAt(0));
+  const { contentType, bytes, ext } = parseSafeImageDataUrl(dataUrl);
   if (bytes.byteLength > 3 * 1024 * 1024) throw new Error("Image must be under 3MB");
-  const ext = contentType.split("/")[1]?.replace("jpeg", "jpg") || "jpg";
   const path = `public-requests/${folder}/${crypto.randomUUID()}.${ext}`;
   const { error } = await supabaseAdmin.storage
     .from("org-documents")
@@ -532,11 +529,7 @@ export const validateOrgCode = createServerFn({ method: "POST" })
     const code = normalizeOrgCode(data.code);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     // Match either full org_code (legacy long hash) or the short letter_code (A, B, C...)
-    const { data: org } = await supabaseAdmin
-      .from("organizations")
-      .select("id, name, logo_url, org_code, letter_code")
-      .or(`org_code.eq.${code},letter_code.eq.${code}`)
-      .maybeSingle();
+    const org = await findOrgByCode(supabaseAdmin, code, "id, name, logo_url, org_code, letter_code");
     if (!org) return { valid: false as const };
     // Return the canonical org_code so downstream registration flow keeps working
     return { valid: true as const, org: { id: org.id, name: org.name, logo_url: org.logo_url, org_code: org.org_code, letter_code: org.letter_code } };
@@ -549,11 +542,7 @@ export const sendMemberIdLoginLink = createServerFn({ method: "POST" })
     const seq = (data.member_seq || "").trim().replace(/^0+(?=\d)/, "");
     if (!code || !seq) return { sent: false as const, reason: "missing" as const };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: org } = await supabaseAdmin
-      .from("organizations")
-      .select("id, letter_code, org_code")
-      .or(`org_code.eq.${code},letter_code.eq.${code}`)
-      .maybeSingle();
+    const org = await findOrgByCode(supabaseAdmin, code, "id, letter_code, org_code");
     if (!org) return { sent: false as const, reason: "org_not_found" as const };
     const padded = seq.padStart(4, "0");
     const memberCode = `${org.letter_code}/${padded}`;
@@ -607,21 +596,13 @@ export const submitMemberRequest = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const code = normalizeOrgCode(data.code);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: org } = await supabaseAdmin
-      .from("organizations")
-      .select("id")
-      .or(`org_code.eq.${code},letter_code.eq.${code}`)
-      .maybeSingle();
+    const org = await findOrgByCode(supabaseAdmin, code, "id");
     if (!org) throw new Error("Invalid QR / Code");
 
     let photo_url = data.photo_url ?? null;
     if (data.photo_data_url?.startsWith("data:image/")) {
-      const match = data.photo_data_url.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
-      if (!match) throw new Error("Invalid photo file");
-      const contentType = match[1];
-      const bytes = Uint8Array.from(atob(match[2]), (char) => char.charCodeAt(0));
+      const { contentType, bytes, ext } = parseSafeImageDataUrl(data.photo_data_url);
       if (bytes.byteLength > 5 * 1024 * 1024) throw new Error("Photo must be under 5MB");
-      const ext = contentType.split("/")[1]?.replace("jpeg", "jpg") || "jpg";
       const path = `public-requests/${org.id}/${crypto.randomUUID()}.${ext}`;
       const { error: uploadError } = await supabaseAdmin.storage
         .from("member-photos")
@@ -634,10 +615,12 @@ export const submitMemberRequest = createServerFn({ method: "POST" })
     if (data.receipt_data_url?.startsWith("data:")) {
       const match = data.receipt_data_url.match(/^data:([a-zA-Z0-9.+/-]+);base64,(.+)$/);
       if (!match) throw new Error("Invalid receipt file");
-      const contentType = match[1];
+      const contentType = match[1].toLowerCase();
+      const allowedReceiptTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "application/pdf"];
+      if (!allowedReceiptTypes.includes(contentType)) throw new Error("Only JPG, PNG, WEBP or PDF receipts are allowed");
       const bytes = Uint8Array.from(atob(match[2]), (c) => c.charCodeAt(0));
       if (bytes.byteLength > 5 * 1024 * 1024) throw new Error("Receipt must be under 5MB");
-      const ext = (contentType.split("/")[1] || "bin").replace("jpeg", "jpg");
+      const ext = contentType === "application/pdf" ? "pdf" : contentType === "image/png" ? "png" : contentType === "image/webp" ? "webp" : "jpg";
       const path = `public-requests/${org.id}/${crypto.randomUUID()}.${ext}`;
       const { error: rErr } = await supabaseAdmin.storage
         .from("member-receipts")
