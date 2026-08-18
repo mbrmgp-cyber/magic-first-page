@@ -5,26 +5,87 @@ import logo from "@/assets/mbr-logo.png.asset.json";
 import { supabase } from "@/integrations/supabase/client";
 import { routeAfterLogin } from "@/lib/post-login-redirect";
 
+const FAQS = [
+  {
+    q: "What is the MBR Platform?",
+    a: "MBR Platform (Management of Board Resources) is an Indian institutional software platform hosted at mbrplatform.com. It currently runs two applications: the MBR App for registered societies and committees, and Vaaradhi, a Telugu-first local marketplace.",
+  },
+  {
+    q: "How does a member join a society on the MBR App?",
+    a: "The society shares its QR code or join link. The member fills in name, father's name, village, PIN code, email, phone, blood group, and introducer, and uploads a photo and payment receipt. The committee reviews the request and, on approval, the member receives a permanent society ID and a login link to their dashboard.",
+  },
+  {
+    q: "Can members pay the society through the app?",
+    a: "Yes. Administrators save the society's bank details once, and the member dashboard shows a Pay to Society card with the account name, number, IFSC, and branch, so members can transfer and upload the receipt.",
+  },
+  {
+    q: "Is member data private?",
+    a: "Yes. Data is protected with row-level security and role-based access. Bank account numbers and identity documents are readable only by authorised administrators, not by other members, and every approval is recorded against the user who made it.",
+  },
+  {
+    q: "Does the platform work in Telugu?",
+    a: "Yes. Both apps are bilingual. Members and sellers can read and enter content in Telugu or English, and the interface follows the language selected on the device.",
+  },
+  {
+    q: "What does Vaaradhi do?",
+    a: "Vaaradhi connects local sellers, transporters, and service providers with buyers around them. Listings show photos, price, unit, stock status, and location, and buyers can browse by state, district, and mandal or see updates within about 100 km of where they are.",
+  },
+];
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "MBR Platform — Management of Board Resources" },
+      { title: "MBR Platform — Society Management & Local Marketplace" },
       {
         name: "description",
         content:
-          "The MBR Platform hosts a suite of institutional applications — MBR App for society & committee administration, and Vaaradhi (coming soon).",
+          "MBR Platform runs the MBR App for society, committee, election, accounts and chit management in India, and Vaaradhi, a Telugu-first local marketplace.",
       },
-      { property: "og:title", content: "MBR Platform — Management of Board Resources" },
+      { property: "og:title", content: "MBR Platform — Society Management & Local Marketplace" },
       {
         property: "og:description",
         content:
-          "A premium platform for institutional software. MBR App and Vaaradhi, unified under mbrplatform.com.",
+          "Member registration, ID cards, committees, elections, accounts, loans and chit auctions on the MBR App — plus Vaaradhi, a Telugu local marketplace.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebSite",
+              name: "MBR Platform",
+              url: "https://mbrplatform.com",
+              inLanguage: ["en", "te"],
+            },
+            {
+              "@type": "SoftwareApplication",
+              name: "MBR App",
+              applicationCategory: "BusinessApplication",
+              operatingSystem: "Web",
+              url: "https://mbrplatform.com/mbr",
+              description:
+                "Society and committee administration: member registration, QR ID cards, elections, accounts, loans, chit auctions, disciplinary workflow and member chat.",
+            },
+            {
+              "@type": "FAQPage",
+              mainEntity: FAQS.map(({ q, a }) => ({
+                "@type": "Question",
+                name: q,
+                acceptedAnswer: { "@type": "Answer", text: a },
+              })),
+            },
+          ],
+        }),
+      },
+    ],
   }),
+
   validateSearch: (s: Record<string, unknown>): { code?: string } => {
     const code = typeof s.code === "string" && s.code.trim() ? s.code.trim() : undefined;
     return code ? { code } : {};
@@ -185,27 +246,124 @@ function PlatformPortal() {
                   <Sparkles className="h-6 w-6 text-[#c9a84c]/80" />
                 </div>
                 <div className="text-[10px] uppercase tracking-[0.25em] text-[#c9a84c]/60">
-                  Product · Coming Soon
+                  Product · Live
                 </div>
               </div>
               <h3 className="mt-6 font-serif text-3xl font-semibold text-[#f5f0e0]/90">
-                Vaaradhi
+                Vaaradhi (వారధి)
               </h3>
               <p className="mt-1 text-sm text-[#f5f0e0]/50">
-                The next MBR Platform application
+                Local marketplace for Andhra Pradesh &amp; Telangana
               </p>
               <p className="mt-4 text-sm text-[#f5f0e0]/60 leading-relaxed">
-                A dedicated experience purpose-built on the shared MBR Platform foundation.
-                Details will follow closer to launch.
+                A Telugu-first marketplace where farmers, shops, transporters, and service
+                providers post what they have — fresh produce, new and used goods, property,
+                vehicles, and services — and buyers discover them within 100 km, filtered by
+                state, district, and mandal.
               </p>
               <div className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-[#f5f0e0]/70 group-hover:text-[#c9a84c] transition-colors">
-                Preview Vaaradhi
+                Open Vaaradhi
                 <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
               </div>
             </div>
           </Link>
         </div>
       </section>
+
+      {/* What MBR App does — depth for members, committees and admins */}
+      <section id="features" className="relative z-10 px-6 sm:px-10 pb-20 max-w-6xl mx-auto">
+        <h2 className="font-serif text-3xl sm:text-4xl font-semibold">
+          What you can run on the MBR App
+        </h2>
+        <p className="mt-4 max-w-3xl text-sm sm:text-base text-[#f5f0e0]/70 leading-relaxed">
+          The MBR App is built for registered societies, welfare associations, and community
+          committees in India. Every module below replaces a paper register: members are
+          issued a permanent society ID (for example <span className="text-[#c9a84c]">A/0001</span>),
+          money movements are receipted, and every approval is recorded against the person who
+          made it.
+        </p>
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-5">
+          {[
+            {
+              title: "Member registration & ID cards",
+              body: "Members join by scanning the society QR code or opening a link, then upload photo, address, blood group, and introducer details. Once the committee approves, the system assigns the next society ID and generates a printable, QR-verified ID card that anyone can scan to confirm membership.",
+            },
+            {
+              title: "Committee & election management",
+              body: "Maintain the executive committee with roles (president, vice-president, treasurer, executive, advisor, worker) and term dates. Run nominations and voting for scheduled elections, and let permissions follow the elected role automatically.",
+            },
+            {
+              title: "Accounts, loans & cash flow",
+              body: "Record subscriptions, donations, registration fees, expenses, and charity spending. Issue monthly member loans with monthly interest, print an Indian-style promissory note with two signatures, and track balances in the master ledger with multi-currency display for members working abroad.",
+            },
+            {
+              title: "Chit auctions",
+              body: "Run monthly chit auctions with member bidding, foreman rules, dividend and net payable calculation, digital consent from participants, and an archive of every closed month.",
+            },
+            {
+              title: "Disciplinary & leave workflow",
+              body: "A separate disciplinary committee reviews suspensions and reviews requests from members who want to leave the society, so pending dues and obligations are settled before a membership is closed.",
+            },
+            {
+              title: "Announcements & private chat",
+              body: "Committees publish announcements to all members and can also send private information to selected members or only to the committee, keeping sensitive matters off public boards.",
+            },
+          ].map(({ title, body }) => (
+            <article
+              key={title}
+              className="rounded-xl border border-[#c9a84c]/15 bg-[#0f1b3d]/40 p-6"
+            >
+              <h3 className="font-semibold text-[#f5f0e0]">{title}</h3>
+              <p className="mt-2 text-sm text-[#f5f0e0]/65 leading-relaxed">{body}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {/* Who it is for */}
+      <section id="who" className="relative z-10 px-6 sm:px-10 pb-20 max-w-6xl mx-auto">
+        <h2 className="font-serif text-3xl sm:text-4xl font-semibold">Who uses MBR Platform</h2>
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-5">
+          {[
+            {
+              title: "Society administrators",
+              body: "Approve new members, correct member IDs, manage bank details shown to members for payments, control which committee role can open which module, and export the full member register as a PDF.",
+            },
+            {
+              title: "Members",
+              body: "Open a personal dashboard to see their ID card, ledger, loan requests, society bank details for payments, meeting and event notices, and to raise a leave request with a written reason.",
+            },
+            {
+              title: "Local sellers & service providers",
+              body: "On Vaaradhi, post produce, goods, vehicles, transport, and services in Telugu or English with photos, price per unit, stock status, and a direct phone or WhatsApp contact.",
+            },
+          ].map(({ title, body }) => (
+            <article key={title} className="rounded-xl border border-[#c9a84c]/15 bg-[#0f1b3d]/40 p-6">
+              <h3 className="font-semibold text-[#f5f0e0]">{title}</h3>
+              <p className="mt-2 text-sm text-[#f5f0e0]/65 leading-relaxed">{body}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="relative z-10 px-6 sm:px-10 pb-20 max-w-6xl mx-auto">
+        <h2 className="font-serif text-3xl sm:text-4xl font-semibold">Common questions</h2>
+        <div className="mt-6 space-y-4">
+          {FAQS.map(({ q, a }) => (
+            <details
+              key={q}
+              className="group rounded-xl border border-[#c9a84c]/15 bg-[#0f1b3d]/40 p-5"
+            >
+              <summary className="cursor-pointer list-none font-semibold text-[#f5f0e0] marker:hidden">
+                {q}
+              </summary>
+              <p className="mt-3 text-sm text-[#f5f0e0]/65 leading-relaxed">{a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
 
       {/* Platform pillars */}
       <section id="platform" className="relative z-10 px-6 sm:px-10 pb-24 max-w-6xl mx-auto">
