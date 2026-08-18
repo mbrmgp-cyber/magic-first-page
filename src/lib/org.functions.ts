@@ -758,7 +758,7 @@ export const listOrgMembers = createServerFn({ method: "GET" })
     if (!org) return { members: [] };
     const { data: members } = await supabase
       .from("members")
-      .select("*")
+      .select(MEMBER_SAFE_COLUMNS)
       .eq("org_id", org.id)
       .order("created_at", { ascending: false });
     return { members: members ?? [] };
