@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { ensureDonorAuthAndSendLink } from "@/lib/donor-login-link.server";
+import { findOrgByCode, parseSafeImageDataUrl } from "@/lib/org-code";
 
 
 async function getOrgForUser(supabase: any, userId: string) {
@@ -273,21 +274,13 @@ export const submitDonorRequest = createServerFn({ method: "POST" })
     if (!data.first_name?.trim()) throw new Error("పేరు ఇవ్వండి");
     if (!data.email?.trim()) throw new Error("Email ఇవ్వండి");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: org } = await supabaseAdmin
-      .from("organizations")
-      .select("id")
-      .or(`org_code.eq.${code},letter_code.eq.${code}`)
-      .maybeSingle();
+    const org = await findOrgByCode(supabaseAdmin, code, "id");
     if (!org) throw new Error("Invalid QR / Code");
 
     let photo_url: string | null = null;
     if (data.photo_data_url?.startsWith("data:image/")) {
-      const match = data.photo_data_url.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
-      if (!match) throw new Error("Invalid photo file");
-      const contentType = match[1];
-      const bytes = Uint8Array.from(atob(match[2]), (c) => c.charCodeAt(0));
+      const { contentType, bytes, ext } = parseSafeImageDataUrl(data.photo_data_url);
       if (bytes.byteLength > 5 * 1024 * 1024) throw new Error("Photo must be under 5MB");
-      const ext = (contentType.split("/")[1] || "jpg").replace("jpeg", "jpg");
       const path = `public-requests/${org.id}/${crypto.randomUUID()}.${ext}`;
       const { error: upErr } = await supabaseAdmin.storage
         .from("member-photos")
