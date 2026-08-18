@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { PUBLIC_APP_ORIGIN, memberRegistrationUrl } from "@/lib/public-url";
 import QRCode from "qrcode";
+import { MEMBER_SAFE_COLUMNS } from "@/lib/db-columns";
 
 function normalizeOrgCode(input: string) {
   const raw = (input || "").trim();
@@ -697,7 +698,7 @@ export const getMyMembership = createServerFn({ method: "GET" })
     }
     const { data: rows } = await supabase
       .from("members")
-      .select("*, organizations(id, name, admin_user_id, logo_url, slogan, letter_code, org_code, gov_reg_number, phone, email, president_name, president_signature_url, theme_color, theme_font, theme_settings, id_card_design, ad_banners, bank_name, bank_branch, bank_account_number, bank_ifsc, bank_account_holder)")
+      .select(`${MEMBER_SAFE_COLUMNS}, organizations(id, name, admin_user_id, logo_url, slogan, letter_code, org_code, gov_reg_number, phone, email, president_name, president_signature_url, theme_color, theme_font, theme_settings, id_card_design, ad_banners, bank_name, bank_branch, bank_account_number, bank_ifsc, bank_account_holder)`)
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
     // A member may have more than one row (duplicate/old registration).

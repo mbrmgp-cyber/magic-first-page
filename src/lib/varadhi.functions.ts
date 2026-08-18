@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { PUBLIC_APP_ORIGIN } from "@/lib/public-url";
+import { VARADHI_PROFILE_SAFE_COLUMNS } from "@/lib/db-columns";
 
 // -------- Varadhi-only login (completely independent of MBR auth flow)
 // mode: "link" sends a click-to-login magic link; "otp" sends a 6-digit code
@@ -150,7 +151,7 @@ export const getMyVaradhiProfile = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data } = await context.supabase
       .from("varadhi_profiles")
-      .select("*")
+      .select(VARADHI_PROFILE_SAFE_COLUMNS)
       .eq("user_id", context.userId)
       .maybeSingle();
     return { profile: data as VaradhiProfile | null };
@@ -164,7 +165,7 @@ export const upsertVaradhiProfile = createServerFn({ method: "POST" })
     const { data: out, error } = await context.supabase
       .from("varadhi_profiles")
       .upsert(row as any, { onConflict: "user_id" })
-      .select()
+      .select(VARADHI_PROFILE_SAFE_COLUMNS)
       .single();
     if (error) throw new Error(error.message);
     return { profile: out };
@@ -192,7 +193,7 @@ export const getListing = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     if (!item) return { listing: null, seller: null, nearby: [] };
     const { data: seller } = await context.supabase
-      .from("varadhi_profiles").select("*").eq("user_id", item.seller_id).maybeSingle();
+      .from("varadhi_profiles").select(VARADHI_PROFILE_SAFE_COLUMNS).eq("user_id", item.seller_id).maybeSingle();
     // Simple nearby transport: online providers within same city (fallback: all online transport)
     let nearbyQ = context.supabase
       .from("varadhi_providers").select("*")
