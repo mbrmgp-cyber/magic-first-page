@@ -36,22 +36,56 @@ const FAQS = [
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "MBR Platform — Management of Board Resources" },
+      { title: "MBR Platform — Society Management & Local Marketplace" },
       {
         name: "description",
         content:
-          "The MBR Platform hosts a suite of institutional applications — MBR App for society & committee administration, and Vaaradhi (coming soon).",
+          "MBR Platform runs the MBR App for society, committee, election, accounts and chit management in India, and Vaaradhi, a Telugu-first local marketplace.",
       },
-      { property: "og:title", content: "MBR Platform — Management of Board Resources" },
+      { property: "og:title", content: "MBR Platform — Society Management & Local Marketplace" },
       {
         property: "og:description",
         content:
-          "A premium platform for institutional software. MBR App and Vaaradhi, unified under mbrplatform.com.",
+          "Member registration, ID cards, committees, elections, accounts, loans and chit auctions on the MBR App — plus Vaaradhi, a Telugu local marketplace.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebSite",
+              name: "MBR Platform",
+              url: "https://mbrplatform.com",
+              inLanguage: ["en", "te"],
+            },
+            {
+              "@type": "SoftwareApplication",
+              name: "MBR App",
+              applicationCategory: "BusinessApplication",
+              operatingSystem: "Web",
+              url: "https://mbrplatform.com/mbr",
+              description:
+                "Society and committee administration: member registration, QR ID cards, elections, accounts, loans, chit auctions, disciplinary workflow and member chat.",
+            },
+            {
+              "@type": "FAQPage",
+              mainEntity: FAQS.map(({ q, a }) => ({
+                "@type": "Question",
+                name: q,
+                acceptedAnswer: { "@type": "Answer", text: a },
+              })),
+            },
+          ],
+        }),
+      },
+    ],
   }),
+
   validateSearch: (s: Record<string, unknown>): { code?: string } => {
     const code = typeof s.code === "string" && s.code.trim() ? s.code.trim() : undefined;
     return code ? { code } : {};
