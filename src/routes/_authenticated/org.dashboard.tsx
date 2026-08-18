@@ -142,7 +142,7 @@ function Dashboard() {
     try {
       const orgId = orgQ.data.org.id;
       const [members, committee, rules, events] = await Promise.all([
-        supabase.from("members").select(MEMBER_SAFE_COLUMNS).eq("org_id", orgId),
+        supabase.from("members").select(MEMBER_SAFE_COLUMNS as "*").eq("org_id", orgId),
         supabase.from("committee_members").select("*").eq("org_id", orgId),
         supabase.from("org_rules").select("*").eq("org_id", orgId),
         supabase.from("org_milestones").select("*").eq("org_id", orgId),

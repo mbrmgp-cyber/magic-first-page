@@ -27,7 +27,7 @@ export const listOrgMembersFull = createServerFn({ method: "GET" })
     if (!orgId) return { members: [], orgId: null, org: null };
     const { data, error } = await supabase
       .from("members")
-      .select(`${MEMBER_SAFE_COLUMNS}, introducer:introducer_member_id(id,name)`)
+      .select(`${MEMBER_SAFE_COLUMNS}, introducer:introducer_member_id(id,name)` as "*")
       .eq("org_id", orgId)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
