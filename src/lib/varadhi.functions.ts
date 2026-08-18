@@ -53,8 +53,9 @@ export const sendVaradhiLoginLink = createServerFn({ method: "POST" })
       import("@/lib/email-templates/magic-link"),
     ]);
     const siteName = "VAARADHI APP";
+    const otpLength = emailOtp?.length ?? 6;
     const note = mode === "otp"
-      ? `Your one-time code / OTP: ${emailOtp}\nమీ OTP కోడ్: ${emailOtp}`
+      ? `Your ${otpLength}-digit one-time code / OTP: ${emailOtp}\nమీ ${otpLength} అంకెల OTP కోడ్: ${emailOtp}`
       : undefined;
     const element = React.createElement(MagicLinkEmail, { siteName, confirmationUrl, note });
     const html = await render(element);
@@ -79,7 +80,7 @@ export const sendVaradhiLoginLink = createServerFn({ method: "POST" })
       { apiKey, idempotencyKey: messageId }
     );
 
-    return { sent: true as const, mode };
+    return { sent: true as const, mode, otpLength };
   });
 
 export type VaradhiProfile = {
