@@ -2,8 +2,6 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { ArrowRight, Building2, Sparkles, ShieldCheck, Layers, Globe2 } from "lucide-react";
 import logo from "@/assets/mbr-logo.png.asset.json";
-import { supabase } from "@/integrations/supabase/client";
-import { routeAfterLogin } from "@/lib/post-login-redirect";
 
 const FAQS = [
   {
