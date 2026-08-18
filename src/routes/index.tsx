@@ -5,6 +5,33 @@ import logo from "@/assets/mbr-logo.png.asset.json";
 import { supabase } from "@/integrations/supabase/client";
 import { routeAfterLogin } from "@/lib/post-login-redirect";
 
+const FAQS = [
+  {
+    q: "What is the MBR Platform?",
+    a: "MBR Platform (Management of Board Resources) is an Indian institutional software platform hosted at mbrplatform.com. It currently runs two applications: the MBR App for registered societies and committees, and Vaaradhi, a Telugu-first local marketplace.",
+  },
+  {
+    q: "How does a member join a society on the MBR App?",
+    a: "The society shares its QR code or join link. The member fills in name, father's name, village, PIN code, email, phone, blood group, and introducer, and uploads a photo and payment receipt. The committee reviews the request and, on approval, the member receives a permanent society ID and a login link to their dashboard.",
+  },
+  {
+    q: "Can members pay the society through the app?",
+    a: "Yes. Administrators save the society's bank details once, and the member dashboard shows a Pay to Society card with the account name, number, IFSC, and branch, so members can transfer and upload the receipt.",
+  },
+  {
+    q: "Is member data private?",
+    a: "Yes. Data is protected with row-level security and role-based access. Bank account numbers and identity documents are readable only by authorised administrators, not by other members, and every approval is recorded against the user who made it.",
+  },
+  {
+    q: "Does the platform work in Telugu?",
+    a: "Yes. Both apps are bilingual. Members and sellers can read and enter content in Telugu or English, and the interface follows the language selected on the device.",
+  },
+  {
+    q: "What does Vaaradhi do?",
+    a: "Vaaradhi connects local sellers, transporters, and service providers with buyers around them. Listings show photos, price, unit, stock status, and location, and buyers can browse by state, district, and mandal or see updates within about 100 km of where they are.",
+  },
+];
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
