@@ -36,6 +36,7 @@ function VaradhiAuthPage() {
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
   const [otp, setOtp] = useState("");
+  const [otpLength, setOtpLength] = useState(6);
   const [busy, setBusy] = useState(false);
   const [allowRedirect, setAllowRedirect] = useState(true);
 
@@ -82,14 +83,15 @@ function VaradhiAuthPage() {
       toast.error((res as any)?.reason || "OTP పంపడం విఫలమైంది");
       return;
     }
+    setOtpLength(Number((res as any)?.otpLength) || 6);
     setStep("otp");
-    toast.success("మీ ఈమెయిల్‌కు 6 అంకెల కోడ్ పంపాం");
+    toast.success("మీ ఈమెయిల్‌కు కోడ్ పంపాం");
   }
 
   async function verifyOtp(e?: React.FormEvent, code?: string) {
     e?.preventDefault();
     const token = (code ?? otp).trim();
-    if (token.length !== 6) return;
+    if (token.length < 6) return;
     setBusy(true);
     const { error } = await supabase.auth.verifyOtp({
       email: email.trim().toLowerCase(),
@@ -105,9 +107,9 @@ function VaradhiAuthPage() {
   }
 
   useEffect(() => {
-    if (step === "otp" && otp.length === 6 && !busy) verifyOtp(undefined, otp);
+    if (step === "otp" && otp.length === otpLength && !busy) verifyOtp(undefined, otp);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [otp, step]);
+  }, [otp, step, otpLength]);
 
   async function setNewPassword(e: React.FormEvent) {
     e.preventDefault();
@@ -217,25 +219,25 @@ function VaradhiAuthPage() {
         {step === "otp" && (
           <form onSubmit={verifyOtp} className="mt-6 space-y-4">
             <div className="rounded-xl border border-[#f97316]/30 bg-[#f97316]/10 p-3 text-center text-[#1e3a8a]">
-              <p className="text-xs">6 అంకెల కోడ్ పంపాం — <b>{email}</b></p>
+              <p className="text-xs">{otpLength} అంకెల కోడ్ పంపాం — <b>{email}</b></p>
             </div>
             <input
               inputMode="numeric"
               pattern="[0-9]*"
               autoComplete="one-time-code"
               autoFocus
-              maxLength={6}
+              maxLength={otpLength}
               required
               value={otp}
-              onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, otpLength))}
               onPaste={(e) => {
-                const t = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+                const t = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, otpLength);
                 if (t) { e.preventDefault(); setOtp(t); }
               }}
-              placeholder="123456"
+              placeholder={"1".repeat(otpLength)}
               className="w-full rounded-xl border border-[#1e3a8a]/20 bg-white px-3 py-3 text-center text-2xl tracking-[0.5em] font-bold text-[#1e3a8a] outline-none focus:border-[#f97316]"
             />
-            <button type="submit" disabled={busy || otp.length !== 6} className="w-full rounded-xl bg-[#f97316] py-3 font-semibold text-white shadow-lg disabled:opacity-60">
+            <button type="submit" disabled={busy || otp.length !== otpLength} className="w-full rounded-xl bg-[#f97316] py-3 font-semibold text-white shadow-lg disabled:opacity-60">
               {busy ? "వెరిఫై చేస్తున్నాం…" : "వెరిఫై చేయండి"}
             </button>
             <div className="flex justify-between text-xs">
