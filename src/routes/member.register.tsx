@@ -486,22 +486,23 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
             <p className="text-xs text-zinc-400">{orgName}</p>
           </div>
           <div className="space-y-2">
-            <Label className="text-zinc-200">{lt("Your Member ID (e.g. 0002)", "మీ సభ్యుడి ఐడి (ఉదా. 0002)")}</Label>
-            <div className="flex gap-2 items-stretch">
-              <div className="flex items-center px-3 rounded-md bg-zinc-900 border border-zinc-700 text-zinc-400 text-sm font-mono">
-                {orgLetter || code}/
-              </div>
-              <Input value={memberSeq} inputMode="numeric" maxLength={4}
-                placeholder="0002"
-                className="bg-zinc-900 border-zinc-700 text-white font-mono tracking-widest text-center"
-                onChange={(e) => setMemberSeq(e.target.value.replace(/[^0-9]/g, ""))} />
-            </div>
-            <p className="text-[11px] text-zinc-500">{lt("A login link will be sent to your registered email.", "మీ రిజిస్టర్డ్ ఈమెయిల్‌కు లాగిన్ లింక్ పంపబడుతుంది.")}</p>
+            <p className="text-sm text-zinc-300">
+              {lt(
+                "Login with your email or phone number and password.",
+                "మీ ఈమెయిల్ లేదా ఫోన్ నంబర్ మరియు పాస్‌వర్డ్‌తో లాగిన్ అవ్వండి."
+              )}
+            </p>
+            <p className="text-[11px] text-zinc-500">
+              {lt(
+                "New user or forgot password? Register with an OTP sent to your registered email.",
+                "కొత్తవారా లేదా పాస్‌వర్డ్ మర్చిపోయారా? మీ రిజిస్టర్డ్ ఈమెయిల్‌కు వచ్చే OTPతో రిజిస్టర్ అవ్వండి."
+              )}
+            </p>
           </div>
-          <Button onClick={onSendMemberLogin} disabled={loading || !memberSeq}
+          <Button onClick={() => navigate({ to: "/auth" })}
             className="w-full h-11 bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white">
-            {loading ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <LogIn className="h-4 w-4 mr-2" />}
-            {lt("Send Login Link", "లాగిన్ లింక్ పంపండి")}
+            <LogIn className="h-4 w-4 mr-2" />
+            {lt("Go to Login", "లాగిన్‌కు వెళ్లండి")}
           </Button>
         </Card>
       </div>
