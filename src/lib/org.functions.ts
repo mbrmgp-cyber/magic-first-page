@@ -1324,3 +1324,111 @@ export const updateOrgBankDetails = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { org };
   });
+
+// -------- MBR OTP + password auth (no magic links) --------
+
+async function resolveMbrLoginEmailFor(supabaseAdmin: any, identifier: string) {
+  const raw = (identifier || "").trim();
+  if (!raw) return null;
+  if (raw.includes("@")) return raw.toLowerCase();
+  const digits = raw.replace(/\D/g, "");
+  if (digits.length < 6) return null;
+  const last10 = digits.slice(-10);
+  const { data: rows } = await supabaseAdmin
+    .from("members")
+    .select("email, phone, created_at")
+    .ilike("phone", `%${last10}%`)
+    .order("created_at", { ascending: false });
+  const hit = (rows ?? []).find((r: any) => r?.email && String(r.phone || "").replace(/\D/g, "").endsWith(last10));
+  return hit?.email ? String(hit.email).toLowerCase() : null;
+}
+
+async function sendMbrOtpEmail(supabaseAdmin: any, email: string) {
+  const { data: link, error } = await supabaseAdmin.auth.admin.generateLink({
+    type: "magiclink",
+    email,
+    options: { redirectTo: `${PUBLIC_APP_ORIGIN}/auth` },
+  });
+  if (error) throw new Error(error.message);
+  const otp = (link?.properties as any)?.email_otp as string | undefined;
+  const confirmationUrl = link?.properties?.action_link as string | undefined;
+  if (!otp) throw new Error("Could not generate OTP");
+
+  const [{ sendLovableEmail }, React, { render }, { MagicLinkEmail }] = await Promise.all([
+    import("@lovable.dev/email-js"),
+    import("react"),
+    import("react-email"),
+    import("@/lib/email-templates/magic-link"),
+  ]);
+  const siteName = "MBR APP";
+  const note = `Your ${otp.length}-digit one-time code / OTP: ${otp}\nమీ ${otp.length} అంకెల OTP కోడ్: ${otp}`;
+  const element = React.createElement(MagicLinkEmail, { siteName, confirmationUrl: confirmationUrl ?? "", note });
+  const html = await render(element);
+  const text = await render(element, { plainText: true });
+  const apiKey = process.env.LOVABLE_API_KEY;
+  if (!apiKey) throw new Error("Email service is not configured");
+  const messageId = crypto.randomUUID();
+  await sendLovableEmail(
+    {
+      to: email,
+      from: `${siteName} <noreply@notify.mbrplatform.com>`,
+      sender_domain: "notify.mbrplatform.com",
+      subject: `MBR APP — Login code ${otp}`,
+      html,
+      text,
+      purpose: "transactional",
+      label: "mbr_otp",
+      message_id: messageId,
+      idempotency_key: messageId,
+      unsubscribe_token: `mbr-otp-${messageId}`,
+    },
+    { apiKey, idempotencyKey: messageId }
+  );
+  return otp.length;
+}
+
+/** Email or phone -> the email that owns the MBR account (for password login). */
+export const resolveMbrLoginEmail = createServerFn({ method: "POST" })
+  .inputValidator((d: { identifier: string }) => d)
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const email = await resolveMbrLoginEmailFor(supabaseAdmin, data.identifier);
+    return email ? { found: true as const, email } : { found: false as const };
+  });
+
+/** Sends a numeric OTP for MBR registration / password reset. */
+export const sendMbrOtp = createServerFn({ method: "POST" })
+  .inputValidator((d: { identifier: string }) => d)
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const email = await resolveMbrLoginEmailFor(supabaseAdmin, data.identifier);
+    if (!email) return { sent: false as const, reason: "not_found" as const };
+
+    let userId = await findAuthUserIdByEmail(supabaseAdmin, email);
+    if (!userId) {
+      const { data: rows } = await supabaseAdmin
+        .from("members")
+        .select("id, email, user_id, status, created_at")
+        .ilike("email", email)
+        .order("created_at", { ascending: false });
+      const member: any = (rows ?? [])[0];
+      if (!member) return { sent: false as const, reason: "not_found" as const };
+      userId = member.user_id ?? null;
+      if (!userId) {
+        const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({
+          email,
+          password: `MBR-${crypto.randomUUID()}`,
+          email_confirm: true,
+          user_metadata: { role: "member" },
+        });
+        if (createError) throw new Error(createError.message);
+        userId = created.user?.id ?? null;
+      }
+      if (userId && !member.user_id) {
+        await supabaseAdmin.from("members").update({ user_id: userId }).eq("id", member.id);
+      }
+    }
+
+    const otpLength = await sendMbrOtpEmail(supabaseAdmin, email);
+    return { sent: true as const, email, otpLength };
+  });
