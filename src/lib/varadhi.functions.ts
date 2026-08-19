@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { PUBLIC_APP_ORIGIN } from "@/lib/public-url";
-import { VARADHI_PROFILE_SAFE_COLUMNS } from "@/lib/db-columns";
+import { VARADHI_PROFILE_SAFE_COLUMNS, VARADHI_LISTING_SAFE_COLUMNS } from "@/lib/db-columns";
 
 // -------- Varadhi-only login (completely independent of MBR auth flow)
 // mode: "link" sends a click-to-login magic link; "otp" sends a 6-digit code
