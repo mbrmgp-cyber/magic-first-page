@@ -177,8 +177,22 @@ export const listListings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { category?: string; mine?: boolean } = {}) => d)
   .handler(async ({ data, context }) => {
-    let q = context.supabase.from("varadhi_listings").select("*").order("created_at", { ascending: false });
-    if (data.mine) q = q.eq("seller_id", context.userId);
+    if (data.mine) {
+      // Owners may see their own private fields (street address, contact phone).
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      let mq = supabaseAdmin
+        .from("varadhi_listings").select("*")
+        .eq("seller_id", context.userId)
+        .order("created_at", { ascending: false });
+      if (data.category) mq = mq.eq("category", data.category);
+      const { data: mine, error: mineErr } = await mq.limit(200);
+      if (mineErr) throw new Error(mineErr.message);
+      return { listings: (mine ?? []) as VaradhiListing[] };
+    }
+    let q = context.supabase
+      .from("varadhi_listings")
+      .select(VARADHI_LISTING_SAFE_COLUMNS as "*")
+      .order("created_at", { ascending: false });
     if (data.category) q = q.eq("category", data.category);
     const { data: rows, error } = await q.limit(200);
     if (error) throw new Error(error.message);
@@ -190,11 +204,12 @@ export const getListing = createServerFn({ method: "GET" })
   .inputValidator((d: { id: string }) => d)
   .handler(async ({ data, context }) => {
     const { data: item, error } = await context.supabase
-      .from("varadhi_listings").select("*").eq("id", data.id).maybeSingle();
+      .from("varadhi_listings").select(VARADHI_LISTING_SAFE_COLUMNS as "*").eq("id", data.id).maybeSingle();
     if (error) throw new Error(error.message);
     if (!item) return { listing: null, seller: null, nearby: [] };
     const { data: seller } = await context.supabase
       .from("varadhi_profiles").select(VARADHI_PROFILE_SAFE_COLUMNS as "*").eq("user_id", item.seller_id).maybeSingle();
+
     // Simple nearby transport: online providers within same city (fallback: all online transport)
     let nearbyQ = context.supabase
       .from("varadhi_providers").select("*")
