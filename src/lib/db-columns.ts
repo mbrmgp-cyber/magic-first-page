@@ -67,3 +67,13 @@ export const VARADHI_PROFILE_SAFE_COLUMNS = [
   "referral_code_used",
   "referred_partner_id",
 ].join(", ");
+
+// Listing columns readable by any signed-in browser. Street address and the
+// raw contact number are privileged and only reachable via owner/admin paths.
+export const VARADHI_LISTING_SAFE_COLUMNS = [
+  "id", "seller_id", "category", "sub_category", "title", "description", "price",
+  "unit", "images", "lat", "lng", "city", "stock_status", "click_count",
+  "created_at", "updated_at", "post_type", "item_condition", "pickup_location",
+  "village", "mandal", "taluk", "district", "state", "pincode", "experience",
+  "service_mode", "service_timing", "service_area", "blood_group", "stock_qty",
+].join(", ");
