@@ -227,7 +227,7 @@ export const upsertListing = createServerFn({ method: "POST" })
     await points.assertPointsAvailable(context.supabase, context.userId);
     const row = { ...data, seller_id: context.userId };
     const { data: out, error } = await context.supabase
-      .from("varadhi_listings").upsert(row as any).select().single();
+      .from("varadhi_listings").upsert(row as any).select(VARADHI_LISTING_SAFE_COLUMNS as "*").single();
     if (error) throw new Error(error.message);
     await points.awardPoint(context.supabase, context.userId, "upload", "listing", (out as any)?.id);
     return { listing: out };
