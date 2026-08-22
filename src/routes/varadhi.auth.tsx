@@ -111,6 +111,23 @@ function VaradhiAuthPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [otp, step, otpLength]);
 
+  async function forgotPassword() {
+    if (!email.trim()) {
+      toast.error("ఈమెయిల్ చిరునామా ఎంటర్ చేయండి");
+      return;
+    }
+    setBusy(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+      redirectTo: `${window.location.origin}/varadhi/auth`,
+    });
+    setBusy(false);
+    if (error) {
+      toast.error(error.message || "Reset link పంపలేకపోయాం");
+      return;
+    }
+    toast.success("మీ ఈమెయిల్‌కు పాస్‌వర్డ్ రీసెట్ లింక్ పంపాం");
+  }
+
   async function setNewPassword(e: React.FormEvent) {
     e.preventDefault();
     if (password.length < 6) {
@@ -133,6 +150,7 @@ function VaradhiAuthPage() {
     navigate({ to: "/varadhi/onboard", replace: true });
   }
 
+
   const inputCls =
     "w-full rounded-xl border border-[#1e3a8a]/20 bg-white pl-9 pr-3 py-2.5 text-sm outline-none focus:border-[#f97316]";
 
@@ -147,24 +165,18 @@ function VaradhiAuthPage() {
         </div>
 
         {step === "form" && (
-          <div className="mt-5 grid grid-cols-2 gap-2 rounded-xl bg-[#1e3a8a]/5 p-1">
+          <div className="mt-5">
             <button
               type="button"
-              onClick={() => { setTab("login"); setOtp(""); }}
-              className={`flex items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-semibold transition ${
-                tab === "login" ? "bg-[#f97316] text-white shadow" : "text-[#1e3a8a]/70"
+              disabled={tab === "register"}
+              onClick={() => { setTab("register"); setPassword(""); setPassword2(""); setOtp(""); }}
+              className={`w-full flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-xs font-semibold transition ${
+                tab === "register"
+                  ? "bg-[#f97316] text-white shadow"
+                  : "bg-[#1e3a8a]/5 text-[#1e3a8a] hover:bg-[#1e3a8a]/10"
               }`}
             >
-              <Lock className="h-3.5 w-3.5" /> లాగిన్
-            </button>
-            <button
-              type="button"
-              onClick={() => { setTab("register"); setPassword(""); setPassword2(""); }}
-              className={`flex items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-semibold transition ${
-                tab === "register" ? "bg-[#f97316] text-white shadow" : "text-[#1e3a8a]/70"
-              }`}
-            >
-              <UserPlus className="h-3.5 w-3.5" /> కొత్త రిజిస్ట్రేషన్
+              <UserPlus className="h-3.5 w-3.5" /> New Registration
             </button>
           </div>
         )}
@@ -190,10 +202,11 @@ function VaradhiAuthPage() {
             </button>
             <button
               type="button"
-              onClick={() => { setTab("register"); setPassword(""); setPassword2(""); }}
-              className="w-full text-center text-[11px] text-[#1e3a8a]/70 underline"
+              onClick={forgotPassword}
+              disabled={busy}
+              className="w-full text-center text-[11px] text-blue-600 hover:text-blue-700 underline"
             >
-              పాస్‌వర్డ్ మర్చిపోయారా? / కొత్తవారా? — OTPతో రిజిస్టర్ చేయండి
+              Forgot Password?
             </button>
           </form>
         )}
@@ -213,6 +226,13 @@ function VaradhiAuthPage() {
             <p className="text-center text-[11px] text-[#1e3a8a]/60">
               OTP వెరిఫై అయిన తర్వాత మీ పాస్‌వర్డ్ సెట్ చేసుకోండి. తర్వాత ఈమెయిల్ + పాస్‌వర్డ్‌తో లాగిన్.
             </p>
+            <button
+              type="button"
+              onClick={() => { setTab("login"); setOtp(""); }}
+              className="w-full text-center text-[11px] text-blue-600 hover:text-blue-700 underline"
+            >
+              Already have an account? Login
+            </button>
           </form>
         )}
 
