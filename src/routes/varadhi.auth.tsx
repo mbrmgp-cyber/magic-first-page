@@ -165,24 +165,18 @@ function VaradhiAuthPage() {
         </div>
 
         {step === "form" && (
-          <div className="mt-5 grid grid-cols-2 gap-2 rounded-xl bg-[#1e3a8a]/5 p-1">
+          <div className="mt-5">
             <button
               type="button"
-              onClick={() => { setTab("login"); setOtp(""); }}
-              className={`flex items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-semibold transition ${
-                tab === "login" ? "bg-[#f97316] text-white shadow" : "text-[#1e3a8a]/70"
+              disabled={tab === "register"}
+              onClick={() => { setTab("register"); setPassword(""); setPassword2(""); setOtp(""); }}
+              className={`w-full flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-xs font-semibold transition ${
+                tab === "register"
+                  ? "bg-[#f97316] text-white shadow"
+                  : "bg-[#1e3a8a]/5 text-[#1e3a8a] hover:bg-[#1e3a8a]/10"
               }`}
             >
-              <Lock className="h-3.5 w-3.5" /> లాగిన్
-            </button>
-            <button
-              type="button"
-              onClick={() => { setTab("register"); setPassword(""); setPassword2(""); }}
-              className={`flex items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-semibold transition ${
-                tab === "register" ? "bg-[#f97316] text-white shadow" : "text-[#1e3a8a]/70"
-              }`}
-            >
-              <UserPlus className="h-3.5 w-3.5" /> కొత్త రిజిస్ట్రేషన్
+              <UserPlus className="h-3.5 w-3.5" /> New Registration
             </button>
           </div>
         )}
@@ -208,10 +202,11 @@ function VaradhiAuthPage() {
             </button>
             <button
               type="button"
-              onClick={() => { setTab("register"); setPassword(""); setPassword2(""); }}
-              className="w-full text-center text-[11px] text-[#1e3a8a]/70 underline"
+              onClick={forgotPassword}
+              disabled={busy}
+              className="w-full text-center text-[11px] text-blue-600 hover:text-blue-700 underline"
             >
-              పాస్‌వర్డ్ మర్చిపోయారా? / కొత్తవారా? — OTPతో రిజిస్టర్ చేయండి
+              Forgot Password?
             </button>
           </form>
         )}
