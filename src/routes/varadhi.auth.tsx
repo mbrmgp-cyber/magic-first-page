@@ -226,6 +226,13 @@ function VaradhiAuthPage() {
             <p className="text-center text-[11px] text-[#1e3a8a]/60">
               OTP వెరిఫై అయిన తర్వాత మీ పాస్‌వర్డ్ సెట్ చేసుకోండి. తర్వాత ఈమెయిల్ + పాస్‌వర్డ్‌తో లాగిన్.
             </p>
+            <button
+              type="button"
+              onClick={() => { setTab("login"); setOtp(""); }}
+              className="w-full text-center text-[11px] text-blue-600 hover:text-blue-700 underline"
+            >
+              Already have an account? Login
+            </button>
           </form>
         )}
 
