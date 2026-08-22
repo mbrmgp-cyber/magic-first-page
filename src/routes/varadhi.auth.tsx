@@ -111,6 +111,23 @@ function VaradhiAuthPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [otp, step, otpLength]);
 
+  async function forgotPassword() {
+    if (!email.trim()) {
+      toast.error("ఈమెయిల్ చిరునామా ఎంటర్ చేయండి");
+      return;
+    }
+    setBusy(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+      redirectTo: `${window.location.origin}/varadhi/auth`,
+    });
+    setBusy(false);
+    if (error) {
+      toast.error(error.message || "Reset link పంపలేకపోయాం");
+      return;
+    }
+    toast.success("మీ ఈమెయిల్‌కు పాస్‌వర్డ్ రీసెట్ లింక్ పంపాం");
+  }
+
   async function setNewPassword(e: React.FormEvent) {
     e.preventDefault();
     if (password.length < 6) {
@@ -132,6 +149,7 @@ function VaradhiAuthPage() {
     setAllowRedirect(true);
     navigate({ to: "/varadhi/onboard", replace: true });
   }
+
 
   const inputCls =
     "w-full rounded-xl border border-[#1e3a8a]/20 bg-white pl-9 pr-3 py-2.5 text-sm outline-none focus:border-[#f97316]";
