@@ -16,6 +16,7 @@ import { getMyAreaAdminStats } from "@/lib/varadhi-partner.functions";
 import { toast } from "sonner";
 import { Plus, Trash2, Camera, Pencil, Save } from "lucide-react";
 import { VaradhiRegistrationForm } from "@/components/varadhi/RegistrationForm";
+import { VaradhiOccupationPanel } from "@/components/varadhi/OccupationPanel";
 
 export const Route = createFileRoute("/varadhi/dashboard")({
   component: UpdateBoard,
@@ -177,12 +178,17 @@ function UpdateBoard() {
   const [hasProfile, setHasProfile] = useState(false);
   const [showRegistration, setShowRegistration] = useState(false);
   const [postType, setPostType] = useState("business");
+  const [status, setStatus] = useState<string | null>(null);
+  const [occupation, setOccupation] = useState("");
 
   const loadProfile = async () => {
     const r = await getProfile();
-    setName(r.profile?.full_name ?? "");
-    setHasProfile(!!r.profile);
-    setShowRegistration(!r.profile);
+    const p: any = r.profile;
+    setName(p?.full_name ?? "");
+    setHasProfile(!!p);
+    setStatus(p?.verification_status ?? null);
+    setOccupation(p?.occupation ?? "");
+    setShowRegistration(!p);
     setReady(true);
   };
 
@@ -235,6 +241,9 @@ function UpdateBoard() {
         <>
           <AreaAdminCounts />
 
+          {/* వృత్తిని బట్టి వ్యక్తిగత డాష్‌బోర్డ్ — ఆమోదం పొందిన తర్వాత మాత్రమే */}
+          {status === "approved" && <VaradhiOccupationPanel occupation={occupation} />}
+
           {/* Post type */}
           <div className="grid grid-cols-4 gap-1.5">
             {POST_TYPES.map((p) => (
@@ -250,17 +259,6 @@ function UpdateBoard() {
           {postType === "transport" ? <TransportSection /> : <PostSection postType={postType} />}
         </>
       )}
-
-
-      <Link to="/varadhi/subscription"
-        className="block text-center rounded-xl bg-[#1e3a8a] py-3 text-white font-semibold shadow">
-        సబ్‌స్క్రిప్షన్ & రిన్యూవల్
-      </Link>
-
-      <Link to="/varadhi/partner"
-        className="mt-2 block text-center rounded-xl bg-gradient-to-r from-[#16a34a] to-[#0d9488] py-3 text-white font-semibold shadow">
-        పార్ట్‌నర్ డాష్‌బోర్డ్ (రెఫరల్ & కమిషన్)
-      </Link>
     </div>
   );
 }

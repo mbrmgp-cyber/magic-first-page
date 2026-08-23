@@ -244,6 +244,22 @@ export const toggleListingStock = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// Quick inventory edit from the Update Board (stock quantity / price only).
+export const updateListingInventory = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; stock_qty?: string | null; price?: number | null }) => d)
+  .handler(async ({ data, context }) => {
+    const patch: Record<string, unknown> = {};
+    if (data.stock_qty !== undefined) patch.stock_qty = data.stock_qty;
+    if (data.price !== undefined) patch.price = data.price;
+    const { error } = await context.supabase
+      .from("varadhi_listings").update(patch as any)
+      .eq("id", data.id).eq("seller_id", context.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+
 export const deleteListing = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string }) => d)
