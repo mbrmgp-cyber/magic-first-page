@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, Link, useLocation } from "@tanstack/react-router";
-import { Home, Search, LayoutDashboard, User, ShieldCheck } from "lucide-react";
+import { Home, Search, LayoutDashboard, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useServerFn } from "@tanstack/react-start";
@@ -76,30 +76,31 @@ function VaradhiLayout() {
           </div>
         </div>
       )}
-      <VaradhiBottomNav />
+      <VaradhiBottomNav isAdmin={isAdmin} />
     </div>
   );
 }
 
 
 
-function VaradhiBottomNav() {
+function VaradhiBottomNav({ isAdmin }: { isAdmin: boolean }) {
   const loc = useLocation();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+  // Registration/profile now lives inside the Update Board, and the admin
+  // panel is only offered to users with admin access.
   const items = [
     { to: "/varadhi", icon: Home, label: "హోమ్" },
     { to: "/varadhi/browse/fresh", icon: Search, label: "వెతకండి" },
     { to: "/varadhi/dashboard", icon: LayoutDashboard, label: "అప్‌డేట్ బోర్డు" },
-    { to: "/varadhi/admin", icon: ShieldCheck, label: "అడ్మిన్ ప్యానెల్" },
-    { to: "/varadhi/onboard", icon: User, label: "ప్రొఫైల్" },
+    ...(isAdmin ? [{ to: "/varadhi/admin", icon: ShieldCheck, label: "అడ్మిన్ ప్యానెల్" }] : []),
   ];
   const nav = (
     <nav
       className="fixed inset-x-0 bottom-0 z-50 bg-white border-t border-[#1e3a8a]/10 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]"
       style={{ position: "fixed", insetInline: 0, bottom: 0, paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <div className="mx-auto max-w-md grid grid-cols-5">
+      <div className="mx-auto max-w-md grid" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}>
         {items.map((it) => {
           const active = it.to === "/varadhi" ? loc.pathname === "/varadhi" : loc.pathname.startsWith(it.to);
           const Icon = it.icon;
