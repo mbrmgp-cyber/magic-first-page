@@ -16,6 +16,7 @@ import { getMyAreaAdminStats } from "@/lib/varadhi-partner.functions";
 import { toast } from "sonner";
 import { Plus, Trash2, Camera, Pencil, Save } from "lucide-react";
 import { VaradhiRegistrationForm } from "@/components/varadhi/RegistrationForm";
+import { VaradhiOccupationPanel } from "@/components/varadhi/OccupationPanel";
 
 export const Route = createFileRoute("/varadhi/dashboard")({
   component: UpdateBoard,

@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, Link, useLocation } from "@tanstack/react-router";
-import { Home, Search, LayoutDashboard, ShieldCheck } from "lucide-react";
+import { Home, Search, LayoutDashboard, ShieldCheck, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useServerFn } from "@tanstack/react-start";
@@ -93,6 +93,7 @@ function VaradhiBottomNav({ isAdmin }: { isAdmin: boolean }) {
     { to: "/varadhi", icon: Home, label: "హోమ్" },
     { to: "/varadhi/browse/fresh", icon: Search, label: "వెతకండి" },
     { to: "/varadhi/dashboard", icon: LayoutDashboard, label: "అప్‌డేట్ బోర్డు" },
+    { to: "/varadhi/profile", icon: User, label: "ప్రొఫైల్" },
     ...(isAdmin ? [{ to: "/varadhi/admin", icon: ShieldCheck, label: "అడ్మిన్ ప్యానెల్" }] : []),
   ];
   const nav = (
