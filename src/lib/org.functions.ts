@@ -1345,7 +1345,7 @@ async function sendMbrOtpEmail(supabaseAdmin: any, email: string) {
   });
   if (error) throw new Error(error.message);
   const otp = (link?.properties as any)?.email_otp as string | undefined;
-  const confirmationUrl = link?.properties?.action_link as string | undefined;
+  const confirmationUrl = `${PUBLIC_APP_ORIGIN}/auth`;
   if (!otp) throw new Error("Could not generate OTP");
 
   const [{ sendLovableEmail }, React, { render }, { MagicLinkEmail }] = await Promise.all([
