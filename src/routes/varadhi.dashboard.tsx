@@ -177,12 +177,17 @@ function UpdateBoard() {
   const [hasProfile, setHasProfile] = useState(false);
   const [showRegistration, setShowRegistration] = useState(false);
   const [postType, setPostType] = useState("business");
+  const [status, setStatus] = useState<string | null>(null);
+  const [occupation, setOccupation] = useState("");
 
   const loadProfile = async () => {
     const r = await getProfile();
-    setName(r.profile?.full_name ?? "");
-    setHasProfile(!!r.profile);
-    setShowRegistration(!r.profile);
+    const p: any = r.profile;
+    setName(p?.full_name ?? "");
+    setHasProfile(!!p);
+    setStatus(p?.verification_status ?? null);
+    setOccupation(p?.occupation ?? "");
+    setShowRegistration(!p);
     setReady(true);
   };
 
