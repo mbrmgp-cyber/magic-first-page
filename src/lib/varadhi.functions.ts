@@ -10,7 +10,7 @@ export const sendVaradhiLoginLink = createServerFn({ method: "POST" })
   .inputValidator((d: { email: string; mode?: "link" | "otp" }) => d)
   .handler(async ({ data }) => {
     const email = data.email.trim().toLowerCase();
-    const mode = data.mode ?? "link";
+    const mode = "otp" as const;
     if (!email) return { sent: false as const, reason: "missing_email" as const };
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -55,9 +55,7 @@ export const sendVaradhiLoginLink = createServerFn({ method: "POST" })
     ]);
     const siteName = "VAARADHI APP";
     const otpLength = emailOtp?.length ?? 6;
-    const note = mode === "otp"
-      ? `Your ${otpLength}-digit one-time code / OTP: ${emailOtp}\nమీ ${otpLength} అంకెల OTP కోడ్: ${emailOtp}`
-      : undefined;
+    const note = `Your ${otpLength}-digit one-time code / OTP: ${emailOtp}\nమీ ${otpLength} అంకెల OTP కోడ్: ${emailOtp}`;
     const element = React.createElement(MagicLinkEmail, { siteName, confirmationUrl, note });
     const html = await render(element);
     const text = await render(element, { plainText: true });
