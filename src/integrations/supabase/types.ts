@@ -2117,6 +2117,24 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_super_admin_seed: {
+        Row: {
+          created_at: string
+          email: string
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: []
+      }
       subscription_payments: {
         Row: {
           amount: number
