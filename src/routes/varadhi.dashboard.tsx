@@ -173,16 +173,23 @@ function UpdateBoard() {
   const getProfile = useServerFn(getMyVaradhiProfile);
   const [name, setName] = useState("");
   const [ready, setReady] = useState(false);
+  const [hasProfile, setHasProfile] = useState(false);
+  const [showRegistration, setShowRegistration] = useState(false);
   const [postType, setPostType] = useState("business");
+
+  const loadProfile = async () => {
+    const r = await getProfile();
+    setName(r.profile?.full_name ?? "");
+    setHasProfile(!!r.profile);
+    setShowRegistration(!r.profile);
+    setReady(true);
+  };
 
   useEffect(() => {
     (async () => {
       const { data } = await supabase.auth.getSession();
       if (!data.session) { navigate({ to: "/varadhi/auth" }); return; }
-      const r = await getProfile();
-      if (!r.profile) { navigate({ to: "/varadhi/onboard" }); return; }
-      setName(r.profile.full_name ?? "");
-      setReady(true);
+      await loadProfile();
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -195,25 +202,54 @@ function UpdateBoard() {
 
       {/* Greeting */}
       <div className="rounded-2xl bg-gradient-to-br from-[#1e3a8a] to-[#3b5bdb] p-4 text-white shadow">
-        <p className="text-base font-semibold">🙏 {t("welcome")}, {name}{lang === "te" ? " గారు" : ""}</p>
-        <p className="text-[11px] opacity-90 mt-0.5">మీ వస్తువులు, సేవలు ఇక్కడ అప్‌డేట్ చేయండి.</p>
+        <p className="text-base font-semibold">🙏 {t("welcome")}{name ? `, ${name}` : ""}{name && lang === "te" ? " గారు" : ""}</p>
+        <p className="text-[11px] opacity-90 mt-0.5">
+          {hasProfile
+            ? "మీ వస్తువులు, సేవలు ఇక్కడ అప్‌డేట్ చేయండి."
+            : "ముందుగా కింద రిజిస్ట్రేషన్ పూర్తి చేయండి."}
+        </p>
       </div>
 
-      <AreaAdminCounts />
-
-      {/* Post type */}
-      <div className="grid grid-cols-4 gap-1.5">
-        {POST_TYPES.map((p) => (
-          <button key={p.id} onClick={() => setPostType(p.id)}
-            className={`rounded-xl py-2 text-[11px] font-semibold border leading-tight ${
-              postType === p.id ? "bg-[#1e3a8a] text-white border-[#1e3a8a]" : "bg-white text-[#1e3a8a] border-black/10"
-            }`}>
-            {p.te}
-          </button>
-        ))}
+      {/* Registration (moved here from the Profile tab) */}
+      <div className="rounded-2xl bg-white p-4 shadow-sm">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-sm font-bold text-[#1e3a8a]">వారధి రిజిస్ట్రేషన్ / నా ప్రొఫైల్</h2>
+          {hasProfile && (
+            <button
+              onClick={() => setShowRegistration((s) => !s)}
+              className="rounded-full bg-[#1e3a8a]/10 px-3 py-1 text-[11px] font-semibold text-[#1e3a8a]"
+            >
+              {showRegistration ? "మూసివేయండి" : "మార్చండి"}
+            </button>
+          )}
+        </div>
+        {showRegistration && (
+          <div className="mt-3">
+            <VaradhiRegistrationForm onSaved={loadProfile} />
+          </div>
+        )}
       </div>
 
-      {postType === "transport" ? <TransportSection /> : <PostSection postType={postType} />}
+      {hasProfile && (
+        <>
+          <AreaAdminCounts />
+
+          {/* Post type */}
+          <div className="grid grid-cols-4 gap-1.5">
+            {POST_TYPES.map((p) => (
+              <button key={p.id} onClick={() => setPostType(p.id)}
+                className={`rounded-xl py-2 text-[11px] font-semibold border leading-tight ${
+                  postType === p.id ? "bg-[#1e3a8a] text-white border-[#1e3a8a]" : "bg-white text-[#1e3a8a] border-black/10"
+                }`}>
+                {p.te}
+              </button>
+            ))}
+          </div>
+
+          {postType === "transport" ? <TransportSection /> : <PostSection postType={postType} />}
+        </>
+      )}
+
 
       <Link to="/varadhi/subscription"
         className="block text-center rounded-xl bg-[#1e3a8a] py-3 text-white font-semibold shadow">
