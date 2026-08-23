@@ -53,15 +53,9 @@ export async function sendMemberDashboardMagicLink(opts: {
 
   const lang = opts.lang || (member as any)?.preferred_lang || "te";
   const redirectTo = `${PUBLIC_APP_ORIGIN}/auth?lang=${encodeURIComponent(lang)}`;
-  const { data, error } = await supabaseAdmin.auth.admin.generateLink({
-    type: "magiclink",
-    email,
-    options: { redirectTo },
-  });
-  if (error) throw new Error(error.message);
+  // No magic links: link to the normal login page only.
+  const confirmationUrl = redirectTo;
 
-  const confirmationUrl = data?.properties?.action_link;
-  if (!confirmationUrl) throw new Error("Login link తయారు కాలేదు");
 
   const label = opts.label || "member_dashboard_magiclink";
   const subject = opts.subject || "MBR APP — Login link";
