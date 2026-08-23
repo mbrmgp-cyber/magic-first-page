@@ -1134,7 +1134,7 @@ const ANY_INDIC = /[\u0900-\u0DFF\u0600-\u06FF]/;
 
 // Strings that must never be machine-translated (data, not UI copy).
 function isUntranslatable(s: string): boolean {
-  if (s.length < 2 || s.length > 200) return true;
+  if (s.length < 2 || s.length > 380) return true;
   if (!/[A-Za-z\u0600-\u06FF\u0900-\u0DFF]/.test(s)) return true; // numbers/symbols only
   if (/^[\d\s.,:/₹$€%+-]+$/.test(s)) return true;
   if (/@|https?:\/\/|^www\./i.test(s)) return true;
