@@ -1109,9 +1109,69 @@ function lookupPhrase(trimmed: string, lang: string): string | undefined {
   return undefined;
 }
 
+// Unicode ranges per UI language, used to detect text that is not yet in the
+// selected language and therefore needs a dynamic (AI) translation.
+const SCRIPT_RANGES: Record<string, RegExp> = {
+  en: /[A-Za-z]/,
+  te: /[\u0C00-\u0C7F]/,
+  hi: /[\u0900-\u097F]/,
+  mr: /[\u0900-\u097F]/,
+  ne: /[\u0900-\u097F]/,
+  sa: /[\u0900-\u097F]/,
+  bn: /[\u0980-\u09FF]/,
+  as: /[\u0980-\u09FF]/,
+  or: /[\u0B00-\u0B7F]/,
+  gu: /[\u0A80-\u0AFF]/,
+  pa: /[\u0A00-\u0A7F]/,
+  ta: /[\u0B80-\u0BFF]/,
+  kn: /[\u0C80-\u0CFF]/,
+  ml: /[\u0D00-\u0D7F]/,
+  ur: /[\u0600-\u06FF]/,
+};
+
+const ANY_INDIC = /[\u0900-\u0DFF\u0600-\u06FF]/;
+
+// Strings that must never be machine-translated (data, not UI copy).
+function isUntranslatable(s: string): boolean {
+  if (s.length < 2 || s.length > 200) return true;
+  if (!/[A-Za-z\u0600-\u06FF\u0900-\u0DFF]/.test(s)) return true; // numbers/symbols only
+  if (/^[\d\s.,:/₹$€%+-]+$/.test(s)) return true;
+  if (/@|https?:\/\/|^www\./i.test(s)) return true;
+  if (/^[A-Z]{1,4}\/\d+/.test(s)) return true; // member IDs like A/123
+  return false;
+}
+
+function needsDynamic(s: string, lang: string): boolean {
+  const own = SCRIPT_RANGES[lang];
+  if (!own) return false;
+  if (isUntranslatable(s)) return false;
+  if (lang === "en") return ANY_INDIC.test(s);
+  // Foreign when it carries Latin words or an Indic script other than the target.
+  if (/[A-Za-z]{3,}/.test(s)) return true;
+  for (const [code, re] of Object.entries(SCRIPT_RANGES)) {
+    if (code === "en") continue;
+    if (re.source === own.source) continue;
+    if (re.test(s)) return true;
+  }
+  return false;
+}
+
 function translateValue(value: string, lang: string): string {
   const trimmed = value.trim();
   if (!trimmed) return value;
+
+  // Dynamic translation memory first: it covers every supported language and
+  // any string the static dictionaries don't know about.
+  if (needsDynamic(trimmed, lang)) {
+    const dyn = getTranslation(lang, trimmed);
+    if (dyn) {
+      const lead = value.match(/^\s*/)?.[0] ?? "";
+      const tail = value.match(/\s*$/)?.[0] ?? "";
+      return lead + dyn + tail;
+    }
+    requestTranslation(lang, trimmed);
+  }
+
   // Any language other than Telugu/English: first collapse the string to a
   // single Telugu version (dictionary + mixed-string cleanup), then convert
   // that Telugu into the target script. This makes hi/ta/kn/ml/bn/… behave
