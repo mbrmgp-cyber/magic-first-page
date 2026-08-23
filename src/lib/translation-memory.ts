@@ -11,6 +11,21 @@ const pending = new Set<string>(); // keys already queued/in-flight
 const queue = new Map<string, Set<string>>(); // lang -> texts
 const listeners = new Set<() => void>();
 
+// Minimal script check so we can tell a real translation from the model
+// echoing the source string back.
+const SCRIPT_RE: Record<string, RegExp> = {
+  en: /[A-Za-z]/, te: /[\u0C00-\u0C7F]/, hi: /[\u0900-\u097F]/, mr: /[\u0900-\u097F]/,
+  ne: /[\u0900-\u097F]/, sa: /[\u0900-\u097F]/, bn: /[\u0980-\u09FF]/, as: /[\u0980-\u09FF]/,
+  or: /[\u0B00-\u0B7F]/, gu: /[\u0A80-\u0AFF]/, pa: /[\u0A00-\u0A7F]/, ta: /[\u0B80-\u0BFF]/,
+  kn: /[\u0C80-\u0CFF]/, ml: /[\u0D00-\u0D7F]/, ur: /[\u0600-\u06FF]/,
+};
+
+const looksTranslated = (lang: string, src: string, out: string) => {
+  if (out !== src) return true;
+  const re = SCRIPT_RE[lang];
+  return re ? re.test(out) : true;
+};
+
 let flushTimer: number | undefined;
 let inFlight = 0;
 let loadedLangs = new Set<string>();
@@ -100,10 +115,14 @@ async function flush() {
     const { translateBatch } = await import("./translate.functions");
     const res: any = await translateBatch({ data: { lang, texts: batch } });
     const map = (res?.map ?? {}) as Record<string, string>;
-    for (const [src, out] of Object.entries(map)) memory.set(keyOf(lang, src), out);
+    const good: Record<string, string> = {};
+    for (const [src, out] of Object.entries(map)) {
+      memory.set(keyOf(lang, src), out);
+      if (looksTranslated(lang, src, out)) good[src] = out;
+    }
     // Strings the model skipped: remember the source so we don't re-ask forever.
     for (const t of batch) if (!(t in map)) memory.set(keyOf(lang, t), t);
-    persist(lang, map);
+    persist(lang, good);
     if (Object.keys(map).length) notify();
   } catch {
     for (const t of batch) pending.delete(keyOf(lang, t));

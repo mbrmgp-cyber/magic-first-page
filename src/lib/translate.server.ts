@@ -61,7 +61,7 @@ Rules:
 - Keep the same numbering, one translation per line, format: "<number>. <translation>".
 - Preserve numbers, currency symbols, dates, codes, emails, URLs and placeholders exactly.
 - Keep it short and natural for buttons/labels.
-- If a string is already in ${target}, repeat it unchanged.
+- Always output the ${target} version. Only brand/person/place names may stay as-is.
 - Output nothing except the numbered lines.
 
 ${numbered}`;
