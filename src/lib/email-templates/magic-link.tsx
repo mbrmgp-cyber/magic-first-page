@@ -37,10 +37,10 @@ export const MagicLinkEmail = ({
       </span>
       <Container style={container}>
         <Text style={brand}>{appName}</Text>
-        <Heading style={h1}>Login Link / లాగిన్ లింక్</Heading>
+        <Heading style={h1}>Login / లాగిన్</Heading>
         {note ? <Text style={noteStyle}>{note}</Text> : null}
         <Text style={text}>
-          Please click the button below to login to {appName}. ఈ లింక్ కొద్దిసేపు మాత్రమే పనిచేస్తుంది.
+          Open {appName} and sign in with your code or password. మీ కోడ్ లేదా పాస్‌వర్డ్‌తో లాగిన్ అవ్వండి.
         </Text>
         <Button style={button} href={confirmationUrl}>
           Login / లాగిన్
@@ -49,7 +49,7 @@ export const MagicLinkEmail = ({
           Sent at: {sentAt}
         </Text>
         <Text style={footer}>
-          If you did not request this link, please ignore this email.
+          If you did not request this, please ignore this email.
           <br />— {appName} Team
           <br />
           <span style={refStyle}>Ref: {uniqueId}</span>

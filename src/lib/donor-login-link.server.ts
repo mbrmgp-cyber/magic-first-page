@@ -40,15 +40,9 @@ export async function ensureDonorAuthAndSendLink(donorId: string, emailRaw: stri
 
     const origin = process.env.PUBLIC_APP_URL || "https://mbrplatform.com";
     const redirectTo = `${origin}/donor/dashboard`;
-    const { data, error } = await supabaseAdmin.auth.admin.generateLink({
-      type: "magiclink",
-      email,
-      options: { redirectTo },
-    });
-    if (error) throw new Error(error.message);
+    // No magic links: link to the normal login page only.
+    const confirmationUrl = redirectTo;
 
-    const confirmationUrl = data?.properties?.action_link;
-    if (!confirmationUrl) throw new Error("Login link తయారు కాలేదు");
 
     const messageId = crypto.randomUUID();
     const apiKey = process.env.LOVABLE_API_KEY;

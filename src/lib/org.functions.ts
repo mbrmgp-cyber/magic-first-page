@@ -57,15 +57,9 @@ async function sendMagicLoginLinkEmail(
     import("@/lib/email-templates/magic-link"),
   ]);
 
-  const { data, error } = await supabaseAdmin.auth.admin.generateLink({
-    type: "magiclink",
-    email,
-    options: { redirectTo },
-  });
-  if (error) throw new Error(error.message);
+  // No magic links: the email only points to the normal login page.
+  const confirmationUrl = redirectTo;
 
-  const confirmationUrl = data?.properties?.action_link;
-  if (!confirmationUrl) throw new Error("Could not generate login link");
 
   const siteName = "MBR APP";
   const subject = opts?.subject || "MBR APP — Login link";
@@ -1351,7 +1345,7 @@ async function sendMbrOtpEmail(supabaseAdmin: any, email: string) {
   });
   if (error) throw new Error(error.message);
   const otp = (link?.properties as any)?.email_otp as string | undefined;
-  const confirmationUrl = link?.properties?.action_link as string | undefined;
+  const confirmationUrl = `${PUBLIC_APP_ORIGIN}/auth`;
   if (!otp) throw new Error("Could not generate OTP");
 
   const [{ sendLovableEmail }, React, { render }, { MagicLinkEmail }] = await Promise.all([

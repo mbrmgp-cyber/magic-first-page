@@ -10,7 +10,7 @@ export const sendVaradhiLoginLink = createServerFn({ method: "POST" })
   .inputValidator((d: { email: string; mode?: "link" | "otp" }) => d)
   .handler(async ({ data }) => {
     const email = data.email.trim().toLowerCase();
-    const mode = data.mode ?? "link";
+    const mode = "otp" as const;
     if (!email) return { sent: false as const, reason: "missing_email" as const };
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -35,16 +35,17 @@ export const sendVaradhiLoginLink = createServerFn({ method: "POST" })
     }
 
     const redirectTo = `${PUBLIC_APP_ORIGIN}/varadhi/auth`;
+    // No magic links: only generate the one-time code, email points to the login page.
     const { data: link, error: linkErr } = await supabaseAdmin.auth.admin.generateLink({
       type: "magiclink",
       email,
       options: { redirectTo },
     });
     if (linkErr) throw new Error(linkErr.message);
-    const confirmationUrl = link?.properties?.action_link;
+    const confirmationUrl = redirectTo;
     const emailOtp = (link?.properties as any)?.email_otp as string | undefined;
-    if (!confirmationUrl) throw new Error("Could not generate login link");
-    if (mode === "otp" && !emailOtp) throw new Error("Could not generate OTP");
+    if (!emailOtp) throw new Error("Could not generate OTP");
+
 
     const [{ sendLovableEmail }, React, { render }, { MagicLinkEmail }] = await Promise.all([
       import("@lovable.dev/email-js"),
@@ -54,9 +55,7 @@ export const sendVaradhiLoginLink = createServerFn({ method: "POST" })
     ]);
     const siteName = "VAARADHI APP";
     const otpLength = emailOtp?.length ?? 6;
-    const note = mode === "otp"
-      ? `Your ${otpLength}-digit one-time code / OTP: ${emailOtp}\nమీ ${otpLength} అంకెల OTP కోడ్: ${emailOtp}`
-      : undefined;
+    const note = `Your ${otpLength}-digit one-time code / OTP: ${emailOtp}\nమీ ${otpLength} అంకెల OTP కోడ్: ${emailOtp}`;
     const element = React.createElement(MagicLinkEmail, { siteName, confirmationUrl, note });
     const html = await render(element);
     const text = await render(element, { plainText: true });
@@ -438,7 +437,7 @@ export const getSignedListingUrl = createServerFn({ method: "GET" })
 // -------- Admin: Varadhi has its OWN super admin role (varadhi_admin),
 // completely independent from the MBR super admin (mbr_admin).
 // Bootstrap emails automatically receive the role on first admin visit.
-const VARADHI_BOOTSTRAP_ADMINS = ["mbrvaradhi@yahoo.com", "mbrproduct@gmail.com"];
+const VARADHI_BOOTSTRAP_ADMINS = ["mbrvaradhi@yahoo.com", "mbrplatform@gmail.com"];
 
 async function assertVaradhiAdmin(_supabase: any, userId: string, email?: string | null) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

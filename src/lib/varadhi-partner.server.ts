@@ -1,4 +1,4 @@
-const BOOTSTRAP_ADMINS = ["mbrvaradhi@yahoo.com", "mbrproduct@gmail.com"];
+const BOOTSTRAP_ADMINS = ["mbrvaradhi@yahoo.com", "mbrplatform@gmail.com"];
 
 export async function assertVaradhiAdminClient(userId: string, email?: string | null) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
