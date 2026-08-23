@@ -158,11 +158,27 @@ export const getMyVaradhiProfile = createServerFn({ method: "GET" })
     return { profile: data as VaradhiProfile | null };
   });
 
+// Columns a user is allowed to change on their own profile. Admin-only fields
+// (verification_status / verification_notes) are deliberately excluded so a
+// user can never self-issue the "verified" badge.
+const VARADHI_PROFILE_USER_EDITABLE = [
+  "full_name", "phone", "primary_role", "business_name", "address", "city",
+  "lat", "lng", "store_photo_url", "photo_url", "aadhaar_url", "license_url",
+  "mandal", "district", "state", "provider_sub_type", "vehicle_photo_url",
+  "experience_years", "certificates_urls", "provider_specialty", "address_type",
+  "house_number", "shop_name", "occupation", "referral_code_used",
+  "referred_partner_id",
+] as const;
+
 export const upsertVaradhiProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: Partial<VaradhiProfile>) => d)
   .handler(async ({ data, context }) => {
-    const row = { ...data, user_id: context.userId };
+    const clean: Record<string, unknown> = {};
+    for (const k of VARADHI_PROFILE_USER_EDITABLE) {
+      if (k in (data as Record<string, unknown>)) clean[k] = (data as Record<string, unknown>)[k];
+    }
+    const row = { ...clean, user_id: context.userId };
     const { data: out, error } = await context.supabase
       .from("varadhi_profiles")
       .upsert(row as any, { onConflict: "user_id" })
@@ -171,6 +187,7 @@ export const upsertVaradhiProfile = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { profile: out };
   });
+
 
 // -------- Listings
 export const listListings = createServerFn({ method: "GET" })
