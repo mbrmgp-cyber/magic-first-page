@@ -15,6 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getMyAreaAdminStats } from "@/lib/varadhi-partner.functions";
 import { toast } from "sonner";
 import { Plus, Trash2, Camera, Pencil, Save } from "lucide-react";
+import { VaradhiRegistrationForm } from "@/components/varadhi/RegistrationForm";
 
 export const Route = createFileRoute("/varadhi/dashboard")({
   component: UpdateBoard,

@@ -43,12 +43,12 @@ function VaradhiAuthPage() {
   useEffect(() => {
     let active = true;
     supabase.auth.getSession().then(({ data }) => {
-      if (active && data.session?.user && allowRedirect) navigate({ to: "/varadhi/onboard", replace: true });
+      if (active && data.session?.user && allowRedirect) navigate({ to: "/varadhi/dashboard", replace: true });
     });
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       if (!allowRedirect) return;
       if ((event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED") && session?.user) {
-        navigate({ to: "/varadhi/onboard", replace: true });
+        navigate({ to: "/varadhi/dashboard", replace: true });
       }
     });
     return () => { active = false; listener.subscription.unsubscribe(); };
@@ -147,7 +147,7 @@ function VaradhiAuthPage() {
     }
     toast.success("రిజిస్ట్రేషన్ పూర్తి! ఇక ఈమెయిల్ + పాస్‌వర్డ్‌తో లాగిన్ కావచ్చు.");
     setAllowRedirect(true);
-    navigate({ to: "/varadhi/onboard", replace: true });
+    navigate({ to: "/varadhi/dashboard", replace: true });
   }
 
 
