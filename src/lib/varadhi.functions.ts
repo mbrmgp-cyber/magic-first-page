@@ -35,16 +35,17 @@ export const sendVaradhiLoginLink = createServerFn({ method: "POST" })
     }
 
     const redirectTo = `${PUBLIC_APP_ORIGIN}/varadhi/auth`;
+    // No magic links: only generate the one-time code, email points to the login page.
     const { data: link, error: linkErr } = await supabaseAdmin.auth.admin.generateLink({
       type: "magiclink",
       email,
       options: { redirectTo },
     });
     if (linkErr) throw new Error(linkErr.message);
-    const confirmationUrl = link?.properties?.action_link;
+    const confirmationUrl = redirectTo;
     const emailOtp = (link?.properties as any)?.email_otp as string | undefined;
-    if (!confirmationUrl) throw new Error("Could not generate login link");
-    if (mode === "otp" && !emailOtp) throw new Error("Could not generate OTP");
+    if (!emailOtp) throw new Error("Could not generate OTP");
+
 
     const [{ sendLovableEmail }, React, { render }, { MagicLinkEmail }] = await Promise.all([
       import("@lovable.dev/email-js"),
