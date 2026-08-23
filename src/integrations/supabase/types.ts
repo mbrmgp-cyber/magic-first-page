@@ -3235,14 +3235,14 @@ export type Database = {
       get_loan_summary: {
         Args: { _loan_id: string }
         Returns: {
-          accrued_interest: number
           balance: number
+          interest: number
           interest_rate_monthly: number
           loan_id: string
-          months_elapsed: number
+          months: number
+          paid: number
           principal: number
           total_due: number
-          total_paid: number
         }[]
       }
       has_role: {
