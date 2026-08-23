@@ -1295,11 +1295,21 @@ export const adminReplyVaradhiMessage = createServerFn({ method: "POST" })
     const scope = await loadAreaScope(context.userId, (context.claims as any)?.email);
     if (!scope.isSuper && !scope.level) throw new Error("Forbidden");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Area admins may only touch messages inside their own state/district.
+    if (!scope.isSuper) {
+      const { data: target } = await supabaseAdmin
+        .from("varadhi_admin_messages").select("state, district").eq("id", data.id).maybeSingle();
+      if (!target) throw new Error("Not found");
+      const t = target as any;
+      if (scope.state && t.state !== scope.state) throw new Error("మీ ప్రాంతం కాదు");
+      if (scope.district && t.district !== scope.district) throw new Error("మీ జిల్లా కాదు");
+    }
     const patch: Record<string, unknown> = {};
     if (data.reply !== undefined) patch.admin_reply = data.reply.trim() || null;
     if (data.status) patch.status = data.status;
     const { error } = await supabaseAdmin
       .from("varadhi_admin_messages").update(patch as any).eq("id", data.id);
+
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
