@@ -11,6 +11,7 @@
 // hardcoded Telugu strings.
 import { useEffect } from "react";
 import { useI18n, transliterateText } from "@/lib/i18n";
+import { getTranslation, requestTranslation, subscribeTranslations } from "@/lib/translation-memory";
 
 // Telugu → English phrase dictionary. Order does not matter; matching is done
 // on the *trimmed* text content of individual DOM text nodes.
@@ -1369,6 +1370,9 @@ export function AutoTransliterate() {
       fullTimer = window.setTimeout(fullPass, 80);
     };
 
+    // Re-sweep whenever fresh AI translations arrive.
+    const unsubscribe = subscribeTranslations(() => scheduleFull());
+
     const obs = new MutationObserver((muts) => {
       if (applying) return;
       apply(() => {
@@ -1397,6 +1401,7 @@ export function AutoTransliterate() {
     const interval = window.setInterval(fullPass, 2000);
 
     return () => {
+      unsubscribe();
       obs.disconnect();
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("popstate", scheduleFull);
