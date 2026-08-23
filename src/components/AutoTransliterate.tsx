@@ -1171,6 +1171,9 @@ function translateValue(value: string, lang: string): string {
       return lead + dyn + tail;
     }
     requestTranslation(lang, trimmed);
+    // For languages without a curated dictionary, keep the source text until
+    // the real translation arrives — script transliteration reads as gibberish.
+    if (lang !== "en" && lang !== "te") return value;
   }
 
   // Any language other than Telugu/English: first collapse the string to a

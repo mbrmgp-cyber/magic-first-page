@@ -80,12 +80,12 @@ export function requestTranslation(lang: string, text: string) {
 
 function scheduleFlush() {
   if (flushTimer) window.clearTimeout(flushTimer);
-  flushTimer = window.setTimeout(flush, 250);
+  flushTimer = window.setTimeout(flush, 200);
 }
 
 async function flush() {
   if (typeof window === "undefined") return;
-  if (inFlight >= 2) {
+  if (inFlight >= 3) {
     scheduleFlush();
     return;
   }
