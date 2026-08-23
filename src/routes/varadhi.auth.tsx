@@ -118,7 +118,7 @@ function VaradhiAuthPage() {
     }
     setBusy(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
-      redirectTo: `${window.location.origin}/varadhi/auth`,
+      redirectTo: `${window.location.origin}/reset-password?app=varadhi`,
     });
     setBusy(false);
     if (error) {

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VaradhiRouteImport } from './routes/varadhi'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as NewOrganizationRouteImport } from './routes/new-organization'
 import { Route as MbrRouteImport } from './routes/mbr'
@@ -75,6 +76,11 @@ const VaradhiRoute = VaradhiRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoute = RegisterRouteImport.update({
@@ -379,6 +385,7 @@ export interface FileRoutesByFullPath {
   '/mbr': typeof MbrRoute
   '/new-organization': typeof NewOrganizationRoute
   '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/varadhi': typeof VaradhiRouteWithChildren
   '/admin': typeof AuthenticatedAdminRoute
@@ -437,6 +444,7 @@ export interface FileRoutesByTo {
   '/mbr': typeof MbrRoute
   '/new-organization': typeof NewOrganizationRoute
   '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/donor/register': typeof DonorRegisterRoute
@@ -496,6 +504,7 @@ export interface FileRoutesById {
   '/mbr': typeof MbrRoute
   '/new-organization': typeof NewOrganizationRoute
   '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/varadhi': typeof VaradhiRouteWithChildren
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
@@ -556,6 +565,7 @@ export interface FileRouteTypes {
     | '/mbr'
     | '/new-organization'
     | '/register'
+    | '/reset-password'
     | '/sitemap.xml'
     | '/varadhi'
     | '/admin'
@@ -614,6 +624,7 @@ export interface FileRouteTypes {
     | '/mbr'
     | '/new-organization'
     | '/register'
+    | '/reset-password'
     | '/sitemap.xml'
     | '/admin'
     | '/donor/register'
@@ -672,6 +683,7 @@ export interface FileRouteTypes {
     | '/mbr'
     | '/new-organization'
     | '/register'
+    | '/reset-password'
     | '/sitemap.xml'
     | '/varadhi'
     | '/_authenticated/admin'
@@ -732,6 +744,7 @@ export interface RootRouteChildren {
   MbrRoute: typeof MbrRoute
   NewOrganizationRoute: typeof NewOrganizationRoute
   RegisterRoute: typeof RegisterRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   VaradhiRoute: typeof VaradhiRouteWithChildren
   DonorRegisterRoute: typeof DonorRegisterRoute
@@ -757,6 +770,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -1256,6 +1276,7 @@ const rootRouteChildren: RootRouteChildren = {
   MbrRoute: MbrRoute,
   NewOrganizationRoute: NewOrganizationRoute,
   RegisterRoute: RegisterRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   VaradhiRoute: VaradhiRouteWithChildren,
   DonorRegisterRoute: DonorRegisterRoute,
