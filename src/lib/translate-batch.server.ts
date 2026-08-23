@@ -1,4 +1,4 @@
-import { aiTranslate, readCache, writeCache, LANG_NAMES } from "./translate.server";
+import { aiTranslate, readCache, writeCache, LANG_NAMES, looksTranslated } from "./translate.server";
 
 export async function translateBatchImpl(
   lang: string,
@@ -12,7 +12,11 @@ export async function translateBatchImpl(
   const missing = unique.filter((t) => !(t in cached));
   if (!missing.length) return { map: cached };
 
-  const fresh = await aiTranslate(lang, missing);
+  const raw = await aiTranslate(lang, missing);
+  const fresh: Record<string, string> = {};
+  for (const [src, out] of Object.entries(raw)) {
+    if (looksTranslated(lang, src, out)) fresh[src] = out;
+  }
   if (Object.keys(fresh).length) {
     try {
       await writeCache(lang, fresh);

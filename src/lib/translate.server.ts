@@ -20,6 +20,21 @@ export const LANG_NAMES: Record<string, string> = {
   ur: "Urdu",
 };
 
+const SCRIPT_RE: Record<string, RegExp> = {
+  en: /[A-Za-z]/, te: /[\u0C00-\u0C7F]/, hi: /[\u0900-\u097F]/, mr: /[\u0900-\u097F]/,
+  ne: /[\u0900-\u097F]/, sa: /[\u0900-\u097F]/, bn: /[\u0980-\u09FF]/, as: /[\u0980-\u09FF]/,
+  or: /[\u0B00-\u0B7F]/, gu: /[\u0A80-\u0AFF]/, pa: /[\u0A00-\u0A7F]/, ta: /[\u0B80-\u0BFF]/,
+  kn: /[\u0C80-\u0CFF]/, ml: /[\u0D00-\u0D7F]/, ur: /[\u0600-\u06FF]/,
+};
+
+// A result that is identical to the source and carries no target-script text
+// means the model echoed the input — do not cache it as a translation.
+export function looksTranslated(lang: string, src: string, out: string): boolean {
+  if (out !== src) return true;
+  const re = SCRIPT_RE[lang];
+  return re ? re.test(out) : true;
+}
+
 export const hashText = (s: string) => createHash("md5").update(s).digest("hex");
 
 export async function readCache(lang: string, texts: string[]) {

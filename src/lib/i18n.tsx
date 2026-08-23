@@ -221,7 +221,10 @@ export function localizeText(entry: LocalizedEntry, lang: string): string {
   if (script === "te") return entry.te;
   if (script === "en") return entry.en;
   if (script === "hi") return entry.hi ?? translit(entry.te, "devanagari");
-  return translit(entry.te, script);
+  // Other languages: hand over the English copy — the dynamic translation
+  // layer converts it into the selected language (transliterating Telugu into
+  // another script would only produce unreadable text).
+  return entry.en;
 }
 
 // Dictionary of common English loanwords written in Telugu/Devanagari.
@@ -338,7 +341,8 @@ export function bi(te: string, en: string, lang: string): string {
   const script = scriptForLang(lang);
   if (script === "en") return en;
   if (script === "te") return te;
-  return transliterateText(te, lang);
+  if (script === "hi") return transliterateText(te, lang);
+  return en;
 }
 
 function resolve(entry: Entry | undefined, lang: string): string {
