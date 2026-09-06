@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { PUBLIC_APP_ORIGIN, memberRegistrationUrl } from "@/lib/public-url";
 import QRCode from "qrcode";
-import { MEMBER_SAFE_COLUMNS } from "@/lib/db-columns";
+import { MEMBER_SAFE_COLUMNS, ORG_SAFE_COLUMNS } from "@/lib/db-columns";
 import { findOrgByCode, parseSafeImageDataUrl } from "@/lib/org-code";
 
 function normalizeOrgCode(input: string) {
@@ -329,7 +329,7 @@ export const getMyOrg = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
     const ownedOrgResult = await supabase
       .from("organizations")
-      .select("*")
+      .select(ORG_SAFE_COLUMNS)
       .eq("admin_user_id", userId)
       .maybeSingle();
     if (ownedOrgResult.error) throw new Error(ownedOrgResult.error.message);
@@ -361,7 +361,7 @@ export const getMyOrg = createServerFn({ method: "GET" })
         if (cm?.id) {
           const committeeOrgResult = await supabase
             .from("organizations")
-            .select("*")
+            .select(ORG_SAFE_COLUMNS)
             .eq("id", me.org_id)
             .maybeSingle();
           if (committeeOrgResult.error) throw new Error(committeeOrgResult.error.message);
