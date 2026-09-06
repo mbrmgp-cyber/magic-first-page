@@ -33,7 +33,19 @@ function Pending() {
     navigate({ to: "/auth", replace: true });
   }
 
-  if (meQ.isLoading) return <div className="min-h-screen flex items-center justify-center">{b("లోడ్ అవుతోంది…", "Loading…")}</div>;
+  if (meQ.isLoading || meQ.isFetching && !meQ.data) return <div className="min-h-screen flex items-center justify-center">{b("లోడ్ అవుతోంది…", "Loading…")}</div>;
+
+  if (meQ.isError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6" translate="no">
+        <Card className="p-6 text-center space-y-3">
+          <p>{b("మీ వివరాలు తీసుకురాలేకపోయాం.", "We couldn't load your details.")}</p>
+          <Button onClick={() => meQ.refetch()}>{b("మళ్లీ ప్రయత్నించండి", "Try again")}</Button>
+        </Card>
+      </div>
+    );
+  }
+
   const m = meQ.data?.membership;
 
   if (m && m.status === "approved") {
