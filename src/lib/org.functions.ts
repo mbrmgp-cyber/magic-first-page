@@ -1473,5 +1473,5 @@ export const sendMbrOtp = createServerFn({ method: "POST" })
     }
 
     const otpLength = await sendMbrOtpEmail(supabaseAdmin, email);
-    return { sent: true as const, email, otpLength };
+    return { sent: true as const, emailHint: maskEmail(email), otpLength };
   });
