@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { getMyRoles, claimMbrAdmin, listAllOrgsForAdmin, reviewOrganization, adminSearchMembers, adminUpdateMemberCode, setOrganizationStatus, getOrganizationDetails, setOrgSubscription, adminUpdateOrganization, adminDeleteOrganization, listOrgReceipts } from "@/lib/org.functions";
+import { getMyRoles, claimMbrAdmin, listAllOrgsForAdmin, reviewOrganization, adminSearchMembers, adminUpdateMemberCode, setOrganizationStatus, getOrganizationDetails, setOrgSubscription, adminUpdateOrganization, adminDeleteOrganization, listOrgReceipts, adminReviewMember } from "@/lib/org.functions";
 import { printReceipt } from "@/lib/subscription-receipt";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -461,6 +461,23 @@ function AllOrganizationsManager() {
     enabled: !!detailsId,
   });
 
+  const reviewMemberFn = useServerFn(adminReviewMember);
+  const [memberBusy, setMemberBusy] = useState<string | null>(null);
+  async function reviewMember(memberId: string, action: "approve" | "reject") {
+    setMemberBusy(memberId);
+    try {
+      await reviewMemberFn({ data: { member_id: memberId, action } });
+      toast.success(action === "approve" ? "Member approved" : "Member rejected");
+      qc.invalidateQueries({ queryKey: ["admin-org-details", detailsId] });
+      qc.invalidateQueries({ queryKey: ["admin-all-orgs"] });
+    } catch (e: any) {
+      toast.error(e.message ?? "Failed");
+    } finally {
+      setMemberBusy(null);
+    }
+  }
+
+
   async function changeStatus(orgId: string, status: OrgStatus) {
     setBusy(orgId);
     try {
@@ -805,8 +822,32 @@ function AllOrganizationsManager() {
                       }`}>
                         {m.status}
                       </span>
+                      <div className="flex gap-1 shrink-0">
+                        {m.status !== "approved" && (
+                          <Button
+                            size="sm"
+                            disabled={memberBusy === m.id}
+                            onClick={() => reviewMember(m.id, "approve")}
+                            className="h-6 px-2 text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white"
+                          >
+                            <CheckCircle2 className="h-3 w-3 mr-1" />Approve
+                          </Button>
+                        )}
+                        {m.status !== "rejected" && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={memberBusy === m.id}
+                            onClick={() => reviewMember(m.id, "reject")}
+                            className="h-6 px-2 text-[10px] border-zinc-600 bg-transparent text-white hover:bg-zinc-800"
+                          >
+                            <XCircle className="h-3 w-3 mr-1" />Reject
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   ))}
+
                 </div>
               </div>
             </div>
