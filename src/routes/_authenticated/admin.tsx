@@ -461,6 +461,23 @@ function AllOrganizationsManager() {
     enabled: !!detailsId,
   });
 
+  const reviewMemberFn = useServerFn(adminReviewMember);
+  const [memberBusy, setMemberBusy] = useState<string | null>(null);
+  async function reviewMember(memberId: string, action: "approve" | "reject") {
+    setMemberBusy(memberId);
+    try {
+      await reviewMemberFn({ data: { member_id: memberId, action } });
+      toast.success(action === "approve" ? "Member approved" : "Member rejected");
+      qc.invalidateQueries({ queryKey: ["admin-org-details", detailsId] });
+      qc.invalidateQueries({ queryKey: ["admin-all-orgs"] });
+    } catch (e: any) {
+      toast.error(e.message ?? "Failed");
+    } finally {
+      setMemberBusy(null);
+    }
+  }
+
+
   async function changeStatus(orgId: string, status: OrgStatus) {
     setBusy(orgId);
     try {
