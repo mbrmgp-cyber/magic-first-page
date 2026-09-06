@@ -805,8 +805,32 @@ function AllOrganizationsManager() {
                       }`}>
                         {m.status}
                       </span>
+                      <div className="flex gap-1 shrink-0">
+                        {m.status !== "approved" && (
+                          <Button
+                            size="sm"
+                            disabled={memberBusy === m.id}
+                            onClick={() => reviewMember(m.id, "approve")}
+                            className="h-6 px-2 text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white"
+                          >
+                            <CheckCircle2 className="h-3 w-3 mr-1" />Approve
+                          </Button>
+                        )}
+                        {m.status !== "rejected" && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={memberBusy === m.id}
+                            onClick={() => reviewMember(m.id, "reject")}
+                            className="h-6 px-2 text-[10px] border-zinc-600 bg-transparent text-white hover:bg-zinc-800"
+                          >
+                            <XCircle className="h-3 w-3 mr-1" />Reject
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   ))}
+
                 </div>
               </div>
             </div>
