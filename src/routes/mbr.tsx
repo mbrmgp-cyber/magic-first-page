@@ -5,7 +5,6 @@ import { Building2, Users, LogIn, ArrowLeft } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import logo from "@/assets/mbr-logo.png.asset.json";
-import { supabase } from "@/integrations/supabase/client";
 
 
 export const Route = createFileRoute("/mbr")({
