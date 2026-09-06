@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { sendMbrOtp, mbrPasswordLogin, verifyMbrOtp } from "@/lib/org.functions";
@@ -31,6 +32,7 @@ type Step = "form" | "otp" | "password";
 
 function AuthPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const requestOtpFn = useServerFn(sendMbrOtp);
   const passwordLoginFn = useServerFn(mbrPasswordLogin);
   const verifyOtpFn = useServerFn(verifyMbrOtp);
@@ -46,29 +48,11 @@ function AuthPage() {
   const [otp, setOtp] = useState("");
   const [otpLength, setOtpLength] = useState(6);
   const [busy, setBusy] = useState(false);
-  const [allowRedirect, setAllowRedirect] = useState(true);
 
   async function redirectAfterLogin(userId: string) {
     const { routeAfterLogin } = await import("@/lib/post-login-redirect");
     await routeAfterLogin(userId, navigate);
   }
-
-  useEffect(() => {
-    let active = true;
-    supabase.auth.getSession().then(({ data }) => {
-      if (active && allowRedirect && data.session?.user) redirectAfterLogin(data.session.user.id);
-    });
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!allowRedirect) return;
-      if ((event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION") && session?.user) {
-        redirectAfterLogin(session.user.id);
-      }
-    });
-    return () => {
-      active = false;
-      listener.subscription.unsubscribe();
-    };
-  }, [allowRedirect]);
 
   async function doLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -87,6 +71,8 @@ function AuthPage() {
       );
       return;
     }
+    await queryClient.cancelQueries();
+    queryClient.clear();
     const { error } = await supabase.auth.setSession(res.session);
     setBusy(false);
     if (error) {
@@ -101,7 +87,6 @@ function AuthPage() {
     e?.preventDefault();
     if (!identifier.trim()) return;
     setBusy(true);
-    setAllowRedirect(false);
     const res = await requestOtpFn({ data: { identifier: identifier.trim() } }).catch((err) => ({
       sent: false as const,
       reason: err instanceof Error ? err.message : String(err),
@@ -169,7 +154,6 @@ function AuthPage() {
       return;
     }
     toast.success(lt("Registration complete! Log in with your password next time.", "రిజిస్ట్రేషన్ పూర్తి! ఇక పాస్‌వర్డ్‌తో లాగిన్ కావచ్చు."));
-    setAllowRedirect(true);
     const uid = userRes.user?.id;
     if (uid) await redirectAfterLogin(uid);
   }
