@@ -1009,7 +1009,8 @@ export const getOrganizationDetails = createServerFn({ method: "GET" })
       .eq("id", data.org_id)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    if (!org) throw new Error("Organization not found");
+    const safeOrg = org as unknown as SafeOrgRow | null;
+    if (!safeOrg) throw new Error("Organization not found");
     const { data: members } = await supabase
       .from("members")
       .select("id, name, member_code, status, email, phone, created_at")
@@ -1017,7 +1018,7 @@ export const getOrganizationDetails = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false });
     const list = (members ?? []) as any[];
     return {
-      org,
+      org: safeOrg,
       members: list,
       counts: {
         total: list.length,
