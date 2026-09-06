@@ -1476,3 +1476,38 @@ export const sendMbrOtp = createServerFn({ method: "POST" })
     const otpLength = await sendMbrOtpEmail(supabaseAdmin, email);
     return { sent: true as const, emailHint: maskEmail(email), otpLength };
   });
+
+// ===== MBR Super Admin: approve / reject a member of ANY organization =====
+export const adminReviewMember = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { member_id: string; action: "approve" | "reject" | "pending" }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "mbr_admin" });
+    if (!isAdmin) throw new Error("Forbidden");
+    const status =
+      data.action === "approve" ? "approved" : data.action === "reject" ? "rejected" : "pending";
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row, error } = await supabaseAdmin
+      .from("members")
+      .update({ status } as any)
+      .eq("id", data.member_id)
+      .select("id, name, email, status")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+
+    let emailSent = false;
+    if (status === "approved" && (row as any)?.email) {
+      try {
+        const { sendMemberDashboardMagicLink } = await import("@/lib/member-notifications.server");
+        const sent = await sendMemberDashboardMagicLink({
+          memberId: data.member_id,
+          subject: "MBR APP — Your membership is approved",
+          label: "member_approved",
+          note: `${(row as any)?.name ?? "సభ్యుడు"}, మీ సభ్యత్వం ఆమోదించబడింది. ఈ లింక్ ఓపెన్ చేస్తే మీ డాష్‌బోర్డ్ నేరుగా ఓపెన్ అవుతుంది.`,
+        });
+        emailSent = sent.sent;
+      } catch { /* best effort */ }
+    }
+    return { ok: true, status, emailSent };
+  });
