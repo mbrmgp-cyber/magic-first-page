@@ -1105,7 +1105,8 @@ export const adminSearchMembers = createServerFn({ method: "POST" })
     const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "mbr_admin" });
     if (!isAdmin) throw new Error("Forbidden");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const q = (data.q || "").trim();
+    // Strip PostgREST filter metacharacters so input can never alter the .or() structure.
+    const q = (data.q || "").trim().replace(/[(),."\\%]/g, "").slice(0, 80);
     if (!q) return { members: [] };
     const { data: rows, error } = await supabaseAdmin
       .from("members")
@@ -1381,13 +1382,62 @@ async function sendMbrOtpEmail(supabaseAdmin: any, email: string) {
   return otp.length;
 }
 
-/** Email or phone -> the email that owns the MBR account (for password login). */
-export const resolveMbrLoginEmail = createServerFn({ method: "POST" })
-  .inputValidator((d: { identifier: string }) => d)
+/** Mask an email so it can be shown as a hint without leaking the address. */
+function maskEmail(email: string) {
+  const [local, domain] = email.split("@");
+  if (!domain) return "***";
+  const [dom, ...tld] = domain.split(".");
+  const mask = (s: string) => (s.length <= 1 ? "*" : `${s[0]}***`);
+  return `${mask(local)}@${mask(dom)}.${tld.join(".") || "com"}`;
+}
+
+/**
+ * Password login by email OR phone. The linked email is resolved server-side
+ * and never returned to the client; only the resulting session is sent back.
+ */
+export const mbrPasswordLogin = createServerFn({ method: "POST" })
+  .inputValidator((d: { identifier: string; password: string }) => d)
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const email = await resolveMbrLoginEmailFor(supabaseAdmin, data.identifier);
-    return email ? { found: true as const, email } : { found: false as const };
+    if (!email) return { ok: false as const, reason: "not_found" as const };
+    const { data: authData, error } = await supabaseAdmin.auth.signInWithPassword({
+      email,
+      password: data.password,
+    });
+    if (error || !authData.session) return { ok: false as const, reason: "invalid_credentials" as const };
+    return {
+      ok: true as const,
+      session: {
+        access_token: authData.session.access_token,
+        refresh_token: authData.session.refresh_token,
+      },
+    };
+  });
+
+/**
+ * Verifies an OTP against the account behind an email/phone identifier.
+ * The email is resolved server-side and never exposed to the client.
+ */
+export const verifyMbrOtp = createServerFn({ method: "POST" })
+  .inputValidator((d: { identifier: string; token: string }) => d)
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const email = await resolveMbrLoginEmailFor(supabaseAdmin, data.identifier);
+    if (!email) return { ok: false as const, reason: "not_found" as const };
+    const { data: authData, error } = await supabaseAdmin.auth.verifyOtp({
+      email,
+      token: (data.token || "").trim(),
+      type: "email",
+    });
+    if (error || !authData.session) return { ok: false as const, reason: "invalid_code" as const };
+    return {
+      ok: true as const,
+      session: {
+        access_token: authData.session.access_token,
+        refresh_token: authData.session.refresh_token,
+      },
+    };
   });
 
 /** Sends a numeric OTP for MBR registration / password reset. */
@@ -1424,5 +1474,5 @@ export const sendMbrOtp = createServerFn({ method: "POST" })
     }
 
     const otpLength = await sendMbrOtpEmail(supabaseAdmin, email);
-    return { sent: true as const, email, otpLength };
+    return { sent: true as const, emailHint: maskEmail(email), otpLength };
   });

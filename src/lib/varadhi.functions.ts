@@ -485,9 +485,10 @@ export const adminListVaradhiProfiles = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     let q = supabaseAdmin.from("varadhi_profiles").select("*").order("created_at", { ascending: false });
     if (data.status && data.status !== "all") q = q.eq("verification_status", data.status);
-    // State admins see only their state; district admins only their district.
+    // Scope strictly to the admin's own area: state < district < mandal.
     if (!scope.isSuper && scope.state) q = q.eq("state", scope.state);
-    if (!scope.isSuper && scope.level === "district_admin" && scope.district) q = q.eq("district", scope.district);
+    if (!scope.isSuper && scope.district && scope.level !== "state_admin") q = q.eq("district", scope.district);
+    if (!scope.isSuper && scope.level === "mandal_admin" && scope.mandal) q = q.eq("mandal", scope.mandal);
     const { data: rows, error } = await q.limit(500);
     if (error) throw new Error(error.message);
 
@@ -519,11 +520,14 @@ export const adminReviewVaradhiProfile = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     if (!scope.isSuper) {
       const { data: target } = await supabaseAdmin
-        .from("varadhi_profiles").select("state, district").eq("user_id", data.user_id).maybeSingle();
+        .from("varadhi_profiles").select("state, district, mandal").eq("user_id", data.user_id).maybeSingle();
       const t = (target ?? {}) as any;
       if (scope.state && t.state !== scope.state) throw new Error("మీ ప్రాంతం కాదు");
-      if (scope.level === "district_admin" && scope.district && t.district !== scope.district) {
+      if (scope.level !== "state_admin" && scope.district && t.district !== scope.district) {
         throw new Error("మీ జిల్లా కాదు");
+      }
+      if (scope.level === "mandal_admin" && scope.mandal && t.mandal !== scope.mandal) {
+        throw new Error("మీ మండలం కాదు");
       }
     }
 
@@ -600,7 +604,8 @@ export const adminPointsOverview = createServerFn({ method: "GET" })
     if (data.state) pq = pq.eq("state", data.state);
     if (data.district) pq = pq.eq("district", data.district);
     if (data.mandal) pq = pq.eq("mandal", data.mandal);
-    if (data.q) pq = pq.or(`full_name.ilike.%${data.q}%,phone.ilike.%${data.q}%`);
+    const pqTerm = (data.q ?? "").replace(/[(),."\\%]/g, "").trim().slice(0, 80);
+    if (pqTerm) pq = pq.or(`full_name.ilike.%${pqTerm}%,phone.ilike.%${pqTerm}%`);
     const { data: profs } = await pq;
     const profiles = (profs ?? []) as any[];
     const ids = profiles.map((p) => p.user_id);
@@ -994,7 +999,8 @@ export const adminSearchVaradhiUsers = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false });
     if (data.state) q = q.eq("state", data.state);
     if (data.district) q = q.eq("district", data.district);
-    if (data.q) q = q.or(`full_name.ilike.%${data.q}%,phone.ilike.%${data.q}%`);
+    const qTerm = (data.q ?? "").replace(/[(),."\\%]/g, "").trim().slice(0, 80);
+    if (qTerm) q = q.or(`full_name.ilike.%${qTerm}%,phone.ilike.%${qTerm}%`);
     const { data: rows, error } = await q.limit(50);
     if (error) throw new Error(error.message);
     return { users: rows ?? [] };
@@ -1204,6 +1210,9 @@ export const adminListAdminAudit = createServerFn({ method: "GET" })
     let q = supabaseAdmin
       .from("varadhi_admin_audit").select("*").order("created_at", { ascending: false });
     if (!scope.isSuper && scope.state) q = q.eq("state", scope.state);
+    // Regional admins see only their own area's audit entries.
+    if (!scope.isSuper && scope.district && scope.level !== "state_admin") q = q.eq("district", scope.district);
+    if (!scope.isSuper && scope.level === "mandal_admin" && scope.mandal) q = q.eq("mandal", scope.mandal);
     const { data: rows, error } = await q.limit(Math.min(data.limit ?? 100, 300));
     if (error) throw new Error(error.message);
 

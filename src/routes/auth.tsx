@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { sendMbrOtp, resolveMbrLoginEmail } from "@/lib/org.functions";
+import { sendMbrOtp, mbrPasswordLogin, verifyMbrOtp } from "@/lib/org.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,14 +32,15 @@ type Step = "form" | "otp" | "password";
 function AuthPage() {
   const navigate = useNavigate();
   const requestOtpFn = useServerFn(sendMbrOtp);
-  const resolveEmailFn = useServerFn(resolveMbrLoginEmail);
+  const passwordLoginFn = useServerFn(mbrPasswordLogin);
+  const verifyOtpFn = useServerFn(verifyMbrOtp);
   const { lang } = useI18n();
   const lt = (en: string, te: string) => localizeText({ en, te }, lang);
 
   const [tab, setTab] = useState<Tab>("login");
   const [step, setStep] = useState<Step>("form");
   const [identifier, setIdentifier] = useState("");
-  const [otpEmail, setOtpEmail] = useState("");
+  const [otpEmailHint, setOtpEmailHint] = useState("");
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
   const [otp, setOtp] = useState("");
@@ -72,21 +73,28 @@ function AuthPage() {
   async function doLogin(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
-    let email = identifier.trim().toLowerCase();
-    if (!email.includes("@")) {
-      const res = await resolveEmailFn({ data: { identifier: email } }).catch(() => null);
-      if (!res?.found) {
-        setBusy(false);
-        toast.error(lt("No account found for this phone number", "ఈ ఫోన్ నంబర్‌కు ఖాతా కనబడలేదు"));
-        return;
-      }
-      email = res.email;
+    // The email behind a phone number is resolved on the server and never
+    // returned to the browser — only the resulting session comes back.
+    const res = await passwordLoginFn({
+      data: { identifier: identifier.trim(), password },
+    }).catch(() => null);
+    if (!res?.ok) {
+      setBusy(false);
+      toast.error(
+        (res as any)?.reason === "not_found"
+          ? lt("No account found for this email/phone", "ఈ ఈమెయిల్/ఫోన్ నంబర్‌కు ఖాతా కనబడలేదు")
+          : lt("Email/phone or password is incorrect. New users: register with OTP.", "ఈమెయిల్/ఫోన్ లేదా పాస్‌వర్డ్ సరికాదు. కొత్తవారైతే OTPతో రిజిస్టర్ అవ్వండి.")
+      );
+      return;
     }
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.setSession(res.session);
     setBusy(false);
     if (error) {
-      toast.error(lt("Email/phone or password is incorrect. New users: register with OTP.", "ఈమెయిల్/ఫోన్ లేదా పాస్‌వర్డ్ సరికాదు. కొత్తవారైతే OTPతో రిజిస్టర్ అవ్వండి."));
+      toast.error(lt("Could not start the session. Please try again.", "సెషన్ ప్రారంభించలేకపోయాం. మళ్లీ ప్రయత్నించండి."));
+      return;
     }
+    const { data: userRes } = await supabase.auth.getUser();
+    if (userRes.user) await redirectAfterLogin(userRes.user.id);
   }
 
   async function requestOtp(e?: React.FormEvent) {
@@ -108,7 +116,7 @@ function AuthPage() {
       );
       return;
     }
-    setOtpEmail((res as any).email);
+    setOtpEmailHint((res as any).emailHint ?? "");
     setOtpLength(Number((res as any).otpLength) || 6);
     setOtp("");
     setStep("otp");
@@ -120,10 +128,17 @@ function AuthPage() {
     const token = (code ?? otp).trim();
     if (token.length < 6) return;
     setBusy(true);
-    const { error } = await supabase.auth.verifyOtp({ email: otpEmail, token, type: "email" });
+    // OTP is verified on the server against the resolved account email.
+    const res = await verifyOtpFn({ data: { identifier: identifier.trim(), token } }).catch(() => null);
+    if (!res?.ok) {
+      setBusy(false);
+      toast.error(lt("Code is invalid or expired", "కోడ్ చెల్లదు లేదా గడువు ముగిసింది"));
+      return;
+    }
+    const { error } = await supabase.auth.setSession(res.session);
     setBusy(false);
     if (error) {
-      toast.error(lt("Code is invalid or expired", "కోడ్ చెల్లదు లేదా గడువు ముగిసింది"));
+      toast.error(lt("Could not start the session. Please try again.", "సెషన్ ప్రారంభించలేకపోయాం. మళ్లీ ప్రయత్నించండి."));
       return;
     }
     setPassword("");
@@ -260,7 +275,7 @@ function AuthPage() {
           <form onSubmit={verifyOtp} className="space-y-4">
             <div className="rounded-xl border border-[#ff8c28]/30 bg-[#ff8c28]/10 p-3 text-center">
               <p className="text-xs text-zinc-200">
-                {otpLength} {lt("digit code sent to", "అంకెల కోడ్ పంపాం —")} <b>{otpEmail}</b>
+                {otpLength} {lt("digit code sent to", "అంకెల కోడ్ పంపాం —")} <b>{otpEmailHint}</b>
               </p>
             </div>
             <input
