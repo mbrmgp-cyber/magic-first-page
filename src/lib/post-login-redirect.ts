@@ -89,7 +89,7 @@ export async function routeAfterLogin(
   }
 
   // Everything answered and the user genuinely has nothing yet.
-  if (roles.ok && org.ok && membershipKnown) {
+  if (allowJoinRedirect && roles.ok && org.ok && membershipKnown) {
     navigate({ to: "/member/pending", replace: true });
     return;
   }
