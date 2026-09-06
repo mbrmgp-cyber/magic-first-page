@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useRouterState } from "@tanstack/react-router";
 import { getMyOrg, getMyMembership } from "@/lib/org.functions";
 import { resolveTheme } from "@/lib/theme";
+import { useHasSession } from "@/hooks/useHasSession";
 
 
 /**
@@ -16,15 +17,20 @@ export function GlobalThemeApplier() {
   const fetchOrg = useServerFn(getMyOrg);
   const fetchMembership = useServerFn(getMyMembership);
 
+  const hasSession = useHasSession();
+
   const orgQ = useQuery({
     queryKey: ["my-org"],
     queryFn: () => fetchOrg(),
+    enabled: hasSession,
+    retry: false,
     staleTime: 60_000,
   });
   const memberQ = useQuery({
     queryKey: ["my-membership"],
     queryFn: () => fetchMembership(),
-    enabled: !orgQ.data?.org,
+    enabled: hasSession && !orgQ.data?.org,
+    retry: false,
     staleTime: 60_000,
   });
 
