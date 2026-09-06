@@ -39,11 +39,16 @@ function MbrHome() {
   useEffect(() => {
     if (code) return;
     let active = true;
-    supabase.auth.getSession().then(({ data }) => {
-      if (active && data.session?.user) {
-        routeAfterLogin(data.session.user.id, navigate);
+    supabase.auth.getUser().then(({ data, error }) => {
+      if (!active) return;
+      if (error || !data.user) {
+        // Stale/expired stored session: clear it so the sign-in screen shows.
+        void supabase.auth.signOut();
+        return;
       }
+      routeAfterLogin(data.user.id, navigate);
     });
+
     return () => {
       active = false;
     };

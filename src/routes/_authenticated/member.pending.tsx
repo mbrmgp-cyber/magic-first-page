@@ -59,10 +59,15 @@ function Pending() {
         <Card className="p-6 text-center space-y-3">
           <p>{b("మీరు ఇంకా ఏ సంస్థలో చేరలేదు.", "You have not joined any organization yet.")}</p>
           <Button onClick={() => navigate({ to: "/member/register" })}>{b("సంస్థలో చేరండి", "Join Org")}</Button>
+          <Button variant="outline" className="w-full" onClick={logout}>
+            <LogOut className="h-4 w-4 mr-1" />
+            {b("సైన్ అవుట్ / వేరే ఖాతాతో లాగిన్", "Sign out / use another account")}
+          </Button>
         </Card>
       </div>
     );
   }
+
 
   const status = m.status;
   const StatusIcon = status === "approved" ? CheckCircle2 : status === "rejected" ? XCircle : Clock;
