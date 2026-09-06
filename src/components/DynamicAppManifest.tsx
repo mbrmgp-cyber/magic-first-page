@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getMyOrg, getMyMembership } from "@/lib/org.functions";
 import { resolveTheme } from "@/lib/theme";
+import { useHasSession } from "@/hooks/useHasSession";
 import mbrLogoAsset from "@/assets/mbr-logo.png.asset.json";
 import { buildPaddedIconSet } from "@/lib/pad-icon";
 
@@ -60,15 +61,20 @@ export function DynamicAppManifest() {
   const fetchOrg = useServerFn(getMyOrg);
   const fetchMembership = useServerFn(getMyMembership);
 
+  const hasSession = useHasSession();
+
   const orgQ = useQuery({
     queryKey: ["my-org"],
     queryFn: () => fetchOrg(),
+    enabled: hasSession,
+    retry: false,
     staleTime: 60_000,
   });
   const memberQ = useQuery({
     queryKey: ["my-membership"],
     queryFn: () => fetchMembership(),
-    enabled: !orgQ.data?.org,
+    enabled: hasSession && !orgQ.data?.org,
+    retry: false,
     staleTime: 60_000,
   });
 
