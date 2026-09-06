@@ -212,10 +212,9 @@ function AdminPanel() {
                       {founders.map((f, i) => (
                         <div key={i} className="flex items-start gap-2 p-2 bg-zinc-800/60 rounded text-xs">
                           {f.aadhaar_url ? (
-                            <a href={f.aadhaar_url} target="_blank" rel="noopener" className="shrink-0">
-                              <img src={f.aadhaar_url} alt="ID" className="w-12 h-12 rounded border object-cover hover:scale-110 transition" style={{ borderColor: "#3f3f46" }} />
-                            </a>
+                            <OrgDocThumb orgId={o.id} path={f.aadhaar_url} />
                           ) : (
+
                             <div className="w-12 h-12 rounded border bg-zinc-900 flex items-center justify-center shrink-0" style={{ borderColor: "#3f3f46" }}>
                               <FileText className="h-4 w-4 text-zinc-400" />
                             </div>
