@@ -1105,7 +1105,8 @@ export const adminSearchMembers = createServerFn({ method: "POST" })
     const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "mbr_admin" });
     if (!isAdmin) throw new Error("Forbidden");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const q = (data.q || "").trim();
+    // Strip PostgREST filter metacharacters so input can never alter the .or() structure.
+    const q = (data.q || "").trim().replace(/[(),."\\%]/g, "").slice(0, 80);
     if (!q) return { members: [] };
     const { data: rows, error } = await supabaseAdmin
       .from("members")
