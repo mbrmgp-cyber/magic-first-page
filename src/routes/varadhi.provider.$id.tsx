@@ -26,18 +26,17 @@ function ProviderDetail() {
       if (found) {
         const { data } = await supabase
           .from("varadhi_profiles")
-          .select("phone, village, mandal, district, state, pincode")
+          .select("phone, city, mandal, district, state")
           .eq("user_id", found.user_id)
           .maybeSingle();
         setPhone((data as any)?.phone ?? found.contact_phone ?? null);
         const parts = [
-          (data as any)?.village || found.city,
+          (data as any)?.city || found.city,
           (data as any)?.mandal,
           (data as any)?.district,
           (data as any)?.state,
         ].filter(Boolean);
-        const pin = (data as any)?.pincode;
-        setPlace(parts.join(", ") + (pin ? ` - ${pin}` : ""));
+        setPlace(parts.join(", "));
         click({ data: { target_type: "provider", target_id: id } }).catch(() => {});
       }
     })();
