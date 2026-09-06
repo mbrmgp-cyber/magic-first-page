@@ -223,9 +223,40 @@ async function uploadImageDataUrl(supabaseAdmin: any, dataUrl: string | undefine
     .from("org-documents")
     .upload(path, bytes, { contentType, upsert: false });
   if (error) throw new Error(error.message);
-  const { data } = await supabaseAdmin.storage.from("org-documents").createSignedUrl(path, 60 * 60 * 24 * 365);
-  return data?.signedUrl ?? path;
+  // Store only the object path. A short-lived signed URL is minted on demand
+  // by getOrgDocumentSignedUrl for authorized viewers.
+  return path;
 }
+
+/**
+ * Mint a short-lived (10 min) signed URL for a private org document.
+ * Only platform admins or people who can edit the owning organization may view.
+ */
+export const getOrgDocumentSignedUrl = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { org_id?: string; path: string }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const path = (data.path || "").trim();
+    if (!path) throw new Error("Missing document");
+    if (/^https?:\/\//i.test(path)) return { url: path };
+    if (path.includes("..")) throw new Error("Invalid document path");
+
+    const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "mbr_admin" });
+    if (!isAdmin) {
+      if (!data.org_id) throw new Error("Forbidden");
+      const { data: canEdit } = await supabase.rpc("can_edit_org", { _org_id: data.org_id });
+      if (!canEdit) throw new Error("Forbidden");
+    }
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: signed, error } = await supabaseAdmin.storage
+      .from("org-documents")
+      .createSignedUrl(path, 600);
+    if (error) throw new Error(error.message);
+    return { url: signed?.signedUrl ?? null };
+  });
+
 
 export const registerOrganization = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
