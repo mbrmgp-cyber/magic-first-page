@@ -59,7 +59,12 @@ function Dashboard() {
   const saveLogo = useServerFn(updateOrgLogo);
   const { lang } = useI18n();
   const lt = (en: string, te: string) => localizeText({ en, te }, lang);
-  const orgQ = useQuery({ queryKey: ["my-org"], queryFn: () => fetchOrg() });
+  const orgQ = useQuery({
+    queryKey: ["my-org"],
+    queryFn: () => fetchOrg(),
+    retry: 4,
+    retryDelay: (i) => 500 * (i + 1),
+  });
   const fetchRoles = useServerFn(getMyRoles);
   const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: () => fetchRoles() });
   const fetchCommittee = useServerFn(getMyCommitteeAccess);
