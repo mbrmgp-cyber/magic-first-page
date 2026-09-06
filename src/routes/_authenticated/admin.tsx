@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { getMyRoles, claimMbrAdmin, listAllOrgsForAdmin, reviewOrganization, adminSearchMembers, adminUpdateMemberCode, setOrganizationStatus, getOrganizationDetails, setOrgSubscription, adminUpdateOrganization, adminDeleteOrganization, listOrgReceipts, adminReviewMember } from "@/lib/org.functions";
+import { getOrgDocumentSignedUrl, getMyRoles, claimMbrAdmin, listAllOrgsForAdmin, reviewOrganization, adminSearchMembers, adminUpdateMemberCode, setOrganizationStatus, getOrganizationDetails, setOrgSubscription, adminUpdateOrganization, adminDeleteOrganization, listOrgReceipts, adminReviewMember } from "@/lib/org.functions";
 import { printReceipt } from "@/lib/subscription-receipt";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -17,6 +17,29 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
+
+function OrgDocThumb({ orgId, path }: { orgId: string; path: string }) {
+  const resolve = useServerFn(getOrgDocumentSignedUrl);
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let alive = true;
+    setUrl(null);
+    resolve({ data: { org_id: orgId, path } })
+      .then((r: any) => { if (alive) setUrl(r?.url ?? null); })
+      .catch(() => { if (alive) setUrl(null); });
+    return () => { alive = false; };
+  }, [orgId, path]);
+  if (!url) {
+    return (
+      <div className="w-12 h-12 rounded border bg-zinc-900 animate-pulse shrink-0" style={{ borderColor: "#3f3f46" }} />
+    );
+  }
+  return (
+    <a href={url} target="_blank" rel="noopener" className="shrink-0">
+      <img src={url} alt="ID" className="w-12 h-12 rounded border object-cover hover:scale-110 transition" style={{ borderColor: "#3f3f46" }} />
+    </a>
+  );
+}
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "MBR Admin Panel" }] }),
@@ -214,7 +237,6 @@ function AdminPanel() {
                           {f.aadhaar_url ? (
                             <OrgDocThumb orgId={o.id} path={f.aadhaar_url} />
                           ) : (
-
                             <div className="w-12 h-12 rounded border bg-zinc-900 flex items-center justify-center shrink-0" style={{ borderColor: "#3f3f46" }}>
                               <FileText className="h-4 w-4 text-zinc-400" />
                             </div>
