@@ -20,7 +20,13 @@ function Pending() {
   const { lang } = useI18n();
   const b = (te: string, en: string) => bi(te, en, lang);
   const fetchMe = useServerFn(getMyMembership);
-  const meQ = useQuery({ queryKey: ["my-membership"], queryFn: () => fetchMe(), refetchInterval: 15000 });
+  const meQ = useQuery({
+    queryKey: ["my-membership"],
+    queryFn: () => fetchMe(),
+    refetchInterval: 15000,
+    retry: 3,
+    retryDelay: (i) => 600 * (i + 1),
+  });
 
   async function logout() {
     await supabase.auth.signOut();
