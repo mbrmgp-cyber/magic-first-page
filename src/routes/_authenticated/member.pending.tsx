@@ -20,14 +20,32 @@ function Pending() {
   const { lang } = useI18n();
   const b = (te: string, en: string) => bi(te, en, lang);
   const fetchMe = useServerFn(getMyMembership);
-  const meQ = useQuery({ queryKey: ["my-membership"], queryFn: () => fetchMe(), refetchInterval: 15000 });
+  const meQ = useQuery({
+    queryKey: ["my-membership"],
+    queryFn: () => fetchMe(),
+    refetchInterval: 15000,
+    retry: 3,
+    retryDelay: (i) => 600 * (i + 1),
+  });
 
   async function logout() {
     await supabase.auth.signOut();
     navigate({ to: "/auth", replace: true });
   }
 
-  if (meQ.isLoading) return <div className="min-h-screen flex items-center justify-center">{b("లోడ్ అవుతోంది…", "Loading…")}</div>;
+  if (meQ.isLoading || meQ.isFetching && !meQ.data) return <div className="min-h-screen flex items-center justify-center">{b("లోడ్ అవుతోంది…", "Loading…")}</div>;
+
+  if (meQ.isError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6" translate="no">
+        <Card className="p-6 text-center space-y-3">
+          <p>{b("మీ వివరాలు తీసుకురాలేకపోయాం.", "We couldn't load your details.")}</p>
+          <Button onClick={() => meQ.refetch()}>{b("మళ్లీ ప్రయత్నించండి", "Try again")}</Button>
+        </Card>
+      </div>
+    );
+  }
+
   const m = meQ.data?.membership;
 
   if (m && m.status === "approved") {
