@@ -46,7 +46,9 @@ function MbrHome() {
         void supabase.auth.signOut();
         return;
       }
-      routeAfterLogin(data.user.id, navigate);
+      // Only forward when the account really has an org / membership.
+      // Otherwise stay here so the user can sign in with another account.
+      routeAfterLogin(data.user.id, navigate, { allowJoinRedirect: false });
     });
 
     return () => {

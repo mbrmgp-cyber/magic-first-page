@@ -32,7 +32,12 @@ async function fetchWithRetry<T>(
  * and if it still fails we leave the user where they are instead of wrongly
  * telling an existing member that they have no organization.
  */
-export async function routeAfterLogin(userId: string, navigate: NavigateFn) {
+export async function routeAfterLogin(
+  userId: string,
+  navigate: NavigateFn,
+  opts: { allowJoinRedirect?: boolean } = {},
+) {
+  const allowJoinRedirect = opts.allowJoinRedirect !== false;
   // 1) Platform admin role
   const roles = await fetchWithRetry<any[]>(() =>
     supabase.from("user_roles").select("role").eq("user_id", userId) as any,
@@ -84,7 +89,7 @@ export async function routeAfterLogin(userId: string, navigate: NavigateFn) {
   }
 
   // Everything answered and the user genuinely has nothing yet.
-  if (roles.ok && org.ok && membershipKnown) {
+  if (allowJoinRedirect && roles.ok && org.ok && membershipKnown) {
     navigate({ to: "/member/pending", replace: true });
     return;
   }
