@@ -333,7 +333,7 @@ export const getMyOrg = createServerFn({ method: "GET" })
       .eq("admin_user_id", userId)
       .maybeSingle();
     if (ownedOrgResult.error) throw new Error(ownedOrgResult.error.message);
-    let org = ownedOrgResult.data;
+    let org = ownedOrgResult.data as unknown as SafeOrgRow | null;
     // Committee members (e.g. treasurer) can also open the org admin dashboard
     // via their own account; resolve the org through their active membership.
     if (!org) {
