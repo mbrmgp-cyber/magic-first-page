@@ -7,7 +7,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 /** Run a fetch with retries. Returns { ok, value }: ok=false means every
  *  attempt errored, so the answer is UNKNOWN (never treat as "no data"). */
 async function fetchWithRetry<T>(
-  fn: () => Promise<{ data: T | null; error: unknown }>,
+  fn: () => PromiseLike<{ data: T | null; error: unknown }>,
   attempts = 3,
 ): Promise<{ ok: boolean; value: T | null }> {
   for (let i = 0; i < attempts; i += 1) {
@@ -34,21 +34,21 @@ async function fetchWithRetry<T>(
  */
 export async function routeAfterLogin(userId: string, navigate: NavigateFn) {
   // 1) Platform admin role
-  const roles = await fetchWithRetry(() =>
-    supabase.from("user_roles").select("role").eq("user_id", userId),
+  const roles = await fetchWithRetry<any[]>(() =>
+    supabase.from("user_roles").select("role").eq("user_id", userId) as any,
   );
-  if (roles.ok && (roles.value as any[] | null)?.some((r) => r.role === "mbr_admin")) {
+  if (roles.ok && roles.value?.some((r) => r.role === "mbr_admin")) {
     navigate({ to: "/admin", replace: true });
     return;
   }
 
   // 2) Organization owned by this user
-  const org = await fetchWithRetry(() =>
+  const org = await fetchWithRetry<any>(() =>
     supabase
       .from("organizations")
       .select("id, approval_status")
       .eq("admin_user_id", userId)
-      .maybeSingle(),
+      .maybeSingle() as any,
   );
   if (org.ok && org.value) {
     navigate({ to: "/org/dashboard", replace: true });
