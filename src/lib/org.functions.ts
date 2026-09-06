@@ -1003,22 +1003,22 @@ export const getOrganizationDetails = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
     const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "mbr_admin" });
     if (!isAdmin) throw new Error("Forbidden");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: org, error } = await supabaseAdmin
+    const { data: org, error } = await supabase
       .from("organizations")
-      .select("*")
+      .select(ORG_SAFE_COLUMNS)
       .eq("id", data.org_id)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    if (!org) throw new Error("Organization not found");
-    const { data: members } = await supabaseAdmin
+    const safeOrg = org as unknown as SafeOrgRow | null;
+    if (!safeOrg) throw new Error("Organization not found");
+    const { data: members } = await supabase
       .from("members")
       .select("id, name, member_code, status, email, phone, created_at")
       .eq("org_id", data.org_id)
       .order("created_at", { ascending: false });
     const list = (members ?? []) as any[];
     return {
-      org,
+      org: safeOrg,
       members: list,
       counts: {
         total: list.length,
