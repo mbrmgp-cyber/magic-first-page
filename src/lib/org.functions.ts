@@ -365,7 +365,7 @@ export const getMyOrg = createServerFn({ method: "GET" })
             .eq("id", me.org_id)
             .maybeSingle();
           if (committeeOrgResult.error) throw new Error(committeeOrgResult.error.message);
-          const orgViaCommittee = committeeOrgResult.data;
+          const orgViaCommittee = committeeOrgResult.data as unknown as SafeOrgRow | null;
           if (orgViaCommittee) org = orgViaCommittee;
         }
       }
