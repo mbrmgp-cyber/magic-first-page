@@ -59,7 +59,12 @@ function Dashboard() {
   const saveLogo = useServerFn(updateOrgLogo);
   const { lang } = useI18n();
   const lt = (en: string, te: string) => localizeText({ en, te }, lang);
-  const orgQ = useQuery({ queryKey: ["my-org"], queryFn: () => fetchOrg() });
+  const orgQ = useQuery({
+    queryKey: ["my-org"],
+    queryFn: () => fetchOrg(),
+    retry: 4,
+    retryDelay: (i) => 500 * (i + 1),
+  });
   const fetchRoles = useServerFn(getMyRoles);
   const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: () => fetchRoles() });
   const fetchCommittee = useServerFn(getMyCommitteeAccess);
@@ -213,7 +218,21 @@ function Dashboard() {
     }
   }
 
-  if (orgQ.isLoading) return <div className="min-h-screen flex items-center justify-center bg-black text-white">Loading…</div>;
+  if (orgQ.isLoading || orgQ.isFetching && !orgQ.data) return <div className="min-h-screen flex items-center justify-center bg-black text-white">Loading…</div>;
+
+  // A failed lookup is NOT "no organization" — never sign the user out for it.
+  if (orgQ.isError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 bg-black">
+        <Card className="p-6 text-center space-y-4 bg-zinc-950 border-zinc-800 text-white max-w-sm">
+          <p className="font-semibold">{lt("Couldn't load your society right now.", "మీ సొసైటీ వివరాలు ఇప్పుడే తీసుకురాలేకపోయాం.")}</p>
+          <Button onClick={() => orgQ.refetch()} className="!bg-[#ff8c28] !text-white font-bold">
+            <RefreshCw className="h-4 w-4 mr-2" />{lt("Try again", "మళ్లీ ప్రయత్నించండి")}
+          </Button>
+        </Card>
+      </div>
+    );
+  }
 
   const org = orgQ.data?.org;
   const qrDataUrl = orgQ.data?.qrDataUrl;
