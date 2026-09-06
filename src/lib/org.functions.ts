@@ -4,6 +4,12 @@ import { PUBLIC_APP_ORIGIN, memberRegistrationUrl } from "@/lib/public-url";
 import QRCode from "qrcode";
 import { MEMBER_SAFE_COLUMNS, ORG_SAFE_COLUMNS } from "@/lib/db-columns";
 import { findOrgByCode, parseSafeImageDataUrl } from "@/lib/org-code";
+import type { Database } from "@/integrations/supabase/types";
+
+type SafeOrgRow = Omit<
+  Database["public"]["Tables"]["organizations"]["Row"],
+  "registration_certificate_url" | "pan_card_url" | "admin_aadhaar_url"
+>;
 
 function normalizeOrgCode(input: string) {
   const raw = (input || "").trim();
