@@ -5,8 +5,6 @@ import { Building2, Users, LogIn, ArrowLeft } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import logo from "@/assets/mbr-logo.png.asset.json";
-import { supabase } from "@/integrations/supabase/client";
-import { routeAfterLogin } from "@/lib/post-login-redirect";
 
 
 export const Route = createFileRoute("/mbr")({
@@ -33,27 +31,6 @@ function MbrHome() {
     if (code) {
       navigate({ to: "/member/register", search: { code }, replace: true });
     }
-  }, [code, navigate]);
-  // Auto-forward already-signed-in users to their dashboard so tapping
-  // the home-screen icon doesn't ask for an email again.
-  useEffect(() => {
-    if (code) return;
-    let active = true;
-    supabase.auth.getUser().then(({ data, error }) => {
-      if (!active) return;
-      if (error || !data.user) {
-        // Stale/expired stored session: clear it so the sign-in screen shows.
-        void supabase.auth.signOut();
-        return;
-      }
-      // Only forward when the account really has an org / membership.
-      // Otherwise stay here so the user can sign in with another account.
-      routeAfterLogin(data.user.id, navigate, { allowJoinRedirect: false });
-    });
-
-    return () => {
-      active = false;
-    };
   }, [code, navigate]);
   if (code) return null;
 

@@ -67,14 +67,20 @@ const MENU = [
 
 function MemberDashboard() {
   const navigate = useNavigate();
+  const { user } = Route.useRouteContext();
   const fetchMe = useServerFn(getMyMembership);
-  const meQ = useQuery({ queryKey: ["my-membership"], queryFn: () => fetchMe() });
+  const meQ = useQuery({
+    queryKey: ["my-membership", user.id],
+    queryFn: () => fetchMe(),
+    retry: 4,
+    retryDelay: (attempt) => 500 * (attempt + 1),
+  });
   const fetchLeaveReq = useServerFn(getMyLeaveRequest);
   const leaveReqQ = useQuery({ queryKey: ["my-leave-request"], queryFn: () => fetchLeaveReq(), refetchInterval: 30_000 });
   const submitLeave = useServerFn(submitLeaveRequest);
   const cancelLeave = useServerFn(cancelMyLeaveRequest);
   const fetchCommittee = useServerFn(getMyCommitteeAccess);
-  const committeeQ = useQuery({ queryKey: ["my-committee-access"], queryFn: () => fetchCommittee() });
+  const committeeQ = useQuery({ queryKey: ["my-committee-access", user.id], queryFn: () => fetchCommittee() });
   const [qrUrl, setQrUrl] = useState<string>("");
   const [qrTargetUrl, setQrTargetUrl] = useState<string>("");
   const [photoUrl, setPhotoUrl] = useState<string>("");
@@ -187,8 +193,20 @@ function MemberDashboard() {
   const wasRejectedLeave = currentLeaveReq?.status === "rejected";
 
 
-  if (meQ.isLoading) {
+  if (meQ.isLoading || (meQ.isFetching && !meQ.data)) {
     return <div className="min-h-screen bg-black text-white flex items-center justify-center">{b("లోడ్ అవుతోంది…", "Loading…")}</div>;
+  }
+  if (meQ.isError) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
+        <Card className="max-w-sm w-full p-6 text-center space-y-4 bg-zinc-950 border-zinc-800 text-white">
+          <p className="font-semibold">{b("మీ సభ్యత్వ వివరాలు ఇప్పుడే తీసుకురాలేకపోయాం.", "We couldn't load your membership right now.")}</p>
+          <Button onClick={() => meQ.refetch()}>
+            <RefreshCw className="h-4 w-4 mr-2" />{b("మళ్లీ ప్రయత్నించండి", "Try again")}
+          </Button>
+        </Card>
+      </div>
+    );
   }
   if (!m || m.status !== "approved") {
     if (typeof window !== "undefined") navigate({ to: "/member/pending", replace: true });

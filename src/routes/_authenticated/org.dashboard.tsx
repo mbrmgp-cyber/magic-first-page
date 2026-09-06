@@ -54,23 +54,24 @@ function MetricItem({ label, sub, value }: { label: string; sub: string; value: 
 
 function Dashboard() {
   const navigate = useNavigate();
+  const { user } = Route.useRouteContext();
   const qc = useQueryClient();
   const fetchOrg = useServerFn(getMyOrg);
   const saveLogo = useServerFn(updateOrgLogo);
   const { lang } = useI18n();
   const lt = (en: string, te: string) => localizeText({ en, te }, lang);
   const orgQ = useQuery({
-    queryKey: ["my-org"],
+    queryKey: ["my-org", user.id],
     queryFn: () => fetchOrg(),
     retry: 4,
     retryDelay: (i) => 500 * (i + 1),
   });
   const fetchRoles = useServerFn(getMyRoles);
-  const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: () => fetchRoles() });
+  const rolesQ = useQuery({ queryKey: ["my-roles", user.id], queryFn: () => fetchRoles() });
   const fetchCommittee = useServerFn(getMyCommitteeAccess);
-  const committeeQ = useQuery({ queryKey: ["my-committee-access"], queryFn: () => fetchCommittee() });
+  const committeeQ = useQuery({ queryKey: ["my-committee-access", user.id], queryFn: () => fetchCommittee() });
   const fetchModules = useServerFn(getMyModules);
-  const modulesQ = useQuery({ queryKey: ["my-modules"], queryFn: () => fetchModules() });
+  const modulesQ = useQuery({ queryKey: ["my-modules", user.id], queryFn: () => fetchModules() });
   const { role: simRole } = useSimRole();
   const isMbrAdmin = (rolesQ.data?.roles?.includes("mbr_admin") ?? false) && simRole === "super_admin";
   const isSuperAdmin = modulesQ.data?.isSuperAdmin ?? false;

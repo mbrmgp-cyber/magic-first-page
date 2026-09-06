@@ -327,35 +327,45 @@ export const getMyOrg = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
-    let { data: org } = await supabase
+    const ownedOrgResult = await supabase
       .from("organizations")
       .select("*")
       .eq("admin_user_id", userId)
       .maybeSingle();
+    if (ownedOrgResult.error) throw new Error(ownedOrgResult.error.message);
+    let org = ownedOrgResult.data;
     // Committee members (e.g. treasurer) can also open the org admin dashboard
     // via their own account; resolve the org through their active membership.
     if (!org) {
-      const { data: me } = await supabase
+      const memberResult = await supabase
         .from("members")
         .select("id, org_id")
         .eq("user_id", userId)
+        .eq("status", "approved")
+        .eq("is_active", true)
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
+      if (memberResult.error) throw new Error(memberResult.error.message);
+      const me = memberResult.data;
       if (me?.id && me?.org_id) {
-        const { data: cm } = await supabase
+        const committeeResult = await supabase
           .from("committee_members")
           .select("id")
           .eq("member_id", me.id)
           .eq("is_active", true)
           .limit(1)
           .maybeSingle();
+        if (committeeResult.error) throw new Error(committeeResult.error.message);
+        const cm = committeeResult.data;
         if (cm?.id) {
-          const { data: orgViaCommittee } = await supabase
+          const committeeOrgResult = await supabase
             .from("organizations")
             .select("*")
             .eq("id", me.org_id)
             .maybeSingle();
+          if (committeeOrgResult.error) throw new Error(committeeOrgResult.error.message);
+          const orgViaCommittee = committeeOrgResult.data;
           if (orgViaCommittee) org = orgViaCommittee;
         }
       }
