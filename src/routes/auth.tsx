@@ -238,9 +238,14 @@ function AuthPage() {
             <Button type="submit" disabled={busy} className="w-full bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white font-semibold border-0 shadow-[0_0_24px_rgba(255,140,40,0.45)]">
               {busy ? lt("Logging in…", "లాగిన్ అవుతోంది…") : lt("Login", "లాగిన్")}
             </Button>
-            <button type="button" onClick={() => setTab("register")} className="w-full text-center text-[11px] text-zinc-400 underline">
-              {lt("Forgot password? / New user? — register with OTP", "పాస్‌వర్డ్ మర్చిపోయారా? / కొత్తవారా? — OTPతో రిజిస్టర్ చేయండి")}
-            </button>
+            <div className="space-y-2 text-center">
+              <Link to="/forgot-password" className="block text-[11px] text-[#ff8c28] font-semibold hover:underline">
+                {lt("Forgot Password?", "పాస్‌వర్డ్ మర్చిపోయారా?")}
+              </Link>
+              <button type="button" onClick={() => setTab("register")} className="text-[11px] text-zinc-400 underline">
+                {lt("New user? — register with OTP", "కొత్తవారా? — OTPతో రిజిస్టర్ చేయండి")}
+              </button>
+            </div>
           </form>
         )}
 
