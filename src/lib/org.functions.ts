@@ -321,11 +321,11 @@ export const registerOrganization = createServerFn({ method: "POST" })
         founders,
         org_code,
       } as any)
-      .select()
+      .select(ORG_SAFE_COLUMNS)
       .single();
     if (error) throw new Error(error.message);
     const qrDataUrl = await QRCode.toDataURL(memberRegistrationUrl(org_code), { width: 512, margin: 2 });
-    return { org, qrDataUrl };
+    return { org: org as unknown as SafeOrgRow, qrDataUrl };
   });
 
 
