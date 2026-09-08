@@ -5,6 +5,17 @@ import QRCode from "qrcode";
 import { MEMBER_SAFE_COLUMNS, ORG_SAFE_COLUMNS } from "@/lib/db-columns";
 import { findOrgByCode, parseSafeImageDataUrl } from "@/lib/org-code";
 import type { Database } from "@/integrations/supabase/types";
+import { getRequest } from "@tanstack/react-start/server";
+import { ACTIVE_ORG_HEADER } from "@/lib/active-org";
+
+/** Organization the user picked in the switcher (sent as a request header). */
+function requestedOrgId(): string | null {
+  try {
+    return getRequest()?.headers?.get(ACTIVE_ORG_HEADER) || null;
+  } catch {
+    return null;
+  }
+}
 
 type SafeOrgRow = Omit<
   Database["public"]["Tables"]["organizations"]["Row"],
@@ -333,10 +344,52 @@ export const getMyOrg = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
+
+    // If the user switched to a specific organization, resolve that one first
+    // (only when they are its owner or an active committee member there).
+    const picked = requestedOrgId();
+    if (picked) {
+      const { data: pickedOrg } = await supabase
+        .from("organizations")
+        .select(ORG_SAFE_COLUMNS)
+        .eq("id", picked)
+        .maybeSingle();
+      const row = pickedOrg as unknown as (SafeOrgRow & { admin_user_id?: string }) | null;
+      if (row) {
+        let allowed = row.admin_user_id === userId;
+        if (!allowed) {
+          const { data: mem } = await supabase
+            .from("members")
+            .select("id")
+            .eq("user_id", userId)
+            .eq("org_id", picked)
+            .eq("status", "approved")
+            .limit(1)
+            .maybeSingle();
+          if (mem?.id) {
+            const { data: seat } = await supabase
+              .from("committee_members")
+              .select("id")
+              .eq("member_id", mem.id)
+              .eq("is_active", true)
+              .limit(1)
+              .maybeSingle();
+            allowed = !!seat?.id;
+          }
+        }
+        if (allowed) {
+          const qrDataUrl = await QRCode.toDataURL(memberRegistrationUrl(row.org_code), { width: 512, margin: 2 });
+          return { org: row as SafeOrgRow, qrDataUrl };
+        }
+      }
+    }
+
     const ownedOrgResult = await supabase
       .from("organizations")
       .select(ORG_SAFE_COLUMNS)
       .eq("admin_user_id", userId)
+      .order("created_at", { ascending: true })
+      .limit(1)
       .maybeSingle();
     if (ownedOrgResult.error) throw new Error(ownedOrgResult.error.message);
     let org = ownedOrgResult.data as unknown as SafeOrgRow | null;
@@ -380,6 +433,70 @@ export const getMyOrg = createServerFn({ method: "GET" })
     const qrDataUrl = await QRCode.toDataURL(memberRegistrationUrl(org.org_code), { width: 512, margin: 2 });
     return { org, qrDataUrl };
   });
+
+/** Every organization this account can work in: owned societies, committee
+ *  seats and plain memberships. Used by the organization switcher. */
+export const listMyOrgs = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const [{ data: owned }, { data: memberRows }] = await Promise.all([
+      supabase.from("organizations").select("id, name, logo_url").eq("admin_user_id", userId),
+      supabase
+        .from("members")
+        .select("id, org_id, status, is_active, organizations(id, name, logo_url)")
+        .eq("user_id", userId),
+    ]);
+
+    const memberIds = (memberRows ?? [])
+      .filter((m: any) => m.status === "approved" && m.is_active !== false)
+      .map((m: any) => m.id);
+    let seatByMember = new Map<string, string>();
+    if (memberIds.length) {
+      const { data: seats } = await supabase
+        .from("committee_members")
+        .select("member_id, role")
+        .in("member_id", memberIds)
+        .eq("is_active", true);
+      seatByMember = new Map((seats ?? []).map((s: any) => [s.member_id, s.role as string]));
+    }
+
+    type Entry = {
+      id: string;
+      name: string;
+      logo_url: string | null;
+      access: "owner" | "committee" | "member";
+      role: string | null;
+      status: string;
+    };
+    const map = new Map<string, Entry>();
+    for (const o of (owned ?? []) as any[]) {
+      map.set(o.id, {
+        id: o.id,
+        name: o.name,
+        logo_url: o.logo_url ?? null,
+        access: "owner",
+        role: "admin",
+        status: "approved",
+      });
+    }
+    for (const m of (memberRows ?? []) as any[]) {
+      const o = m.organizations;
+      if (!o?.id || map.has(o.id)) continue;
+      const seat = seatByMember.get(m.id) ?? null;
+      map.set(o.id, {
+        id: o.id,
+        name: o.name,
+        logo_url: o.logo_url ?? null,
+        access: seat ? "committee" : "member",
+        role: seat,
+        status: m.status,
+      });
+    }
+    return { orgs: [...map.values()] };
+  });
+
+
 
 // Returns whether the current user has an active committee seat, and in
 // which organization / role. Used to expose an "Open Admin Panel" toggle
@@ -730,7 +847,10 @@ export const getMyMembership = createServerFn({ method: "GET" })
     // blocks a genuinely approved member.
     const rank = (s: string) => (s === "approved" ? 0 : s === "pending" ? 1 : 2);
     const list = (rows ?? []).slice().sort((a: any, b: any) => rank(a.status) - rank(b.status));
-    return { membership: list[0] ?? null };
+    // Honour the organization picked in the switcher, when the user belongs to it.
+    const picked = requestedOrgId();
+    const inPicked = picked ? list.find((m: any) => m.org_id === picked) : null;
+    return { membership: inPicked ?? list[0] ?? null };
   });
 
 
