@@ -5,6 +5,17 @@ import QRCode from "qrcode";
 import { MEMBER_SAFE_COLUMNS, ORG_SAFE_COLUMNS } from "@/lib/db-columns";
 import { findOrgByCode, parseSafeImageDataUrl } from "@/lib/org-code";
 import type { Database } from "@/integrations/supabase/types";
+import { getRequest } from "@tanstack/react-start/server";
+import { ACTIVE_ORG_HEADER } from "@/lib/active-org";
+
+/** Organization the user picked in the switcher (sent as a request header). */
+function requestedOrgId(): string | null {
+  try {
+    return getRequest()?.headers?.get(ACTIVE_ORG_HEADER) || null;
+  } catch {
+    return null;
+  }
+}
 
 type SafeOrgRow = Omit<
   Database["public"]["Tables"]["organizations"]["Row"],
