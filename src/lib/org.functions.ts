@@ -434,6 +434,70 @@ export const getMyOrg = createServerFn({ method: "GET" })
     return { org, qrDataUrl };
   });
 
+/** Every organization this account can work in: owned societies, committee
+ *  seats and plain memberships. Used by the organization switcher. */
+export const listMyOrgs = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const [{ data: owned }, { data: memberRows }] = await Promise.all([
+      supabase.from("organizations").select("id, name, logo_url").eq("admin_user_id", userId),
+      supabase
+        .from("members")
+        .select("id, org_id, status, is_active, organizations(id, name, logo_url)")
+        .eq("user_id", userId),
+    ]);
+
+    const memberIds = (memberRows ?? [])
+      .filter((m: any) => m.status === "approved" && m.is_active !== false)
+      .map((m: any) => m.id);
+    let seatByMember = new Map<string, string>();
+    if (memberIds.length) {
+      const { data: seats } = await supabase
+        .from("committee_members")
+        .select("member_id, role")
+        .in("member_id", memberIds)
+        .eq("is_active", true);
+      seatByMember = new Map((seats ?? []).map((s: any) => [s.member_id, s.role as string]));
+    }
+
+    type Entry = {
+      id: string;
+      name: string;
+      logo_url: string | null;
+      access: "owner" | "committee" | "member";
+      role: string | null;
+      status: string;
+    };
+    const map = new Map<string, Entry>();
+    for (const o of (owned ?? []) as any[]) {
+      map.set(o.id, {
+        id: o.id,
+        name: o.name,
+        logo_url: o.logo_url ?? null,
+        access: "owner",
+        role: "admin",
+        status: "approved",
+      });
+    }
+    for (const m of (memberRows ?? []) as any[]) {
+      const o = m.organizations;
+      if (!o?.id || map.has(o.id)) continue;
+      const seat = seatByMember.get(m.id) ?? null;
+      map.set(o.id, {
+        id: o.id,
+        name: o.name,
+        logo_url: o.logo_url ?? null,
+        access: seat ? "committee" : "member",
+        role: seat,
+        status: m.status,
+      });
+    }
+    return { orgs: [...map.values()] };
+  });
+
+
+
 // Returns whether the current user has an active committee seat, and in
 // which organization / role. Used to expose an "Open Admin Panel" toggle
 // on the member dashboard for treasurers, presidents, etc.
