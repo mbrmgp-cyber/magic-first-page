@@ -847,7 +847,10 @@ export const getMyMembership = createServerFn({ method: "GET" })
     // blocks a genuinely approved member.
     const rank = (s: string) => (s === "approved" ? 0 : s === "pending" ? 1 : 2);
     const list = (rows ?? []).slice().sort((a: any, b: any) => rank(a.status) - rank(b.status));
-    return { membership: list[0] ?? null };
+    // Honour the organization picked in the switcher, when the user belongs to it.
+    const picked = requestedOrgId();
+    const inPicked = picked ? list.find((m: any) => m.org_id === picked) : null;
+    return { membership: inPicked ?? list[0] ?? null };
   });
 
 
