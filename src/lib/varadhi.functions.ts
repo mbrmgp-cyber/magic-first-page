@@ -1283,6 +1283,7 @@ export const adminListVaradhiMessages = createServerFn({ method: "GET" })
       .from("varadhi_admin_messages").select("*").order("created_at", { ascending: false });
     if (!scope.isSuper && scope.state) q = q.eq("state", scope.state);
     if (!scope.isSuper && scope.district) q = q.eq("district", scope.district);
+    if (!scope.isSuper && scope.level === "mandal_admin" && scope.mandal) q = q.eq("mandal", scope.mandal);
     const { data: rows, error } = await q.limit(Math.min(data.limit ?? 100, 300));
     if (error) throw new Error(error.message);
     const list = (rows ?? []) as any[];
@@ -1306,11 +1307,14 @@ export const adminReplyVaradhiMessage = createServerFn({ method: "POST" })
     // Area admins may only touch messages inside their own state/district.
     if (!scope.isSuper) {
       const { data: target } = await supabaseAdmin
-        .from("varadhi_admin_messages").select("state, district").eq("id", data.id).maybeSingle();
+        .from("varadhi_admin_messages").select("state, district, mandal").eq("id", data.id).maybeSingle();
       if (!target) throw new Error("Not found");
       const t = target as any;
       if (scope.state && t.state !== scope.state) throw new Error("మీ ప్రాంతం కాదు");
       if (scope.district && t.district !== scope.district) throw new Error("మీ జిల్లా కాదు");
+      if (scope.level === "mandal_admin" && scope.mandal && t.mandal !== scope.mandal) {
+        throw new Error("మీ మండలం కాదు");
+      }
     }
     const patch: Record<string, unknown> = {};
     if (data.reply !== undefined) patch.admin_reply = data.reply.trim() || null;
