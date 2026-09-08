@@ -292,6 +292,14 @@ export const addMemberLoan = createServerFn({ method: "POST" })
   }) => d)
   .handler(async ({ data, context }) => {
     const { supabase } = context;
+    // The member must belong to the org the loan is being written against.
+    const { data: owner } = await supabase
+      .from("members")
+      .select("id")
+      .eq("id", data.member_id)
+      .eq("org_id", data.org_id)
+      .maybeSingle();
+    if (!owner) throw new Error("Member does not belong to this organization");
     const { error } = await supabase.from("member_loans").insert(data);
     if (error) throw new Error(error.message);
     let emailSent = false;
@@ -322,6 +330,14 @@ export const addLoanPayment = createServerFn({ method: "POST" })
   }) => d)
   .handler(async ({ data, context }) => {
     const { supabase } = context;
+    // The loan must belong to the org the payment is being written against.
+    const { data: parentLoan } = await supabase
+      .from("member_loans")
+      .select("id")
+      .eq("id", data.loan_id)
+      .eq("org_id", data.org_id)
+      .maybeSingle();
+    if (!parentLoan) throw new Error("Loan does not belong to this organization");
     const { error } = await supabase.from("member_loan_payments").insert(data);
     if (error) throw new Error(error.message);
     let emailSent = false;

@@ -187,6 +187,14 @@ export const addDonation = createServerFn({ method: "POST" })
     const { orgId } = await getOrgForUser(supabase, userId);
     if (!orgId) throw new Error("Organization కనపడలేదు");
     if (!(data.amount > 0)) throw new Error("Amount తప్పు");
+    // The donor must belong to this organization.
+    const { data: ownDonor } = await supabase
+      .from("donors")
+      .select("id")
+      .eq("id", data.donor_id)
+      .eq("org_id", orgId)
+      .maybeSingle();
+    if (!ownDonor) throw new Error("Donor does not belong to this organization");
     const { data: row, error } = await supabase.from("donations").insert({
       org_id: orgId,
       donor_id: data.donor_id,
