@@ -71,14 +71,17 @@ export async function assertPointsAvailable(sb: any, userId: string): Promise<vo
 }
 
 export async function awardPoint(
-  sb: any,
+  _sb: any,
   userId: string | null | undefined,
   eventType: "upload" | "contact",
   refType?: string,
   refId?: string,
 ): Promise<void> {
   if (!userId) return;
-  await sb.rpc("varadhi_award_point", {
+  // Point events are credited only by trusted server code (service role);
+  // the RPC is not callable by anon/authenticated clients.
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  await supabaseAdmin.rpc("varadhi_award_point", {
     _user_id: userId,
     _event_type: eventType,
     _ref_type: refType ?? null,
