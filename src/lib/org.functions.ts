@@ -344,10 +344,52 @@ export const getMyOrg = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
+
+    // If the user switched to a specific organization, resolve that one first
+    // (only when they are its owner or an active committee member there).
+    const picked = requestedOrgId();
+    if (picked) {
+      const { data: pickedOrg } = await supabase
+        .from("organizations")
+        .select(ORG_SAFE_COLUMNS)
+        .eq("id", picked)
+        .maybeSingle();
+      const row = pickedOrg as unknown as (SafeOrgRow & { admin_user_id?: string }) | null;
+      if (row) {
+        let allowed = row.admin_user_id === userId;
+        if (!allowed) {
+          const { data: mem } = await supabase
+            .from("members")
+            .select("id")
+            .eq("user_id", userId)
+            .eq("org_id", picked)
+            .eq("status", "approved")
+            .limit(1)
+            .maybeSingle();
+          if (mem?.id) {
+            const { data: seat } = await supabase
+              .from("committee_members")
+              .select("id")
+              .eq("member_id", mem.id)
+              .eq("is_active", true)
+              .limit(1)
+              .maybeSingle();
+            allowed = !!seat?.id;
+          }
+        }
+        if (allowed) {
+          const qrDataUrl = await QRCode.toDataURL(memberRegistrationUrl(row.org_code), { width: 512, margin: 2 });
+          return { org: row as SafeOrgRow, qrDataUrl };
+        }
+      }
+    }
+
     const ownedOrgResult = await supabase
       .from("organizations")
       .select(ORG_SAFE_COLUMNS)
       .eq("admin_user_id", userId)
+      .order("created_at", { ascending: true })
+      .limit(1)
       .maybeSingle();
     if (ownedOrgResult.error) throw new Error(ownedOrgResult.error.message);
     let org = ownedOrgResult.data as unknown as SafeOrgRow | null;
