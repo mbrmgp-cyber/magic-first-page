@@ -84,7 +84,7 @@ export async function awardPoint(
   await supabaseAdmin.rpc("varadhi_award_point", {
     _user_id: userId,
     _event_type: eventType,
-    _ref_type: refType ?? null,
-    _ref_id: refId ?? null,
+    _ref_type: refType ?? undefined,
+    _ref_id: refId ?? undefined,
   });
 }
