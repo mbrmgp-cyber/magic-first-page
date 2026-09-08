@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { useI18n, localizeText } from "@/lib/i18n";
 import logo from "@/assets/mbr-logo.png.asset.json";
 import { Mail, Lock, KeyRound, UserPlus } from "lucide-react";
+import { OrgBrandedAppIcons } from "@/components/OrgBrandedAppIcons";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -165,6 +166,8 @@ function AuthPage() {
 
   return (
     <div className="min-h-screen relative flex items-center justify-center p-6 overflow-hidden bg-black">
+      <OrgBrandedAppIcons />
+
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute -top-32 -left-32 h-72 w-72 rounded-full bg-[#ff8c28]/15 blur-3xl" />
         <div className="absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-[#ff8c28]/10 blur-3xl" />
@@ -229,6 +232,9 @@ function AuthPage() {
               <button type="button" onClick={() => setTab("register")} className="text-[11px] text-zinc-400 underline">
                 {lt("New user? — register with OTP", "కొత్తవారా? — OTPతో రిజిస్టర్ చేయండి")}
               </button>
+              <Link to="/mbr" className="block text-[10px] text-zinc-500 hover:text-zinc-300 underline">
+                {lt("go to MBR main page", "MBR ప్రధాన పేజీకి వెళ్లండి")}
+              </Link>
             </div>
           </form>
         )}
