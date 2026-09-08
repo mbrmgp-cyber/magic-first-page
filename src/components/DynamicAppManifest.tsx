@@ -6,6 +6,7 @@ import { resolveTheme } from "@/lib/theme";
 import { useHasSession } from "@/hooks/useHasSession";
 import mbrLogoAsset from "@/assets/mbr-logo.png.asset.json";
 import { buildPaddedIconSet } from "@/lib/pad-icon";
+import { saveOrgBranding } from "@/lib/org-branding";
 
 const MBR_LOGO_URL = mbrLogoAsset.url;
 
@@ -95,6 +96,10 @@ export function DynamicAppManifest() {
     // Maskable safe-zone background: prefer white when the logo is likely
     // dark-on-light (org logos), else use the theme background.
     const iconBg = (org.logo_url || "").trim() ? "#ffffff" : theme.bg || "#000000";
+
+    // Remember this org's branding so the login screen can offer the same
+    // home-screen icon before the user signs in again.
+    saveOrgBranding({ name, shortName, logoUrl: rawLogo, bg: theme.bg || "#000000", iconBg });
 
     let cancelled = false;
     (async () => {
