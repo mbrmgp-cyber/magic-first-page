@@ -166,6 +166,8 @@ function AuthPage() {
 
   return (
     <div className="min-h-screen relative flex items-center justify-center p-6 overflow-hidden bg-black">
+      <OrgBrandedAppIcons />
+
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute -top-32 -left-32 h-72 w-72 rounded-full bg-[#ff8c28]/15 blur-3xl" />
         <div className="absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-[#ff8c28]/10 blur-3xl" />
