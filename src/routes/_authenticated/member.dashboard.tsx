@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Textarea } from "@/components/ui/textarea";
 import { MemberIdCard } from "@/components/MemberIdCard";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { OrgSwitcher } from "@/components/OrgSwitcher";
 
 import { useI18n, bi } from "@/lib/i18n";
 import {
@@ -256,6 +257,7 @@ function MemberDashboard() {
           <div className="flex-1 min-w-0 flex flex-col items-center justify-center gap-2">
             <p className="text-sm font-semibold text-white leading-tight text-center">{b("స్వాగతం గౌరవ సభ్యులకు", "Welcome, respected member")} 🙏</p>
             <div className="flex items-center gap-2">
+              <OrgSwitcher />
               <LanguageToggle />
               <button
                 onClick={logout}

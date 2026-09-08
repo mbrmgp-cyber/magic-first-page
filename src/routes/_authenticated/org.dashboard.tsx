@@ -18,6 +18,7 @@ import {
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 import { localizeText, transliterateText, useI18n } from "@/lib/i18n";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { OrgSwitcher } from "@/components/OrgSwitcher";
 import { resolveTheme } from "@/lib/theme";
 import { memberRegistrationUrl } from "@/lib/public-url";
 import { useSimRole, canAccess, ROUTE_ACCESS, ROLE_LABELS } from "@/lib/rbac";
@@ -332,6 +333,7 @@ function Dashboard() {
                 <QrCode className="w-5 h-5 text-zinc-500" />
               )}
             </button>
+            <OrgSwitcher />
             <LanguageToggle />
           </div>
           <Button variant="ghost" size="icon" onClick={() => setSettingsOpen(true)} className="text-zinc-200 hover:bg-zinc-900 hover:text-white h-9 w-9 p-0 rounded-md border border-zinc-700 inline-flex items-center justify-center shrink-0 [&_svg]:mx-auto" aria-label="Settings">
