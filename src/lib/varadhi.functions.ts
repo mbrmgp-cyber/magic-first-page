@@ -907,6 +907,8 @@ export const adminListAreaAdmins = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     let q = supabaseAdmin.from("varadhi_area_admins").select("*").order("created_at", { ascending: false });
     if (!scope.isSuper && scope.state) q = q.eq("state", scope.state);
+    if (!scope.isSuper && scope.district && scope.level !== "state_admin") q = q.eq("district", scope.district);
+    if (!scope.isSuper && scope.level === "mandal_admin" && scope.mandal) q = q.eq("mandal", scope.mandal);
     const { data: rows } = await q.limit(500);
     const list = (rows ?? []) as any[];
     const ids = Array.from(new Set(list.map((r) => r.user_id)));
