@@ -312,17 +312,6 @@ function OrgRegister() {
             onChange={(url) => setForm({ ...form, admin_aadhaar_url: url })}
           />
 
-          {!isGov && (
-            <Button
-              type="button"
-              onClick={() => { setAadhaarOtpValue(""); setAadhaarOtpOpen(true); }}
-              className={`w-full font-semibold border-0 ${aadhaarVerified ? "bg-emerald-600 hover:bg-emerald-600/90 text-white" : "bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white shadow-[0_0_24px_rgba(255,140,40,0.45)]"}`}
-            >
-              <ShieldCheck className="h-4 w-4" />
-              {aadhaarVerified ? t("aadhaarVerified") : t("verifyAadhaarOtp")}
-            </Button>
-          )}
-
           {/* Founders only when gov registered */}
           {isGov && (
             <div className="space-y-2">
