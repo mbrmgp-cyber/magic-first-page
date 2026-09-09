@@ -86,7 +86,8 @@ export function DynamicAppManifest() {
     ((memberQ.data?.membership as any)?.organizations as any) ||
     null;
 
-  const blobUrlRef = useRef<string | null>(null);
+
+
 
   useEffect(() => {
     if (typeof document === "undefined" || !org) return;
@@ -150,11 +151,6 @@ export function DynamicAppManifest() {
     };
   }, [org]);
 
-  useEffect(() => {
-    return () => {
-      if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
-    };
-  }, []);
 
   return null;
 }
