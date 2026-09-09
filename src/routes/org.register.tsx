@@ -9,10 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { RefreshCw, Plus, X, AlertCircle, CheckCircle2, Info, ShieldCheck } from "lucide-react";
+import { RefreshCw, Plus, X, AlertCircle, CheckCircle2, Info } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/org/register")({
@@ -86,9 +84,6 @@ function OrgRegister() {
   const [status, setStatus] = useState<{ type: "info" | "success" | "error"; title: string; message: string } | null>(null);
   const [result, setResult] = useState<{ org: { name: string; org_code: string }; qrDataUrl: string } | null>(null);
   const [isGov, setIsGov] = useState<boolean>(true);
-  const [aadhaarOtpOpen, setAadhaarOtpOpen] = useState(false);
-  const [aadhaarOtpValue, setAadhaarOtpValue] = useState("");
-  const [aadhaarVerified, setAadhaarVerified] = useState(false);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -317,17 +312,6 @@ function OrgRegister() {
             onChange={(url) => setForm({ ...form, admin_aadhaar_url: url })}
           />
 
-          {!isGov && (
-            <Button
-              type="button"
-              onClick={() => { setAadhaarOtpValue(""); setAadhaarOtpOpen(true); }}
-              className={`w-full font-semibold border-0 ${aadhaarVerified ? "bg-emerald-600 hover:bg-emerald-600/90 text-white" : "bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white shadow-[0_0_24px_rgba(255,140,40,0.45)]"}`}
-            >
-              <ShieldCheck className="h-4 w-4" />
-              {aadhaarVerified ? t("aadhaarVerified") : t("verifyAadhaarOtp")}
-            </Button>
-          )}
-
           {/* Founders only when gov registered */}
           {isGov && (
             <div className="space-y-2">
@@ -367,42 +351,6 @@ function OrgRegister() {
         </form>
       </Card>
 
-      <Dialog open={aadhaarOtpOpen} onOpenChange={setAadhaarOtpOpen}>
-        <DialogContent className="bg-zinc-950 border-zinc-800 text-white">
-          <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-[#ff8c28]" />
-              {t("verifyAadhaarOtp")}
-            </DialogTitle>
-            <DialogDescription className="text-zinc-400">
-              {t("enterAadhaarOtp")}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-center py-4">
-            <InputOTP maxLength={6} value={aadhaarOtpValue} onChange={setAadhaarOtpValue}>
-              <InputOTPGroup>
-                {[0,1,2,3,4,5].map((i) => (
-                  <InputOTPSlot key={i} index={i} className="bg-zinc-900 border-zinc-700 text-white h-11 w-11" />
-                ))}
-              </InputOTPGroup>
-            </InputOTP>
-          </div>
-          <DialogFooter>
-            <Button
-              type="button"
-              disabled={aadhaarOtpValue.length !== 6}
-              onClick={() => {
-                setAadhaarVerified(true);
-                setAadhaarOtpOpen(false);
-                toast.success(t("aadhaarVerified"));
-              }}
-              className="w-full bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white font-semibold border-0 shadow-[0_0_24px_rgba(255,140,40,0.45)]"
-            >
-              {t("verify")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
