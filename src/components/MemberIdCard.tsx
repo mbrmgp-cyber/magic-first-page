@@ -194,6 +194,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
   const [showBack, setShowBack] = useState(false);
   const [lang, setLang] = useState<CardLang>("te");
   const [designation, setDesignation] = useState<string>("సభ్యుడు");
+  const [roleKey, setRoleKey] = useState<string | null>(null);
   const [presidentName, setPresidentName] = useState<string | null>(null);
   const t = L[lang];
   const frontRef = useRef<HTMLDivElement>(null);
@@ -273,6 +274,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
         worker: "కార్యకర్త",
       };
       setDesignation(role && map[role] ? map[role] : "సభ్యుడు");
+      setRoleKey(role && map[role] ? role : null);
     })();
     return () => { cancel = true; };
   }, [member.id]);
