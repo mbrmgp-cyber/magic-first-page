@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getMyOrg, getMyMembership } from "@/lib/org.functions";
@@ -6,7 +6,9 @@ import { resolveTheme } from "@/lib/theme";
 import { useHasSession } from "@/hooks/useHasSession";
 import mbrLogoAsset from "@/assets/mbr-logo.png.asset.json";
 import { buildPaddedIconSet } from "@/lib/pad-icon";
+import { toManifestDataUrl } from "@/lib/manifest-url";
 import { saveOrgBranding } from "@/lib/org-branding";
+
 
 const MBR_LOGO_URL = mbrLogoAsset.url;
 
@@ -84,7 +86,8 @@ export function DynamicAppManifest() {
     ((memberQ.data?.membership as any)?.organizations as any) ||
     null;
 
-  const blobUrlRef = useRef<string | null>(null);
+
+
 
   useEffect(() => {
     if (typeof document === "undefined" || !org) return;
@@ -125,12 +128,8 @@ export function DynamicAppManifest() {
         icons,
       };
 
-      if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
-      const blob = new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" });
-      const url = URL.createObjectURL(blob);
-      blobUrlRef.current = url;
+      upsertLink("manifest", { href: toManifestDataUrl(manifest) });
 
-      upsertLink("manifest", { href: url });
       upsertLink("apple-touch-icon", { href: set.apple180 });
       upsertLink("apple-touch-icon", { sizes: "180x180", href: set.apple180 });
       upsertLink("icon", { href: set.any192, type: "image/png" });
@@ -152,11 +151,6 @@ export function DynamicAppManifest() {
     };
   }, [org]);
 
-  useEffect(() => {
-    return () => {
-      if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
-    };
-  }, []);
 
   return null;
 }

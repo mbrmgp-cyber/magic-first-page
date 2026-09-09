@@ -1,6 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { buildPaddedIconSet } from "@/lib/pad-icon";
+import { toManifestDataUrl } from "@/lib/manifest-url";
 import { getOrgBranding } from "@/lib/org-branding";
+
 
 function upsertLink(rel: string, attrs: Record<string, string>) {
   const selector = `link[rel="${rel}"]${attrs.sizes ? `[sizes="${attrs.sizes}"]` : ""}`;
@@ -30,8 +32,6 @@ function upsertMeta(name: string, content: string) {
  * with their own organization logo, even before signing in.
  */
 export function OrgBrandedAppIcons() {
-  const blobUrlRef = useRef<string | null>(null);
-
   useEffect(() => {
     if (typeof document === "undefined") return;
     const b = getOrgBranding();
@@ -59,12 +59,7 @@ export function OrgBrandedAppIcons() {
         ],
       };
 
-      if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
-      const blob = new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" });
-      const url = URL.createObjectURL(blob);
-      blobUrlRef.current = url;
-
-      upsertLink("manifest", { href: url });
+      upsertLink("manifest", { href: toManifestDataUrl(manifest) });
       upsertLink("apple-touch-icon", { href: set.apple180 });
       upsertLink("apple-touch-icon", { sizes: "180x180", href: set.apple180 });
       upsertLink("icon", { href: set.any192, type: "image/png" });
@@ -73,13 +68,14 @@ export function OrgBrandedAppIcons() {
       upsertMeta("application-name", b.shortName);
       upsertMeta("apple-mobile-web-app-capable", "yes");
       upsertMeta("mobile-web-app-capable", "yes");
+      if (b.name) document.title = b.name;
     })();
 
     return () => {
       cancelled = true;
-      if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
     };
   }, []);
 
   return null;
 }
+
