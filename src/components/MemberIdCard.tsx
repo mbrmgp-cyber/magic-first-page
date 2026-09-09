@@ -436,7 +436,7 @@ function LegacyLayout(props: any) {
                 fref={frontRef}
                 member={member} org={org} t={t} lang={lang}
                 photoUrl={photoUrl} logoUrl={logoUrl} sigUrl={sigUrl} qrDataUrl={qrDataUrl} qrLink={memberQrLink}
-                joined={joined}
+                joined={joined} roleKey={roleKey}
               />
             </div>
             <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
@@ -468,7 +468,7 @@ function LegacyLayout(props: any) {
 
 
 function CardFront({
-  fref, member, org, photoUrl, logoUrl, sigUrl, qrDataUrl, qrLink, joined, t, lang,
+  fref, member, org, photoUrl, logoUrl, sigUrl, qrDataUrl, qrLink, joined, t, lang, roleKey,
 }: {
   fref: React.RefObject<HTMLDivElement | null>;
   member: Member; org: Org | null;
@@ -478,6 +478,7 @@ function CardFront({
   joined: string;
   t: Record<string, string>;
   lang: CardLang;
+  roleKey?: string | null;
 }) {
   // Derive village & mandal: prefer explicit fields, else parse address.
   let village = member.village ?? null;
@@ -529,7 +530,7 @@ function CardFront({
           fontSize: "2mm", background: "#000080", color: "#fff",
           padding: "0.4mm 1.2mm", borderRadius: "1mm", fontWeight: 800,
         }}>
-          {t.member}
+          {(roleKey && t[roleKey]) || t.member}
         </div>
       </div>
 
