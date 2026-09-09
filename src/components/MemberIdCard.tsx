@@ -84,7 +84,9 @@ const L: Record<CardLang, Record<string, string>> = {
   te: {
     member: "సభ్యుడు", id: "ఐడి", father: "తండ్రి", phone: "ఫోన్", joined: "చేరిన",
     village: "గ్రామం", mandal: "మండలం",
-    president: "అధ్యక్షుడు", active: "● యాక్టివ్ సభ్యుడు", inactive: "● ఇనాక్టివ్",
+    president: "అధ్యక్షుడు", vice_president: "ఉపాధ్యక్షుడు", treasurer: "కోశాధికారి",
+    advisor: "సలహాదారు", executive: "కార్యవర్గ సభ్యుడు", worker: "కార్యకర్త",
+    active: "● యాక్టివ్ సభ్యుడు", inactive: "● ఇనాక్టివ్",
     objectives: "ముఖ్య ఉద్దేశాలు", oath: "సభ్యుని ప్రమాణం",
     jaihind: "జై హింద్",
     mbrApp: "కొత్త సభ్యుల నమోదు",
@@ -96,7 +98,9 @@ const L: Record<CardLang, Record<string, string>> = {
   en: {
     member: "MEMBER", id: "ID", father: "Father", phone: "Phone", joined: "Joined",
     village: "Village", mandal: "Mandal",
-    president: "President", active: "● ACTIVE MEMBER", inactive: "● INACTIVE",
+    president: "PRESIDENT", vice_president: "VICE PRESIDENT", treasurer: "TREASURER",
+    advisor: "ADVISOR", executive: "EXECUTIVE", worker: "WORKER",
+    active: "● ACTIVE MEMBER", inactive: "● INACTIVE",
     objectives: "Key Objectives", oath: "Member's Oath",
     jaihind: "Jai Hind",
     mbrApp: "New Member Registration",
@@ -108,7 +112,9 @@ const L: Record<CardLang, Record<string, string>> = {
   hi: {
     member: "सदस्य", id: "आईडी", father: "पिता", phone: "फ़ोन", joined: "शामिल",
     village: "गाँव", mandal: "मंडल",
-    president: "अध्यक्ष", active: "● सक्रिय सदस्य", inactive: "● निष्क्रिय",
+    president: "अध्यक्ष", vice_president: "उपाध्यक्ष", treasurer: "कोषाध्यक्ष",
+    advisor: "सलाहकार", executive: "कार्यकारी सदस्य", worker: "कार्यकर्ता",
+    active: "● सक्रिय सदस्य", inactive: "● निष्क्रिय",
     objectives: "मुख्य उद्देश्य", oath: "सदस्य की शपथ",
     jaihind: "जय हिन्द",
     mbrApp: "नए सदस्य पंजीकरण",
