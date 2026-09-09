@@ -389,6 +389,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
           memberQrLink={memberQrLink}
           registrationQrLink={registrationQrLink}
           joined={joined}
+          roleKey={roleKey}
         />
       )}
     </div>
@@ -397,7 +398,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
 
 function LegacyLayout(props: any) {
   const { langs, lang, setLang, langLabel, showBack, setShowBack, handlePrint,
-          frontRef, backRef, member, org, t, photoUrl, logoUrl, sigUrl, qrDataUrl, appQrUrl, memberQrLink, registrationQrLink, joined } = props;
+          frontRef, backRef, member, org, t, photoUrl, logoUrl, sigUrl, qrDataUrl, appQrUrl, memberQrLink, registrationQrLink, joined, roleKey } = props;
   return (
     <>
 
