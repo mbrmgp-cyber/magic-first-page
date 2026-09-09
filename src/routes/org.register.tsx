@@ -351,42 +351,6 @@ function OrgRegister() {
         </form>
       </Card>
 
-      <Dialog open={aadhaarOtpOpen} onOpenChange={setAadhaarOtpOpen}>
-        <DialogContent className="bg-zinc-950 border-zinc-800 text-white">
-          <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-[#ff8c28]" />
-              {t("verifyAadhaarOtp")}
-            </DialogTitle>
-            <DialogDescription className="text-zinc-400">
-              {t("enterAadhaarOtp")}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-center py-4">
-            <InputOTP maxLength={6} value={aadhaarOtpValue} onChange={setAadhaarOtpValue}>
-              <InputOTPGroup>
-                {[0,1,2,3,4,5].map((i) => (
-                  <InputOTPSlot key={i} index={i} className="bg-zinc-900 border-zinc-700 text-white h-11 w-11" />
-                ))}
-              </InputOTPGroup>
-            </InputOTP>
-          </div>
-          <DialogFooter>
-            <Button
-              type="button"
-              disabled={aadhaarOtpValue.length !== 6}
-              onClick={() => {
-                setAadhaarVerified(true);
-                setAadhaarOtpOpen(false);
-                toast.success(t("aadhaarVerified"));
-              }}
-              className="w-full bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white font-semibold border-0 shadow-[0_0_24px_rgba(255,140,40,0.45)]"
-            >
-              {t("verify")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
