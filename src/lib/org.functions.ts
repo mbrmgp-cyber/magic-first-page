@@ -335,9 +335,96 @@ export const registerOrganization = createServerFn({ method: "POST" })
       .select(ORG_SAFE_COLUMNS)
       .single();
     if (error) throw new Error(error.message);
+    const orgRow = org as unknown as SafeOrgRow;
+    await ensureOrgEmailAdminAccount({
+      orgId: orgRow.id,
+      orgName: orgRow.name,
+      email: data.email,
+      adminName: data.admin_name,
+    });
     const qrDataUrl = await QRCode.toDataURL(memberRegistrationUrl(org_code), { width: 512, margin: 2 });
-    return { org: org as unknown as SafeOrgRow, qrDataUrl };
+    return { org: orgRow, qrDataUrl };
   });
+
+/**
+ * The organization's own email gets a login account with the default password
+ * "admin", seated as an active committee president so it can approve members.
+ * Existing accounts keep their current password.
+ */
+async function ensureOrgEmailAdminAccount(args: {
+  orgId: string;
+  orgName: string;
+  email: string;
+  adminName?: string | undefined;
+}) {
+  const email = (args.email || "").trim().toLowerCase();
+  if (!email) return;
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    let userId: string | null = null;
+    const created = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password: "admin",
+      email_confirm: true,
+      user_metadata: { full_name: args.adminName || args.orgName },
+    });
+    if (created.data?.user?.id) {
+      userId = created.data.user.id;
+    } else {
+      const { data: list } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 200 });
+      userId = list?.users?.find((u) => (u.email || "").toLowerCase() === email)?.id ?? null;
+    }
+    if (!userId) return;
+
+    const { data: existingMember } = await supabaseAdmin
+      .from("members")
+      .select("id")
+      .eq("org_id", args.orgId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    let memberId = existingMember?.id ?? null;
+    if (!memberId) {
+      const { data: inserted } = await supabaseAdmin
+        .from("members")
+        .insert({
+          org_id: args.orgId,
+          user_id: userId,
+          email,
+          name: args.adminName || args.orgName,
+          status: "approved",
+          is_active: true,
+          is_committee: true,
+        } as any)
+        .select("id")
+        .single();
+      memberId = inserted?.id ?? null;
+    }
+    if (!memberId) return;
+
+    const { data: seat } = await supabaseAdmin
+      .from("committee_members")
+      .select("id")
+      .eq("org_id", args.orgId)
+      .eq("member_id", memberId)
+      .maybeSingle();
+    if (!seat?.id) {
+      const termEnd = new Date();
+      termEnd.setFullYear(termEnd.getFullYear() + 5);
+      await supabaseAdmin.from("committee_members").insert({
+        org_id: args.orgId,
+        member_id: memberId,
+        role: "president",
+        is_active: true,
+        term_end_date: termEnd.toISOString().slice(0, 10),
+      } as any);
+    }
+  } catch {
+    // Never block registration if the helper account could not be created.
+  }
+}
+
 
 
 export const getMyOrg = createServerFn({ method: "GET" })
