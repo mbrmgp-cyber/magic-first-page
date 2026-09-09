@@ -1,6 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import mbrLogoAsset from "@/assets/mbr-logo.png.asset.json";
 import { buildPaddedIconSet } from "@/lib/pad-icon";
+import { toManifestDataUrl } from "@/lib/manifest-url";
+import { getOrgBranding } from "@/lib/org-branding";
 
 const MBR_LOGO_URL = mbrLogoAsset.url;
 
@@ -22,8 +24,6 @@ function upsertLink(rel: string, attrs: Record<string, string>) {
  * later overrides these with org-specific padded icons when an org is loaded.
  */
 export function StaticAppIcons() {
-  const blobUrlRef = useRef<string | null>(null);
-
   useEffect(() => {
     if (typeof document === "undefined") return;
     // Skip MBR icon/manifest injection on Varadhi routes so magic-link opens
@@ -31,6 +31,9 @@ export function StaticAppIcons() {
     if (typeof window !== "undefined" && window.location.pathname.startsWith("/varadhi")) {
       return;
     }
+    // If the user's organization branding is already known, let it win.
+    if (getOrgBranding()) return;
+
     let cancelled = false;
     (async () => {
       const set = await buildPaddedIconSet(MBR_LOGO_URL, "#000000");
@@ -53,12 +56,7 @@ export function StaticAppIcons() {
         ],
       };
 
-      if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
-      const blob = new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" });
-      const url = URL.createObjectURL(blob);
-      blobUrlRef.current = url;
-
-      upsertLink("manifest", { href: url });
+      upsertLink("manifest", { href: toManifestDataUrl(manifest) });
       upsertLink("apple-touch-icon", { href: set.apple180 });
       upsertLink("apple-touch-icon", { sizes: "180x180", href: set.apple180 });
       upsertLink("icon", { href: set.any192, type: "image/png" });
@@ -67,7 +65,6 @@ export function StaticAppIcons() {
 
     return () => {
       cancelled = true;
-      if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
     };
   }, []);
 
