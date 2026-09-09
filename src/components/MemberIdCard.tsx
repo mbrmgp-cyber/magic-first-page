@@ -84,7 +84,9 @@ const L: Record<CardLang, Record<string, string>> = {
   te: {
     member: "సభ్యుడు", id: "ఐడి", father: "తండ్రి", phone: "ఫోన్", joined: "చేరిన",
     village: "గ్రామం", mandal: "మండలం",
-    president: "అధ్యక్షుడు", active: "● యాక్టివ్ సభ్యుడు", inactive: "● ఇనాక్టివ్",
+    president: "అధ్యక్షుడు", vice_president: "ఉపాధ్యక్షుడు", treasurer: "కోశాధికారి",
+    advisor: "సలహాదారు", executive: "కార్యవర్గ సభ్యుడు", worker: "కార్యకర్త",
+    active: "● యాక్టివ్ సభ్యుడు", inactive: "● ఇనాక్టివ్",
     objectives: "ముఖ్య ఉద్దేశాలు", oath: "సభ్యుని ప్రమాణం",
     jaihind: "జై హింద్",
     mbrApp: "కొత్త సభ్యుల నమోదు",
@@ -96,7 +98,9 @@ const L: Record<CardLang, Record<string, string>> = {
   en: {
     member: "MEMBER", id: "ID", father: "Father", phone: "Phone", joined: "Joined",
     village: "Village", mandal: "Mandal",
-    president: "President", active: "● ACTIVE MEMBER", inactive: "● INACTIVE",
+    president: "PRESIDENT", vice_president: "VICE PRESIDENT", treasurer: "TREASURER",
+    advisor: "ADVISOR", executive: "EXECUTIVE", worker: "WORKER",
+    active: "● ACTIVE MEMBER", inactive: "● INACTIVE",
     objectives: "Key Objectives", oath: "Member's Oath",
     jaihind: "Jai Hind",
     mbrApp: "New Member Registration",
@@ -108,7 +112,9 @@ const L: Record<CardLang, Record<string, string>> = {
   hi: {
     member: "सदस्य", id: "आईडी", father: "पिता", phone: "फ़ोन", joined: "शामिल",
     village: "गाँव", mandal: "मंडल",
-    president: "अध्यक्ष", active: "● सक्रिय सदस्य", inactive: "● निष्क्रिय",
+    president: "अध्यक्ष", vice_president: "उपाध्यक्ष", treasurer: "कोषाध्यक्ष",
+    advisor: "सलाहकार", executive: "कार्यकारी सदस्य", worker: "कार्यकर्ता",
+    active: "● सक्रिय सदस्य", inactive: "● निष्क्रिय",
     objectives: "मुख्य उद्देश्य", oath: "सदस्य की शपथ",
     jaihind: "जय हिन्द",
     mbrApp: "नए सदस्य पंजीकरण",
@@ -188,6 +194,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
   const [showBack, setShowBack] = useState(false);
   const [lang, setLang] = useState<CardLang>("te");
   const [designation, setDesignation] = useState<string>("సభ్యుడు");
+  const [roleKey, setRoleKey] = useState<string | null>(null);
   const [presidentName, setPresidentName] = useState<string | null>(null);
   const t = L[lang];
   const frontRef = useRef<HTMLDivElement>(null);
@@ -267,6 +274,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
         worker: "కార్యకర్త",
       };
       setDesignation(role && map[role] ? map[role] : "సభ్యుడు");
+      setRoleKey(role && map[role] ? role : null);
     })();
     return () => { cancel = true; };
   }, [member.id]);
@@ -381,6 +389,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
           memberQrLink={memberQrLink}
           registrationQrLink={registrationQrLink}
           joined={joined}
+          roleKey={roleKey}
         />
       )}
     </div>
@@ -389,7 +398,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
 
 function LegacyLayout(props: any) {
   const { langs, lang, setLang, langLabel, showBack, setShowBack, handlePrint,
-          frontRef, backRef, member, org, t, photoUrl, logoUrl, sigUrl, qrDataUrl, appQrUrl, memberQrLink, registrationQrLink, joined } = props;
+          frontRef, backRef, member, org, t, photoUrl, logoUrl, sigUrl, qrDataUrl, appQrUrl, memberQrLink, registrationQrLink, joined, roleKey } = props;
   return (
     <>
 
@@ -427,7 +436,7 @@ function LegacyLayout(props: any) {
                 fref={frontRef}
                 member={member} org={org} t={t} lang={lang}
                 photoUrl={photoUrl} logoUrl={logoUrl} sigUrl={sigUrl} qrDataUrl={qrDataUrl} qrLink={memberQrLink}
-                joined={joined}
+                joined={joined} roleKey={roleKey}
               />
             </div>
             <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
@@ -459,7 +468,7 @@ function LegacyLayout(props: any) {
 
 
 function CardFront({
-  fref, member, org, photoUrl, logoUrl, sigUrl, qrDataUrl, qrLink, joined, t, lang,
+  fref, member, org, photoUrl, logoUrl, sigUrl, qrDataUrl, qrLink, joined, t, lang, roleKey,
 }: {
   fref: React.RefObject<HTMLDivElement | null>;
   member: Member; org: Org | null;
@@ -469,6 +478,7 @@ function CardFront({
   joined: string;
   t: Record<string, string>;
   lang: CardLang;
+  roleKey?: string | null;
 }) {
   // Derive village & mandal: prefer explicit fields, else parse address.
   let village = member.village ?? null;
@@ -520,7 +530,7 @@ function CardFront({
           fontSize: "2mm", background: "#000080", color: "#fff",
           padding: "0.4mm 1.2mm", borderRadius: "1mm", fontWeight: 800,
         }}>
-          {t.member}
+          {(roleKey && t[roleKey]) || t.member}
         </div>
       </div>
 
