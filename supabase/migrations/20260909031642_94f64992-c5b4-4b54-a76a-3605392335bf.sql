@@ -1,0 +1,12 @@
+GRANT EXECUTE ON FUNCTION public.is_approved_member(uuid, uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.is_org_admin(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.is_org_member(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.is_org_committee(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.is_disciplinary_member(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_committee_role(uuid, uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.can_edit_org(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.can_edit_accounts(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.can_edit_events(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.can_edit_rules(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.can_manage_committee(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.varadhi_month_points(uuid) TO authenticated;
