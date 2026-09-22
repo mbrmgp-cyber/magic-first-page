@@ -369,7 +369,7 @@ function AddDonorDialog({ onAdded }: { onAdded: () => void }) {
         <div className="space-y-3 pt-2">
           <div className="flex items-center gap-3">
             <div className="h-20 w-20 rounded-full overflow-hidden bg-muted flex items-center justify-center shrink-0 border">
-              {photoPreview ? <img src={photoPreview} className="h-full w-full object-cover" />
+              {photoPreview ? <img src={photoPreview} alt="Donor photo preview" className="h-full w-full object-cover" />
                 : <User className="w-8 h-8 text-muted-foreground" />}
             </div>
             <label className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-md border cursor-pointer hover:bg-accent">
@@ -494,8 +494,8 @@ function EditDonorDialog({ donor, onSaved }: { donor: Donor; onSaved: () => void
         <div className="space-y-3 pt-2">
           <div className="flex items-center gap-3">
             <div className="h-20 w-20 rounded-full overflow-hidden bg-muted flex items-center justify-center shrink-0 border">
-              {photoPreview ? <img src={photoPreview} className="h-full w-full object-cover" />
-                : existingPhotoUrl ? <img src={existingPhotoUrl} className="h-full w-full object-cover" />
+              {photoPreview ? <img src={photoPreview} alt="Donor photo preview" className="h-full w-full object-cover" />
+                : existingPhotoUrl ? <img src={existingPhotoUrl} alt="Current donor photo" className="h-full w-full object-cover" />
                 : <User className="w-8 h-8 text-muted-foreground" />}
             </div>
             <label className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-md border cursor-pointer hover:bg-accent">
