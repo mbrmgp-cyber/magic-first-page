@@ -5,6 +5,19 @@ import { getMyRewards } from "@/lib/varadhi.functions";
 import { ArrowLeft, Gift } from "lucide-react";
 
 export const Route = createFileRoute("/varadhi/rewards")({
+  head: () => ({
+    meta: [
+      { title: "Vaaradhi Reward Points — Earn & Redeem | MBR Platform" },
+      {
+        name: "description",
+        content: "వారధిలో పాయింట్లు సంపాదించండి, చరిత్ర చూడండి మరియు బహుమతులుగా వాడుకోండి.",
+      },
+      { property: "og:title", content: "Vaaradhi Reward Points" },
+      { property: "og:description", content: "వారధిలో పాయింట్లు సంపాదించండి మరియు బహుమతులుగా వాడుకోండి." },
+      { property: "og:url", content: "https://mbrplatform.com/varadhi/rewards" },
+    ],
+    links: [{ rel: "canonical", href: "https://mbrplatform.com/varadhi/rewards" }],
+  }),
   component: RewardsPage,
 });
 

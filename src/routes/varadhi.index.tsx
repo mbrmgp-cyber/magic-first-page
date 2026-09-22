@@ -16,6 +16,23 @@ import banner3 from "@/assets/varadhi-banner-3.jpg";
 import { Sparkles, ImageOff } from "lucide-react";
 
 export const Route = createFileRoute("/varadhi/")({
+  head: () => ({
+    meta: [
+      { title: "Vaaradhi (వారధి) — Telugu Local Marketplace for Buying, Selling & Transport" },
+      {
+        name: "description",
+        content:
+          "వారధి — మీ ఊరిలో వస్తువులు అమ్మండి, కొనండి, రవాణా వాహనాలు మరియు టెక్నీషియన్ సేవలు కనుగొనండి.",
+      },
+      { property: "og:title", content: "Vaaradhi (వారధి) — Telugu Local Marketplace" },
+      {
+        property: "og:description",
+        content: "మీ ఊరిలో వస్తువులు అమ్మండి, కొనండి, రవాణా మరియు స్థానిక సేవలు కనుగొనండి.",
+      },
+      { property: "og:url", content: "https://mbrplatform.com/varadhi" },
+    ],
+    links: [{ rel: "canonical", href: "https://mbrplatform.com/varadhi" }],
+  }),
   component: VaradhiHome,
 });
 
@@ -214,7 +231,9 @@ function VaradhiHome() {
         <div className="flex min-w-0 items-center gap-3">
           <img src={varadhiLogo.url} alt="Vaaradhi" className="h-12 w-12 shrink-0 rounded-2xl object-contain bg-white shadow-sm p-1" />
           <div className="min-w-0">
-            <h1 className="truncate text-xl font-bold tracking-tight text-[#1e3a8a]">వారధి</h1>
+            <h1 className="truncate text-xl font-bold tracking-tight text-[#1e3a8a]">
+              వారధి <span className="sr-only">— Telugu Local Marketplace for Buying, Selling, Transport & Services</span>
+            </h1>
             <p className="truncate text-[11px] text-[#1e3a8a]/70">అమ్మండి, కొనండి, రవాణా & సేవలు</p>
           </div>
         </div>
