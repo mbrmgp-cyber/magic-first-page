@@ -8,6 +8,23 @@ import { formatAmount, formatPrice, isFreeListing, noPriceLabel, stockLabel } fr
 import { ArrowLeft, Phone, MessageCircle, Truck, Share2 } from "lucide-react";
 
 export const Route = createFileRoute("/varadhi/item/$id")({
+  head: ({ params }) => {
+    const url = `https://mbrplatform.com/varadhi/item/${params.id}`;
+    const title = "Item Details — Vaaradhi (వారధి) Local Marketplace";
+    const desc =
+      "వారధిలో ఈ వస్తువు వివరాలు — ధర, ఫోటోలు, అమ్మకందారు సమాచారం మరియు సమీప రవాణా సౌకర్యాలు.";
+    return {
+      meta: [
+        { title },
+        { name: "description", content: desc },
+        { property: "og:title", content: title },
+        { property: "og:description", content: desc },
+        { property: "og:type", content: "product" },
+        { property: "og:url", content: url },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   component: ItemDetail,
 });
 
