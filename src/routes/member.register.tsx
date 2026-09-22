@@ -13,7 +13,25 @@ import { decodeQrFromFile, QrScanner } from "@/components/QrScanner";
 import { localizeText, useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/member/register")({
-  head: () => ({ meta: [{ title: "Member Registration — MBR App" }] }),
+  head: () => ({
+    meta: [
+      { title: "Member Registration & Login — MBR App" },
+      {
+        name: "description",
+        content:
+          "Register as a society member on the MBR App: fill in your details, upload documents and get approval from your society admin.",
+      },
+      { property: "og:title", content: "Member Registration & Login — MBR App" },
+      {
+        property: "og:description",
+        content: "Fill in your details, upload documents and get approval from your society admin on the MBR App.",
+      },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://mbrplatform.com/member/register" },
+      { name: "twitter:card", content: "summary" },
+    ],
+    links: [{ rel: "canonical", href: "https://mbrplatform.com/member/register" }],
+  }),
   ssr: false,
   validateSearch: (s: Record<string, unknown>): { code?: string } => {
     const code = typeof s.code === "string" && s.code ? s.code : undefined;
