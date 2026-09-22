@@ -11,8 +11,10 @@ export type PointStatus = {
   blocked: boolean;
 };
 
-export async function getPointSettings(sb: any): Promise<{ free_monthly_points: number; enforce_limit: boolean }> {
-  const { data } = await sb.from("varadhi_point_settings").select("*").eq("id", 1).maybeSingle();
+export async function getPointSettings(_sb?: any): Promise<{ free_monthly_points: number; enforce_limit: boolean }> {
+  // Config row is read with the trusted server client; clients have no direct read access.
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data } = await supabaseAdmin.from("varadhi_point_settings").select("*").eq("id", 1).maybeSingle();
   return {
     free_monthly_points: data?.free_monthly_points ?? 10,
     enforce_limit: data?.enforce_limit ?? true,
