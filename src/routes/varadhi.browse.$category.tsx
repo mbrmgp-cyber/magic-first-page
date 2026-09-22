@@ -14,8 +14,35 @@ import { enState } from "@/lib/state-alias";
 import { indiaMandalsFor } from "@/lib/india-mandals";
 import { SearchSelect } from "@/components/varadhi/SearchSelect";
 
+const CATEGORY_META: Record<string, { title: string; desc: string }> = {
+  fresh: { title: "Fresh Produce & Groceries", desc: "తాజా కూరగాయలు, పండ్లు మరియు నిత్యావసర వస్తువులు మీ ప్రాంతంలో." },
+  new: { title: "New Items for Sale", desc: "కొత్త వస్తువులు మీ ప్రాంతంలో కొనండి, అమ్మండి." },
+  used: { title: "Used & Second-hand Items", desc: "పాత వస్తువులు తక్కువ ధరకు కొనండి లేదా అమ్మండి." },
+  realestate: { title: "Land, Houses & Rentals", desc: "స్థలాలు, ఇళ్లు మరియు అద్దె ప్రకటనలు మీ ప్రాంతంలో." },
+  transport: { title: "Transport Vehicles & Drivers", desc: "ఆటో, ట్రాక్టర్, లారీ మరియు ఇతర రవాణా సౌకర్యాలు." },
+  services: { title: "Local Technicians & Services", desc: "ఎలక్ట్రీషియన్, ప్లంబర్, మెకానిక్ వంటి స్థానిక సేవలు." },
+};
+
 export const Route = createFileRoute("/varadhi/browse/$category")({
   validateSearch: zodValidator(z.object({ q: fallback(z.string(), "").default("") })),
+  head: ({ params }) => {
+    const meta = CATEGORY_META[params.category] ?? {
+      title: "Browse Listings",
+      desc: "వారధిలో మీ ప్రాంతంలోని ప్రకటనలు చూడండి.",
+    };
+    const url = `https://mbrplatform.com/varadhi/browse/${params.category}`;
+    const title = `${meta.title} — Vaaradhi (వారధి)`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: meta.desc },
+        { property: "og:title", content: title },
+        { property: "og:description", content: meta.desc },
+        { property: "og:url", content: url },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   component: BrowsePage,
 });
 

@@ -454,8 +454,8 @@ function HistoryTab() {
                       </div>
                       {canEdit && (
                         <div className="flex flex-col gap-1 shrink-0">
-                          <button onClick={() => startEdit(m)} className="text-muted-foreground hover:text-foreground"><Pencil className="w-3.5 h-3.5" /></button>
-                          <button onClick={() => handleDel(m.id)} className="text-destructive hover:opacity-70"><Trash2 className="w-3.5 h-3.5" /></button>
+                          <button aria-label="Edit entry" onClick={() => startEdit(m)} className="text-muted-foreground hover:text-foreground"><Pencil className="w-3.5 h-3.5" /></button>
+                          <button aria-label="Delete entry" onClick={() => handleDel(m.id)} className="text-destructive hover:opacity-70"><Trash2 className="w-3.5 h-3.5" /></button>
                         </div>
                       )}
                     </div>

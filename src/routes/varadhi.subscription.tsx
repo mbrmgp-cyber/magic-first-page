@@ -7,6 +7,19 @@ import { ArrowLeft, Download } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/varadhi/subscription")({
+  head: () => ({
+    meta: [
+      { title: "Vaaradhi Subscription Plans — Monthly & Yearly | MBR Platform" },
+      {
+        name: "description",
+        content: "వారధి సబ్‌స్క్రిప్షన్ ప్లాన్లు — 1 నెల నుండి 1 సంవత్సరం వరకు, రసీదుతో సహా.",
+      },
+      { property: "og:title", content: "Vaaradhi Subscription Plans" },
+      { property: "og:description", content: "వారధి సబ్‌స్క్రిప్షన్ ప్లాన్లు — 1 నెల నుండి 1 సంవత్సరం వరకు." },
+      { property: "og:url", content: "https://mbrplatform.com/varadhi/subscription" },
+    ],
+    links: [{ rel: "canonical", href: "https://mbrplatform.com/varadhi/subscription" }],
+  }),
   component: SubscriptionPage,
 });
 

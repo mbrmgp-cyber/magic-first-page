@@ -7,6 +7,22 @@ import { ArrowLeft, Phone, MessageCircle, Share2, Truck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/varadhi/provider/$id")({
+  head: ({ params }) => {
+    const url = `https://mbrplatform.com/varadhi/provider/${params.id}`;
+    const title = "Transport & Service Provider — Vaaradhi (వారధి)";
+    const desc = "వారధిలో ఈ రవాణా / సేవా ప్రొవైడర్ వివరాలు — వాహనం, ప్రాంతం మరియు సంప్రదింపు సమాచారం.";
+    return {
+      meta: [
+        { title },
+        { name: "description", content: desc },
+        { property: "og:title", content: title },
+        { property: "og:description", content: desc },
+        { property: "og:type", content: "profile" },
+        { property: "og:url", content: url },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   component: ProviderDetail,
 });
 

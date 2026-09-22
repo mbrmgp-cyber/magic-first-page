@@ -63,6 +63,9 @@ function MbrHome() {
           <img src={logo.url} alt="MBR" className="mx-auto w-32 drop-shadow-[0_0_24px_rgba(255,140,40,0.35)]" />
           <h1 className="text-2xl font-bold tracking-tight text-white">
             Management of <span className="text-[#ff8c28]">Board</span> Resources
+            <span className="mt-1 block text-sm font-normal text-white/70">
+              MBR App — Society and Committee Administration
+            </span>
           </h1>
           <p className="text-white/60 text-sm">{t("appTagline")}</p>
         </header>
