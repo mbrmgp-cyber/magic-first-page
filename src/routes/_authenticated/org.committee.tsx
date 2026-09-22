@@ -151,10 +151,10 @@ function MemberCard({
     >
       {canManage && (
         <div className="absolute top-2 right-2 flex gap-1" onClick={e => e.stopPropagation()}>
-          <button onClick={onEdit} className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground">
+          <button aria-label="Edit committee member" onClick={onEdit} className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground">
             <Pencil className="w-3.5 h-3.5" />
           </button>
-          <button onClick={onDelete} className="p-1 rounded hover:bg-destructive/10 text-destructive">
+          <button aria-label="Delete committee member" onClick={onDelete} className="p-1 rounded hover:bg-destructive/10 text-destructive">
             <Trash2 className="w-3.5 h-3.5" />
           </button>
         </div>

@@ -161,6 +161,9 @@ function PlatformPortal() {
             Board
           </span>{" "}
           Resources
+          <span className="mt-3 block font-sans text-base sm:text-lg font-normal text-[#f5f0e0]/60">
+            MBR Platform — Institutional Software and Local Marketplace
+          </span>
         </h1>
 
         <p className="mt-6 text-base sm:text-lg text-[#f5f0e0]/70 max-w-2xl mx-auto leading-relaxed">

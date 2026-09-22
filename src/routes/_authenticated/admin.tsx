@@ -36,7 +36,7 @@ function OrgDocThumb({ orgId, path }: { orgId: string; path: string }) {
   }
   return (
     <a href={url} target="_blank" rel="noopener" className="shrink-0">
-      <img src={url} alt="ID" className="w-12 h-12 rounded border object-cover hover:scale-110 transition" style={{ borderColor: "#3f3f46" }} />
+      <img src={url} alt="Uploaded identity document preview" className="w-12 h-12 rounded border object-cover hover:scale-110 transition" style={{ borderColor: "#3f3f46" }} />
     </a>
   );
 }
