@@ -397,10 +397,12 @@ function PlatformPortal() {
       {/* Footer */}
       <footer className="relative z-10 border-t border-[#c9a84c]/10 px-6 sm:px-10 py-8">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#f5f0e0]/50">
-          <div>© {new Date().getFullYear()} MBR Platform. All rights reserved.</div>
+          <div>© {new Date().getFullYear()} Empire Platform. All rights reserved. · <a href="mailto:mbrplatform@gmail.com" className="hover:text-[#c9a84c]">mbrplatform@gmail.com</a></div>
           <div className="flex items-center gap-4">
             <Link to="/mbr" className="hover:text-[#c9a84c] transition-colors">MBR App</Link>
             <Link to="/varadhi" className="hover:text-[#c9a84c] transition-colors">Vaaradhi</Link>
+            <Link to="/privacy" className="hover:text-[#c9a84c] transition-colors">Privacy Policy</Link>
+            <Link to="/delete-account" className="hover:text-[#c9a84c] transition-colors">Delete Account</Link>
           </div>
         </div>
       </footer>
