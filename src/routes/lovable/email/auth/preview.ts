@@ -18,7 +18,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "First Page Design"
+const SITE_NAME = "MBR APP"
 const ROOT_DOMAIN = "mbrplatform.com"
 
 // Sample data for preview mode ONLY (not used in actual email sending).
