@@ -32,7 +32,7 @@ export const Route = createFileRoute("/_authenticated/org/disciplinary")({
   head: () => ({ meta: [{ title: "Disciplinary Committee — MBR" }] }),
   component: DisciplinaryPage,
   errorComponent: ({ error }) => (
-    <div className="p-6 text-red-500">Error: {String(error?.message ?? error)}</div>
+    <div className="p-6 text-red-500">Error: {String((error as Error)?.message ?? error)}</div>
   ),
   notFoundComponent: () => <div className="p-6">Not found</div>,
 });

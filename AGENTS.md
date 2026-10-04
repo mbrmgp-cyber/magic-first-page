@@ -1,0 +1,1 @@
+- Android apps (Capacitor) load the live published site via server.url; select app with CAP_APP in capacitor.config.ts — why: web updates reach app users without Play Store releases.

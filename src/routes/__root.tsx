@@ -6,6 +6,7 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { LanguageProvider } from "@/lib/i18n";
@@ -14,6 +15,7 @@ import { CurrencyProvider } from "@/lib/currency-context";
 import { SplashScreen } from "@/components/SplashScreen";
 import { Toaster } from "@/components/ui/sonner";
 import { StaticAppIcons } from "@/components/StaticAppIcons";
+import { OfflineNotice } from "@/components/OfflineNotice";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -61,7 +63,7 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
   useEffect(() => {
@@ -159,8 +161,10 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const [showSplash, setShowSplash] = useState(() => {
-    if (typeof window === "undefined") return false;
+  const [showSplash, setShowSplash] = useState(false);
+
+  // Decide on the splash after hydration so server and client HTML match.
+  useEffect(() => {
     const path = window.location.pathname;
     if (
       path === "/" ||
@@ -168,13 +172,11 @@ function RootComponent() {
       path === "/register" ||
       path === "/member/register"
     ) {
-      return false;
+      return;
     }
-    if (sessionStorage.getItem("mbr_splash_seen")) return false;
-    return true;
-  });
-
-  useEffect(() => {}, []);
+    if (sessionStorage.getItem("mbr_splash_seen")) return;
+    setShowSplash(true);
+  }, []);
 
   const handleSplashDone = () => {
     if (typeof window !== "undefined") sessionStorage.setItem("mbr_splash_seen", "1");
@@ -191,6 +193,7 @@ function RootComponent() {
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
           <Toaster position="top-center" richColors closeButton />
+          <OfflineNotice />
         </CurrencyProvider>
       </LanguageProvider>
     </QueryClientProvider>
