@@ -14,6 +14,7 @@ import { CurrencyProvider } from "@/lib/currency-context";
 import { SplashScreen } from "@/components/SplashScreen";
 import { Toaster } from "@/components/ui/sonner";
 import { StaticAppIcons } from "@/components/StaticAppIcons";
+import { OfflineNotice } from "@/components/OfflineNotice";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -191,6 +192,7 @@ function RootComponent() {
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
           <Toaster position="top-center" richColors closeButton />
+          <OfflineNotice />
         </CurrencyProvider>
       </LanguageProvider>
     </QueryClientProvider>
