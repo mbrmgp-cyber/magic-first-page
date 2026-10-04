@@ -9,7 +9,9 @@ export async function assertVaradhiAdminClient(userId: string, email?: string | 
     .eq("role", "varadhi_admin")
     .maybeSingle();
   if (roleRow) return supabaseAdmin;
-  const mail = (email ?? "").trim().toLowerCase();
+  void email;
+  const { data: u } = await supabaseAdmin.auth.admin.getUserById(userId);
+  const mail = u?.user?.email_confirmed_at ? (u.user.email ?? "").trim().toLowerCase() : "";
   if (mail && BOOTSTRAP_ADMINS.includes(mail)) return supabaseAdmin;
   throw new Error("Forbidden: Varadhi Admin only");
 }

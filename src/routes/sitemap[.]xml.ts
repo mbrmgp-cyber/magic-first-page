@@ -44,6 +44,7 @@ export const Route = createFileRoute("/sitemap.xml")({
             supabaseAdmin
               .from("varadhi_listings")
               .select("id, updated_at")
+              .neq("stock_status", "closed")
               .order("updated_at", { ascending: false }),
             supabaseAdmin
               .from("varadhi_providers")

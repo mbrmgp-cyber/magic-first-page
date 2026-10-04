@@ -5,9 +5,9 @@ const EMAIL = "mbrplatform@gmail.com";
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "Privacy Policy — Empire Platform (MBR App & Vaaradhi)" },
-      { name: "description", content: "How Empire Platform collects, uses, protects and deletes your data in the MBR App and Vaaradhi." },
-      { property: "og:title", content: "Privacy Policy — Empire Platform" },
+      { title: "Privacy Policy — MBR Platform (MBR App & Vaaradhi)" },
+      { name: "description", content: "How MBR Platform collects, uses, protects and deletes your data in the MBR App and Vaaradhi." },
+      { property: "og:title", content: "Privacy Policy — MBR Platform" },
       { property: "og:description", content: "Data collection, use, security and deletion for MBR App and Vaaradhi." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -22,7 +22,7 @@ function PrivacyPage() {
       <article className="max-w-3xl mx-auto space-y-5 text-sm leading-relaxed">
         <h1 className="text-2xl font-bold">Privacy Policy</h1>
         <p className="text-muted-foreground">Last updated: October 4, 2026</p>
-        <p>This policy explains how <b>Empire Platform</b> ("we") handles your information in the <b>MBR App</b> and <b>Vaaradhi</b> apps and the website mbrplatform.com.</p>
+        <p>This policy explains how <b>MBR Platform</b> ("we") handles your information in the <b>MBR App</b> and <b>Vaaradhi</b> apps and the website mbrplatform.com.</p>
 
         <h2 className="text-lg font-semibold">1. Information we collect</h2>
         <ul className="list-disc pl-5 space-y-1">
@@ -49,7 +49,7 @@ function PrivacyPage() {
         <p>The apps are intended for users aged 18 and above.</p>
 
         <h2 className="text-lg font-semibold">7. Contact</h2>
-        <p>Empire Platform — <a href={`mailto:${EMAIL}`} className="underline">{EMAIL}</a></p>
+        <p>MBR Platform — <a href={`mailto:${EMAIL}`} className="underline">{EMAIL}</a></p>
 
         <p className="pt-4"><Link to="/" className="underline">← Home</Link></p>
       </article>

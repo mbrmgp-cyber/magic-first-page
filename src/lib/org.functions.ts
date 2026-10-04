@@ -132,12 +132,25 @@ async function sendMagicLoginLinkEmail(
   }
 }
 
+async function assertCallerManagesEmail(supabase: any, supabaseAdmin: any, email: string, memberId?: string) {
+  let q = supabaseAdmin.from("members").select("org_id").ilike("email", email);
+  if (memberId) q = supabaseAdmin.from("members").select("org_id").eq("id", memberId).ilike("email", email);
+  const { data: rows } = await q;
+  for (const r of rows ?? []) {
+    const { data: ok } = await supabase.rpc("can_edit_org", { _org_id: r.org_id });
+    if (ok) return;
+  }
+  throw new Error("Forbidden");
+}
+
 export const sendMemberProfileUpdatedEmail = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d: { email: string; name?: string | null }) => d)
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const email = (data.email || "").trim().toLowerCase();
     if (!email) return { sent: false as const, reason: "missing_email" as const };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await assertCallerManagesEmail(context.supabase, supabaseAdmin, email);
     // Ensure the auth user exists so the magic link works.
     let userId = await findAuthUserIdByEmail(supabaseAdmin, email);
     if (!userId) {
@@ -206,11 +219,13 @@ export const sendLoginLink = createServerFn({ method: "POST" })
   });
 
 export const sendMemberWelcomeEmail = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d: { email: string; name?: string; member_id?: string }) => d)
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const email = data.email.trim().toLowerCase();
     if (!email) return { sent: false as const, reason: "missing_email" as const };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await assertCallerManagesEmail(context.supabase, supabaseAdmin, email, data.member_id);
     // Ensure auth user exists & is linked to the member row.
     let userId = await findAuthUserIdByEmail(supabaseAdmin, email);
     if (!userId) {
@@ -267,6 +282,11 @@ export const getOrgDocumentSignedUrl = createServerFn({ method: "POST" })
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (!isAdmin) {
+      // The document must actually belong to the organization the caller manages.
+      const { data: orgRow } = await supabaseAdmin.from("organizations").select("*").eq("id", data.org_id!).maybeSingle();
+      if (!orgRow || !JSON.stringify(orgRow).includes(path)) throw new Error("Forbidden");
+    }
     const { data: signed, error } = await supabaseAdmin.storage
       .from("org-documents")
       .createSignedUrl(path, 600);
@@ -348,7 +368,7 @@ export const registerOrganization = createServerFn({ method: "POST" })
 
 /**
  * The organization's own email gets a login account with the default password
- * "admin", seated as an active committee president so it can approve members.
+ * random password (owner sets it via Forgot Password), seated as an active committee president so it can approve members.
  * Existing accounts keep their current password.
  */
 async function ensureOrgEmailAdminAccount(args: {
@@ -365,7 +385,7 @@ async function ensureOrgEmailAdminAccount(args: {
     let userId: string | null = null;
     const created = await supabaseAdmin.auth.admin.createUser({
       email,
-      password: "admin",
+      password: `MBR-${crypto.randomUUID()}`,
       email_confirm: true,
       user_metadata: { full_name: args.adminName || args.orgName },
     });

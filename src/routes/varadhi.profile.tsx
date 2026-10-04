@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { getMyVaradhiProfile } from "@/lib/varadhi.functions";
 import { CreditCard, Handshake, Gift, LogOut } from "lucide-react";
+import { DeleteAccountButton } from "@/components/DeleteAccountButton";
 
 export const Route = createFileRoute("/varadhi/profile")({
   head: () => ({
@@ -76,6 +77,8 @@ function VaradhiProfilePage() {
         className="flex w-full items-center gap-2 rounded-xl border border-[#1e3a8a]/15 bg-white px-4 py-3 text-sm font-semibold text-[#1e3a8a]">
         <LogOut className="h-4 w-4" /> లాగ్ అవుట్
       </button>
+
+      <DeleteAccountButton redirectTo="/varadhi" />
     </div>
   );
 }

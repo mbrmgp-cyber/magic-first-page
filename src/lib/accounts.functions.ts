@@ -188,16 +188,6 @@ export const recordMonthlyPayment = createServerFn({ method: "POST" })
     }
 
     // Email receipt (best-effort log; full email infra can be wired later)
-    if (member.email) {
-      console.log("[accounts] payment receipt", {
-        to: member.email,
-        member: member.name,
-        principal: data.principal_amount,
-        interest: data.interest_amount,
-        balance,
-        date: data.payment_date,
-      });
-    }
     return {
       ok: true as const,
       balance: Math.round(balance * 100) / 100,
