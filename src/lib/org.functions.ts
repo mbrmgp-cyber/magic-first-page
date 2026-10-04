@@ -987,10 +987,7 @@ export const sendApprovedMemberLoginLink = createServerFn({ method: "POST" })
       if (createError) throw new Error(createError.message);
       memberUserId = created.user?.id;
     }
-    if (memberUserId && !(member as any).user_id) {
-      const { error: claimError } = await supabaseAdmin.from("members").update({ user_id: memberUserId }).eq("id", member.id);
-      if (claimError) throw new Error(claimError.message);
-    }
+    // The member row is linked only when the email owner actually signs in.
     const lang = data.lang || (member as any).preferred_lang || "te";
     const redirectTo = `${PUBLIC_APP_ORIGIN}/auth?lang=${encodeURIComponent(lang)}`;
     await sendMagicLoginLinkEmail(supabaseAdmin, member.email, redirectTo);
@@ -1070,27 +1067,12 @@ export const getMyRoles = createServerFn({ method: "GET" })
 export const claimMbrAdmin = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { userId } = context;
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { count } = await supabaseAdmin
-      .from("user_roles")
-      .select("*", { count: "exact", head: true })
-      .eq("role", "mbr_admin");
-    if ((count ?? 0) > 0) {
-      const { data: mine } = await supabaseAdmin
-        .from("user_roles")
-        .select("id")
-        .eq("user_id", userId)
-        .eq("role", "mbr_admin")
-        .maybeSingle();
-      if (!mine) throw new Error("MBR admin ఇప్పటికే assign అయ్యారు");
-      return { ok: true, alreadyMine: true };
-    }
-    const { error } = await supabaseAdmin
-      .from("user_roles")
-      .insert({ user_id: userId, role: "mbr_admin" });
-    if (error) throw new Error(error.message);
-    return { ok: true, claimed: true };
+    // Self-claiming is disabled: the MBR admin role is only granted to the
+    // seeded platform super admins (server-side), never on first come.
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "mbr_admin" });
+    if (!isAdmin) throw new Error("Forbidden: MBR admin only");
+    return { ok: true, alreadyMine: true };
   });
 
 export const listAllOrgsForAdmin = createServerFn({ method: "GET" })

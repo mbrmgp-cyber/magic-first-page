@@ -76,6 +76,8 @@ export const adminAddMember = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const orgId = await getOrgForUser(supabase, userId);
     if (!orgId) throw new Error("Organization కనపడలేదు");
+    const { data: canEdit } = await supabase.rpc("can_edit_org", { _org_id: orgId });
+    if (!canEdit) throw new Error("Forbidden");
     const { data: row, error } = await supabase.from("members").insert({
       org_id: orgId,
       name: data.name,
@@ -156,11 +158,14 @@ export const updateMemberProfile = createServerFn({ method: "POST" })
     try {
       const { data: m } = await supabase
         .from("members")
-        .select("email, name, status")
+        .select("email, name, status, org_id")
         .eq("id", member_id)
         .maybeSingle();
       const email = (m?.email || "").trim().toLowerCase();
-      if (send_login_link && email && m?.status === "approved") {
+      const { data: canEdit } = m?.org_id
+        ? await supabase.rpc("can_edit_org", { _org_id: m.org_id })
+        : { data: false };
+      if (send_login_link && email && m?.status === "approved" && canEdit) {
         const { sendMemberDashboardMagicLink } = await import("@/lib/member-notifications.server");
         const sent = await sendMemberDashboardMagicLink({
           memberId: member_id,

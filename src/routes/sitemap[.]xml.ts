@@ -49,6 +49,7 @@ export const Route = createFileRoute("/sitemap.xml")({
             supabaseAdmin
               .from("varadhi_providers")
               .select("id, updated_at")
+              .eq("availability_status", "online")
               .order("updated_at", { ascending: false }),
           ]);
 
