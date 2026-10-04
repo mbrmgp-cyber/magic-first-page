@@ -49,6 +49,9 @@ export function OfflineNotice() {
         <WifiOff className="mx-auto h-14 w-14 text-muted-foreground" aria-hidden />
         <h2 className="mt-4 text-xl font-semibold text-foreground">{t.title}</h2>
         <p className="mt-2 text-sm text-muted-foreground">{t.body}</p>
+        {lang !== "te" && (
+          <p className="mt-3 text-sm text-muted-foreground">{TEXT.te.title} — {TEXT.te.body}</p>
+        )}
         <button
           type="button"
           onClick={() => {
