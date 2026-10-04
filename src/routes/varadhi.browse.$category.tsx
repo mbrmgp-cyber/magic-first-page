@@ -21,6 +21,7 @@ const CATEGORY_META: Record<string, { title: string; desc: string }> = {
   realestate: { title: "Land, Houses & Rentals", desc: "స్థలాలు, ఇళ్లు మరియు అద్దె ప్రకటనలు మీ ప్రాంతంలో." },
   transport: { title: "Transport Vehicles & Drivers", desc: "ఆటో, ట్రాక్టర్, లారీ మరియు ఇతర రవాణా సౌకర్యాలు." },
   services: { title: "Local Technicians & Services", desc: "ఎలక్ట్రీషియన్, ప్లంబర్, మెకానిక్ వంటి స్థానిక సేవలు." },
+  all: { title: "All Listings", desc: "మీ ప్రాంతంలోని అన్ని ప్రకటనలు ఒకే చోట చూడండి." },
 };
 
 export const Route = createFileRoute("/varadhi/browse/$category")({
@@ -156,7 +157,7 @@ function BrowsePage() {
   };
 
   const shownListings = areaListings
-    .filter((l) => (category === "freeservices" ? isFree(l) : l.category === category && !isFree(l)))
+    .filter((l) => (category === "freeservices" ? isFree(l) : category === "all" ? true : l.category === category && !isFree(l)))
     .filter((l) =>
       !needle ||
       [l.title, l.description, l.sub_category, l.city, l.village, l.mandal, l.district, l.state].some((v) =>
