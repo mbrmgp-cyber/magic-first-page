@@ -37,6 +37,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as VaradhiProviderIdRouteImport } from './routes/varadhi.provider.$id'
 import { Route as VaradhiItemIdRouteImport } from './routes/varadhi.item.$id'
 import { Route as VaradhiBrowseCategoryRouteImport } from './routes/varadhi.browse.$category'
+import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
 import { Route as AuthenticatedOrgThemeRouteImport } from './routes/_authenticated/org.theme'
 import { Route as AuthenticatedOrgSubscriptionRouteImport } from './routes/_authenticated/org.subscription'
 import { Route as AuthenticatedOrgRulesRouteImport } from './routes/_authenticated/org.rules'
@@ -65,7 +66,6 @@ import { Route as AuthenticatedMemberLedgerRouteImport } from './routes/_authent
 import { Route as AuthenticatedMemberEventsRouteImport } from './routes/_authenticated/member.events'
 import { Route as AuthenticatedMemberDashboardRouteImport } from './routes/_authenticated/member.dashboard'
 import { Route as AuthenticatedDonorDashboardRouteImport } from './routes/_authenticated/donor.dashboard'
-import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 
@@ -207,6 +207,11 @@ const VaradhiBrowseCategoryRoute = VaradhiBrowseCategoryRouteImport.update({
   id: '/browse/$category',
   path: '/browse/$category',
   getParentRoute: () => VaradhiRoute,
+} as any)
+const LovableEmailEventsRoute = LovableEmailEventsRouteImport.update({
+  id: '/lovable/email/events',
+  path: '/lovable/email/events',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedOrgThemeRoute = AuthenticatedOrgThemeRouteImport.update({
   id: '/org/theme',
@@ -368,12 +373,6 @@ const AuthenticatedDonorDashboardRoute =
     path: '/donor/dashboard',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const LovableEmailQueueProcessRoute =
-  LovableEmailQueueProcessRouteImport.update({
-    id: '/lovable/email/queue/process',
-    path: '/lovable/email/queue/process',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
   id: '/lovable/email/auth/webhook',
   path: '/lovable/email/auth/webhook',
@@ -438,12 +437,12 @@ export interface FileRoutesByFullPath {
   '/org/rules': typeof AuthenticatedOrgRulesRoute
   '/org/subscription': typeof AuthenticatedOrgSubscriptionRoute
   '/org/theme': typeof AuthenticatedOrgThemeRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/varadhi/browse/$category': typeof VaradhiBrowseCategoryRoute
   '/varadhi/item/$id': typeof VaradhiItemIdRoute
   '/varadhi/provider/$id': typeof VaradhiProviderIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
-  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -497,12 +496,12 @@ export interface FileRoutesByTo {
   '/org/rules': typeof AuthenticatedOrgRulesRoute
   '/org/subscription': typeof AuthenticatedOrgSubscriptionRoute
   '/org/theme': typeof AuthenticatedOrgThemeRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/varadhi/browse/$category': typeof VaradhiBrowseCategoryRoute
   '/varadhi/item/$id': typeof VaradhiItemIdRoute
   '/varadhi/provider/$id': typeof VaradhiProviderIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
-  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -559,12 +558,12 @@ export interface FileRoutesById {
   '/_authenticated/org/rules': typeof AuthenticatedOrgRulesRoute
   '/_authenticated/org/subscription': typeof AuthenticatedOrgSubscriptionRoute
   '/_authenticated/org/theme': typeof AuthenticatedOrgThemeRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/varadhi/browse/$category': typeof VaradhiBrowseCategoryRoute
   '/varadhi/item/$id': typeof VaradhiItemIdRoute
   '/varadhi/provider/$id': typeof VaradhiProviderIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
-  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -621,12 +620,12 @@ export interface FileRouteTypes {
     | '/org/rules'
     | '/org/subscription'
     | '/org/theme'
+    | '/lovable/email/events'
     | '/varadhi/browse/$category'
     | '/varadhi/item/$id'
     | '/varadhi/provider/$id'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
-    | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -680,12 +679,12 @@ export interface FileRouteTypes {
     | '/org/rules'
     | '/org/subscription'
     | '/org/theme'
+    | '/lovable/email/events'
     | '/varadhi/browse/$category'
     | '/varadhi/item/$id'
     | '/varadhi/provider/$id'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
-    | '/lovable/email/queue/process'
   id:
     | '__root__'
     | '/'
@@ -741,12 +740,12 @@ export interface FileRouteTypes {
     | '/_authenticated/org/rules'
     | '/_authenticated/org/subscription'
     | '/_authenticated/org/theme'
+    | '/lovable/email/events'
     | '/varadhi/browse/$category'
     | '/varadhi/item/$id'
     | '/varadhi/provider/$id'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
-    | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -764,9 +763,9 @@ export interface RootRouteChildren {
   MCodeRoute: typeof MCodeRoute
   MemberRegisterRoute: typeof MemberRegisterRoute
   OrgRegisterRoute: typeof OrgRegisterRoute
+  LovableEmailEventsRoute: typeof LovableEmailEventsRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
-  LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -967,6 +966,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VaradhiBrowseCategoryRouteImport
       parentRoute: typeof VaradhiRoute
     }
+    '/lovable/email/events': {
+      id: '/lovable/email/events'
+      path: '/lovable/email/events'
+      fullPath: '/lovable/email/events'
+      preLoaderRoute: typeof LovableEmailEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/org/theme': {
       id: '/_authenticated/org/theme'
       path: '/org/theme'
@@ -1163,13 +1169,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDonorDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/lovable/email/queue/process': {
-      id: '/lovable/email/queue/process'
-      path: '/lovable/email/queue/process'
-      fullPath: '/lovable/email/queue/process'
-      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/lovable/email/auth/webhook': {
       id: '/lovable/email/auth/webhook'
       path: '/lovable/email/auth/webhook'
@@ -1304,9 +1303,9 @@ const rootRouteChildren: RootRouteChildren = {
   MCodeRoute: MCodeRoute,
   MemberRegisterRoute: MemberRegisterRoute,
   OrgRegisterRoute: OrgRegisterRoute,
+  LovableEmailEventsRoute: LovableEmailEventsRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
-  LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
