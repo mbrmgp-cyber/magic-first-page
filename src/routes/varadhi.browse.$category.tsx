@@ -224,13 +224,16 @@ function BrowsePage() {
 
       {/* Grouped category boxes — counts reflect the selected area */}
       {(() => {
-        const boxBtn = (b: Box) => {
+        const boxBtn = (b: Box, inGroup: boolean) => {
           const active = b.id === category;
           return (
             <button
               key={b.id}
               type="button"
-              onClick={() => navigate({ to: "/varadhi/browse/$category", params: { category: b.id }, search: { q: term.trim() } })}
+              onClick={() => {
+                if (!inGroup) setOpenGroup(null);
+                navigate({ to: "/varadhi/browse/$category", params: { category: b.id }, search: { q: term.trim() } });
+              }}
               className={`rounded-2xl border p-2 text-left transition active:scale-[.98] ${
                 active ? "border-transparent text-white shadow" : "border-black/5 bg-white text-[#1e3a8a]"
               }`}
