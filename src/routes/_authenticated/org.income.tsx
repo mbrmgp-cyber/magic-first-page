@@ -19,6 +19,10 @@ import { CURRENCIES, BASE_CURRENCY, type CurrencyCode, useCurrency } from "@/lib
 import { useI18n } from "@/lib/i18n";
 import { pdfText } from "@/lib/loan-pdf";
 
+function escHtml(v: unknown): string {
+  return String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
+}
+
 export const Route = createFileRoute("/_authenticated/org/income")({
   head: () => ({ meta: [{ title: "ఆదాయం / Income Receipts" }] }),
   component: IncomePage,
@@ -93,7 +97,7 @@ function IncomePage() {
 </style></head><body>
   <div class="wrap">
     <div class="hdr">
-      ${org?.logo_url ? `<img src="${org.logo_url}" alt="logo"/>` : ""}
+      ${org?.logo_url && /^https:\/\//i.test(org.logo_url) ? `<img src="${escHtml(org.logo_url)}" alt="logo"/>` : ""}
       <div>
         <h1>${e(org?.name ?? "Society")}</h1>
         <p>${e(org?.slogan ?? "")} ${org?.gov_reg_number ? "• Reg: " + e(org.gov_reg_number) : ""}</p>

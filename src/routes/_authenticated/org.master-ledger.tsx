@@ -9,6 +9,12 @@ import { downloadMasterLedgerPdfCanvas } from "@/lib/loan-pdf";
 import { useCurrency } from "@/lib/currency-context";
 import { useI18n } from "@/lib/i18n";
 
+function csvCell(v: unknown): string {
+  let s = String(v ?? "");
+  if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+  return `"${s.replace(/"/g, '""')}"`;
+}
+
 export const Route = createFileRoute("/_authenticated/org/master-ledger")({
   head: () => ({ meta: [{ title: "Master Ledger" }] }),
   component: MasterLedgerPage,
@@ -42,7 +48,7 @@ function MasterLedgerPage() {
     const headers = [H.id, H.name, H.oldBal, H.principal, H.interest, H.newLoan, H.total];
     const lines = [headers.join(",")];
     for (const r of rows) {
-      lines.push([r.member_id, `"${r.member_name}"`, r.old_balance, r.principal_collected, r.interest_collected, r.new_loan, r.net_balance].join(","));
+      lines.push([csvCell(r.member_id), csvCell(r.member_name), r.old_balance, r.principal_collected, r.interest_collected, r.new_loan, r.net_balance].join(","));
     }
     lines.push([H.totalLabel, "", totals.outstanding, totals.principal, totals.interest, totals.newLoan, totals.net].join(","));
     const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });

@@ -3194,15 +3194,6 @@ export type Database = {
       can_edit_org: { Args: { _org_id: string }; Returns: boolean }
       can_edit_rules: { Args: { _org_id: string }; Returns: boolean }
       can_manage_committee: { Args: { _org_id: string }; Returns: boolean }
-      delete_email: {
-        Args: { message_id: number; queue_name: string }
-        Returns: boolean
-      }
-      email_queue_dispatch: { Args: never; Returns: undefined }
-      enqueue_email: {
-        Args: { payload: Json; queue_name: string }
-        Returns: number
-      }
       finalize_chit_auction: {
         Args: { _auction_id: string; _org_id: string }
         Returns: {
@@ -3279,15 +3270,6 @@ export type Database = {
       is_org_admin: { Args: { _org_id: string }; Returns: boolean }
       is_org_committee: { Args: { _org_id: string }; Returns: boolean }
       is_org_member: { Args: { _org_id: string }; Returns: boolean }
-      move_to_dlq: {
-        Args: {
-          dlq_name: string
-          message_id: number
-          payload: Json
-          source_queue: string
-        }
-        Returns: number
-      }
       org_admin_update_member_code: {
         Args: { _member_id: string; _new_code: string }
         Returns: {
@@ -3331,14 +3313,6 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
-      }
-      read_email_batch: {
-        Args: { batch_size: number; queue_name: string; vt: number }
-        Returns: {
-          message: Json
-          msg_id: number
-          read_ct: number
-        }[]
       }
       reject_leave_request: {
         Args: { _notes?: string; _request_id: string }

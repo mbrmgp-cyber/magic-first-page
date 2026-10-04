@@ -85,7 +85,8 @@ export const adminAddDonor = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     let linkSent = false;
     let linkError: string | null = null;
-    if ((data.status ?? "approved") === "approved" && data.email?.trim()) {
+    const { data: canEditOrg } = await supabase.rpc("can_edit_org", { _org_id: orgId });
+    if ((data.status ?? "approved") === "approved" && data.email?.trim() && canEditOrg) {
       const r = await ensureDonorAuthAndSendLink(row.id, data.email);
       linkSent = r.ok;
       linkError = r.ok ? null : (r as any).error ?? null;
@@ -123,12 +124,15 @@ export const updateDonor = createServerFn({ method: "POST" })
       .from("donors")
       .update(patch)
       .eq("id", data.donor_id)
-      .select("id, email, status")
+      .select("id, email, status, org_id")
       .maybeSingle();
     if (error) throw new Error(error.message);
     let linkSent = false;
     let linkError: string | null = null;
-    if (data.send_login_link && donor?.status === "approved" && donor?.email?.trim()) {
+    const { data: canEditOrg } = donor?.org_id
+      ? await supabase.rpc("can_edit_org", { _org_id: donor.org_id })
+      : { data: false };
+    if (data.send_login_link && donor?.status === "approved" && donor?.email?.trim() && canEditOrg) {
       const r = await ensureDonorAuthAndSendLink(donor.id, donor.email);
       linkSent = r.ok;
       linkError = r.ok ? null : r.error ?? null;
