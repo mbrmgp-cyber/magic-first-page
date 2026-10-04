@@ -6,8 +6,8 @@ export const translateBatch = createServerFn({ method: "POST" })
   .inputValidator((d) =>
     z
       .object({
-        lang: z.string().min(2).max(8),
-        texts: z.array(z.string().min(1).max(400)).max(60),
+        lang: z.enum(["te", "hi", "en", "ta", "kn"]),
+        texts: z.array(z.string().min(1).max(400)).max(40),
       })
       .parse(d)
   )

@@ -5,9 +5,9 @@ const EMAIL = "mbrplatform@gmail.com";
 export const Route = createFileRoute("/delete-account")({
   head: () => ({
     meta: [
-      { title: "Delete Your Account — Empire Platform" },
+      { title: "Delete Your Account — MBR Platform" },
       { name: "description", content: "Request deletion of your MBR App or Vaaradhi account and personal data." },
-      { property: "og:title", content: "Delete Your Account — Empire Platform" },
+      { property: "og:title", content: "Delete Your Account — MBR Platform" },
       { property: "og:description", content: "How to delete your MBR App or Vaaradhi account and data." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -22,7 +22,7 @@ function DeleteAccountPage() {
     <main className="min-h-screen bg-background text-foreground px-5 py-10">
       <article className="max-w-2xl mx-auto space-y-5 text-sm leading-relaxed">
         <h1 className="text-2xl font-bold">Delete your account</h1>
-        <p>You can ask <b>Empire Platform</b> to delete your <b>MBR App</b> or <b>Vaaradhi</b> account and personal data at any time.</p>
+        <p>You can ask <b>MBR Platform</b> to delete your <b>MBR App</b> or <b>Vaaradhi</b> account and personal data at any time.</p>
         <ol className="list-decimal pl-5 space-y-1">
           <li>Send an email from your registered email address to <a href={mailto} className="underline">{EMAIL}</a>.</li>
           <li>Write "Account deletion request" and which app you use.</li>

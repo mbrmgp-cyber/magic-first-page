@@ -267,8 +267,16 @@ export const saveAuctionState = createServerFn({ method: "POST" })
     const sb = context.supabase as any;
     const state = data.state;
     const groupName = (state.liveGroupName || state.groupName || "Group A").trim();
-    const winnerNet = state.pastWinners?.find((w) => w.month === state.currentMonth)?.net ?? null;
-    const winnerDividend = state.pastWinners?.find((w) => w.month === state.currentMonth)?.dividend ?? null;
+    // Winner fields are owned by finalize_chit_auction (computed from real bids);
+    // never accept them from the client.
+    const { data: prev } = await sb
+      .from("auction_sessions")
+      .select("winner_bid_id, winner_member_id, winner_member_name, winner_member_code, winner_amount, winner_net, winner_dividend")
+      .eq("org_id", data.orgId)
+      .eq("group_name", groupName)
+      .maybeSingle();
+    const winnerNet = prev?.winner_net ?? null;
+    const winnerDividend = prev?.winner_dividend ?? null;
     const { data: row, error } = await sb
       .from("auction_sessions")
       .upsert(
@@ -286,11 +294,11 @@ export const saveAuctionState = createServerFn({ method: "POST" })
           turn_end: isoFromMs(state.turnEnd),
           auction_closed: !!state.auctionClosed,
           status: state.auctionClosed ? "closed" : "active",
-          winner_bid_id: state.winner?.id ?? null,
-          winner_member_id: state.winner?.memberId ?? null,
-          winner_member_name: state.winner?.memberName ?? null,
-          winner_member_code: state.winner?.memberCode ?? null,
-          winner_amount: state.winner?.amount ?? null,
+          winner_bid_id: prev?.winner_bid_id ?? null,
+          winner_member_id: prev?.winner_member_id ?? null,
+          winner_member_name: prev?.winner_member_name ?? null,
+          winner_member_code: prev?.winner_member_code ?? null,
+          winner_amount: prev?.winner_amount ?? null,
           winner_net: winnerNet,
           winner_dividend: winnerDividend,
           past_winners: state.pastWinners ?? [],

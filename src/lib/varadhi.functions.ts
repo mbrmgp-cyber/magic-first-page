@@ -450,11 +450,10 @@ async function assertVaradhiAdmin(_supabase: any, userId: string, email?: string
     .maybeSingle();
   if (roleRow) return;
 
-  let mail = (email ?? "").trim().toLowerCase();
-  if (!mail) {
-    const { data: u } = await supabaseAdmin.auth.admin.getUserById(userId);
-    mail = (u?.user?.email ?? "").trim().toLowerCase();
-  }
+  void email;
+  // Only trust the stored, confirmed email — never a caller-supplied one.
+  const { data: u } = await supabaseAdmin.auth.admin.getUserById(userId);
+  const mail = u?.user?.email_confirmed_at ? (u.user.email ?? "").trim().toLowerCase() : "";
   if (mail && VARADHI_BOOTSTRAP_ADMINS.includes(mail)) {
     await supabaseAdmin.from("user_roles").insert({ user_id: userId, role: "varadhi_admin" });
     return;
