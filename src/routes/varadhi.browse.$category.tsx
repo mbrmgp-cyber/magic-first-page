@@ -249,14 +249,23 @@ function BrowsePage() {
           <div className="mt-3 space-y-2">
             <div className="grid grid-cols-4 gap-2">
               {GROUPS.map((g) => {
-                if (g.kind === "single") return boxBtn(g.box);
+                if (g.kind === "single") return boxBtn(g.box, false);
                 const isOpen = openGroup === g.id;
                 const total = g.boxes.reduce((n, b) => n + countFor(b.id), 0);
                 return (
                   <button
                     key={g.id}
                     type="button"
-                    onClick={() => setOpenGroup(isOpen ? null : g.id)}
+                    onClick={() => {
+                      if (isOpen) { setOpenGroup(null); return; }
+                      setOpenGroup(g.id);
+                      // Only one selection at a time: opening a group deselects any
+                      // active category that is not part of this group.
+                      const inGroup = g.boxes.some((b) => b.id === category);
+                      if (!inGroup && category !== "all") {
+                        navigate({ to: "/varadhi/browse/$category", params: { category: "all" }, search: { q: term.trim() } });
+                      }
+                    }}
                     className={`rounded-2xl border p-2 text-left transition active:scale-[.98] ${
                       isOpen ? "border-transparent text-white shadow" : "border-black/5 bg-white text-[#1e3a8a]"
                     }`}
@@ -275,7 +284,7 @@ function BrowsePage() {
 
             {GROUPS.filter((g): g is Extract<Group, { kind: "group" }> => g.kind === "group" && openGroup === g.id).map((g) => (
               <div key={g.id} className="grid grid-cols-3 gap-2 rounded-2xl bg-white/60 p-2">
-                {g.boxes.map(boxBtn)}
+                {g.boxes.map((b) => boxBtn(b, true))}
               </div>
             ))}
           </div>
