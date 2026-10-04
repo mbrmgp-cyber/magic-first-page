@@ -14,43 +14,61 @@ import {
 interface MagicLinkEmailProps {
   siteName: string
   confirmationUrl: string
+  note?: string
 }
 
 export const MagicLinkEmail = ({
   siteName,
   confirmationUrl,
-}: MagicLinkEmailProps) => (
+  note,
+}: MagicLinkEmailProps) => {
+  const now = new Date()
+  const sentAt = now.toUTCString()
+  const uniqueId = `${now.getTime()}-${Math.random().toString(36).slice(2, 10)}`
+  const appName = siteName || 'MBR APP'
+  return (
   <Html lang="en" dir="ltr">
-    <Head>
-      <style>{darkModeCss}</style>
-    </Head>
-    <Preview>Your login link for {siteName}</Preview>
+    <Head />
+    <Preview>{appName} login link · {sentAt}</Preview>
     <Body style={main}>
+      {/* Hidden preheader to ensure unique content per email (prevents Gmail from collapsing repeated messages) */}
+      <span style={hidden}>
+        Login request generated {sentAt} · ref {uniqueId}
+      </span>
       <Container style={container}>
-        <Heading style={h1}>Your login link</Heading>
+        <Text style={brand}>{appName}</Text>
+        <Heading style={h1}>Login / లాగిన్</Heading>
+        {note ? <Text style={noteStyle}>{note}</Text> : null}
         <Text style={text}>
-          Click the button below to log in to {siteName}. This link will expire
-          shortly.
+          Open {appName} and sign in with your code or password. మీ కోడ్ లేదా పాస్‌వర్డ్‌తో లాగిన్ అవ్వండి.
         </Text>
-        <Button className="dm-btn" style={button} href={confirmationUrl}>
-          Log In
+        <Button style={button} href={confirmationUrl}>
+          Login / లాగిన్
         </Button>
+        <Text style={sentAtStyle}>
+          Sent at: {sentAt}
+        </Text>
         <Text style={footer}>
-          If you didn't request this link, you can safely ignore this email.
+          If you did not request this, please ignore this email.
+          <br />— {appName} Team
+          <br />
+          <span style={refStyle}>Ref: {uniqueId}</span>
         </Text>
       </Container>
     </Body>
   </Html>
-)
+  )
+}
 
 export default MagicLinkEmail
 
 const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
-const container = { padding: '20px 25px' }
+const container = { maxWidth: '560px', margin: '0 auto', padding: '28px 26px', borderTop: '6px solid #f97316' }
+const brand = { fontSize: '18px', fontWeight: 'bold' as const, color: '#9a3412', margin: '0 0 14px', letterSpacing: '1px' }
 const h1 = {
-  fontSize: '22px',
+  fontSize: '24px',
   fontWeight: 'bold' as const,
-  color: '#000000',
+  color: '#111827',
   margin: '0 0 20px',
 }
 const text = {
@@ -60,20 +78,15 @@ const text = {
   margin: '0 0 25px',
 }
 const button = {
-  backgroundColor: '#000000',
+  backgroundColor: '#f97316',
   color: '#ffffff',
   fontSize: '14px',
-  border: '1px solid #000000',
   borderRadius: '8px',
   padding: '12px 20px',
   textDecoration: 'none',
 }
 const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
-// Rendered as a text child, which React may HTML-escape: keep this CSS free of >, &, and quotes.
-const darkModeCss = `
-  @media (prefers-color-scheme: dark) {
-    .dm-btn { background-color: #ffffff !important; color: #000000 !important; }
-  }
-  [data-ogsc] .dm-btn { background-color: #ffffff !important; color: #000000 !important; }
-  [data-ogsb] .dm-btn { background-color: #ffffff !important; color: #000000 !important; }
-`
+const hidden = { display: 'none', overflow: 'hidden', lineHeight: '1px', opacity: 0, maxHeight: 0, maxWidth: 0, fontSize: '1px', color: '#ffffff' as const }
+const sentAtStyle = { fontSize: '11px', color: '#b0b0b0', margin: '18px 0 0' }
+const refStyle = { fontSize: '10px', color: '#cccccc' }
+const noteStyle = { fontSize: '14px', color: '#1f2937', lineHeight: '1.5', margin: '0 0 18px', padding: '10px 12px', backgroundColor: '#fff7ed', borderLeft: '3px solid #f97316', borderRadius: '4px' }
