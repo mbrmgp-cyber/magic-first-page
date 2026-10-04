@@ -9,111 +9,75 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as VaradhiRouteImport } from './routes/varadhi'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as RegisterRouteImport } from './routes/register'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as NewOrganizationRouteImport } from './routes/new-organization'
-import { Route as MbrRouteImport } from './routes/mbr'
-import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as DeleteAccountRouteImport } from './routes/delete-account'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as VaradhiIndexRouteImport } from './routes/varadhi.index'
-import { Route as VaradhiSubscriptionRouteImport } from './routes/varadhi.subscription'
-import { Route as VaradhiRewardsRouteImport } from './routes/varadhi.rewards'
-import { Route as VaradhiProfileRouteImport } from './routes/varadhi.profile'
-import { Route as VaradhiPartnerRouteImport } from './routes/varadhi.partner'
-import { Route as VaradhiOnboardRouteImport } from './routes/varadhi.onboard'
-import { Route as VaradhiDashboardRouteImport } from './routes/varadhi.dashboard'
-import { Route as VaradhiAuthRouteImport } from './routes/varadhi.auth'
-import { Route as VaradhiAdminApplyRouteImport } from './routes/varadhi.admin-apply'
-import { Route as VaradhiAdminRouteImport } from './routes/varadhi.admin'
-import { Route as OrgRegisterRouteImport } from './routes/org.register'
-import { Route as MemberRegisterRouteImport } from './routes/member.register'
-import { Route as MCodeRouteImport } from './routes/m.$code'
-import { Route as DonorRegisterRouteImport } from './routes/donor.register'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as DeleteAccountRouteImport } from './routes/delete-account'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as MbrRouteImport } from './routes/mbr'
+import { Route as NewOrganizationRouteImport } from './routes/new-organization'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as VaradhiRouteImport } from './routes/varadhi'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
-import { Route as VaradhiProviderIdRouteImport } from './routes/varadhi.provider.$id'
-import { Route as VaradhiItemIdRouteImport } from './routes/varadhi.item.$id'
-import { Route as VaradhiBrowseCategoryRouteImport } from './routes/varadhi.browse.$category'
-import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
-import { Route as AuthenticatedOrgThemeRouteImport } from './routes/_authenticated/org.theme'
-import { Route as AuthenticatedOrgSubscriptionRouteImport } from './routes/_authenticated/org.subscription'
-import { Route as AuthenticatedOrgRulesRouteImport } from './routes/_authenticated/org.rules'
-import { Route as AuthenticatedOrgMembersRouteImport } from './routes/_authenticated/org.members'
-import { Route as AuthenticatedOrgMasterLedgerRouteImport } from './routes/_authenticated/org.master-ledger'
-import { Route as AuthenticatedOrgLoanRequestsRouteImport } from './routes/_authenticated/org.loan-requests'
-import { Route as AuthenticatedOrgIncomeRouteImport } from './routes/_authenticated/org.income'
-import { Route as AuthenticatedOrgExpensesRouteImport } from './routes/_authenticated/org.expenses'
-import { Route as AuthenticatedOrgEventsRouteImport } from './routes/_authenticated/org.events'
-import { Route as AuthenticatedOrgElectionsRouteImport } from './routes/_authenticated/org.elections'
-import { Route as AuthenticatedOrgDisciplinaryRouteImport } from './routes/_authenticated/org.disciplinary'
-import { Route as AuthenticatedOrgDesignsRouteImport } from './routes/_authenticated/org.designs'
-import { Route as AuthenticatedOrgDashboardRouteImport } from './routes/_authenticated/org.dashboard'
-import { Route as AuthenticatedOrgCommitteeRouteImport } from './routes/_authenticated/org.committee'
-import { Route as AuthenticatedOrgChatRouteImport } from './routes/_authenticated/org.chat'
-import { Route as AuthenticatedOrgCashflowRouteImport } from './routes/_authenticated/org.cashflow'
-import { Route as AuthenticatedOrgBankDetailsRouteImport } from './routes/_authenticated/org.bank-details'
-import { Route as AuthenticatedOrgAuctionRouteImport } from './routes/_authenticated/org.auction'
-import { Route as AuthenticatedOrgAdminAccessRouteImport } from './routes/_authenticated/org.admin-access'
-import { Route as AuthenticatedOrgAccountsHubRouteImport } from './routes/_authenticated/org.accounts-hub'
-import { Route as AuthenticatedOrgAccountsRouteImport } from './routes/_authenticated/org.accounts'
-import { Route as AuthenticatedMemberSuretyInboxRouteImport } from './routes/_authenticated/member.surety-inbox'
-import { Route as AuthenticatedMemberPendingRouteImport } from './routes/_authenticated/member.pending'
-import { Route as AuthenticatedMemberLoanRequestRouteImport } from './routes/_authenticated/member.loan-request'
-import { Route as AuthenticatedMemberLedgerRouteImport } from './routes/_authenticated/member.ledger'
-import { Route as AuthenticatedMemberEventsRouteImport } from './routes/_authenticated/member.events'
-import { Route as AuthenticatedMemberDashboardRouteImport } from './routes/_authenticated/member.dashboard'
+import { Route as DonorRegisterRouteImport } from './routes/donor.register'
+import { Route as MCodeRouteImport } from './routes/m.$code'
+import { Route as MemberRegisterRouteImport } from './routes/member.register'
+import { Route as OrgRegisterRouteImport } from './routes/org.register'
+import { Route as VaradhiIndexRouteImport } from './routes/varadhi.index'
+import { Route as VaradhiAdminRouteImport } from './routes/varadhi.admin'
+import { Route as VaradhiAdminApplyRouteImport } from './routes/varadhi.admin-apply'
+import { Route as VaradhiAuthRouteImport } from './routes/varadhi.auth'
+import { Route as VaradhiDashboardRouteImport } from './routes/varadhi.dashboard'
+import { Route as VaradhiOnboardRouteImport } from './routes/varadhi.onboard'
+import { Route as VaradhiPartnerRouteImport } from './routes/varadhi.partner'
+import { Route as VaradhiProfileRouteImport } from './routes/varadhi.profile'
+import { Route as VaradhiRewardsRouteImport } from './routes/varadhi.rewards'
+import { Route as VaradhiSubscriptionRouteImport } from './routes/varadhi.subscription'
 import { Route as AuthenticatedDonorDashboardRouteImport } from './routes/_authenticated/donor.dashboard'
-import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
+import { Route as AuthenticatedMemberDashboardRouteImport } from './routes/_authenticated/member.dashboard'
+import { Route as AuthenticatedMemberEventsRouteImport } from './routes/_authenticated/member.events'
+import { Route as AuthenticatedMemberLedgerRouteImport } from './routes/_authenticated/member.ledger'
+import { Route as AuthenticatedMemberLoanRequestRouteImport } from './routes/_authenticated/member.loan-request'
+import { Route as AuthenticatedMemberPendingRouteImport } from './routes/_authenticated/member.pending'
+import { Route as AuthenticatedMemberSuretyInboxRouteImport } from './routes/_authenticated/member.surety-inbox'
+import { Route as AuthenticatedOrgAccountsRouteImport } from './routes/_authenticated/org.accounts'
+import { Route as AuthenticatedOrgAccountsHubRouteImport } from './routes/_authenticated/org.accounts-hub'
+import { Route as AuthenticatedOrgAdminAccessRouteImport } from './routes/_authenticated/org.admin-access'
+import { Route as AuthenticatedOrgAuctionRouteImport } from './routes/_authenticated/org.auction'
+import { Route as AuthenticatedOrgBankDetailsRouteImport } from './routes/_authenticated/org.bank-details'
+import { Route as AuthenticatedOrgCashflowRouteImport } from './routes/_authenticated/org.cashflow'
+import { Route as AuthenticatedOrgChatRouteImport } from './routes/_authenticated/org.chat'
+import { Route as AuthenticatedOrgCommitteeRouteImport } from './routes/_authenticated/org.committee'
+import { Route as AuthenticatedOrgDashboardRouteImport } from './routes/_authenticated/org.dashboard'
+import { Route as AuthenticatedOrgDesignsRouteImport } from './routes/_authenticated/org.designs'
+import { Route as AuthenticatedOrgDisciplinaryRouteImport } from './routes/_authenticated/org.disciplinary'
+import { Route as AuthenticatedOrgElectionsRouteImport } from './routes/_authenticated/org.elections'
+import { Route as AuthenticatedOrgEventsRouteImport } from './routes/_authenticated/org.events'
+import { Route as AuthenticatedOrgExpensesRouteImport } from './routes/_authenticated/org.expenses'
+import { Route as AuthenticatedOrgIncomeRouteImport } from './routes/_authenticated/org.income'
+import { Route as AuthenticatedOrgLoanRequestsRouteImport } from './routes/_authenticated/org.loan-requests'
+import { Route as AuthenticatedOrgMasterLedgerRouteImport } from './routes/_authenticated/org.master-ledger'
+import { Route as AuthenticatedOrgMembersRouteImport } from './routes/_authenticated/org.members'
+import { Route as AuthenticatedOrgRulesRouteImport } from './routes/_authenticated/org.rules'
+import { Route as AuthenticatedOrgSubscriptionRouteImport } from './routes/_authenticated/org.subscription'
+import { Route as AuthenticatedOrgThemeRouteImport } from './routes/_authenticated/org.theme'
+import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
+import { Route as VaradhiBrowseCategoryRouteImport } from './routes/varadhi.browse.$category'
+import { Route as VaradhiItemIdRouteImport } from './routes/varadhi.item.$id'
+import { Route as VaradhiProviderIdRouteImport } from './routes/varadhi.provider.$id'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 
-const VaradhiRoute = VaradhiRouteImport.update({
-  id: '/varadhi',
-  path: '/varadhi',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RegisterRoute = RegisterRouteImport.update({
-  id: '/register',
-  path: '/register',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NewOrganizationRoute = NewOrganizationRouteImport.update({
-  id: '/new-organization',
-  path: '/new-organization',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MbrRoute = MbrRouteImport.update({
-  id: '/mbr',
-  path: '/mbr',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
-  id: '/forgot-password',
-  path: '/forgot-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DeleteAccountRoute = DeleteAccountRouteImport.update({
-  id: '/delete-account',
-  path: '/delete-account',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -121,83 +85,49 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
+const DeleteAccountRoute = DeleteAccountRouteImport.update({
+  id: '/delete-account',
+  path: '/delete-account',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const VaradhiIndexRoute = VaradhiIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => VaradhiRoute,
-} as any)
-const VaradhiSubscriptionRoute = VaradhiSubscriptionRouteImport.update({
-  id: '/subscription',
-  path: '/subscription',
-  getParentRoute: () => VaradhiRoute,
-} as any)
-const VaradhiRewardsRoute = VaradhiRewardsRouteImport.update({
-  id: '/rewards',
-  path: '/rewards',
-  getParentRoute: () => VaradhiRoute,
-} as any)
-const VaradhiProfileRoute = VaradhiProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => VaradhiRoute,
-} as any)
-const VaradhiPartnerRoute = VaradhiPartnerRouteImport.update({
-  id: '/partner',
-  path: '/partner',
-  getParentRoute: () => VaradhiRoute,
-} as any)
-const VaradhiOnboardRoute = VaradhiOnboardRouteImport.update({
-  id: '/onboard',
-  path: '/onboard',
-  getParentRoute: () => VaradhiRoute,
-} as any)
-const VaradhiDashboardRoute = VaradhiDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => VaradhiRoute,
-} as any)
-const VaradhiAuthRoute = VaradhiAuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => VaradhiRoute,
-} as any)
-const VaradhiAdminApplyRoute = VaradhiAdminApplyRouteImport.update({
-  id: '/admin-apply',
-  path: '/admin-apply',
-  getParentRoute: () => VaradhiRoute,
-} as any)
-const VaradhiAdminRoute = VaradhiAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => VaradhiRoute,
-} as any)
-const OrgRegisterRoute = OrgRegisterRouteImport.update({
-  id: '/org/register',
-  path: '/org/register',
+const MbrRoute = MbrRouteImport.update({
+  id: '/mbr',
+  path: '/mbr',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MemberRegisterRoute = MemberRegisterRouteImport.update({
-  id: '/member/register',
-  path: '/member/register',
+const NewOrganizationRoute = NewOrganizationRouteImport.update({
+  id: '/new-organization',
+  path: '/new-organization',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MCodeRoute = MCodeRouteImport.update({
-  id: '/m/$code',
-  path: '/m/$code',
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DonorRegisterRoute = DonorRegisterRouteImport.update({
-  id: '/donor/register',
-  path: '/donor/register',
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VaradhiRoute = VaradhiRouteImport.update({
+  id: '/varadhi',
+  path: '/varadhi',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
@@ -205,172 +135,80 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const VaradhiProviderIdRoute = VaradhiProviderIdRouteImport.update({
-  id: '/provider/$id',
-  path: '/provider/$id',
-  getParentRoute: () => VaradhiRoute,
-} as any)
-const VaradhiItemIdRoute = VaradhiItemIdRouteImport.update({
-  id: '/item/$id',
-  path: '/item/$id',
-  getParentRoute: () => VaradhiRoute,
-} as any)
-const VaradhiBrowseCategoryRoute = VaradhiBrowseCategoryRouteImport.update({
-  id: '/browse/$category',
-  path: '/browse/$category',
-  getParentRoute: () => VaradhiRoute,
-} as any)
-const LovableEmailEventsRoute = LovableEmailEventsRouteImport.update({
-  id: '/lovable/email/events',
-  path: '/lovable/email/events',
+const DonorRegisterRoute = DonorRegisterRouteImport.update({
+  id: '/donor/register',
+  path: '/donor/register',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedOrgThemeRoute = AuthenticatedOrgThemeRouteImport.update({
-  id: '/org/theme',
-  path: '/org/theme',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const MCodeRoute = MCodeRouteImport.update({
+  id: '/m/$code',
+  path: '/m/$code',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedOrgSubscriptionRoute =
-  AuthenticatedOrgSubscriptionRouteImport.update({
-    id: '/org/subscription',
-    path: '/org/subscription',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOrgRulesRoute = AuthenticatedOrgRulesRouteImport.update({
-  id: '/org/rules',
-  path: '/org/rules',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const MemberRegisterRoute = MemberRegisterRouteImport.update({
+  id: '/member/register',
+  path: '/member/register',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedOrgMembersRoute = AuthenticatedOrgMembersRouteImport.update({
-  id: '/org/members',
-  path: '/org/members',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const OrgRegisterRoute = OrgRegisterRouteImport.update({
+  id: '/org/register',
+  path: '/org/register',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedOrgMasterLedgerRoute =
-  AuthenticatedOrgMasterLedgerRouteImport.update({
-    id: '/org/master-ledger',
-    path: '/org/master-ledger',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOrgLoanRequestsRoute =
-  AuthenticatedOrgLoanRequestsRouteImport.update({
-    id: '/org/loan-requests',
-    path: '/org/loan-requests',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOrgIncomeRoute = AuthenticatedOrgIncomeRouteImport.update({
-  id: '/org/income',
-  path: '/org/income',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const VaradhiIndexRoute = VaradhiIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => VaradhiRoute,
 } as any)
-const AuthenticatedOrgExpensesRoute =
-  AuthenticatedOrgExpensesRouteImport.update({
-    id: '/org/expenses',
-    path: '/org/expenses',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOrgEventsRoute = AuthenticatedOrgEventsRouteImport.update({
-  id: '/org/events',
-  path: '/org/events',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const VaradhiAdminRoute = VaradhiAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => VaradhiRoute,
 } as any)
-const AuthenticatedOrgElectionsRoute =
-  AuthenticatedOrgElectionsRouteImport.update({
-    id: '/org/elections',
-    path: '/org/elections',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOrgDisciplinaryRoute =
-  AuthenticatedOrgDisciplinaryRouteImport.update({
-    id: '/org/disciplinary',
-    path: '/org/disciplinary',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOrgDesignsRoute = AuthenticatedOrgDesignsRouteImport.update({
-  id: '/org/designs',
-  path: '/org/designs',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const VaradhiAdminApplyRoute = VaradhiAdminApplyRouteImport.update({
+  id: '/admin-apply',
+  path: '/admin-apply',
+  getParentRoute: () => VaradhiRoute,
 } as any)
-const AuthenticatedOrgDashboardRoute =
-  AuthenticatedOrgDashboardRouteImport.update({
-    id: '/org/dashboard',
-    path: '/org/dashboard',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOrgCommitteeRoute =
-  AuthenticatedOrgCommitteeRouteImport.update({
-    id: '/org/committee',
-    path: '/org/committee',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOrgChatRoute = AuthenticatedOrgChatRouteImport.update({
-  id: '/org/chat',
-  path: '/org/chat',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const VaradhiAuthRoute = VaradhiAuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => VaradhiRoute,
 } as any)
-const AuthenticatedOrgCashflowRoute =
-  AuthenticatedOrgCashflowRouteImport.update({
-    id: '/org/cashflow',
-    path: '/org/cashflow',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOrgBankDetailsRoute =
-  AuthenticatedOrgBankDetailsRouteImport.update({
-    id: '/org/bank-details',
-    path: '/org/bank-details',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOrgAuctionRoute = AuthenticatedOrgAuctionRouteImport.update({
-  id: '/org/auction',
-  path: '/org/auction',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const VaradhiDashboardRoute = VaradhiDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => VaradhiRoute,
 } as any)
-const AuthenticatedOrgAdminAccessRoute =
-  AuthenticatedOrgAdminAccessRouteImport.update({
-    id: '/org/admin-access',
-    path: '/org/admin-access',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOrgAccountsHubRoute =
-  AuthenticatedOrgAccountsHubRouteImport.update({
-    id: '/org/accounts-hub',
-    path: '/org/accounts-hub',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOrgAccountsRoute =
-  AuthenticatedOrgAccountsRouteImport.update({
-    id: '/org/accounts',
-    path: '/org/accounts',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedMemberSuretyInboxRoute =
-  AuthenticatedMemberSuretyInboxRouteImport.update({
-    id: '/member/surety-inbox',
-    path: '/member/surety-inbox',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedMemberPendingRoute =
-  AuthenticatedMemberPendingRouteImport.update({
-    id: '/member/pending',
-    path: '/member/pending',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedMemberLoanRequestRoute =
-  AuthenticatedMemberLoanRequestRouteImport.update({
-    id: '/member/loan-request',
-    path: '/member/loan-request',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedMemberLedgerRoute =
-  AuthenticatedMemberLedgerRouteImport.update({
-    id: '/member/ledger',
-    path: '/member/ledger',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedMemberEventsRoute =
-  AuthenticatedMemberEventsRouteImport.update({
-    id: '/member/events',
-    path: '/member/events',
+const VaradhiOnboardRoute = VaradhiOnboardRouteImport.update({
+  id: '/onboard',
+  path: '/onboard',
+  getParentRoute: () => VaradhiRoute,
+} as any)
+const VaradhiPartnerRoute = VaradhiPartnerRouteImport.update({
+  id: '/partner',
+  path: '/partner',
+  getParentRoute: () => VaradhiRoute,
+} as any)
+const VaradhiProfileRoute = VaradhiProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => VaradhiRoute,
+} as any)
+const VaradhiRewardsRoute = VaradhiRewardsRouteImport.update({
+  id: '/rewards',
+  path: '/rewards',
+  getParentRoute: () => VaradhiRoute,
+} as any)
+const VaradhiSubscriptionRoute = VaradhiSubscriptionRouteImport.update({
+  id: '/subscription',
+  path: '/subscription',
+  getParentRoute: () => VaradhiRoute,
+} as any)
+const AuthenticatedDonorDashboardRoute =
+  AuthenticatedDonorDashboardRouteImport.update({
+    id: '/donor/dashboard',
+    path: '/donor/dashboard',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedMemberDashboardRoute =
@@ -379,20 +217,182 @@ const AuthenticatedMemberDashboardRoute =
     path: '/member/dashboard',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedDonorDashboardRoute =
-  AuthenticatedDonorDashboardRouteImport.update({
-    id: '/donor/dashboard',
-    path: '/donor/dashboard',
+const AuthenticatedMemberEventsRoute =
+  AuthenticatedMemberEventsRouteImport.update({
+    id: '/member/events',
+    path: '/member/events',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
-  id: '/lovable/email/auth/webhook',
-  path: '/lovable/email/auth/webhook',
+const AuthenticatedMemberLedgerRoute =
+  AuthenticatedMemberLedgerRouteImport.update({
+    id: '/member/ledger',
+    path: '/member/ledger',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMemberLoanRequestRoute =
+  AuthenticatedMemberLoanRequestRouteImport.update({
+    id: '/member/loan-request',
+    path: '/member/loan-request',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMemberPendingRoute =
+  AuthenticatedMemberPendingRouteImport.update({
+    id: '/member/pending',
+    path: '/member/pending',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMemberSuretyInboxRoute =
+  AuthenticatedMemberSuretyInboxRouteImport.update({
+    id: '/member/surety-inbox',
+    path: '/member/surety-inbox',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOrgAccountsRoute =
+  AuthenticatedOrgAccountsRouteImport.update({
+    id: '/org/accounts',
+    path: '/org/accounts',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOrgAccountsHubRoute =
+  AuthenticatedOrgAccountsHubRouteImport.update({
+    id: '/org/accounts-hub',
+    path: '/org/accounts-hub',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOrgAdminAccessRoute =
+  AuthenticatedOrgAdminAccessRouteImport.update({
+    id: '/org/admin-access',
+    path: '/org/admin-access',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOrgAuctionRoute = AuthenticatedOrgAuctionRouteImport.update({
+  id: '/org/auction',
+  path: '/org/auction',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOrgBankDetailsRoute =
+  AuthenticatedOrgBankDetailsRouteImport.update({
+    id: '/org/bank-details',
+    path: '/org/bank-details',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOrgCashflowRoute =
+  AuthenticatedOrgCashflowRouteImport.update({
+    id: '/org/cashflow',
+    path: '/org/cashflow',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOrgChatRoute = AuthenticatedOrgChatRouteImport.update({
+  id: '/org/chat',
+  path: '/org/chat',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOrgCommitteeRoute =
+  AuthenticatedOrgCommitteeRouteImport.update({
+    id: '/org/committee',
+    path: '/org/committee',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOrgDashboardRoute =
+  AuthenticatedOrgDashboardRouteImport.update({
+    id: '/org/dashboard',
+    path: '/org/dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOrgDesignsRoute = AuthenticatedOrgDesignsRouteImport.update({
+  id: '/org/designs',
+  path: '/org/designs',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOrgDisciplinaryRoute =
+  AuthenticatedOrgDisciplinaryRouteImport.update({
+    id: '/org/disciplinary',
+    path: '/org/disciplinary',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOrgElectionsRoute =
+  AuthenticatedOrgElectionsRouteImport.update({
+    id: '/org/elections',
+    path: '/org/elections',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOrgEventsRoute = AuthenticatedOrgEventsRouteImport.update({
+  id: '/org/events',
+  path: '/org/events',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOrgExpensesRoute =
+  AuthenticatedOrgExpensesRouteImport.update({
+    id: '/org/expenses',
+    path: '/org/expenses',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOrgIncomeRoute = AuthenticatedOrgIncomeRouteImport.update({
+  id: '/org/income',
+  path: '/org/income',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOrgLoanRequestsRoute =
+  AuthenticatedOrgLoanRequestsRouteImport.update({
+    id: '/org/loan-requests',
+    path: '/org/loan-requests',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOrgMasterLedgerRoute =
+  AuthenticatedOrgMasterLedgerRouteImport.update({
+    id: '/org/master-ledger',
+    path: '/org/master-ledger',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOrgMembersRoute = AuthenticatedOrgMembersRouteImport.update({
+  id: '/org/members',
+  path: '/org/members',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOrgRulesRoute = AuthenticatedOrgRulesRouteImport.update({
+  id: '/org/rules',
+  path: '/org/rules',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOrgSubscriptionRoute =
+  AuthenticatedOrgSubscriptionRouteImport.update({
+    id: '/org/subscription',
+    path: '/org/subscription',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOrgThemeRoute = AuthenticatedOrgThemeRouteImport.update({
+  id: '/org/theme',
+  path: '/org/theme',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const LovableEmailEventsRoute = LovableEmailEventsRouteImport.update({
+  id: '/lovable/email/events',
+  path: '/lovable/email/events',
   getParentRoute: () => rootRouteImport,
+} as any)
+const VaradhiBrowseCategoryRoute = VaradhiBrowseCategoryRouteImport.update({
+  id: '/browse/$category',
+  path: '/browse/$category',
+  getParentRoute: () => VaradhiRoute,
+} as any)
+const VaradhiItemIdRoute = VaradhiItemIdRouteImport.update({
+  id: '/item/$id',
+  path: '/item/$id',
+  getParentRoute: () => VaradhiRoute,
+} as any)
+const VaradhiProviderIdRoute = VaradhiProviderIdRouteImport.update({
+  id: '/provider/$id',
+  path: '/provider/$id',
+  getParentRoute: () => VaradhiRoute,
 } as any)
 const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   id: '/lovable/email/auth/preview',
   path: '/lovable/email/auth/preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
+  id: '/lovable/email/auth/webhook',
+  path: '/lovable/email/auth/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -796,74 +796,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/varadhi': {
-      id: '/varadhi'
-      path: '/varadhi'
-      fullPath: '/varadhi'
-      preLoaderRoute: typeof VaradhiRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/register': {
-      id: '/register'
-      path: '/register'
-      fullPath: '/register'
-      preLoaderRoute: typeof RegisterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/new-organization': {
-      id: '/new-organization'
-      path: '/new-organization'
-      fullPath: '/new-organization'
-      preLoaderRoute: typeof NewOrganizationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mbr': {
-      id: '/mbr'
-      path: '/mbr'
-      fullPath: '/mbr'
-      preLoaderRoute: typeof MbrRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/forgot-password': {
-      id: '/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof ForgotPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/delete-account': {
-      id: '/delete-account'
-      path: '/delete-account'
-      fullPath: '/delete-account'
-      preLoaderRoute: typeof DeleteAccountRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -873,109 +810,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/varadhi/': {
-      id: '/varadhi/'
-      path: '/'
-      fullPath: '/varadhi/'
-      preLoaderRoute: typeof VaradhiIndexRouteImport
-      parentRoute: typeof VaradhiRoute
-    }
-    '/varadhi/subscription': {
-      id: '/varadhi/subscription'
-      path: '/subscription'
-      fullPath: '/varadhi/subscription'
-      preLoaderRoute: typeof VaradhiSubscriptionRouteImport
-      parentRoute: typeof VaradhiRoute
-    }
-    '/varadhi/rewards': {
-      id: '/varadhi/rewards'
-      path: '/rewards'
-      fullPath: '/varadhi/rewards'
-      preLoaderRoute: typeof VaradhiRewardsRouteImport
-      parentRoute: typeof VaradhiRoute
-    }
-    '/varadhi/profile': {
-      id: '/varadhi/profile'
-      path: '/profile'
-      fullPath: '/varadhi/profile'
-      preLoaderRoute: typeof VaradhiProfileRouteImport
-      parentRoute: typeof VaradhiRoute
-    }
-    '/varadhi/partner': {
-      id: '/varadhi/partner'
-      path: '/partner'
-      fullPath: '/varadhi/partner'
-      preLoaderRoute: typeof VaradhiPartnerRouteImport
-      parentRoute: typeof VaradhiRoute
-    }
-    '/varadhi/onboard': {
-      id: '/varadhi/onboard'
-      path: '/onboard'
-      fullPath: '/varadhi/onboard'
-      preLoaderRoute: typeof VaradhiOnboardRouteImport
-      parentRoute: typeof VaradhiRoute
-    }
-    '/varadhi/dashboard': {
-      id: '/varadhi/dashboard'
-      path: '/dashboard'
-      fullPath: '/varadhi/dashboard'
-      preLoaderRoute: typeof VaradhiDashboardRouteImport
-      parentRoute: typeof VaradhiRoute
-    }
-    '/varadhi/auth': {
-      id: '/varadhi/auth'
+    '/auth': {
+      id: '/auth'
       path: '/auth'
-      fullPath: '/varadhi/auth'
-      preLoaderRoute: typeof VaradhiAuthRouteImport
-      parentRoute: typeof VaradhiRoute
-    }
-    '/varadhi/admin-apply': {
-      id: '/varadhi/admin-apply'
-      path: '/admin-apply'
-      fullPath: '/varadhi/admin-apply'
-      preLoaderRoute: typeof VaradhiAdminApplyRouteImport
-      parentRoute: typeof VaradhiRoute
-    }
-    '/varadhi/admin': {
-      id: '/varadhi/admin'
-      path: '/admin'
-      fullPath: '/varadhi/admin'
-      preLoaderRoute: typeof VaradhiAdminRouteImport
-      parentRoute: typeof VaradhiRoute
-    }
-    '/org/register': {
-      id: '/org/register'
-      path: '/org/register'
-      fullPath: '/org/register'
-      preLoaderRoute: typeof OrgRegisterRouteImport
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/member/register': {
-      id: '/member/register'
-      path: '/member/register'
-      fullPath: '/member/register'
-      preLoaderRoute: typeof MemberRegisterRouteImport
+    '/delete-account': {
+      id: '/delete-account'
+      path: '/delete-account'
+      fullPath: '/delete-account'
+      preLoaderRoute: typeof DeleteAccountRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/m/$code': {
-      id: '/m/$code'
-      path: '/m/$code'
-      fullPath: '/m/$code'
-      preLoaderRoute: typeof MCodeRouteImport
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/donor/register': {
-      id: '/donor/register'
-      path: '/donor/register'
-      fullPath: '/donor/register'
-      preLoaderRoute: typeof DonorRegisterRouteImport
+    '/mbr': {
+      id: '/mbr'
+      path: '/mbr'
+      fullPath: '/mbr'
+      preLoaderRoute: typeof MbrRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/new-organization': {
+      id: '/new-organization'
+      path: '/new-organization'
+      fullPath: '/new-organization'
+      preLoaderRoute: typeof NewOrganizationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/varadhi': {
+      id: '/varadhi'
+      path: '/varadhi'
+      fullPath: '/varadhi'
+      preLoaderRoute: typeof VaradhiRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -985,214 +887,109 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/varadhi/provider/$id': {
-      id: '/varadhi/provider/$id'
-      path: '/provider/$id'
-      fullPath: '/varadhi/provider/$id'
-      preLoaderRoute: typeof VaradhiProviderIdRouteImport
-      parentRoute: typeof VaradhiRoute
-    }
-    '/varadhi/item/$id': {
-      id: '/varadhi/item/$id'
-      path: '/item/$id'
-      fullPath: '/varadhi/item/$id'
-      preLoaderRoute: typeof VaradhiItemIdRouteImport
-      parentRoute: typeof VaradhiRoute
-    }
-    '/varadhi/browse/$category': {
-      id: '/varadhi/browse/$category'
-      path: '/browse/$category'
-      fullPath: '/varadhi/browse/$category'
-      preLoaderRoute: typeof VaradhiBrowseCategoryRouteImport
-      parentRoute: typeof VaradhiRoute
-    }
-    '/lovable/email/events': {
-      id: '/lovable/email/events'
-      path: '/lovable/email/events'
-      fullPath: '/lovable/email/events'
-      preLoaderRoute: typeof LovableEmailEventsRouteImport
+    '/donor/register': {
+      id: '/donor/register'
+      path: '/donor/register'
+      fullPath: '/donor/register'
+      preLoaderRoute: typeof DonorRegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/org/theme': {
-      id: '/_authenticated/org/theme'
-      path: '/org/theme'
-      fullPath: '/org/theme'
-      preLoaderRoute: typeof AuthenticatedOrgThemeRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/m/$code': {
+      id: '/m/$code'
+      path: '/m/$code'
+      fullPath: '/m/$code'
+      preLoaderRoute: typeof MCodeRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/org/subscription': {
-      id: '/_authenticated/org/subscription'
-      path: '/org/subscription'
-      fullPath: '/org/subscription'
-      preLoaderRoute: typeof AuthenticatedOrgSubscriptionRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/member/register': {
+      id: '/member/register'
+      path: '/member/register'
+      fullPath: '/member/register'
+      preLoaderRoute: typeof MemberRegisterRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/org/rules': {
-      id: '/_authenticated/org/rules'
-      path: '/org/rules'
-      fullPath: '/org/rules'
-      preLoaderRoute: typeof AuthenticatedOrgRulesRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/org/register': {
+      id: '/org/register'
+      path: '/org/register'
+      fullPath: '/org/register'
+      preLoaderRoute: typeof OrgRegisterRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/org/members': {
-      id: '/_authenticated/org/members'
-      path: '/org/members'
-      fullPath: '/org/members'
-      preLoaderRoute: typeof AuthenticatedOrgMembersRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/varadhi/': {
+      id: '/varadhi/'
+      path: '/'
+      fullPath: '/varadhi/'
+      preLoaderRoute: typeof VaradhiIndexRouteImport
+      parentRoute: typeof VaradhiRoute
     }
-    '/_authenticated/org/master-ledger': {
-      id: '/_authenticated/org/master-ledger'
-      path: '/org/master-ledger'
-      fullPath: '/org/master-ledger'
-      preLoaderRoute: typeof AuthenticatedOrgMasterLedgerRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/varadhi/admin': {
+      id: '/varadhi/admin'
+      path: '/admin'
+      fullPath: '/varadhi/admin'
+      preLoaderRoute: typeof VaradhiAdminRouteImport
+      parentRoute: typeof VaradhiRoute
     }
-    '/_authenticated/org/loan-requests': {
-      id: '/_authenticated/org/loan-requests'
-      path: '/org/loan-requests'
-      fullPath: '/org/loan-requests'
-      preLoaderRoute: typeof AuthenticatedOrgLoanRequestsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/varadhi/admin-apply': {
+      id: '/varadhi/admin-apply'
+      path: '/admin-apply'
+      fullPath: '/varadhi/admin-apply'
+      preLoaderRoute: typeof VaradhiAdminApplyRouteImport
+      parentRoute: typeof VaradhiRoute
     }
-    '/_authenticated/org/income': {
-      id: '/_authenticated/org/income'
-      path: '/org/income'
-      fullPath: '/org/income'
-      preLoaderRoute: typeof AuthenticatedOrgIncomeRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/varadhi/auth': {
+      id: '/varadhi/auth'
+      path: '/auth'
+      fullPath: '/varadhi/auth'
+      preLoaderRoute: typeof VaradhiAuthRouteImport
+      parentRoute: typeof VaradhiRoute
     }
-    '/_authenticated/org/expenses': {
-      id: '/_authenticated/org/expenses'
-      path: '/org/expenses'
-      fullPath: '/org/expenses'
-      preLoaderRoute: typeof AuthenticatedOrgExpensesRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/varadhi/dashboard': {
+      id: '/varadhi/dashboard'
+      path: '/dashboard'
+      fullPath: '/varadhi/dashboard'
+      preLoaderRoute: typeof VaradhiDashboardRouteImport
+      parentRoute: typeof VaradhiRoute
     }
-    '/_authenticated/org/events': {
-      id: '/_authenticated/org/events'
-      path: '/org/events'
-      fullPath: '/org/events'
-      preLoaderRoute: typeof AuthenticatedOrgEventsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/varadhi/onboard': {
+      id: '/varadhi/onboard'
+      path: '/onboard'
+      fullPath: '/varadhi/onboard'
+      preLoaderRoute: typeof VaradhiOnboardRouteImport
+      parentRoute: typeof VaradhiRoute
     }
-    '/_authenticated/org/elections': {
-      id: '/_authenticated/org/elections'
-      path: '/org/elections'
-      fullPath: '/org/elections'
-      preLoaderRoute: typeof AuthenticatedOrgElectionsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/varadhi/partner': {
+      id: '/varadhi/partner'
+      path: '/partner'
+      fullPath: '/varadhi/partner'
+      preLoaderRoute: typeof VaradhiPartnerRouteImport
+      parentRoute: typeof VaradhiRoute
     }
-    '/_authenticated/org/disciplinary': {
-      id: '/_authenticated/org/disciplinary'
-      path: '/org/disciplinary'
-      fullPath: '/org/disciplinary'
-      preLoaderRoute: typeof AuthenticatedOrgDisciplinaryRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/varadhi/profile': {
+      id: '/varadhi/profile'
+      path: '/profile'
+      fullPath: '/varadhi/profile'
+      preLoaderRoute: typeof VaradhiProfileRouteImport
+      parentRoute: typeof VaradhiRoute
     }
-    '/_authenticated/org/designs': {
-      id: '/_authenticated/org/designs'
-      path: '/org/designs'
-      fullPath: '/org/designs'
-      preLoaderRoute: typeof AuthenticatedOrgDesignsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/varadhi/rewards': {
+      id: '/varadhi/rewards'
+      path: '/rewards'
+      fullPath: '/varadhi/rewards'
+      preLoaderRoute: typeof VaradhiRewardsRouteImport
+      parentRoute: typeof VaradhiRoute
     }
-    '/_authenticated/org/dashboard': {
-      id: '/_authenticated/org/dashboard'
-      path: '/org/dashboard'
-      fullPath: '/org/dashboard'
-      preLoaderRoute: typeof AuthenticatedOrgDashboardRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/varadhi/subscription': {
+      id: '/varadhi/subscription'
+      path: '/subscription'
+      fullPath: '/varadhi/subscription'
+      preLoaderRoute: typeof VaradhiSubscriptionRouteImport
+      parentRoute: typeof VaradhiRoute
     }
-    '/_authenticated/org/committee': {
-      id: '/_authenticated/org/committee'
-      path: '/org/committee'
-      fullPath: '/org/committee'
-      preLoaderRoute: typeof AuthenticatedOrgCommitteeRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/org/chat': {
-      id: '/_authenticated/org/chat'
-      path: '/org/chat'
-      fullPath: '/org/chat'
-      preLoaderRoute: typeof AuthenticatedOrgChatRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/org/cashflow': {
-      id: '/_authenticated/org/cashflow'
-      path: '/org/cashflow'
-      fullPath: '/org/cashflow'
-      preLoaderRoute: typeof AuthenticatedOrgCashflowRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/org/bank-details': {
-      id: '/_authenticated/org/bank-details'
-      path: '/org/bank-details'
-      fullPath: '/org/bank-details'
-      preLoaderRoute: typeof AuthenticatedOrgBankDetailsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/org/auction': {
-      id: '/_authenticated/org/auction'
-      path: '/org/auction'
-      fullPath: '/org/auction'
-      preLoaderRoute: typeof AuthenticatedOrgAuctionRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/org/admin-access': {
-      id: '/_authenticated/org/admin-access'
-      path: '/org/admin-access'
-      fullPath: '/org/admin-access'
-      preLoaderRoute: typeof AuthenticatedOrgAdminAccessRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/org/accounts-hub': {
-      id: '/_authenticated/org/accounts-hub'
-      path: '/org/accounts-hub'
-      fullPath: '/org/accounts-hub'
-      preLoaderRoute: typeof AuthenticatedOrgAccountsHubRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/org/accounts': {
-      id: '/_authenticated/org/accounts'
-      path: '/org/accounts'
-      fullPath: '/org/accounts'
-      preLoaderRoute: typeof AuthenticatedOrgAccountsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/member/surety-inbox': {
-      id: '/_authenticated/member/surety-inbox'
-      path: '/member/surety-inbox'
-      fullPath: '/member/surety-inbox'
-      preLoaderRoute: typeof AuthenticatedMemberSuretyInboxRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/member/pending': {
-      id: '/_authenticated/member/pending'
-      path: '/member/pending'
-      fullPath: '/member/pending'
-      preLoaderRoute: typeof AuthenticatedMemberPendingRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/member/loan-request': {
-      id: '/_authenticated/member/loan-request'
-      path: '/member/loan-request'
-      fullPath: '/member/loan-request'
-      preLoaderRoute: typeof AuthenticatedMemberLoanRequestRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/member/ledger': {
-      id: '/_authenticated/member/ledger'
-      path: '/member/ledger'
-      fullPath: '/member/ledger'
-      preLoaderRoute: typeof AuthenticatedMemberLedgerRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/member/events': {
-      id: '/_authenticated/member/events'
-      path: '/member/events'
-      fullPath: '/member/events'
-      preLoaderRoute: typeof AuthenticatedMemberEventsRouteImport
+    '/_authenticated/donor/dashboard': {
+      id: '/_authenticated/donor/dashboard'
+      path: '/donor/dashboard'
+      fullPath: '/donor/dashboard'
+      preLoaderRoute: typeof AuthenticatedDonorDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/member/dashboard': {
@@ -1202,25 +999,228 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMemberDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/donor/dashboard': {
-      id: '/_authenticated/donor/dashboard'
-      path: '/donor/dashboard'
-      fullPath: '/donor/dashboard'
-      preLoaderRoute: typeof AuthenticatedDonorDashboardRouteImport
+    '/_authenticated/member/events': {
+      id: '/_authenticated/member/events'
+      path: '/member/events'
+      fullPath: '/member/events'
+      preLoaderRoute: typeof AuthenticatedMemberEventsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/lovable/email/auth/webhook': {
-      id: '/lovable/email/auth/webhook'
-      path: '/lovable/email/auth/webhook'
-      fullPath: '/lovable/email/auth/webhook'
-      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
+    '/_authenticated/member/ledger': {
+      id: '/_authenticated/member/ledger'
+      path: '/member/ledger'
+      fullPath: '/member/ledger'
+      preLoaderRoute: typeof AuthenticatedMemberLedgerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/member/loan-request': {
+      id: '/_authenticated/member/loan-request'
+      path: '/member/loan-request'
+      fullPath: '/member/loan-request'
+      preLoaderRoute: typeof AuthenticatedMemberLoanRequestRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/member/pending': {
+      id: '/_authenticated/member/pending'
+      path: '/member/pending'
+      fullPath: '/member/pending'
+      preLoaderRoute: typeof AuthenticatedMemberPendingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/member/surety-inbox': {
+      id: '/_authenticated/member/surety-inbox'
+      path: '/member/surety-inbox'
+      fullPath: '/member/surety-inbox'
+      preLoaderRoute: typeof AuthenticatedMemberSuretyInboxRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/accounts': {
+      id: '/_authenticated/org/accounts'
+      path: '/org/accounts'
+      fullPath: '/org/accounts'
+      preLoaderRoute: typeof AuthenticatedOrgAccountsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/accounts-hub': {
+      id: '/_authenticated/org/accounts-hub'
+      path: '/org/accounts-hub'
+      fullPath: '/org/accounts-hub'
+      preLoaderRoute: typeof AuthenticatedOrgAccountsHubRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/admin-access': {
+      id: '/_authenticated/org/admin-access'
+      path: '/org/admin-access'
+      fullPath: '/org/admin-access'
+      preLoaderRoute: typeof AuthenticatedOrgAdminAccessRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/auction': {
+      id: '/_authenticated/org/auction'
+      path: '/org/auction'
+      fullPath: '/org/auction'
+      preLoaderRoute: typeof AuthenticatedOrgAuctionRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/bank-details': {
+      id: '/_authenticated/org/bank-details'
+      path: '/org/bank-details'
+      fullPath: '/org/bank-details'
+      preLoaderRoute: typeof AuthenticatedOrgBankDetailsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/cashflow': {
+      id: '/_authenticated/org/cashflow'
+      path: '/org/cashflow'
+      fullPath: '/org/cashflow'
+      preLoaderRoute: typeof AuthenticatedOrgCashflowRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/chat': {
+      id: '/_authenticated/org/chat'
+      path: '/org/chat'
+      fullPath: '/org/chat'
+      preLoaderRoute: typeof AuthenticatedOrgChatRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/committee': {
+      id: '/_authenticated/org/committee'
+      path: '/org/committee'
+      fullPath: '/org/committee'
+      preLoaderRoute: typeof AuthenticatedOrgCommitteeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/dashboard': {
+      id: '/_authenticated/org/dashboard'
+      path: '/org/dashboard'
+      fullPath: '/org/dashboard'
+      preLoaderRoute: typeof AuthenticatedOrgDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/designs': {
+      id: '/_authenticated/org/designs'
+      path: '/org/designs'
+      fullPath: '/org/designs'
+      preLoaderRoute: typeof AuthenticatedOrgDesignsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/disciplinary': {
+      id: '/_authenticated/org/disciplinary'
+      path: '/org/disciplinary'
+      fullPath: '/org/disciplinary'
+      preLoaderRoute: typeof AuthenticatedOrgDisciplinaryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/elections': {
+      id: '/_authenticated/org/elections'
+      path: '/org/elections'
+      fullPath: '/org/elections'
+      preLoaderRoute: typeof AuthenticatedOrgElectionsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/events': {
+      id: '/_authenticated/org/events'
+      path: '/org/events'
+      fullPath: '/org/events'
+      preLoaderRoute: typeof AuthenticatedOrgEventsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/expenses': {
+      id: '/_authenticated/org/expenses'
+      path: '/org/expenses'
+      fullPath: '/org/expenses'
+      preLoaderRoute: typeof AuthenticatedOrgExpensesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/income': {
+      id: '/_authenticated/org/income'
+      path: '/org/income'
+      fullPath: '/org/income'
+      preLoaderRoute: typeof AuthenticatedOrgIncomeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/loan-requests': {
+      id: '/_authenticated/org/loan-requests'
+      path: '/org/loan-requests'
+      fullPath: '/org/loan-requests'
+      preLoaderRoute: typeof AuthenticatedOrgLoanRequestsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/master-ledger': {
+      id: '/_authenticated/org/master-ledger'
+      path: '/org/master-ledger'
+      fullPath: '/org/master-ledger'
+      preLoaderRoute: typeof AuthenticatedOrgMasterLedgerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/members': {
+      id: '/_authenticated/org/members'
+      path: '/org/members'
+      fullPath: '/org/members'
+      preLoaderRoute: typeof AuthenticatedOrgMembersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/rules': {
+      id: '/_authenticated/org/rules'
+      path: '/org/rules'
+      fullPath: '/org/rules'
+      preLoaderRoute: typeof AuthenticatedOrgRulesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/subscription': {
+      id: '/_authenticated/org/subscription'
+      path: '/org/subscription'
+      fullPath: '/org/subscription'
+      preLoaderRoute: typeof AuthenticatedOrgSubscriptionRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/org/theme': {
+      id: '/_authenticated/org/theme'
+      path: '/org/theme'
+      fullPath: '/org/theme'
+      preLoaderRoute: typeof AuthenticatedOrgThemeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/lovable/email/events': {
+      id: '/lovable/email/events'
+      path: '/lovable/email/events'
+      fullPath: '/lovable/email/events'
+      preLoaderRoute: typeof LovableEmailEventsRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/varadhi/browse/$category': {
+      id: '/varadhi/browse/$category'
+      path: '/browse/$category'
+      fullPath: '/varadhi/browse/$category'
+      preLoaderRoute: typeof VaradhiBrowseCategoryRouteImport
+      parentRoute: typeof VaradhiRoute
+    }
+    '/varadhi/item/$id': {
+      id: '/varadhi/item/$id'
+      path: '/item/$id'
+      fullPath: '/varadhi/item/$id'
+      preLoaderRoute: typeof VaradhiItemIdRouteImport
+      parentRoute: typeof VaradhiRoute
+    }
+    '/varadhi/provider/$id': {
+      id: '/varadhi/provider/$id'
+      path: '/provider/$id'
+      fullPath: '/varadhi/provider/$id'
+      preLoaderRoute: typeof VaradhiProviderIdRouteImport
+      parentRoute: typeof VaradhiRoute
     }
     '/lovable/email/auth/preview': {
       id: '/lovable/email/auth/preview'
       path: '/lovable/email/auth/preview'
       fullPath: '/lovable/email/auth/preview'
       preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/auth/webhook': {
+      id: '/lovable/email/auth/webhook'
+      path: '/lovable/email/auth/webhook'
+      fullPath: '/lovable/email/auth/webhook'
+      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
