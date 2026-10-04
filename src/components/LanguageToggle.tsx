@@ -28,7 +28,7 @@ export function LanguageToggle({ className = "" }: { className?: string }) {
           <DropdownMenuItem
             key={o.code}
             onClick={() => setLang(o.code)}
-            className="cursor-pointer flex items-center justify-between"
+            className="cursor-pointer flex items-center justify-between text-white hover:bg-white hover:text-black focus:bg-white focus:text-black data-[highlighted]:bg-white data-[highlighted]:text-black"
           >
             <span data-notranslit>{o.label}</span>
             {lang === o.code && <Check className="h-4 w-4 text-[#ff8c28]" />}
