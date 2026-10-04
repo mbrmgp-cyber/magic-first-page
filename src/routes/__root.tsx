@@ -161,8 +161,10 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const [showSplash, setShowSplash] = useState(() => {
-    if (typeof window === "undefined") return false;
+  const [showSplash, setShowSplash] = useState(false);
+
+  // Decide on the splash after hydration so server and client HTML match.
+  useEffect(() => {
     const path = window.location.pathname;
     if (
       path === "/" ||
@@ -170,13 +172,11 @@ function RootComponent() {
       path === "/register" ||
       path === "/member/register"
     ) {
-      return false;
+      return;
     }
-    if (sessionStorage.getItem("mbr_splash_seen")) return false;
-    return true;
-  });
-
-  useEffect(() => {}, []);
+    if (sessionStorage.getItem("mbr_splash_seen")) return;
+    setShowSplash(true);
+  }, []);
 
   const handleSplashDone = () => {
     if (typeof window !== "undefined") sessionStorage.setItem("mbr_splash_seen", "1");
