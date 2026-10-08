@@ -16,6 +16,7 @@ import { SplashScreen } from "@/components/SplashScreen";
 import { Toaster } from "@/components/ui/sonner";
 import { StaticAppIcons } from "@/components/StaticAppIcons";
 import { OfflineNotice } from "@/components/OfflineNotice";
+import { AndroidBackHandler } from "@/components/AndroidBackHandler";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -194,6 +195,7 @@ function RootComponent() {
           <Outlet />
           <Toaster position="top-center" richColors closeButton />
           <OfflineNotice />
+          <AndroidBackHandler />
         </CurrencyProvider>
       </LanguageProvider>
     </QueryClientProvider>
