@@ -6,6 +6,8 @@ import { sendVaradhiLoginLink } from "@/lib/varadhi.functions";
 import { toast } from "sonner";
 import { Mail, KeyRound, Lock, UserPlus } from "lucide-react";
 import varadhiLogo from "@/assets/varadhi-logo.jpg.asset.json";
+import { useI18n } from "@/lib/i18n";
+import { sharedTranslation } from "@/lib/language-support";
 
 export const Route = createFileRoute("/varadhi/auth")({
   head: () => ({
@@ -29,6 +31,8 @@ type Step = "form" | "otp" | "password";
 
 function VaradhiAuthPage() {
   const navigate = useNavigate();
+  const { lang } = useI18n();
+  const ui = (source: string) => sharedTranslation(lang, source) ?? source;
   const sendOtp = useServerFn(sendVaradhiLoginLink);
   const [tab, setTab] = useState<Tab>("login");
   const [step, setStep] = useState<Step>("form");
@@ -63,7 +67,7 @@ function VaradhiAuthPage() {
     });
     setBusy(false);
     if (error) {
-      toast.error("ఈమెయిల్ లేదా పాస్‌వర్డ్ సరికాదు. కొత్తవారైతే ముందు రిజిస్టర్ చేయండి.");
+      toast.error(ui("ఈమెయిల్ లేదా పాస్‌వర్డ్ సరికాదు. కొత్తవారైతే ముందు రిజిస్టర్ చేయండి."));
       return;
     }
     // onAuthStateChange navigates
@@ -80,12 +84,12 @@ function VaradhiAuthPage() {
     }));
     setBusy(false);
     if (!res?.sent) {
-      toast.error((res as any)?.reason || "OTP పంపడం విఫలమైంది");
+      toast.error(ui("Could not send OTP"));
       return;
     }
     setOtpLength(Number((res as any)?.otpLength) || 6);
     setStep("otp");
-    toast.success("మీ ఈమెయిల్‌కు కోడ్ పంపాం");
+    toast.success(ui("మీ ఈమెయిల్‌కు కోడ్ పంపాం"));
   }
 
   async function verifyOtp(e?: React.FormEvent, code?: string) {
@@ -100,7 +104,7 @@ function VaradhiAuthPage() {
     });
     setBusy(false);
     if (error) {
-      toast.error("కోడ్ చెల్లదు లేదా గడువు ముగిసింది");
+      toast.error(ui("కోడ్ చెల్లదు లేదా గడువు ముగిసింది"));
       return;
     }
     setStep("password");
@@ -113,7 +117,7 @@ function VaradhiAuthPage() {
 
   async function forgotPassword() {
     if (!email.trim()) {
-      toast.error("ఈమెయిల్ చిరునామా ఎంటర్ చేయండి");
+      toast.error(ui("ఈమెయిల్ చిరునామా ఎంటర్ చేయండి"));
       return;
     }
     setBusy(true);
@@ -122,30 +126,30 @@ function VaradhiAuthPage() {
     });
     setBusy(false);
     if (error) {
-      toast.error(error.message || "Reset link పంపలేకపోయాం");
+      toast.error(ui("Could not send the reset link"));
       return;
     }
-    toast.success("మీ ఈమెయిల్‌కు పాస్‌వర్డ్ రీసెట్ లింక్ పంపాం");
+    toast.success(ui("మీ ఈమెయిల్‌కు పాస్‌వర్డ్ రీసెట్ లింక్ పంపాం"));
   }
 
   async function setNewPassword(e: React.FormEvent) {
     e.preventDefault();
     if (password.length < 6) {
-      toast.error("పాస్‌వర్డ్ కనీసం 6 అక్షరాలు ఉండాలి");
+      toast.error(ui("పాస్‌వర్డ్ కనీసం 6 అక్షరాలు ఉండాలి"));
       return;
     }
     if (password !== password2) {
-      toast.error("రెండు పాస్‌వర్డ్‌లు ఒకేలా లేవు");
+      toast.error(ui("రెండు పాస్‌వర్డ్‌లు ఒకేలా లేవు"));
       return;
     }
     setBusy(true);
     const { error } = await supabase.auth.updateUser({ password });
     setBusy(false);
     if (error) {
-      toast.error(error.message || "పాస్‌వర్డ్ సేవ్ కాలేదు");
+      toast.error(ui("Password update failed"));
       return;
     }
-    toast.success("రిజిస్ట్రేషన్ పూర్తి! ఇక ఈమెయిల్ + పాస్‌వర్డ్‌తో లాగిన్ కావచ్చు.");
+    toast.success(ui("రిజిస్ట్రేషన్ పూర్తి! ఇక ఈమెయిల్ + పాస్‌వర్డ్‌తో లాగిన్ కావచ్చు."));
     setAllowRedirect(true);
     navigate({ to: "/varadhi/dashboard", replace: true });
   }
@@ -159,8 +163,8 @@ function VaradhiAuthPage() {
       <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
         <div className="text-center">
           <img src={varadhiLogo.url} alt="Vaaradhi" className="mx-auto h-16 w-16 rounded-2xl object-contain bg-white p-1 shadow" />
-          <h1 className="mt-3 text-2xl font-bold text-[#1e3a8a]">వారధి</h1>
-          <p className="text-xs text-[#1e3a8a]/70">వారధి లాగిన్</p>
+          <h1 className="mt-3 text-2xl font-bold text-[#1e3a8a]">{ui("వారధి")}</h1>
+          <p className="text-xs text-[#1e3a8a]/70">{ui("వారధి లాగిన్")}</p>
           <div className="mx-auto mt-2 h-1 w-16 rounded-full bg-[#f97316]" />
         </div>
 
@@ -176,7 +180,7 @@ function VaradhiAuthPage() {
                   : "bg-[#1e3a8a]/5 text-[#1e3a8a] hover:bg-[#1e3a8a]/10"
               }`}
             >
-              <UserPlus className="h-3.5 w-3.5" /> New Registration
+              <UserPlus className="h-3.5 w-3.5" /> {ui("New Registration")}
             </button>
           </div>
         )}
@@ -184,21 +188,21 @@ function VaradhiAuthPage() {
         {step === "form" && tab === "login" && (
           <form onSubmit={doLogin} className="mt-5 space-y-4">
             <div>
-              <label className="block text-xs font-medium text-[#1e3a8a]/80 mb-1">ఈమెయిల్</label>
+              <label className="block text-xs font-medium text-[#1e3a8a]/80 mb-1">{ui("ఈమెయిల్")}</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#1e3a8a]/50" />
                 <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" autoComplete="email" className={inputCls} />
               </div>
             </div>
             <div>
-              <label className="block text-xs font-medium text-[#1e3a8a]/80 mb-1">పాస్‌వర్డ్</label>
+              <label className="block text-xs font-medium text-[#1e3a8a]/80 mb-1">{ui("పాస్\u200cవర్డ్")}</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#1e3a8a]/50" />
                 <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••" autoComplete="current-password" className={inputCls} />
               </div>
             </div>
             <button type="submit" disabled={busy} className="w-full rounded-xl bg-[#f97316] py-3 font-semibold text-white shadow-lg disabled:opacity-60">
-              {busy ? "లాగిన్ అవుతోంది…" : "లాగిన్"}
+              {busy ? ui("లాగిన్ అవుతోంది…") : ui("లాగిన్")}
             </button>
             <button
               type="button"
@@ -206,7 +210,7 @@ function VaradhiAuthPage() {
               disabled={busy}
               className="w-full text-center text-[11px] text-blue-600 hover:text-blue-700 underline"
             >
-              Forgot Password?
+              {ui("Forgot Password")}
             </button>
           </form>
         )}
@@ -214,24 +218,24 @@ function VaradhiAuthPage() {
         {step === "form" && tab === "register" && (
           <form onSubmit={requestOtp} className="mt-5 space-y-4">
             <div>
-              <label className="block text-xs font-medium text-[#1e3a8a]/80 mb-1">ఈమెయిల్</label>
+              <label className="block text-xs font-medium text-[#1e3a8a]/80 mb-1">{ui("ఈమెయిల్")}</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#1e3a8a]/50" />
                 <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" autoComplete="email" className={inputCls} />
               </div>
             </div>
             <button type="submit" disabled={busy} className="w-full rounded-xl bg-[#f97316] py-3 font-semibold text-white shadow-lg disabled:opacity-60">
-              {busy ? "కోడ్ పంపిస్తున్నాం…" : "OTP కోడ్ పంపండి"}
+              {busy ? ui("కోడ్ పంపిస్తున్నాం…") : ui("OTP కోడ్ పంపండి")}
             </button>
             <p className="text-center text-[11px] text-[#1e3a8a]/60">
-              OTP వెరిఫై అయిన తర్వాత మీ పాస్‌వర్డ్ సెట్ చేసుకోండి. తర్వాత ఈమెయిల్ + పాస్‌వర్డ్‌తో లాగిన్.
+              {ui("OTP వెరిఫై అయిన తర్వాత మీ పాస్‌వర్డ్ సెట్ చేసుకోండి. తర్వాత ఈమెయిల్ + పాస్‌వర్డ్‌తో లాగిన్.")}
             </p>
             <button
               type="button"
               onClick={() => { setTab("login"); setOtp(""); }}
               className="w-full text-center text-[11px] text-blue-600 hover:text-blue-700 underline"
             >
-              Already have an account? Login
+              {ui("Already have an account? Login")}
             </button>
           </form>
         )}
@@ -239,7 +243,7 @@ function VaradhiAuthPage() {
         {step === "otp" && (
           <form onSubmit={verifyOtp} className="mt-6 space-y-4">
             <div className="rounded-xl border border-[#f97316]/30 bg-[#f97316]/10 p-3 text-center text-[#1e3a8a]">
-              <p className="text-xs">{otpLength} అంకెల కోడ్ పంపాం — <b>{email}</b></p>
+              <p className="text-xs">{otpLength} {ui("digit code sent to")} <b>{email}</b></p>
             </div>
             <input
               inputMode="numeric"
@@ -258,14 +262,14 @@ function VaradhiAuthPage() {
               className="w-full rounded-xl border border-[#1e3a8a]/20 bg-white px-3 py-3 text-center text-2xl tracking-[0.5em] font-bold text-[#1e3a8a] outline-none focus:border-[#f97316]"
             />
             <button type="submit" disabled={busy || otp.length !== otpLength} className="w-full rounded-xl bg-[#f97316] py-3 font-semibold text-white shadow-lg disabled:opacity-60">
-              {busy ? "వెరిఫై చేస్తున్నాం…" : "వెరిఫై చేయండి"}
+              {busy ? ui("వెరిఫై చేస్తున్నాం…") : ui("వెరిఫై చేయండి")}
             </button>
             <div className="flex justify-between text-xs">
               <button type="button" onClick={() => { setStep("form"); setOtp(""); }} className="text-[#1e3a8a]/70 underline">
-                ← వేరే ఈమెయిల్
+                ← {ui("Change email")}
               </button>
               <button type="button" onClick={() => requestOtp()} className="text-[#f97316] font-semibold">
-                మళ్లీ కోడ్ పంపండి
+                {ui("Resend code")}
               </button>
             </div>
           </form>
@@ -275,24 +279,24 @@ function VaradhiAuthPage() {
           <form onSubmit={setNewPassword} className="mt-6 space-y-4">
             <div className="rounded-xl border border-emerald-300 bg-emerald-50 p-3 text-center text-emerald-800">
               <KeyRound className="mx-auto mb-1 h-5 w-5" />
-              <p className="text-xs font-semibold">ఈమెయిల్ వెరిఫై అయ్యింది. ఇప్పుడు పాస్‌వర్డ్ సెట్ చేయండి.</p>
+              <p className="text-xs font-semibold">{ui("ఈమెయిల్ వెరిఫై అయ్యింది. ఇప్పుడు పాస్\u200cవర్డ్ సెట్ చేయండి.")}</p>
             </div>
             <div>
-              <label className="block text-xs font-medium text-[#1e3a8a]/80 mb-1">కొత్త పాస్‌వర్డ్</label>
+              <label className="block text-xs font-medium text-[#1e3a8a]/80 mb-1">{ui("కొత్త పాస్\u200cవర్డ్")}</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#1e3a8a]/50" />
-                <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" placeholder="కనీసం 6 అక్షరాలు" className={inputCls} />
+                <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" placeholder={ui("Minimum 6 characters")} className={inputCls} />
               </div>
             </div>
             <div>
-              <label className="block text-xs font-medium text-[#1e3a8a]/80 mb-1">పాస్‌వర్డ్ మళ్లీ</label>
+              <label className="block text-xs font-medium text-[#1e3a8a]/80 mb-1">{ui("పాస్\u200cవర్డ్ మళ్లీ")}</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#1e3a8a]/50" />
                 <input type="password" required minLength={6} value={password2} onChange={(e) => setPassword2(e.target.value)} autoComplete="new-password" placeholder="••••••" className={inputCls} />
               </div>
             </div>
             <button type="submit" disabled={busy} className="w-full rounded-xl bg-[#f97316] py-3 font-semibold text-white shadow-lg disabled:opacity-60">
-              {busy ? "సేవ్ అవుతోంది…" : "పాస్‌వర్డ్ సేవ్ చేసి కొనసాగండి"}
+              {busy ? ui("సేవ్ అవుతోంది…") : ui("పాస్‌వర్డ్ సేవ్ చేసి కొనసాగండి")}
             </button>
           </form>
         )}
@@ -301,7 +305,7 @@ function VaradhiAuthPage() {
           onClick={() => navigate({ to: "/varadhi" })}
           className="mt-6 w-full text-center text-xs text-[#1e3a8a]/60 hover:underline"
         >
-          ← వారధి హోమ్‌కి తిరిగి
+          {ui("← వారధి హోమ్‌కి తిరిగి")}
         </button>
       </div>
     </div>

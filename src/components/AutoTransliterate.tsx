@@ -12,6 +12,7 @@
 import { useEffect } from "react";
 import { useI18n } from "@/lib/i18n";
 import { getTranslation, requestTranslation, subscribeTranslations } from "@/lib/translation-memory";
+import { sharedTranslation } from "@/lib/language-support";
 
 // Telugu → English phrase dictionary. Order does not matter; matching is done
 // on the *trimmed* text content of individual DOM text nodes.
@@ -1161,6 +1162,8 @@ function needsDynamic(s: string, lang: string): boolean {
 function translateValue(value: string, lang: string): string {
   const trimmed = value.trim();
   if (!trimmed) return value;
+  const reviewed = sharedTranslation(lang, trimmed);
+  if (reviewed) return value.replace(trimmed, reviewed);
   const englishSource = TE_EN[trimmed] ?? ENGLISH_SOURCE[trimmed] ?? trimmed;
   const cached = getTranslation(lang, englishSource) ?? getTranslation(lang, trimmed);
   if (cached) return value.replace(trimmed, cached);

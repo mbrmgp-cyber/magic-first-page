@@ -207,7 +207,9 @@ function initialLang(): Lang {
 }
 
 export function localizeText(entry: LocalizedEntry, lang: string): string {
-  const translated = sharedTranslation(lang, entry.en) ?? getTranslation(lang, entry.en);
+  const bundled = sharedTranslation(lang, entry.en);
+  if (bundled) return bundled;
+  const translated = getTranslation(lang, entry.en);
   if (lang !== "en" && lang !== "te" && lang !== "hi" && translated) return translated;
   const script = scriptForLang(lang);
   if (script === "te") return entry.te;
@@ -330,6 +332,8 @@ export function transliterateText(text: string | null | undefined, lang: string)
 // Use for hardcoded "Telugu / English" dual-language strings so the UI respects
 // the user's language selection instead of always showing both.
 export function bi(te: string, en: string, lang: string): string {
+  const bundled = sharedTranslation(lang, en) ?? sharedTranslation(lang, te);
+  if (bundled) return bundled;
   if (lang === "en") return en;
   if (lang === "te") return te;
   return getTranslation(lang, en) ?? en;
