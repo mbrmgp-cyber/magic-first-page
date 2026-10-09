@@ -33,17 +33,19 @@ export function ModuleRouteGuard({ children }: { children: React.ReactNode }) {
   const q = useQuery({
     queryKey: ["my-admin-modules"],
     queryFn: () => fetchMods(),
-    staleTime: 60_000,
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
     enabled: needsCheck,
   });
 
   const allowed =
     !needsCheck ||
-    q.isLoading ||
-    !q.data ||
+    (q.isFetchedAfterMount && !!q.data &&
     (isAdminAccess
       ? q.data.isSuperAdmin
-      : q.data.isSuperAdmin || (q.data.modules as string[]).includes(modKey!));
+      : q.data.isSuperAdmin || (q.data.modules as string[]).includes(modKey!)));
+  const checking = needsCheck && !q.isFetchedAfterMount && !q.isError;
 
 
   useEffect(() => {
@@ -51,6 +53,7 @@ export function ModuleRouteGuard({ children }: { children: React.ReactNode }) {
   }, [allowed]);
 
   if (allowed) return <>{children}</>;
+  if (checking) return <div className="min-h-screen bg-black" />;
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-black">
