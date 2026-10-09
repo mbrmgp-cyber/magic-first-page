@@ -5,8 +5,9 @@ import recoveryCopy from "./locales/recovery.json";
 
 // Match original Telugu as well as English and already-rendered Hindi when switching.
 const reviewedCopy = new Map<string, { en: string; te: string; hi: string }>();
+const copyKey = (source: string) => source.normalize("NFC").replace(/[\u200c\u200d]/g, "").trim();
 for (const entry of [...vaaradhiCopy, ...recoveryCopy]) {
-  for (const source of [entry.en, entry.te, entry.hi]) reviewedCopy.set(source, entry);
+  for (const source of [entry.en, entry.te, entry.hi]) reviewedCopy.set(copyKey(source), entry);
 }
 
 export const LANGUAGE_CODES = ["te", "en", "hi"] as const;
@@ -28,7 +29,7 @@ const rows: Record<string, string[]> = {
 };
 
 export function sharedTranslation(lang: string, source: string): string | undefined {
-  const reviewed = reviewedCopy.get(source);
+  const reviewed = reviewedCopy.get(copyKey(source));
   if (reviewed && (lang === "te" || lang === "hi" || lang === "en")) return reviewed[lang];
   const locale: Record<string, Record<string, string>> = sharedLocales;
   const supplied = locale[lang]?.[source];

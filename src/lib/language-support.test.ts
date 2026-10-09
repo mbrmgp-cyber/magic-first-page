@@ -1,8 +1,25 @@
 import { describe, expect, it } from "vitest";
 import { LANGUAGE_CODES, languageDirection, sharedTranslation, translationInputSchema } from "./language-support";
 import sharedLocales from "./locales/shared.json";
+import vaaradhiCopy from "./locales/vaaradhi.json";
+import recoveryCopy from "./locales/recovery.json";
 
 describe("language support rules", () => {
+  it("bundles real Hindi and Telugu for marketplace and recovery copy", () => {
+    for (const entry of [...vaaradhiCopy, ...recoveryCopy]) {
+      expect(entry.en.trim()).not.toBe("");
+      expect(entry.te).toMatch(/[\u0c00-\u0c7f]/);
+      expect(entry.hi).toMatch(/[\u0900-\u097f]/);
+      expect(entry.hi).not.toMatch(/[\u0c00-\u0c7f]/);
+      expect(sharedTranslation("hi", entry.te)).toMatch(/[\u0900-\u097f]/);
+    }
+  });
+  it("matches Telugu joiner variants and translates recovery errors immediately", () => {
+    expect(sharedTranslation("hi", "పాస్\u200cవర్డ్")).toBe("पासवर्ड");
+    expect(sharedTranslation("hi", "Password update failed")).toBe("पासवर्ड नहीं बदल सके। कृपया फिर से कोशिश करें।");
+    expect(sharedTranslation("hi", "Login to get started")).toBe("शुरू करने के लिए लॉगिन करें");
+    expect(sharedTranslation("en", "← వారధి హోమ్\u200cకి తిరిగి")).toBe("← Back to Vaaradhi home");
+  });
   it.each(["te", "en", "hi"])("accepts offered language %s", (lang) => {
     expect(translationInputSchema.parse({ lang, texts: ["Login"] }).lang).toBe(lang);
   });
