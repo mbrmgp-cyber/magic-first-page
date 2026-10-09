@@ -59,7 +59,7 @@ function ForgotPasswordPage() {
       toast.error(
         reason === "not_found"
           ? lt("No member account found for this email", "ఈ ఈమెయిల్‌కు ఖాతా లేదు")
-          : reason || lt("Could not send OTP", "OTP పంపలేకపోయాం")
+          : lt("Could not send OTP", "OTP పంపలేకపోయాం")
       );
       return;
     }
@@ -111,7 +111,7 @@ function ForgotPasswordPage() {
     const { error } = await supabase.auth.updateUser({ password });
     if (error) {
       setBusy(false);
-      toast.error(error.message || lt("Could not save password", "పాస్‌వర్డ్ సేవ్ కాలేదు"));
+      toast.error(lt("Could not save password", "పాస్‌వర్డ్ సేవ్ కాలేదు"));
       return;
     }
     await supabase.auth.signOut();
