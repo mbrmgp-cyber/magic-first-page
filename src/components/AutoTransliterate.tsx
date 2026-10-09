@@ -1080,6 +1080,7 @@ Object.assign(EN_TE, {
 // OPTION text is translated (its `value` attribute is untouched) so dropdown
 // lists like state/district never show a second language.
 const SKIP_TAGS = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEXTAREA", "INPUT", "CODE", "PRE"]);
+const ENGLISH_SOURCE = Object.fromEntries(Object.entries(EN_TE).map(([en, te]) => [te, en]));
 const ORIG_ATTR = "data-mbr-orig";
 const ATTR_ORIG_PREFIX = "__mbrOrigAttr_";
 const TRANSLATABLE_ATTRS = ["placeholder", "title", "aria-label", "alt"] as const;
@@ -1160,7 +1161,7 @@ function needsDynamic(s: string, lang: string): boolean {
 function translateValue(value: string, lang: string): string {
   const trimmed = value.trim();
   if (!trimmed) return value;
-  const englishSource = TE_EN[trimmed] ?? trimmed;
+  const englishSource = TE_EN[trimmed] ?? ENGLISH_SOURCE[trimmed] ?? trimmed;
   const cached = getTranslation(lang, englishSource) ?? getTranslation(lang, trimmed);
   if (cached) return value.replace(trimmed, cached);
   const curated = lookupPhrase(trimmed, lang);

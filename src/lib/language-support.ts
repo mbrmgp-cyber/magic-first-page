@@ -1,4 +1,5 @@
 import { z } from "zod";
+import sharedLocales from "./locales/shared.json";
 
 export const LANGUAGE_CODES = ["te", "en", "hi", "mr", "ne", "sa", "bn", "as", "or", "gu", "pa", "ta", "kn", "ml", "ur"] as const;
 export const TRANSLATION_BATCH_SIZE = 40;
@@ -31,6 +32,9 @@ const rows: Record<string, string[]> = {
 };
 
 export function sharedTranslation(lang: string, source: string): string | undefined {
+  const locale: Record<string, Record<string, string>> = sharedLocales;
+  const supplied = locale[lang]?.[source];
+  if (supplied) return supplied;
   const index = sources.indexOf(source);
   if (index < 0) return undefined;
   return lang === "en" ? source : rows[lang]?.[index];

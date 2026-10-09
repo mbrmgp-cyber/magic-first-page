@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { LANGUAGE_CODES, languageDirection, sharedTranslation, translationInputSchema } from "./language-support";
+import sharedLocales from "./locales/shared.json";
 
 describe("language support rules", () => {
   it.each(["te", "en", "hi", "mr", "ne", "sa", "bn", "as", "or", "gu", "pa", "ta", "kn", "ml", "ur"])("accepts offered language %s", (lang) => {
@@ -19,5 +20,12 @@ describe("language support rules", () => {
   it("keeps identity fields out of shared UI translations", () => {
     expect(sharedTranslation("te", "mbrplatform@gmail.com")).toBeUndefined();
     expect(sharedTranslation("hi", "A/1234")).toBeUndefined();
+  });
+  it("ships identical shared-source coverage for all non-English languages", () => {
+    const expected = Object.keys(sharedLocales.te).sort();
+    for (const lang of LANGUAGE_CODES.filter((code) => code !== "en")) {
+      const locales: Record<string, Record<string, string>> = sharedLocales;
+      expect(Object.keys(locales[lang]).sort()).toEqual(expected);
+    }
   });
 });
