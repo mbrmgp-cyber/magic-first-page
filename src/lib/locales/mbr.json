@@ -540,11 +540,6 @@
   "hi": "किनारे की शैली"
  },
  {
-  "en": "Border Width (px)",
-  "te": "అంచు వెడల్పు (px)",
-  "hi": "किनारे की चौड़ाई (px)"
- },
- {
   "en": "Borrower Name",
   "te": "అప్పు తీసుకున్నవారి పేరు",
   "hi": "ऋण लेने वाले का नाम"
@@ -4745,11 +4740,6 @@
   "hi": "आकार"
  },
  {
-  "en": "Size (px)",
-  "te": "పరిమాణం (px)",
-  "hi": "आकार (px)"
- },
- {
   "en": "Small Letters Style & Color",
   "te": "చిన్న అక్షరాల శైలి & రంగు",
   "hi": "छोटे अक्षरों की शैली और रंग"
@@ -6005,11 +5995,6 @@
   "hi": "गैप-1.5 फॉन्ट-सेमीबोल्ड"
  },
  {
-  "en": "inset 0 1px 0 rgba(255,255,255,0.04)",
-  "te": "ఇన్‌సెట్ 0 1px 0 rgba(255,255,255,0.04)",
-  "hi": "इनसेट 0 1px 0 rgba(255,255,255,0.04)"
- },
- {
   "en": "instead to disable the society while keeping its data safe.",
   "te": "అయితే, దాని డేటాను సురక్షితంగా ఉంచుతూ సంఘాన్ని నిలిపివేయడానికి బదులు.",
   "hi": "बल्कि, उसके डेटा को सुरक्षित रखते हुए समाज को अक्षम करने के लिए।"
@@ -6018,11 +6003,6 @@
   "en": "justify-self-end self-center",
   "te": "జస్టిఫై-సెల్ఫ్-ఎండ్ సెల్ఫ్-సెంటర్",
   "hi": "जस्टिफाई-सेल्फ-एंड सेल्फ-सेंटर"
- },
- {
-  "en": "linear-gradient(135deg, #fffdf4 0%, #ffe082 100%)",
-  "te": "లీనియర్-గ్రాడియంట్(135deg, #fffdf4 0%, #ffe082 100%)",
-  "hi": "लीनियर-ग्रेडिएंट(135deg, #fffdf4 0%, #ffe082 100%)"
  },
  {
   "en": "mbr-global-ad-bar no-print print:hidden fixed inset-x-0 bottom-0 z-40 pointer-events-none m-0 p-0 overflow-hidden",
@@ -6153,95 +6133,5 @@
   "en": "transform 0.6s",
   "te": "ట్రాన్స్‌ఫార్మ్ 0.6s",
   "hi": "ट्रांसफॉर्म 0.6s"
- },
- {
-  "en": "var(--design-big-box, var(--mbr-theme-big-card, #0a0a0a))",
-  "te": "var(--design-బిగ్-బాక్స్, var(--mbr-థీమ్-బిగ్-కార్డ్, #0a0a0a))",
-  "hi": "var(--design-बिग-बॉक्स, var(--mbr-थीम-बिग-कार्ड, #0a0a0a))"
- },
- {
-  "en": "var(--design-big-box, var(--mbr-theme-big-card, #111113))",
-  "te": "var(--design-బిగ్-బాక్స్, var(--mbr-థీమ్-బిగ్-కార్డ్, #111113))",
-  "hi": "var(--design-बिग-बॉक्स, var(--mbr-थीम-बिग-कार्ड, #111113))"
- },
- {
-  "en": "var(--design-big-box, var(--mbr-theme-big-card, #1b1b22))",
-  "te": "var(--design-బిగ్-బాక్స్, var(--mbr-థీమ్-బిగ్-కార్డ్, #1b1b22))",
-  "hi": "var(--design-बिग-बॉक्स, var(--mbr-थीम-बिग-कार्ड, #1b1b22))"
- },
- {
-  "en": "var(--design-border, var(--mbr-theme-border, #27272a))",
-  "te": "var(--design-బార్డర్, var(--mbr-థీమ్-బార్డర్, #27272a))",
-  "hi": "var(--design-बॉर्डर, var(--mbr-थीम-बॉर्डर, #27272a))"
- },
- {
-  "en": "var(--design-border, var(--mbr-theme-border, #3a3a46))",
-  "te": "var(--design-బార్డర్, var(--mbr-థీమ్-బార్డర్, #3a3a46))",
-  "hi": "var(--design-बॉर्डर, var(--mbr-थीम-बॉर्डर, #3a3a46))"
- },
- {
-  "en": "var(--design-heading, var(--mbr-theme-heading, #f4f4f6))",
-  "te": "var(--design-హెడ్డింగ్, var(--mbr-థీమ్-హెడ్డింగ్, #f4f4f6))",
-  "hi": "var(--design-हेडिंग, var(--mbr-थीम-हेडिंग, #f4f4f6))"
- },
- {
-  "en": "var(--design-heading, var(--mbr-theme-heading, #fafafa))",
-  "te": "var(--design-హెడ్డింగ్, var(--mbr-థీమ్-హెడ్డింగ్, #fafafa))",
-  "hi": "var(--design-हेडिंग, var(--mbr-थीम-हेडिंग, #fafafa))"
- },
- {
-  "en": "var(--design-heading, var(--mbr-theme-heading, #ffffff))",
-  "te": "var(--design-హెడ్డింగ్, var(--mbr-థీమ్-హెడ్డింగ్, #ffffff))",
-  "hi": "var(--design-हेडिंग, var(--mbr-थीम-हेडिंग, #ffffff))"
- },
- {
-  "en": "var(--design-input-bg, var(--mbr-theme-input-bg, #0a0a0a))",
-  "te": "var(--design-ఇన్‌పుట్-bg, var(--mbr-థీమ్-ఇన్‌పుట్-bg, #0a0a0a))",
-  "hi": "var(--design-इनपुट-bg, var(--mbr-थीम-इनपुट-bg, #0a0a0a))"
- },
- {
-  "en": "var(--design-input-bg, var(--mbr-theme-input-bg, #0f0f14))",
-  "te": "var(--design-ఇన్‌పుట్-bg, var(--mbr-థీమ్-ఇన్‌పుట్-bg, #0f0f14))",
-  "hi": "var(--design-इनपुट-bg, var(--mbr-थीम-इनपुट-bg, #0f0f14))"
- },
- {
-  "en": "var(--design-input-text, var(--mbr-theme-input-text, #ffffff))",
-  "te": "var(--design-ఇన్‌పుట్-టెక్స్ట్, var(--mbr-థీమ్-ఇన్‌పుట్-టెక్స్ట్, #ffffff))",
-  "hi": "var(--design-इनपुट-टेक्स्ट, var(--mbr-थीम-इनपुट-टेक्स्ट, #ffffff))"
- },
- {
-  "en": "var(--design-mini-box, var(--mbr-theme-mini-card, #0a0a0a))",
-  "te": "var(--design-మినీ-బాక్స్, var(--mbr-థీమ్-మినీ-కార్డ్, #0a0a0a))",
-  "hi": "var(--design-मिनी-बॉक्स, var(--mbr-थीम-मिनी-कार्ड, #0a0a0a))"
- },
- {
-  "en": "var(--design-mini-box, var(--mbr-theme-mini-card, #242430))",
-  "te": "var(--design-మినీ-బాక్స్, var(--mbr-థీమ్-మినీ-కార్డ్, #242430))",
-  "hi": "var(--design-मिनी-बॉक्स, var(--mbr-थीम-मिनी-कार्ड, #242430))"
- },
- {
-  "en": "var(--design-muted, var(--mbr-theme-muted, #a1a1aa))",
-  "te": "var(--design-మ్యూటెడ్, var(--mbr-థీమ్-మ్యూటెడ్, #a1a1aa))",
-  "hi": "var(--design-म्यूटेड, var(--mbr-थीम-म्यूटेड, #a1a1aa))"
- },
- {
-  "en": "var(--design-muted, var(--mbr-theme-muted, #b8b8c2))",
-  "te": "var(--design-మ్యూటెడ్, var(--mbr-థీమ్-మ్యూటెడ్, #b8b8c2))",
-  "hi": "var(--design-म्यूटेड, var(--mbr-थीम-म्यूटेड, #b8b8c2))"
- },
- {
-  "en": "var(--mbr-theme-primary, #138808)",
-  "te": "var(--mbr-థీమ్-ప్రైమరీ, #138808)",
-  "hi": "var(--mbr-थीम-प्राइमरी, #138808)"
- },
- {
-  "en": "var(--mbr-theme-primary, var(--design-icon, #f97316))",
-  "te": "var(--mbr-థీమ్-ప్రైమరీ, var(--design-ఐకాన్, #f97316))",
-  "hi": "var(--mbr-थीम-प्राइमरी, var(--design-आइकॉन, #f97316))"
- },
- {
-  "en": "var(--mbr-theme-primary-fg, #fff)",
-  "te": "var(--mbr-థీమ్-ప్రైమరీ-fg, #fff)",
-  "hi": "var(--mbr-थीम-प्राइमरी-fg, #fff)"
  }
 ]
