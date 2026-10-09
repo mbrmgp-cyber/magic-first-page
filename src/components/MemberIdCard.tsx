@@ -184,6 +184,16 @@ export function MemberIdCardButton({ member, org }: { member: Member; org: Org |
   );
 }
 
+const ROLE_NAMES: Record<string, Record<CardLang, string>> = {
+  member: { te: "సభ్యుడు", en: "Member", hi: "सदस्य" },
+  president: { te: "అధ్యక్షుడు", en: "President", hi: "अध्यक्ष" },
+  vice_president: { te: "ఉపాధ్యక్షుడు", en: "Vice President", hi: "उपाध्यक्ष" },
+  treasurer: { te: "కోశాధికారి", en: "Treasurer", hi: "कोषाध्यक्ष" },
+  advisor: { te: "సలహాదారు", en: "Advisor", hi: "सलाहकार" },
+  executive: { te: "కార్యవర్గ సభ్యుడు", en: "Executive Member", hi: "कार्यकारी सदस्य" },
+  worker: { te: "కార్యకర్త", en: "Worker", hi: "कार्यकर्ता" },
+};
+
 export function MemberIdCard({ member, org }: { member: Member; org: Org | null }) {
   const { lang: appLang } = useI18n();
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
@@ -382,7 +392,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
           backRef={backRef}
           onPrint={handlePrint}
           lang={lang}
-          designation={designation}
+          designation={roleKey ? ROLE_NAMES[roleKey]?.[lang] ?? designation : ROLE_NAMES.member[lang]}
         />
       ) : (
         <LegacyLayout
@@ -818,7 +828,7 @@ function SavedDesignCard({
     <>
       <div className="flex justify-center">
         <div ref={side === "front" ? frontRef : backRef}>
-          <IdCardRenderer design={design} org={orgCtx} member={sample} side={side} scale={1} />
+          <IdCardRenderer design={design} org={orgCtx} member={sample} side={side} scale={1} lang={lang} />
         </div>
       </div>
       <div className="flex justify-between items-center gap-2 pt-2">
