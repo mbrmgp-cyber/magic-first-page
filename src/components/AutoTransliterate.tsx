@@ -1346,9 +1346,13 @@ export function AutoTransliterate() {
   const { lang } = useI18n();
   useEffect(() => {
     if (typeof document === "undefined") return;
+    // Lazy route boundaries can still hydrate after this shared effect mounts.
+    // Do not rewrite their server HTML during that initial hand-off.
+    let ready = false;
     let applying = false;
     let applyTimer: number | undefined;
     const apply = (fn: () => void) => {
+      if (!ready) return;
       applying = true;
       try { fn(); } finally {
         if (applyTimer) window.clearTimeout(applyTimer);
@@ -1363,7 +1367,7 @@ export function AutoTransliterate() {
         translateDocumentTitle(lang);
         walk(document.body, lang);
       });
-    const initialTimer = window.setTimeout(fullPass, 0);
+    const initialTimer = window.setTimeout(() => { ready = true; fullPass(); }, 500);
     // Content that appears after async work (session checks, data fetches) can
     // land while a mutation batch is being applied, so sweep again shortly
     // after mount to guarantee a single-language UI.
