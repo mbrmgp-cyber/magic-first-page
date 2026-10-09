@@ -33,13 +33,16 @@ export function ModuleRouteGuard({ children }: { children: React.ReactNode }) {
   const q = useQuery({
     queryKey: ["my-admin-modules"],
     queryFn: () => fetchMods(),
-    staleTime: 60_000,
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
     enabled: needsCheck,
   });
 
   const allowed =
     !needsCheck ||
     q.isLoading ||
+    q.isFetching ||
     !q.data ||
     (isAdminAccess
       ? q.data.isSuperAdmin

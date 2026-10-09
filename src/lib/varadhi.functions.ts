@@ -417,12 +417,10 @@ export const resolveListingImage = createServerFn({ method: "GET" })
     const path = (data.path ?? "").trim();
     if (!path || path.startsWith("http")) return { url: path || null };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    for (const bucket of ["varadhi-listings", "varadhi-proofs"]) {
-      if (bucket === "varadhi-proofs" && !path.includes("listing-")) continue;
-      const { data: s } = await supabaseAdmin.storage.from(bucket).createSignedUrl(path, 60 * 60 * 6);
-      if (s?.signedUrl) return { url: s.signedUrl };
-    }
-    return { url: null };
+    // Only the public listing-photo bucket; private proof documents are never signed here.
+    if (path.includes("..")) return { url: null };
+    const { data: s } = await supabaseAdmin.storage.from("varadhi-listings").createSignedUrl(path, 60 * 60 * 6);
+    return { url: s?.signedUrl ?? null };
   });
 
 export const getSignedListingUrl = createServerFn({ method: "GET" })
@@ -1050,7 +1048,8 @@ export const adminAssignMandalAdmin = createServerFn({ method: "POST" })
 export const adminListMandalOptions = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { state?: string; district?: string } = {}) => d)
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertVaradhiAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const out = new Set<string>();
     let pq = supabaseAdmin.from("varadhi_profiles").select("mandal").not("mandal", "is", null);
