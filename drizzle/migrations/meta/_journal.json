@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1791559277828,
+      "tag": "0000_member_code_sequential_lock",
+      "breakpoints": true
+    }
+  ]
+}
