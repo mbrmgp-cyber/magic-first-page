@@ -11,19 +11,19 @@ type Dict = Record<string, Entry>;
 
 const DICT: Dict = {
   appTagline: {
-    te: "సంస్థ లేదా సభ్యుడిగా register అవ్వండి",
+    te: "సంస్థగా లేదా సభ్యుడిగా నమోదు చేసుకోండి",
     en: "Register as an organization or a member",
     hi: "संगठन या सदस्य के रूप में पंजीकरण करें",
   },
-  org: { te: "సంస్థ (Organization)", en: "Organization", hi: "संगठन" },
+  org: { te: "సంస్థ", en: "Organization", hi: "संगठन" },
   orgDesc: {
-    te: "కొత్త Org register చేసి QR code పొందండి",
+    te: "కొత్త సంస్థను నమోదు చేసి ప్రత్యేక QR కోడ్ పొందండి",
     en: "Register a new org and get a unique QR code",
     hi: "नया संगठन पंजीकरण करें और QR कोड प्राप्त करें",
   },
-  member: { te: "సభ్యుడు (Member)", en: "Member", hi: "सदस्य" },
+  member: { te: "సభ్యుడు", en: "Member", hi: "सदस्य" },
   memberDesc: {
-    te: "Org QR code scan చేసి join అవ్వండి",
+    te: "సంస్థ QR కోడ్ స్కాన్ చేసి చేరండి",
     en: "Scan the org QR code and join",
     hi: "संगठन का QR कोड स्कैन करें और जुड़ें",
   },
@@ -53,7 +53,7 @@ const DICT: Dict = {
     hi: "ईमेल से लॉगिन (पहले से पंजीकृत?)",
   },
   loginWithEmailDesc: {
-    te: "మీ Email ఎంటర్ చేయండి, login link మీ Email కి వస్తుంది",
+    te: "మీ ఈమెయిల్ ఇవ్వండి — సురక్షిత లాగిన్ లింక్ పంపబడుతుంది",
     en: "Enter your email — a secure login link will be sent",
     hi: "अपना ईमेल दर्ज करें — एक सुरक्षित लॉगिन लिंक भेजा जाएगा",
   },

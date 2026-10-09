@@ -24,7 +24,8 @@ export const Route = createFileRoute("/mbr")({
 });
 
 function MbrHome() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const L = (te: string, en: string, hi: string) => (lang === "te" ? te : lang === "hi" ? hi : en);
   const { code } = Route.useSearch();
   const navigate = useNavigate();
   useEffect(() => {
@@ -35,14 +36,14 @@ function MbrHome() {
   if (code) return null;
 
   return (
-    <div className="min-h-screen relative flex flex-col items-center justify-center p-6 overflow-hidden bg-black">
+    <div key={lang} data-notranslit className="min-h-screen relative flex flex-col items-center justify-center p-6 overflow-hidden bg-black">
       <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
         <Link
           to="/"
           className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/40 backdrop-blur px-3 py-1.5 text-xs text-white/90 hover:bg-white/10 transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          <span>Platform</span>
+          <span>{L("ప్లాట్‌ఫారమ్", "Platform", "प्लेटफ़ॉर्म")}</span>
         </Link>
         <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/40 backdrop-blur px-3 py-1.5 text-xs text-white/90">
           <span aria-hidden>🙏</span>
@@ -62,9 +63,11 @@ function MbrHome() {
         <header className="text-center space-y-3">
           <img src={logo.url} alt="MBR" className="mx-auto w-32 drop-shadow-[0_0_24px_rgba(255,140,40,0.35)]" />
           <h1 className="text-2xl font-bold tracking-tight text-white">
-            Management of <span className="text-[#ff8c28]">Board</span> Resources
+            {lang === "en" ? (<>Management of <span className="text-[#ff8c28]">Board</span> Resources</>)
+              : lang === "hi" ? (<>बोर्ड <span className="text-[#ff8c28]">संसाधन</span> प्रबंधन</>)
+              : (<>బోర్డు <span className="text-[#ff8c28]">వనరుల</span> నిర్వహణ</>)}
             <span className="mt-1 block text-sm font-normal text-white/70">
-              MBR App — Society and Committee Administration
+              {L("MBR యాప్ — సొసైటీ మరియు కమిటీ నిర్వహణ", "MBR App — Society and Committee Administration", "MBR ऐप — सोसाइटी और समिति प्रशासन")}
             </span>
           </h1>
           <p className="text-white/60 text-sm">{t("appTagline")}</p>
