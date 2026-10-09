@@ -48,3 +48,10 @@ describe("language support rules", () => {
     }
   });
 });
+describe("MBR society screens", () => {
+  it("translates the named English subtitles into pure Telugu", () => {
+    expect(sharedTranslation("te", "Not assigned")).toBe("కేటాయించబడలేదు");
+    expect(sharedTranslation("te", "No committee members appointed yet.")).toBe("ఇంకా కమిటీ సభ్యులు నియమించబడలేదు.");
+    expect(sharedTranslation("en", "కేటాయించబడలేదు")).toBe("Not assigned");
+  });
+});

@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
@@ -21,6 +22,7 @@ function moduleKeyFor(pathname: string): string | null {
 }
 
 export function ModuleRouteGuard({ children }: { children: React.ReactNode }) {
+  const { lang } = useI18n();
   const location = useLocation();
   const navigate = useNavigate();
   const fetchMods = useServerFn(getMyModules);
@@ -53,6 +55,7 @@ export function ModuleRouteGuard({ children }: { children: React.ReactNode }) {
   }, [allowed]);
 
   if (allowed) return <>{children}</>;
+  const L = (te: string, en: string, hi: string) => (lang === "te" ? te : lang === "hi" ? hi : en);
   if (checking) return <div className="min-h-screen bg-black" />;
 
   return (
@@ -61,20 +64,18 @@ export function ModuleRouteGuard({ children }: { children: React.ReactNode }) {
         <div className="mx-auto w-12 h-12 rounded-full bg-red-500/15 border border-red-500/40 flex items-center justify-center">
           <ShieldAlert className="w-6 h-6 text-red-400" />
         </div>
-        <h2 className="text-lg font-bold">Access Restricted · ప్రవేశం లేదు</h2>
+        <h2 className="text-lg font-bold">{L("ప్రవేశం లేదు", "Access Restricted", "प्रवेश प्रतिबंधित")}</h2>
         <p className="text-sm text-zinc-400">
-          మీకు ఈ సెక్షన్‌కి Super Admin అనుమతి ఇవ్వలేదు.
-        </p>
-        <p className="text-xs text-zinc-500">
-          You don't have permission to view this page. Ask the Super Admin to
-          enable this module for your role in "Admin Role &amp; Access".
+          {L("ఈ పేజీ చూసే అనుమతి మీకు లేదు. \"నిర్వాహక పాత్ర & అనుమతులు\"లో మీ పాత్రకు ఈ విభాగాన్ని ప్రారంభించమని సూపర్ నిర్వాహకుడిని అడగండి.",
+            "You don't have permission to view this page. Ask the Super Admin to enable this module for your role in \"Admin Role & Access\".",
+            "आपको यह पृष्ठ देखने की अनुमति नहीं है। \"व्यवस्थापक भूमिका और पहुँच\" में अपनी भूमिका के लिए यह मॉड्यूल चालू करने हेतु सुपर व्यवस्थापक से कहें।")}
         </p>
         <Button
           variant="outline"
           className="border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800"
           onClick={() => navigate({ to: "/org/dashboard", replace: true })}
         >
-          Back to Dashboard
+          {L("డాష్‌బోర్డ్‌కు తిరిగి", "Back to Dashboard", "डैशबोर्ड पर वापस")}
         </Button>
       </Card>
     </div>
