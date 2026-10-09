@@ -8,5 +8,7 @@
 
 # Vaaradhi and recovery language corrections
 
-- [ ] Bundle meaningful Hindi and Telugu for Vaaradhi screens and recovery messages.
-- [ ] Preserve identity fields and verify language switching, registration and recovery states.
+- [x] Bundle meaningful Hindi and Telugu for Vaaradhi screens and recovery messages.
+- [x] Preserve identity fields and verify language switching, registration and recovery states.
+- [x] Verify signed-in registration, admin application, partner and profile screens have no Telugu text in Hindi mode; 23 locale regression tests and automatic build passed.
+- [ ] End-to-end emailed OTP/password update and full admin action states remain unverified; no account data was changed during translation checks.
