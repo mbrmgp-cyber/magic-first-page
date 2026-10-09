@@ -156,24 +156,11 @@ const DICT: Dict = {
   pleaseWait: { te: "దయచేసి కొద్దిసేపు ఆగండి…", en: "Please wait a moment…", hi: "कृपया प्रतीक्षा करें…" },
 };
 
-// Indian languages – supported via Sanscript transliteration from Hindi (Devanagari)
-// or Telugu source, with English fallback for non-Indic scripts.
+// Language choices shared by both apps.
 export const LANG_OPTIONS: { code: string; label: string; short: string; script: "te" | "hi" | "en" | string }[] = [
   { code: "te", label: "తెలుగు", short: "తె", script: "te" },
   { code: "en", label: "English", short: "EN", script: "en" },
   { code: "hi", label: "हिन्दी", short: "हि", script: "hi" },
-  { code: "mr", label: "मराठी", short: "म", script: "devanagari" },
-  { code: "ne", label: "नेपाली", short: "ने", script: "devanagari" },
-  { code: "sa", label: "संस्कृतम्", short: "सं", script: "devanagari" },
-  { code: "bn", label: "বাংলা", short: "বা", script: "bengali" },
-  { code: "as", label: "অসমীয়া", short: "অ", script: "bengali" },
-  { code: "or", label: "ଓଡ଼ିଆ", short: "ଓ", script: "oriya" },
-  { code: "gu", label: "ગુજરાતી", short: "ગુ", script: "gujarati" },
-  { code: "pa", label: "ਪੰਜਾਬੀ", short: "ਪੰ", script: "gurmukhi" },
-  { code: "ta", label: "தமிழ்", short: "த", script: "tamil" },
-  { code: "kn", label: "ಕನ್ನಡ", short: "ಕ", script: "kannada" },
-  { code: "ml", label: "മലയാളം", short: "മ", script: "malayalam" },
-  { code: "ur", label: "اردو", short: "ار", script: "en" },
 ];
 
 function translit(text: string, target: string): string {

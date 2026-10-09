@@ -3,19 +3,21 @@ import { LANGUAGE_CODES, languageDirection, sharedTranslation, translationInputS
 import sharedLocales from "./locales/shared.json";
 
 describe("language support rules", () => {
-  it.each(["te", "en", "hi", "mr", "ne", "sa", "bn", "as", "or", "gu", "pa", "ta", "kn", "ml", "ur"])("accepts offered language %s", (lang) => {
+  it.each(["te", "en", "hi"])("accepts offered language %s", (lang) => {
     expect(translationInputSchema.parse({ lang, texts: ["Login"] }).lang).toBe(lang);
   });
-  it("rejects unsupported languages", () => {
-    expect(translationInputSchema.safeParse({ lang: "xx", texts: ["Login"] }).success).toBe(false);
+  it("supports exactly Telugu, English and Hindi", () => {
+    expect([...LANGUAGE_CODES]).toEqual(["te", "en", "hi"]);
+  });
+  it.each(["mr", "ne", "sa", "bn", "as", "or", "gu", "pa", "ta", "kn", "ml", "ur", "xx"])("rejects removed or unsupported language %s", (lang) => {
+    expect(translationInputSchema.safeParse({ lang, texts: ["Login"] }).success).toBe(false);
   });
   it("accepts forty strings but rejects forty-one", () => {
     expect(translationInputSchema.safeParse({ lang: "te", texts: Array(40).fill("Login") }).success).toBe(true);
     expect(translationInputSchema.safeParse({ lang: "te", texts: Array(41).fill("Login") }).success).toBe(false);
   });
-  it("uses right-to-left only for Urdu", () => {
-    expect(languageDirection("ur")).toBe("rtl");
-    for (const lang of LANGUAGE_CODES.filter((code) => code !== "ur")) expect(languageDirection(lang)).toBe("ltr");
+  it("uses left-to-right for all supported languages", () => {
+    for (const lang of LANGUAGE_CODES) expect(languageDirection(lang)).toBe("ltr");
   });
   it("keeps identity fields out of shared UI translations", () => {
     expect(sharedTranslation("te", "mbrplatform@gmail.com")).toBeUndefined();
