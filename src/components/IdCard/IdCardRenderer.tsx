@@ -18,6 +18,8 @@ export type SampleMember = {
   status?: "active" | "inactive";
 };
 
+let currentCardLang = "te";
+
 function StatusBadge({ status, bg, fg, lang = "en" }: { status?: "active" | "inactive"; bg: string; fg?: string; lang?: string }) {
   const inactive = status === "inactive";
   const badgeBg = inactive ? bg : bg;
@@ -92,6 +94,7 @@ function cornerStyle(corner: string | undefined, offset = 6): React.CSSPropertie
 
 export function IdCardRenderer({ design, org, member, side, scale = 1, lang: langProp }: Props & { lang?: "te" | "en" | "hi" }) {
   const cardLang = langProp || ((typeof window !== "undefined" && window.localStorage?.getItem("mbr_lang")) || "te");
+  currentCardLang = cardLang;
   const isVertical = design.templateId === "vertical" || design.cardType === "keychain";
   const baseW = design.cardType === "keychain" ? KEYCHAIN_W : isVertical ? NORMAL_H : NORMAL_W;
   const baseH = design.cardType === "keychain" ? KEYCHAIN_H : isVertical ? NORMAL_W : NORMAL_H;
@@ -153,7 +156,7 @@ function Header({ design, org, member }: { design: IdCardDesign; org: OrgContext
         {show(e.regNumber) && org.regNumber && <div style={txt(e.regNumber, "#fff")}>Reg: {org.regNumber}</div>}
       </div>
       <div style={{ flexShrink: 0, transform: `translateX(${badgeDx}px)` }}>
-        <StatusBadge lang={cardLang} status={member.status} bg={g.memberCodeBadgeBg || g.accentColor} fg={e.memberCode?.color || "#fff"} />
+        <StatusBadge lang={currentCardLang} status={member.status} bg={g.memberCodeBadgeBg || g.accentColor} fg={e.memberCode?.color || "#fff"} />
       </div>
     </div>
   );
@@ -311,7 +314,7 @@ function renderBack(design: IdCardDesign, org: OrgContext, member: SampleMember)
   const backTextStyle = { ...txt(e.backMatter), fontSize: fitSize + "px" };
 
   // Pick president label per active language (te = Telugu only, else English)
-  const lang = cardLang;
+  const lang = currentCardLang;
   const presLabel = lang === "te" ? "అధ్యక్షుడు" : lang === "hi" ? "अध्यक्ष" : "President";
 
   // Oath text — replace {name} / (సభ్యుడి పేరు) placeholder with member name
