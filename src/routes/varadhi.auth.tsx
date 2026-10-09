@@ -210,7 +210,7 @@ function VaradhiAuthPage() {
               disabled={busy}
               className="w-full text-center text-[11px] text-blue-600 hover:text-blue-700 underline"
             >
-              Forgot Password?
+              {ui("Forgot Password")}
             </button>
           </form>
         )}
@@ -243,7 +243,7 @@ function VaradhiAuthPage() {
         {step === "otp" && (
           <form onSubmit={verifyOtp} className="mt-6 space-y-4">
             <div className="rounded-xl border border-[#f97316]/30 bg-[#f97316]/10 p-3 text-center text-[#1e3a8a]">
-              <p className="text-xs">{ui("{otpLength} {ui("digit code sent to")} ")}<b>{email}</b></p>
+              <p className="text-xs">{otpLength} {ui("digit code sent to")} <b>{email}</b></p>
             </div>
             <input
               inputMode="numeric"
