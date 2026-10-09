@@ -1,5 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import Sanscript from "@indic-transliteration/sanscript";
+import { languageDirection, sharedTranslation } from "./language-support";
+import { getTranslation } from "./translation-memory";
 
 export type Lang = string;
 export type LocalizedEntry = { te: string; en: string; hi?: string };
@@ -210,17 +212,20 @@ function initialLang(): Lang {
   if (typeof window === "undefined") return "en";
   const urlLang = readUrlLang();
   if (urlLang) return urlLang;
-  const saved = localStorage.getItem("mbr_lang");
+  let saved: string | null = null;
+  try { saved = localStorage.getItem("mbr_lang"); } catch { /* private storage */ }
   if (isValidLang(saved)) return saved;
   const browserLang = navigator.language?.split("-")[0] ?? "";
   return isValidLang(browserLang) ? browserLang : "en";
 }
 
 export function localizeText(entry: LocalizedEntry, lang: string): string {
+  const translated = sharedTranslation(lang, entry.en) ?? getTranslation(lang, entry.en);
+  if (lang !== "en" && lang !== "te" && lang !== "hi" && translated) return translated;
   const script = scriptForLang(lang);
   if (script === "te") return entry.te;
   if (script === "en") return entry.en;
-  if (script === "hi") return entry.hi ?? translit(entry.te, "devanagari");
+  if (script === "hi") return entry.hi ?? translated ?? entry.en;
   // Other languages: hand over the English copy — the dynamic translation
   // layer converts it into the selected language (transliterating Telugu into
   // another script would only produce unreadable text).
@@ -338,11 +343,9 @@ export function transliterateText(text: string | null | undefined, lang: string)
 // Use for hardcoded "Telugu / English" dual-language strings so the UI respects
 // the user's language selection instead of always showing both.
 export function bi(te: string, en: string, lang: string): string {
-  const script = scriptForLang(lang);
-  if (script === "en") return en;
-  if (script === "te") return te;
-  if (script === "hi") return transliterateText(te, lang);
-  return en;
+  if (lang === "en") return en;
+  if (lang === "te") return te;
+  return getTranslation(lang, en) ?? en;
 }
 
 function resolve(entry: Entry | undefined, lang: string): string {
@@ -366,17 +369,21 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const resolved = initialLang();
-    localStorage.setItem("mbr_lang", resolved);
+    try { localStorage.setItem("mbr_lang", resolved); } catch { /* private storage */ }
     setLangState(resolved);
   }, []);
 
   useEffect(() => {
-    if (typeof document !== "undefined") document.documentElement.lang = lang;
+    if (typeof document !== "undefined") {
+      document.documentElement.lang = lang;
+      document.documentElement.dir = languageDirection(lang);
+    }
   }, [lang]);
 
   const setLang = (l: Lang) => {
+    if (!isValidLang(l)) return;
     setLangState(l);
-    if (typeof window !== "undefined") localStorage.setItem("mbr_lang", l);
+    try { localStorage.setItem("mbr_lang", l); } catch { /* private storage */ }
   };
 
   const value = useMemo(

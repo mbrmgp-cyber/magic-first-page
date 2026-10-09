@@ -1,1 +1,3 @@
 - Android apps (Capacitor) load the live published site via server.url; select app with CAP_APP in capacitor.config.ts — why: web updates reach app users without Play Store releases.
+- Keep supported-language validation, batch limits and bundled shared controls in language-support.ts; DOM translation reads cache only — why: menu/server parity and no AI spending triggered by page rendering.
+- Use translation for UI/descriptions and transliteration only for identity fields; never alter editable values — why: preserve meaning and original user data.

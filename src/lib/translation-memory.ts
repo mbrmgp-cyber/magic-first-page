@@ -6,6 +6,8 @@
 // translation server function, and subscribers are notified when new
 // translations land so the page can be re-swept.
 
+import { sharedTranslation, TRANSLATION_BATCH_SIZE } from "./language-support";
+
 const memory = new Map<string, string>(); // `${lang}\u0000${text}` -> translated
 const pending = new Set<string>(); // keys already queued/in-flight
 const queue = new Map<string, Set<string>>(); // lang -> texts
@@ -31,7 +33,7 @@ let inFlight = 0;
 let loadedLangs = new Set<string>();
 
 const keyOf = (lang: string, text: string) => `${lang}\u0000${text}`;
-const storageKey = (lang: string) => `mbr_tm_${lang}`;
+const storageKey = (lang: string) => `mbr_tm_v2_${lang}`;
 
 function loadLang(lang: string) {
   if (loadedLangs.has(lang) || typeof window === "undefined") return;
@@ -73,6 +75,8 @@ function notify() {
 
 /** Cached translation, or undefined when not (yet) available. */
 export function getTranslation(lang: string, text: string): string | undefined {
+  const bundled = sharedTranslation(lang, text);
+  if (bundled) return bundled;
   loadLang(lang);
   return memory.get(keyOf(lang, text));
 }
@@ -80,6 +84,8 @@ export function getTranslation(lang: string, text: string): string | undefined {
 /** Queue a string for AI translation into `lang`. */
 export function requestTranslation(lang: string, text: string) {
   if (typeof window === "undefined") return;
+  if (sharedTranslation(lang, text)) return;
+  if (!text.trim() || text.length > 400) return;
   loadLang(lang);
   const k = keyOf(lang, text);
   if (memory.has(k) || pending.has(k)) return;
@@ -100,14 +106,14 @@ function scheduleFlush() {
 
 async function flush() {
   if (typeof window === "undefined") return;
-  if (inFlight >= 3) {
+  if (inFlight >= 1) {
     scheduleFlush();
     return;
   }
   const entry = Array.from(queue.entries()).find(([, s]) => s.size > 0);
   if (!entry) return;
   const [lang, set] = entry;
-  const batch = Array.from(set).slice(0, 50);
+  const batch = Array.from(set).slice(0, TRANSLATION_BATCH_SIZE);
   for (const t of batch) set.delete(t);
 
   inFlight++;
@@ -117,13 +123,16 @@ async function flush() {
     const map = (res?.map ?? {}) as Record<string, string>;
     const good: Record<string, string> = {};
     for (const [src, out] of Object.entries(map)) {
-      memory.set(keyOf(lang, src), out);
-      if (looksTranslated(lang, src, out)) good[src] = out;
+      if (typeof out === "string" && looksTranslated(lang, src, out)) {
+        memory.set(keyOf(lang, src), out);
+        good[src] = out;
+      }
     }
     // Strings the model skipped: remember the source so we don't re-ask forever.
-    for (const t of batch) if (!(t in map)) memory.set(keyOf(lang, t), t);
+    // A cache miss is not a translation. Keep it pending for this page session
+    // without poisoning memory; a later visit can pick up newly supplied copy.
     persist(lang, good);
-    if (Object.keys(map).length) notify();
+    if (Object.keys(good).length) notify();
   } catch {
     for (const t of batch) pending.delete(keyOf(lang, t));
   } finally {

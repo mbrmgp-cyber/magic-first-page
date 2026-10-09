@@ -10,7 +10,7 @@
 // perfect control. This component is the safety net for pages that still have
 // hardcoded Telugu strings.
 import { useEffect } from "react";
-import { useI18n, transliterateText } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n";
 import { getTranslation, requestTranslation, subscribeTranslations } from "@/lib/translation-memory";
 
 // Telugu → English phrase dictionary. Order does not matter; matching is done
@@ -1082,7 +1082,7 @@ Object.assign(EN_TE, {
 const SKIP_TAGS = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEXTAREA", "INPUT", "CODE", "PRE"]);
 const ORIG_ATTR = "data-mbr-orig";
 const ATTR_ORIG_PREFIX = "__mbrOrigAttr_";
-const TRANSLATABLE_ATTRS = ["placeholder", "title", "aria-label"] as const;
+const TRANSLATABLE_ATTRS = ["placeholder", "title", "aria-label", "alt"] as const;
 
 function shouldSkip(node: Node): boolean {
   let p: Node | null = node.parentNode;
@@ -1160,6 +1160,17 @@ function needsDynamic(s: string, lang: string): boolean {
 function translateValue(value: string, lang: string): string {
   const trimmed = value.trim();
   if (!trimmed) return value;
+  const englishSource = TE_EN[trimmed] ?? trimmed;
+  const cached = getTranslation(lang, englishSource) ?? getTranslation(lang, trimmed);
+  if (cached) return value.replace(trimmed, cached);
+  const curated = lookupPhrase(trimmed, lang);
+  if (curated) return value.replace(trimmed, curated);
+  if (lang !== "en" && lang !== "te") {
+    // Hindi, Marathi, Nepali and Sanskrit share a script, not a vocabulary.
+    // Always look up the source in the requested language, never transliterate UI.
+    if (!isUntranslatable(englishSource)) requestTranslation(lang, englishSource);
+    return value;
+  }
 
   // Dynamic translation memory first: it covers every supported language and
   // any string the static dictionaries don't know about.
@@ -1176,17 +1187,6 @@ function translateValue(value: string, lang: string): string {
     if (lang !== "en" && lang !== "te") return value;
   }
 
-  // Any language other than Telugu/English: first collapse the string to a
-  // single Telugu version (dictionary + mixed-string cleanup), then convert
-  // that Telugu into the target script. This makes hi/ta/kn/ml/bn/… behave
-  // like the other two instead of staying bilingual.
-  if (lang !== "en" && lang !== "te") {
-    const teVal = translateValue(value, "te");
-    const lead = teVal.match(/^\s*/)?.[0] ?? "";
-    const tail = teVal.match(/\s*$/)?.[0] ?? "";
-    const converted = transliterateText(teVal.trim(), lang);
-    return converted ? lead + converted + tail : teVal;
-  }
   const hit = lookupPhrase(trimmed, lang);
   if (!hit) {
     const mixed = translateMixedValue(value, lang);
@@ -1219,6 +1219,7 @@ function translateValue(value: string, lang: string): string {
 
 const TELUGU_RE = /[\u0C00-\u0C7F]/;
 const LATIN_RE = /[A-Za-z]/;
+const LAST_ATTR_PREFIX = "__mbrLastAttr_";
 
 function cleanSeparators(s: string): string {
   return s
@@ -1279,16 +1280,22 @@ function translateNode(node: Text, lang: string) {
 }
 
 function translateAttrs(el: Element, lang: string) {
-  if (el.hasAttribute("data-notranslit")) return;
-  if (el.getAttribute("translate") === "no") return;
+  if (el.closest('[data-notranslit], [translate="no"], [contenteditable="true"]')) return;
   for (const attr of TRANSLATABLE_ATTRS) {
     const current = el.getAttribute(attr);
-    if (!current) continue;
     const key = ATTR_ORIG_PREFIX + attr;
+    const lastKey = LAST_ATTR_PREFIX + attr;
+    if (!current) {
+      delete (el as any)[key];
+      delete (el as any)[lastKey];
+      continue;
+    }
+    if (current !== (el as any)[lastKey]) (el as any)[key] = current;
     const orig = (el as any)[key] ?? current;
     if (!(el as any)[key]) (el as any)[key] = orig;
     const next = translateValue(orig, lang);
     if (current !== next) el.setAttribute(attr, next);
+    (el as any)[lastKey] = next;
   }
 }
 
@@ -1390,11 +1397,12 @@ export function AutoTransliterate() {
             delete (m.target as any)[ORIG_ATTR];
             translateNode(m.target as Text, lang);
           }
+          if (m.type === "attributes" && m.target instanceof Element) translateAttrs(m.target, lang);
         }
       });
       scheduleFull();
     });
-    obs.observe(document.body, { childList: true, subtree: true, characterData: true });
+    obs.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: [...TRANSLATABLE_ATTRS] });
 
     // Safety nets: scroll reveals lazily rendered rows, and navigation can swap
     // whole subtrees while a batch is being applied.
