@@ -18,12 +18,14 @@ export type SampleMember = {
   status?: "active" | "inactive";
 };
 
-function StatusBadge({ status, bg, fg }: { status?: "active" | "inactive"; bg: string; fg?: string }) {
+let currentCardLang = "te";
+
+function StatusBadge({ status, bg, fg, lang = "en" }: { status?: "active" | "inactive"; bg: string; fg?: string; lang?: string }) {
   const inactive = status === "inactive";
   const badgeBg = inactive ? bg : bg;
   return (
     <div style={{ display: "inline-flex", alignSelf: "center", background: badgeBg, color: fg || "#fff", fontSize: 9, fontWeight: 700, padding: "2px 10px", borderRadius: 999, lineHeight: 1.1, marginTop: 4, whiteSpace: "nowrap", letterSpacing: 0.3 }}>
-      {inactive ? "Inactive" : "Active"}
+      {inactive ? (lang === "te" ? "నిష్క్రియ" : lang === "hi" ? "निष्क्रिय" : "Inactive") : (lang === "te" ? "క్రియాశీల" : lang === "hi" ? "सक्रिय" : "Active")}
     </div>
   );
 }
@@ -90,7 +92,9 @@ function cornerStyle(corner: string | undefined, offset = 6): React.CSSPropertie
 }
 
 
-export function IdCardRenderer({ design, org, member, side, scale = 1 }: Props) {
+export function IdCardRenderer({ design, org, member, side, scale = 1, lang: langProp }: Props & { lang?: "te" | "en" | "hi" }) {
+  const cardLang = langProp || ((typeof window !== "undefined" && window.localStorage?.getItem("mbr_lang")) || "te");
+  currentCardLang = cardLang;
   const isVertical = design.templateId === "vertical" || design.cardType === "keychain";
   const baseW = design.cardType === "keychain" ? KEYCHAIN_W : isVertical ? NORMAL_H : NORMAL_W;
   const baseH = design.cardType === "keychain" ? KEYCHAIN_H : isVertical ? NORMAL_W : NORMAL_H;
@@ -152,7 +156,7 @@ function Header({ design, org, member }: { design: IdCardDesign; org: OrgContext
         {show(e.regNumber) && org.regNumber && <div style={txt(e.regNumber, "#fff")}>Reg: {org.regNumber}</div>}
       </div>
       <div style={{ flexShrink: 0, transform: `translateX(${badgeDx}px)` }}>
-        <StatusBadge status={member.status} bg={g.memberCodeBadgeBg || g.accentColor} fg={e.memberCode?.color || "#fff"} />
+        <StatusBadge lang={currentCardLang} status={member.status} bg={g.memberCodeBadgeBg || g.accentColor} fg={e.memberCode?.color || "#fff"} />
       </div>
     </div>
   );
@@ -310,8 +314,8 @@ function renderBack(design: IdCardDesign, org: OrgContext, member: SampleMember)
   const backTextStyle = { ...txt(e.backMatter), fontSize: fitSize + "px" };
 
   // Pick president label per active language (te = Telugu only, else English)
-  const lang = (typeof window !== "undefined" && window.localStorage?.getItem("mbr_lang")) || "te";
-  const presLabel = lang === "te" ? "అధ్యక్షుడు" : "President";
+  const lang = currentCardLang;
+  const presLabel = lang === "te" ? "అధ్యక్షుడు" : lang === "hi" ? "अध्यक्ष" : "President";
 
   // Oath text — replace {name} / (సభ్యుడి పేరు) placeholder with member name
   const oathRaw = design.oathText || "";
@@ -357,7 +361,7 @@ function renderBack(design: IdCardDesign, org: OrgContext, member: SampleMember)
       <div style={{ display: "flex", alignItems: "flex-end", gap: 8, paddingRight: mbrLogoSize + 8 }}>
         <div style={{ ...txt(e.presidentName), fontSize: 9, opacity: 0.9 }}>
           <div style={{ fontSize: 8, opacity: 0.7, letterSpacing: 0.4, textTransform: "uppercase" }}>
-            {lang === "te" ? "జారీ చేసినవారు" : "Issued by"}
+            {lang === "te" ? "జారీ చేసినవారు" : lang === "hi" ? "जारीकर्ता" : "Issued by"}
           </div>
           {show(e.presidentSignature) && org.presidentSignatureUrl && (
             <img

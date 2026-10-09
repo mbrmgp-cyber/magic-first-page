@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n";
 import { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
 import Sanscript from "@indic-transliteration/sanscript";
@@ -183,7 +184,18 @@ export function MemberIdCardButton({ member, org }: { member: Member; org: Org |
   );
 }
 
+const ROLE_NAMES: Record<string, Record<CardLang, string>> = {
+  member: { te: "సభ్యుడు", en: "Member", hi: "सदस्य" },
+  president: { te: "అధ్యక్షుడు", en: "President", hi: "अध्यक्ष" },
+  vice_president: { te: "ఉపాధ్యక్షుడు", en: "Vice President", hi: "उपाध्यक्ष" },
+  treasurer: { te: "కోశాధికారి", en: "Treasurer", hi: "कोषाध्यक्ष" },
+  advisor: { te: "సలహాదారు", en: "Advisor", hi: "सलाहकार" },
+  executive: { te: "కార్యవర్గ సభ్యుడు", en: "Executive Member", hi: "कार्यकारी सदस्य" },
+  worker: { te: "కార్యకర్త", en: "Worker", hi: "कार्यकर्ता" },
+};
+
 export function MemberIdCard({ member, org }: { member: Member; org: Org | null }) {
+  const { lang: appLang } = useI18n();
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [sigUrl, setSigUrl] = useState<string | null>(null);
@@ -192,7 +204,8 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
   const [memberQrLink, setMemberQrLink] = useState<string>("");
   const [registrationQrLink, setRegistrationQrLink] = useState<string>("");
   const [showBack, setShowBack] = useState(false);
-  const [lang, setLang] = useState<CardLang>("te");
+  const [lang, setLang] = useState<CardLang>(appLang === "en" || appLang === "hi" ? appLang : "te");
+  useEffect(() => { if (appLang === "en" || appLang === "hi" || appLang === "te") setLang(appLang); }, [appLang]);
   const [designation, setDesignation] = useState<string>("సభ్యుడు");
   const [roleKey, setRoleKey] = useState<string | null>(null);
   const [presidentName, setPresidentName] = useState<string | null>(null);
@@ -347,6 +360,20 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
 
   return (
     <div className="space-y-3">
+      <div className="flex items-center gap-1 justify-center">
+        <Languages className="w-4 h-4 text-muted-foreground" />
+        {langs.map((l: CardLang) => (
+          <Button
+            key={l}
+            size="sm"
+            variant={lang === l ? "default" : "outline"}
+            className="h-7 px-2 text-xs"
+            onClick={() => setLang(l)}
+          >
+            {langLabel[l]}
+          </Button>
+        ))}
+      </div>
       {org?.id_card_design ? (
         <SavedDesignCard
           design={org.id_card_design}
@@ -365,7 +392,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
           backRef={backRef}
           onPrint={handlePrint}
           lang={lang}
-          designation={designation}
+          designation={roleKey ? ROLE_NAMES[roleKey]?.[lang] ?? designation : ROLE_NAMES.member[lang]}
         />
       ) : (
         <LegacyLayout
@@ -402,20 +429,6 @@ function LegacyLayout(props: any) {
   return (
     <>
 
-      <div className="flex items-center gap-1 justify-center">
-        <Languages className="w-4 h-4 text-muted-foreground" />
-        {langs.map((l: CardLang) => (
-          <Button
-            key={l}
-            size="sm"
-            variant={lang === l ? "default" : "outline"}
-            className="h-7 px-2 text-xs"
-            onClick={() => setLang(l)}
-          >
-            {langLabel[l]}
-          </Button>
-        ))}
-      </div>
 
       {/* Auto-scale wrapper: card is fixed at 85.6mm × 54mm (~324×204px), scale to fit container width on mobile */}
       <ScaledCard>
@@ -573,11 +586,11 @@ function CardFront({
             {t.id}: {member.member_code ?? "—"}
           </div>
           <div style={{ fontSize: "3.4mm", fontWeight: 800, marginTop: "0.6mm", color: "#000080", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", lineHeight: 1.25 }}>
-            {tr(member.name, lang)}
+            {member.name}
           </div>
-          {member.father_name && <Row label={t.father} value={tr(member.father_name, lang)} />}
-          {village && <Row label={t.village} value={tr(village, lang)} />}
-          {mandal && <Row label={t.mandal} value={tr(mandal, lang)} />}
+          {member.father_name && <Row label={t.father} value={member.father_name} />}
+          {village && <Row label={t.village} value={village} />}
+          {mandal && <Row label={t.mandal} value={mandal} />}
           {member.phone && <Row label={t.phone} value={member.phone} />}
           <div style={{ display: "flex", gap: "1.5mm", marginTop: "0.4mm", alignItems: "center", flexWrap: "wrap" }}>
             <div style={{ fontSize: "2.1mm", color: "#222" }}>
@@ -721,7 +734,7 @@ function CardBack({
               {t.oath}
             </div>
             <div style={{ fontSize: "2mm", lineHeight: 1.3, color: "#222", fontStyle: "italic" }}>
-              "{t.oathText}" — <span style={{ fontWeight: 700, fontStyle: "normal", color: "#000080" }}>{tr(memberName, lang)}</span>
+              "{t.oathText}" — <span style={{ fontWeight: 700, fontStyle: "normal", color: "#000080" }}>{memberName}</span>
             </div>
             <div style={{ fontSize: "2.1mm", fontWeight: 800, color: "#C8102E", marginTop: "0.4mm", letterSpacing: "0.2mm" }}>
               {t.jaihind} 🇮🇳
@@ -815,7 +828,7 @@ function SavedDesignCard({
     <>
       <div className="flex justify-center">
         <div ref={side === "front" ? frontRef : backRef}>
-          <IdCardRenderer design={design} org={orgCtx} member={sample} side={side} scale={1} />
+          <IdCardRenderer design={design} org={orgCtx} member={sample} side={side} scale={1} lang={lang} />
         </div>
       </div>
       <div className="flex justify-between items-center gap-2 pt-2">
