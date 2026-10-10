@@ -515,11 +515,6 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
               <UserPlus className="h-5 w-5 mr-2" />
               {lt("New Member Registration", "కొత్త సభ్యుడి రిజిస్ట్రేషన్")}
             </Button>
-            <Button onClick={() => setStage("login")} variant="outline"
-              className="w-full h-12 bg-transparent border-[#ff8c28]/60 text-[#ff8c28] hover:bg-[#ff8c28]/10">
-              <LogIn className="h-5 w-5 mr-2" />
-              {lt("Login with Member ID (0002)", "సభ్యుడి ఐడి (0002) తో లాగిన్ అవ్వండి")}
-            </Button>
             <Button onClick={() => navigate({ to: "/auth" })} variant="outline"
               className="w-full h-12 bg-transparent border-zinc-600 text-white hover:bg-white/10">
               <KeyRound className="h-5 w-5 mr-2" />
