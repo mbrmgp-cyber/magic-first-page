@@ -122,7 +122,7 @@ function RulesTab() {
     const sections = Object.entries(grouped).map(([cat, items]) => `
       <h2>${escapeHtml(cat)}</h2>
       <ol>
-        ${items.map(r => `<li>${escapeHtml(r.text)}</li>`).join("")}
+        ${items.map(r => `<li style="white-space:pre-line">${escapeHtml(r.text.trim())}</li>`).join("")}
       </ol>
     `).join("");
     printDocument({
@@ -175,10 +175,10 @@ function RulesTab() {
             <h3 className="font-bold text-sm px-4 py-2 text-white" style={{
               background: "linear-gradient(90deg,#8B1A1A,#B22222)",
             }}>{cat}</h3>
-            <ol className="space-y-2 list-decimal list-inside p-4">
+            <ol className="space-y-3 list-decimal pl-9 pr-4 py-4 marker:font-semibold">
               {items.map(r => (
-                <li key={r.id} className="text-sm leading-relaxed">
-                  <span>{pickLang(lang, r.text, r.text_en)}</span>
+                <li key={r.id} className="text-sm leading-relaxed pl-1">
+                  <span className="whitespace-pre-line break-words">{pickLang(lang, r.text, r.text_en).trim()}</span>
 
                   {canEdit && (
                     <span className="ml-2 inline-flex gap-1">
