@@ -82,13 +82,14 @@ function RulesTab() {
   useEffect(() => { load(); }, []);
 
   const handleSubmit = async () => {
-    if (!newText.trim()) return;
+    if (!newText.trim() && !newTextEn.trim()) return;
+    const text = newText.trim() || newTextEn.trim();
     try {
       if (editId) {
-        await fnUpd({ data: { id: editId, text: newText, category: newCat || undefined, text_en: newTextEn || undefined, category_en: newCatEn || undefined } });
+        await fnUpd({ data: { id: editId, text, category: newCat || undefined, text_en: newTextEn || undefined, category_en: newCatEn || undefined } });
         toast.success(lt("Updated", "నవీకరించబడింది"));
       } else {
-        await fnAdd({ data: { text: newText, category: newCat || undefined, text_en: newTextEn || undefined, category_en: newCatEn || undefined } });
+        await fnAdd({ data: { text, category: newCat || undefined, text_en: newTextEn || undefined, category_en: newCatEn || undefined } });
         toast.success(lt("Rule added", "నియమం జోడించబడింది"));
       }
       setEditId(null); setNewText(""); setNewCat(""); setNewTextEn(""); setNewCatEn("");
@@ -152,7 +153,7 @@ function RulesTab() {
           <Input placeholder="Category (optional) — e.g. Membership, Donations" value={newCatEn} onChange={e => setNewCatEn(e.target.value)} />
           <Textarea placeholder="Write the same rule in English..." rows={2} value={newTextEn} onChange={e => setNewTextEn(e.target.value)} />
           <div className="flex gap-2">
-            <Button onClick={handleSubmit} disabled={!newText.trim()} className="flex-1">
+            <Button onClick={handleSubmit} disabled={!newText.trim() && !newTextEn.trim()} className="flex-1">
               {editId ? <><Check className="w-4 h-4 mr-1" />{lt("Update", "నవీకరించండి")}</> : <><Plus className="w-4 h-4 mr-1" />{lt("Add rule", "నియమం జోడించండి")}</>}
             </Button>
             {editId && (
