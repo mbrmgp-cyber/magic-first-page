@@ -92,6 +92,14 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
     bank_account_number: "",
     bank_ifsc: "",
   });
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const passwordError =
+    password.length > 0 && password.length < 6
+      ? lt("Password must be at least 6 characters", "పాస్‌వర్డ్ కనీసం 6 అక్షరాలు ఉండాలి")
+      : confirmPassword.length > 0 && password !== confirmPassword
+        ? lt("Passwords do not match", "పాస్‌వర్డ్‌లు సరిపోలలేదు")
+        : null;
 
   function normalizeCodeInput(input: string) {
     const raw = (input || "").trim();
@@ -201,7 +209,9 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
     !form.email.trim() ||
     !form.phone.trim() ||
     !form.blood_group ||
-    !form.introduced_by_name.trim();
+    !form.introduced_by_name.trim() ||
+    password.length < 6 ||
+    password !== confirmPassword;
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -211,6 +221,16 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
     }
     setLoading(true);
     try {
+      // Create the login account first so a weak/invalid password stops the request.
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { error: signUpError } = await supabase.auth.signUp({
+        email: form.email.trim(),
+        password,
+        options: { emailRedirectTo: window.location.origin + "/mbr" },
+      });
+      if (signUpError && !/already|registered|exists/i.test(signUpError.message)) {
+        throw new Error(signUpError.message);
+      }
       const photo_data_url = photoFile ? await fileToDataUrl(photoFile) : undefined;
       const receipt_data_url = receiptFile ? await fileToDataUrl(receiptFile) : undefined;
       await submit({
@@ -252,7 +272,7 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
           </div>
           <h1 className="text-2xl font-bold">{lt("Submitted for Approval", "ఆమోదం కోసం సమర్పించబడింది")}</h1>
           <p className="text-zinc-300 leading-relaxed">
-            {lt("Your details are under verification. Once approved by the society, an access link will be sent to your email.", "మీ వివరాలు సమీక్షలో ఉన్నాయి. సొసైటీ ఆమోదించిన తర్వాత యాక్సెస్ లింక్ ఈమెయిల్‌కు పంపబడుతుంది.")}
+            {lt("Your details are under verification. Please confirm your email using the link we sent. Once the society approves you, log in with your email and password.", "మీ వివరాలు సమీక్షలో ఉన్నాయి. మేము పంపిన లింక్‌తో మీ ఈమెయిల్‌ను నిర్ధారించండి. సొసైటీ ఆమోదించిన తర్వాత మీ ఈమెయిల్, పాస్‌వర్డ్‌తో లాగిన్ అవ్వండి.")}
           </p>
 
           <Button onClick={() => navigate({ to: "/member/pending" })}
@@ -345,6 +365,21 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
                 <Input type="email" className="bg-zinc-900 border-zinc-700 text-white"
                   value={form.email} required
                   onChange={(e) => setForm({ ...form, email: e.target.value })} />
+              </div>
+
+              <div className="space-y-1.5">
+                <BiLabel en="Password" te="పాస్‌వర్డ్" required />
+                <Input type="password" autoComplete="new-password" className="bg-zinc-900 border-zinc-700 text-white"
+                  value={password} required minLength={6}
+                  onChange={(e) => setPassword(e.target.value)} />
+              </div>
+
+              <div className="space-y-1.5">
+                <BiLabel en="Confirm Password" te="పాస్‌వర్డ్ నిర్ధారించండి" required />
+                <Input type="password" autoComplete="new-password" className="bg-zinc-900 border-zinc-700 text-white"
+                  value={confirmPassword} required minLength={6}
+                  onChange={(e) => setConfirmPassword(e.target.value)} />
+                {passwordError && <p className="text-xs text-red-400">{passwordError}</p>}
               </div>
 
               <div className="space-y-1.5">
