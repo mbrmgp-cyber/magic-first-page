@@ -6158,5 +6158,10 @@
   "en": "Your details are under verification. Please confirm your email using the link we sent. Once the society approves you, log in with your email and password.",
   "te": "మీ వివరాలు సమీక్షలో ఉన్నాయి. మేము పంపిన లింక్‌తో మీ ఈమెయిల్‌ను నిర్ధారించండి. సొసైటీ ఆమోదించిన తర్వాత మీ ఈమెయిల్, పాస్‌వర్డ్‌తో లాగిన్ అవ్వండి.",
   "hi": "आपके विवरण की जाँच हो रही है। हमारे भेजे गए लिंक से अपना ईमेल पुष्टि करें। सोसाइटी की मंज़ूरी के बाद अपने ईमेल और पासवर्ड से लॉगिन करें।"
+ },
+ {
+  "en": "Login with Password",
+  "te": "పాస్‌వర్డ్‌తో లాగిన్ చేయండి",
+  "hi": "पासवर्ड से लॉगिन करें"
  }
 ]

@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Image as ImageIcon, QrCode, ScanLine, RefreshCw, Camera, Plus, CheckCircle2, ShieldCheck, UserPlus, LogIn, ArrowLeft } from "lucide-react";
+import { Image as ImageIcon, QrCode, ScanLine, RefreshCw, Camera, Plus, CheckCircle2, ShieldCheck, UserPlus, LogIn, ArrowLeft, KeyRound } from "lucide-react";
 import mbrLogoAsset from "@/assets/mbr-logo.png.asset.json";
 import { decodeQrFromFile, QrScanner } from "@/components/QrScanner";
 import { localizeText, useI18n } from "@/lib/i18n";
@@ -519,6 +519,11 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
               className="w-full h-12 bg-transparent border-[#ff8c28]/60 text-[#ff8c28] hover:bg-[#ff8c28]/10">
               <LogIn className="h-5 w-5 mr-2" />
               {lt("Login with Member ID (0002)", "సభ్యుడి ఐడి (0002) తో లాగిన్ అవ్వండి")}
+            </Button>
+            <Button onClick={() => navigate({ to: "/auth" })} variant="outline"
+              className="w-full h-12 bg-transparent border-zinc-600 text-white hover:bg-white/10">
+              <KeyRound className="h-5 w-5 mr-2" />
+              {lt("Login with Password", "పాస్‌వర్డ్‌తో లాగిన్ చేయండి")}
             </Button>
           </div>
         </Card>
