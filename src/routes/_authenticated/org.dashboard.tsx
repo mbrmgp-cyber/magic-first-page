@@ -373,10 +373,10 @@ function Dashboard() {
               </span>
             </button>
             <div className="min-w-0 flex-1" style={{ textAlign: theme.headAlign }}>
-              <h1 className="font-extrabold leading-tight tracking-tight" style={{ fontSize: "clamp(0.95rem, 4.6vw, 1.6rem)", color: theme.headColor, fontFamily: `${theme.headFont}, system-ui, sans-serif` }}>
+              <h1 className="font-extrabold leading-tight tracking-tight" style={{ fontSize: `clamp(0.95rem, 4.6vw, ${theme.headSize}px)`, color: theme.headColor, fontFamily: `${theme.headFont}, system-ui, sans-serif` }}>
                 {lang === "en" && org.name_en ? org.name_en : transliterateText(org.name, lang)}
               </h1>
-              {org.slogan && <p className="mt-1 italic" style={{ color: theme.subColor, fontFamily: `${theme.subFont}, system-ui, sans-serif` }}>{transliterateText(org.slogan, lang)}</p>}
+              {org.slogan && <p className="mt-1 italic" style={{ fontSize: theme.subSize, color: theme.subColor, fontFamily: `${theme.subFont}, system-ui, sans-serif` }}>{transliterateText(org.slogan, lang)}</p>}
               {org.gov_reg_number && (
                 <p className="mt-1" style={{ color: theme.smallColor, fontSize: theme.smallSize }}>
                   {lt("Reg No", "నమోదు సంఖ్య")}: <span className="font-mono" style={{ color: theme.icon }}>{org.gov_reg_number}</span>

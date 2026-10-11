@@ -158,12 +158,12 @@ function OrgThemePage() {
                   <Sparkles className="w-5 h-5" style={{ color: t.icon }} />
                 </div>
                 <div className="flex-1 min-w-0" style={{ textAlign: t.headAlign }}>
-                  <h2 className="font-extrabold leading-tight tracking-tight text-base"
-                    style={{ color: t.headColor, fontFamily: `${t.headFont}, system-ui, sans-serif` }}>
+                  <h2 className="font-extrabold leading-tight tracking-tight"
+                    style={{ fontSize: t.headSize, color: t.headColor, fontFamily: `${t.headFont}, system-ui, sans-serif` }}>
                     {orgName}
                   </h2>
-                  <p className="italic mt-0.5 text-[12px]"
-                    style={{ color: t.subColor, fontFamily: `${t.subFont}, system-ui, sans-serif` }}>
+                  <p className="italic mt-0.5"
+                    style={{ fontSize: t.subSize, color: t.subColor, fontFamily: `${t.subFont}, system-ui, sans-serif` }}>
                     {orgSlogan}
                   </p>
                   <p className="mt-0.5" style={{ color: t.smallColor, fontSize: t.smallSize }}>
@@ -272,6 +272,13 @@ function OrgThemePage() {
             <Input value={t.headColor} onChange={(e) => set("headColor", e.target.value)}
               className="bg-zinc-900 border-zinc-700 text-white font-mono w-24 h-9" maxLength={7} />
           </div>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-zinc-400 w-16">{lt("Size", "సైజ్")}</span>
+            <input type="range" min={16} max={48} step={1} value={t.headSize}
+              onChange={(e) => set("headSize", parseInt(e.target.value))}
+              className="flex-1" style={{ accentColor: t.icon }} />
+            <span className="font-mono text-xs text-zinc-300 w-10 text-right">{t.headSize}px</span>
+          </div>
           <div className="grid grid-cols-2 gap-2">
             {HEAD_FONTS.map((f) => (
               <button key={f.value} onClick={() => set("headFont", f.value)}
@@ -300,6 +307,13 @@ function OrgThemePage() {
               className="h-9 w-12 rounded cursor-pointer bg-transparent border border-zinc-700" />
             <Input value={t.subColor} onChange={(e) => set("subColor", e.target.value)}
               className="bg-zinc-900 border-zinc-700 text-white font-mono w-24 h-9" maxLength={7} />
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-zinc-400 w-16">{lt("Size", "సైజ్")}</span>
+            <input type="range" min={12} max={32} step={1} value={t.subSize}
+              onChange={(e) => set("subSize", parseInt(e.target.value))}
+              className="flex-1" style={{ accentColor: t.icon }} />
+            <span className="font-mono text-xs text-zinc-300 w-10 text-right">{t.subSize}px</span>
           </div>
           <div className="grid grid-cols-2 gap-2">
             {HEAD_FONTS.map((f) => (
