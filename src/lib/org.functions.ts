@@ -655,7 +655,7 @@ export const regenerateOrgQr = createServerFn({ method: "POST" })
       .from("organizations")
       .update({ org_code: newCode })
       .eq("id", org.id)
-      .select()
+      .select(ORG_SAFE_COLUMNS)
       .single();
     if (error) throw new Error(error.message);
     const qrDataUrl = await QRCode.toDataURL(memberRegistrationUrl(newCode), { width: 512, margin: 2 });
@@ -671,7 +671,7 @@ export const updateOrgLogo = createServerFn({ method: "POST" })
       .from("organizations")
       .update({ logo_url: data.logo_url })
       .eq("admin_user_id", userId)
-      .select()
+      .select(ORG_SAFE_COLUMNS)
       .single();
     if (error) throw new Error(error.message);
     return { org };
@@ -689,7 +689,7 @@ export const updateOrgPresident = createServerFn({ method: "POST" })
       .from("organizations")
       .update(patch as any)
       .eq("admin_user_id", userId)
-      .select()
+      .select(ORG_SAFE_COLUMNS)
       .single();
     if (error) throw new Error(error.message);
     return { org };
@@ -735,7 +735,7 @@ export const updateOrgTheme = createServerFn({ method: "POST" })
       .from("organizations")
       .update(patch as any)
       .eq("admin_user_id", userId)
-      .select()
+      .select(ORG_SAFE_COLUMNS)
       .single();
     if (error) throw new Error(error.message);
     return { org };
@@ -758,7 +758,7 @@ export const updateOrgAdBanners = createServerFn({ method: "POST" })
       .from("organizations")
       .update({ ad_banners: cleaned } as any)
       .eq("admin_user_id", userId)
-      .select()
+      .select(ORG_SAFE_COLUMNS)
       .single();
     if (error) throw new Error(error.message);
     return { org };
@@ -773,7 +773,7 @@ export const updateOrgIdDesign = createServerFn({ method: "POST" })
       .from("organizations")
       .update({ id_card_design: data.id_card_design } as any)
       .eq("admin_user_id", userId)
-      .select()
+      .select(ORG_SAFE_COLUMNS)
       .single();
     if (error) throw new Error(error.message);
     return { org };
