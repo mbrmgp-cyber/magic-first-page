@@ -19,6 +19,8 @@ export type ThemeSettings = {
   subFont?: string;     // sub-title font family
   smallColor?: string;  // small text color
   smallSize?: number;   // small text size px (10..16)
+  headSize?: number;    // head title size px (16..48)
+  subSize?: number;     // sub-title size px (12..32)
   headAlign?: TextAlign; // text alignment for headline block
 };
 
@@ -39,6 +41,8 @@ export const DEFAULT_THEME: Required<ThemeSettings> = {
   subFont: "Inter",
   smallColor: "#b8c4d9",
   smallSize: 12,
+  headSize: 24,
+  subSize: 14,
   headAlign: "left",
 };
 
@@ -96,6 +100,8 @@ export function themeStyle(t: Required<ThemeSettings>): React.CSSProperties {
     ["--tsub" as any]: t.subColor,
     ["--tsmall" as any]: t.smallColor,
     ["--tsmallSize" as any]: `${t.smallSize}px`,
+    ["--theadSize" as any]: `${t.headSize}px`,
+    ["--tsubSize" as any]: `${t.subSize}px`,
     fontFamily: `${t.headFont}, system-ui, sans-serif`,
     backgroundColor: t.bg,
     color: t.headColor,

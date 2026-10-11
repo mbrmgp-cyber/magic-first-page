@@ -725,6 +725,11 @@ export const updateOrgTheme = createServerFn({ method: "POST" })
         if (s[k] !== undefined && s[k] !== null && s[k] !== "" && !allowedFonts.includes(String(s[k]))) delete s[k];
       }
       if (s.headAlign !== undefined && !["left", "center", "right"].includes(String(s.headAlign))) delete s.headAlign;
+      for (const [k, lo, hi] of [["smallSize", 10, 16], ["headSize", 16, 48], ["subSize", 12, 32]] as const) {
+        if (s[k] === undefined || s[k] === null || s[k] === "") continue;
+        const n = Number(s[k]);
+        if (Number.isFinite(n)) s[k] = Math.min(hi, Math.max(lo, Math.round(n))); else delete s[k];
+      }
       patch.theme_settings = s;
     }
     if (data.name_en !== undefined) {
