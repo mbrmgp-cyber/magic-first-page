@@ -722,13 +722,9 @@ export const updateOrgTheme = createServerFn({ method: "POST" })
       }
       const allowedFonts = ["Inter", "Poppins", "Playfair Display", "Merriweather", "Roboto Slab", "Noto Sans"];
       for (const k of ["headFont", "subFont"]) {
-        if (s[k] !== undefined && s[k] !== null && s[k] !== "" && !allowedFonts.includes(String(s[k]))) {
-          throw new Error(`Invalid ${k}`);
-        }
+        if (s[k] !== undefined && s[k] !== null && s[k] !== "" && !allowedFonts.includes(String(s[k]))) delete s[k];
       }
-      if (s.headAlign !== undefined && !["left", "center", "right"].includes(String(s.headAlign))) {
-        throw new Error("Invalid headAlign");
-      }
+      if (s.headAlign !== undefined && !["left", "center", "right"].includes(String(s.headAlign))) delete s.headAlign;
       patch.theme_settings = s;
     }
     if (data.name_en !== undefined) {
