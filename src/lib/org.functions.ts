@@ -701,7 +701,7 @@ export const updateOrgTheme = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const patch: Record<string, any> = {};
-    const isHex = (v: string) => /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v);
+    const isHex = (v: string) => /^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(v.trim());
     if (data.theme_color !== undefined) {
       if (!isHex(data.theme_color)) throw new Error("Invalid color");
       patch.theme_color = data.theme_color;
@@ -712,22 +712,19 @@ export const updateOrgTheme = createServerFn({ method: "POST" })
       patch.theme_font = data.theme_font;
     }
     if (data.theme_settings !== undefined) {
-      const s = data.theme_settings || {};
+      const s = { ...(data.theme_settings || {}) };
       const colorKeys = ["bg", "box", "bigBox", "miniBox", "border", "icon", "buttonBg", "buttonText", "inputBg", "inputText", "headColor", "subColor", "smallColor"];
       for (const k of colorKeys) {
-        if (s[k] !== undefined && s[k] !== null && s[k] !== "" && !isHex(String(s[k]))) {
-          throw new Error(`Invalid ${k}`);
-        }
+        if (s[k] === undefined || s[k] === null || s[k] === "") continue;
+        const v = String(s[k]).trim();
+        // Unrecognized values fall back to the default theme color instead of blocking the save.
+        if (isHex(v)) s[k] = v; else delete s[k];
       }
       const allowedFonts = ["Inter", "Poppins", "Playfair Display", "Merriweather", "Roboto Slab", "Noto Sans"];
       for (const k of ["headFont", "subFont"]) {
-        if (s[k] !== undefined && s[k] !== null && s[k] !== "" && !allowedFonts.includes(String(s[k]))) {
-          throw new Error(`Invalid ${k}`);
-        }
+        if (s[k] !== undefined && s[k] !== null && s[k] !== "" && !allowedFonts.includes(String(s[k]))) delete s[k];
       }
-      if (s.headAlign !== undefined && !["left", "center", "right"].includes(String(s.headAlign))) {
-        throw new Error("Invalid headAlign");
-      }
+      if (s.headAlign !== undefined && !["left", "center", "right"].includes(String(s.headAlign))) delete s.headAlign;
       patch.theme_settings = s;
     }
     if (data.name_en !== undefined) {
