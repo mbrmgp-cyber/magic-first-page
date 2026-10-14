@@ -100,21 +100,31 @@ function OrgRegister() {
     admin_designation: "",
     admin_aadhaar_url: "",
   });
+  const [password, setPassword] = useState("");
+  const [password2, setPassword2] = useState("");
+  const { lang } = useI18n();
+  const PL = (en: string, te: string, hi: string) => (lang === "te" ? te : lang === "hi" ? hi : en);
+  const pwError = password.length > 0 && password.length < 6
+    ? PL("Password must be at least 6 characters", "పాస్‌వర్డ్ కనీసం 6 అక్షరాలు ఉండాలి", "पासवर्ड कम से कम 6 अक्षरों का होना चाहिए")
+    : password2.length > 0 && password !== password2
+      ? PL("Passwords do not match", "రెండు పాస్‌వర్డ్‌లు ఒకేలా లేవు", "दोनों पासवर्ड मेल नहीं खाते")
+      : "";
+  const pwOk = password.length >= 6 && password === password2;
   const [founders, setFounders] = useState<{ name: string; address: string; aadhaar_url: string }[]>([
     { name: "", address: "", aadhaar_url: "" },
   ]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!pwOk) { toast.error(pwError || PL("Please set a password", "దయచేసి పాస్‌వర్డ్ సెట్ చేయండి", "कृपया पासवर्ड सेट करें")); return; }
     setLoading(true);
     setStatus({ type: "info", title: t("registering"), message: t("pleaseWait") });
     try {
-      const generatedPassword = `MBR-${crypto.randomUUID()}`;
       const { data: existing } = await supabase.auth.getUser();
       if (!existing.user) {
         const { error: suErr } = await supabase.auth.signUp({
           email: form.email,
-          password: generatedPassword,
+          password,
           options: { emailRedirectTo: `${window.location.origin}/auth?lang=${encodeURIComponent(localStorage.getItem("mbr_lang") || "te")}` },
         });
         if (suErr) {
@@ -249,6 +259,17 @@ function OrgRegister() {
           <div className="space-y-2">
             <Label>{isGov ? t("orgEmail") : t("committeeEmail")} *</Label>
             <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+          </div>
+          <div className="space-y-1.5">
+            <Label>{PL("Password", "పాస్‌వర్డ్", "पासवर्ड")} *</Label>
+            <Input type="password" autoComplete="new-password" minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} required />
+          </div>
+          <div className="space-y-1.5">
+            <Label>{PL("Confirm Password", "పాస్‌వర్డ్ నిర్ధారించండి", "पासवर्ड की पुष्टि करें")} *</Label>
+            <Input type="password" autoComplete="new-password" minLength={6} value={password2} onChange={(e) => setPassword2(e.target.value)} required />
+            {pwError ? <p className="text-xs text-red-400">{pwError}</p> : (
+              <p className="text-xs text-zinc-400">{PL("Use this email and password to log in as the organization admin.", "ఈ ఈమెయిల్, పాస్‌వర్డ్‌తో సంస్థ నిర్వాహకుడిగా లాగిన్ అవ్వండి.", "संस्था व्यवस्थापक के रूप में लॉगिन करने के लिए इसी ईमेल और पासवर्ड का उपयोग करें।")}</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label>{t("orgPhone")}</Label>
