@@ -23,9 +23,9 @@ const DICT: Dict = {
   },
   member: { te: "సభ్యుడు", en: "Member", hi: "सदस्य" },
   memberDesc: {
-    te: "సంస్థ QR కోడ్ స్కాన్ చేసి చేరండి",
-    en: "Scan the org QR code and join",
-    hi: "संगठन का QR कोड स्कैन करें और जुड़ें",
+    te: "మీ సంస్థల్లో రిజిస్టర్ చేసుకుని మరియు లాగిన్ అవ్వండి",
+    en: "Register and log in to your organization",
+    hi: "अपनी संस्था में रजिस्टर करें और लॉगिन करें",
   },
   haveAccount: {
     te: "ఇప్పటికే account ఉందా? Login",
@@ -48,14 +48,14 @@ const DICT: Dict = {
   language: { te: "భాష", en: "Language", hi: "भाषा" },
   welcome: { te: "స్వాగతం", en: "Welcome", hi: "स्वागत" },
   loginWithEmail: {
-    te: "ఈమెయిల్ తో లాగిన్ (ఇప్పటికే రిజిస్టర్ అయ్యారా?)",
-    en: "Login with Email (Already registered?)",
-    hi: "ईमेल से लॉगिन (पहले से पंजीकृत?)",
+    te: "ఈమెయిల్ / యూజర్‌నేమ్ & పాస్‌వర్డ్‌తో లాగిన్",
+    en: "Login with Email / Username & Password",
+    hi: "ईमेल / यूज़रनेम और पासवर्ड से लॉगिन",
   },
   loginWithEmailDesc: {
-    te: "మీ ఈమెయిల్ ఇవ్వండి — సురక్షిత లాగిన్ లింక్ పంపబడుతుంది",
-    en: "Enter your email — a secure login link will be sent",
-    hi: "अपना ईमेल दर्ज करें — एक सुरक्षित लॉगिन लिंक भेजा जाएगा",
+    te: "ఇప్పటికే రిజిస్టర్ అయ్యారా? మీ ఈమెయిల్ లేదా ఫోన్ నంబర్, పాస్‌వర్డ్‌తో లాగిన్ అవ్వండి",
+    en: "Already registered? Log in with your email or phone number and password",
+    hi: "पहले से पंजीकृत? अपने ईमेल या फ़ोन नंबर और पासवर्ड से लॉगिन करें",
   },
   viewIdCard: { te: "నా ID కార్డ్ చూడండి", en: "View my ID Card", hi: "मेरा ID कार्ड देखें" },
   viewIdCardDesc: {

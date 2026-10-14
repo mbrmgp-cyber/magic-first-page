@@ -63,7 +63,6 @@ function MbrHome() {
               {L("MBR యాప్ — సొసైటీ మరియు కమిటీ నిర్వహణ", "MBR App — Society and Committee Administration", "MBR ऐप — सोसाइटी और समिति प्रशासन")}
             </span>
           </h1>
-          <p className="text-white/60 text-sm">{t("appTagline")}</p>
         </header>
 
         <div className="space-y-4">
