@@ -324,7 +324,7 @@ function AuthPage() {
         )}
 
         <div className="text-center text-sm text-zinc-400">
-          <Link to="/" className="text-[#ff8c28] font-medium hover:underline">{lt("Back to home", "హోమ్‌కి తిరిగి")}</Link>
+          <Link to="/mbr" className="text-[#ff8c28] font-medium hover:underline">{lt("Back to home", "హోమ్‌కి తిరిగి")}</Link>
         </div>
       </Card>
     </div>

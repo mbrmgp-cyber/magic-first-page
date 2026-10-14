@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { Building2, Users, LogIn, ArrowLeft } from "lucide-react";
+import { Building2, Users, LogIn } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import logo from "@/assets/mbr-logo.png.asset.json";
@@ -38,13 +38,6 @@ function MbrHome() {
   return (
     <div key={lang} data-notranslit className="min-h-screen relative flex flex-col items-center justify-center p-6 overflow-hidden bg-black">
       <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/40 backdrop-blur px-3 py-1.5 text-xs text-white/90 hover:bg-white/10 transition-colors"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          <span>{L("ప్లాట్‌ఫారమ్", "Platform", "प्लेटफ़ॉर्म")}</span>
-        </Link>
         <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/40 backdrop-blur px-3 py-1.5 text-xs text-white/90">
           <span aria-hidden>🙏</span>
           <span className="font-medium">{t("welcome")}</span>
