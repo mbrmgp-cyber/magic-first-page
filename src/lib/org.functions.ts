@@ -1018,15 +1018,36 @@ export const reviewMember = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { member_id: string; action: "approve" | "reject" }) => d)
   .handler(async ({ data, context }) => {
-    const { supabase } = context;
+    const { supabase, userId } = context;
     const status = data.action === "approve" ? "approved" : "rejected";
-    const { data: memberRow, error } = await supabase
+    const { supabaseAdmin: admin } = await import("@/integrations/supabase/client.server");
+    const { data: target } = await admin
+      .from("members").select("id, org_id").eq("id", data.member_id).maybeSingle();
+    if (!target) throw new Error("Member not found");
+    // Caller must be the society's main admin or an active committee member.
+    const { data: orgRow } = await admin
+      .from("organizations").select("admin_user_id").eq("id", target.org_id).maybeSingle();
+    let allowed = (orgRow as any)?.admin_user_id === userId;
+    if (!allowed) {
+      const { data: me } = await supabase
+        .from("members").select("id").eq("user_id", userId).eq("org_id", target.org_id)
+        .eq("status", "approved").limit(1).maybeSingle();
+      if (me?.id) {
+        const { data: seat } = await admin
+          .from("committee_members").select("id").eq("member_id", me.id)
+          .eq("is_active", true).limit(1).maybeSingle();
+        allowed = !!seat?.id;
+      }
+    }
+    if (!allowed) throw new Error("You do not have permission to review members of this society");
+    const { data: memberRow, error } = await admin
       .from("members")
       .update({ status, reviewed_at: new Date().toISOString() })
       .eq("id", data.member_id)
       .select("id, email, preferred_lang")
-      .single();
+      .maybeSingle();
     if (error) throw new Error(error.message);
+    if (!memberRow) throw new Error("Member not found");
     if (data.action === "approve" && memberRow?.email) {
       const lang = (memberRow as any).preferred_lang || "te";
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
