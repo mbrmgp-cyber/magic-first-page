@@ -331,6 +331,14 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
     return (
       <div className="min-h-screen bg-black text-white p-4 pb-12">
         <div className="max-w-md mx-auto space-y-4">
+          <button
+            type="button"
+            onClick={() => { setStage(orgId ? "portal" : "code"); window.scrollTo(0, 0); }}
+            className="inline-flex items-center gap-2 rounded-full border border-zinc-600 bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800"
+            data-notranslit
+          >
+            <ArrowLeft className="h-5 w-5" /> {localizeText({ en: "Back", te: "వెనుకకు", hi: "वापस" }, lang)}
+          </button>
           <div>
             <h1 className="text-xl font-bold">{lt("Member Registration", "సభ్యుని రిజిస్ట్రేషన్")}</h1>
             <p className="text-xs text-zinc-400 mt-1">{orgName}</p>
