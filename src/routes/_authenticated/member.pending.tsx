@@ -1,3 +1,4 @@
+import { signOutToSociety } from "@/lib/society-logout";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
@@ -29,8 +30,7 @@ function Pending() {
   });
 
   async function logout() {
-    await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
+    await signOutToSociety(navigate);
   }
 
   if (meQ.isLoading || meQ.isFetching && !meQ.data) return <div className="min-h-screen flex items-center justify-center">{b("లోడ్ అవుతోంది…", "Loading…")}</div>;

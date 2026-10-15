@@ -1,3 +1,4 @@
+import { signOutToSociety } from "@/lib/society-logout";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
@@ -45,8 +46,7 @@ export function SubscriptionGate({ children }: { children: ReactNode }) {
     : "—";
 
   async function logout() {
-    await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
+    await signOutToSociety(navigate);
   }
 
   return (
