@@ -7,7 +7,7 @@ import { useHasSession } from "@/hooks/useHasSession";
 import mbrLogoAsset from "@/assets/mbr-logo.png.asset.json";
 import { buildPaddedIconSet } from "@/lib/pad-icon";
 import { toManifestDataUrl } from "@/lib/manifest-url";
-import { saveOrgBranding } from "@/lib/org-branding";
+import { saveOrgBranding, orgStartUrl } from "@/lib/org-branding";
 
 
 const MBR_LOGO_URL = mbrLogoAsset.url;
@@ -102,7 +102,7 @@ export function DynamicAppManifest() {
 
     // Remember this org's branding so the login screen can offer the same
     // home-screen icon before the user signs in again.
-    saveOrgBranding({ name, shortName, logoUrl: rawLogo, bg: theme.bg || "#000000", iconBg });
+    saveOrgBranding({ name, shortName, logoUrl: rawLogo, bg: theme.bg || "#000000", iconBg, orgCode: org.org_code ?? null });
 
     let cancelled = false;
     (async () => {
@@ -119,8 +119,8 @@ export function DynamicAppManifest() {
         name,
         short_name: shortName,
         description: name,
-        start_url: "/",
-        scope: "/",
+        start_url: orgStartUrl(org.org_code),
+        scope: `${window.location.origin}/`,
         display: "standalone",
         orientation: "portrait",
         background_color: iconBg,

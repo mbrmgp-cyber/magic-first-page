@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { buildPaddedIconSet } from "@/lib/pad-icon";
 import { toManifestDataUrl } from "@/lib/manifest-url";
-import { getOrgBranding } from "@/lib/org-branding";
+import { getOrgBranding, orgStartUrl } from "@/lib/org-branding";
 
 
 function upsertLink(rel: string, attrs: Record<string, string>) {
@@ -46,8 +46,8 @@ export function OrgBrandedAppIcons() {
         name: b.name,
         short_name: b.shortName,
         description: b.name,
-        start_url: "/",
-        scope: "/",
+        start_url: orgStartUrl(b.orgCode),
+        scope: `${window.location.origin}/`,
         display: "standalone",
         orientation: "portrait",
         background_color: b.iconBg || "#ffffff",
