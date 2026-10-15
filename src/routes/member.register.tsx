@@ -65,7 +65,7 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
   const lt = (en: string, te: string) => localizeText({ en, te }, lang);
   const search = { code: initialCode };
 
-  const [stage, setStage] = useState<"code" | "scan" | "portal" | "login" | "form" | "done">(search.code ? "form" : "code");
+  const [stage, setStage] = useState<"code" | "scan" | "portal" | "login" | "form" | "done">(search.code ? ((search as any).portal ? "portal" : "form") : "code");
   const [code, setCode] = useState(search.code?.toUpperCase() ?? "");
   const [orgId, setOrgId] = useState<string | null>(null);
   const [orgName, setOrgName] = useState("");
@@ -198,6 +198,21 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search.code]);
+
+  // Home-screen shortcut: if the user is still signed in, open their dashboard directly.
+  useEffect(() => {
+    if (!(search as any).portal) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      const uid = data.session?.user?.id;
+      if (!uid || cancelled) return;
+      const { routeAfterLogin } = await import("@/lib/post-login-redirect");
+      if (!cancelled) await routeAfterLogin(uid, navigate, { allowJoinRedirect: false });
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function onPhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
