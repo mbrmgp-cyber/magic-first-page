@@ -1,3 +1,4 @@
+import { signOutToSociety } from "@/lib/society-logout";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
@@ -156,8 +157,7 @@ function MemberDashboard() {
   }, [m?.photo_url]);
 
   async function logout() {
-    await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
+    await signOutToSociety(navigate, (org as any)?.org_code);
   }
 
   async function submitLeaveRequestFn() {

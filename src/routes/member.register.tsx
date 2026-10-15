@@ -1,3 +1,4 @@
+import { rememberSocietyCode } from "@/lib/society-logout";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
@@ -34,9 +35,10 @@ export const Route = createFileRoute("/member/register")({
     links: [{ rel: "canonical", href: "https://mbrplatform.com/member/register" }],
   }),
   ssr: false,
-  validateSearch: (s: Record<string, unknown>): { code?: string } => {
+  validateSearch: (s: Record<string, unknown>): { code?: string; portal?: string } => {
     const code = typeof s.code === "string" && s.code ? s.code : undefined;
-    return code ? { code } : {};
+    const portal = s.portal === "1" || s.portal === 1 ? "1" : undefined;
+    return code ? (portal ? { code, portal } : { code }) : {};
   },
   component: function MemberRegisterRoute() {
     const search = Route.useSearch();
@@ -161,6 +163,7 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
       setOrgId(res.org.id);
       setOrgLetter(res.org.letter_code ?? normalized);
       setOrgLogo(res.org.logo_url ?? null);
+      rememberSocietyCode(res.org.org_code ?? normalized);
       setStage(opts?.goTo ?? "portal");
     } finally { setLoading(false); }
   }
@@ -191,7 +194,7 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
   // Auto-verify when ?code=ABC is supplied (e.g. from ID card back QR)
   useEffect(() => {
     if (search.code && !orgId) {
-      void verifyCode(search.code, { goTo: "form" });
+      void verifyCode(search.code, { goTo: (search as any).portal ? "portal" : "form" });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search.code]);

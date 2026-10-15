@@ -1,3 +1,4 @@
+import { signOutToSociety } from "@/lib/society-logout";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -104,8 +105,7 @@ function Dashboard() {
       toast.success("మీరు సంస్థ నుండి విజయవంతంగా వైదొలిగారు");
       setLeaveOpen(false);
       setSettingsOpen(false);
-      await supabase.auth.signOut();
-      navigate({ to: "/auth", replace: true });
+      await signOutToSociety(navigate, orgQ.data?.org?.org_code);
     } catch (e: any) {
       toast.error(e.message ?? "Failed to leave organization");
     } finally {
@@ -114,8 +114,7 @@ function Dashboard() {
   }
 
   async function logout() {
-    await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
+    await signOutToSociety(navigate, orgQ.data?.org?.org_code);
   }
 
   async function onLogoPicked(e: React.ChangeEvent<HTMLInputElement>) {
@@ -211,8 +210,7 @@ function Dashboard() {
       toast.success(lt("Cancellation request recorded. 30-day grace period started.", "రద్దు అభ్యర్థన నమోదు అయింది. 30 రోజుల గ్రేస్ పీరియడ్ ప్రారంభమైంది."));
       setCancelOpen(false);
       setSettingsOpen(false);
-      await supabase.auth.signOut();
-      navigate({ to: "/auth", replace: true });
+      await signOutToSociety(navigate, orgQ.data?.org?.org_code);
     } catch (e: any) {
       toast.error(e.message ?? lt("Failed", "విఫలమైంది"));
     } finally {
@@ -240,8 +238,7 @@ function Dashboard() {
   const qrDataUrl = orgQ.data?.qrDataUrl;
   if (!org) {
     const reLogin = async () => {
-      try { await supabase.auth.signOut(); } catch {}
-      navigate({ to: "/auth", replace: true });
+      await signOutToSociety(navigate, orgQ.data?.org?.org_code);
     };
     return (
       <div className="min-h-screen flex items-center justify-center p-6 bg-black">
