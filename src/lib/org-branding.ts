@@ -9,7 +9,15 @@ export type CachedOrgBranding = {
   logoUrl: string;
   bg: string;
   iconBg: string;
+  orgCode?: string | null;
 };
+
+/** Home-screen shortcut start page: the society's own welcome/login portal. */
+export function orgStartUrl(code?: string | null): string {
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const c = (code || "").trim();
+  return c ? `${origin}/member/register?code=${encodeURIComponent(c)}&portal=1` : `${origin}/`;
+}
 
 const KEY = "mbr.org_branding";
 
