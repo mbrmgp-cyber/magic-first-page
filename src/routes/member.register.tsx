@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
-import { validateOrgCode, submitMemberRequest, sendMemberIdLoginLink } from "@/lib/org.functions";
+import { validateOrgCode, submitMemberRequest, sendMemberIdLoginLink, mbrPasswordLogin } from "@/lib/org.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -71,6 +72,33 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
   const [loading, setLoading] = useState(!!search.code);
   const [memberSeq, setMemberSeq] = useState("");
   const sendLogin = useServerFn(sendMemberIdLoginLink);
+  const passwordLoginFn = useServerFn(mbrPasswordLogin);
+  const L3 = (en: string, te: string, hi: string) => (lang === "te" ? te : lang === "hi" ? hi : en);
+  const [loginId, setLoginId] = useState("");
+  const [loginPw, setLoginPw] = useState("");
+  const [loginBusy, setLoginBusy] = useState(false);
+  async function doPasswordLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setLoginBusy(true);
+    const res = await passwordLoginFn({ data: { identifier: loginId.trim(), password: loginPw } }).catch(() => null);
+    if (!res?.ok) {
+      setLoginBusy(false);
+      toast.error(L3("Email/phone or password is incorrect", "ఈమెయిల్/ఫోన్ లేదా పాస్‌వర్డ్ సరికాదు", "ईमेल/फ़ोन या पासवर्ड गलत है"));
+      return;
+    }
+    const { error } = await supabase.auth.setSession(res.session);
+    if (error) {
+      setLoginBusy(false);
+      toast.error(L3("Could not start the session. Please try again.", "సెషన్ ప్రారంభించలేకపోయాం. మళ్లీ ప్రయత్నించండి.", "सत्र शुरू नहीं हो सका। फिर से कोशिश करें।"));
+      return;
+    }
+    const { data: u } = await supabase.auth.getUser();
+    setLoginBusy(false);
+    if (u.user) {
+      const { routeAfterLogin } = await import("@/lib/post-login-redirect");
+      await routeAfterLogin(u.user.id, navigate);
+    }
+  }
   const qrFileRef = useRef<HTMLInputElement>(null);
   const qrHostId = useRef(`qr-file-${Math.random().toString(36).slice(2)}`);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -515,7 +543,7 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
               <UserPlus className="h-5 w-5 mr-2" />
               {lt("New Member Registration", "కొత్త సభ్యుడి రిజిస్ట్రేషన్")}
             </Button>
-            <Button onClick={() => navigate({ to: "/auth" })} variant="outline"
+            <Button onClick={() => setStage("login")} variant="outline"
               className="w-full h-12 bg-transparent border-zinc-600 text-white hover:bg-white/10">
               <KeyRound className="h-5 w-5 mr-2" />
               {lt("Login with Password", "పాస్‌వర్డ్‌తో లాగిన్ చేయండి")}
@@ -535,28 +563,30 @@ function MemberRegister({ initialCode }: { initialCode?: string }) {
             <ArrowLeft className="h-3.5 w-3.5" /> {lt("Back", "వెనుకకు")}
           </button>
           <div className="space-y-1">
-            <h1 className="text-xl font-bold">{lt("Member Login", "సభ్యుడి లాగిన్")}</h1>
+            <h1 className="text-xl font-bold">{L3("Member Login", "సభ్యుడి లాగిన్", "सदस्य लॉगिन")}</h1>
             <p className="text-xs text-zinc-400">{orgName}</p>
           </div>
-          <div className="space-y-2">
-            <p className="text-sm text-zinc-300">
-              {lt(
-                "Login with your email or phone number and password.",
-                "మీ ఈమెయిల్ లేదా ఫోన్ నంబర్ మరియు పాస్‌వర్డ్‌తో లాగిన్ అవ్వండి."
-              )}
-            </p>
-            <p className="text-[11px] text-zinc-500">
-              {lt(
-                "New user or forgot password? Register with an OTP sent to your registered email.",
-                "కొత్తవారా లేదా పాస్‌వర్డ్ మర్చిపోయారా? మీ రిజిస్టర్డ్ ఈమెయిల్‌కు వచ్చే OTPతో రిజిస్టర్ అవ్వండి."
-              )}
-            </p>
-          </div>
-          <Button onClick={() => navigate({ to: "/auth" })}
-            className="w-full h-11 bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white">
-            <LogIn className="h-4 w-4 mr-2" />
-            {lt("Go to Login", "లాగిన్‌కు వెళ్లండి")}
-          </Button>
+          <form onSubmit={doPasswordLogin} className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-zinc-200">{L3("Email or phone number", "ఈమెయిల్ లేదా ఫోన్ నంబర్", "ईमेल या फ़ोन नंबर")}</Label>
+              <Input value={loginId} onChange={(e) => setLoginId(e.target.value)} required autoComplete="username"
+                placeholder={L3("Enter email or phone number", "ఈమెయిల్ లేదా ఫోన్ నంబర్ ఇవ్వండి", "ईमेल या फ़ोन नंबर दर्ज करें")}
+                className="bg-zinc-900 border-zinc-700 text-white" />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-zinc-200">{L3("Password", "పాస్‌వర్డ్", "पासवर्ड")}</Label>
+              <Input type="password" value={loginPw} onChange={(e) => setLoginPw(e.target.value)} required autoComplete="current-password"
+                placeholder={L3("Enter your password", "మీ పాస్‌వర్డ్ ఇవ్వండి", "अपना पासवर्ड दर्ज करें")}
+                className="bg-zinc-900 border-zinc-700 text-white" />
+            </div>
+            <Button type="submit" disabled={loginBusy} className="w-full h-11 bg-[#ff8c28] hover:bg-[#ff8c28]/90 text-white">
+              <LogIn className="h-4 w-4 mr-2" />
+              {loginBusy ? L3("Logging in…", "లాగిన్ అవుతోంది…", "लॉगिन हो रहा है…") : L3("Sign In", "లాగిన్", "साइन इन करें")}
+            </Button>
+            <button type="button" onClick={() => navigate({ to: "/forgot-password" })} className="block w-full text-center text-[11px] text-[#ff8c28] font-semibold">
+              {L3("Forgot Password?", "పాస్‌వర్డ్ మర్చిపోయారా?", "पासवर्ड भूल गए?")}
+            </button>
+          </form>
         </Card>
       </div>
     );
