@@ -42,7 +42,7 @@ export const Route = createFileRoute("/member/register")({
   },
   component: function MemberRegisterRoute() {
     const search = Route.useSearch();
-    return <MemberRegister initialCode={search.code} />;
+    return <MemberRegister initialCode={search.code} portal={!!search.portal} />;
   },
 });
 
@@ -57,13 +57,13 @@ function BiLabel({ en, te, required }: { en: string; te: string; required?: bool
   );
 }
 
-function MemberRegister({ initialCode }: { initialCode?: string }) {
+function MemberRegister({ initialCode, portal }: { initialCode?: string; portal?: boolean }) {
   const navigate = useNavigate();
   const validate = useServerFn(validateOrgCode);
   const submit = useServerFn(submitMemberRequest);
   const { lang } = useI18n();
   const lt = (en: string, te: string) => localizeText({ en, te }, lang);
-  const search = { code: initialCode };
+  const search = { code: initialCode, portal: portal ? "1" : undefined };
 
   const [stage, setStage] = useState<"code" | "scan" | "portal" | "login" | "form" | "done">(search.code ? ((search as any).portal ? "portal" : "form") : "code");
   const [code, setCode] = useState(search.code?.toUpperCase() ?? "");
