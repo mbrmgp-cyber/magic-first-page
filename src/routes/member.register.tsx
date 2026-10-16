@@ -214,12 +214,42 @@ function MemberRegister({ initialCode, portal }: { initialCode?: string; portal?
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function onPhoto(e: React.ChangeEvent<HTMLInputElement>) {
+  async function compressPhoto(file: File): Promise<File> {
+    const url = URL.createObjectURL(file);
+    try {
+      const img = await new Promise<HTMLImageElement>((res, rej) => {
+        const i = new Image();
+        i.onload = () => res(i);
+        i.onerror = () => rej(new Error("decode"));
+        i.src = url;
+      });
+      const max = 1024;
+      const scale = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.naturalWidth * scale);
+      canvas.height = Math.round(img.naturalHeight * scale);
+      canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/jpeg", 0.85));
+      if (!blob) throw new Error("encode");
+      return new File([blob], "photo.jpg", { type: "image/jpeg" });
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  async function onPhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
+    e.target.value = "";
     if (!f) return;
-    if (f.size > 5 * 1024 * 1024) { toast.error(lt("Photo must be under 5MB", "ఫోటో 5MB లోపు ఉండాలి")); return; }
-    setPhotoFile(f);
-    setPhotoPreview(URL.createObjectURL(f));
+    let out: File;
+    try {
+      out = await compressPhoto(f);
+    } catch {
+      toast.error(lt("Could not read this photo. Please choose a JPG or PNG photo.", "ఈ ఫోటో చదవలేకపోయాం. JPG లేదా PNG ఫోటో ఎంచుకోండి."));
+      return;
+    }
+    setPhotoFile(out);
+    setPhotoPreview(URL.createObjectURL(out));
   }
 
   async function onQrImage(e: React.ChangeEvent<HTMLInputElement>) {
