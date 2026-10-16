@@ -15,6 +15,13 @@
       "when": 1792173473891,
       "tag": "0001_member_photos_committee_upload",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792175462038,
+      "tag": "0002_member_photos_request_read",
+      "breakpoints": true
     }
   ]
 }
