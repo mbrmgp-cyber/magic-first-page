@@ -22,6 +22,13 @@
       "when": 1792175462038,
       "tag": "0002_member_photos_request_read",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792227804339,
+      "tag": "0003_extend_disciplinary_appointment_roles",
+      "breakpoints": true
     }
   ]
 }
