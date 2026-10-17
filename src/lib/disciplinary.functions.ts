@@ -1,5 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { parseDisciplinaryRole, type DisciplinaryRole } from "@/lib/disciplinary-roles";
+import { resolveMemberPhoto } from "@/lib/member-photo";
 
 async function resolveOrgId(supabase: any, userId: string): Promise<string | null> {
   const { data: ownOrg } = await supabase
@@ -80,20 +82,45 @@ export const getDisciplinaryOverview = createServerFn({ method: "GET" })
         .order("name", { ascending: true }),
     ]);
 
+    // Storage paths are not browser URLs. Sign only photos read through this
+    // caller's organization-scoped RLS queries, using their storage access.
+    const photoCache = new Map<string, Promise<string | null>>();
+    const withPhoto = async (member: any) => {
+      if (!member?.photo_url) return member;
+      const path = member.photo_url as string;
+      let pending = photoCache.get(path);
+      if (!pending) {
+        pending = resolveMemberPhoto(supabase, path);
+        photoCache.set(path, pending);
+      }
+      return { ...member, photo_url: await pending };
+    };
+    const withMemberPhotos = (rows: any[]) => Promise.all(rows.map(async (row) => ({
+      ...row, members: await withPhoto(row.members),
+    })));
+    const [committee, suspensions, nominations, members] = await Promise.all([
+      withMemberPhotos(committeeRes.data ?? []),
+      withMemberPhotos(suspRes.data ?? []),
+      withMemberPhotos(nomRes.data ?? []),
+      Promise.all((membersRes.data ?? []).map(withPhoto)),
+    ]);
+
     return {
       orgId,
       canManage: await canManage(supabase, userId, orgId),
-      committee: committeeRes.data ?? [],
-      suspensions: suspRes.data ?? [],
-      nominations: nomRes.data ?? [],
+      committee,
+      suspensions,
+      nominations,
       electionMode: !!(orgRes.data as any)?.election_mode_enabled,
-      members: membersRes.data ?? [],
+      members,
     };
   });
 
 export const appointDisciplinaryMember = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { member_id: string; role: "founder" | "former_president"; notes?: string }) => d)
+  .inputValidator((d: { member_id: string; role: DisciplinaryRole; notes?: string }) => ({
+    ...d, role: parseDisciplinaryRole(d.role),
+  }))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const orgId = await resolveOrgId(supabase, userId);

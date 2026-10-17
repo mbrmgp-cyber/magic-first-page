@@ -1,0 +1,2 @@
+ALTER TABLE public.disciplinary_committee_members DROP CONSTRAINT disciplinary_committee_members_role_check;
+ALTER TABLE public.disciplinary_committee_members ADD CONSTRAINT disciplinary_committee_members_role_check CHECK (role IN ('founder', 'former_president', 'sincere_senior', 'present_president'));

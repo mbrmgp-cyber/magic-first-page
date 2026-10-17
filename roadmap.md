@@ -1,5 +1,10 @@
 # Language support
 
+# Disciplinary committee
+- [x] Resolve private member photos for the committee list.
+- [x] Offer Founder, Sincere Senior and Present President below the member selector; preserve existing appointments.
+- [x] Test role validation and verify signed-in photo rendering and role selection.
+
 - [x] Align every listed language with translation validation and batching.
 - [x] Supply bundled translations for shared controls and registration/sign-in labels in all listed languages.
 - [x] Correct language direction, persistence, and same-script language handling.

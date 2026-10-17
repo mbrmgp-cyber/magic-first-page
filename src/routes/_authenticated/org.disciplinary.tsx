@@ -3,6 +3,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useI18n, localizeText } from "@/lib/i18n";
+import { DISCIPLINARY_ROLES, disciplinaryRoleCopy, parseDisciplinaryRole, type DisciplinaryRole } from "@/lib/disciplinary-roles";
 import {
   getDisciplinaryOverview,
   appointDisciplinaryMember,
@@ -29,7 +31,14 @@ import { ShieldAlert, Gavel, UserPlus, Ban, Vote, ArrowLeft, Trash2, ThumbsUp, T
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/org/disciplinary")({
-  head: () => ({ meta: [{ title: "Disciplinary Committee — MBR" }] }),
+  head: () => ({ meta: [
+    { title: "Disciplinary Committee — MBR Platform" },
+    { name: "description", content: "Manage society disciplinary committee appointments, suspensions and leadership on MBR Platform." },
+    { property: "og:title", content: "Disciplinary Committee — MBR Platform" },
+    { property: "og:description", content: "Society disciplinary committee appointments, member photos and leadership." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: DisciplinaryPage,
   errorComponent: ({ error }) => (
     <div className="p-6 text-red-500">Error: {String((error as Error)?.message ?? error)}</div>
@@ -38,6 +47,7 @@ export const Route = createFileRoute("/_authenticated/org/disciplinary")({
 });
 
 function DisciplinaryPage() {
+  const { lang } = useI18n();
   const qc = useQueryClient();
   const fetchOverview = useServerFn(getDisciplinaryOverview);
   const q = useQuery({ queryKey: ["disciplinary-overview"], queryFn: () => fetchOverview() });
@@ -62,7 +72,7 @@ function DisciplinaryPage() {
 
   // Appoint form
   const [apMember, setApMember] = useState("");
-  const [apRole, setApRole] = useState<"founder" | "former_president">("founder");
+  const [apRole, setApRole] = useState<DisciplinaryRole>("founder");
   const [apNotes, setApNotes] = useState("");
 
   // Suspension form
@@ -113,7 +123,10 @@ function DisciplinaryPage() {
     } catch (e: any) { toast.error(e.message); }
   }
 
-  const roleLabel = (r: string) => r === "founder" ? "Founder · వ్యవస్థాపకుడు" : "Former President · మాజీ అధ్యక్షుడు";
+  const roleLabel = (r: string) => {
+    const copy = disciplinaryRoleCopy[r];
+    return copy ? localizeText(copy, lang) : r;
+  };
   const catLabel: Record<string, string> = {
     rule_violation: "Rule Violation",
     misuse: "Misuse of Society",
@@ -142,7 +155,7 @@ function DisciplinaryPage() {
             <div>
               <h1 className="text-lg md:text-xl font-bold">Disciplinary Committee · క్రమశిక్షణా కమిటీ</h1>
               <p className="text-xs text-muted-foreground">
-                Supreme advisory body — Founders & Former Presidents. Appoints President, issues suspensions, unlocks Election Mode.
+                {localizeText({ en: "Supreme advisory body — Founders, Sincere Seniors & Present Presidents. Appoints President, issues suspensions, unlocks Election Mode.", te: "అత్యున్నత సలహా మండలి — వ్యవస్థాపకులు, నిబద్ధతగల సీనియర్ సభ్యులు, ప్రస్తుత అధ్యక్షులు. అధ్యక్షుడిని నియమిస్తుంది, సస్పెన్షన్లు విధిస్తుంది, ఎన్నికలను ప్రారంభిస్తుంది.", hi: "सर्वोच्च सलाहकार समिति — संस्थापक, निष्ठावान वरिष्ठ सदस्य और वर्तमान अध्यक्ष। अध्यक्ष नियुक्त करती है, निलंबन जारी करती है और चुनाव सक्षम करती है।" }, lang)}
               </p>
             </div>
           </div>
@@ -186,7 +199,7 @@ function DisciplinaryPage() {
                   <UserPlus className="size-4 text-red-400" />
                   <h2 className="font-semibold text-sm">Appoint Committee Member</h2>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 gap-2">
                   <Select value={apMember} onValueChange={setApMember}>
                     <SelectTrigger><SelectValue placeholder="Select member" /></SelectTrigger>
                     <SelectContent>
@@ -197,11 +210,12 @@ function DisciplinaryPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <Select value={apRole} onValueChange={(v: any) => setApRole(v)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                  <Select value={apRole} onValueChange={(v) => setApRole(parseDisciplinaryRole(v))}>
+                    <SelectTrigger aria-label={localizeText({ en: "Committee role", te: "కమిటీ పదవి", hi: "समिति पद" }, lang)} data-notranslit><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="founder">Founder · వ్యవస్థాపకుడు</SelectItem>
-                      <SelectItem value="former_president">Former President · మాజీ అధ్యక్షుడు</SelectItem>
+                      {DISCIPLINARY_ROLES.map((role) => (
+                        <SelectItem key={role} value={role} data-notranslit>{roleLabel(role)}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -222,12 +236,12 @@ function DisciplinaryPage() {
                 <Card key={c.id} className="p-3 bg-card flex items-center gap-3">
                   <div className="size-12 rounded-full bg-muted overflow-hidden flex items-center justify-center shrink-0">
                     {c.members?.photo_url
-                      ? <img src={c.members.photo_url} className="size-full object-cover" alt="" />
+                      ? <img src={c.members.photo_url} className="size-full object-cover" alt={c.members.name ?? ""} />
                       : <ShieldAlert className="size-6 text-muted-foreground" />}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold text-sm truncate">{c.members?.name ?? "Unknown"}</p>
-                    <p className="text-[10px] text-muted-foreground truncate">
+                    <p className="text-[10px] text-muted-foreground break-words" data-notranslit>
                       {c.members?.member_code ?? ""} · {roleLabel(c.role)}
                     </p>
                     {c.notes && <p className="text-[10px] text-muted-foreground truncate italic">{c.notes}</p>}

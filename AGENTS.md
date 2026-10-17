@@ -2,3 +2,5 @@
 - Keep supported-language validation, batch limits and bundled shared controls in language-support.ts; DOM translation reads cache only — why: menu/server parity and no AI spending triggered by page rendering.
 - Bundle Vaaradhi and recovery copy with source-language aliases through language-support.ts — why: exact Hindi/Telugu translations work offline and survive language switching without changing entered data.
 - Use translation for UI/descriptions and transliteration only for identity fields; never alter editable values — why: preserve meaning and original user data.
+- Keep disciplinary appointment roles in one shared validated module and retain legacy role labels — why: selection, server validation and historical appointments must remain consistent.
+- Resolve private member photo paths through the caller's authenticated storage client before returning disciplinary overview data — why: raw paths cannot render and photo access must retain storage permissions.
