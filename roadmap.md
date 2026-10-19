@@ -1,8 +1,8 @@
 # Language support
 
 # Admin organization member counts
-- [ ] Correct organization details so the admin sees actual members and status totals, not a silent zero on read failure.
-- [ ] Verify counts against the signed-in admin panel and add a regression test.
+- [x] Correct organization details so the admin sees actual members and status totals, not a silent zero on read failure.
+- [x] Verify counts against the signed-in admin panel and add a regression test: Chitvel 10 approved, other societies 1 each; three tests passed.
 
 # Disciplinary committee
 - [x] Resolve private member photos for the committee list.
