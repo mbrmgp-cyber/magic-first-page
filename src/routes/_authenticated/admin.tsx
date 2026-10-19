@@ -42,7 +42,14 @@ function OrgDocThumb({ orgId, path }: { orgId: string; path: string }) {
 }
 
 export const Route = createFileRoute("/_authenticated/admin")({
-  head: () => ({ meta: [{ title: "MBR Admin Panel" }] }),
+  head: () => ({ meta: [
+    { title: "MBR Platform — Admin Panel" },
+    { name: "description", content: "Manage societies, organization members and approvals in MBR Platform." },
+    { property: "og:title", content: "MBR Platform — Admin Panel" },
+    { property: "og:description", content: "Manage societies, organization members and approvals in MBR Platform." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: AdminPanel,
 });
 
@@ -478,7 +485,10 @@ function AllOrganizationsManager() {
 
   const detailsQ = useQuery({
     queryKey: ["admin-org-details", detailsId],
-    queryFn: () => getDetails({ data: { org_id: detailsId! } }),
+    queryFn: () => {
+      if (!detailsId) throw new Error("Organization not selected");
+      return getDetails({ data: { org_id: detailsId } });
+    },
     enabled: !!detailsId,
   });
 
@@ -783,6 +793,14 @@ function AllOrganizationsManager() {
           </DialogHeader>
 
           {detailsQ.isLoading && <div className="text-center py-6 text-sm text-zinc-400">Loading…</div>}
+
+          {detailsQ.isError && (
+            <Alert variant="destructive">
+              <AlertTitle>Unable to load organization members</AlertTitle>
+              <AlertDescription>{detailsQ.error.message}</AlertDescription>
+              <Button variant="outline" size="sm" onClick={() => detailsQ.refetch()}>Retry</Button>
+            </Alert>
+          )}
 
           {detailsQ.data && (
             <div className="space-y-4">

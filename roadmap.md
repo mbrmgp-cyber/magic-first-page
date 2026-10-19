@@ -1,5 +1,9 @@
 # Language support
 
+# Admin organization member counts
+- [x] Correct organization details so the admin sees actual members and status totals, not a silent zero on read failure.
+- [x] Verify counts against the signed-in admin panel and add a regression test: Chitvel 10 approved, other societies 1 each; three tests passed.
+
 # Disciplinary committee
 - [x] Resolve private member photos for the committee list.
 - [x] Offer Founder, Sincere Senior and Present President below the member selector; preserve existing appointments.
