@@ -1243,21 +1243,16 @@ export const getOrganizationDetails = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     const safeOrg = org as unknown as SafeOrgRow | null;
     if (!safeOrg) throw new Error("Organization not found");
-    const { data: members } = await supabase
-      .from("members")
-      .select("id, name, member_code, status, email, phone, created_at")
-      .eq("org_id", data.org_id)
-      .order("created_at", { ascending: false });
-    const list = (members ?? []) as any[];
+    // Platform-admin oversight is privileged: society-scoped RLS hides members
+    // from admins who are not themselves members of this particular society.
+    const [{ supabaseAdmin }, { readAdminOrgMembers }] = await Promise.all([
+      import("@/integrations/supabase/client.server"),
+      import("@/lib/admin-org-members.server"),
+    ]);
+    const summary = await readAdminOrgMembers(supabaseAdmin, data.org_id);
     return {
       org: safeOrg,
-      members: list,
-      counts: {
-        total: list.length,
-        approved: list.filter((m) => m.status === "approved").length,
-        pending: list.filter((m) => m.status === "pending").length,
-        rejected: list.filter((m) => m.status === "rejected").length,
-      },
+      ...summary,
     };
   });
 

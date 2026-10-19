@@ -4,3 +4,4 @@
 - Use translation for UI/descriptions and transliteration only for identity fields; never alter editable values — why: preserve meaning and original user data.
 - Keep disciplinary appointment roles in one shared validated module and retain legacy role labels — why: selection, server validation and historical appointments must remain consistent.
 - Resolve private member photo paths through the caller's authenticated storage client before returning disciplinary overview data — why: raw paths cannot render and photo access must retain storage permissions.
+- Read platform-admin organization member summaries through a server-only paginated helper after validating the caller's MBR admin role; propagate read errors — why: society-scoped RLS must not silently produce empty platform oversight reports.
