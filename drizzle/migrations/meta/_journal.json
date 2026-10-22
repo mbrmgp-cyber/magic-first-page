@@ -29,6 +29,13 @@
       "when": 1792227804339,
       "tag": "0003_extend_disciplinary_appointment_roles",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792672745481,
+      "tag": "0004_notifications",
+      "breakpoints": true
     }
   ]
 }
