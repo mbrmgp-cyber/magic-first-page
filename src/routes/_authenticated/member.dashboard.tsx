@@ -1,3 +1,4 @@
+import { NotificationBell } from "@/components/NotificationBell";
 import { signOutToSociety } from "@/lib/society-logout";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -258,6 +259,7 @@ function MemberDashboard() {
           <div className="flex-1 min-w-0 flex flex-col items-center justify-center gap-2">
             <p className="text-sm font-semibold text-white leading-tight text-center">{b("స్వాగతం గౌరవ సభ్యులకు", "Welcome, respected member")} 🙏</p>
             <div className="flex items-center gap-2">
+              <NotificationBell />
               <OrgSwitcher />
               <LanguageToggle />
               <button

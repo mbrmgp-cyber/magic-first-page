@@ -1,3 +1,4 @@
+import { NotificationBell } from "@/components/NotificationBell";
 import { signOutToSociety } from "@/lib/society-logout";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -330,6 +331,7 @@ function Dashboard() {
                 <QrCode className="w-5 h-5 text-zinc-500" />
               )}
             </button>
+            <NotificationBell />
             <OrgSwitcher />
             <LanguageToggle />
           </div>
