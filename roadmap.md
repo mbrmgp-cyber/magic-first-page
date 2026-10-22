@@ -21,3 +21,7 @@
 - [x] Preserve identity fields and verify language switching, registration and recovery states.
 - [x] Verify signed-in registration, admin application, partner and profile screens have no Telugu text in Hindi mode; 23 locale regression tests and automatic build passed.
 - [ ] End-to-end emailed OTP/password update and full admin action states remain unverified; no account data was changed during translation checks.
+
+# Saved society ID card editing
+- [x] Restore saved design loading and preserve saved styling in Design Studio; show the legacy society card when no design is stored.
+- [x] Verify signed-in Chitvel editing, save and reopen, desktop/mobile display and two regression tests; restore the original card after testing.
