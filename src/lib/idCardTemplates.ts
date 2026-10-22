@@ -201,6 +201,21 @@ export function defaultDesign(templateId: TemplateId = "classic", cardType: Card
   };
 }
 
+// Existing societies without a stored design display the saffron legacy card.
+// Never apply the portal theme over an independently saved print design.
+export function societyIdCardDesign(org: {
+  id_card_design?: IdCardDesign | null;
+  theme_color?: string | null;
+}): IdCardDesign {
+  if (org.id_card_design) return structuredClone(org.id_card_design);
+  const design = defaultDesign("legacy", "normal");
+  if (org.theme_color) design.global.accentColor = org.theme_color;
+  design.global.contactFooterBg = design.global.footerColor;
+  design.global.memberCodeBadgeBg = design.elements.orgName.color;
+  design.elements.memberName.color = design.elements.orgName.color;
+  return design;
+}
+
 export const ELEMENT_LABELS: Record<ElementKey, { en: string; te: string; side: "front" | "back" }> = {
   logo:        { en: "Logo",              te: "లోగో",            side: "front" },
   orgName:     { en: "Organization Name", te: "సంస్థ పేరు",       side: "front" },

@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { getMyOrg, updateOrgIdDesign } from "@/lib/org.functions";
-import { defaultDesign, TEMPLATE_META, type IdCardDesign, type TemplateId, type CardType, type ElementKey } from "@/lib/idCardTemplates";
+import { defaultDesign, societyIdCardDesign, TEMPLATE_META, type IdCardDesign, type TemplateId, type CardType, type ElementKey } from "@/lib/idCardTemplates";
 import { IdCardRenderer, type OrgContext, type SampleMember } from "@/components/IdCard/IdCardRenderer";
 import { TemplateCustomizer } from "@/components/IdCard/TemplateCustomizer";
 import { Card } from "@/components/ui/card";
@@ -30,7 +30,14 @@ import { localizeText, useI18n } from "@/lib/i18n";
 import { pdfText } from "@/lib/loan-pdf";
 
 export const Route = createFileRoute("/_authenticated/org/designs")({
-  head: () => ({ meta: [{ title: "Designs Studio — MBR App" }] }),
+  head: () => ({ meta: [
+    { title: "Society Design Studio — MBR App" },
+    { name: "description", content: "Edit your society's saved ID card, letter pad and receipt designs." },
+    { property: "og:title", content: "Society Design Studio — MBR App" },
+    { property: "og:description", content: "Edit your society's saved ID card, letter pad and receipt designs." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: DesignsPage,
 });
 
@@ -358,6 +365,12 @@ function DesignsPage() {
     w.document.close();
   }
 
+  if (orgQ.isPending) return <div className="p-6 text-muted-foreground">{localizeText({ en: "Loading…", te: "లోడ్ అవుతోంది…", hi: "लोड हो रहा है…" }, lang)}</div>;
+  if (orgQ.isError || !org) return <div className="p-6 space-y-3">
+    <p className="text-destructive">{localizeText({ en: "We couldn't load your society's design.", te: "మీ సొసైటీ డిజైన్‌ను తీసుకురాలేకపోయాం.", hi: "आपकी संस्था का डिज़ाइन लोड नहीं हो सका।" }, lang)}</p>
+    <Button variant="outline" onClick={() => orgQ.refetch()}>{localizeText({ en: "Try again", te: "మళ్లీ ప్రయత్నించండి", hi: "फिर कोशिश करें" }, lang)}</Button>
+  </div>;
+
   return (
     <div className="min-h-screen pb-16" data-theme-surface="background" style={designVars}>
       <div className="max-w-5xl mx-auto p-4 space-y-5">
@@ -396,6 +409,7 @@ function DesignsPage() {
           {/* ============= MODULE 1: ID CARD (Template-First) ============= */}
           <TabsContent value="id" className="mt-4 space-y-4">
             <TemplateFirstIdCard
+              key={org.id}
               org={org}
               orgQ={orgQ}
               theme={theme}
@@ -1929,15 +1943,16 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
   const { lang } = useI18n();
   const lt = (en: string, te: string) => localizeText({ en, te }, lang);
   const saveDesign = useServerFn(updateOrgIdDesign);
-  const initial: IdCardDesign = applyOrgThemeToIdDesign((org?.id_card_design as IdCardDesign) || defaultDesign("classic", "normal"), theme);
+  const initial = societyIdCardDesign(org);
   const [design, setDesign] = useState<IdCardDesign>(initial);
   const [side, setSide] = useState<"front" | "back">("front");
-  const [step, setStep] = useState<"pick" | "edit">(org?.id_card_design ? "edit" : "pick");
+  const [step, setStep] = useState<"pick" | "edit">("edit");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    setDesign(applyOrgThemeToIdDesign((org?.id_card_design as IdCardDesign) || defaultDesign(design.templateId, design.cardType), theme));
-  }, [org?.id, org?.theme_settings, org?.id_card_design, theme.bg, theme.bigBox, theme.miniBox, theme.border, theme.icon, theme.buttonBg, theme.buttonText, theme.headColor, theme.subColor, theme.headFont, theme.subFont]);
+    setDesign(societyIdCardDesign(org));
+    setStep("edit");
+  }, [org?.id, org?.id_card_design]);
 
   const orgCode = org?.org_code || "";
   // Member-registration deep link for this society (back QR scans straight into the form)
@@ -1977,10 +1992,10 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
 
 
   function pickTemplate(id: TemplateId) {
-    setDesign(applyOrgThemeToIdDesign(defaultDesign(id, design.cardType), theme));
+    setDesign(defaultDesign(id, design.cardType));
     setStep("edit");
   }
-  function setCardType(t: CardType) { setDesign(applyOrgThemeToIdDesign({ ...design, cardType: t }, theme)); }
+  function setCardType(t: CardType) { setDesign((prev) => ({ ...prev, cardType: t })); }
 
   async function onSave() {
     setSaving(true);
@@ -2040,7 +2055,7 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {(Object.keys(TEMPLATE_META) as TemplateId[]).map((id) => {
               const meta = TEMPLATE_META[id];
-              const tplDesign: IdCardDesign = applyOrgThemeToIdDesign(defaultDesign(id, design.cardType), theme);
+              const tplDesign = defaultDesign(id, design.cardType);
               return (
                 <button key={id} onClick={() => pickTemplate(id)}
                   className="rounded-xl border p-3 text-left hover:scale-[1.02] transition space-y-2"
@@ -2101,7 +2116,7 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
               }}
             >
               <div style={{ width: "100%", minWidth: "max-content", padding: 12, display: "flex", justifyContent: "center" }}>
-                <IdCardRenderer design={design} org={orgCtx} member={sampleMember} side={side} scale={1} />
+                <IdCardRenderer design={design} org={orgCtx} member={sampleMember} side={side} scale={1} lang={lang} />
               </div>
             </div>
           </div>
