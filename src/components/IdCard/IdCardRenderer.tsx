@@ -131,7 +131,7 @@ export function IdCardRenderer({ design, org, member, side, scale = 1, lang: lan
   };
 
   return (
-    <div className="mbr-preserve-design" data-theme-preserve="card" style={containerStyle}>
+    <div className="mbr-preserve-design" data-notranslit data-theme-preserve="card" style={containerStyle}>
       <div style={inner}>
         {societyLayout ? <SocietyCardRenderer design={design} org={org} member={member} side={side} lang={cardLang === "hi" ? "hi" : cardLang === "en" ? "en" : "te"} /> : side === "front" ? renderFront(design, org, member) : renderBack(design, org, member)}
       </div>

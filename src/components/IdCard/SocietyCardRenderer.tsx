@@ -206,7 +206,7 @@ function CardFront({
           }}>
             {e.memberCode.visible && `${t.id}: ${member.member_code ?? "—"}`}
           </div>
-          <div style={{ fontSize: e.memberName.size, fontWeight: e.memberName.weight, marginTop: "0.6mm", fontFamily: e.memberName.font, color: e.memberName.color, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", lineHeight: 1.25 }}>
+          <div style={{ fontSize: e.memberName.size, fontWeight: e.memberName.weight, marginTop: "0.6mm", fontFamily: `${e.memberName.font}, ${TELUGU_FONT}`, color: e.memberName.color, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", lineHeight: 1.25 }}>
             {e.memberName.visible && member.name}
           </div>
           {e.fatherName.visible && member.father_name && <Row style={e.fatherName} label={t.father} value={member.father_name} />}
@@ -386,7 +386,7 @@ function CardBack({
 
 function Row({ label, value, style }: { label: string; value: string; style?: ElementStyle }) {
   return (
-    <div style={{ fontSize: style?.size || "2.2mm", color: style?.color || "var(--society-body)", fontFamily: style?.font, marginTop: "0.3mm", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+    <div style={{ fontSize: style?.size || "2.2mm", color: style?.color || "var(--society-body)", fontFamily: `${style?.font || "Noto Sans"}, ${TELUGU_FONT}`, marginTop: "0.3mm", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
       <span style={{ color: "var(--society-muted)" }}>{label}: </span>
       <span style={{ fontWeight: 600 }}>{value}</span>
     </div>

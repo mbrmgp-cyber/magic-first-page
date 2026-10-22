@@ -23,6 +23,6 @@
 - [ ] End-to-end emailed OTP/password update and full admin action states remain unverified; no account data was changed during translation checks.
 
 # Saved society ID card editing
-- [ ] Match the displayed society card in the studio, including real member photo, designation, signature and footer; verify editing and reopening.
+- [x] Match the displayed society card in the studio, including real member photo, designation, signature and footer; verified header edit/save/reopen and restored original design, four tests passed.
 - [x] Restore saved design loading and preserve saved styling in Design Studio; show the legacy society card when no design is stored.
 - [x] Verify signed-in Chitvel editing, save and reopen, desktop/mobile display and two regression tests; restore the original card after testing.

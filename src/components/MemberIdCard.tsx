@@ -296,13 +296,17 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
   function handlePrint() {
     const f = frontRef.current; const b = backRef.current;
     if (!f || !b) return;
-    const frontHtml = f.outerHTML.replace(/₹/g, "Rs.").replace(/రూ\.?/g, "Rs.").replace(/د\.إ/g, "AED").replace(/د\.ك/g, "KWD");
+    const frontHtml = f.outerHTML.replace(/display:\s*none;?/g, "display:block;").replace(/₹/g, "Rs.").replace(/రూ\.?/g, "Rs.").replace(/د\.إ/g, "AED").replace(/د\.ك/g, "KWD");
     const backHtml = b.outerHTML.replace(/display:\s*none;?/g, "display:block;").replace(/₹/g, "Rs.").replace(/రూ\.?/g, "Rs.").replace(/د\.إ/g, "AED").replace(/د\.ك/g, "KWD");
+    const computed = getComputedStyle(document.documentElement);
+    const printTokens = ["society-ink", "society-paper", "society-body", "society-text", "society-muted", "society-placeholder", "society-photo", "society-blood", "society-brand", "india-green", "saffron"]
+      .map((key) => `--${key}:${computed.getPropertyValue(`--${key}`)};`).join("");
     const html = `<!DOCTYPE html><html><head><title>ID Card - ${pdfText(member.name)}</title>
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Noto+Sans+Telugu:wght@400;600;700;800;900&family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap">
       <style>
+        :root { ${printTokens} }
         @page { size: 85.6mm 54mm; margin: 0; }
         @font-face{font-family:'Noto Sans Telugu';src:url('/fonts/NotoSansTelugu-Regular.ttf') format('truetype');font-weight:400;font-style:normal}
         @font-face{font-family:'Noto Sans Telugu';src:url('/fonts/NotoSansTelugu-Bold.ttf') format('truetype');font-weight:700 900;font-style:normal}
