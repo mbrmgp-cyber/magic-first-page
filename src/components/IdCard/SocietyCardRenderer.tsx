@@ -145,9 +145,9 @@ function CardFront({
         gap: "2.2mm", height: "13mm",
       }}>
         {e.logo.visible && (logoUrl ? (
-          <img src={logoUrl} alt="" style={{ height: e.logo.imgSize, width: e.logo.imgSize, borderRadius: "50%", background: "#fff", objectFit: "cover", border: "0.3mm solid #fff" }} />
+          <img src={logoUrl} alt="" style={{ height: e.logo.imgSize, width: e.logo.imgSize, borderRadius: "50%", background: "var(--society-paper)", objectFit: "cover", border: "0.3mm solid var(--society-paper)", transform: `translateX(${g.headerLogoOffsetX || 0}px)` }} />
         ) : (
-          <div style={{ height: e.logo.imgSize, width: e.logo.imgSize, borderRadius: "50%", background: "#fff" }} />
+          <div style={{ height: e.logo.imgSize, width: e.logo.imgSize, borderRadius: "50%", background: "var(--society-paper)" }} />
         ))}
         <div style={{ flex: 1, minWidth: 0, lineHeight: 1.35, textAlign: g.headerAlign || "left" }}>
           <div style={{ fontFamily: `${e.orgName.font}, ${TELUGU_FONT}`, fontSize: e.orgName.size, fontWeight: e.orgName.weight, color: e.orgName.color, letterSpacing: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
@@ -161,27 +161,27 @@ function CardFront({
           )}
         </div>
         <div style={{
-          fontSize: "2mm", background: "#000080", color: "#fff",
-          padding: "0.4mm 1.2mm", borderRadius: "1mm", fontWeight: 800,
+          fontSize: e.designation.size, background: g.memberCodeBadgeBg,
+          padding: "0.4mm 1.2mm", borderRadius: "1mm", fontWeight: e.designation.weight, color: e.designation.color, fontFamily: e.designation.font, transform: `translateX(${g.headerBadgeOffsetX || 0}px)`,
         }}>
           {e.designation.visible && ((roleKey && t[roleKey]) || t.member)}
         </div>
       </div>
 
       {/* Body */}
-      <div style={{ display: "flex", gap: "2.2mm", padding: "1.4mm 2.5mm 1mm", height: "32mm", background: "#fff", position: "relative" }}>
+      <div style={{ display: "flex", gap: "2.2mm", padding: "1.4mm 2.5mm 1mm", height: "32mm", background: g.backgroundColor, position: "relative" }}>
         <div style={{ width: e.photo.imgSize, flexShrink: 0, display: "flex", flexDirection: "column" }}>
           <div style={{
             width: e.photo.imgSize, height: (e.photo.imgSize ?? 75.59) * 1.2,
-            border: "0.3mm solid #138808",
-            background: "#f5f5f5",
+            border: "0.3mm solid var(--india-green)",
+            background: "var(--society-photo)",
             display: "flex", alignItems: "center", justifyContent: "center",
             overflow: "hidden",
           }}>
             {e.photo.visible && (photoUrl ? (
               <img src={photoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             ) : (
-              <User style={{ width: "9mm", height: "9mm", color: "#999" }} />
+              <User style={{ width: "9mm", height: "9mm", color: "var(--society-placeholder)" }} />
             ))}
           </div>
           {/* Active status badge — pushed slightly down with margin */}
@@ -189,24 +189,24 @@ function CardFront({
             marginTop: "1.4mm",
             fontFamily: TELUGU_FONT,
             fontSize: "1.7mm", fontWeight: 800,
-            color: "#fff",
-            background: member.is_active === false ? "#666" : "#138808",
+            color: "var(--society-paper)",
+            background: member.is_active === false ? "var(--society-muted)" : "var(--india-green)",
             textAlign: "center", padding: "0.5mm 0.6mm", borderRadius: "0.8mm",
-            letterSpacing: "0.1mm", lineHeight: 1.2,
+            letterSpacing: 0, lineHeight: 1.2,
           }}>
             {member.is_active === false ? t.inactive : t.active}
           </div>
         </div>
 
-        <div style={{ flex: 1, minWidth: 0, fontFamily: TELUGU_FONT, fontSize: "2.4mm", lineHeight: 1.35, color: "#111", display: "flex", flexDirection: "column" }}>
+        <div style={{ flex: 1, minWidth: 0, fontFamily: TELUGU_FONT, fontSize: "2.4mm", lineHeight: 1.35, color: "var(--society-text)", display: "flex", flexDirection: "column" }}>
           <div style={{
             fontSize: e.memberCode.size, color: e.memberCode.color, background: g.memberCodeBadgeBg, fontWeight: e.memberCode.weight,
-            letterSpacing: "0.3mm", padding: "0.4mm 1.4mm", borderRadius: "0.8mm",
+            letterSpacing: 0, padding: "0.4mm 1.4mm", borderRadius: "0.8mm",
             display: "inline-block", alignSelf: "flex-start",
           }}>
             {e.memberCode.visible && `${t.id}: ${member.member_code ?? "—"}`}
           </div>
-          <div style={{ fontSize: e.memberName.size, fontWeight: e.memberName.weight, marginTop: "0.6mm", color: e.memberName.color, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", lineHeight: 1.25 }}>
+          <div style={{ fontSize: e.memberName.size, fontWeight: e.memberName.weight, marginTop: "0.6mm", fontFamily: e.memberName.font, color: e.memberName.color, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", lineHeight: 1.25 }}>
             {e.memberName.visible && member.name}
           </div>
           {e.fatherName.visible && member.father_name && <Row style={e.fatherName} label={t.father} value={member.father_name} />}
@@ -214,13 +214,13 @@ function CardFront({
           {e.village.visible && mandal && <Row style={e.village} label={t.mandal} value={mandal} />}
           {e.phone.visible && member.phone && <Row style={e.phone} label={t.phone} value={member.phone} />}
           <div style={{ display: "flex", gap: "1.5mm", marginTop: "0.4mm", alignItems: "center", flexWrap: "wrap" }}>
-            <div style={{ fontSize: "2.1mm", color: "#222" }}>
-              <span style={{ color: "#666" }}>{t.joined}: </span>
+            <div style={{ fontSize: "2.1mm", color: "var(--society-body)" }}>
+              <span style={{ color: "var(--society-muted)" }}>{t.joined}: </span>
               <span style={{ fontWeight: 600 }}>{joined}</span>
             </div>
             {e.bloodGroup.visible && member.blood_group && (
               <div style={{
-                fontSize: "2.1mm", background: "#C8102E", color: "#fff",
+                fontSize: "2.1mm", background: "var(--society-blood)", color: "var(--society-paper)",
                 padding: "0.2mm 1.4mm", borderRadius: "0.8mm", fontWeight: 800,
               }}>
                 🩸 {member.blood_group}
@@ -240,7 +240,7 @@ function CardFront({
                   fontStyle: "italic",
                   fontWeight: 700,
                   fontSize: "4.2mm",
-                  color: "#000080",
+                  color: "var(--society-ink)",
                   textAlign: "right",
                   lineHeight: 1,
                   transform: "rotate(-4deg)",
@@ -254,9 +254,9 @@ function CardFront({
                 {e.presidentName.visible && (org?.president_name ?? "")}
               </div>
             ))}
-            <div style={{ borderTop: "0.2mm solid #000080", marginTop: "0.2mm", paddingTop: "0.2mm", fontSize: "1.8mm", color: "#000080", fontWeight: 700, lineHeight: 1.1 }}>
+            <div style={{ borderTop: "0.2mm solid var(--society-ink)", marginTop: "0.2mm", paddingTop: "0.2mm", fontSize: "1.8mm", color: "var(--society-ink)", fontWeight: 700, lineHeight: 1.1 }}>
               {e.presidentName.visible && (org?.president_name ?? "")}
-              <div style={{ fontSize: "1.5mm", color: "#666", fontWeight: 500 }}>{t.president}</div>
+              <div style={{ fontSize: "1.5mm", color: "var(--society-muted)", fontWeight: 500 }}>{t.president}</div>
             </div>
           </div>
         </div>
@@ -271,16 +271,16 @@ function CardFront({
       }}>
         {e.qrCode.visible && (qrDataUrl ? (
           qrLink ? (
-            <a href={qrLink} aria-label="Open member QR link" style={{ height: e.qrCode.imgSize, width: e.qrCode.imgSize, background: "#fff", padding: "0.3mm", borderRadius: "0.5mm", flexShrink: 0, display: "block" }}>
+            <a href={qrLink} aria-label="Open member QR link" style={{ height: e.qrCode.imgSize, width: e.qrCode.imgSize, background: "var(--society-paper)", padding: "0.3mm", borderRadius: "0.5mm", flexShrink: 0, display: "block" }}>
               <img src={qrDataUrl} alt="Member QR" style={{ height: "100%", width: "100%", objectFit: "contain", display: "block" }} />
             </a>
           ) : (
-            <img src={qrDataUrl} alt="Member QR" style={{ height: e.qrCode.imgSize, width: e.qrCode.imgSize, background: "#fff", padding: "0.3mm", borderRadius: "0.5mm", flexShrink: 0 }} />
+            <img src={qrDataUrl} alt="Member QR" style={{ height: e.qrCode.imgSize, width: e.qrCode.imgSize, background: "var(--society-paper)", padding: "0.3mm", borderRadius: "0.5mm", flexShrink: 0 }} />
           )
         ) : <div style={{ width: "7.6mm" }} />)}
 
         <div style={{
-          flex: 1, minWidth: 0, color: "#fff", textAlign: "center",
+          flex: 1, minWidth: 0, color: "var(--society-paper)", textAlign: "center",
           fontFamily: TELUGU_FONT, lineHeight: 1.25,
         }}>
           <div style={{ fontSize: g.contactFooterTextSize, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
@@ -293,7 +293,7 @@ function CardFront({
 
         <div style={{
           height: e.mbrLogo.imgSize, width: e.mbrLogo.imgSize,
-          background: "#000",
+          background: "var(--society-brand)",
           borderRadius: "50%",
           display: "flex", alignItems: "center", justifyContent: "center",
           padding: "0.7mm", flexShrink: 0,
@@ -335,15 +335,15 @@ function CardBack({
       {/* tricolor stripe */}
       <div style={{ display: "flex", height: "2mm" }}>
         <div style={{ flex: 1, background: accent }} />
-        <div style={{ flex: 1, background: "#fff" }} />
-        <div style={{ flex: 1, background: "#138808" }} />
+        <div style={{ flex: 1, background: "var(--society-paper)" }} />
+        <div style={{ flex: 1, background: "var(--india-green)" }} />
       </div>
 
 
       <div style={{ padding: "1.5mm 2.5mm", height: "52mm", display: "flex", flexDirection: "column", gap: "1mm" }}>
         {/* Objectives */}
         <div>
-          <div style={{ fontSize: "2.5mm", fontWeight: 800, color: "#000080", borderBottom: `0.2mm solid ${accent}`, paddingBottom: "0.2mm", marginBottom: "0.5mm" }}>
+          <div style={{ fontSize: "2.5mm", fontWeight: 800, color: "var(--society-ink)", borderBottom: `0.2mm solid ${accent}`, paddingBottom: "0.2mm", marginBottom: "0.5mm" }}>
             {t.objectives}
           </div>
           <ol style={{ margin: 0, paddingLeft: "3.5mm", fontSize: e.backMatter.size, lineHeight: e.backMatter.lineHeight, color: e.backMatter.color, fontFamily: e.backMatter.font, display: e.backMatter.visible ? undefined : "none" }}>
@@ -354,27 +354,27 @@ function CardBack({
         {/* Oath + MBR app QR side-by-side */}
         <div style={{ marginTop: "0.4mm", display: "flex", gap: "2mm", alignItems: "flex-start" }}>
           <div style={{ flex: 1, minWidth: 0, visibility: e.oath.visible ? undefined : "hidden" }}>
-            <div style={{ fontSize: "2.5mm", fontWeight: 800, color: "#138808", borderBottom: "0.2mm solid #138808", paddingBottom: "0.2mm", marginBottom: "0.4mm" }}>
+            <div style={{ fontSize: "2.5mm", fontWeight: 800, color: "var(--india-green)", borderBottom: "0.2mm solid var(--india-green)", paddingBottom: "0.2mm", marginBottom: "0.4mm" }}>
               {t.oath}
             </div>
             <div style={{ fontSize: e.oath.size, lineHeight: e.oath.lineHeight, color: e.oath.color, fontFamily: e.oath.font, fontStyle: "italic" }}>
-              "{copy(design.oathText || L.te.oathText, "oathText").replace(/\{name\}/g, memberName)}" — <span style={{ fontWeight: 700, fontStyle: "normal", color: "#000080" }}>{memberName}</span>
+              "{copy(design.oathText || L.te.oathText, "oathText").replace(/\{name\}/g, memberName)}" — <span style={{ fontWeight: 700, fontStyle: "normal", color: "var(--society-ink)" }}>{memberName}</span>
             </div>
-            <div style={{ fontSize: "2.1mm", fontWeight: 800, color: "#C8102E", marginTop: "0.4mm", letterSpacing: "0.2mm" }}>
+            <div style={{ fontSize: "2.1mm", fontWeight: 800, color: "var(--society-blood)", marginTop: "0.4mm", letterSpacing: 0 }}>
               {t.jaihind} 🇮🇳
             </div>
           </div>
           <div style={{ flexShrink: 0, textAlign: "center" }}>
             {e.mbrQrCode.visible && appQrUrl && (
               appQrLink ? (
-                <a href={appQrLink} aria-label="Open member registration QR" style={{ height: e.mbrQrCode.imgSize, width: e.mbrQrCode.imgSize, border: "0.2mm solid #000080", padding: "0.3mm", background: "#fff", display: "block", boxSizing: "border-box" }}>
+                <a href={appQrLink} aria-label="Open member registration QR" style={{ height: e.mbrQrCode.imgSize, width: e.mbrQrCode.imgSize, border: "0.2mm solid var(--society-ink)", padding: "0.3mm", background: "var(--society-paper)", display: "block", boxSizing: "border-box" }}>
                   <img src={appQrUrl} alt="MBR APP" style={{ height: "100%", width: "100%", objectFit: "contain", display: "block" }} />
                 </a>
               ) : (
-                <img src={appQrUrl} alt="MBR APP" style={{ height: e.mbrQrCode.imgSize, width: e.mbrQrCode.imgSize, border: "0.2mm solid #000080", padding: "0.3mm", background: "#fff" }} />
+                <img src={appQrUrl} alt="MBR APP" style={{ height: e.mbrQrCode.imgSize, width: e.mbrQrCode.imgSize, border: "0.2mm solid var(--society-ink)", padding: "0.3mm", background: "var(--society-paper)" }} />
               )
             )}
-            <div style={{ fontSize: "1.5mm", fontWeight: 700, color: "#000080", marginTop: "0.3mm", lineHeight: 1.1, maxWidth: "13mm" }}>
+            <div style={{ fontSize: "1.5mm", fontWeight: 700, color: "var(--society-ink)", marginTop: "0.3mm", lineHeight: 1.1, maxWidth: "13mm" }}>
               {t.mbrApp}
             </div>
           </div>
@@ -386,8 +386,8 @@ function CardBack({
 
 function Row({ label, value, style }: { label: string; value: string; style?: ElementStyle }) {
   return (
-    <div style={{ fontSize: style?.size || "2.2mm", color: style?.color || "#222", fontFamily: style?.font, marginTop: "0.3mm", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-      <span style={{ color: "#666" }}>{label}: </span>
+    <div style={{ fontSize: style?.size || "2.2mm", color: style?.color || "var(--society-body)", fontFamily: style?.font, marginTop: "0.3mm", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+      <span style={{ color: "var(--society-muted)" }}>{label}: </span>
       <span style={{ fontWeight: 600 }}>{value}</span>
     </div>
   );
@@ -399,5 +399,5 @@ export function SocietyCardRenderer({ design, org, member, side, lang }: { desig
   const person: Member = { id: "preview", name: member.name, member_code: member.memberCode, father_name: member.fatherName, village: member.village, mandal: member.mandal || member.pincode, phone: member.phone, joined_date: member.joinedDate, blood_group: member.bloodGroup, is_active: member.status !== "inactive" };
   const props = { design, lang, t: L[lang] };
   const nullRef = { current: null };
-  return side === "front" ? <CardFront {...props} fref={nullRef} member={person} org={society} photoUrl={member.photoUrl || null} logoUrl={org.logoUrl || null} sigUrl={org.presidentSignatureUrl || null} qrDataUrl={member.qrUrl || ""} qrLink={member.qrLink || undefined} joined={member.joinedDate ? new Date(member.joinedDate).toLocaleDateString("en-IN") : "—"} roleKey={member.roleKey} /> : <CardBack {...props} bref={nullRef} memberName={member.name} appQrUrl={org.mbrQrUrl || ""} appQrLink={org.mbrQrLink || undefined} accent={design.global.accentColor} />;
+  return side === "front" ? <CardFront {...props} fref={nullRef} member={person} org={society} photoUrl={member.photoUrl || null} logoUrl={org.logoUrl || null} sigUrl={org.presidentSignatureUrl || null} qrDataUrl={member.qrUrl || ""} qrLink={member.qrLink || undefined} joined={member.joinedDate ? new Date(member.joinedDate).toLocaleDateString(lang === "hi" ? "hi-IN" : lang === "en" ? "en-IN" : "te-IN", { day: "2-digit", month: "2-digit", year: "numeric" }) : "—"} roleKey={member.roleKey} /> : <CardBack {...props} bref={nullRef} memberName={member.name} appQrUrl={org.mbrQrUrl || ""} appQrLink={org.mbrQrLink || undefined} accent={design.global.accentColor} />;
 }
