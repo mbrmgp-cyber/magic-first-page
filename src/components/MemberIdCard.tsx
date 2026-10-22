@@ -9,6 +9,7 @@ import { Printer, IdCard, User, RotateCw, Languages } from "lucide-react";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 import { IdCardRenderer, type OrgContext, type SampleMember } from "@/components/IdCard/IdCardRenderer";
 import type { IdCardDesign } from "@/lib/idCardTemplates";
+import { societyIdCardDesign } from "@/lib/idCardTemplates";
 import { memberRegistrationUrl, memberVerifyUrl } from "@/lib/public-url";
 import { pdfText } from "@/lib/loan-pdf";
 
@@ -295,13 +296,17 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
   function handlePrint() {
     const f = frontRef.current; const b = backRef.current;
     if (!f || !b) return;
-    const frontHtml = f.outerHTML.replace(/₹/g, "Rs.").replace(/రూ\.?/g, "Rs.").replace(/د\.إ/g, "AED").replace(/د\.ك/g, "KWD");
-    const backHtml = b.outerHTML.replace(/₹/g, "Rs.").replace(/రూ\.?/g, "Rs.").replace(/د\.إ/g, "AED").replace(/د\.ك/g, "KWD");
+    const frontHtml = f.outerHTML.replace(/display:\s*none;?/g, "display:block;").replace(/₹/g, "Rs.").replace(/రూ\.?/g, "Rs.").replace(/د\.إ/g, "AED").replace(/د\.ك/g, "KWD");
+    const backHtml = b.outerHTML.replace(/display:\s*none;?/g, "display:block;").replace(/₹/g, "Rs.").replace(/రూ\.?/g, "Rs.").replace(/د\.إ/g, "AED").replace(/د\.ك/g, "KWD");
+    const computed = getComputedStyle(document.documentElement);
+    const printTokens = ["society-ink", "society-paper", "society-body", "society-text", "society-muted", "society-placeholder", "society-photo", "society-blood", "society-brand", "india-green", "saffron"]
+      .map((key) => `--${key}:${computed.getPropertyValue(`--${key}`)};`).join("");
     const html = `<!DOCTYPE html><html><head><title>ID Card - ${pdfText(member.name)}</title>
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Noto+Sans+Telugu:wght@400;600;700;800;900&family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap">
       <style>
+        :root { ${printTokens} }
         @page { size: 85.6mm 54mm; margin: 0; }
         @font-face{font-family:'Noto Sans Telugu';src:url('/fonts/NotoSansTelugu-Regular.ttf') format('truetype');font-weight:400;font-style:normal}
         @font-face{font-family:'Noto Sans Telugu';src:url('/fonts/NotoSansTelugu-Bold.ttf') format('truetype');font-weight:700 900;font-style:normal}
@@ -374,9 +379,9 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
           </Button>
         ))}
       </div>
-      {org?.id_card_design ? (
+      {org ? (
         <SavedDesignCard
-          design={org.id_card_design}
+          design={societyIdCardDesign(org)}
           org={effectiveOrg}
           member={member}
           photoUrl={photoUrl}
@@ -813,6 +818,9 @@ function SavedDesignCard({
     memberCode: member.member_code || undefined,
     designation: designation || "సభ్యుడు",
     village: member.village || undefined,
+    mandal: member.mandal || undefined,
+    joinedDate: member.joined_date || undefined,
+    roleKey: Object.keys(ROLE_NAMES).find((key) => ROLE_NAMES[key]?.[lang] === designation),
     pincode: undefined,
     phone: member.phone || undefined,
     email: member.email || undefined,
@@ -821,16 +829,19 @@ function SavedDesignCard({
     photoUrl: photoUrl,
     qrUrl: qrDataUrl || null,
     qrLink: memberQrLink || null,
-    status: (member as any)?.status === "approved" || (member as any)?.status === "active" ? "active" : "inactive",
+    status: member.is_active === false ? "inactive" : "active",
   };
   const side = showBack ? "back" : "front";
   return (
     <>
-      <div className="flex justify-center">
-        <div ref={side === "front" ? frontRef : backRef}>
-          <IdCardRenderer design={design} org={orgCtx} member={sample} side={side} scale={1} lang={lang} />
+      <ScaledCard>
+        <div ref={frontRef} style={{ display: side === "front" ? "block" : "none" }}>
+          <IdCardRenderer design={design} org={orgCtx} member={sample} side="front" scale={design.global.societyLayout ? 1 : 323.6 / 340} lang={lang} />
         </div>
-      </div>
+        <div ref={backRef} style={{ display: side === "back" ? "block" : "none" }}>
+          <IdCardRenderer design={design} org={orgCtx} member={sample} side="back" scale={design.global.societyLayout ? 1 : 323.6 / 340} lang={lang} />
+        </div>
+      </ScaledCard>
       <div className="flex justify-between items-center gap-2 pt-2">
         <Button
           size="sm"

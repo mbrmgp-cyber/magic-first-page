@@ -134,12 +134,27 @@
 
 :root {
   --saffron: #FF9933;
+  --society-ink: #000080;
+  --society-paper: #fff;
+  --society-body: #222;
+  --society-text: #111;
+  --society-muted: #666;
+  --society-placeholder: #999;
+  --society-photo: #f5f5f5;
+  --society-blood: #C8102E;
+  --society-brand: #000;
   --india-green: #138808;
   --cream: #FFF7E6;
   --gradient-tricolor: linear-gradient(135deg, #FF9933 0%, #FFF7E6 50%, #138808 100%);
   --gradient-tricolor-soft: linear-gradient(135deg, #FFE2C2 0%, #FFFBEF 50%, #C9E8C0 100%);
   --gradient-saffron-green: linear-gradient(90deg, #FF9933 0%, #138808 100%);
   --shadow-warm: 0 10px 30px -10px rgba(255, 153, 51, 0.45);
+}
+
+@media (max-width: 420px) {
+  .society-studio-preview .mbr-preserve-design {
+    zoom: 0.78;
+  }
 }
 
 @layer base {

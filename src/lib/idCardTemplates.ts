@@ -52,6 +52,7 @@ export type ElementStyle = {
 
 
 export type GlobalStyle = {
+  societyLayout?: boolean; // preserve the existing society card composition when editing
   borderColor: string;
   borderWidth: number;
   borderStyle: "solid" | "dashed" | "none";
@@ -206,9 +207,37 @@ export function defaultDesign(templateId: TemplateId = "classic", cardType: Card
 export function societyIdCardDesign(org: {
   id_card_design?: IdCardDesign | null;
   theme_color?: string | null;
+  theme_settings?: { headFont?: string; subFont?: string; subColor?: string; headAlign?: "left" | "center" | "right" } | null;
 }): IdCardDesign {
   if (org.id_card_design) return structuredClone(org.id_card_design);
   const design = defaultDesign("legacy", "normal");
+  design.global.societyLayout = true;
+  design.global.borderColor = "#000080";
+  design.global.borderWidth = 1.13;
+  design.global.cornerRadius = 11.34;
+  design.elements.logo.imgSize = 41.57;
+  design.elements.photo.imgSize = 75.59;
+  design.elements.orgName = { ...design.elements.orgName, font: org.theme_settings?.headFont || "Noto Sans", size: 13.61 };
+  design.elements.slogan = { ...design.elements.slogan, font: org.theme_settings?.subFont || "Noto Sans", size: 7.94, color: org.theme_settings?.subColor || "#000080" };
+  design.elements.regNumber = { ...design.elements.regNumber, size: 6.43, color: "#000080" };
+  design.elements.memberName.size = 12.85;
+  design.elements.fatherName.size = 8.31;
+  design.elements.village.size = 8.31;
+  design.elements.phone.size = 8.31;
+  design.elements.memberCode.size = 8.31;
+  design.elements.designation = { ...design.elements.designation, size: 7.56, weight: 800, color: "#ffffff" };
+  design.elements.qrCode = { visible: true, imgSize: 28.72, corner: "bl" };
+  design.elements.mbrLogo.imgSize = 28.72;
+  design.global.contactFooterTextSize = 7.18;
+  design.global.headerAlign = org.theme_settings?.headAlign || "left";
+  design.backMatter = "చిట్వేల్ మండల ప్రజలకు మౌలిక సదుపాయాల (విద్య, వైద్య, పర్యావరణ) ఏర్పాటు కై ప్రయత్నం.\nకుల, మత, ప్రాంత, వర్గ, రాజకీయాలకు అతీతంగా యువకులలో దేశభక్తిని పెంచడం. మానవత్వంతో నిస్వార్థ సేవ చేపట్టడం.\nఅత్యవసర పరిస్థితుల్లో ప్రభుత్వ అధికారులకు సహాయ సహకారాలు అందించడం. వారి నిజాయితీని గ్రహించి సన్మానించడం.";
+  design.oathText = "నేను నమ్మిన దైవం సాక్షిగా (భగవద్గీత / ఖురాన్ / బైబుల్) ఎటువంటి స్వార్థం లేకుండా ఈ సంఘంలోని నిబంధనలకు అనుగుణంగా నడుచుకుంటానని సభ్యునిగా ప్రమాణం చేస్తున్నాను.";
+  design.elements.oath.visible = true;
+  design.elements.backMatter.size = 7.56;
+  design.elements.backMatter.lineHeight = 1.3;
+  design.elements.oath.size = 7.56;
+  design.elements.oath.lineHeight = 1.3;
+  design.elements.mbrQrCode.imgSize = 41.57;
   if (org.theme_color) design.global.accentColor = org.theme_color;
   design.global.contactFooterBg = design.global.footerColor;
   design.global.memberCodeBadgeBg = design.elements.orgName.color;
