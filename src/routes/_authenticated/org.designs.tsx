@@ -28,6 +28,8 @@ import { CustomIdBuilder } from "@/components/CustomIdBuilder";
 import { Wand2 } from "lucide-react";
 import { localizeText, useI18n } from "@/lib/i18n";
 import { pdfText } from "@/lib/loan-pdf";
+import { supabase } from "@/integrations/supabase/client";
+import { resolveMemberPhoto } from "@/lib/member-photo";
 
 export const Route = createFileRoute("/_authenticated/org/designs")({
   head: () => ({ meta: [
@@ -1948,6 +1950,25 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
   const [side, setSide] = useState<"front" | "back">("front");
   const [step, setStep] = useState<"pick" | "edit">("edit");
   const [saving, setSaving] = useState(false);
+  const previewQ = useQuery({
+    queryKey: ["society-card-preview", org.id],
+    queryFn: async () => {
+      const { data: president, error: presidentError } = await supabase.from("committee_members")
+        .select("member_id, members(name, signature_url)").eq("org_id", org.id).eq("role", "president")
+        .eq("is_active", true).order("position_number").limit(1).maybeSingle();
+      if (presidentError) throw presidentError;
+      let query = supabase.from("members").select("id, name, father_name, member_code, village, mandal, phone, email, blood_group, address, photo_url, joined_date, is_active")
+        .eq("org_id", org.id).eq("status", "approved");
+      if (president?.member_id) query = query.eq("id", president.member_id);
+      const { data: member, error } = await query.order("member_code").limit(1).maybeSingle();
+      if (error) throw error;
+      const signer = president?.members as { name?: string; signature_url?: string | null } | null;
+      return { member, photoUrl: await resolveMemberPhoto(supabase, member?.photo_url),
+        presidentName: signer?.name || org.president_name,
+        signatureUrl: await resolveMemberPhoto(supabase, signer?.signature_url || org.president_signature_url),
+        roleKey: president?.member_id === member?.id ? "president" : "member" };
+    },
+  });
 
   useEffect(() => {
     setDesign(societyIdCardDesign(org));
@@ -1965,8 +1986,8 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
     slogan: org?.slogan || "॥ మానవసేవే మాధవసేవ ॥",
     regNumber: org?.gov_reg_number || "235/16",
     logoUrl: org?.logo_url,
-    presidentName: org?.president_name || "",
-    presidentSignatureUrl: org?.president_signature_url,
+    presidentName: previewQ.data?.presidentName || org?.president_name || "",
+    presidentSignatureUrl: previewQ.data?.signatureUrl || org?.president_signature_url,
     mbrLogoUrl: mbrLogo.url,
     mbrQrUrl: qrApi(memberRegUrl, 200),
     mbrQrLink: memberRegUrl,
@@ -1975,19 +1996,21 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
   };
 
   const sampleMember: SampleMember = {
-    name: "మన్నూరు భాస్కర్ రెడ్డి",
-    fatherName: "రోసి రెడ్డి",
-    memberCode: org?.letter_code ? `${org.letter_code}/0001` : "A/0001",
-    designation: (typeof window !== "undefined" && window.localStorage?.getItem("mbr_lang") === "en") ? "Member" : "సభ్యుడు",
-    village: "మార్గోపల్లి",
-    pincode: "516104",
-    phone: "+91 90595 94989",
-    email: "member@example.com",
-    bloodGroup: "B+",
-    address: "Chitvel, Kadapa, AP",
-    photoUrl: null,
+    name: previewQ.data?.member?.name || "—",
+    fatherName: previewQ.data?.member?.father_name || undefined,
+    memberCode: previewQ.data?.member?.member_code || undefined,
+    roleKey: previewQ.data?.roleKey,
+    designation: previewQ.data?.roleKey === "president" ? localizeText({ en: "President", te: "అధ్యక్షుడు", hi: "अध्यक्ष" }, lang) : localizeText({ en: "Member", te: "సభ్యుడు", hi: "सदस्य" }, lang),
+    village: previewQ.data?.member?.village || undefined,
+    mandal: previewQ.data?.member?.mandal || undefined,
+    joinedDate: previewQ.data?.member?.joined_date || undefined,
+    phone: previewQ.data?.member?.phone || undefined,
+    email: previewQ.data?.member?.email || undefined,
+    bloodGroup: previewQ.data?.member?.blood_group || undefined,
+    address: previewQ.data?.member?.address || undefined,
+    photoUrl: previewQ.data?.photoUrl || null,
     qrUrl: qrApi(memberRegUrl + (memberRegUrl.includes("?") ? "&" : "?") + "m=A_0001", 160),
-    status: "active",
+    status: previewQ.data?.member?.is_active === false ? "inactive" : "active",
   };
 
 
