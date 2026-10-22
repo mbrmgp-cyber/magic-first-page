@@ -297,7 +297,7 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
     const f = frontRef.current; const b = backRef.current;
     if (!f || !b) return;
     const frontHtml = f.outerHTML.replace(/₹/g, "Rs.").replace(/రూ\.?/g, "Rs.").replace(/د\.إ/g, "AED").replace(/د\.ك/g, "KWD");
-    const backHtml = b.outerHTML.replace(/₹/g, "Rs.").replace(/రూ\.?/g, "Rs.").replace(/د\.إ/g, "AED").replace(/د\.ك/g, "KWD");
+    const backHtml = b.outerHTML.replace(/display:\s*none;?/g, "display:block;").replace(/₹/g, "Rs.").replace(/రూ\.?/g, "Rs.").replace(/د\.إ/g, "AED").replace(/د\.ك/g, "KWD");
     const html = `<!DOCTYPE html><html><head><title>ID Card - ${pdfText(member.name)}</title>
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

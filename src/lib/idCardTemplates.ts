@@ -225,6 +225,7 @@ export function societyIdCardDesign(org: {
   design.elements.village.size = 8.31;
   design.elements.phone.size = 8.31;
   design.elements.memberCode.size = 8.31;
+  design.elements.designation = { ...design.elements.designation, size: 7.56, weight: 800, color: "#ffffff" };
   design.elements.qrCode = { visible: true, imgSize: 28.72, corner: "bl" };
   design.elements.mbrLogo.imgSize = 28.72;
   design.global.contactFooterTextSize = 7.18;
