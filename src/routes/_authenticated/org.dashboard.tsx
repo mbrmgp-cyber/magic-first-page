@@ -330,6 +330,7 @@ function Dashboard() {
                 <QrCode className="w-5 h-5 text-zinc-500" />
               )}
             </button>
+            <NotificationBell />
             <OrgSwitcher />
             <LanguageToggle />
           </div>
