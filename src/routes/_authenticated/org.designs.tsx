@@ -1957,7 +1957,7 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
         .select("member_id, members(name, signature_url)").eq("org_id", org.id).eq("role", "president")
         .eq("is_active", true).order("position_number").limit(1).maybeSingle();
       if (presidentError) throw presidentError;
-      let query = supabase.from("members").select("id, name, father_name, member_code, village, mandal, phone, email, blood_group, address, photo_url, joined_date, is_active")
+      let query = supabase.from("members").select("id, name, father_name, member_code, village, phone, email, blood_group, address, photo_url, joined_date, is_active")
         .eq("org_id", org.id).eq("status", "approved");
       if (president?.member_id) query = query.eq("id", president.member_id);
       const { data: member, error } = await query.order("member_code").limit(1).maybeSingle();
@@ -2002,7 +2002,7 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
     roleKey: previewQ.data?.roleKey,
     designation: previewQ.data?.roleKey === "president" ? localizeText({ en: "President", te: "అధ్యక్షుడు", hi: "अध्यक्ष" }, lang) : localizeText({ en: "Member", te: "సభ్యుడు", hi: "सदस्य" }, lang),
     village: previewQ.data?.member?.village || undefined,
-    mandal: previewQ.data?.member?.mandal || undefined,
+    mandal: previewQ.data?.member?.address?.split(",")[1]?.trim() || undefined,
     joinedDate: previewQ.data?.member?.joined_date || undefined,
     phone: previewQ.data?.member?.phone || undefined,
     email: previewQ.data?.member?.email || undefined,

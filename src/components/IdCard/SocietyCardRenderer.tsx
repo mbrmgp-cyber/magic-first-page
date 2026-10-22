@@ -2,30 +2,7 @@ import type { IdCardDesign, ElementStyle } from "@/lib/idCardTemplates";
 import type { OrgContext, SampleMember } from "./IdCardRenderer";
 import { User } from "lucide-react";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
-function tr(text: string | null | undefined, lang: "te" | "en" | "hi"): string {
-  if (!text) return "";
-  if (lang === "te") return text;
-  const hasTelugu = /[\u0C00-\u0C7F]/.test(text);
-  if (!hasTelugu) return text;
-  if (lang === "hi") {
-    try { return Sanscript.t(text, "telugu", "devanagari"); } catch { return text; }
-  }
-  // English: telugu -> itrans, then prettify
-  let out: string;
-  try { out = Sanscript.t(text, "telugu", "itrans"); } catch { return text; }
-  return out
-    .replace(/~N|~n/g, "n")
-    .replace(/\.n/g, "n")
-    .replace(/[A-Z]/g, (c) => c.toLowerCase())
-    .replace(/aa/g, "a").replace(/ii/g, "i").replace(/uu/g, "u")
-    .replace(/RRi|R\^i/g, "ri")
-    .replace(/\^|\.|_/g, "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .split(/\s+/)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
-}
+import { sharedTranslation } from "@/lib/language-support";
 
 
 type Org = {
@@ -173,10 +150,10 @@ function CardFront({
           <div style={{ height: e.logo.imgSize, width: e.logo.imgSize, borderRadius: "50%", background: "#fff" }} />
         ))}
         <div style={{ flex: 1, minWidth: 0, lineHeight: 1.35, textAlign: g.headerAlign || "left" }}>
-          <div style={{ fontFamily: org?.theme_settings?.headFont ? `${org.theme_settings.headFont}, ${TELUGU_FONT}` : TELUGU_FONT, fontSize: e.orgName.size, fontWeight: e.orgName.weight, color: e.orgName.color, letterSpacing: "0.05mm", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          <div style={{ fontFamily: `${e.orgName.font}, ${TELUGU_FONT}`, fontSize: e.orgName.size, fontWeight: e.orgName.weight, color: e.orgName.color, letterSpacing: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
             {e.orgName.visible && (org?.name ?? "Organization")}
           </div>
-          <div style={{ fontFamily: org?.theme_settings?.subFont ? `${org.theme_settings.subFont}, ${TELUGU_FONT}` : TELUGU_FONT, fontSize: e.slogan.size, color: e.slogan.color, fontWeight: e.slogan.weight, marginTop: "0.3mm", fontStyle: "italic", lineHeight: 1.3 }}>
+          <div style={{ fontFamily: `${e.slogan.font}, ${TELUGU_FONT}`, fontSize: e.slogan.size, color: e.slogan.color, fontWeight: e.slogan.weight, marginTop: "0.3mm", fontStyle: "italic", lineHeight: 1.3 }}>
             {e.slogan.visible && (lang === "te" ? SLOGAN : lang === "hi" ? "॥ मानवसेवा ही माधव सेवा ॥" : "॥ Service to Humanity is Service to God ॥")}
           </div>
           {e.regNumber.visible && org?.gov_reg_number && (
@@ -315,7 +292,7 @@ function CardFront({
         </div>
 
         <div style={{
-          height: e.qrCode.imgSize, width: e.qrCode.imgSize,
+          height: e.mbrLogo.imgSize, width: e.mbrLogo.imgSize,
           background: "#000",
           borderRadius: "50%",
           display: "flex", alignItems: "center", justifyContent: "center",
@@ -340,6 +317,9 @@ function CardBack({
   lang: CardLang;
   accent: string;
 }) {
+  const e = design.elements;
+  const copy = (value: string, key: string) => value === L.te[key] ? t[key] : sharedTranslation(lang, value) || value;
+  const objectives = (design.backMatter || `${L.te.obj1}\n${L.te.obj2}\n${L.te.obj3}`).split("\n");
   return (
     <div
       ref={bref}
@@ -366,34 +346,32 @@ function CardBack({
           <div style={{ fontSize: "2.5mm", fontWeight: 800, color: "#000080", borderBottom: `0.2mm solid ${accent}`, paddingBottom: "0.2mm", marginBottom: "0.5mm" }}>
             {t.objectives}
           </div>
-          <ol style={{ margin: 0, paddingLeft: "3.5mm", fontSize: "2mm", lineHeight: 1.3, color: "#222" }}>
-            <li style={{ marginBottom: "0.4mm" }}>{design.backMatter?.split("\n")[0] || t.obj1}</li>
-            <li style={{ marginBottom: "0.4mm" }}>{design.backMatter?.split("\n")[1] || t.obj2}</li>
-            <li>{design.backMatter?.split("\n").slice(2).join("\n") || t.obj3}</li>
+          <ol style={{ margin: 0, paddingLeft: "3.5mm", fontSize: e.backMatter.size, lineHeight: e.backMatter.lineHeight, color: e.backMatter.color, fontFamily: e.backMatter.font, display: e.backMatter.visible ? undefined : "none" }}>
+            {objectives.map((text, index) => <li key={index} style={{ marginBottom: "0.4mm" }}>{copy(text, `obj${index + 1}`)}</li>)}
           </ol>
         </div>
 
         {/* Oath + MBR app QR side-by-side */}
         <div style={{ marginTop: "0.4mm", display: "flex", gap: "2mm", alignItems: "flex-start" }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ flex: 1, minWidth: 0, visibility: e.oath.visible ? undefined : "hidden" }}>
             <div style={{ fontSize: "2.5mm", fontWeight: 800, color: "#138808", borderBottom: "0.2mm solid #138808", paddingBottom: "0.2mm", marginBottom: "0.4mm" }}>
               {t.oath}
             </div>
-            <div style={{ fontSize: "2mm", lineHeight: 1.3, color: "#222", fontStyle: "italic" }}>
-              "{(design.oathText || t.oathText).replace(/\{name\}/g, memberName)}" — <span style={{ fontWeight: 700, fontStyle: "normal", color: "#000080" }}>{memberName}</span>
+            <div style={{ fontSize: e.oath.size, lineHeight: e.oath.lineHeight, color: e.oath.color, fontFamily: e.oath.font, fontStyle: "italic" }}>
+              "{copy(design.oathText || L.te.oathText, "oathText").replace(/\{name\}/g, memberName)}" — <span style={{ fontWeight: 700, fontStyle: "normal", color: "#000080" }}>{memberName}</span>
             </div>
             <div style={{ fontSize: "2.1mm", fontWeight: 800, color: "#C8102E", marginTop: "0.4mm", letterSpacing: "0.2mm" }}>
               {t.jaihind} 🇮🇳
             </div>
           </div>
           <div style={{ flexShrink: 0, textAlign: "center" }}>
-            {appQrUrl && (
+            {e.mbrQrCode.visible && appQrUrl && (
               appQrLink ? (
-                <a href={appQrLink} aria-label="Open member registration QR" style={{ height: e.logo.imgSize, width: e.logo.imgSize, border: "0.2mm solid #000080", padding: "0.3mm", background: "#fff", display: "block", boxSizing: "border-box" }}>
+                <a href={appQrLink} aria-label="Open member registration QR" style={{ height: e.mbrQrCode.imgSize, width: e.mbrQrCode.imgSize, border: "0.2mm solid #000080", padding: "0.3mm", background: "#fff", display: "block", boxSizing: "border-box" }}>
                   <img src={appQrUrl} alt="MBR APP" style={{ height: "100%", width: "100%", objectFit: "contain", display: "block" }} />
                 </a>
               ) : (
-                <img src={appQrUrl} alt="MBR APP" style={{ height: e.logo.imgSize, width: e.logo.imgSize, border: "0.2mm solid #000080", padding: "0.3mm", background: "#fff" }} />
+                <img src={appQrUrl} alt="MBR APP" style={{ height: e.mbrQrCode.imgSize, width: e.mbrQrCode.imgSize, border: "0.2mm solid #000080", padding: "0.3mm", background: "#fff" }} />
               )
             )}
             <div style={{ fontSize: "1.5mm", fontWeight: 700, color: "#000080", marginTop: "0.3mm", lineHeight: 1.1, maxWidth: "13mm" }}>
