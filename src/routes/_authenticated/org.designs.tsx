@@ -2000,7 +2000,7 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
   async function onSave() {
     setSaving(true);
     try {
-      await saveDesign({ data: { id_card_design: design as any } });
+      await saveDesign({ data: { org_id: org.id, id_card_design: design as any } });
       toast.success("ID Card design saved — applies to all members automatically", { description: "డిజైన్ సేవ్ అయింది. సభ్యులందరికీ ఆటోమేటిక్ గా అప్లై అవుతుంది." });
       orgQ.refetch();
     } catch (e: any) {

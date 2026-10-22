@@ -771,16 +771,20 @@ export const updateOrgAdBanners = createServerFn({ method: "POST" })
 
 export const updateOrgIdDesign = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id_card_design: Record<string, any> }) => d)
+  .inputValidator((d: { org_id: string; id_card_design: Record<string, any> }) => d)
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
+    const { supabase } = context;
+    const { data: canEdit, error: permissionError } = await supabase.rpc("can_edit_org", { _org_id: data.org_id });
+    if (permissionError) throw new Error(permissionError.message);
+    if (!canEdit) throw new Error("You do not have permission to edit this society's design");
     const { data: org, error } = await supabase
       .from("organizations")
       .update({ id_card_design: data.id_card_design } as any)
-      .eq("admin_user_id", userId)
+      .eq("id", data.org_id)
       .select(ORG_SAFE_COLUMNS)
-      .single();
+      .maybeSingle();
     if (error) throw new Error(error.message);
+    if (!org) throw new Error("The society design could not be saved");
     return { org };
   });
 
