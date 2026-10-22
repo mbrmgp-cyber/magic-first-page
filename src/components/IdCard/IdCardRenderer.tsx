@@ -1,5 +1,6 @@
 import type { IdCardDesign, ElementStyle } from "@/lib/idCardTemplates";
 import mbrLogoAsset from "@/assets/mbr-logo.png.asset.json";
+import { SocietyCardRenderer } from "./SocietyCardRenderer";
 
 export type SampleMember = {
   name: string;
@@ -7,6 +8,9 @@ export type SampleMember = {
   memberCode?: string;
   designation?: string;
   village?: string;
+  mandal?: string;
+  joinedDate?: string;
+  roleKey?: string;
   pincode?: string;
   phone?: string;
   email?: string;
@@ -96,8 +100,9 @@ export function IdCardRenderer({ design, org, member, side, scale = 1, lang: lan
   const cardLang = langProp || ((typeof window !== "undefined" && window.localStorage?.getItem("mbr_lang")) || "te");
   currentCardLang = cardLang;
   const isVertical = design.templateId === "vertical" || design.cardType === "keychain";
-  const baseW = design.cardType === "keychain" ? KEYCHAIN_W : isVertical ? NORMAL_H : NORMAL_W;
-  const baseH = design.cardType === "keychain" ? KEYCHAIN_H : isVertical ? NORMAL_W : NORMAL_H;
+  const societyLayout = design.templateId === "legacy" && design.global.societyLayout && !isVertical;
+  const baseW = societyLayout ? 323.6 : design.cardType === "keychain" ? KEYCHAIN_W : isVertical ? NORMAL_H : NORMAL_W;
+  const baseH = societyLayout ? 204.1 : design.cardType === "keychain" ? KEYCHAIN_H : isVertical ? NORMAL_W : NORMAL_H;
 
   const g = design.global;
   const bgImg = side === "front" ? g.frontBgImage : g.backBgImage;
@@ -128,7 +133,7 @@ export function IdCardRenderer({ design, org, member, side, scale = 1, lang: lan
   return (
     <div className="mbr-preserve-design" data-theme-preserve="card" style={containerStyle}>
       <div style={inner}>
-        {side === "front" ? renderFront(design, org, member) : renderBack(design, org, member)}
+        {societyLayout ? <SocietyCardRenderer design={design} org={org} member={member} side={side} lang={cardLang === "hi" ? "hi" : cardLang === "en" ? "en" : "te"} /> : side === "front" ? renderFront(design, org, member) : renderBack(design, org, member)}
       </div>
     </div>
   );

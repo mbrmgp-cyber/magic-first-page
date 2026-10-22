@@ -7,6 +7,7 @@ describe("society ID card editing", () => {
     expect(design.templateId).toBe("legacy");
     expect(design.global.accentColor).toBe("#FF9933");
     expect(design.global.contactFooterBg).toBe("#138808");
+    expect(design.global.societyLayout).toBe(true);
   });
 
   it("preserves the saved card rather than replacing its independent colors and text", () => {

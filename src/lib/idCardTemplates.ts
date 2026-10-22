@@ -207,6 +207,7 @@ export function defaultDesign(templateId: TemplateId = "classic", cardType: Card
 export function societyIdCardDesign(org: {
   id_card_design?: IdCardDesign | null;
   theme_color?: string | null;
+  theme_settings?: { headFont?: string; subFont?: string; subColor?: string; headAlign?: "left" | "center" | "right" } | null;
 }): IdCardDesign {
   if (org.id_card_design) return structuredClone(org.id_card_design);
   const design = defaultDesign("legacy", "normal");
@@ -227,6 +228,10 @@ export function societyIdCardDesign(org: {
   design.elements.qrCode = { visible: true, imgSize: 28.72, corner: "bl" };
   design.elements.mbrLogo.imgSize = 28.72;
   design.global.contactFooterTextSize = 7.18;
+  design.global.headerAlign = org.theme_settings?.headAlign || "left";
+  design.backMatter = "చిట్వేల్ మండల ప్రజలకు మౌలిక సదుపాయాల (విద్య, వైద్య, పర్యావరణ) ఏర్పాటు కై ప్రయత్నం.\nకుల, మత, ప్రాంత, వర్గ, రాజకీయాలకు అతీతంగా యువకులలో దేశభక్తిని పెంచడం. మానవత్వంతో నిస్వార్థ సేవ చేపట్టడం.\nఅత్యవసర పరిస్థితుల్లో ప్రభుత్వ అధికారులకు సహాయ సహకారాలు అందించడం. వారి నిజాయితీని గ్రహించి సన్మానించడం.";
+  design.oathText = "నేను నమ్మిన దైవం సాక్షిగా (భగవద్గీత / ఖురాన్ / బైబుల్) ఎటువంటి స్వార్థం లేకుండా ఈ సంఘంలోని నిబంధనలకు అనుగుణంగా నడుచుకుంటానని సభ్యునిగా ప్రమాణం చేస్తున్నాను.";
+  design.elements.oath.visible = true;
   if (org.theme_color) design.global.accentColor = org.theme_color;
   design.global.contactFooterBg = design.global.footerColor;
   design.global.memberCodeBadgeBg = design.elements.orgName.color;

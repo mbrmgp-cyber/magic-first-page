@@ -813,6 +813,9 @@ function SavedDesignCard({
     memberCode: member.member_code || undefined,
     designation: designation || "సభ్యుడు",
     village: member.village || undefined,
+    mandal: member.mandal || undefined,
+    joinedDate: member.joined_date || undefined,
+    roleKey: Object.keys(ROLE_NAMES).find((key) => ROLE_NAMES[key]?.[lang] === designation),
     pincode: undefined,
     phone: member.phone || undefined,
     email: member.email || undefined,
@@ -821,7 +824,7 @@ function SavedDesignCard({
     photoUrl: photoUrl,
     qrUrl: qrDataUrl || null,
     qrLink: memberQrLink || null,
-    status: (member as any)?.status === "approved" || (member as any)?.status === "active" ? "active" : "inactive",
+    status: member.is_active === false ? "inactive" : "active",
   };
   const side = showBack ? "back" : "front";
   return (
