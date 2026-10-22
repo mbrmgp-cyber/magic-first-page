@@ -2148,7 +2148,7 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
           <TemplateCustomizer design={design} onChange={setDesign} />
 
           {/* Save */}
-          <div className="sticky bottom-0 -mx-4 px-4 py-3 border-t" data-theme-surface="big-box" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
+          <div className="-mx-4 px-4 py-3 border-t" data-theme-surface="big-box" style={{ background: PAGE_PANEL, borderColor: PAGE_BORDER }}>
             <Button onClick={onSave} disabled={saving}
               className="w-full h-12 text-sm font-bold"
               style={{ background: theme.buttonBg, color: theme.buttonText }}>
