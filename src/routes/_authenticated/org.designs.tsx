@@ -2138,7 +2138,7 @@ function TemplateFirstIdCard({ org, orgQ, theme }: { org: any; orgQ: any; theme:
                 overscrollBehavior: "contain",
               }}
             >
-              <div style={{ width: "100%", minWidth: "max-content", padding: 12, display: "flex", justifyContent: "center" }}>
+              <div className="society-studio-preview" style={{ width: "100%", padding: 12, display: "flex", justifyContent: "center" }}>
                 <IdCardRenderer design={design} org={orgCtx} member={sampleMember} side={side} scale={1} lang={lang === "hi" ? "hi" : lang === "en" ? "en" : "te"} />
               </div>
             </div>

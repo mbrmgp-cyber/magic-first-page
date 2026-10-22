@@ -9,6 +9,7 @@ import { Printer, IdCard, User, RotateCw, Languages } from "lucide-react";
 import mbrLogo from "@/assets/mbr-logo.png.asset.json";
 import { IdCardRenderer, type OrgContext, type SampleMember } from "@/components/IdCard/IdCardRenderer";
 import type { IdCardDesign } from "@/lib/idCardTemplates";
+import { societyIdCardDesign } from "@/lib/idCardTemplates";
 import { memberRegistrationUrl, memberVerifyUrl } from "@/lib/public-url";
 import { pdfText } from "@/lib/loan-pdf";
 
@@ -374,9 +375,9 @@ export function MemberIdCard({ member, org }: { member: Member; org: Org | null 
           </Button>
         ))}
       </div>
-      {org?.id_card_design ? (
+      {org ? (
         <SavedDesignCard
-          design={org.id_card_design}
+          design={societyIdCardDesign(org)}
           org={effectiveOrg}
           member={member}
           photoUrl={photoUrl}
@@ -829,11 +830,14 @@ function SavedDesignCard({
   const side = showBack ? "back" : "front";
   return (
     <>
-      <div className="flex justify-center">
-        <div ref={side === "front" ? frontRef : backRef}>
-          <IdCardRenderer design={design} org={orgCtx} member={sample} side={side} scale={1} lang={lang} />
+      <ScaledCard>
+        <div ref={frontRef} style={{ display: side === "front" ? "block" : "none" }}>
+          <IdCardRenderer design={design} org={orgCtx} member={sample} side="front" scale={design.global.societyLayout ? 1 : 323.6 / 340} lang={lang} />
         </div>
-      </div>
+        <div ref={backRef} style={{ display: side === "back" ? "block" : "none" }}>
+          <IdCardRenderer design={design} org={orgCtx} member={sample} side="back" scale={design.global.societyLayout ? 1 : 323.6 / 340} lang={lang} />
+        </div>
+      </ScaledCard>
       <div className="flex justify-between items-center gap-2 pt-2">
         <Button
           size="sm"
