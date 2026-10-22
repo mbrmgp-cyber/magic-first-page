@@ -52,6 +52,7 @@ export type ElementStyle = {
 
 
 export type GlobalStyle = {
+  societyLayout?: boolean; // preserve the existing society card composition when editing
   borderColor: string;
   borderWidth: number;
   borderStyle: "solid" | "dashed" | "none";
@@ -209,6 +210,23 @@ export function societyIdCardDesign(org: {
 }): IdCardDesign {
   if (org.id_card_design) return structuredClone(org.id_card_design);
   const design = defaultDesign("legacy", "normal");
+  design.global.societyLayout = true;
+  design.global.borderColor = "#000080";
+  design.global.borderWidth = 1.13;
+  design.global.cornerRadius = 11.34;
+  design.elements.logo.imgSize = 41.57;
+  design.elements.photo.imgSize = 75.59;
+  design.elements.orgName = { ...design.elements.orgName, font: org.theme_settings?.headFont || "Noto Sans", size: 13.61 };
+  design.elements.slogan = { ...design.elements.slogan, font: org.theme_settings?.subFont || "Noto Sans", size: 7.94, color: org.theme_settings?.subColor || "#000080" };
+  design.elements.regNumber = { ...design.elements.regNumber, size: 6.43, color: "#000080" };
+  design.elements.memberName.size = 12.85;
+  design.elements.fatherName.size = 8.31;
+  design.elements.village.size = 8.31;
+  design.elements.phone.size = 8.31;
+  design.elements.memberCode.size = 8.31;
+  design.elements.qrCode = { visible: true, imgSize: 28.72, corner: "bl" };
+  design.elements.mbrLogo.imgSize = 28.72;
+  design.global.contactFooterTextSize = 7.18;
   if (org.theme_color) design.global.accentColor = org.theme_color;
   design.global.contactFooterBg = design.global.footerColor;
   design.global.memberCodeBadgeBg = design.elements.orgName.color;
