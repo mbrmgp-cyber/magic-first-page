@@ -1,3 +1,4 @@
+import { NotificationBell } from "@/components/NotificationBell";
 import { signOutToSociety } from "@/lib/society-logout";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
