@@ -1,5 +1,9 @@
 # Language support
 
+# Separate app search branding and direct entry
+- [ ] Verify app entry URLs, app-specific logos and default MBR shortcut destination.
+- [ ] Separate Google search logos: requires user-approved separate hostnames and domain connections; paths on one hostname share Google's favicon.
+
 # Admin organization member counts
 - [x] Correct organization details so the admin sees actual members and status totals, not a silent zero on read failure.
 - [x] Verify counts against the signed-in admin panel and add a regression test: Chitvel 10 approved, other societies 1 each; three tests passed.

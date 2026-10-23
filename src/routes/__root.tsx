@@ -28,7 +28,7 @@ const MBR_MANIFEST = `data:application/manifest+json;charset=utf-8,${encodeURICo
     name: "MBR APP",
     short_name: "MBR",
     description: "MBR APP",
-    start_url: "/",
+    start_url: "/mbr",
     scope: "/",
     display: "standalone",
     orientation: "portrait",
@@ -120,9 +120,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "MBR APP" },
       { property: "og:description", content: "MBR APP — Member Based Registry" },
       { property: "og:type", content: "website" },
-      { property: "og:image", content: MBR_LOGO },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:image", content: MBR_LOGO },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

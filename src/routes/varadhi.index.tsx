@@ -30,6 +30,8 @@ export const Route = createFileRoute("/varadhi/")({
         content: "మీ ఊరిలో వస్తువులు అమ్మండి, కొనండి, రవాణా మరియు స్థానిక సేవలు కనుగొనండి.",
       },
       { property: "og:url", content: "https://mbrplatform.com/varadhi" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
     links: [{ rel: "canonical", href: "https://mbrplatform.com/varadhi" }],
   }),
