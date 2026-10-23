@@ -1,7 +1,7 @@
 # Language support
 
 # Separate app search branding and direct entry
-- [ ] Verify app entry URLs, app-specific logos and default MBR shortcut destination.
+- [x] Verify /mbr and /varadhi open directly with their own logos; default MBR shortcut starts at /mbr, society shortcuts retain their portal; two tests passed.
 - [ ] Separate Google search logos: requires user-approved separate hostnames and domain connections; paths on one hostname share Google's favicon.
 
 # Admin organization member counts
