@@ -1,4 +1,5 @@
 - Android apps (Capacitor) load the live published site via server.url; select app with CAP_APP in capacitor.config.ts — why: web updates reach app users without Play Store releases.
+- Default MBR manifests and shortcuts without society context start at /mbr; society shortcuts retain their code-specific portal — why: app shortcuts must not open the platform chooser.
 - Keep supported-language validation, batch limits and bundled shared controls in language-support.ts; DOM translation reads cache only — why: menu/server parity and no AI spending triggered by page rendering.
 - Bundle Vaaradhi and recovery copy with source-language aliases through language-support.ts — why: exact Hindi/Telugu translations work offline and survive language switching without changing entered data.
 - Use translation for UI/descriptions and transliteration only for identity fields; never alter editable values — why: preserve meaning and original user data.

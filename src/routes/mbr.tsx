@@ -14,7 +14,12 @@ export const Route = createFileRoute("/mbr")({
       { name: "description", content: "Register your organization, share a unique QR code, and let members join with approval." },
       { property: "og:title", content: "MBR App — Society & Committee Administration" },
       { property: "og:description", content: "Register your organization, share a unique QR code, and let members join with approval." },
+      { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "MBR APP" },
+      { property: "og:url", content: "https://mbrplatform.com/mbr" },
+      { name: "twitter:card", content: "summary" },
     ],
+    links: [{ rel: "canonical", href: "https://mbrplatform.com/mbr" }],
   }),
   validateSearch: (s: Record<string, unknown>): { code?: string } => {
     const code = typeof s.code === "string" && s.code.trim() ? s.code.trim() : undefined;

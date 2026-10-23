@@ -43,7 +43,7 @@ export function StaticAppIcons() {
         name: "MBR APP",
         short_name: "MBR",
         description: "MBR APP",
-        start_url: "/",
+        start_url: "/mbr",
         scope: "/",
         display: "standalone",
         orientation: "portrait",

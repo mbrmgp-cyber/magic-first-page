@@ -15,13 +15,11 @@ export const Route = createFileRoute("/varadhi")({
       { name: "description", content: "వారధి అనేది స్థానిక కొనుగోళ్లు, అమ్మకాలు, రవాణా సౌకర్యాలు మరియు టెక్నీషియన్ సేవలను ఒకే చోట అందించే సమగ్ర వేదిక. వివరాల కోసం ఇప్పుడే చూడండి." },
       { property: "og:title", content: "Vaaradhi (వారధి) — Sell, Buy, Transport & Local Services | MBR Platform" },
       { property: "og:description", content: "వారధి అనేది స్థానిక కొనుగోళ్లు, అమ్మకాలు, రవాణా సౌకర్యాలు మరియు టెక్నీషియన్ సేవలను ఒకే చోట అందించే సమగ్ర వేదిక. వివరాల కోసం ఇప్పుడే చూడండి." },
-      { property: "og:image", content: varadhiLogo.url },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Vaaradhi" },
       { name: "application-name", content: "Vaaradhi" },
       { name: "apple-mobile-web-app-title", content: "Vaaradhi" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:image", content: varadhiLogo.url },
     ],
     links: [
       { rel: "manifest", href: "/varadhi-manifest.webmanifest" },

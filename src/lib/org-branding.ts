@@ -16,7 +16,7 @@ export type CachedOrgBranding = {
 export function orgStartUrl(code?: string | null): string {
   const origin = typeof window !== "undefined" ? window.location.origin : "";
   const c = (code || "").trim();
-  return c ? `${origin}/member/register?code=${encodeURIComponent(c)}&portal=1` : `${origin}/`;
+  return c ? `${origin}/member/register?code=${encodeURIComponent(c)}&portal=1` : `${origin}/mbr`;
 }
 
 const KEY = "mbr.org_branding";
