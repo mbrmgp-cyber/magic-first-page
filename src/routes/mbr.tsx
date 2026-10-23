@@ -5,6 +5,7 @@ import { Building2, Users, LogIn } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import logo from "@/assets/mbr-logo.png.asset.json";
+import { currentAppPageUrl } from "@/lib/app-host-context";
 
 
 export const Route = createFileRoute("/mbr")({
@@ -16,10 +17,10 @@ export const Route = createFileRoute("/mbr")({
       { property: "og:description", content: "Register your organization, share a unique QR code, and let members join with approval." },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "MBR APP" },
-      { property: "og:url", content: "https://mbrplatform.com/mbr" },
+      { property: "og:url", content: currentAppPageUrl("/mbr") },
       { name: "twitter:card", content: "summary" },
     ],
-    links: [{ rel: "canonical", href: "https://mbrplatform.com/mbr" }],
+    links: [{ rel: "canonical", href: currentAppPageUrl("/mbr") }],
   }),
   validateSearch: (s: Record<string, unknown>): { code?: string } => {
     const code = typeof s.code === "string" && s.code.trim() ? s.code.trim() : undefined;

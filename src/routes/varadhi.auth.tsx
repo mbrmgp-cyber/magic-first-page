@@ -8,6 +8,7 @@ import { Mail, KeyRound, Lock, UserPlus } from "lucide-react";
 import varadhiLogo from "@/assets/varadhi-logo.jpg.asset.json";
 import { useI18n } from "@/lib/i18n";
 import { sharedTranslation } from "@/lib/language-support";
+import { currentAppPageUrl } from "@/lib/app-host-context";
 
 export const Route = createFileRoute("/varadhi/auth")({
   head: () => ({
@@ -18,10 +19,10 @@ export const Route = createFileRoute("/varadhi/auth")({
       { property: "og:description", content: "Register with an email OTP, then sign in to Vaaradhi with email and password." },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Vaaradhi" },
-      { property: "og:url", content: "https://mbrplatform.com/varadhi/auth" },
+      { property: "og:url", content: currentAppPageUrl("/varadhi/auth") },
       { name: "twitter:card", content: "summary" },
     ],
-    links: [{ rel: "canonical", href: "https://mbrplatform.com/varadhi/auth" }],
+    links: [{ rel: "canonical", href: currentAppPageUrl("/varadhi/auth") }],
   }),
   component: VaradhiAuthPage,
 });

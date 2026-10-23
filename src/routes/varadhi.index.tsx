@@ -14,6 +14,7 @@ import banner1 from "@/assets/varadhi-banner-1.jpg";
 import banner2 from "@/assets/varadhi-banner-2.jpg";
 import banner3 from "@/assets/varadhi-banner-3.jpg";
 import { Sparkles, ImageOff } from "lucide-react";
+import { currentAppPageUrl } from "@/lib/app-host-context";
 
 export const Route = createFileRoute("/varadhi/")({
   head: () => ({
@@ -29,11 +30,11 @@ export const Route = createFileRoute("/varadhi/")({
         property: "og:description",
         content: "మీ ఊరిలో వస్తువులు అమ్మండి, కొనండి, రవాణా మరియు స్థానిక సేవలు కనుగొనండి.",
       },
-      { property: "og:url", content: "https://mbrplatform.com/varadhi" },
+      { property: "og:url", content: currentAppPageUrl("/varadhi") },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
-    links: [{ rel: "canonical", href: "https://mbrplatform.com/varadhi" }],
+    links: [{ rel: "canonical", href: currentAppPageUrl("/varadhi") }],
   }),
   component: VaradhiHome,
 });

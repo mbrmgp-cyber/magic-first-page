@@ -1,4 +1,6 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
+import { currentAppHostname } from "@/lib/app-host-context";
+import { appEntryPath } from "@/lib/app-hosts";
 import { useEffect } from "react";
 import { ArrowRight, Building2, Sparkles, ShieldCheck, Layers, Globe2 } from "lucide-react";
 import logo from "@/assets/mbr-logo.png.asset.json";
@@ -32,6 +34,11 @@ const FAQS = [
 
 
 export const Route = createFileRoute("/")({
+  beforeLoad: ({ search }) => {
+    const entry = appEntryPath(currentAppHostname());
+    if (entry === "/mbr") throw redirect({ to: "/mbr", search: { code: search.code } });
+    if (entry === "/varadhi") throw redirect({ to: "/varadhi" });
+  },
   head: () => ({
     meta: [
       { title: "MBR Platform — Society Management & Local Marketplace" },
