@@ -2,8 +2,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Eye, EyeOff } from "lucide-react";
-import type { IdCardDesign, ElementKey } from "@/lib/idCardTemplates";
+import { Eye, EyeOff, Plus, Trash2 } from "lucide-react";
+import type { IdCardDesign, ElementKey, CustomText, CustomImage } from "@/lib/idCardTemplates";
 import { ELEMENT_LABELS, FONT_OPTIONS } from "@/lib/idCardTemplates";
 import { localizeText, useI18n } from "@/lib/i18n";
 
@@ -186,7 +186,132 @@ export function TemplateCustomizer({ design, onChange }: Props) {
       <Section title={lt("Back Side — Lines & Elements", "బ్యాక్ లైన్స్")}>
         {backKeys.map((k) => <ElementRow key={k} k={k} design={design} setElement={setElement} />)}
       </Section>
+
+      {/* CUSTOM ITEMS — add new text / photos, delete them anytime */}
+      <CustomItemsSection design={design} onChange={onChange} lt={lt} />
     </div>
+  );
+}
+
+function newId() {
+  return `c${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+}
+
+function CustomItemsSection({ design, onChange, lt }: { design: IdCardDesign; onChange: (next: IdCardDesign) => void; lt: (en: string, te: string) => string }) {
+  const texts = design.customTexts || [];
+  const images = design.customImages || [];
+
+  function setTexts(next: CustomText[]) { onChange({ ...design, customTexts: next }); }
+  function setImages(next: CustomImage[]) { onChange({ ...design, customImages: next }); }
+  function patchText(id: string, patch: Partial<CustomText>) { setTexts(texts.map((t) => (t.id === id ? { ...t, ...patch } : t))); }
+  function patchImage(id: string, patch: Partial<CustomImage>) { setImages(images.map((i) => (i.id === id ? { ...i, ...patch } : i))); }
+
+  function addText(side: "front" | "back") {
+    setTexts([...texts, { id: newId(), side, text: lt("New text", "కొత్త టెక్స్ట్"), x: 50, y: side === "front" ? 55 : 50, size: 9, color: "#111111", weight: 600, font: "Noto Sans" }]);
+  }
+  function addImage(side: "front" | "back", file: File) {
+    const reader = new FileReader();
+    reader.onload = () => setImages([...images, { id: newId(), side, url: String(reader.result), x: 50, y: 50, size: 40 }]);
+    reader.readAsDataURL(file);
+  }
+
+  const sideSelect = (value: "front" | "back", onPick: (v: "front" | "back") => void) => (
+    <Select value={value} onValueChange={(v) => onPick(v as "front" | "back")}>
+      <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+      <SelectContent>
+        <SelectItem value="front">{lt("Front", "ముందు")}</SelectItem>
+        <SelectItem value="back">{lt("Back", "వెనుక")}</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+
+  const posSliders = (x: number, y: number, onPos: (x: number, y: number) => void) => (
+    <>
+      <div className="space-y-1">
+        <Label className="text-[10px]" style={{ color: TEXT_SUB }}>↔ {lt("Left–Right", "ఎడమ–కుడి")} — {Math.round(x)}%</Label>
+        <input type="range" min={0} max={100} step={1} value={x} onChange={(e) => onPos(Number(e.target.value), y)} className="w-full" />
+      </div>
+      <div className="space-y-1">
+        <Label className="text-[10px]" style={{ color: TEXT_SUB }}>↕ {lt("Up–Down", "పై–కింద")} — {Math.round(y)}%</Label>
+        <input type="range" min={0} max={100} step={1} value={y} onChange={(e) => onPos(x, Number(e.target.value))} className="w-full" />
+      </div>
+    </>
+  );
+
+  return (
+    <Section title={lt("Add New Text / Photo (and Delete)", "కొత్త టెక్స్ట్ / ఫోటో యాడ్ చేయండి")}>
+      <div className="flex gap-2">
+        <button type="button" onClick={() => addText("front")}
+          className="flex-1 flex items-center justify-center gap-1 h-9 rounded-md text-[11px] font-semibold border"
+          style={{ background: "var(--mbr-theme-primary, #138808)", borderColor: PANEL_BORDER, color: "var(--mbr-theme-primary-fg, #ffffff)" }}>
+          <Plus className="h-3.5 w-3.5" /> {lt("Add Text", "టెక్స్ట్ యాడ్")}
+        </button>
+        <label className="flex-1 flex items-center justify-center gap-1 h-9 rounded-md text-[11px] font-semibold border cursor-pointer"
+          style={{ background: "var(--mbr-theme-primary, #138808)", borderColor: PANEL_BORDER, color: "var(--mbr-theme-primary-fg, #ffffff)" }}>
+          <Plus className="h-3.5 w-3.5" /> {lt("Add Photo", "ఫోటో యాడ్")}
+          <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) addImage("front", f); e.target.value = ""; }} />
+        </label>
+      </div>
+      <p className="text-[10px]" style={{ color: TEXT_SUB }}>
+        {lt(
+          "New items appear at the card center — move them with the Left–Right / Up–Down sliders. To remove an old fixed line, use its Show/Hidden button above.",
+          "కొత్తవి కార్డు మధ్యలో వస్తాయి — ఎడమ–కుడి / పై–కింద స్లయిడర్లతో జరపండి. పాత లైన్ తొలగించాలంటే పైన ఉన్న దాని Show/Hidden బటన్ వాడండి."
+        )}
+      </p>
+
+      {texts.map((t) => (
+        <div key={t.id} className="rounded-md p-2 border space-y-2" style={{ borderColor: PANEL_BORDER, background: MINI_BG }}>
+          <div className="flex items-center justify-between gap-2">
+            <Input value={t.text} onChange={(e) => patchText(t.id, { text: e.target.value })} className="h-8 text-xs flex-1" />
+            <button type="button" onClick={() => setTexts(texts.filter((x) => x.id !== t.id))}
+              className="flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded border"
+              style={{ borderColor: PANEL_BORDER, color: "#f87171", background: MINI_BG }}>
+              <Trash2 className="h-3 w-3" /> {lt("Delete", "తొలగించు")}
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1">
+              <Label className="text-[10px]" style={{ color: TEXT_SUB }}>{lt("Side", "వైపు")}</Label>
+              {sideSelect(t.side, (v) => patchText(t.id, { side: v }))}
+            </div>
+            <NumberField label={lt("Size (px)", "సైజ్ (px)")} value={t.size} min={5} max={28} onChange={(v) => patchText(t.id, { size: v })} />
+            <div className="space-y-1">
+              <Label className="text-[10px]" style={{ color: TEXT_SUB }}>{lt("Font", "ఫాంట్")}</Label>
+              <Select value={t.font || "Noto Sans"} onValueChange={(v) => patchText(t.id, { font: v })}>
+                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>{FONT_OPTIONS.map((f) => <SelectItem key={f} value={f}>{f}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <ColorField label={lt("Color", "రంగు")} value={t.color} onChange={(v) => patchText(t.id, { color: v })} />
+          </div>
+          {posSliders(t.x, t.y, (x, y) => patchText(t.id, { x, y }))}
+        </div>
+      ))}
+
+      {images.map((i) => (
+        <div key={i.id} className="rounded-md p-2 border space-y-2" style={{ borderColor: PANEL_BORDER, background: MINI_BG }}>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <img src={i.url} alt="" style={{ width: 32, height: 32, objectFit: "cover", borderRadius: 4, border: `1px solid ${PANEL_BORDER}` }} />
+              <span className="text-[11px] font-semibold" style={{ color: TEXT_HEAD }}>{lt("Photo", "ఫోటో")}</span>
+            </div>
+            <button type="button" onClick={() => setImages(images.filter((x) => x.id !== i.id))}
+              className="flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded border"
+              style={{ borderColor: PANEL_BORDER, color: "#f87171", background: MINI_BG }}>
+              <Trash2 className="h-3 w-3" /> {lt("Delete", "తొలగించు")}
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1">
+              <Label className="text-[10px]" style={{ color: TEXT_SUB }}>{lt("Side", "వైపు")}</Label>
+              {sideSelect(i.side, (v) => patchImage(i.id, { side: v }))}
+            </div>
+            <NumberField label={lt("Size (px)", "సైజ్ (px)")} value={i.size} min={12} max={140} onChange={(v) => patchImage(i.id, { size: v })} />
+          </div>
+          {posSliders(i.x, i.y, (x, y) => patchImage(i.id, { x, y }))}
+        </div>
+      ))}
+    </Section>
   );
 }
 
