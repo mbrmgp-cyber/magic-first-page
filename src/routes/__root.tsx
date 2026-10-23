@@ -21,6 +21,8 @@ import { AndroidBackHandler } from "@/components/AndroidBackHandler";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import mbrLogoAsset from "../assets/mbr-logo.png.asset.json";
+import { currentAppHostname } from "@/lib/app-host-context";
+import { appForHostname } from "@/lib/app-hosts";
 
 const MBR_LOGO = mbrLogoAsset.url;
 const MBR_MANIFEST = `data:application/manifest+json;charset=utf-8,${encodeURIComponent(
@@ -124,12 +126,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.png", type: "image/png", sizes: "512x512" },
-      { rel: "icon", href: "/favicon.ico", sizes: "48x48" },
-      { rel: "shortcut icon", href: "/favicon.ico" },
-      { rel: "apple-touch-icon", href: MBR_LOGO },
-      { rel: "apple-touch-icon", sizes: "180x180", href: MBR_LOGO },
-      { rel: "manifest", href: MBR_MANIFEST },
+      { rel: "icon", href: appForHostname(currentAppHostname()) === "varadhi" ? "/varadhi-icon-512.png" : "/favicon.png", type: "image/png", sizes: "512x512" },
+      { rel: "icon", href: appForHostname(currentAppHostname()) === "varadhi" ? "/varadhi-icon-192.png" : "/favicon.ico" },
+      { rel: "shortcut icon", href: appForHostname(currentAppHostname()) === "varadhi" ? "/varadhi-icon-192.png" : "/favicon.ico" },
+      { rel: "apple-touch-icon", href: appForHostname(currentAppHostname()) === "varadhi" ? "/varadhi-apple-touch-icon.png" : MBR_LOGO },
+      { rel: "apple-touch-icon", sizes: "180x180", href: appForHostname(currentAppHostname()) === "varadhi" ? "/varadhi-apple-touch-icon.png" : MBR_LOGO },
+      { rel: "manifest", href: appForHostname(currentAppHostname()) === "varadhi" ? "/varadhi-manifest.webmanifest" : MBR_MANIFEST },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
