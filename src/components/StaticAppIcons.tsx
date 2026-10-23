@@ -3,6 +3,7 @@ import mbrLogoAsset from "@/assets/mbr-logo.png.asset.json";
 import { buildPaddedIconSet } from "@/lib/pad-icon";
 import { toManifestDataUrl } from "@/lib/manifest-url";
 import { getOrgBranding } from "@/lib/org-branding";
+import { appForHostname } from "@/lib/app-hosts";
 
 const MBR_LOGO_URL = mbrLogoAsset.url;
 
@@ -28,7 +29,7 @@ export function StaticAppIcons() {
     if (typeof document === "undefined") return;
     // Skip MBR icon/manifest injection on Varadhi routes so magic-link opens
     // don't flash MBR branding before Varadhi content mounts.
-    if (typeof window !== "undefined" && window.location.pathname.startsWith("/varadhi")) {
+    if (typeof window !== "undefined" && (window.location.pathname.startsWith("/varadhi") || appForHostname(window.location.hostname) === "varadhi")) {
       return;
     }
     // If the user's organization branding is already known, let it win.
