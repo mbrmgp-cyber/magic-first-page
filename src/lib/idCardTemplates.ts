@@ -71,6 +71,30 @@ export type GlobalStyle = {
   memberCodeBadgeBg?: string;     // "A/0001" id badge background
 };
 
+// Free-form items the society adds on top of the fixed layout.
+// x/y are percentages of the card width/height (0–100), so they scale with the card.
+export type CustomText = {
+  id: string;
+  side: "front" | "back";
+  text: string;
+  x: number; // % from left
+  y: number; // % from top
+  size: number; // px
+  color: string;
+  weight: number;
+  font?: string;
+};
+
+export type CustomImage = {
+  id: string;
+  side: "front" | "back";
+  url: string; // data URL or https URL
+  x: number;
+  y: number;
+  size: number; // px width/height
+  round?: boolean;
+};
+
 export type IdCardDesign = {
   cardType: CardType;
   templateId: TemplateId;
@@ -78,6 +102,8 @@ export type IdCardDesign = {
   elements: Record<ElementKey, ElementStyle>;
   backMatter?: string; // editable back-side paragraph text
   oathText?: string;   // editable oath / pledge text (use {name} for member name)
+  customTexts?: CustomText[];
+  customImages?: CustomImage[];
 };
 
 
