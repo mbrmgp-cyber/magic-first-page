@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { listProviders, logClick, type VaradhiProvider } from "@/lib/varadhi.functions";
 import { useListingImage } from "@/lib/varadhi-image";
+import { PostModerationActions } from "@/components/varadhi/PostModerationActions";
 import { ArrowLeft, Phone, MessageCircle, Share2, Truck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/varadhi/provider/$id")({
         { property: "og:title", content: title },
         { property: "og:description", content: desc },
         { property: "og:type", content: "profile" },
+        { name: "twitter:card", content: "summary_large_image" },
         { property: "og:url", content: url },
       ],
       links: [{ rel: "canonical", href: url }],
@@ -33,9 +35,11 @@ function ProviderDetail() {
   const [p, setP] = useState<VaradhiProvider | null>(null);
   const [phone, setPhone] = useState<string | null>(null);
   const [place, setPlace] = useState<string>("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
+      try {
       const r = await fetchAll({});
       const found = r.providers.find((x) => x.id === id) ?? null;
       setP(found);
@@ -55,13 +59,15 @@ function ProviderDetail() {
         setPlace(parts.join(", "));
         click({ data: { target_type: "provider", target_id: id } }).catch(() => {});
       }
+      } finally { setLoading(false); }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const photo = useListingImage((p as any)?.photo_url);
 
-  if (!p) return <p className="p-6 text-center text-sm">లోడ్…</p>;
+  if (loading) return <p className="p-6 text-center text-sm">లోడ్…</p>;
+  if (!p) return <div className="p-6 text-center text-sm"><p>పోస్ట్ దొరకలేదు</p><PostModerationActions target={{ target_type: "provider", target_id: id }} unavailable /></div>;
   const tel = phone ? `tel:${phone}` : "#";
   const wa = phone ? `https://wa.me/${phone.replace(/\D/g, "")}` : "#";
 
@@ -95,6 +101,7 @@ function ProviderDetail() {
         <h1 className="text-base font-bold text-[#1e3a8a] truncate">{p.title}</h1>
       </div>
 
+      <PostModerationActions target={{ target_type: "provider", target_id: id }} onRemoved={() => setP(null)} />
       {photo ? (
         <img
           src={photo}

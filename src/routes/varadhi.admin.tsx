@@ -19,6 +19,7 @@ import {
 } from "@/lib/varadhi.functions";
 import { AdminRequestsPanel, AdminHierarchyPanel } from "@/components/varadhi/AdminHierarchyPanel";
 import { AdminAuditPanel } from "@/components/varadhi/AdminAuditPanel";
+import { AdminPostReportsPanel } from "@/components/varadhi/AdminPostReportsPanel";
 import { AdminMessagesPanel } from "@/components/varadhi/AdminMessagesPanel";
 import { AdminPartnersPanel } from "@/components/varadhi/AdminPartnersPanel";
 import { ContactAdminForm } from "@/components/varadhi/ContactAdminForm";
@@ -43,6 +44,8 @@ export const Route = createFileRoute("/varadhi/admin")({
       { property: "og:title", content: "Vaaradhi Admin — Registrations & Approvals" },
       { property: "og:description", content: "Vaaradhi super admin panel to review and approve registrations." },
       { name: "robots", content: "noindex" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: VaradhiAdmin,
@@ -73,7 +76,7 @@ function VaradhiAdmin() {
   const scope = scopeQ.data;
   const isAdmin = isSuper || !!scope?.level;
 
-  type AdminTab = "reg" | "points" | "ticker" | "requests" | "hierarchy" | "partners" | "messages" | "audit";
+  type AdminTab = "reg" | "points" | "ticker" | "requests" | "hierarchy" | "partners" | "messages" | "audit" | "reports";
   const [tab, setTab] = useState<AdminTab>("reg");
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -159,9 +162,10 @@ function VaradhiAdmin() {
           { k: "hierarchy", label: "అడ్మిన్ హైరార్కీ" },
           ...(isSuper ? [{ k: "partners" as const, label: bi("పార్ట్‌నర్లు & పేఅవుట్లు", "Partners & Payouts", lang) }] : []),
           { k: "messages", label: "యూజర్ సందేశాలు" },
+          { k: "reports", label: "పోస్ట్ రిపోర్టులు" },
           { k: "audit", label: "మార్పుల చరిత్ర" },
         ];
-        const current = items.find((i) => i.k === tab) ?? items[0]!;
+        const current = items.find((i) => i.k === tab) ?? { k: "reg", label: "రిజిస్ట్రేషన్లు" };
         return (
           <div className="relative">
             <Button
@@ -207,6 +211,7 @@ function VaradhiAdmin() {
       {tab === "partners" && isSuper && <AdminPartnersPanel />}
       {tab === "messages" && <AdminMessagesPanel />}
       {tab === "audit" && <AdminAuditPanel />}
+      {tab === "reports" && <AdminPostReportsPanel />}
 
 
       {tab === "reg" && (

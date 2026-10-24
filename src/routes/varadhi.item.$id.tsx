@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { getListing, logClick, type VaradhiListing, type VaradhiProvider, type VaradhiProfile } from "@/lib/varadhi.functions";
 import { useListingImage } from "@/lib/varadhi-image";
+import { PostModerationActions } from "@/components/varadhi/PostModerationActions";
 import { formatAmount, formatPrice, isFreeListing, noPriceLabel, stockLabel } from "@/lib/varadhi-format";
 
 import { ArrowLeft, Phone, MessageCircle, Truck, Share2 } from "lucide-react";
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/varadhi/item/$id")({
         { property: "og:title", content: title },
         { property: "og:description", content: desc },
         { property: "og:type", content: "product" },
+        { name: "twitter:card", content: "summary_large_image" },
         { property: "og:url", content: url },
       ],
       links: [{ rel: "canonical", href: url }],
@@ -55,7 +57,7 @@ function ItemDetail() {
   const img1 = useListingImage(item?.images?.[1]);
 
   if (loading) return <p className="p-6 text-center text-sm">లోడ్ అవుతోంది…</p>;
-  if (!item) return <p className="p-6 text-center text-sm">వస్తువు దొరకలేదు</p>;
+  if (!item) return <div className="p-6 text-center text-sm"><p>వస్తువు దొరకలేదు</p><PostModerationActions target={{ target_type: "listing", target_id: id }} unavailable /></div>;
 
   const phone = (seller as any)?.phone;
   const waLink = phone ? `https://wa.me/${phone.replace(/\D/g, "")}` : "#";
@@ -74,6 +76,7 @@ function ItemDetail() {
         <h1 className="text-base font-bold text-[#1e3a8a] truncate">{item.title}</h1>
       </div>
 
+      <PostModerationActions target={{ target_type: "listing", target_id: id }} onRemoved={() => setItem(null)} />
       {img0 ? (
         <img src={img0} alt={item.title} className="mt-3 w-full aspect-square rounded-2xl object-cover bg-white" />
       ) : (
