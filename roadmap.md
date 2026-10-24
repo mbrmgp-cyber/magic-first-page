@@ -1,9 +1,9 @@
 # Language support
 
 # Vaaradhi post moderation
-- [ ] Add permission-checked removal with required reason and immutable admin attribution.
-- [ ] Add user reports and scoped admin report/history review.
-- [ ] Verify reports, removal, hidden public posts and retained history with tests and signed-in UI.
+- [x] Add permission-checked removal with required reason and immutable admin attribution; super admins across areas, regional admins within active seats.
+- [x] Add signed-in user reports and scoped admin report/history review, with owner-facing removal explanations.
+- [x] Verify reports, removal, hidden listing/provider after reload and retained reason/admin history in signed-in UI; 27 tests passed, build OK; temporary verification rows removed.
 
 # Separate app search branding and direct entry
 - [x] Verify /mbr and /varadhi open directly with their own logos; default MBR shortcut starts at /mbr, society shortcuts retain their portal; two tests passed.
