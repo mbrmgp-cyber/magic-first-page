@@ -5,6 +5,7 @@
 - [x] Separate app host routing and Google branding: verified root redirects, server-rendered app-specific icons and self-referencing entry canonicals; six regression tests passed. Hosted checks await domain setup and publication.
 - [x] Per-domain favicon, SEO title/description, Organization schema and host-scoped sitemap: verified on both hosts via server responses; six tests passed, build OK.
 - [ ] Activate separate Google search logos: Vaaradhi DNS setup, Unset as primary, and publish remain required; Google recrawl is outside app control.
+- [ ] Complete Vaaradhi domain connection and point app entry at its dedicated hostname; verify live opening and report any owner-only setup steps.
 
 # Admin organization member counts
 - [x] Correct organization details so the admin sees actual members and status totals, not a silent zero on read failure.
