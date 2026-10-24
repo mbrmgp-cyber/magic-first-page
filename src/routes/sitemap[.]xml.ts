@@ -35,13 +35,27 @@ const VARADHI_ENTRIES: SitemapEntry[] = [
 export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
-      GET: async () => {
-        const entries: SitemapEntry[] = [...STATIC_ENTRIES];
+      GET: async ({ request }) => {
+        // Resolve the requesting host so each app domain gets its own sitemap.
+        // Only the local development proxy supplies x-forwarded-host.
+        const reqUrl = new URL(request.url);
+        const forwarded = reqUrl.hostname === "localhost" ? request.headers.get("x-forwarded-host") : null;
+        const hostname = (forwarded ?? reqUrl.hostname).toLowerCase();
+        const app = appForHostname(hostname);
+        const origin = app ? `https://${hostname}` : MAIN_ORIGIN;
+
+        const entries: SitemapEntry[] =
+          app === "mbr"
+            ? [...MBR_ENTRIES]
+            : app === "varadhi"
+              ? [...VARADHI_ENTRIES]
+              : [...MBR_ENTRIES, ...VARADHI_ENTRIES];
 
         // Fetch dynamic Vaaradhi listings + providers via the service-role
         // client (bypasses RLS). Loaded inside the handler so the client-only
-        // server module never reaches the browser bundle.
-        try {
+        // server module never reaches the browser bundle. Skipped on the MBR
+        // app domain, whose sitemap lists MBR pages only.
+        if (app !== "mbr") try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
           const [listings, providers] = await Promise.all([
@@ -82,7 +96,7 @@ export const Route = createFileRoute("/sitemap.xml")({
         const urls = entries.map((e) =>
           [
             `  <url>`,
-            `    <loc>${BASE_URL}${e.path}</loc>`,
+            `    <loc>${origin}${e.path}</loc>`,
             e.lastmod ? `    <lastmod>${e.lastmod}</lastmod>` : null,
             e.changefreq ? `    <changefreq>${e.changefreq}</changefreq>` : null,
             e.priority ? `    <priority>${e.priority}</priority>` : null,
