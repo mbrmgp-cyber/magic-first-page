@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
+import { appForHostname } from "@/lib/app-hosts";
 
-const BASE_URL = "https://mbrplatform.com";
+const MAIN_ORIGIN = "https://mbrplatform.com";
 
 interface SitemapEntry {
   path: string;
@@ -10,10 +11,16 @@ interface SitemapEntry {
   priority?: string;
 }
 
-// Static public indexable routes.
-const STATIC_ENTRIES: SitemapEntry[] = [
+// Static public indexable routes, grouped per app.
+const MBR_ENTRIES: SitemapEntry[] = [
   { path: "/", changefreq: "weekly", priority: "1.0" },
   { path: "/mbr", changefreq: "monthly", priority: "0.9" },
+  { path: "/member/register", changefreq: "monthly", priority: "0.4" },
+  { path: "/org/register", changefreq: "monthly", priority: "0.4" },
+  { path: "/donor/register", changefreq: "monthly", priority: "0.4" },
+];
+
+const VARADHI_ENTRIES: SitemapEntry[] = [
   { path: "/varadhi", changefreq: "daily", priority: "0.9" },
   { path: "/varadhi/browse/fresh", changefreq: "daily", priority: "0.8" },
   { path: "/varadhi/browse/new", changefreq: "daily", priority: "0.8" },
@@ -23,9 +30,6 @@ const STATIC_ENTRIES: SitemapEntry[] = [
   { path: "/varadhi/browse/services", changefreq: "weekly", priority: "0.7" },
   { path: "/varadhi/rewards", changefreq: "monthly", priority: "0.5" },
   { path: "/varadhi/subscription", changefreq: "monthly", priority: "0.5" },
-  { path: "/member/register", changefreq: "monthly", priority: "0.4" },
-  { path: "/org/register", changefreq: "monthly", priority: "0.4" },
-  { path: "/donor/register", changefreq: "monthly", priority: "0.4" },
 ];
 
 export const Route = createFileRoute("/sitemap.xml")({
