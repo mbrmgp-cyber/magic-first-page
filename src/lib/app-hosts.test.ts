@@ -1,5 +1,10 @@
 import { expect, it } from "vitest";
-import { appEntryPath, appForHostname, appPageUrl } from "./app-hosts";
+import { appEntryPath, appForHostname, appPageUrl, VARADHI_APP_URL } from "./app-hosts";
+
+it("launches Vaaradhi links and the Android shell on its dedicated domain", () => {
+  expect(VARADHI_APP_URL).toBe("https://vaaradhi.mbrplatform.com/varadhi");
+  expect(appForHostname(new URL(VARADHI_APP_URL).hostname)).toBe("varadhi");
+});
 
 it("opens MBR APP on its approved hostname", () => {
   expect(appEntryPath("mbr.mbrplatform.com")).toBe("/mbr");

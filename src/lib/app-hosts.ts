@@ -1,3 +1,6 @@
+/** Public launch address shared by platform links and the Android shell. */
+export const VARADHI_APP_URL = "https://vaaradhi.mbrplatform.com/varadhi";
+
 export function appForHostname(hostname: string): "mbr" | "varadhi" | null {
   switch (hostname.toLowerCase()) {
     case "mbr.mbrplatform.com": return "mbr";

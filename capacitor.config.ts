@@ -3,6 +3,7 @@
 //   CAP_APP=mbr npx cap sync android
 //   CAP_APP=varadhi npx cap sync android   (use a separate checkout/android folder per app)
 import type { CapacitorConfig } from "@capacitor/cli";
+import { VARADHI_APP_URL } from "./src/lib/app-hosts";
 
 const APPS = {
   mbr: {
@@ -13,7 +14,7 @@ const APPS = {
   varadhi: {
     appId: "com.mbrplatform.varadhi",
     appName: "Vaaradhi",
-    url: "https://mbrplatform.com/varadhi",
+    url: VARADHI_APP_URL,
   },
 } as const;
 

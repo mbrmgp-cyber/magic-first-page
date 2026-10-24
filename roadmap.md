@@ -4,7 +4,9 @@
 - [x] Verify /mbr and /varadhi open directly with their own logos; default MBR shortcut starts at /mbr, society shortcuts retain their portal; two tests passed.
 - [x] Separate app host routing and Google branding: verified root redirects, server-rendered app-specific icons and self-referencing entry canonicals; six regression tests passed. Hosted checks await domain setup and publication.
 - [x] Per-domain favicon, SEO title/description, Organization schema and host-scoped sitemap: verified on both hosts via server responses; six tests passed, build OK.
-- [ ] Activate separate Google search logos: Vaaradhi DNS setup, Unset as primary, and publish remain required; Google recrawl is outside app control.
+- [ ] Google recrawl for separate search logos: both app domains are connected and Vaaradhi serves its own favicon; Google controls refresh timing.
+- [x] Verify Vaaradhi DNS connection and live root redirect to its app with its own favicon, canonical and sitemap; platform entry links and future Android shells use its dedicated hostname, seven regression tests passed and browser entry verified.
+- [ ] Publish dedicated Vaaradhi platform entry links; existing Android installations retain their packaged launch URL until updated.
 
 # Admin organization member counts
 - [x] Correct organization details so the admin sees actual members and status totals, not a silent zero on read failure.
