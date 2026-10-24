@@ -196,11 +196,14 @@ export const listListings = createServerFn({ method: "GET" })
     if (data.mine) {
       // Owners may see their own private fields (street address, contact phone).
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: removed, error: removalError } = await context.supabase.from("varadhi_post_removals").select("target_id").eq("target_type", "listing").eq("owner_id", context.userId);
+      if (removalError) throw new Error(removalError.message);
       let mq = supabaseAdmin
         .from("varadhi_listings").select("*")
         .eq("seller_id", context.userId)
         .order("created_at", { ascending: false });
       if (data.category) mq = mq.eq("category", data.category);
+      if (removed?.length) mq = mq.not("id", "in", `(${removed.map(r => r.target_id).join(",")})`);
       const { data: mine, error: mineErr } = await mq.limit(200);
       if (mineErr) throw new Error(mineErr.message);
       return { listings: (mine ?? []) as VaradhiListing[] };

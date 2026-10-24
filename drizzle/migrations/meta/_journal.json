@@ -36,6 +36,20 @@
       "when": 1792672745481,
       "tag": "0004_notifications",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792859376301,
+      "tag": "0005_vaaradhi_post_reports_and_moderation",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792859599148,
+      "tag": "0006_allow_signed_in_vaaradhi_post_reports",
+      "breakpoints": true
     }
   ]
 }

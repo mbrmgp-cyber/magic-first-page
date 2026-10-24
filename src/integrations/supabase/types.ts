@@ -2865,6 +2865,108 @@ export type Database = {
         }
         Relationships: []
       }
+      varadhi_post_removals: {
+        Row: {
+          actor_id: string
+          actor_name: string
+          created_at: string
+          district: string | null
+          id: string
+          mandal: string | null
+          owner_id: string
+          reason: string
+          state: string | null
+          target_id: string
+          target_type: string
+          title: string
+        }
+        Insert: {
+          actor_id: string
+          actor_name: string
+          created_at?: string
+          district?: string | null
+          id?: string
+          mandal?: string | null
+          owner_id: string
+          reason: string
+          state?: string | null
+          target_id: string
+          target_type: string
+          title: string
+        }
+        Update: {
+          actor_id?: string
+          actor_name?: string
+          created_at?: string
+          district?: string | null
+          id?: string
+          mandal?: string | null
+          owner_id?: string
+          reason?: string
+          state?: string | null
+          target_id?: string
+          target_type?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      varadhi_post_reports: {
+        Row: {
+          created_at: string
+          district: string | null
+          id: string
+          mandal: string | null
+          owner_id: string
+          reason: string
+          reporter_id: string
+          review_reason: string | null
+          reviewed_at: string | null
+          reviewer_id: string | null
+          reviewer_name: string | null
+          state: string | null
+          status: string
+          target_id: string
+          target_type: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          district?: string | null
+          id?: string
+          mandal?: string | null
+          owner_id: string
+          reason: string
+          reporter_id: string
+          review_reason?: string | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          reviewer_name?: string | null
+          state?: string | null
+          status?: string
+          target_id: string
+          target_type: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          district?: string | null
+          id?: string
+          mandal?: string | null
+          owner_id?: string
+          reason?: string
+          reporter_id?: string
+          review_reason?: string | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          reviewer_name?: string | null
+          state?: string | null
+          status?: string
+          target_id?: string
+          target_type?: string
+          title?: string
+        }
+        Relationships: []
+      }
       varadhi_profiles: {
         Row: {
           aadhaar_url: string | null
@@ -3463,11 +3565,23 @@ export type Database = {
         }
         Returns: undefined
       }
+      varadhi_can_moderate_area: {
+        Args: { _district: string; _mandal: string; _state: string }
+        Returns: boolean
+      }
       varadhi_log_click: {
         Args: { _target_id: string; _target_type: string }
         Returns: undefined
       }
+      varadhi_moderate_post: {
+        Args: { _action: string; _id: string; _reason?: string; _type: string }
+        Returns: Json
+      }
       varadhi_month_points: { Args: { _user_id: string }; Returns: number }
+      varadhi_post_is_removed: {
+        Args: { _id: string; _type: string }
+        Returns: boolean
+      }
       varadhi_request_payout: {
         Args: { _note?: string }
         Returns: {
