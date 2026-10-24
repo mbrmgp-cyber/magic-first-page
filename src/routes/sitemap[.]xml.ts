@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
+import { appForHostname } from "@/lib/app-hosts";
 
-const BASE_URL = "https://mbrplatform.com";
+const MAIN_ORIGIN = "https://mbrplatform.com";
 
 interface SitemapEntry {
   path: string;
@@ -10,10 +11,16 @@ interface SitemapEntry {
   priority?: string;
 }
 
-// Static public indexable routes.
-const STATIC_ENTRIES: SitemapEntry[] = [
+// Static public indexable routes, grouped per app.
+const MBR_ENTRIES: SitemapEntry[] = [
   { path: "/", changefreq: "weekly", priority: "1.0" },
   { path: "/mbr", changefreq: "monthly", priority: "0.9" },
+  { path: "/member/register", changefreq: "monthly", priority: "0.4" },
+  { path: "/org/register", changefreq: "monthly", priority: "0.4" },
+  { path: "/donor/register", changefreq: "monthly", priority: "0.4" },
+];
+
+const VARADHI_ENTRIES: SitemapEntry[] = [
   { path: "/varadhi", changefreq: "daily", priority: "0.9" },
   { path: "/varadhi/browse/fresh", changefreq: "daily", priority: "0.8" },
   { path: "/varadhi/browse/new", changefreq: "daily", priority: "0.8" },
@@ -23,21 +30,32 @@ const STATIC_ENTRIES: SitemapEntry[] = [
   { path: "/varadhi/browse/services", changefreq: "weekly", priority: "0.7" },
   { path: "/varadhi/rewards", changefreq: "monthly", priority: "0.5" },
   { path: "/varadhi/subscription", changefreq: "monthly", priority: "0.5" },
-  { path: "/member/register", changefreq: "monthly", priority: "0.4" },
-  { path: "/org/register", changefreq: "monthly", priority: "0.4" },
-  { path: "/donor/register", changefreq: "monthly", priority: "0.4" },
 ];
 
 export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
-      GET: async () => {
-        const entries: SitemapEntry[] = [...STATIC_ENTRIES];
+      GET: async ({ request }) => {
+        // Resolve the requesting host so each app domain gets its own sitemap.
+        // Only the local development proxy supplies x-forwarded-host.
+        const reqUrl = new URL(request.url);
+        const forwarded = reqUrl.hostname === "localhost" ? request.headers.get("x-forwarded-host") : null;
+        const hostname = (forwarded ?? reqUrl.hostname).toLowerCase();
+        const app = appForHostname(hostname);
+        const origin = app ? `https://${hostname}` : MAIN_ORIGIN;
+
+        const entries: SitemapEntry[] =
+          app === "mbr"
+            ? [...MBR_ENTRIES]
+            : app === "varadhi"
+              ? [...VARADHI_ENTRIES]
+              : [...MBR_ENTRIES, ...VARADHI_ENTRIES];
 
         // Fetch dynamic Vaaradhi listings + providers via the service-role
         // client (bypasses RLS). Loaded inside the handler so the client-only
-        // server module never reaches the browser bundle.
-        try {
+        // server module never reaches the browser bundle. Skipped on the MBR
+        // app domain, whose sitemap lists MBR pages only.
+        if (app !== "mbr") try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
           const [listings, providers] = await Promise.all([
@@ -78,7 +96,7 @@ export const Route = createFileRoute("/sitemap.xml")({
         const urls = entries.map((e) =>
           [
             `  <url>`,
-            `    <loc>${BASE_URL}${e.path}</loc>`,
+            `    <loc>${origin}${e.path}</loc>`,
             e.lastmod ? `    <lastmod>${e.lastmod}</lastmod>` : null,
             e.changefreq ? `    <changefreq>${e.changefreq}</changefreq>` : null,
             e.priority ? `    <priority>${e.priority}</priority>` : null,

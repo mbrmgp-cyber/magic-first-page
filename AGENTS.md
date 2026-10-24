@@ -1,6 +1,7 @@
 - Android apps (Capacitor) load the live published site via server.url; select app with CAP_APP in capacitor.config.ts — why: web updates reach app users without Play Store releases.
 - Default MBR manifests and shortcuts without society context start at /mbr; society shortcuts retain their code-specific portal — why: app shortcuts must not open the platform chooser.
 - Resolve only approved app hostnames through app-hosts and an isomorphic request boundary; redirect their root to the existing app route and self-reference entry canonicals — why: distinct Google site identities must not change main-domain routing or trust arbitrary hosts.
+- Derive per-host SEO (title, description, Organization schema, favicon links) from appBrandingForHostname in app-hosts.ts, and scope sitemap.xml entries to the requesting host — why: each app domain must present its own identity to Google without duplicating the other app's pages.
 - Keep supported-language validation, batch limits and bundled shared controls in language-support.ts; DOM translation reads cache only — why: menu/server parity and no AI spending triggered by page rendering.
 - Bundle Vaaradhi and recovery copy with source-language aliases through language-support.ts — why: exact Hindi/Telugu translations work offline and survive language switching without changing entered data.
 - Use translation for UI/descriptions and transliteration only for identity fields; never alter editable values — why: preserve meaning and original user data.

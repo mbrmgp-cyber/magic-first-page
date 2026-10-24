@@ -22,7 +22,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import mbrLogoAsset from "../assets/mbr-logo.png.asset.json";
 import { currentAppHostname } from "@/lib/app-host-context";
-import { appForHostname } from "@/lib/app-hosts";
+import { appBrandingForHostname, appForHostname } from "@/lib/app-hosts";
 
 const MBR_LOGO = mbrLogoAsset.url;
 const MBR_MANIFEST = `data:application/manifest+json;charset=utf-8,${encodeURIComponent(
@@ -105,24 +105,40 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
+  head: () => {
+    const hostname = currentAppHostname();
+    const branding = appBrandingForHostname(hostname);
+    return {
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "google-site-verification", content: "KtwmdwYueuvCfSG7MN_9xeycXzmmCW3UIDY_J7NLXyE" },
-      { title: "MBR APP" },
-      { name: "description", content: "MBR APP — Member Based Registry" },
-      { name: "author", content: "MBR APP" },
-      { name: "application-name", content: "MBR APP" },
-      { name: "apple-mobile-web-app-title", content: "MBR APP" },
+      { title: branding.title },
+      { name: "description", content: branding.description },
+      { name: "author", content: branding.orgName },
+      { name: "application-name", content: branding.orgName },
+      { name: "apple-mobile-web-app-title", content: branding.orgName },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
       { name: "theme-color", content: "#000000" },
-      { property: "og:title", content: "MBR APP" },
-      { property: "og:description", content: "MBR APP — Member Based Registry" },
+      { property: "og:title", content: branding.title },
+      { property: "og:description", content: branding.description },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: branding.orgName },
       { name: "twitter:card", content: "summary" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: branding.orgName,
+          url: branding.orgUrl,
+          logo: `${branding.orgUrl}${branding.logoPath}`,
+        }),
+      },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -139,7 +155,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Noto+Sans+Telugu:wght@400;600;700;800;900&family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap",
       },
     ],
-  }),
+    };
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
