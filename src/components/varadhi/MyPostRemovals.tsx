@@ -1,7 +1,6 @@
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { listPostModeration } from "@/lib/varadhi-moderation.functions";
-import { getMyVaradhiProfile } from "@/lib/varadhi.functions";
 import { useI18n } from "@/lib/i18n";
 import { sharedTranslation } from "@/lib/language-support";
 
