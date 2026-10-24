@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
 import { currentAppHostname } from "@/lib/app-host-context";
-import { appEntryPath } from "@/lib/app-hosts";
+import { appEntryPath, VARADHI_APP_URL } from "@/lib/app-hosts";
 import { useEffect } from "react";
 import { ArrowRight, Building2, Sparkles, ShieldCheck, Layers, Globe2 } from "lucide-react";
 import logo from "@/assets/mbr-logo.png.asset.json";
@@ -187,13 +187,13 @@ function PlatformPortal() {
             <span>Go to MBR App</span>
             <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
           </Link>
-          <Link
-            to="/varadhi"
+          <a
+            href={VARADHI_APP_URL}
             className="group inline-flex items-center justify-center gap-2 rounded-lg border border-[#c9a84c]/40 bg-[#0f1b3d]/40 backdrop-blur px-6 py-3.5 text-sm font-semibold text-[#f5f0e0] hover:border-[#c9a84c] hover:bg-[#1e3a5f]/60 transition-all"
           >
             <span>Go to Vaaradhi App</span>
             <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
-          </Link>
+          </a>
         </div>
 
       </section>
@@ -232,8 +232,8 @@ function PlatformPortal() {
           </Link>
 
           {/* Vaaradhi card */}
-          <Link
-            to="/varadhi"
+          <a
+            href={VARADHI_APP_URL}
             className="group relative rounded-2xl border border-[#c9a84c]/15 bg-gradient-to-br from-[#0f1b3d]/80 to-[#1e3a5f]/30 backdrop-blur p-8 hover:border-[#c9a84c]/50 transition-all overflow-hidden"
           >
             <div className="absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-[#c9a84c]/5 blur-3xl group-hover:bg-[#c9a84c]/15 transition-all" />
@@ -263,7 +263,7 @@ function PlatformPortal() {
                 <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
               </div>
             </div>
-          </Link>
+          </a>
         </div>
       </section>
 
@@ -407,7 +407,7 @@ function PlatformPortal() {
           <div>© {new Date().getFullYear()} MBR Platform. All rights reserved. · <a href="mailto:mbrplatform@gmail.com" className="hover:text-[#c9a84c]">mbrplatform@gmail.com</a></div>
           <div className="flex items-center gap-4">
             <Link to="/mbr" className="hover:text-[#c9a84c] transition-colors">MBR App</Link>
-            <Link to="/varadhi" className="hover:text-[#c9a84c] transition-colors">Vaaradhi</Link>
+            <a href={VARADHI_APP_URL} className="hover:text-[#c9a84c] transition-colors">Vaaradhi</a>
             <Link to="/privacy" className="hover:text-[#c9a84c] transition-colors">Privacy Policy</Link>
             <Link to="/delete-account" className="hover:text-[#c9a84c] transition-colors">Delete Account</Link>
           </div>
