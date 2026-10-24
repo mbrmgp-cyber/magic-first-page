@@ -21,7 +21,7 @@ export function AdminPostReportsPanel() {
       : q.data?.reports.length ? q.data.reports.map(r => <article key={r.id} className="border-b border-border py-3 space-y-1">
         <h3 className="font-semibold break-words">{r.title}</h3><p className="text-sm whitespace-pre-wrap break-words">{t("కారణం")}: {r.reason}</p><p className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString()} · {t(r.status === "pending" ? "పెండింగ్" : r.status === "removed" ? "పోస్ట్ తొలగించబడింది" : "రిపోర్ట్ మూసివేయబడింది")}</p>
         {r.review_reason && <p className="text-sm break-words">{r.review_reason} · {r.reviewer_name}</p>}
-        {r.status === "pending" && <><Link className="text-sm underline" to={r.target_type === "listing" ? "/varadhi/item/$id" : "/varadhi/provider/$id"} params={{ id: r.target_id }}>{t("పోస్ట్ చూడండి")}</Link><PostModerationActions target={r} canReview /></>}
+        {r.status === "pending" && <><Link className="text-sm underline" to={r.target_type === "listing" ? "/varadhi/item/$id" : "/varadhi/provider/$id"} params={{ id: r.target_id }}>{t("పోస్ట్ చూడండి")}</Link><PostModerationActions target={{ target_type: r.target_type === "provider" ? "provider" : "listing", target_id: r.target_id }} canReview /></>}
       </article>) : <p>{t("రిపోర్టులు లేవు")}</p>}
   </section>;
 }
