@@ -49,7 +49,7 @@ export function PostModerationActions({ target, onRemoved, canReview, unavailabl
     <Button variant="outline" size="sm" disabled={status.data?.reported} onClick={() => open("report")}><Flag className="mr-1 h-4 w-4" />{t(status.data?.reported ? "రిపోర్ట్ పంపబడింది" : "పోస్ట్ రిపోర్ట్ చేయండి")}</Button>
     {status.data?.canRemove && <><Button variant="destructive" size="sm" onClick={() => open("remove")}><Trash2 className="mr-1 h-4 w-4" />{t("పోస్ట్ తొలగించండి")}</Button>{canReview && <Button variant="outline" size="sm" onClick={() => open("dismiss")}>{t("రిపోర్ట్ మూసివేయండి")}</Button>}</>}
     <Dialog open={action !== null} onOpenChange={v => { if (!busy && !v) setAction(null); }}>
-      <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-lg">
+      <DialogContent className="max-w-[calc(100%_-_2rem)] sm:max-w-lg">
         <DialogHeader><DialogTitle>{t(action === "report" ? "పోస్ట్ రిపోర్ట్ చేయండి" : action === "remove" ? "పోస్ట్ తొలగించండి" : "రిపోర్ట్ మూసివేయండి")}</DialogTitle><DialogDescription>{t("కారణం")}</DialogDescription></DialogHeader>
         <Textarea aria-label={t("కారణం")} placeholder={t("కారణం ఇవ్వండి")} value={reason} onChange={e => setReason(e.target.value)} maxLength={1000} rows={4} />
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
