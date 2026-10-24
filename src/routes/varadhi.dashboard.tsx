@@ -17,8 +17,18 @@ import { toast } from "sonner";
 import { Plus, Trash2, Camera, Pencil, Save } from "lucide-react";
 import { VaradhiRegistrationForm } from "@/components/varadhi/RegistrationForm";
 import { VaradhiOccupationPanel } from "@/components/varadhi/OccupationPanel";
+import { MyPostRemovals } from "@/components/varadhi/MyPostRemovals";
 
 export const Route = createFileRoute("/varadhi/dashboard")({
+  head: () => ({ meta: [
+    { title: "My Posts & Profile — Vaaradhi" },
+    { name: "description", content: "Manage your Vaaradhi posts, availability and profile, and view post removal explanations." },
+    { property: "og:title", content: "My Posts & Profile — Vaaradhi" },
+    { property: "og:description", content: "Your Vaaradhi posts, profile and moderation history." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+    { name: "robots", content: "noindex" },
+  ] }),
   component: UpdateBoard,
 });
 
@@ -240,6 +250,7 @@ function UpdateBoard() {
       {hasProfile && (
         <>
           <AreaAdminCounts />
+          <MyPostRemovals />
 
           {/* వృత్తిని బట్టి వ్యక్తిగత డాష్‌బోర్డ్ — ఆమోదం పొందిన తర్వాత మాత్రమే */}
           {status === "approved" && <VaradhiOccupationPanel occupation={occupation} />}
