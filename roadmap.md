@@ -1,4 +1,5 @@
 # Language support
+- [ ] Make the item posting form show only the selected language and verify switching without changing entered values.
 
 # Vaaradhi post moderation
 - [x] Add permission-checked removal with required reason and immutable admin attribution; super admins across areas, regional admins within active seats.
