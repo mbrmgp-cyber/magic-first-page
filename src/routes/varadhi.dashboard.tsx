@@ -673,7 +673,7 @@ function PostSection({ postType }: { postType: string }) {
                   </button>
                 ))}
               </div>
-            </div>
+            </>
           )}
 
           {/* 1. వస్తువు పేరు + ఫోటో */}
@@ -1010,7 +1010,7 @@ function TransportSection() {
             </button>
             <button onClick={save} disabled={saving}
               className="col-span-2 rounded-xl bg-[#1e3a8a] py-2.5 text-white font-semibold flex items-center justify-center gap-1 disabled:opacity-60">
-              <Save className="h-4 w-4" /> {ui(saving ? "సేవ్ అవుతోంది…" : "సేవ్")}
+              <Save className="h-4 w-4" /> {saving ? "సేవ్ అవుతోంది…" : "సేవ్"}
             </button>
           </div>
         </div>
