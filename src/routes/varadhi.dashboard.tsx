@@ -673,41 +673,80 @@ function PostSection({ postType }: { postType: string }) {
             </>
           )}
 
-          <L n="1">{isLand ? "ఆస్తి పేరు / వివరం" : "అమ్మ దలిచిన వస్తువు పేరు"}</L>
-          <input className={inp} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-
-          <L n="2">రేటు (Rs.)</L>
-          <input className={inp} type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
-
-          <L n="3">ఫోటో</L>
-          <label className="flex items-center gap-2 rounded-lg border border-dashed border-[#1e3a8a]/30 bg-white px-3 py-3 text-xs text-[#1e3a8a]">
-            <Camera className="h-4 w-4" />
-            {form.photo ? "ఫోటో ఎంపిక అయింది ✓" : "ఫోటో అప్‌లోడ్ చేయండి"}
-            <input type="file" accept="image/*" className="hidden"
-              onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0], "photo")} />
-          </label>
-
-          <L n="4">{unitList.join(" / ")}</L>
-          <div className={`grid gap-1.5 ${unitList.length === 3 ? "grid-cols-3" : "grid-cols-3"}`}>
-            {unitList.map((u) => (
-              <button key={u} onClick={() => setForm({ ...form, unit: u })}
-                className={`rounded-lg py-2 text-[10px] font-semibold border ${
-                  form.unit === u ? "bg-[#1e3a8a] text-white border-[#1e3a8a]" : "bg-white text-[#1e3a8a] border-black/10"
-                }`}>
-                {u}
-              </button>
-            ))}
+          {/* 1. వస్తువు పేరు + ఫోటో */}
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <L n="1">{isLand ? "ఆస్తి పేరు / వివరం" : "అమ్మ దలిచిన వస్తువు పేరు"}</L>
+              <input className={inp} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+            </div>
+            <div>
+              <L n="">వస్తువు ఫోటో</L>
+              <label className="flex items-center justify-center gap-1.5 rounded-lg border border-dashed border-[#1e3a8a]/30 bg-white px-2 py-2.5 text-[11px] text-[#1e3a8a]">
+                <Camera className="h-4 w-4" />
+                {form.photo ? "ఫోటో ✓" : "ఫోటో అప్‌లోడ్"}
+                <input type="file" accept="image/*" className="hidden"
+                  onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0], "photo")} />
+              </label>
+            </div>
           </div>
-          <input className={inp} placeholder="ఇతర యూనిట్ రాయండి"
-            value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} />
 
-          <L n="4b">ఎంత స్టాక్ ఉంది?</L>
-          <input className={inp} placeholder={`ఉదా: 50 ${form.unit || ""}`}
-            value={form.stock_qty} onChange={(e) => setForm({ ...form, stock_qty: e.target.value })} />
+          {/* 2. రేటు + యూనిట్ + స్టాక్ */}
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <L n="2">రేటు (Rs.)</L>
+              <input className={inp} type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
+            </div>
+            <div>
+              <L n="">యూనిట్ ఎంచుకోండి</L>
+              <div className={`grid gap-1 ${unitList.length === 3 ? "grid-cols-3" : "grid-cols-3"}`}>
+                {unitList.map((u) => (
+                  <button key={u} onClick={() => setForm({ ...form, unit: u })}
+                    className={`rounded-lg py-2.5 text-[10px] font-semibold border ${
+                      form.unit === u ? "bg-[#1e3a8a] text-white border-[#1e3a8a]" : "bg-white text-[#1e3a8a] border-black/10"
+                    }`}>
+                    {u}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <input className={inp} placeholder="ఇతర యూనిట్ రాయండి (ఐచ్ఛికం)"
+            value={unitList.includes(form.unit) ? "" : form.unit}
+            onChange={(e) => setForm({ ...form, unit: e.target.value })} />
 
-          <L n="5">{isLand ? "భూమి / ల్యాండ్ లొకేషన్" : "వస్తువు దొరుకు లొకేషన్"}</L>
-          <input className={inp} placeholder="లొకేషన్ లేదా Google Maps లింక్"
-            value={form.pickup_location} onChange={(e) => setForm({ ...form, pickup_location: e.target.value })} />
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <L n="">అందుబాటులో ఉన్న స్టాక్</L>
+              <input className={inp} placeholder={`ఉదా: 50 ${form.unit || ""}`}
+                value={form.stock_qty} onChange={(e) => setForm({ ...form, stock_qty: e.target.value })} />
+            </div>
+            <div>
+              <L n="">స్టాక్</L>
+              <div className="grid grid-cols-2 gap-1">
+                {(["running", "closed"] as const).map((s) => (
+                  <button key={s} onClick={() => setForm({ ...form, stock_status: s })}
+                    className={`rounded-lg py-2.5 text-[11px] font-semibold border ${
+                      form.stock_status === s ? "bg-[#16a34a] text-white border-[#16a34a]" : "bg-white text-[#1e3a8a] border-black/10"
+                    }`}>
+                    {s === "running" ? "IN" : "OUT"}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* 3. పికప్ లొకేషన్ + కాంటాక్ట్ */}
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <L n="3">{isLand ? "భూమి లొకేషన్" : "వస్తువు పికప్ లొకేషన్"}</L>
+              <input className={inp} placeholder="Google map లింక్"
+                value={form.pickup_location} onChange={(e) => setForm({ ...form, pickup_location: e.target.value })} />
+            </div>
+            <div>
+              <L n="">కాంటాక్ట్ ఫోన్ నెంబరు</L>
+              <input className={inp} inputMode="tel" value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} />
+            </div>
+          </div>
           <div className="grid grid-cols-2 gap-2">
             <label className="flex items-center justify-center gap-1.5 rounded-lg border border-dashed border-[#1e3a8a]/30 bg-white px-2 py-2.5 text-[11px] text-[#1e3a8a]">
               <Camera className="h-4 w-4" />
@@ -721,43 +760,27 @@ function PostSection({ postType }: { postType: string }) {
             </button>
           </div>
 
-          <L n="6">ఇల్లు / షాప్ నెంబర్</L>
-          <input className={inp} value={form.house_no} onChange={(e) => setForm({ ...form, house_no: e.target.value })} />
-
-
-          <L n="7">వీధి, గ్రామం & మండలం</L>
-          <div className="grid grid-cols-3 gap-2">
+          {/* 4. పికప్ చిరునామా */}
+          <L n="4">వస్తువు పికప్ చిరునామా</L>
+          <div className="grid grid-cols-2 gap-2">
+            <input className={inp} placeholder="ఇల్లు / షాప్ నెంబర్" value={form.house_no} onChange={(e) => setForm({ ...form, house_no: e.target.value })} />
             <input className={inp} placeholder="వీధి" value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} />
-            <input className={inp} placeholder="గ్రామం" value={form.village} onChange={(e) => setForm({ ...form, village: e.target.value })} />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <input className={inp} placeholder="ఏరియా / గ్రామం" value={form.village} onChange={(e) => setForm({ ...form, village: e.target.value })} />
             <input className={inp} placeholder="మండలం" value={form.mandal} onChange={(e) => setForm({ ...form, mandal: e.target.value })} />
           </div>
-
-          <L n="8">తాలూకా & జిల్లా</L>
           <div className="grid grid-cols-2 gap-2">
-            <input className={inp} placeholder="తాలూకా" value={form.taluk} onChange={(e) => setForm({ ...form, taluk: e.target.value })} />
             <input className={inp} placeholder="జిల్లా" value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value })} />
-          </div>
-
-          <L n="9">రాష్ట్రం & పిన్‌కోడ్</L>
-          <div className="grid grid-cols-2 gap-2">
             <input className={inp} placeholder="రాష్ట్రం" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
-            <input className={inp} placeholder="పిన్‌కోడ్" inputMode="numeric" value={form.pincode} onChange={(e) => setForm({ ...form, pincode: e.target.value })} />
           </div>
-
-          <L n="10">కాంటాక్ట్ ఫోన్ నెంబరు</L>
-          <input className={inp} inputMode="tel" value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} />
-
-          <L n="11">స్టాక్</L>
           <div className="grid grid-cols-2 gap-2">
-            {(["running", "closed"] as const).map((s) => (
-              <button key={s} onClick={() => setForm({ ...form, stock_status: s })}
-                className={`rounded-lg py-2 text-[11px] font-semibold border ${
-                  form.stock_status === s ? "bg-[#16a34a] text-white border-[#16a34a]" : "bg-white text-[#1e3a8a] border-black/10"
-                }`}>
-                {s === "running" ? "స్టాక్ ఉంది" : "స్టాక్ లేదు"}
-              </button>
-            ))}
+            <input className={inp} placeholder="పిన్‌కోడ్" inputMode="numeric" value={form.pincode} onChange={(e) => setForm({ ...form, pincode: e.target.value })} />
+            <input className={inp} placeholder="తాలూకా (ఐచ్ఛికం)" value={form.taluk} onChange={(e) => setForm({ ...form, taluk: e.target.value })} />
           </div>
+
+          {/* 5. వివరణ */}
+          <L n="5">వివరణ</L>
           </>
           )}
 
@@ -810,7 +833,7 @@ function PostSection({ postType }: { postType: string }) {
 }
 
 function L({ n, children }: { n: string; children: React.ReactNode }) {
-  return <p className="text-[11px] font-semibold text-[#1e3a8a]/70 pt-1">{n}. {children}</p>;
+  return <p className="text-[11px] font-semibold text-[#1e3a8a]/70 pt-1">{n ? `${n}. ` : ""}{children}</p>;
 }
 
 const inp = "w-full rounded-lg border border-[#1e3a8a]/15 bg-white px-3 py-2 text-sm outline-none focus:border-[#1e3a8a]";
