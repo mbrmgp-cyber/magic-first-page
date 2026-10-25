@@ -833,7 +833,7 @@ function PostSection({ postType }: { postType: string }) {
 }
 
 function L({ n, children }: { n: string; children: React.ReactNode }) {
-  return <p className="text-[11px] font-semibold text-[#1e3a8a]/70 pt-1">{n}. {children}</p>;
+  return <p className="text-[11px] font-semibold text-[#1e3a8a]/70 pt-1">{n ? `${n}. ` : ""}{children}</p>;
 }
 
 const inp = "w-full rounded-lg border border-[#1e3a8a]/15 bg-white px-3 py-2 text-sm outline-none focus:border-[#1e3a8a]";
