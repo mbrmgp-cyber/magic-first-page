@@ -1,4 +1,5 @@
 # Language support
+- [x] Localize item form labels, placeholders, units and stock controls in Telugu/Hindi/English; 24 existing tests passed, build OK. Browser presentation checks with a temporary profile response confirmed language switching preserves typed values; real signed-in account has no Vaaradhi profile, so its posting flow remains unverified.
 
 # Vaaradhi post moderation
 - [x] Add permission-checked removal with required reason and immutable admin attribution; super admins across areas, regional admins within active seats.

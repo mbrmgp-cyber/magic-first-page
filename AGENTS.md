@@ -5,6 +5,7 @@
 - Derive per-host SEO (title, description, Organization schema, favicon links) from appBrandingForHostname in app-hosts.ts, and scope sitemap.xml entries to the requesting host — why: each app domain must present its own identity to Google without duplicating the other app's pages.
 - Keep supported-language validation, batch limits and bundled shared controls in language-support.ts; DOM translation reads cache only — why: menu/server parity and no AI spending triggered by page rendering.
 - Bundle Vaaradhi and recovery copy with source-language aliases through language-support.ts — why: exact Hindi/Telugu translations work offline and survive language switching without changing entered data.
+- Render item form labels and placeholders from bundled language-support translations, excluding that localized block from DOM translation and leaving controlled values untouched — why: selected-language copy must remain consistent without altering user input.
 - Use translation for UI/descriptions and transliteration only for identity fields; never alter editable values — why: preserve meaning and original user data.
 - Keep disciplinary appointment roles in one shared validated module and retain legacy role labels — why: selection, server validation and historical appointments must remain consistent.
 - Resolve private member photo paths through the caller's authenticated storage client before returning disciplinary overview data — why: raw paths cannot render and photo access must retain storage permissions.

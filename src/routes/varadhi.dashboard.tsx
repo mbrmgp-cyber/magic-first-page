@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice, isFreeListing, stockLabel } from "@/lib/varadhi-format";
 import { useI18n } from "@/lib/i18n";
+import { sharedTranslation } from "@/lib/language-support";
 
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -307,6 +308,8 @@ function AreaAdminCounts() {
 }
 
 function PostSection({ postType }: { postType: string }) {
+  const { lang } = useI18n();
+  const ui = (source: string) => sharedTranslation(lang, source) ?? source;
   const fetchMy = useServerFn(listListings);
   const upsert = useServerFn(upsertListing);
   const toggle = useServerFn(toggleListingStock);
@@ -457,7 +460,7 @@ function PostSection({ postType }: { postType: string }) {
 
               style={{ background: c.color }}
               className="rounded-xl py-2.5 text-[11px] font-semibold text-white shadow-sm flex items-center justify-center gap-1 active:scale-[.98]">
-              <Plus className="h-3.5 w-3.5" /> {c.te}
+              <Plus className="h-3.5 w-3.5" /> {ui(c.te)}
             </button>
           ))}
         </div>
@@ -471,7 +474,7 @@ function PostSection({ postType }: { postType: string }) {
               }}
               style={{ background: c.color }}
               className="rounded-xl py-2.5 text-[11px] font-semibold text-white shadow-sm flex items-center justify-center gap-1 active:scale-[.98]">
-              <Plus className="h-3.5 w-3.5" /> {c.te}
+              <Plus className="h-3.5 w-3.5" /> {ui(c.te)}
             </button>
           ))}
         </div>
@@ -483,7 +486,7 @@ function PostSection({ postType }: { postType: string }) {
           {postType === "business" && (
             <p className="text-[11px] font-semibold text-white inline-block rounded-full px-3 py-1"
               style={{ background: BUSINESS_CATS.find((c) => c.id === form.item_condition)?.color ?? "#1e3a8a" }}>
-              {BUSINESS_CATS.find((c) => c.id === form.item_condition)?.te ?? "కొత్త వస్తువులు"}
+              {ui(BUSINESS_CATS.find((c) => c.id === form.item_condition)?.te ?? "కొత్త వస్తువులు")}
             </p>
           )}
 
@@ -653,7 +656,7 @@ function PostSection({ postType }: { postType: string }) {
               </div>
             </>
           ) : (
-            <>
+            <div className="contents" data-notranslit>
 
 
 
@@ -666,7 +669,7 @@ function PostSection({ postType }: { postType: string }) {
                     className={`rounded-lg py-2 text-[10px] font-semibold border ${
                       form.property_type === p ? "bg-[#7c3aed] text-white border-[#7c3aed]" : "bg-white text-[#1e3a8a] border-black/10"
                     }`}>
-                    {p}
+                    {ui(p)}
                   </button>
                 ))}
               </div>
@@ -676,14 +679,14 @@ function PostSection({ postType }: { postType: string }) {
           {/* 1. వస్తువు పేరు + ఫోటో */}
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <L n="1">{isLand ? "ఆస్తి పేరు / వివరం" : "అమ్మ దలిచిన వస్తువు పేరు"}</L>
+              <L n="1">{ui(isLand ? "ఆస్తి పేరు / వివరం" : "అమ్మ దలిచిన వస్తువు పేరు")}</L>
               <input className={inp} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
             </div>
             <div>
               <L n="">వస్తువు ఫోటో</L>
               <label className="flex items-center justify-center gap-1.5 rounded-lg border border-dashed border-[#1e3a8a]/30 bg-white px-2 py-2.5 text-[11px] text-[#1e3a8a]">
                 <Camera className="h-4 w-4" />
-                {form.photo ? "ఫోటో ✓" : "ఫోటో అప్‌లోడ్"}
+                {ui(form.photo ? "ఫోటో ✓" : "ఫోటో అప్‌లోడ్")}
                 <input type="file" accept="image/*" className="hidden"
                   onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0], "photo")} />
               </label>
@@ -693,7 +696,7 @@ function PostSection({ postType }: { postType: string }) {
           {/* 2. రేటు + యూనిట్ + స్టాక్ */}
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <L n="2">రేటు (Rs.)</L>
+              <L n="2">రేటు (రూ.)</L>
               <input className={inp} type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
             </div>
             <div>
@@ -704,20 +707,20 @@ function PostSection({ postType }: { postType: string }) {
                     className={`rounded-lg py-2.5 text-[10px] font-semibold border ${
                       form.unit === u ? "bg-[#1e3a8a] text-white border-[#1e3a8a]" : "bg-white text-[#1e3a8a] border-black/10"
                     }`}>
-                    {u}
+                    {ui(u)}
                   </button>
                 ))}
               </div>
             </div>
           </div>
-          <input className={inp} placeholder="ఇతర యూనిట్ రాయండి (ఐచ్ఛికం)"
+          <input className={inp} placeholder={ui("ఇతర యూనిట్ రాయండి (ఐచ్ఛికం)")}
             value={unitList.includes(form.unit) ? "" : form.unit}
             onChange={(e) => setForm({ ...form, unit: e.target.value })} />
 
           <div className="grid grid-cols-2 gap-2">
             <div>
               <L n="">అందుబాటులో ఉన్న స్టాక్</L>
-              <input className={inp} placeholder={`ఉదా: 50 ${form.unit || ""}`}
+              <input className={inp} placeholder={`${ui("Example:")} 50 ${ui(form.unit || "")}`}
                 value={form.stock_qty} onChange={(e) => setForm({ ...form, stock_qty: e.target.value })} />
             </div>
             <div>
@@ -728,7 +731,7 @@ function PostSection({ postType }: { postType: string }) {
                     className={`rounded-lg py-2.5 text-[11px] font-semibold border ${
                       form.stock_status === s ? "bg-[#16a34a] text-white border-[#16a34a]" : "bg-white text-[#1e3a8a] border-black/10"
                     }`}>
-                    {s === "running" ? "IN" : "OUT"}
+                    {ui(s === "running" ? "In stock" : "Out of stock")}
                   </button>
                 ))}
               </div>
@@ -738,8 +741,8 @@ function PostSection({ postType }: { postType: string }) {
           {/* 3. పికప్ లొకేషన్ + కాంటాక్ట్ */}
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <L n="3">{isLand ? "భూమి లొకేషన్" : "వస్తువు పికప్ లొకేషన్"}</L>
-              <input className={inp} placeholder="Google map లింక్"
+              <L n="3">{ui(isLand ? "భూమి లొకేషన్" : "వస్తువు పికప్ లొకేషన్")}</L>
+              <input className={inp} placeholder={ui("Google Maps link")}
                 value={form.pickup_location} onChange={(e) => setForm({ ...form, pickup_location: e.target.value })} />
             </div>
             <div>
@@ -750,48 +753,48 @@ function PostSection({ postType }: { postType: string }) {
           <div className="grid grid-cols-2 gap-2">
             <label className="flex items-center justify-center gap-1.5 rounded-lg border border-dashed border-[#1e3a8a]/30 bg-white px-2 py-2.5 text-[11px] text-[#1e3a8a]">
               <Camera className="h-4 w-4" />
-              {form.location_photo ? "లొకేషన్ ఫోటో ✓" : "లొకేషన్ ఫోటో అప్‌లోడ్"}
+              {ui(form.location_photo ? "లొకేషన్ ఫోటో ✓" : "లొకేషన్ ఫోటో అప్‌లోడ్")}
               <input type="file" accept="image/*,application/pdf" className="hidden"
                 onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0], "location_photo")} />
             </label>
             <button type="button" onClick={useCurrentLocation}
               className="rounded-lg border border-[#1e3a8a]/20 bg-white px-2 py-2.5 text-[11px] font-semibold text-[#1e3a8a]">
-              📍 ప్రస్తుత లొకేషన్
+              📍 {ui("ప్రస్తుత లొకేషన్")}
             </button>
           </div>
 
           {/* 4. పికప్ చిరునామా */}
           <L n="4">వస్తువు పికప్ చిరునామా</L>
           <div className="grid grid-cols-2 gap-2">
-            <input className={inp} placeholder="ఇల్లు / షాప్ నెంబర్" value={form.house_no} onChange={(e) => setForm({ ...form, house_no: e.target.value })} />
-            <input className={inp} placeholder="వీధి" value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} />
+            <input className={inp} placeholder={ui("ఇల్లు / షాప్ నెంబర్")} value={form.house_no} onChange={(e) => setForm({ ...form, house_no: e.target.value })} />
+            <input className={inp} placeholder={ui("వీధి")} value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} />
           </div>
           <div className="grid grid-cols-2 gap-2">
-            <input className={inp} placeholder="ఏరియా / గ్రామం" value={form.village} onChange={(e) => setForm({ ...form, village: e.target.value })} />
-            <input className={inp} placeholder="మండలం" value={form.mandal} onChange={(e) => setForm({ ...form, mandal: e.target.value })} />
+            <input className={inp} placeholder={ui("ఏరియా / గ్రామం")} value={form.village} onChange={(e) => setForm({ ...form, village: e.target.value })} />
+            <input className={inp} placeholder={ui("మండలం")} value={form.mandal} onChange={(e) => setForm({ ...form, mandal: e.target.value })} />
           </div>
           <div className="grid grid-cols-2 gap-2">
-            <input className={inp} placeholder="జిల్లా" value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value })} />
-            <input className={inp} placeholder="రాష్ట్రం" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
+            <input className={inp} placeholder={ui("జిల్లా")} value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value })} />
+            <input className={inp} placeholder={ui("రాష్ట్రం")} value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
           </div>
           <div className="grid grid-cols-2 gap-2">
-            <input className={inp} placeholder="పిన్‌కోడ్" inputMode="numeric" value={form.pincode} onChange={(e) => setForm({ ...form, pincode: e.target.value })} />
-            <input className={inp} placeholder="తాలూకా (ఐచ్ఛికం)" value={form.taluk} onChange={(e) => setForm({ ...form, taluk: e.target.value })} />
+            <input className={inp} placeholder={ui("పిన్‌కోడ్")} inputMode="numeric" value={form.pincode} onChange={(e) => setForm({ ...form, pincode: e.target.value })} />
+            <input className={inp} placeholder={ui("తాలూకా (ఐచ్ఛికం)")} value={form.taluk} onChange={(e) => setForm({ ...form, taluk: e.target.value })} />
           </div>
 
           {/* 5. వివరణ */}
           <L n="5">వివరణ</L>
-          </>
+          </div>
           )}
 
-          <textarea className={inp} placeholder="వివరణ (ఐచ్ఛికం)" value={form.description}
+          <textarea data-notranslit className={inp} placeholder={ui("వివరణ (ఐచ్ఛికం)")} value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })} />
 
 
 
           <button onClick={save} disabled={saving}
             className="w-full rounded-xl bg-[#1e3a8a] py-2.5 text-white font-semibold flex items-center justify-center gap-1 disabled:opacity-60">
-            <Save className="h-4 w-4" /> {saving ? "సేవ్ అవుతోంది…" : "సేవ్"}
+            <Save className="h-4 w-4" /> {ui(saving ? "సేవ్ అవుతోంది…" : "సేవ్")}
           </button>
         </div>
       )}
@@ -833,7 +836,9 @@ function PostSection({ postType }: { postType: string }) {
 }
 
 function L({ n, children }: { n: string; children: React.ReactNode }) {
-  return <p className="text-[11px] font-semibold text-[#1e3a8a]/70 pt-1">{n ? `${n}. ` : ""}{children}</p>;
+  const { lang } = useI18n();
+  const label = typeof children === "string" ? sharedTranslation(lang, children) ?? children : children;
+  return <p className="text-[11px] font-semibold text-[#1e3a8a]/70 pt-1">{n ? `${n}. ` : ""}{label}</p>;
 }
 
 const inp = "w-full rounded-lg border border-[#1e3a8a]/15 bg-white px-3 py-2 text-sm outline-none focus:border-[#1e3a8a]";
