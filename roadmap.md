@@ -1,5 +1,5 @@
 # Admin organization registration details
-- [ ] Show and edit all organization registration details, founders and private documents; verify saving and readback as MBR admin.
+- [x] Show and edit organization registration fields, bank/admin details, founders and private document uploads; verified signed-in founder/address save, View readback, reopening, mobile layout, and restoration of test values; seven regression tests passed, build OK.
 
 # Language support
 - [x] Localize item form labels, placeholders, units and stock controls in Telugu/Hindi/English; 24 existing tests passed, build OK. Browser presentation checks with a temporary profile response confirmed language switching preserves typed values; real signed-in account has no Vaaradhi profile, so its posting flow remains unverified.
