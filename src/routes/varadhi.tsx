@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { amIVaradhiAdmin, getMyVaradhiScope } from "@/lib/varadhi.functions";
 import varadhiLogo from "@/assets/varadhi-logo.jpg.asset.json";
 import { VaradhiAppIcons } from "@/components/VaradhiAppIcons";
+import { VARADHI_SHARE_IMAGE } from "@/lib/app-hosts";
 
 export const Route = createFileRoute("/varadhi")({
   head: () => ({

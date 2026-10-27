@@ -15,6 +15,7 @@ import banner2 from "@/assets/varadhi-banner-2.jpg";
 import banner3 from "@/assets/varadhi-banner-3.jpg";
 import { Sparkles, ImageOff } from "lucide-react";
 import { currentAppPageUrl } from "@/lib/app-host-context";
+import { VARADHI_SHARE_IMAGE } from "@/lib/app-hosts";
 
 export const Route = createFileRoute("/varadhi/")({
   head: () => ({
