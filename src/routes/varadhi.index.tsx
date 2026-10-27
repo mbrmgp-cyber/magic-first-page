@@ -15,6 +15,7 @@ import banner2 from "@/assets/varadhi-banner-2.jpg";
 import banner3 from "@/assets/varadhi-banner-3.jpg";
 import { Sparkles, ImageOff } from "lucide-react";
 import { currentAppPageUrl } from "@/lib/app-host-context";
+import { VARADHI_SHARE_IMAGE } from "@/lib/app-hosts";
 
 export const Route = createFileRoute("/varadhi/")({
   head: () => ({
@@ -32,7 +33,12 @@ export const Route = createFileRoute("/varadhi/")({
       },
       { property: "og:url", content: currentAppPageUrl("/varadhi") },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { property: "og:image", content: VARADHI_SHARE_IMAGE },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "Vaaradhi (వారధి) logo" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: VARADHI_SHARE_IMAGE },
     ],
     links: [{ rel: "canonical", href: currentAppPageUrl("/varadhi") }],
   }),

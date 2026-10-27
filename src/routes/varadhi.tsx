@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { amIVaradhiAdmin, getMyVaradhiScope } from "@/lib/varadhi.functions";
 import varadhiLogo from "@/assets/varadhi-logo.jpg.asset.json";
 import { VaradhiAppIcons } from "@/components/VaradhiAppIcons";
+import { VARADHI_SHARE_IMAGE } from "@/lib/app-hosts";
 
 export const Route = createFileRoute("/varadhi")({
   head: () => ({
@@ -17,6 +18,11 @@ export const Route = createFileRoute("/varadhi")({
       { property: "og:description", content: "వారధి అనేది స్థానిక కొనుగోళ్లు, అమ్మకాలు, రవాణా సౌకర్యాలు మరియు టెక్నీషియన్ సేవలను ఒకే చోట అందించే సమగ్ర వేదిక. వివరాల కోసం ఇప్పుడే చూడండి." },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Vaaradhi" },
+      { property: "og:image", content: VARADHI_SHARE_IMAGE },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "Vaaradhi (వారధి) logo" },
+      { name: "twitter:image", content: VARADHI_SHARE_IMAGE },
       { name: "application-name", content: "Vaaradhi" },
       { name: "apple-mobile-web-app-title", content: "Vaaradhi" },
       { name: "twitter:card", content: "summary_large_image" },
