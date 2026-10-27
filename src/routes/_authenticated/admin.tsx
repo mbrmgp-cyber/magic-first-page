@@ -476,6 +476,7 @@ function AllOrganizationsManager() {
   const [detailsId, setDetailsId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [expiryEdits, setExpiryEdits] = useState<Record<string, string>>({});
+  const [openOrgId, setOpenOrgId] = useState<string | null>(null);
   const [editOrg, setEditOrg] = useState<any | null>(null);
   const [editForm, setEditForm] = useState<OrganizationForm>({});
   const [editLoading, setEditLoading] = useState(false);
@@ -647,13 +648,14 @@ function AllOrganizationsManager() {
 
   const orgs = (orgsQ.data?.orgs ?? []) as any[];
   const q = search.trim().toLowerCase();
-  const filtered = q
+  const filtered = (q
     ? orgs.filter((o) =>
         [o.name, o.email, o.phone, o.org_code, o.gov_reg_number]
           .filter(Boolean)
           .some((v: string) => String(v).toLowerCase().includes(q)),
       )
-    : orgs;
+    : orgs
+  ).slice().sort((a, b) => String(a.name ?? "").localeCompare(String(b.name ?? ""), "en", { sensitivity: "base" }));
 
   return (
     <>
@@ -685,8 +687,23 @@ function AllOrganizationsManager() {
               : "—";
             const inputVal =
               expiryEdits[o.id] ?? (expDate ? expDate.toISOString().slice(0, 10) : "");
+            const lineColor =
+              status === "approved" ? "#22c55e" : status === "suspended" || status === "rejected" ? "#ef4444" : "#eab308";
+            const open = openOrgId === o.id;
             return (
-              <div key={o.id} className="p-3 border rounded-lg bg-zinc-800/60 space-y-2" style={{ borderColor: "#3f3f46" }}>
+              <div key={o.id} className="border rounded-lg bg-zinc-800/60 overflow-hidden" style={{ borderColor: "#3f3f46", borderLeft: `6px solid ${lineColor}` }}>
+                <button
+                  type="button"
+                  onClick={() => setOpenOrgId(open ? null : o.id)}
+                  aria-expanded={open}
+                  className="w-full flex items-center gap-2 px-3 py-2.5 text-left"
+                >
+                  <span className="font-semibold text-sm truncate text-white flex-1">{o.name}</span>
+                  <span className="text-[10px] font-semibold uppercase" style={{ color: lineColor }}>{STATUS_LABEL[status]}</span>
+                  <span className="text-zinc-400 text-xs">{open ? "▲" : "▼"}</span>
+                </button>
+                {open && (
+                <div className="p-3 pt-0 space-y-2">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     {o.logo_url ? (
@@ -781,6 +798,8 @@ function AllOrganizationsManager() {
                     </Button>
                   </div>
                 </div>
+                </div>
+                )}
               </div>
             );
           })}
