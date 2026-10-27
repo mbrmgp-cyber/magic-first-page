@@ -7,6 +7,7 @@ import { findOrgByCode, parseSafeImageDataUrl } from "@/lib/org-code";
 import type { Database } from "@/integrations/supabase/types";
 import { getRequest } from "@tanstack/react-start/server";
 import { ACTIVE_ORG_HEADER } from "@/lib/active-org";
+import { organizationEditSchema } from "@/lib/admin-organization";
 
 /** Organization the user picked in the switcher (sent as a request header). */
 function requestedOrgId(): string | null {
@@ -1159,34 +1160,29 @@ export const setOrganizationStatus = createServerFn({ method: "POST" })
 
 export const adminUpdateOrganization = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: {
-    org_id: string;
-    name?: string;
-    email?: string;
-    phone?: string | null;
-    slogan?: string | null;
-    address?: string | null;
-    gov_reg_number?: string | null;
-    logo_url?: string | null;
-  }) => d)
+  .inputValidator((d) => organizationEditSchema.parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "mbr_admin" });
     if (!isAdmin) throw new Error("Forbidden");
-    const patch: Record<string, any> = {};
-    if (data.name !== undefined) patch.name = data.name;
-    if (data.email !== undefined) patch.email = data.email;
-    if (data.phone !== undefined) patch.phone = data.phone;
-    if (data.slogan !== undefined) patch.slogan = data.slogan;
-    if (data.address !== undefined) patch.address = data.address;
-    if (data.gov_reg_number !== undefined) patch.gov_reg_number = data.gov_reg_number;
-    if (data.logo_url !== undefined) patch.logo_url = data.logo_url;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
+    const { org_id, ...patch } = data;
+    for (const key of ["logo_url", "registration_certificate_url", "pan_card_url", "admin_aadhaar_url"] as const) {
+      if (patch[key] !== undefined) patch[key] = await uploadImageDataUrl(supabaseAdmin, patch[key], `${org_id}/${key}`);
+    }
+    if (patch.founders) {
+      patch.founders = await Promise.all(patch.founders.map(async (founder, index) => ({
+        ...founder,
+        aadhaar_url: (await uploadImageDataUrl(supabaseAdmin, founder.aadhaar_url, `${org_id}/founder-${index}`)) ?? "",
+      })));
+    }
+    const { data: updated, error } = await supabaseAdmin
       .from("organizations")
       .update(patch as any)
-      .eq("id", data.org_id);
+      .eq("id", org_id)
+      .select("id").maybeSingle();
     if (error) throw new Error(error.message);
+    if (!updated) throw new Error("Organization not found");
     return { ok: true };
   });
 
@@ -1239,20 +1235,18 @@ export const getOrganizationDetails = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
     const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "mbr_admin" });
     if (!isAdmin) throw new Error("Forbidden");
-    const { data: org, error } = await supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: org, error } = await supabaseAdmin
       .from("organizations")
-      .select(ORG_SAFE_COLUMNS)
+      .select(`${ORG_SAFE_COLUMNS}, registration_certificate_url, pan_card_url, admin_aadhaar_url`)
       .eq("id", data.org_id)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    const safeOrg = org as unknown as SafeOrgRow | null;
+    const safeOrg = org as unknown as Database["public"]["Tables"]["organizations"]["Row"] | null;
     if (!safeOrg) throw new Error("Organization not found");
     // Platform-admin oversight is privileged: society-scoped RLS hides members
     // from admins who are not themselves members of this particular society.
-    const [{ supabaseAdmin }, { readAdminOrgMembers }] = await Promise.all([
-      import("@/integrations/supabase/client.server"),
-      import("@/lib/admin-org-members.server"),
-    ]);
+    const { readAdminOrgMembers } = await import("@/lib/admin-org-members.server");
     const summary = await readAdminOrgMembers(supabaseAdmin, data.org_id);
     return {
       org: safeOrg,
