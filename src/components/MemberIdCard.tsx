@@ -507,7 +507,7 @@ function CardFront({
     if (!mandal && parts[1]) mandal = parts[1];
   }
   const societyEmail = org?.email || SOCIETY_EMAIL;
-  const societyPhone = org?.phone || SOCIETY_PHONE;
+  const societyPhone = org ? (org.phone || "").trim() : SOCIETY_PHONE;
   const accent = org?.theme_color || "#FF9933";
 
 
@@ -670,9 +670,9 @@ function CardFront({
           <div style={{ fontSize: "1.9mm", fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
             ✉ {societyEmail}
           </div>
-          <div style={{ fontSize: "1.9mm", fontWeight: 700, marginTop: "0.3mm" }}>
+          {societyPhone && (<div style={{ fontSize: "1.9mm", fontWeight: 700, marginTop: "0.3mm" }}>
             ☎ {societyPhone}
-          </div>
+          </div>)}
         </div>
 
         <div style={{
