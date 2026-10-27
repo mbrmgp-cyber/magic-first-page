@@ -1,3 +1,6 @@
+import { OrganizationRegistrationDetails } from "@/components/OrganizationRegistrationDetails";
+import { organizationFormFromRow, type OrganizationForm } from "@/lib/admin-organization";
+import { useI18n } from "@/lib/i18n";
 import { DateInput } from "@/components/DateInput";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -458,6 +461,8 @@ const STATUS_LABEL: Record<OrgStatus, string> = {
 };
 
 function AllOrganizationsManager() {
+  const { lang } = useI18n();
+  const L = (en: string, te: string, hi: string) => lang === "te" ? te : lang === "hi" ? hi : en;
   const qc = useQueryClient();
   const fetchOrgs = useServerFn(listAllOrgsForAdmin);
   const setStatus = useServerFn(setOrganizationStatus);
@@ -472,7 +477,9 @@ function AllOrganizationsManager() {
   const [search, setSearch] = useState("");
   const [expiryEdits, setExpiryEdits] = useState<Record<string, string>>({});
   const [editOrg, setEditOrg] = useState<any | null>(null);
-  const [editForm, setEditForm] = useState<any>({});
+  const [editForm, setEditForm] = useState<OrganizationForm>({});
+  const [editLoading, setEditLoading] = useState(false);
+  const [editError, setEditError] = useState("");
   const [deleteOrgState, setDeleteOrgState] = useState<any | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [suspendOrgState, setSuspendOrgState] = useState<any | null>(null);
@@ -574,15 +581,18 @@ function AllOrganizationsManager() {
     }
   }
 
-  function openEdit(o: any) {
+  async function openEdit(o: any) {
     setEditOrg(o);
-    setEditForm({
-      name: o.name ?? "",
-      email: o.email ?? "",
-      phone: o.phone ?? "",
-      slogan: o.slogan ?? "",
-      gov_reg_number: o.gov_reg_number ?? "",
-    });
+    setEditLoading(true);
+    setEditError("");
+    try {
+      const result = await getDetails({ data: { org_id: o.id } });
+      setEditForm(organizationFormFromRow(result.org));
+    } catch (e: any) {
+      setEditError(e.message ?? "Unable to load organization");
+    } finally {
+      setEditLoading(false);
+    }
   }
 
   async function saveEdit() {
@@ -590,9 +600,10 @@ function AllOrganizationsManager() {
     setBusy(editOrg.id);
     try {
       await updateOrg({ data: { org_id: editOrg.id, ...editForm } });
-      toast.success("Organization updated");
+      toast.success(L("Organization updated", "సంస్థ వివరాలు నవీకరించబడ్డాయి", "संस्था का विवरण अपडेट किया गया"));
       setEditOrg(null);
       qc.invalidateQueries({ queryKey: ["admin-all-orgs"] });
+      qc.invalidateQueries({ queryKey: ["admin-org-details"] });
     } catch (e: any) {
       toast.error(e.message ?? "Update failed");
     } finally {
@@ -823,20 +834,19 @@ function AllOrganizationsManager() {
                 </div>
               </div>
 
-              <div className="text-xs space-y-1 border rounded p-3 bg-zinc-800/60" style={{ borderColor: "#3f3f46" }}>
-                <div><b className="text-zinc-300">Email:</b> {detailsQ.data.org.email ?? "—"}</div>
-                <div><b className="text-zinc-300">Phone:</b> {detailsQ.data.org.phone ?? "—"}</div>
-                {detailsQ.data.org.gov_reg_number && <div><b className="text-zinc-300">Reg No:</b> {detailsQ.data.org.gov_reg_number}</div>}
-                {detailsQ.data.org.slogan && <div><b className="text-zinc-300">Slogan:</b> {detailsQ.data.org.slogan}</div>}
-                {(detailsQ.data.org as any).address && <div><b className="text-zinc-300">Address:</b> {(detailsQ.data.org as any).address}</div>}
-                <div><b className="text-zinc-300">Created:</b> {new Date(detailsQ.data.org.created_at).toLocaleDateString("en-GB")}</div>
-                <div>
-                  <b className="text-zinc-300">Status:</b>{" "}
-                  <span className={`text-[10px] px-2 py-0.5 rounded border font-semibold uppercase ${STATUS_STYLES[(detailsQ.data.org.approval_status ?? "pending") as OrgStatus]}`}>
-                    {STATUS_LABEL[(detailsQ.data.org.approval_status ?? "pending") as OrgStatus]}
-                  </span>
-                </div>
-              </div>
+              <OrganizationRegistrationDetails
+                value={organizationFormFromRow(detailsQ.data.org)}
+                document={(path) => <OrgDocThumb orgId={detailsQ.data.org.id} path={path} />}
+              />
+              <dl className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-foreground">
+                <div><dt className="text-muted-foreground">{L("Organization code", "సంస్థ కోడ్", "संस्था कोड")}</dt><dd>{detailsQ.data.org.org_code}</dd></div>
+                <div><dt className="text-muted-foreground">{L("Letter code", "అక్షర కోడ్", "अक्षर कोड")}</dt><dd>{detailsQ.data.org.letter_code ?? "—"}</dd></div>
+                <div><dt className="text-muted-foreground">{L("Registered on", "నమోదైన తేదీ", "पंजीकरण तिथि")}</dt><dd>{new Date(detailsQ.data.org.created_at).toLocaleString()}</dd></div>
+                <div><dt className="text-muted-foreground">{L("Status", "స్థితి", "स्थिति")}</dt><dd>{detailsQ.data.org.approval_status}</dd></div>
+                <div><dt className="text-muted-foreground">{L("Review notes", "సమీక్ష గమనికలు", "समीक्षा टिप्पणियाँ")}</dt><dd className="break-words">{detailsQ.data.org.approval_notes || "—"}</dd></div>
+                <div><dt className="text-muted-foreground">{L("Subscription expires", "చందా ముగింపు", "सदस्यता समाप्ति")}</dt><dd>{detailsQ.data.org.subscription_expires_at ? new Date(detailsQ.data.org.subscription_expires_at).toLocaleDateString() : "—"}</dd></div>
+              </dl>
+              <Button variant="outline" onClick={() => { const org = detailsQ.data.org; setDetailsId(null); openEdit(org); }}><Pencil className="h-4 w-4 mr-2" />{L("Edit organization", "సంస్థ వివరాలు మార్చు", "संस्था का विवरण बदलें")}</Button>
 
               <div>
                 <div className="font-semibold text-sm mb-2 flex items-center gap-1 text-white">
@@ -894,45 +904,16 @@ function AllOrganizationsManager() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!editOrg} onOpenChange={(o) => !o && setEditOrg(null)}>
-        <DialogContent className="max-w-lg bg-zinc-900 border-zinc-700 text-white">
+      <Dialog open={!!editOrg} onOpenChange={(open) => { if (!open && busy !== editOrg?.id) setEditOrg(null); }}>
+        <DialogContent className="max-w-2xl max-h-[85dvh] overflow-y-auto bg-background border-border text-foreground">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-white">
-              <Pencil className="h-5 w-5 text-blue-400" /> Edit Organization
-            </DialogTitle>
-            <DialogDescription className="text-xs font-mono text-zinc-400">
-              {editOrg?.org_code}
-            </DialogDescription>
+            <DialogTitle className="flex items-center gap-2"><Pencil className="h-5 w-5 text-primary" />{L("Edit Organization", "సంస్థ వివరాల సవరణ", "संस्था का विवरण संपादित करें")}</DialogTitle>
+            <DialogDescription className="text-xs font-mono">{editOrg?.org_code}</DialogDescription>
           </DialogHeader>
-          <div className="space-y-3">
-            <div>
-              <Label className="text-xs text-zinc-300">Name</Label>
-              <Input value={editForm.name ?? ""} onChange={(e) => setEditForm((f: any) => ({ ...f, name: e.target.value }))} className="bg-zinc-950 border-zinc-700 text-white" />
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <Label className="text-xs text-zinc-300">Email</Label>
-                <Input value={editForm.email ?? ""} onChange={(e) => setEditForm((f: any) => ({ ...f, email: e.target.value }))} className="bg-zinc-950 border-zinc-700 text-white" />
-              </div>
-              <div>
-                <Label className="text-xs text-zinc-300">Phone</Label>
-                <Input value={editForm.phone ?? ""} onChange={(e) => setEditForm((f: any) => ({ ...f, phone: e.target.value }))} className="bg-zinc-950 border-zinc-700 text-white" />
-              </div>
-            </div>
-            <div>
-              <Label className="text-xs text-zinc-300">Slogan</Label>
-              <Input value={editForm.slogan ?? ""} onChange={(e) => setEditForm((f: any) => ({ ...f, slogan: e.target.value }))} className="bg-zinc-950 border-zinc-700 text-white" />
-            </div>
-            <div>
-              <Label className="text-xs text-zinc-300">Gov Registration No.</Label>
-              <Input value={editForm.gov_reg_number ?? ""} onChange={(e) => setEditForm((f: any) => ({ ...f, gov_reg_number: e.target.value }))} className="bg-zinc-950 border-zinc-700 text-white font-mono" />
-            </div>
-          </div>
+          {editLoading ? <p>{L("Loading…", "లోడ్ అవుతోంది…", "लोड हो रहा है…")}</p> : editError ? <Alert variant="destructive"><AlertDescription>{editError}</AlertDescription><Button variant="outline" onClick={() => openEdit(editOrg)}>{L("Retry", "మళ్ళీ ప్రయత్నించు", "फिर से प्रयास करें")}</Button></Alert> : editOrg && <OrganizationRegistrationDetails value={editForm} onChange={setEditForm} disabled={busy === editOrg.id} document={(path) => <OrgDocThumb orgId={editOrg.id} path={path} />} />}
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setEditOrg(null)} className="text-white hover:bg-zinc-800">Cancel</Button>
-            <Button onClick={saveEdit} disabled={busy === editOrg?.id} className="bg-blue-600 hover:bg-blue-700 text-white">
-              <Save className="h-4 w-4 mr-1" />Save Changes
-            </Button>
+            <Button variant="ghost" disabled={busy === editOrg?.id} onClick={() => setEditOrg(null)}>{L("Cancel", "రద్దు", "रद्द करें")}</Button>
+            <Button onClick={saveEdit} disabled={editLoading || !!editError || busy === editOrg?.id}><Save className="h-4 w-4 mr-1" />{L("Save Changes", "మార్పులు సేవ్ చేయండి", "बदलाव सहेजें")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
