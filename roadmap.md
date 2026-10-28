@@ -1,3 +1,6 @@
+# Vaaradhi home refresh
+- [ ] Refine auto-sliding illustration banners, add five category shortcuts, and polish spacing, colors and shadows; verify category navigation and mobile/desktop layout.
+
 # Vaaradhi profile page placement
 - [x] Move registration/profile details from Update Board to Profile; verified signed-in bottom-menu navigation, direct registration form and mobile layout, with three existing profile permission tests passing. Approved ordinary-user preview verification confirms eight detail fields, no edit/save controls, no admin menu and no profile section on Update Board.
 - [ ] Live verification of moved Profile page: publish requested October 28; latest live check still served the previous placement, so deployment completion remains the blocker.
