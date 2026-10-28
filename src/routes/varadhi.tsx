@@ -89,7 +89,7 @@ function VaradhiBottomNav({ isAdmin }: { isAdmin: boolean }) {
   const loc = useLocation();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
-  // Registration/profile now lives inside the Update Board, and the admin
+  // Registration/profile lives on the Profile page, and the admin
   // panel is only offered to users with admin access.
   const items = [
     { to: "/varadhi", icon: Home, label: "హోమ్" },
