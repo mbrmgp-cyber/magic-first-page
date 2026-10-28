@@ -1,5 +1,6 @@
 # Vaaradhi profile page placement
-- [x] Move registration/profile details from Update Board to Profile; verified signed-in bottom-menu navigation, direct registration form and mobile layout, with three existing profile permission tests passing. The tested account has no registered profile, so approved-profile detail readback was not re-tested; the shared read-only form is unchanged.
+- [x] Move registration/profile details from Update Board to Profile; verified signed-in bottom-menu navigation, direct registration form and mobile layout, with three existing profile permission tests passing. Approved ordinary-user preview verification confirms eight detail fields, no edit/save controls, no admin menu and no profile section on Update Board.
+- [ ] Live verification of moved Profile page: publish requested October 28; latest live check still served the previous placement, so deployment completion remains the blocker.
 
 # Vaaradhi approved profile permissions
 - [x] Make the registration photo optional, lock approved profiles for ordinary users, and add authorized admin profile editing.
