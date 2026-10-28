@@ -41,16 +41,6 @@ export function HomeDiscovery() {
           return banner.category === "goods" ? <Button key={banner.category} variant="ghost" className={className} onClick={() => setGoodsOpen(true)}>{content}</Button> : <Button key={banner.category} asChild variant="ghost" className={className}><Link to="/varadhi/browse/$category" params={{ category: banner.category }} search={{ q: "" }}>{content}</Link></Button>;
         })}
       </section>
-      <section className="mt-5" aria-label={t("Explore categories")}>
-        <h2 className="mb-3 text-base font-bold text-market-ink">{t("Explore categories")}</h2>
-        <div className="grid grid-cols-6 gap-3 sm:grid-cols-5">
-          {categories.map(({ id, title, Icon, tone }, index) => {
-            const content = <><div className="flex w-full items-start justify-between"><span className="market-category-icon flex h-11 w-11 items-center justify-center rounded-lg"><Icon className="!h-6 !w-6" strokeWidth={1.7} /></span><ArrowUpRight className="mt-1 opacity-50" /></div><span className="mt-3 block whitespace-normal text-left text-[13px] font-bold leading-relaxed">{t(title)}</span></>;
-            const className = `${tone} market-category col-span-2 ${index > 2 ? "col-span-3" : ""} sm:col-span-1 flex h-auto min-h-32 flex-col items-start justify-start rounded-lg border p-3 shadow-market-card transition-transform motion-safe:hover:-translate-y-1`;
-            return id === "goods" ? <Button key={id} variant="ghost" className={className} onClick={() => setGoodsOpen(true)}>{content}</Button> : <Button key={id} asChild variant="ghost" className={className}><Link to="/varadhi/browse/$category" params={{ category: id }} search={{ q: "" }}>{content}</Link></Button>;
-          })}
-        </div>
-      </section>
       <Dialog open={goodsOpen} onOpenChange={setGoodsOpen}>
         <DialogContent className="max-w-sm" data-no-translate><DialogHeader><DialogTitle>{t("New / Used Goods")}</DialogTitle></DialogHeader>
           <div className="grid grid-cols-2 gap-3">{[{ id: "new", title: "New goods", Icon: Package }, { id: "used", title: "Used goods", Icon: Recycle }].map(({ id, title, Icon }) => <Button key={id} asChild variant="outline" className="h-auto min-h-24 flex-col whitespace-normal text-center"><Link to="/varadhi/browse/$category" params={{ category: id }} search={{ q: "" }} onClick={() => setGoodsOpen(false)}><Icon />{t(title)}</Link></Button>)}</div>
