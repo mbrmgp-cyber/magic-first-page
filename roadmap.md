@@ -1,5 +1,5 @@
 # Vaaradhi home refresh
-- [ ] Refine auto-sliding illustration banners, add five category shortcuts, and polish spacing, colors and shadows; verify category navigation and mobile/desktop layout.
+- [x] Refine auto-sliding illustration banners with swipe and pause controls, add five category shortcuts (New/Used selection), and polish spacing, colors and shadows; verified automatic advance, all category destinations, loaded images, desktop/mobile and Telugu layout without overflow or runtime errors; 24 language tests passed. Not published.
 
 # Vaaradhi profile page placement
 - [x] Move registration/profile details from Update Board to Profile; verified signed-in bottom-menu navigation, direct registration form and mobile layout, with three existing profile permission tests passing. Approved ordinary-user preview verification confirms eight detail fields, no edit/save controls, no admin menu and no profile section on Update Board.
