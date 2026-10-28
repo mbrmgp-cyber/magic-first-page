@@ -1,3 +1,7 @@
+# Vaaradhi approved profile permissions
+- [ ] Make the registration photo optional, lock approved profiles for ordinary users, and add authorized admin profile editing.
+- [ ] Test permissions and verify approved profile editing and readback.
+
 # Admin organization registration details
 - [x] Show and edit organization registration fields, bank/admin details, founders and private document uploads; verified signed-in founder/address save, View readback, reopening, mobile layout, and restoration of test values; seven regression tests passed, build OK.
 
