@@ -3556,6 +3556,48 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      varadhi_admin_edit_profile: {
+        Args: { _changes: Json; _user_id: string }
+        Returns: {
+          aadhaar_url: string | null
+          address: string | null
+          address_type: string | null
+          business_name: string | null
+          certificates_urls: string[] | null
+          city: string | null
+          created_at: string
+          district: string | null
+          experience_years: number | null
+          full_name: string
+          house_number: string | null
+          lat: number | null
+          license_url: string | null
+          lng: number | null
+          mandal: string | null
+          occupation: string | null
+          phone: string | null
+          photo_url: string | null
+          primary_role: string
+          provider_specialty: string | null
+          provider_sub_type: string | null
+          referral_code_used: string | null
+          referred_partner_id: string | null
+          shop_name: string | null
+          state: string | null
+          store_photo_url: string | null
+          updated_at: string
+          user_id: string
+          vehicle_photo_url: string | null
+          verification_notes: string | null
+          verification_status: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "varadhi_profiles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       varadhi_award_point: {
         Args: {
           _event_type: string
