@@ -16,16 +16,16 @@ import { useQuery } from "@tanstack/react-query";
 import { getMyAreaAdminStats } from "@/lib/varadhi-partner.functions";
 import { toast } from "sonner";
 import { Plus, Trash2, Camera, Pencil, Save } from "lucide-react";
-import { VaradhiRegistrationForm } from "@/components/varadhi/RegistrationForm";
+import { Button } from "@/components/ui/button";
 import { VaradhiOccupationPanel } from "@/components/varadhi/OccupationPanel";
 import { MyPostRemovals } from "@/components/varadhi/MyPostRemovals";
 
 export const Route = createFileRoute("/varadhi/dashboard")({
   head: () => ({ meta: [
-    { title: "My Posts & Profile — Vaaradhi" },
-    { name: "description", content: "Manage your Vaaradhi posts, availability and profile, and view post removal explanations." },
-    { property: "og:title", content: "My Posts & Profile — Vaaradhi" },
-    { property: "og:description", content: "Your Vaaradhi posts, profile and moderation history." },
+    { title: "Update Board — Vaaradhi" },
+    { name: "description", content: "Manage your Vaaradhi posts and availability, and view post removal explanations." },
+    { property: "og:title", content: "Update Board — Vaaradhi" },
+    { property: "og:description", content: "Your Vaaradhi posts, availability and moderation history." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },
     { name: "robots", content: "noindex" },
@@ -187,7 +187,6 @@ function UpdateBoard() {
   const [name, setName] = useState("");
   const [ready, setReady] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
-  const [showRegistration, setShowRegistration] = useState(false);
   const [postType, setPostType] = useState("business");
   const [status, setStatus] = useState<string | null>(null);
   const [occupation, setOccupation] = useState("");
@@ -199,7 +198,6 @@ function UpdateBoard() {
     setHasProfile(!!p);
     setStatus(p?.verification_status ?? null);
     setOccupation(p?.occupation ?? "");
-    setShowRegistration(!p);
     setReady(true);
   };
 
@@ -224,29 +222,15 @@ function UpdateBoard() {
         <p className="text-[11px] opacity-90 mt-0.5">
           {hasProfile
             ? "మీ వస్తువులు, సేవలు ఇక్కడ అప్‌డేట్ చేయండి."
-            : "ముందుగా కింద రిజిస్ట్రేషన్ పూర్తి చేయండి."}
+            : lang === "hi" ? "पहले प्रोफ़ाइल में पंजीकरण पूरा करें." : lang === "en" ? "Complete your registration in Profile first." : "ముందుగా ప్రొఫైల్‌లో రిజిస్ట్రేషన్ పూర్తి చేయండి."}
         </p>
       </div>
 
-      {/* Registration (moved here from the Profile tab) */}
-      <div className="rounded-2xl bg-white p-4 shadow-sm">
-        <div className="flex items-center justify-between gap-2">
-          <h2 className="text-sm font-bold text-[#1e3a8a]">వారధి రిజిస్ట్రేషన్ / నా ప్రొఫైల్</h2>
-          {hasProfile && (
-            <button
-              onClick={() => setShowRegistration((s) => !s)}
-              className="rounded-full bg-[#1e3a8a]/10 px-3 py-1 text-[11px] font-semibold text-[#1e3a8a]"
-            >
-              {showRegistration ? "మూసివేయండి" : status === "approved" ? "చూడండి" : "మార్చండి"}
-            </button>
-          )}
-        </div>
-        {showRegistration && (
-          <div className="mt-3">
-            <VaradhiRegistrationForm onSaved={loadProfile} />
-          </div>
-        )}
-      </div>
+      {!hasProfile && (
+        <Button asChild className="w-full">
+          <Link to="/varadhi/profile">ప్రొఫైల్</Link>
+        </Button>
+      )}
 
       {hasProfile && (
         <>
