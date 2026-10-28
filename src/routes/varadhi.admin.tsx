@@ -20,6 +20,7 @@ import {
 import { AdminRequestsPanel, AdminHierarchyPanel } from "@/components/varadhi/AdminHierarchyPanel";
 import { AdminAuditPanel } from "@/components/varadhi/AdminAuditPanel";
 import { AdminPostReportsPanel } from "@/components/varadhi/AdminPostReportsPanel";
+import { AdminProfileEditor } from "@/components/varadhi/AdminProfileEditor";
 import { AdminMessagesPanel } from "@/components/varadhi/AdminMessagesPanel";
 import { AdminPartnersPanel } from "@/components/varadhi/AdminPartnersPanel";
 import { ContactAdminForm } from "@/components/varadhi/ContactAdminForm";
@@ -291,6 +292,7 @@ function VaradhiAdmin() {
                   )}
                 </div>
 
+                <AdminProfileEditor profile={r} />
                 {status === "pending" && (
                   <div className="space-y-2">
                     <Textarea

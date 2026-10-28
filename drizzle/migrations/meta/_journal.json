@@ -50,6 +50,13 @@
       "when": 1792859599148,
       "tag": "0006_allow_signed_in_vaaradhi_post_reports",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793172329499,
+      "tag": "0007_vaaradhi_approved_profile_lock",
+      "breakpoints": true
     }
   ]
 }

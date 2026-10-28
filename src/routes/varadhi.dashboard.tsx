@@ -237,7 +237,7 @@ function UpdateBoard() {
               onClick={() => setShowRegistration((s) => !s)}
               className="rounded-full bg-[#1e3a8a]/10 px-3 py-1 text-[11px] font-semibold text-[#1e3a8a]"
             >
-              {showRegistration ? "మూసివేయండి" : "మార్చండి"}
+              {showRegistration ? "మూసివేయండి" : status === "approved" ? "చూడండి" : "మార్చండి"}
             </button>
           )}
         </div>

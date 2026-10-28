@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { PUBLIC_APP_ORIGIN } from "@/lib/public-url";
 import { VARADHI_PROFILE_SAFE_COLUMNS, VARADHI_LISTING_SAFE_COLUMNS } from "@/lib/db-columns";
+import { profileEditSchema, adminProfileEditSchema, isProfileLocked } from "@/lib/varadhi-profile";
 
 // -------- Varadhi-only login (completely independent of MBR auth flow)
 // mode: "link" sends a click-to-login magic link; "otp" sends a 6-digit code
@@ -171,8 +172,11 @@ const VARADHI_PROFILE_USER_EDITABLE = [
 
 export const upsertVaradhiProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: Partial<VaradhiProfile>) => d)
+  .inputValidator((d: unknown) => profileEditSchema.parse(d))
   .handler(async ({ data, context }) => {
+    const { data: current, error: readError } = await context.supabase.from("varadhi_profiles").select("verification_status").eq("user_id", context.userId).maybeSingle();
+    if (readError) throw new Error(readError.message);
+    if (isProfileLocked(current?.verification_status)) throw new Error("Approved profiles can only be edited from the admin panel");
     const clean: Record<string, unknown> = {};
     for (const k of VARADHI_PROFILE_USER_EDITABLE) {
       if (k in (data as Record<string, unknown>)) clean[k] = (data as Record<string, unknown>)[k];
@@ -185,6 +189,15 @@ export const upsertVaradhiProfile = createServerFn({ method: "POST" })
       .single();
     if (error) throw new Error(error.message);
     return { profile: out };
+  });
+
+export const adminEditVaradhiProfile = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => adminProfileEditSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: profile, error } = await context.supabase.rpc("varadhi_admin_edit_profile" as any, { _user_id: data.user_id, _changes: data.changes } as any);
+    if (error) throw new Error(error.message);
+    return { profile };
   });
 
 
