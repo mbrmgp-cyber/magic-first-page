@@ -5,14 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useI18n } from "@/lib/i18n";
 import { sharedTranslation } from "@/lib/language-support";
-import photoMarket from "@/assets/varadhi-photo-market.jpg";
-import photoTransport from "@/assets/varadhi-photo-transport.jpg";
-import photoServices from "@/assets/varadhi-photo-services.jpg";
+import photoServices from "@/assets/varadhi-category-services.jpg";
+import photoMarket from "@/assets/varadhi-category-fresh.jpg";
+import photoGoods from "@/assets/varadhi-category-goods.jpg";
+import photoEstate from "@/assets/varadhi-category-estate.jpg";
+import photoTransport from "@/assets/varadhi-category-transport.jpg";
 
 const banners = [
-  { src: photoMarket, title: "Fresh finds, close to home", category: "fresh" },
-  { src: photoTransport, title: "Transport made simple", category: "transport" },
-  { src: photoServices, title: "Local experts, ready to help", category: "services" },
+  { src: photoServices, title: "Services", category: "services", width: 1024, height: 768 },
+  { src: photoMarket, title: "Fresh Items", category: "fresh", width: 1024, height: 768 },
+  { src: photoGoods, title: "New / Used Goods", category: "goods", width: 1024, height: 768 },
+  { src: photoEstate, title: "Real Estate", category: "realestate", width: 1024, height: 768 },
+  { src: photoTransport, title: "Transport", category: "transport", width: 1536, height: 864 },
 ];
 const categories = [
   { id: "fresh", title: "Fresh Items", Icon: Apple, tone: "market-fresh" },
@@ -30,13 +34,12 @@ export function HomeDiscovery() {
 
   return (
     <div data-no-translate>
-      <section aria-label="Vaaradhi" className="mt-5 grid grid-cols-3 gap-2 sm:gap-3">
-        {banners.map((banner, index) => (
-          <Link key={banner.category} to="/varadhi/browse/$category" params={{ category: banner.category }} search={{ q: "" }} className="group overflow-hidden rounded-lg border border-market-border bg-market-surface shadow-market-card">
-            <img src={banner.src} alt={t(banner.title)} width={1024} height={768} className="aspect-[4/3] w-full object-cover" loading={index === 0 ? "eager" : "lazy"} />
-            <span className="block px-2 py-1.5 text-xs font-semibold leading-snug text-market-ink sm:text-sm">{t(banner.title)}</span>
-          </Link>
-        ))}
+      <section aria-label="Vaaradhi" className="mt-5 grid grid-cols-6 gap-3">
+        {banners.map((banner, index) => {
+          const content = <><img src={banner.src} alt={t(banner.title)} width={banner.width} height={banner.height} className="w-full" loading={index === 0 ? "eager" : "lazy"} /><span className="block px-3 py-2 text-sm font-semibold leading-snug text-market-ink">{t(banner.title)}</span></>;
+          const className = `col-span-3 ${index === 4 ? "col-span-6" : ""} ${index < 3 ? "sm:col-span-2" : "sm:col-span-3"} block h-auto overflow-hidden whitespace-normal rounded-lg border border-market-border bg-market-surface p-0 text-left shadow-market-card`;
+          return banner.category === "goods" ? <Button key={banner.category} variant="ghost" className={className} onClick={() => setGoodsOpen(true)}>{content}</Button> : <Button key={banner.category} asChild variant="ghost" className={className}><Link to="/varadhi/browse/$category" params={{ category: banner.category }} search={{ q: "" }}>{content}</Link></Button>;
+        })}
       </section>
       <section className="mt-5" aria-label={t("Explore categories")}>
         <h2 className="mb-3 text-base font-bold text-market-ink">{t("Explore categories")}</h2>
