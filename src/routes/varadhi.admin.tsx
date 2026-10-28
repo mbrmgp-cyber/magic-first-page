@@ -77,7 +77,7 @@ function VaradhiAdmin() {
   const scope = scopeQ.data;
   const isAdmin = isSuper || !!scope?.level;
 
-  type AdminTab = "reg" | "points" | "ticker" | "requests" | "hierarchy" | "partners" | "messages" | "audit" | "reports";
+  type AdminTab = "reg" | "points" | "ticker" | "ads" | "requests" | "hierarchy" | "partners" | "messages" | "audit" | "reports";
   const [tab, setTab] = useState<AdminTab>("reg");
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -158,6 +158,7 @@ function VaradhiAdmin() {
           { k: "reg", label: "రిజిస్ట్రేషన్లు" },
           ...(isSuper ? [{ k: "points" as const, label: "పాయింట్లు" }] : []),
           ...(isSuper ? [{ k: "ticker" as const, label: bi("లైవ్ టెక్స్ట్", "Live Text", lang) }] : []),
+          ...(isSuper ? [{ k: "ads" as const, label: "Manage Local Ads" }] : []),
           ...(isSuper || scope?.level === "state_admin"
             ? [{ k: "requests" as const, label: "అడ్మిన్ దరఖాస్తులు" }] : []),
           { k: "hierarchy", label: "అడ్మిన్ హైరార్కీ" },
@@ -207,6 +208,7 @@ function VaradhiAdmin() {
 
       {tab === "points" && isSuper && <PointsPanel />}
       {tab === "ticker" && isSuper && <TickerPanel />}
+      {tab === "ads" && isSuper && <AdminLocalAdsPanel />}
       {tab === "requests" && <AdminRequestsPanel isSuper={isSuper} />}
       {tab === "hierarchy" && <AdminHierarchyPanel isSuper={isSuper} />}
       {tab === "partners" && isSuper && <AdminPartnersPanel />}
