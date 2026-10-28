@@ -1,4 +1,5 @@
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { AdminLocalAdsPanel } from "@/components/varadhi/AdminLocalAdsPanel";
 import { useI18n, bi } from "@/lib/i18n";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
