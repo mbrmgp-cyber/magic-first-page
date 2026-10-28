@@ -59,10 +59,38 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-market-canvas: var(--market-canvas);
+  --color-market-surface: var(--market-surface);
+  --color-market-ink: var(--market-ink);
+  --color-market-muted: var(--market-muted);
+  --color-market-border: var(--market-border);
+  --color-market-brand: var(--market-brand);
+  --color-market-on-brand: var(--market-on-brand);
+  --color-market-fresh: var(--market-fresh);
+  --color-market-notice: var(--market-notice);
+  --color-market-notice-ink: var(--market-notice-ink);
+  --shadow-market: var(--market-shadow);
+  --shadow-market-card: var(--market-card-shadow);
 }
 
 :root {
   --radius: 0.625rem;
+  --market-canvas: oklch(0.98 0.006 160);
+  --market-surface: oklch(1 0 0);
+  --market-ink: oklch(0.28 0.032 165);
+  --market-muted: oklch(0.5 0.023 165);
+  --market-border: oklch(0.91 0.013 160);
+  --market-brand: oklch(0.48 0.108 164);
+  --market-on-brand: oklch(1 0 0);
+  --market-fresh: oklch(0.45 0.12 145);
+  --market-notice: oklch(0.97 0.024 85);
+  --market-notice-ink: oklch(0.43 0.068 70);
+  --market-shadow: 0 8px 28px -12px oklch(0.3 0.03 165 / 0.2);
+  --market-card-shadow: 0 3px 10px -5px oklch(0.3 0.03 165 / 0.16);
+  --market-goods: oklch(0.5 0.12 250);
+  --market-estate: oklch(0.48 0.12 15);
+  --market-transport: oklch(0.46 0.09 220);
+  --market-services: oklch(0.5 0.095 70);
   --background: oklch(1 0 0);
   --foreground: oklch(0.129 0.042 264.695);
   --card: oklch(1 0 0);
@@ -98,6 +126,20 @@
 }
 
 .dark {
+  --market-canvas: oklch(0.2 0.018 165);
+  --market-surface: oklch(0.26 0.02 165);
+  --market-ink: oklch(0.94 0.009 165);
+  --market-muted: oklch(0.75 0.02 165);
+  --market-border: oklch(0.36 0.023 165);
+  --market-brand: oklch(0.72 0.13 164);
+  --market-on-brand: oklch(0.2 0.025 165);
+  --market-fresh: oklch(0.75 0.13 145);
+  --market-goods: oklch(0.75 0.1 250);
+  --market-estate: oklch(0.76 0.1 15);
+  --market-transport: oklch(0.75 0.08 220);
+  --market-services: oklch(0.78 0.1 70);
+  --market-notice: oklch(0.29 0.03 85);
+  --market-notice-ink: oklch(0.85 0.06 85);
   --background: oklch(0.129 0.042 264.695);
   --foreground: oklch(0.984 0.003 247.858);
   --card: oklch(0.208 0.042 265.755);
@@ -532,4 +574,22 @@ body.mbr-printing .mbr-global-ad-bar * {
 .varadhi-marquee {
   display: inline-block;
   animation: varadhi-marquee 22s linear infinite;
+}
+
+.market-home { color: var(--market-ink); letter-spacing: 0; }
+.market-banner-caption { background: linear-gradient(0deg, var(--market-surface) 0%, color-mix(in oklch, var(--market-surface) 90%, transparent) 45%, transparent 100%); }
+.market-fresh { --category-tone: var(--market-fresh); }
+.market-goods { --category-tone: var(--market-goods); }
+.market-estate { --category-tone: var(--market-estate); }
+.market-transport { --category-tone: var(--market-transport); }
+.market-services { --category-tone: var(--market-services); }
+.market-category {
+  color: var(--market-ink);
+  background: color-mix(in oklch, var(--category-tone) 7%, var(--market-surface));
+  border-color: color-mix(in oklch, var(--category-tone) 14%, var(--market-surface));
+}
+.market-category:hover { background: color-mix(in oklch, var(--category-tone) 12%, var(--market-surface)); color: var(--market-ink); }
+.market-category-icon { color: var(--category-tone); background: color-mix(in oklch, var(--category-tone) 12%, var(--market-surface)); }
+@media (prefers-reduced-motion: reduce) {
+  .varadhi-marquee { animation: none; white-space: normal; }
 }
