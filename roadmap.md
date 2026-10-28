@@ -1,5 +1,5 @@
 # Vaaradhi home refresh
-- [ ] Replace static photos with five natural-looking category photos in requested order: services, fresh produce/grains, new/used goods, real estate, transport; verify images and category navigation.
+- [x] Replace static photos with five natural-looking category photos in requested order: services, fresh produce/grains, new/used goods, real estate, transport; all images loaded, all five category actions verified including Used chooser, desktop/mobile inspected without overflow or runtime errors; build OK. Not published.
 - [x] Refine auto-sliding illustration banners with swipe and pause controls, add five category shortcuts (New/Used selection), and polish spacing, colors and shadows; verified automatic advance, all category destinations, loaded images, desktop/mobile and Telugu layout without overflow or runtime errors; 24 language tests passed. Not published.
 
 # Vaaradhi profile page placement
