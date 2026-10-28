@@ -62,14 +62,6 @@ function VaradhiLayout() {
   return (
     <div className={`min-h-screen pb-16 ${showDisclaimer ? "bg-market-canvas text-market-ink" : "bg-[#f7f7fb] text-[#1e3a8a]"}`}>
       <VaradhiAppIcons />
-      {isAdmin && !loc.pathname.startsWith("/varadhi/admin") && (
-        <Link
-          to="/varadhi/admin"
-          className="flex items-center justify-center gap-1.5 bg-[#1e3a8a] py-2 text-xs font-semibold text-white"
-        >
-          <ShieldCheck className="h-4 w-4" /> వారధి అడ్మిన్ ప్యానెల్ తెరవండి
-        </Link>
-      )}
       <Outlet />
       {showDisclaimer && (
         <div className="mx-auto max-w-3xl px-4 pb-3 sm:px-6">
