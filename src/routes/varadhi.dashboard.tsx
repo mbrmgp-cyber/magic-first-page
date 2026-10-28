@@ -222,7 +222,7 @@ function UpdateBoard() {
         <p className="text-[11px] opacity-90 mt-0.5">
           {hasProfile
             ? "మీ వస్తువులు, సేవలు ఇక్కడ అప్‌డేట్ చేయండి."
-            : "ముందుగా ప్రొఫైల్‌లో రిజిస్ట్రేషన్ పూర్తి చేయండి."}
+            : lang === "hi" ? "पहले प्रोफ़ाइल में पंजीकरण पूरा करें." : lang === "en" ? "Complete your registration in Profile first." : "ముందుగా ప్రొఫైల్‌లో రిజిస్ట్రేషన్ పూర్తి చేయండి."}
         </p>
       </div>
 
