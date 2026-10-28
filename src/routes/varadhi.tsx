@@ -60,7 +60,7 @@ function VaradhiLayout() {
   }, [loc.pathname]);
 
   return (
-    <div className="min-h-screen bg-[#f7f7fb] text-[#1e3a8a] pb-16">
+    <div className={`min-h-screen pb-16 ${showDisclaimer ? "bg-market-canvas text-market-ink" : "bg-[#f7f7fb] text-[#1e3a8a]"}`}>
       <VaradhiAppIcons />
       {isAdmin && !loc.pathname.startsWith("/varadhi/admin") && (
         <Link
@@ -72,8 +72,8 @@ function VaradhiLayout() {
       )}
       <Outlet />
       {showDisclaimer && (
-        <div className="mx-auto max-w-md px-3 pb-3">
-          <div className="rounded-lg bg-black/70 text-white text-[10px] leading-tight px-3 py-1.5">
+        <div className="mx-auto max-w-3xl px-4 pb-3 sm:px-6">
+          <div className="border-t border-market-border text-market-muted text-[10px] leading-relaxed py-3">
             వారధి కేవలం సమాచార వేదిక. వినియోగదారుల మధ్య జరిగే డబ్బు లావాదేవీలు, వస్తువుల నాణ్యత లేదా ఒప్పందాలకు వారధి బాధ్యత వహించదు.
           </div>
         </div>
