@@ -1,4 +1,5 @@
 import { createFileRoute, Outlet, Link, useLocation } from "@tanstack/react-router";
+import { PageAdBanner, pageForPath } from "@/components/varadhi/PageAdBanner";
 import { Home, Search, LayoutDashboard, ShieldCheck, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
@@ -63,6 +64,7 @@ function VaradhiLayout() {
     <div className={`min-h-screen pb-16 ${showDisclaimer ? "bg-market-canvas text-market-ink" : "bg-[#f7f7fb] text-[#1e3a8a]"}`}>
       <VaradhiAppIcons />
       <Outlet />
+      {pageForPath(loc.pathname) && <PageAdBanner page={pageForPath(loc.pathname)!} />}
       {showDisclaimer && (
         <div className="mx-auto max-w-3xl px-4 pb-3 sm:px-6">
           <div className="border-t border-market-border text-market-muted text-[10px] leading-relaxed py-3">

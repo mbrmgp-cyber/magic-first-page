@@ -57,6 +57,13 @@
       "when": 1793172329499,
       "tag": "0007_vaaradhi_approved_profile_lock",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793214386091,
+      "tag": "0008_varadhi_local_ads",
+      "breakpoints": true
     }
   ]
 }
