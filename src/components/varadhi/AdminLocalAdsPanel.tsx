@@ -45,7 +45,7 @@ export function AdminLocalAdsPanel() {
     } catch (e: any) { toast.error(e.message ?? "విఫలమైంది"); } finally { setBusy(false); }
   }
 
-  async function update(id: string, changes: Record<string, any>) {
+  async function update(id: string, changes: any) {
     const { error } = await supabase.from("varadhi_page_ads").update(changes).eq("id", id);
     if (error) toast.error(error.message); else { toast.success("సేవ్ అయింది"); load(); }
   }
