@@ -2707,6 +2707,42 @@ export type Database = {
         }
         Relationships: []
       }
+      varadhi_page_ads: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          image_url: string
+          link_url: string | null
+          page: string
+          phone: string | null
+          sort_order: number
+          title: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          image_url: string
+          link_url?: string | null
+          page: string
+          phone?: string | null
+          sort_order?: number
+          title?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          image_url?: string
+          link_url?: string | null
+          page?: string
+          phone?: string | null
+          sort_order?: number
+          title?: string | null
+        }
+        Relationships: []
+      }
       varadhi_partners: {
         Row: {
           commission_pct: number
