@@ -5,6 +5,8 @@ import { getMyVaradhiProfile, upsertVaradhiProfile } from "@/lib/varadhi.functio
 import { validateReferralCode } from "@/lib/varadhi-partner.functions";
 import { toast } from "sonner";
 import { Upload, Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { isProfileLocked, registrationComplete } from "@/lib/varadhi-profile";
 
 const OCCUPATIONS = [
   "వ్యాపారం",
@@ -87,20 +89,11 @@ export function VaradhiRegistrationForm({
     toast.success("అప్‌లోడ్ అయింది");
   };
 
-  const complete =
-    form.full_name.trim().length > 0 &&
-    form.photo_url.length > 0 &&
-    form.aadhaar_url.length > 0 &&
-    form.phone.trim().length >= 10 &&
-    form.house_number.trim().length > 0 &&
-    form.city.trim().length > 0 &&
-    form.mandal.trim().length > 0 &&
-    form.district.trim().length > 0 &&
-    form.state.trim().length > 0 &&
-    form.occupation.length > 0 &&
-    (form.occupation !== "ఇతర" || occupationOther.trim().length > 0);
+  const complete = registrationComplete(form, occupationOther);
+  const locked = isProfileLocked(status);
 
   const submit = async () => {
+    if (locked) return;
     if (!complete) return toast.error("అన్ని వివరాలు పూర్తి చేయండి");
     setSaving(true);
     try {
@@ -165,13 +158,20 @@ export function VaradhiRegistrationForm({
         </div>
       )}
 
+      {locked ? (
+        <dl className="mt-4 grid grid-cols-1 gap-3 text-sm text-foreground">
+          {[["పేరు", form.full_name], ["ఫోన్ నెంబర్", form.phone], ["అడ్రస్", form.house_number], ["గ్రామం పేరు", form.city], ["మండలం", form.mandal], ["జిల్లా", form.district], ["రాష్ట్రం", form.state], ["వృత్తి", form.occupation === "ఇతర" ? occupationOther : form.occupation]].map(([label, value]) => (
+            <div key={label}><dt className="text-xs text-muted-foreground">{label}</dt><dd data-notranslit className="break-words">{value || "—"}</dd></div>
+          ))}
+        </dl>
+      ) : <>
       <div className="mt-4 space-y-3">
         <Field label="పేరు *">
           <input className={inp} value={form.full_name}
             onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
         </Field>
 
-        <ProofField label="ఫోటో *" file={form.photo_url}
+        <ProofField label="ఫోటో (ఐచ్ఛికం)" file={form.photo_url}
           onFile={(f) => uploadTo(f, "photo_url")} />
 
         <Field label="అడ్రస్ — ఇంటి నెంబర్ + వీధి నెంబర్ *">
@@ -230,14 +230,14 @@ export function VaradhiRegistrationForm({
         </Field>
       </div>
 
-      <button onClick={submit} disabled={!complete || saving}
-        className="w-full mt-5 rounded-xl bg-[#1e3a8a] py-3 text-white font-bold shadow-md disabled:opacity-50">
+      <Button onClick={submit} disabled={!complete || saving} className="w-full mt-5">
         {saving ? "పంపుతోంది…" : status ? "వివరాలు సేవ్ చేయండి" : "రిజిస్టర్"}
-      </button>
+      </Button>
 
       <p className="text-[10px] text-[#1e3a8a]/60 mt-2">
         మీ ఆధార్ & వివరాలను Admin పరిశీలించి ఆమోదిస్తారు.
       </p>
+      </>}
     </div>
   );
 }
