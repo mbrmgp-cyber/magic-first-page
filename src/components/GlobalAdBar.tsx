@@ -1,9 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import promotionVideo from "@/assets/videos/vaaradhi-promotion-silent.mp4.asset.json";
+import { VARADHI_APP_URL } from "@/lib/app-hosts";
 
 type AdRow = { id: string; url: string; label: string | null };
-type AdSlide = { id: string; src: string; label: string | null; kind: "video" | "image" };
+type AdSlide = { id: string; src: string; label: string | null; kind: "video" | "image"; href?: string };
+
+const promotionSlide: AdSlide = {
+  id: "vaaradhi-promotion", src: promotionVideo.url, label: null, kind: "video", href: VARADHI_APP_URL,
+};
 
 function detectKind(url: string): "video" | "image" {
   const clean = url.split("?")[0].toLowerCase();
@@ -27,7 +33,7 @@ export function GlobalAdBar() {
     },
   });
 
-  const [slides, setSlides] = useState<AdSlide[]>([]);
+  const [slides, setSlides] = useState<AdSlide[]>([promotionSlide]);
   const [idx, setIdx] = useState(0);
 
   useEffect(() => {
@@ -43,7 +49,7 @@ export function GlobalAdBar() {
         return src ? { id: r.id, src, label: r.label, kind: detectKind(r.url) } as AdSlide : null;
       }));
       if (!cancelled) {
-        setSlides(built.filter(Boolean) as AdSlide[]);
+        setSlides([promotionSlide, ...built.filter((slide): slide is AdSlide => slide !== null)]);
         setIdx(0);
       }
     })();
@@ -161,7 +167,7 @@ export function GlobalAdBar() {
     <div
       className="mbr-global-ad-bar no-print print:hidden fixed inset-x-0 bottom-0 z-40 pointer-events-none m-0 p-0 overflow-hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
-      aria-hidden="true"
+      aria-label="MBR advertisements"
     >
       <style>{`
         @keyframes mbrAdFadeIn { from { opacity: 0; transform: scale(1.03); } to { opacity: 1; transform: scale(1); } }
@@ -170,7 +176,7 @@ export function GlobalAdBar() {
         .mbr-ad-marquee-track { animation: mbrAdMarquee 22s linear infinite; }
       `}</style>
       <div className="w-full max-w-none pointer-events-auto m-0 p-0">
-        <div className="relative overflow-hidden bg-black shadow-[0_-6px_24px_rgba(0,0,0,0.55)] w-full max-w-none h-[70px] m-0 p-0">
+        <div className="relative overflow-hidden bg-market-header shadow-market w-full max-w-none h-[70px] m-0 p-0">
           {slides.map((s, i) => {
             const active = i === (idx % slides.length);
             return (
@@ -182,7 +188,8 @@ export function GlobalAdBar() {
                 {s.kind === "video" ? (
                   <video
                     src={s.src}
-                    className="w-full h-[70px] object-cover block bg-black"
+                    className={`w-full h-[70px] block ${s.href ? "object-contain bg-market-header" : "object-cover bg-background"}`}
+                    aria-label={s.href ? "Vaaradhi promotion video" : s.label || "Advertisement video"}
                     autoPlay
                     muted
                     loop
@@ -198,11 +205,12 @@ export function GlobalAdBar() {
                     decoding="async"
                   />
                 )}
+                {s.href && active ? <a href={s.href} aria-label="Open Vaaradhi" className="absolute inset-0 focus-visible:outline-2 focus-visible:outline-market-brand" /> : null}
               </div>
             );
           })}
 
-          {marqueeText ? (
+          {marqueeText && !slides[idx % slides.length]?.href ? (
             <div className="absolute inset-x-0 bottom-0 h-6 overflow-hidden bg-gradient-to-t from-black/80 to-transparent">
               <div className="mbr-ad-marquee-track whitespace-nowrap text-white text-xs font-semibold tracking-wide leading-6 px-4">
                 {marqueeText}   •   {marqueeText}
