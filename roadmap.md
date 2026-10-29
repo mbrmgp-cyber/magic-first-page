@@ -1,8 +1,8 @@
 # Vaaradhi October 29 page adjustments
-- [ ] Update the slogan with transport and add a fourth rotating real-estate photo.
-- [ ] Highlight search heading and search bar background.
-- [ ] Rename Update Board to Upload, move posting controls below welcome, hide occupation heading and collapse removal history at the bottom.
-- [ ] Collapse profile details behind the Profile button; verify signed-in interactions and mobile layout without changing approval locks.
+- [x] Update the slogan with transport and add a fourth rotating real-estate photo; Telugu slogan, loaded image and timed wrap verified.
+- [x] Highlight search heading and search bar background; mobile appearance and entered search term verified.
+- [x] Rename Update Board to Upload, move posting controls below welcome, hide occupation heading and collapse removal history at the bottom; approved-user upload form opens, final history button expands/collapses correctly.
+- [x] Collapse profile details behind the Profile button; approved-user eight read-only fields expand/collapse with zero inputs; mobile no overflow or runtime errors and 30 regression tests pass. Not published.
 
 # Vaaradhi home refresh
 - [x] Update header slogan to Online Business & Services, enlarge the existing logo and add a distinct mint background; verified desktop/mobile, loaded logo and Telugu/English language selection; 24 language tests passed. Not published.
