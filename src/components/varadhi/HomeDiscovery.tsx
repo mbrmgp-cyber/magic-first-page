@@ -8,11 +8,13 @@ import { sharedTranslation } from "@/lib/language-support";
 import slideServices from "@/assets/varadhi-slide-services.jpg";
 import slideTransport from "@/assets/varadhi-slide-transport.jpg";
 import slideMarket from "@/assets/varadhi-slide-market.jpg";
+import slideEstate from "@/assets/varadhi-slide-estate.jpg";
 
 const slides = [
   { src: slideServices, title: "Services" },
   { src: slideTransport, title: "Transport" },
   { src: slideMarket, title: "New / Used Goods" },
+  { src: slideEstate, title: "Real Estate" },
 ];
 const categories = [
   { id: "fresh", title: "Fresh Items", Icon: Apple, tone: "market-fresh" },
@@ -41,7 +43,7 @@ export function HomeDiscovery() {
         ))}
         <div className="absolute bottom-3 right-4 flex gap-1.5">
           {slides.map((slide, index) => (
-            <button key={slide.title} type="button" aria-label={t(slide.title)} onClick={() => setActive(index)} className={`h-2 rounded-full bg-background/90 transition-all ${index === active ? "w-6" : "w-2 opacity-70"}`} />
+            <Button key={slide.title} type="button" variant="ghost" size="icon" aria-label={t(slide.title)} aria-pressed={index === active} onClick={() => setActive(index)} className={`h-2 min-h-0 rounded-full bg-background/90 p-0 transition-all hover:bg-background ${index === active ? "w-6" : "w-2 opacity-70"}`} />
           ))}
         </div>
       </section>

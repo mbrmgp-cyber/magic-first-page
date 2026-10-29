@@ -1,7 +1,10 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { CreditCard, Handshake, Gift, LogOut } from "lucide-react";
+import { CreditCard, Handshake, Gift, LogOut, User, ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useI18n } from "@/lib/i18n";
+import { sharedTranslation } from "@/lib/language-support";
 import { DeleteAccountButton } from "@/components/DeleteAccountButton";
 import { VaradhiRegistrationForm } from "@/components/varadhi/RegistrationForm";
 
@@ -22,6 +25,8 @@ export const Route = createFileRoute("/varadhi/profile")({
 function VaradhiProfilePage() {
   const navigate = useNavigate();
   const [ready, setReady] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const { lang } = useI18n();
 
   useEffect(() => {
     (async () => {
@@ -39,7 +44,11 @@ function VaradhiProfilePage() {
       <h1 className="text-xl font-bold text-[#1e3a8a]">నా ప్రొఫైల్</h1>
 
       <section aria-label="Vaaradhi registration / My profile" className="border-b border-border pb-5">
-        <VaradhiRegistrationForm showRewardsLink={false} />
+        <Button className="w-full justify-start" variant="outline" aria-expanded={profileOpen} aria-controls="vaaradhi-profile-details" onClick={() => setProfileOpen(v => !v)}>
+          <User className="h-4 w-4" /><span data-no-translate>{sharedTranslation(lang, "Profile") ?? "Profile"}</span>
+          <ChevronDown className={`ml-auto h-4 w-4 transition-transform ${profileOpen ? "rotate-180" : ""}`} />
+        </Button>
+        {profileOpen && <div id="vaaradhi-profile-details" className="mt-4"><VaradhiRegistrationForm showRewardsLink={false} /></div>}
       </section>
 
       <Link to="/varadhi/subscription"

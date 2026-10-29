@@ -40,6 +40,8 @@ export const Route = createFileRoute("/varadhi/browse/$category")({
         { property: "og:title", content: title },
         { property: "og:description", content: meta.desc },
         { property: "og:url", content: url },
+        { property: "og:type", content: "website" },
+        { name: "twitter:card", content: "summary" },
       ],
       links: [{ rel: "canonical", href: url }],
     };
@@ -171,18 +173,18 @@ function BrowsePage() {
 
   return (
     <div className="mx-auto max-w-md px-4 pt-4">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 rounded-lg border border-market-brand/20 bg-market-header px-3 py-3 text-market-ink">
         <Link to="/varadhi" className="p-1"><ArrowLeft className="h-5 w-5" /></Link>
-        <h1 className="text-lg font-bold text-[#1e3a8a]">ఎక్కడ ఏమి కావాలో వెతకండి</h1>
+        <h1 className="min-w-0 text-lg font-bold text-market-ink">ఎక్కడ ఏమి కావాలో వెతకండి</h1>
       </div>
 
-      <div className="mt-3 flex items-center gap-2 rounded-xl border border-black/10 bg-white px-3 py-2 shadow-sm">
-        <Search className="h-4 w-4 shrink-0 text-[#1e3a8a]/50" />
+      <div className="mt-3 flex items-center gap-2 rounded-lg border border-market-brand/20 bg-market-header px-3 py-3 shadow-sm focus-within:ring-2 focus-within:ring-market-brand/30">
+        <Search className="h-4 w-4 shrink-0 text-market-brand" />
         <input
           value={term}
           onChange={(e) => setTerm(e.target.value)}
           placeholder="వెతకండి…"
-          className="min-w-0 flex-1 bg-transparent text-sm text-[#1e3a8a] outline-none placeholder:text-[#1e3a8a]/40"
+          className="min-w-0 flex-1 bg-transparent text-sm text-market-ink outline-none placeholder:text-market-muted"
         />
         {term && (
           <button type="button" onClick={() => setTerm("")} className="text-xs text-[#1e3a8a]/50">✕</button>

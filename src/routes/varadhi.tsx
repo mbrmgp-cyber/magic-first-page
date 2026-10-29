@@ -1,6 +1,8 @@
 import { createFileRoute, Outlet, Link, useLocation } from "@tanstack/react-router";
 import { PageAdBanner, pageForPath } from "@/components/varadhi/PageAdBanner";
-import { Home, Search, LayoutDashboard, ShieldCheck, User } from "lucide-react";
+import { Home, Search, Upload, ShieldCheck, User } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
+import { sharedTranslation } from "@/lib/language-support";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useServerFn } from "@tanstack/react-start";
@@ -41,6 +43,7 @@ export const Route = createFileRoute("/varadhi")({
 
 function VaradhiLayout() {
   const loc = useLocation();
+  const adPage = pageForPath(loc.pathname);
   const showDisclaimer = loc.pathname === "/varadhi";
   const checkAdmin = useServerFn(amIVaradhiAdmin);
   const checkScope = useServerFn(getMyVaradhiScope);
@@ -64,7 +67,7 @@ function VaradhiLayout() {
     <div className={`min-h-screen pb-16 ${showDisclaimer ? "bg-market-canvas text-market-ink" : "bg-[#f7f7fb] text-[#1e3a8a]"}`}>
       <VaradhiAppIcons />
       <Outlet />
-      {pageForPath(loc.pathname) && <PageAdBanner page={pageForPath(loc.pathname)!} />}
+      {adPage && <PageAdBanner page={adPage} />}
       {showDisclaimer && (
         <div className="mx-auto max-w-3xl px-4 pb-3 sm:px-6">
           <div className="border-t border-market-border text-market-muted text-[10px] leading-relaxed py-3">
@@ -81,6 +84,7 @@ function VaradhiLayout() {
 
 function VaradhiBottomNav({ isAdmin }: { isAdmin: boolean }) {
   const loc = useLocation();
+  const { lang } = useI18n();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   // Registration/profile lives on the Profile page, and the admin
@@ -88,7 +92,7 @@ function VaradhiBottomNav({ isAdmin }: { isAdmin: boolean }) {
   const items = [
     { to: "/varadhi", icon: Home, label: "హోమ్" },
     { to: "/varadhi/browse/fresh", icon: Search, label: "వెతకండి" },
-    { to: "/varadhi/dashboard", icon: LayoutDashboard, label: "అప్‌డేట్ బోర్డు" },
+    { to: "/varadhi/dashboard", icon: Upload, label: "Upload" },
     { to: "/varadhi/profile", icon: User, label: "ప్రొఫైల్" },
     ...(isAdmin ? [{ to: "/varadhi/admin", icon: ShieldCheck, label: "అడ్మిన్ ప్యానెల్" }] : []),
   ];
@@ -110,7 +114,7 @@ function VaradhiBottomNav({ isAdmin }: { isAdmin: boolean }) {
               }`}
             >
               <Icon className="h-5 w-5" />
-              <span>{it.label}</span>
+              <span data-no-translate>{sharedTranslation(lang, it.label) ?? it.label}</span>
             </Link>
           );
         })}

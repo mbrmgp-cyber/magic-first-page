@@ -199,7 +199,7 @@ function VaradhiHome() {
             <h1 className="break-words text-xl font-bold text-market-ink sm:text-2xl">
               వారధి <span className="sr-only">— Telugu Local Marketplace for Buying, Selling, Transport & Services</span>
             </h1>
-            <p className="mt-1 text-xs font-medium leading-relaxed text-market-ink" data-notranslit>{t("Online Business & Services")}</p>
+            <p className="mt-1 text-xs font-medium leading-relaxed text-market-ink" data-no-translate data-notranslit>{t("Online Business & Services, Transport")}</p>
           </div>
         </div>
         <LanguageToggle />
