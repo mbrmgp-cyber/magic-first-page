@@ -42,7 +42,7 @@ export function PageAdBanner({ page }: { page: AdPage }) {
       <p className="text-[10px] uppercase tracking-wide opacity-60">ప్రకటన · Ad</p>
       {ads.map((a) => {
         const href = a.phone ? `tel:${a.phone.replace(/\s+/g, "")}` : a.link_url || undefined;
-        const img = <img src={a.src} alt={a.title ?? "Local ad"} loading="lazy" className="w-full rounded-xl border object-cover max-h-40" />;
+        const img = <img src={a.src} alt={a.title ?? "Local ad"} loading="lazy" className="block w-full aspect-[4.4/1] rounded-2xl border object-cover shadow-sm" />;
         return href ? (
           <a key={a.id} href={href} target={a.phone ? undefined : "_blank"} rel="noopener noreferrer" className="block">{img}</a>
         ) : <div key={a.id}>{img}</div>;
