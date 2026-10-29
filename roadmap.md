@@ -1,3 +1,7 @@
+# MBR organization sharing
+- [ ] Add organization-logo share previews and permission-checked destinations with blank registration fallback.
+- [ ] Verify public metadata, registration fallback and authorized sharing end to end.
+
 # Vaaradhi October 29 page adjustments
 - [x] Update the slogan with transport and add a fourth rotating real-estate photo; Telugu slogan, loaded image and timed wrap verified.
 - [x] Highlight search heading and search bar background; mobile appearance and entered search term verified.
