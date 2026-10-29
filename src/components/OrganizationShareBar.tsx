@@ -7,12 +7,19 @@ import { getMyOrg } from "@/lib/org.functions";
 import { destinationForPath, organizationShareUrl } from "@/lib/organization-share";
 import { useI18n, localizeText } from "@/lib/i18n";
 import { toast } from "sonner";
+import { useEffect, useState } from "react";
+import { getActiveOrgId, onActiveOrgChange } from "@/lib/active-org";
 
 export function OrganizationShareBar() {
   const { pathname } = useLocation();
   const fetchOrg = useServerFn(getMyOrg);
   const { lang } = useI18n();
-  const { data } = useQuery({ queryKey: ["share-organization", pathname], queryFn: () => fetchOrg(), enabled: pathname.startsWith("/org/"), retry: false });
+  const [activeOrg, setActiveOrg] = useState<string | null>(null);
+  useEffect(() => {
+    setActiveOrg(getActiveOrgId());
+    return onActiveOrgChange(setActiveOrg);
+  }, []);
+  const { data } = useQuery({ queryKey: ["share-organization", pathname, activeOrg], queryFn: () => fetchOrg(), enabled: pathname.startsWith("/org/"), retry: false });
   const org = data?.org;
   if (!pathname.startsWith("/org/") || !org?.org_code || org.approval_status !== "approved") return null;
   async function share() {

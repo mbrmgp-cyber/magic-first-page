@@ -1,5 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { getRequest } from "@tanstack/react-start/server";
+import { ACTIVE_ORG_HEADER } from "@/lib/active-org";
 
 // Canonical list of modules the Super Admin can toggle per admin.
 // Keys are stable strings stored in admin_module_access.modules.
@@ -29,6 +31,21 @@ export const PRESET_MODULES: Record<Exclude<AdminPreset, "custom">, AdminModuleK
 };
 
 async function resolveOrg(supabase: any, userId: string): Promise<string | null> {
+  const picked = getRequest().headers.get(ACTIVE_ORG_HEADER);
+  if (picked) {
+    const { data: org, error: orgError } = await supabase.from("organizations")
+      .select("id, admin_user_id").eq("id", picked).maybeSingle();
+    if (orgError) throw new Error(orgError.message);
+    if (org?.admin_user_id === userId) return picked;
+    const { data: member, error: memberError } = await supabase.from("members")
+      .select("id").eq("org_id", picked).eq("user_id", userId).eq("status", "approved").eq("is_active", true).maybeSingle();
+    if (memberError) throw new Error(memberError.message);
+    if (!member) return null;
+    const { data: seat, error: seatError } = await supabase.from("committee_members")
+      .select("id").eq("org_id", picked).eq("member_id", member.id).eq("is_active", true).limit(1);
+    if (seatError) throw new Error(seatError.message);
+    return seat?.length ? picked : null;
+  }
   const { data: own } = await supabase
     .from("organizations")
     .select("id")
