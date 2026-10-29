@@ -20,3 +20,4 @@
 - Mount the shared Vaaradhi registration/profile form behind a local disclosure on the Profile page, not the posting page — why: personal details stay in the Profile destination without altering shared approval permissions.
 - Keep home discovery in its own browser-safe component with a bundled slide list and localized copy — why: adding photo subjects preserves the existing timed fade and stable banner dimensions.
 - Keep posting controls before occupation panels and removal history in its own query-enabled disclosure at the bottom — why: upload actions remain primary and moderation data loads only on request without changing permissions.
+- Share a CDN-hosted silent promotion asset between the built-in MBR global ad slide and the Vaaradhi home video link; preserve existing ad rotation and contain the promotion without cropping — why: both entry points must play the same complete video without audio or database changes.

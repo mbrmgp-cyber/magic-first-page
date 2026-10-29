@@ -1,3 +1,8 @@
+# Vaaradhi silent promotion video
+- [x] Remove all audio and register silent MP4/WebM app assets; both retain 1200×128 dimensions.
+- [x] Show the video in the MBR global advertisement rotation and add the promotion-video link on Vaaradhi Home, opening a playable video page with download.
+- [x] Verify signed-in MBR ad autoplay, muted playback, uncropped framing, Vaaradhi Home → promotion-page link and playback; no page errors, five entry-link regression tests pass and build OK. Not published.
+
 # MBR organization sharing
 - [x] Add organization-logo share previews, page-level Share buttons and permission-checked destinations with blank registration fallback; registration QR links use branded society URLs.
 - [x] Verify SSR logo/title tags, loaded logo, blank registration for signed-out/other-society users, owner access to Members and exact copied link; 12 regression tests pass. Not published. Existing notification subscription error observed on dashboard remount, unrelated to sharing.
