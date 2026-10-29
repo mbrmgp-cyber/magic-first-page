@@ -1,6 +1,6 @@
 # MBR organization sharing
-- [ ] Add organization-logo share previews and permission-checked destinations with blank registration fallback.
-- [ ] Verify public metadata, registration fallback and authorized sharing end to end.
+- [x] Add organization-logo share previews, page-level Share buttons and permission-checked destinations with blank registration fallback; registration QR links use branded society URLs.
+- [x] Verify SSR logo/title tags, loaded logo, blank registration for signed-out/other-society users, owner access to Members and exact copied link; 12 regression tests pass. Not published. Existing notification subscription error observed on dashboard remount, unrelated to sharing.
 
 # Vaaradhi October 29 page adjustments
 - [x] Update the slogan with transport and add a fourth rotating real-estate photo; Telugu slogan, loaded image and timed wrap verified.
