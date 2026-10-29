@@ -190,20 +190,20 @@ function VaradhiHome() {
   const others = recent.filter((l) => !nearbyIds.has(l.id));
 
   return (
-    <div className="market-home mx-auto max-w-3xl px-4 pt-6 pb-8 sm:px-6">
+    <div className="market-home mx-auto max-w-3xl px-4 pb-8 sm:px-6">
       {/* Header */}
-      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+      <header className="-mx-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-market-brand/20 bg-market-header px-4 py-4 sm:-mx-6 sm:gap-4 sm:px-6 sm:py-5">
         <div className="flex min-w-0 items-center gap-3">
-          <img src={varadhiLogo.url} alt="Vaaradhi" className="h-14 w-14 shrink-0 rounded-lg object-contain bg-market-surface shadow-market-card p-1" />
+          <img src={varadhiLogo.url} alt="Vaaradhi" className="h-[72px] w-[72px] shrink-0 rounded-lg object-contain bg-market-surface shadow-market-card p-1 sm:h-20 sm:w-20" />
           <div className="min-w-0">
             <h1 className="truncate text-2xl font-bold text-market-ink">
               వారధి <span className="sr-only">— Telugu Local Marketplace for Buying, Selling, Transport & Services</span>
             </h1>
-            <p className="text-xs leading-relaxed text-market-muted">{t("Buy, sell & connect locally")}</p>
+            <p className="mt-1 text-xs font-medium leading-relaxed text-market-ink" data-notranslit>{t("Online Business & Services")}</p>
           </div>
         </div>
         <LanguageToggle />
-      </div>
+      </header>
 
       {/* Banner carousel */}
       <HomeDiscovery />

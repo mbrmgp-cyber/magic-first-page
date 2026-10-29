@@ -65,6 +65,7 @@
   --color-market-muted: var(--market-muted);
   --color-market-border: var(--market-border);
   --color-market-brand: var(--market-brand);
+  --color-market-header: var(--market-header);
   --color-market-on-brand: var(--market-on-brand);
   --color-market-fresh: var(--market-fresh);
   --color-market-notice: var(--market-notice);
@@ -81,6 +82,7 @@
   --market-muted: oklch(0.5 0.023 165);
   --market-border: oklch(0.91 0.013 160);
   --market-brand: oklch(0.48 0.108 164);
+  --market-header: oklch(0.92 0.045 164);
   --market-on-brand: oklch(1 0 0);
   --market-fresh: oklch(0.45 0.12 145);
   --market-notice: oklch(0.97 0.024 85);
@@ -132,6 +134,7 @@
   --market-muted: oklch(0.75 0.02 165);
   --market-border: oklch(0.36 0.023 165);
   --market-brand: oklch(0.72 0.13 164);
+  --market-header: oklch(0.31 0.047 164);
   --market-on-brand: oklch(0.2 0.025 165);
   --market-fresh: oklch(0.75 0.13 145);
   --market-goods: oklch(0.75 0.1 250);
