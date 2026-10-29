@@ -1,7 +1,7 @@
 # Vaaradhi silent promotion video
-- [ ] Remove the promotional video's audio and register it as an app asset.
-- [ ] Show the video in the MBR advertisement bar and link it from the menu-linked Vaaradhi page.
-- [ ] Verify signed-in menu navigation, silent playback, complete banner framing and video link.
+- [x] Remove all audio and register silent MP4/WebM app assets; both retain 1200×128 dimensions.
+- [x] Show the video in the MBR global advertisement rotation and add the promotion-video link on Vaaradhi Home, opening a playable video page with download.
+- [x] Verify signed-in MBR ad autoplay, muted playback, uncropped framing, Vaaradhi Home → promotion-page link and playback; no page errors, five entry-link regression tests pass and build OK. Not published.
 
 # MBR organization sharing
 - [x] Add organization-logo share previews, page-level Share buttons and permission-checked destinations with blank registration fallback; registration QR links use branded society URLs.
