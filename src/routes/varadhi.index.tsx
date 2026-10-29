@@ -196,7 +196,7 @@ function VaradhiHome() {
         <div className="flex min-w-0 items-center gap-3">
           <img src={varadhiLogo.url} alt="Vaaradhi" className="h-[72px] w-[72px] shrink-0 rounded-lg object-contain bg-market-surface shadow-market-card p-1 sm:h-20 sm:w-20" />
           <div className="min-w-0">
-            <h1 className="truncate text-2xl font-bold text-market-ink">
+            <h1 className="break-words text-xl font-bold text-market-ink sm:text-2xl">
               వారధి <span className="sr-only">— Telugu Local Marketplace for Buying, Selling, Transport & Services</span>
             </h1>
             <p className="mt-1 text-xs font-medium leading-relaxed text-market-ink" data-notranslit>{t("Online Business & Services")}</p>
