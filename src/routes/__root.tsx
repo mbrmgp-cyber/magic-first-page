@@ -17,6 +17,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { StaticAppIcons } from "@/components/StaticAppIcons";
 import { OfflineNotice } from "@/components/OfflineNotice";
 import { AndroidBackHandler } from "@/components/AndroidBackHandler";
+import { OrganizationShareBar } from "@/components/OrganizationShareBar";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -188,6 +189,7 @@ function RootComponent() {
       path === "/" ||
       path.startsWith("/varadhi") ||
       path === "/register" ||
+      path.startsWith("/society/") ||
       path === "/member/register"
     ) {
       return;
@@ -209,6 +211,7 @@ function RootComponent() {
           <AutoTransliterate />
           {showSplash && <SplashScreen onDone={handleSplashDone} />}
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+          <OrganizationShareBar />
           <Outlet />
           <Toaster position="top-center" richColors closeButton />
           <OfflineNotice />

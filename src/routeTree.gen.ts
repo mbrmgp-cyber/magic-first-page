@@ -26,6 +26,7 @@ import { Route as DonorRegisterRouteImport } from './routes/donor.register'
 import { Route as MCodeRouteImport } from './routes/m.$code'
 import { Route as MemberRegisterRouteImport } from './routes/member.register'
 import { Route as OrgRegisterRouteImport } from './routes/org.register'
+import { Route as SocietyCodeRouteImport } from './routes/society.$code'
 import { Route as VaradhiIndexRouteImport } from './routes/varadhi.index'
 import { Route as VaradhiAdminRouteImport } from './routes/varadhi.admin'
 import { Route as VaradhiAdminApplyRouteImport } from './routes/varadhi.admin-apply'
@@ -65,6 +66,7 @@ import { Route as AuthenticatedOrgRulesRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedOrgSubscriptionRouteImport } from './routes/_authenticated/org.subscription'
 import { Route as AuthenticatedOrgThemeRouteImport } from './routes/_authenticated/org.theme'
 import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
+import { Route as SocietyCodeLogoRouteImport } from './routes/society.$code_.logo'
 import { Route as VaradhiBrowseCategoryRouteImport } from './routes/varadhi.browse.$category'
 import { Route as VaradhiItemIdRouteImport } from './routes/varadhi.item.$id'
 import { Route as VaradhiProviderIdRouteImport } from './routes/varadhi.provider.$id'
@@ -153,6 +155,11 @@ const MemberRegisterRoute = MemberRegisterRouteImport.update({
 const OrgRegisterRoute = OrgRegisterRouteImport.update({
   id: '/org/register',
   path: '/org/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SocietyCodeRoute = SocietyCodeRouteImport.update({
+  id: '/society/$code',
+  path: '/society/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VaradhiIndexRoute = VaradhiIndexRouteImport.update({
@@ -370,6 +377,11 @@ const LovableEmailEventsRoute = LovableEmailEventsRouteImport.update({
   path: '/lovable/email/events',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SocietyCodeLogoRoute = SocietyCodeLogoRouteImport.update({
+  id: '/society/$code_/logo',
+  path: '/society/$code/logo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VaradhiBrowseCategoryRoute = VaradhiBrowseCategoryRouteImport.update({
   id: '/browse/$category',
   path: '/browse/$category',
@@ -413,6 +425,7 @@ export interface FileRoutesByFullPath {
   '/m/$code': typeof MCodeRoute
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
+  '/society/$code': typeof SocietyCodeRoute
   '/varadhi/admin': typeof VaradhiAdminRoute
   '/varadhi/admin-apply': typeof VaradhiAdminApplyRoute
   '/varadhi/auth': typeof VaradhiAuthRoute
@@ -452,6 +465,7 @@ export interface FileRoutesByFullPath {
   '/org/subscription': typeof AuthenticatedOrgSubscriptionRoute
   '/org/theme': typeof AuthenticatedOrgThemeRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
+  '/society/$code/logo': typeof SocietyCodeLogoRoute
   '/varadhi/browse/$category': typeof VaradhiBrowseCategoryRoute
   '/varadhi/item/$id': typeof VaradhiItemIdRoute
   '/varadhi/provider/$id': typeof VaradhiProviderIdRoute
@@ -474,6 +488,7 @@ export interface FileRoutesByTo {
   '/m/$code': typeof MCodeRoute
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
+  '/society/$code': typeof SocietyCodeRoute
   '/varadhi/admin': typeof VaradhiAdminRoute
   '/varadhi/admin-apply': typeof VaradhiAdminApplyRoute
   '/varadhi/auth': typeof VaradhiAuthRoute
@@ -513,6 +528,7 @@ export interface FileRoutesByTo {
   '/org/subscription': typeof AuthenticatedOrgSubscriptionRoute
   '/org/theme': typeof AuthenticatedOrgThemeRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
+  '/society/$code/logo': typeof SocietyCodeLogoRoute
   '/varadhi/browse/$category': typeof VaradhiBrowseCategoryRoute
   '/varadhi/item/$id': typeof VaradhiItemIdRoute
   '/varadhi/provider/$id': typeof VaradhiProviderIdRoute
@@ -538,6 +554,7 @@ export interface FileRoutesById {
   '/m/$code': typeof MCodeRoute
   '/member/register': typeof MemberRegisterRoute
   '/org/register': typeof OrgRegisterRoute
+  '/society/$code': typeof SocietyCodeRoute
   '/varadhi/admin': typeof VaradhiAdminRoute
   '/varadhi/admin-apply': typeof VaradhiAdminApplyRoute
   '/varadhi/auth': typeof VaradhiAuthRoute
@@ -577,6 +594,7 @@ export interface FileRoutesById {
   '/_authenticated/org/subscription': typeof AuthenticatedOrgSubscriptionRoute
   '/_authenticated/org/theme': typeof AuthenticatedOrgThemeRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
+  '/society/$code_/logo': typeof SocietyCodeLogoRoute
   '/varadhi/browse/$category': typeof VaradhiBrowseCategoryRoute
   '/varadhi/item/$id': typeof VaradhiItemIdRoute
   '/varadhi/provider/$id': typeof VaradhiProviderIdRoute
@@ -602,6 +620,7 @@ export interface FileRouteTypes {
     | '/m/$code'
     | '/member/register'
     | '/org/register'
+    | '/society/$code'
     | '/varadhi/admin'
     | '/varadhi/admin-apply'
     | '/varadhi/auth'
@@ -641,6 +660,7 @@ export interface FileRouteTypes {
     | '/org/subscription'
     | '/org/theme'
     | '/lovable/email/events'
+    | '/society/$code/logo'
     | '/varadhi/browse/$category'
     | '/varadhi/item/$id'
     | '/varadhi/provider/$id'
@@ -663,6 +683,7 @@ export interface FileRouteTypes {
     | '/m/$code'
     | '/member/register'
     | '/org/register'
+    | '/society/$code'
     | '/varadhi/admin'
     | '/varadhi/admin-apply'
     | '/varadhi/auth'
@@ -702,6 +723,7 @@ export interface FileRouteTypes {
     | '/org/subscription'
     | '/org/theme'
     | '/lovable/email/events'
+    | '/society/$code/logo'
     | '/varadhi/browse/$category'
     | '/varadhi/item/$id'
     | '/varadhi/provider/$id'
@@ -726,6 +748,7 @@ export interface FileRouteTypes {
     | '/m/$code'
     | '/member/register'
     | '/org/register'
+    | '/society/$code'
     | '/varadhi/admin'
     | '/varadhi/admin-apply'
     | '/varadhi/auth'
@@ -765,6 +788,7 @@ export interface FileRouteTypes {
     | '/_authenticated/org/subscription'
     | '/_authenticated/org/theme'
     | '/lovable/email/events'
+    | '/society/$code_/logo'
     | '/varadhi/browse/$category'
     | '/varadhi/item/$id'
     | '/varadhi/provider/$id'
@@ -789,7 +813,9 @@ export interface RootRouteChildren {
   MCodeRoute: typeof MCodeRoute
   MemberRegisterRoute: typeof MemberRegisterRoute
   OrgRegisterRoute: typeof OrgRegisterRoute
+  SocietyCodeRoute: typeof SocietyCodeRoute
   LovableEmailEventsRoute: typeof LovableEmailEventsRoute
+  SocietyCodeLogoRoute: typeof SocietyCodeLogoRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
 }
@@ -913,6 +939,13 @@ declare module '@tanstack/react-router' {
       path: '/org/register'
       fullPath: '/org/register'
       preLoaderRoute: typeof OrgRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/society/$code': {
+      id: '/society/$code'
+      path: '/society/$code'
+      fullPath: '/society/$code'
+      preLoaderRoute: typeof SocietyCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/varadhi/': {
@@ -1188,6 +1221,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/society/$code_/logo': {
+      id: '/society/$code_/logo'
+      path: '/society/$code/logo'
+      fullPath: '/society/$code/logo'
+      preLoaderRoute: typeof SocietyCodeLogoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/varadhi/browse/$category': {
       id: '/varadhi/browse/$category'
       path: '/browse/$category'
@@ -1345,7 +1385,9 @@ const rootRouteChildren: RootRouteChildren = {
   MCodeRoute: MCodeRoute,
   MemberRegisterRoute: MemberRegisterRoute,
   OrgRegisterRoute: OrgRegisterRoute,
+  SocietyCodeRoute: SocietyCodeRoute,
   LovableEmailEventsRoute: LovableEmailEventsRoute,
+  SocietyCodeLogoRoute: SocietyCodeLogoRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
 }
