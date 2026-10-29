@@ -3498,6 +3498,15 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      organization_share_branding: {
+        Args: { _code: string }
+        Returns: {
+          has_logo: boolean
+          id: string
+          name: string
+          org_code: string
+        }[]
+      }
       reject_leave_request: {
         Args: { _notes?: string; _request_id: string }
         Returns: undefined
