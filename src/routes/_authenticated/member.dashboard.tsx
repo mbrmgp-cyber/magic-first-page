@@ -59,7 +59,7 @@ export const Route = createFileRoute("/_authenticated/member/dashboard")({
 });
 
 const MENU = [
-  { label: "Society Rules", te: "సంస్థ నియమాలు", icon: BookOpen, to: "/org/rules" },
+  { label: "Society Rules", te: "సంస్థ నియమాలు", icon: BookOpen, to: "/org/rules", search: { view: "read" } },
   { label: "Financial Ledger", te: "ఆర్థిక వివరాలు", icon: Wallet, to: "/member/ledger" },
   
   { label: "Live Chit Auction", te: "లైవ్ చిట్ ఆక్షన్", icon: Gavel, to: "/org/auction" },
