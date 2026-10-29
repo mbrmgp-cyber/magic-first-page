@@ -22,9 +22,9 @@ import { MyPostRemovals } from "@/components/varadhi/MyPostRemovals";
 
 export const Route = createFileRoute("/varadhi/dashboard")({
   head: () => ({ meta: [
-    { title: "Update Board — Vaaradhi" },
+    { title: "Upload — Vaaradhi" },
     { name: "description", content: "Manage your Vaaradhi posts and availability, and view post removal explanations." },
-    { property: "og:title", content: "Update Board — Vaaradhi" },
+    { property: "og:title", content: "Upload — Vaaradhi" },
     { property: "og:description", content: "Your Vaaradhi posts, availability and moderation history." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },
@@ -214,14 +214,14 @@ function UpdateBoard() {
 
   return (
     <div className="mx-auto max-w-md px-4 pt-4 pb-8 space-y-4">
-      <h1 className="text-xl font-bold text-[#1e3a8a]">అప్‌డేట్ బోర్డు</h1>
+      <h1 className="text-xl font-bold text-market-ink" data-no-translate>{sharedTranslation(lang, "Upload") ?? "Upload"}</h1>
 
       {/* Greeting */}
-      <div className="rounded-2xl bg-gradient-to-br from-[#1e3a8a] to-[#3b5bdb] p-4 text-white shadow">
+      <div className="rounded-lg bg-primary p-4 text-primary-foreground shadow-sm">
         <p className="text-base font-semibold">🙏 {t("welcome")}{name ? `, ${name}` : ""}{name && lang === "te" ? " గారు" : ""}</p>
         <p className="text-[11px] opacity-90 mt-0.5">
           {hasProfile
-            ? "మీ వస్తువులు, సేవలు ఇక్కడ అప్‌డేట్ చేయండి."
+            ? "మీ వస్తువులు, సేవలు ఇక్కడ అప్‌లోడ్ చేయండి."
             : lang === "hi" ? "पहले प्रोफ़ाइल में पंजीकरण पूरा करें." : lang === "en" ? "Complete your registration in Profile first." : "ముందుగా ప్రొఫైల్‌లో రిజిస్ట్రేషన్ పూర్తి చేయండి."}
         </p>
       </div>
@@ -234,25 +234,20 @@ function UpdateBoard() {
 
       {hasProfile && (
         <>
-          <AreaAdminCounts />
-          <MyPostRemovals />
-
-          {/* వృత్తిని బట్టి వ్యక్తిగత డాష్‌బోర్డ్ — ఆమోదం పొందిన తర్వాత మాత్రమే */}
-          {status === "approved" && <VaradhiOccupationPanel occupation={occupation} />}
-
           {/* Post type */}
           <div className="grid grid-cols-4 gap-1.5">
             {POST_TYPES.map((p) => (
-              <button key={p.id} onClick={() => setPostType(p.id)}
-                className={`rounded-xl py-2 text-[11px] font-semibold border leading-tight ${
-                  postType === p.id ? "bg-[#1e3a8a] text-white border-[#1e3a8a]" : "bg-white text-[#1e3a8a] border-black/10"
-                }`}>
+              <Button key={p.id} onClick={() => setPostType(p.id)} variant={postType === p.id ? "default" : "outline"}
+                className="h-auto min-h-10 whitespace-normal px-1 py-2 text-[11px] font-semibold leading-tight">
                 {p.te}
-              </button>
+              </Button>
             ))}
           </div>
 
           {postType === "transport" ? <TransportSection /> : <PostSection postType={postType} />}
+          <AreaAdminCounts />
+          {status === "approved" && <VaradhiOccupationPanel occupation={occupation} />}
+          <MyPostRemovals />
         </>
       )}
     </div>

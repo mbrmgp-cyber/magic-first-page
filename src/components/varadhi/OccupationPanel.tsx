@@ -113,10 +113,7 @@ export function VaradhiOccupationPanel({ occupation }: { occupation: string }) {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="text-xs font-bold text-[#1e3a8a]">
-          🧑‍🌾 మీ వృత్తి: <span className="font-semibold">{occupation || "—"}</span>
-        </p>
+      <div className="flex items-center justify-end">
         <button onClick={load} className="flex items-center gap-1 rounded-full bg-[#1e3a8a]/10 px-3 py-1 text-[10px] font-semibold text-[#1e3a8a]">
           <RefreshCw className="h-3 w-3" /> రిఫ్రెష్
         </button>

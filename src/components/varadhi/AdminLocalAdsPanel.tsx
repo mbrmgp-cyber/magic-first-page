@@ -9,7 +9,7 @@ import { signAdImages, type AdPage } from "./PageAdBanner";
 const PAGES: { k: AdPage; label: string }[] = [
   { k: "home", label: "హోమ్ (Home)" },
   { k: "search", label: "వెతకండి (Search)" },
-  { k: "dashboard", label: "అప్‌డేట్ బోర్డు (Update Board)" },
+  { k: "dashboard", label: "అప్‌లోడ్ (Upload)" },
   { k: "profile", label: "ప్రొఫైల్ (Profile)" },
 ];
 
