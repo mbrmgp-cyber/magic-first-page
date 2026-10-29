@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import promotionVideo from "@/assets/videos/vaaradhi-promotion-silent.mp4.asset.json";
+import promotionWebm from "@/assets/videos/vaaradhi-promotion-silent.webm.asset.json";
 import { VARADHI_APP_URL } from "@/lib/app-hosts";
 
 type AdRow = { id: string; url: string; label: string | null };
@@ -187,7 +188,7 @@ export function GlobalAdBar() {
               >
                 {s.kind === "video" ? (
                   <video
-                    src={s.src}
+                    src={s.href ? undefined : s.src}
                     className={`w-full h-[70px] block ${s.href ? "object-contain bg-market-header" : "object-cover bg-background"}`}
                     aria-label={s.href ? "Vaaradhi promotion video" : s.label || "Advertisement video"}
                     autoPlay
@@ -195,7 +196,9 @@ export function GlobalAdBar() {
                     loop
                     playsInline
                     preload="auto"
-                  />
+                  >
+                    {s.href ? <><source src={promotionWebm.url} type="video/webm" /><source src={promotionVideo.url} type="video/mp4" /></> : null}
+                  </video>
                 ) : (
                   <img
                     src={s.src}

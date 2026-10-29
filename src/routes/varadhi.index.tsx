@@ -14,7 +14,7 @@ import { HomeDiscovery } from "@/components/varadhi/HomeDiscovery";
 import { Button } from "@/components/ui/button";
 import { sharedTranslation } from "@/lib/language-support";
 import { Sparkles, ImageOff, Video } from "lucide-react";
-import promotionVideo from "@/assets/videos/vaaradhi-promotion-silent.mp4.asset.json";
+import promotionVideo from "@/assets/videos/vaaradhi-promotion-silent.webm.asset.json";
 import { currentAppPageUrl } from "@/lib/app-host-context";
 import { VARADHI_SHARE_IMAGE } from "@/lib/app-hosts";
 
