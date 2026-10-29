@@ -59,7 +59,7 @@ export const Route = createFileRoute("/_authenticated/member/dashboard")({
 });
 
 const MENU = [
-  { label: "Society Rules", te: "సంస్థ నియమాలు", icon: BookOpen, to: "/org/rules" },
+  { label: "Society Rules", te: "సంస్థ నియమాలు", icon: BookOpen, to: "/org/rules", search: { view: "read" } },
   { label: "Financial Ledger", te: "ఆర్థిక వివరాలు", icon: Wallet, to: "/member/ledger" },
   
   { label: "Live Chit Auction", te: "లైవ్ చిట్ ఆక్షన్", icon: Gavel, to: "/org/auction" },
@@ -377,7 +377,7 @@ function MemberDashboard() {
           {MENU.map((it) => {
             const showDot = it.to === "/org/chat" && hasNewChat;
             return (
-            <Link key={it.label} to={it.to as any}
+            <Link key={it.label} to={it.to as any} search={("search" in it ? it.search : undefined) as any}
               className="relative rounded-xl bg-zinc-950 border border-zinc-800 p-4 flex flex-col items-center justify-center gap-2.5 text-center transition hover:-translate-y-0.5 min-h-[112px]"
               style={{ ["--brand" as any]: brand } as React.CSSProperties}
               onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${brand}99`; e.currentTarget.style.boxShadow = `0 0 20px ${brand}33`; }}

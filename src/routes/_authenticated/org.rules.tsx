@@ -58,6 +58,7 @@ function RulesTab() {
   const fnUpd = useServerFn(updateRule);
   const fnDel = useServerFn(deleteRule);
   const [rules, setRules] = useState<Rule[]>([]);
+  const readOnly = Route.useSearch().view === "read";
   const [canEdit, setCanEdit] = useState(false);
   const [orgName, setOrgName] = useState<string>("");
   const [orgLogoUrl, setOrgLogoUrl] = useState<string | null>(null);
@@ -74,7 +75,7 @@ function RulesTab() {
     try {
       const r = await fnList();
       setRules(r.rules as Rule[]);
-      setCanEdit(r.canEdit);
+      setCanEdit(r.canEdit && !readOnly);
       setOrgName((r as any).orgName ?? "");
       setOrgLogoUrl((r as any).orgLogoUrl ?? null);
     } finally { setLoading(false); }
@@ -206,6 +207,7 @@ function HistoryTab() {
   const fnUpd = useServerFn(updateMilestone);
   const fnDel = useServerFn(deleteMilestone);
   const [items, setItems] = useState<Milestone[]>([]);
+  const readOnly = Route.useSearch().view === "read";
   const [canEdit, setCanEdit] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -237,7 +239,7 @@ function HistoryTab() {
       const r = await fnList();
       const list = r.milestones as Milestone[];
       setItems(list);
-      setCanEdit(r.canEdit);
+      setCanEdit(r.canEdit && !readOnly);
       setOrgName((r as any).orgName ?? "");
       setOrgLogoUrl((r as any).orgLogoUrl ?? null);
       const entries = await Promise.all(
@@ -488,6 +490,7 @@ function Page() {
 }
 
 export const Route = createFileRoute("/_authenticated/org/rules")({
+  validateSearch: (s: Record<string, unknown>): { view?: "read" } => (s.view === "read" ? { view: "read" } : {}),
   head: () => ({ meta: [{ title: "నియమాలు & చరిత్ర" }] }),
   component: Page,
 });
