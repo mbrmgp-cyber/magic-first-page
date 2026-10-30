@@ -1,4 +1,4 @@
-import promotionVideo from "@/assets/videos/vaaradhi-promotion-silent.mp4.asset.json";
+import promotionVideo from "../assets/videos/vaaradhi-promotion-silent.mp4.asset.json";
 
 export type GlobalAd = { id: string; url: string; label: string | null; active: boolean; sort_order: number; organization_ids: string[] | null };
 export const PROMOTION_ID = "a204d8a2-32a0-4b46-906a-48094420de91";
