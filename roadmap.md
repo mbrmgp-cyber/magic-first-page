@@ -1,4 +1,5 @@
 # Vaaradhi silent promotion video
+- [ ] Publish the advertisement bar and Vaaradhi promotion link; verify dashboard bell/language/settings spacing with the screenshot's organization.
 - [x] Match the MBR ad bar to the video's aspect ratio, remove empty bands and round its corners; verified signed-in desktop/mobile full-frame silent playback and rounded corners, build OK. Not published.
 - [x] Remove all audio and register silent MP4/WebM app assets; both retain 1200×128 dimensions.
 - [x] Show the video in the MBR global advertisement rotation and add the promotion-video link on Vaaradhi Home, opening a playable video page with download.
