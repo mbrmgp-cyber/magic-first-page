@@ -27,7 +27,14 @@ import { useSimRole, canAccess, ROUTE_ACCESS, ROLE_LABELS } from "@/lib/rbac";
 import { MEMBER_SAFE_COLUMNS } from "@/lib/db-columns";
 
 export const Route = createFileRoute("/_authenticated/org/dashboard")({
-  head: () => ({ meta: [{ title: "Society Dashboard — MBR App" }] }),
+  head: () => ({ meta: [
+    { title: "Society Dashboard — MBR App" },
+    { name: "description", content: "Manage your MBR society, members, events, accounts and organization settings." },
+    { property: "og:title", content: "Society Dashboard — MBR App" },
+    { property: "og:description", content: "Manage your MBR society, members, events, accounts and organization settings." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: Dashboard,
 });
 
@@ -317,8 +324,8 @@ function Dashboard() {
       <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onLogoPicked} />
       <div className="max-w-3xl mx-auto space-y-4">
         {/* Top bar */}
-        <div className="flex items-center justify-between gap-1.5 flex-nowrap">
-          <div className="flex items-center gap-1.5 flex-nowrap min-w-0">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-1.5 sm:flex sm:justify-between">
+          <div className="grid min-w-0 grid-cols-[40px_36px_minmax(0,1fr)_36px] items-center gap-1 sm:flex sm:gap-1.5">
             <button
               type="button"
               onClick={() => setQrOpen(true)}
@@ -332,22 +339,20 @@ function Dashboard() {
               )}
             </button>
             <NotificationBell />
-            <OrgSwitcher />
-            <LanguageToggle />
-          </div>
+            <LanguageToggle className="min-w-0 w-full !gap-1 !px-2 sm:w-auto [&_svg]:shrink-0 [&_span]:truncate" />
           <Button variant="ghost" size="icon" onClick={() => setSettingsOpen(true)} className="text-zinc-200 hover:bg-zinc-900 hover:text-white h-9 w-9 p-0 rounded-md border border-zinc-700 inline-flex items-center justify-center shrink-0 [&_svg]:mx-auto" aria-label="Settings">
             <Settings className="h-4 w-4" />
           </Button>
-          <div className="flex items-center gap-1 flex-nowrap justify-end min-w-0">
-            <Button variant="ghost" size="sm" onClick={logout} className="text-zinc-200 hover:bg-zinc-900 hover:text-white px-2 h-9 rounded-md border border-zinc-700 shrink-0">
-              <LogOut className="h-4 w-4 mr-1" />{lt("Logout", "లాగ్ అవుట్")}
+          </div>
+          <div className="flex items-center gap-1 justify-end shrink-0">
+            <Button variant="ghost" size="sm" onClick={logout} aria-label={lt("Logout", "లాగ్ అవుట్")} title={lt("Logout", "లాగ్ అవుట్")} className="text-zinc-200 hover:bg-zinc-900 hover:text-white p-0 w-9 sm:w-auto sm:px-2 h-9 rounded-md border border-zinc-700 shrink-0">
+              <LogOut className="h-4 w-4 shrink-0" /><span className="hidden sm:inline">{lt("Logout", "లాగ్ అవుట్")}</span>
             </Button>
             <img src={mbrLogo.url} alt="MBR" data-mbr-logo className="w-10 h-10 shrink-0 rounded-md border border-zinc-800 object-contain p-0.5" style={{ backgroundColor: "#000" }} />
           </div>
 
         </div>
-
-
+        <OrgSwitcher className="w-fit max-w-full" />
 
 
         {/* Society headline card */}
