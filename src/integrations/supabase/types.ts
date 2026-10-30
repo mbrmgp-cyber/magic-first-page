@@ -966,6 +966,7 @@ export type Database = {
           created_by: string | null
           id: string
           label: string | null
+          organization_ids: string[] | null
           sort_order: number
           updated_at: string
           url: string
@@ -976,6 +977,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           label?: string | null
+          organization_ids?: string[] | null
           sort_order?: number
           updated_at?: string
           url: string
@@ -986,6 +988,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           label?: string | null
+          organization_ids?: string[] | null
           sort_order?: number
           updated_at?: string
           url?: string

@@ -78,6 +78,13 @@
       "when": 1793337274712,
       "tag": "0010_extend_executive_committee_positions",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1793347969039,
+      "tag": "0011_mbr_ad_organization_targets",
+      "breakpoints": true
     }
   ]
 }
