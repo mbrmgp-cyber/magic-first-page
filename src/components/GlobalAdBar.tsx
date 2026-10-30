@@ -1,61 +1,61 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { listMyOrgs } from "@/lib/org.functions";
+import { getActiveOrgId, onActiveOrgChange } from "@/lib/active-org";
+import { adVisibleInOrganization, adMediaKind, managedAds, PROMOTION_URL, resolveAdUrl, type GlobalAd } from "@/lib/mbr-ads";
 import { supabase } from "@/integrations/supabase/client";
 import promotionVideo from "@/assets/videos/vaaradhi-promotion-silent.mp4.asset.json";
 import promotionWebm from "@/assets/videos/vaaradhi-promotion-silent.webm.asset.json";
 import { VARADHI_APP_URL } from "@/lib/app-hosts";
 
-type AdRow = { id: string; url: string; label: string | null };
-type AdSlide = { id: string; src: string; label: string | null; kind: "video" | "image"; href?: string };
-
-const promotionSlide: AdSlide = {
-  id: "vaaradhi-promotion", src: promotionVideo.url, label: null, kind: "video", href: VARADHI_APP_URL,
-};
-
-function detectKind(url: string): "video" | "image" {
-  const clean = url.split("?")[0].toLowerCase();
-  if (/\.(mp4|webm|mov|m4v|ogv)$/.test(clean)) return "video";
-  return "image";
-}
+type AdSlide = { id: string; src: string; label: string | null; kind: "video" | "image"; href?: string; builtin: boolean };
 
 export function GlobalAdBar() {
+  const [selectedOrg, setSelectedOrg] = useState<string | null>(null);
+  const fetchOrgs = useServerFn(listMyOrgs);
+  const orgsQ = useQuery({ queryKey: ["my-orgs"], queryFn: () => fetchOrgs(), staleTime: 60_000 });
+  useEffect(() => { setSelectedOrg(getActiveOrgId()); return onActiveOrgChange(setSelectedOrg); }, []);
+  const organizations = orgsQ.data?.orgs ?? [];
+  const orgId = organizations.find((org) => org.id === selectedOrg)?.id ?? organizations[0]?.id ?? null;
   const q = useQuery({
     queryKey: ["mbr-global-ads-active"],
     refetchInterval: 5 * 60_000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("mbr_global_ads" as any)
-        .select("id,url,label")
-        .eq("active", true)
+        .select("id,url,label,active,sort_order,organization_ids")
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: true });
-      if (error) return [] as AdRow[];
-      return ((data as unknown) || []) as AdRow[];
+      if (error) throw new Error(error.message);
+      return ((data as unknown) || []) as GlobalAd[];
     },
   });
 
-  const [slides, setSlides] = useState<AdSlide[]>([promotionSlide]);
+  const [slides, setSlides] = useState<AdSlide[]>([]);
   const [idx, setIdx] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
-    const rows = q.data || [];
+    setSlides([]);
+    if (!q.data) return;
+    const rows = managedAds(q.data).filter((row) => adVisibleInOrganization(row, orgId));
     (async () => {
       const built = await Promise.all(rows.map(async (r) => {
-        let src = r.url;
-        if (!/^https?:\/\//i.test(r.url) && !r.url.startsWith("data:")) {
-          const { data } = await supabase.storage.from("mbr-global-ads").createSignedUrl(r.url, 3600);
-          src = data?.signedUrl || "";
-        }
-        return src ? { id: r.id, src, label: r.label, kind: detectKind(r.url) } as AdSlide : null;
+        const src = await resolveAdUrl(r.url, async (path) => {
+          const { data } = await supabase.storage.from("mbr-global-ads").createSignedUrl(path, 3600);
+          return data?.signedUrl || "";
+        });
+        const builtin = r.url === PROMOTION_URL;
+        return src ? { id: r.id, src, label: builtin ? null : r.label, kind: adMediaKind(r.url), builtin, href: builtin ? VARADHI_APP_URL : undefined } as AdSlide : null;
       }));
       if (!cancelled) {
-        setSlides([promotionSlide, ...built.filter((slide): slide is AdSlide => slide !== null)]);
+        setSlides(built.filter((slide): slide is AdSlide => slide !== null));
         setIdx(0);
       }
     })();
     return () => { cancelled = true; };
-  }, [JSON.stringify((q.data || []).map((r) => `${r.id}:${r.url}`))]);
+  }, [JSON.stringify(q.data), orgId]);
 
   // Auto-advance: videos linger longer than static images
   useEffect(() => {
@@ -188,8 +188,8 @@ export function GlobalAdBar() {
               >
                 {s.kind === "video" ? (
                   <video
-                    src={s.href ? undefined : s.src}
-                    className={`w-full h-full block ${s.href ? "object-contain bg-market-header" : "object-cover bg-background"}`}
+                    src={s.builtin ? undefined : s.src}
+                    className="w-full h-full block object-contain bg-market-header"
                     aria-label={s.href ? "Vaaradhi promotion video" : s.label || "Advertisement video"}
                     autoPlay
                     muted
@@ -197,7 +197,7 @@ export function GlobalAdBar() {
                     playsInline
                     preload="auto"
                   >
-                    {s.href ? <><source src={promotionWebm.url} type="video/webm" /><source src={promotionVideo.url} type="video/mp4" /></> : null}
+                    {s.builtin ? <><source src={promotionWebm.url} type="video/webm" /><source src={promotionVideo.url} type="video/mp4" /></> : null}
                   </video>
                 ) : (
                   <img
