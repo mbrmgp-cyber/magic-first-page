@@ -71,6 +71,13 @@
       "when": 1793281772809,
       "tag": "0009_organization_public_share_branding",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793337274712,
+      "tag": "0010_extend_executive_committee_positions",
+      "breakpoints": true
     }
   ]
 }

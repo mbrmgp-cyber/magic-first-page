@@ -1,3 +1,7 @@
+# Executive committee and member logo
+- [x] Add Founders and Disciplinary Committee Member appointment positions; shared validator and database enum confirmed, seven tests pass, both roles saved and read back in the signed-in committee page, original Executive appointment restored.
+- [x] Fill the member dashboard organization logo box; signed-in real logo loads edge-to-edge at 390/1280 widths, both position selections verified, build OK. Not published. Existing notification subscription error remains unrelated.
+
 # Vaaradhi silent promotion video
 - [x] Verify dashboard bell/language/settings spacing in the screenshot's organization at 320/360/390/1280 widths; no overlapping controls, notification and language menus and Settings open. MBR silent full-frame video and Vaaradhi Home → promotion playback verified.
 - [ ] Confirm live deployment of the advertisement bar, Vaaradhi promotion link and dashboard header adjustments after requesting publication; deployment completion is external.

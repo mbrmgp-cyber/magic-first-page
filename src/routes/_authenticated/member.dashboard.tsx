@@ -54,7 +54,14 @@ import QRCode from "qrcode";
 import { DeleteAccountButton } from "@/components/DeleteAccountButton";
 
 export const Route = createFileRoute("/_authenticated/member/dashboard")({
-  head: () => ({ meta: [{ title: "Member Dashboard — MBR App" }] }),
+  head: () => ({ meta: [
+    { title: "Member Dashboard — MBR Platform" },
+    { name: "description", content: "Your organization membership, ID card, committee details, rules and updates on MBR Platform." },
+    { property: "og:title", content: "Member Dashboard — MBR Platform" },
+    { property: "og:description", content: "Your organization membership, ID card, committee details, rules and updates on MBR Platform." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: MemberDashboard,
 });
 
@@ -253,7 +260,7 @@ function MemberDashboard() {
         <header className="flex items-start justify-between gap-3">
           <div className="h-14 w-14 rounded-xl bg-white overflow-hidden flex items-center justify-center shrink-0 border border-white/20">
             {org?.logo_url
-              ? <img src={org.logo_url} alt="" className="h-full w-full object-contain p-1" />
+              ? <img src={org.logo_url} alt={`${org.name} logo`} className="h-full w-full object-cover" />
               : <ShieldCheck className="h-7 w-7 text-black" />}
           </div>
           <div className="flex-1 min-w-0 flex flex-col items-center justify-center gap-2">

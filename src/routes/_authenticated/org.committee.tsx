@@ -22,6 +22,7 @@ import { getMyOrg, updateOrgPresident } from "@/lib/org.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
+import { COMMITTEE_ROLES } from "@/lib/committee-roles";
 
 // Bilingual UI helper — picks EN when script is english, else TE.
 function useLt() {
@@ -36,6 +37,8 @@ const ROLE_LABELS_EN: Record<CommitteeRole, string> = {
   treasurer: "Treasurer",
   executive: "Executive",
   worker: "Worker",
+  founder: "Founders",
+  disciplinary_committee_member: "Disciplinary Committee Member",
 };
 
 type CM = {
@@ -57,11 +60,11 @@ const ROLE_LABELS: Record<CommitteeRole, string> = {
   treasurer: "కోశాధికారి",
   executive: "కార్యనిర్వాహకుడు",
   worker: "కార్యకర్త",
+  founder: "వ్యవస్థాపకులు",
+  disciplinary_committee_member: "క్రమశిక్షణ కమిటీ మెంబర్",
 };
 
-const ROLE_ORDER: CommitteeRole[] = [
-  "president", "vice_president", "advisor", "treasurer", "executive", "worker",
-];
+const ROLE_ORDER = COMMITTEE_ROLES;
 
 const ROLE_GRADIENT: Record<CommitteeRole, string> = {
   president: "linear-gradient(135deg,#B85C00,#FF9933)",
@@ -70,6 +73,8 @@ const ROLE_GRADIENT: Record<CommitteeRole, string> = {
   treasurer: "linear-gradient(135deg,#0B7A0B,#5BC85B)",
   executive: "linear-gradient(135deg,#0B5C06,#138808)",
   worker: "linear-gradient(135deg,#1A6D8E,#4FB3D9)",
+  founder: "var(--primary)",
+  disciplinary_committee_member: "var(--primary)",
 };
 
 function fmtDate(d: string, lang: string) {
@@ -270,6 +275,7 @@ function CommitteePage() {
   const grouped = useMemo(() => {
     const g: Record<CommitteeRole, CM[]> = {
       president: [], vice_president: [], advisor: [], treasurer: [], executive: [], worker: [],
+      founder: [], disciplinary_committee_member: [],
     };
     data.committee.forEach(c => g[c.role].push(c));
     return g;
@@ -574,7 +580,14 @@ function CommitteePage() {
 }
 
 export const Route = createFileRoute("/_authenticated/org/committee")({
-  head: () => ({ meta: [{ title: "కార్యవర్గం" }] }),
+  head: () => ({ meta: [
+    { title: "Executive Committee — MBR Platform" },
+    { name: "description", content: "Organization executive committee appointments, founders, positions and term details on MBR Platform." },
+    { property: "og:title", content: "Executive Committee — MBR Platform" },
+    { property: "og:description", content: "Organization executive committee appointments, founders, positions and term details on MBR Platform." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: CommitteePage,
 });
 
