@@ -51,7 +51,6 @@ const SOCIAL_LINKS = [
   },
 ] as const;
 import QRCode from "qrcode";
-import { DeleteAccountButton } from "@/components/DeleteAccountButton";
 
 export const Route = createFileRoute("/_authenticated/member/dashboard")({
   head: () => ({ meta: [
@@ -511,10 +510,6 @@ function MemberDashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      <div className="max-w-md mx-auto px-4 pb-8">
-        <DeleteAccountButton redirectTo="/mbr" />
-      </div>
     </div>
   );
 }
