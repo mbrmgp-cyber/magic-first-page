@@ -1,13 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-
-export type CommitteeRole =
-  | "president"
-  | "vice_president"
-  | "advisor"
-  | "treasurer"
-  | "executive"
-  | "worker";
+import { parseCommitteeRole, type CommitteeRole } from "@/lib/committee-roles";
+export type { CommitteeRole } from "@/lib/committee-roles";
 
 async function resolveOrgId(supabase: any, userId: string): Promise<string | null> {
   const { data: ownOrg } = await supabase
@@ -128,7 +122,7 @@ export const appointCommitteeMember = createServerFn({ method: "POST" })
       term_end_date: string;
       qualifications?: string;
       responsibilities?: string;
-    }) => d,
+    }) => ({ ...d, role: parseCommitteeRole(d.role) }),
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
@@ -173,7 +167,7 @@ export const updateCommitteeMember = createServerFn({ method: "POST" })
       term_end_date: string;
       qualifications?: string;
       responsibilities?: string;
-    }) => d,
+    }) => ({ ...d, role: parseCommitteeRole(d.role) }),
   )
   .handler(async ({ data, context }) => {
     const { supabase } = context;
