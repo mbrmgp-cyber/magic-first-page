@@ -1,3 +1,7 @@
+# MBR advertisement management
+- [ ] Add a collapsed Advertisement button with current promotion/upload previews, copy/download, replacement and organization selection.
+- [ ] Persist targeting with existing super-admin authorization and verify signed-in save/readback and dashboard filtering.
+
 # Executive committee and member logo
 - [x] Add Founders and Disciplinary Committee Member appointment positions; shared validator and database enum confirmed, seven tests pass, both roles saved and read back in the signed-in committee page, original Executive appointment restored.
 - [x] Fill the member dashboard organization logo box; signed-in real logo loads edge-to-edge at 390/1280 widths, both position selections verified, build OK. Not published. Existing notification subscription error remains unrelated.
