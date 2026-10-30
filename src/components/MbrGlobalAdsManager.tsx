@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { ChevronDown, Copy, Download, ImageIcon, Save, Upload, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { adMediaKind, managedAds, PROMOTION_ID, PROMOTION_URL, resolveAdUrl, type GlobalAd } from "@/lib/mbr-ads";
+import promotionWebm from "@/assets/videos/vaaradhi-promotion-silent.webm.asset.json";
 
 type Organization = { id: string; name: string; org_code?: string };
 async function previewUrl(url: string) {
@@ -84,7 +85,9 @@ function AdEditor({ ad, organizations, saved, upload, refresh }: { ad: GlobalAd;
   }
   return <article className="rounded-lg border border-border bg-card text-card-foreground overflow-hidden">
     <div className="aspect-[1200/128] bg-market-header overflow-hidden">
-      {src ? adMediaKind(ad.url) === "video" ? <video src={src} controls muted playsInline preload="metadata" className="w-full h-full object-contain" aria-label={ad.label ?? "Advertisement preview"} /> : <img src={src} alt={ad.label ?? "Advertisement preview"} className="w-full h-full object-contain" /> : <div className="h-full animate-pulse bg-muted" />}
+      {src ? adMediaKind(ad.url) === "video" ? <video src={ad.url === PROMOTION_URL ? undefined : src} controls autoPlay loop muted playsInline preload="auto" className="w-full h-full object-contain" aria-label={ad.label ?? "Advertisement preview"}>
+        {ad.url === PROMOTION_URL && <><source src={promotionWebm.url} type="video/webm" /><source src={src} type="video/mp4" /></>}
+      </video> : <img src={src} alt={ad.label ?? "Advertisement preview"} className="w-full h-full object-contain" /> : <div className="h-full animate-pulse bg-muted" />}
     </div>
     <div className="p-3 space-y-3">
       <Label className="block">Advertisement name / ప్రకటన పేరు<Input value={draft.label ?? ""} onChange={(e) => setDraft({ ...draft, label: e.target.value })} className="mt-1" /></Label>
