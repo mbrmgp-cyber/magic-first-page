@@ -3700,6 +3700,8 @@ export type Database = {
         | "treasurer"
         | "executive"
         | "worker"
+        | "founder"
+        | "disciplinary_committee_member"
       election_status:
         | "scheduled"
         | "nominations_open"
@@ -3852,6 +3854,8 @@ export const Constants = {
         "treasurer",
         "executive",
         "worker",
+        "founder",
+        "disciplinary_committee_member",
       ],
       election_status: [
         "scheduled",
