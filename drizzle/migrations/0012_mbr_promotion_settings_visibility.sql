@@ -1,0 +1,2 @@
+ALTER POLICY mbr_global_ads_read_authenticated ON public.mbr_global_ads USING (active = true OR id = 'a204d8a2-32a0-4b46-906a-48094420de91'::uuid OR public.has_role(auth.uid(), 'mbr_admin'));
+COMMENT ON POLICY mbr_global_ads_read_authenticated ON public.mbr_global_ads IS 'Authenticated readers receive active public advertisements and the built-in promotion settings even when disabled, so the default cannot reappear. All writes remain mbr_admin only.';

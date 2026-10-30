@@ -85,6 +85,13 @@
       "when": 1793347969039,
       "tag": "0011_mbr_ad_organization_targets",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1793348080488,
+      "tag": "0012_mbr_promotion_settings_visibility",
+      "breakpoints": true
     }
   ]
 }
