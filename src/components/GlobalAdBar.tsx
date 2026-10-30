@@ -171,13 +171,13 @@ export function GlobalAdBar() {
       aria-label="MBR advertisements"
     >
       <style>{`
-        @keyframes mbrAdFadeIn { from { opacity: 0; transform: scale(1.03); } to { opacity: 1; transform: scale(1); } }
+        @keyframes mbrAdFadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes mbrAdMarquee { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
         .mbr-ad-slide { animation: mbrAdFadeIn 700ms ease-out both; }
         .mbr-ad-marquee-track { animation: mbrAdMarquee 22s linear infinite; }
       `}</style>
       <div className="w-full max-w-none pointer-events-auto m-0 p-0">
-        <div className="relative overflow-hidden bg-market-header shadow-market w-full max-w-none h-[70px] m-0 p-0">
+        <div className="relative overflow-hidden rounded-lg bg-market-header shadow-market w-full max-w-none aspect-[1200/128] m-0 p-0">
           {slides.map((s, i) => {
             const active = i === (idx % slides.length);
             return (
@@ -189,7 +189,7 @@ export function GlobalAdBar() {
                 {s.kind === "video" ? (
                   <video
                     src={s.href ? undefined : s.src}
-                    className={`w-full h-[70px] block ${s.href ? "object-contain bg-market-header" : "object-cover bg-background"}`}
+                    className={`w-full h-full block ${s.href ? "object-contain bg-market-header" : "object-cover bg-background"}`}
                     aria-label={s.href ? "Vaaradhi promotion video" : s.label || "Advertisement video"}
                     autoPlay
                     muted
@@ -203,7 +203,7 @@ export function GlobalAdBar() {
                   <img
                     src={s.src}
                     alt={s.label || "MBR platform advertisement"}
-                    className="w-full h-[70px] object-cover block"
+                    className="w-full h-full object-cover block"
                     loading="eager"
                     decoding="async"
                   />

@@ -1,4 +1,5 @@
 # Vaaradhi silent promotion video
+- [ ] Match the MBR ad bar to the video's aspect ratio, remove empty bands and round its corners; verify mobile and desktop playback.
 - [x] Remove all audio and register silent MP4/WebM app assets; both retain 1200×128 dimensions.
 - [x] Show the video in the MBR global advertisement rotation and add the promotion-video link on Vaaradhi Home, opening a playable video page with download.
 - [x] Verify signed-in MBR ad autoplay, muted playback, uncropped framing, Vaaradhi Home → promotion-page link and playback; no page errors, five entry-link regression tests pass and build OK. Not published.
