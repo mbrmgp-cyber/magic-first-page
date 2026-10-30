@@ -1,3 +1,4 @@
+import { MbrGlobalAdsManager } from "@/components/MbrGlobalAdsManager";
 import { OrganizationRegistrationDetails } from "@/components/OrganizationRegistrationDetails";
 import { organizationFormFromRow, type OrganizationForm } from "@/lib/admin-organization";
 import { useI18n } from "@/lib/i18n";
@@ -188,7 +189,7 @@ function AdminPanel() {
 
         <MemberIdUpdater />
 
-        <MbrGlobalAdsManager />
+        <MbrGlobalAdsManager organizations={orgs} />
 
         <AllOrganizationsManager />
 
@@ -1192,148 +1193,6 @@ function SuspendConfirmDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-}
-
-type GlobalAd = { id: string; url: string; label: string | null; active: boolean; sort_order: number };
-
-function MbrGlobalAdsManager() {
-  const qc = useQueryClient();
-  const listQ = useQuery({
-    queryKey: ["mbr-global-ads-admin"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("mbr_global_ads" as any)
-        .select("id,url,label,active,sort_order")
-        .order("sort_order", { ascending: true })
-        .order("created_at", { ascending: true });
-      if (error) throw new Error(error.message);
-      return ((data as unknown) || []) as GlobalAd[];
-    },
-  });
-
-  const [previews, setPreviews] = useState<Record<string, string>>({});
-  const [uploading, setUploading] = useState(false);
-
-  const ads = listQ.data || [];
-
-  useEffect(() => {
-    let cancel = false;
-    (async () => {
-      const map: Record<string, string> = {};
-      await Promise.all(ads.map(async (a) => {
-        if (!a.url) return;
-        if (/^https?:\/\//i.test(a.url) || a.url.startsWith("data:")) { map[a.url] = a.url; return; }
-        const { data } = await supabase.storage.from("mbr-global-ads").createSignedUrl(a.url, 3600);
-        if (data?.signedUrl) map[a.url] = data.signedUrl;
-      }));
-      if (!cancel) setPreviews(map);
-    })();
-    return () => { cancel = true; };
-  }, [JSON.stringify(ads.map((a) => a.url))]);
-
-  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files || []);
-    e.target.value = "";
-    if (!files.length) return;
-    setUploading(true);
-    try {
-      for (const file of files) {
-        const ext = (file.name.split(".").pop() || "png").toLowerCase();
-        const path = `global/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-        const up = await supabase.storage.from("mbr-global-ads").upload(path, file, { contentType: file.type, upsert: false });
-        if (up.error) throw new Error(up.error.message);
-        const ins = await supabase.from("mbr_global_ads" as any).insert({ url: path, active: true, sort_order: ads.length });
-        if (ins.error) throw new Error(ins.error.message);
-      }
-      toast.success("Uploaded / అప్‌లోడ్ అయింది");
-      qc.invalidateQueries({ queryKey: ["mbr-global-ads-admin"] });
-      qc.invalidateQueries({ queryKey: ["mbr-global-ads-active"] });
-    } catch (err: any) {
-      toast.error(err.message ?? "Upload failed");
-    } finally {
-      setUploading(false);
-    }
-  }
-
-  async function toggleActive(a: GlobalAd) {
-    const { error } = await supabase.from("mbr_global_ads" as any).update({ active: !a.active }).eq("id", a.id);
-    if (error) { toast.error(error.message); return; }
-    qc.invalidateQueries({ queryKey: ["mbr-global-ads-admin"] });
-    qc.invalidateQueries({ queryKey: ["mbr-global-ads-active"] });
-  }
-
-  async function remove(a: GlobalAd) {
-    if (!confirm("Delete this banner?")) return;
-    if (a.url && !/^https?:\/\//i.test(a.url) && !a.url.startsWith("data:")) {
-      await supabase.storage.from("mbr-global-ads").remove([a.url]).catch(() => {});
-    }
-    const { error } = await supabase.from("mbr_global_ads" as any).delete().eq("id", a.id);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Deleted");
-    qc.invalidateQueries({ queryKey: ["mbr-global-ads-admin"] });
-    qc.invalidateQueries({ queryKey: ["mbr-global-ads-active"] });
-  }
-
-  return (
-    <Card className="p-4 bg-zinc-900/95 border-zinc-700 text-white shadow-md space-y-3">
-      <div className="flex items-center gap-2">
-        <ImageIcon className="h-5 w-5 text-[#ff8c28]" />
-        <h2 className="font-bold text-white">MBR APP Global Ad Banners (Super Admin only)</h2>
-      </div>
-      <p className="text-xs text-zinc-400">
-        ఈ ప్రకటనలు అన్ని సొసైటీల సభ్యుల డాష్‌బోర్డ్ కింద sticky bar లో కనిపిస్తాయి. Society admins దీన్ని edit చేయలేరు.
-      </p>
-      <div className="rounded-md border border-dashed border-[#ff8c28]/60 bg-[#ff8c28]/10 p-2 text-[11px] text-[#ff8c28]">
-        Recommended: <span className="font-mono">1200 × 128 px</span> (ratio ~9:1) — slim horizontal banner, max height 64px on mobile. JPG/PNG, &lt; 500KB.
-      </div>
-
-      <label className="flex items-center justify-center gap-2 rounded-lg border border-dashed border-zinc-600 bg-zinc-900 py-4 cursor-pointer hover:border-[#ff8c28] transition">
-        <ImageIcon className="h-4 w-4 text-[#ff8c28]" />
-        <span className="text-sm text-white">{uploading ? "Uploading…" : "Upload global banner image(s)"}</span>
-        <input type="file" accept="image/*" multiple className="hidden" onChange={handleUpload} disabled={uploading} />
-      </label>
-
-      {ads.length === 0 ? (
-        <p className="text-xs text-zinc-400 italic text-center py-2">No global banners yet.</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {ads.map((a) => {
-            const src = previews[a.url] || "";
-            return (
-              <div key={a.id} className="rounded-lg overflow-hidden border relative"
-                style={{ borderColor: a.active ? "#ff8c28" : "#3f3f46", opacity: a.active ? 1 : 0.55 }}>
-                {src
-                  ? <img
-                      src={src}
-                      alt=""
-                      className="w-full h-16 object-cover bg-zinc-800"
-                      onError={async (e) => {
-                        const img = e.currentTarget;
-                        if (img.dataset.retried) return;
-                        img.dataset.retried = "1";
-                        const { data } = await supabase.storage.from("mbr-global-ads").createSignedUrl(a.url, 3600);
-                        if (data?.signedUrl) img.src = data.signedUrl;
-                      }}
-                    />
-                  : <div className="w-full h-16 bg-zinc-800 animate-pulse" />}
-
-                <div className="flex items-center justify-between p-1.5 bg-zinc-900 border-t" style={{ borderColor: "#3f3f46" }}>
-                  <button type="button" onClick={() => toggleActive(a)}
-                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-white hover:text-zinc-300">
-                    {a.active ? <><Eye className="h-3.5 w-3.5" /> Active</> : <><Ban className="h-3.5 w-3.5" /> Hidden</>}
-                  </button>
-                  <button type="button" onClick={() => remove(a)}
-                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-red-400 hover:text-red-300">
-                    <XCircle className="h-3.5 w-3.5" /> Delete
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </Card>
   );
 }
 
