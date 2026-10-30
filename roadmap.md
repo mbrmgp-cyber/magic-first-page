@@ -1,3 +1,7 @@
+# Executive committee and member logo
+- [ ] Add Founders and Disciplinary Committee Member appointment positions, retaining existing permissions and appointments.
+- [ ] Fill the member dashboard organization logo box and verify signed-in display and position selection.
+
 # Vaaradhi silent promotion video
 - [x] Verify dashboard bell/language/settings spacing in the screenshot's organization at 320/360/390/1280 widths; no overlapping controls, notification and language menus and Settings open. MBR silent full-frame video and Vaaradhi Home → promotion playback verified.
 - [ ] Confirm live deployment of the advertisement bar, Vaaradhi promotion link and dashboard header adjustments after requesting publication; deployment completion is external.
