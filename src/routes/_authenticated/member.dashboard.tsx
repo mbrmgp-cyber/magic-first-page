@@ -511,10 +511,6 @@ function MemberDashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      <div className="max-w-md mx-auto px-4 pb-8">
-        <DeleteAccountButton redirectTo="/mbr" />
-      </div>
     </div>
   );
 }
