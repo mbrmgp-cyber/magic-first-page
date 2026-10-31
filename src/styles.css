@@ -580,7 +580,7 @@ body.mbr-printing .mbr-global-ad-bar * {
 }
 
 .market-home { color: var(--market-ink); letter-spacing: 0; }
-.market-banner-caption { background: linear-gradient(0deg, var(--market-surface) 0%, color-mix(in oklch, var(--market-surface) 90%, transparent) 45%, transparent 100%); }
+.market-banner-caption { background: linear-gradient(0deg, rgb(0 0 0 / 0.6) 0%, rgb(0 0 0 / 0.25) 55%, transparent 100%); color: #fff; text-shadow: 0 1px 3px rgb(0 0 0 / 0.7); }
 .market-fresh { --category-tone: var(--market-fresh); }
 .market-goods { --category-tone: var(--market-goods); }
 .market-estate { --category-tone: var(--market-estate); }
