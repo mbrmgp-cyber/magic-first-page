@@ -1,3 +1,6 @@
+# Vaaradhi home photo captions
+- [ ] Add the requested localized photo captions and remove the Home promotion-video link; verify all four captions and mobile layout.
+
 # MBR advertisement management
 - [x] Add a collapsed Advertisement button with current promotion/upload previews, copy/download, replacement and organization selection; signed-in preview, clipboard, download and mobile overflow verified.
 - [x] Persist targeting with existing super-admin authorization; selected society saved and read back after reload, five targeting/disable regression tests passed, actual ad bar hides for disabled promotion and returns after restore, build OK. Not published.

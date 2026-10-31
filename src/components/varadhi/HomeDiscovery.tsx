@@ -11,10 +11,10 @@ import slideMarket from "@/assets/varadhi-slide-market.jpg";
 import slideEstate from "@/assets/varadhi-slide-estate.jpg";
 
 const slides = [
-  { src: slideServices, title: "Services" },
-  { src: slideTransport, title: "Transport" },
-  { src: slideMarket, title: "New / Used Goods" },
-  { src: slideEstate, title: "Real Estate" },
+  { src: slideServices, title: "Paid & Free Services" },
+  { src: slideTransport, title: "Vehicles & Machinery" },
+  { src: slideMarket, title: "New, Used & Fresh Goods" },
+  { src: slideEstate, title: "Flats & Land" },
 ];
 const categories = [
   { id: "fresh", title: "Fresh Items", Icon: Apple, tone: "market-fresh" },
@@ -41,7 +41,10 @@ export function HomeDiscovery() {
         {slides.map((slide, index) => (
           <img key={slide.title} src={slide.src} alt={t(slide.title)} width={1760} height={800} loading={index === 0 ? "eager" : "lazy"} className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${index === active ? "opacity-100" : "opacity-0"}`} />
         ))}
-        <div className="absolute bottom-3 right-4 flex gap-1.5">
+        <div className="absolute inset-x-0 bottom-0 bg-market-surface/90 px-3 pb-6 pt-2 text-center text-base font-bold leading-relaxed text-market-ink sm:text-2xl" aria-live="off">
+          {t(slides[active]?.title ?? "Paid & Free Services")}
+        </div>
+        <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1.5">
           {slides.map((slide, index) => (
             <Button key={slide.title} type="button" variant="ghost" size="icon" aria-label={t(slide.title)} aria-pressed={index === active} onClick={() => setActive(index)} className={`h-2 min-h-0 rounded-full bg-background/90 p-0 transition-all hover:bg-background ${index === active ? "w-6" : "w-2 opacity-70"}`} />
           ))}
