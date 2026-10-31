@@ -41,7 +41,7 @@ export function HomeDiscovery() {
         {slides.map((slide, index) => (
           <img key={slide.title} src={slide.src} alt={t(slide.title)} width={1760} height={800} loading={index === 0 ? "eager" : "lazy"} className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${index === active ? "opacity-100" : "opacity-0"}`} />
         ))}
-        <div className="absolute inset-x-0 bottom-0 bg-market-surface/90 px-3 pb-6 pt-2 text-center text-base font-bold leading-relaxed text-market-ink sm:text-2xl" aria-live="off">
+        <div className="market-banner-caption pointer-events-none absolute inset-x-0 bottom-0 px-3 pb-6 pt-8 text-center text-base font-bold leading-relaxed sm:text-2xl" aria-live="off">
           {t(slides[active]?.title ?? "Paid & Free Services")}
         </div>
         <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1.5">
