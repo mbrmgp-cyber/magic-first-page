@@ -1,5 +1,5 @@
 # Vaaradhi home photo captions
-- [ ] Add the requested localized photo captions and remove the Home promotion-video link; verify all four captions and mobile layout.
+- [x] Add the requested localized photo captions and remove the Home promotion-video link; all four Telugu/English captions verified, mobile has no horizontal overflow, 24 language tests passed and build OK. Not published.
 
 # MBR advertisement management
 - [x] Add a collapsed Advertisement button with current promotion/upload previews, copy/download, replacement and organization selection; signed-in preview, clipboard, download and mobile overflow verified.
