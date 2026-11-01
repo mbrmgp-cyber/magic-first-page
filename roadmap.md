@@ -1,3 +1,6 @@
+# Vaaradhi WhatsApp logo correction
+- [ ] Replace stale Telugu share artwork with the current English logo and version its public image URL; verify crawler-readable metadata and image.
+
 # Logo and installed icon corrections
 - [x] Use English lettering in the Vaaradhi logo and update both promotion versions.
 - [x] Separate platform installation manifest from MBR APP and provide complete safe-zone icons.
