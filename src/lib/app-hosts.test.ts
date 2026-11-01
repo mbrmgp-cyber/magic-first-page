@@ -1,22 +1,30 @@
 import { expect, it } from "vitest";
-import { appBrandingForHostname, appEntryPath, appForHostname, appPageUrl, VARADHI_APP_URL } from "./app-hosts";
+import { appBrandingForHostname, appEntryPath, appForHostname, appPageUrl, appManifestPath, VARADHI_APP_URL } from "./app-hosts";
 
 it("retains the old MBR APP logo on its own hostname", () => {
-  expect(appBrandingForHostname("mbr.mbrplatform.com").logoPath).toBe("/favicon.png");
+  expect(appBrandingForHostname("mbr.mbrplatform.com").logoPath).toBe("/mbr-icon-512-v2.png");
   expect(appBrandingForHostname("mbr.mbrplatform.com").orgName).toBe("MBR APP");
 });
 it("gives the main platform its selected separate logo", () => {
-  expect(appBrandingForHostname("mbrplatform.com").logoPath).toBe("/platform-logo-512.png");
+  expect(appBrandingForHostname("mbrplatform.com").logoPath).toBe("/platform-icon-512-v2.png");
   expect(appBrandingForHostname("mbrplatform.com").orgName).toBe("MBR Platform");
 });
 it("uses Vaaradhi icons only for Vaaradhi branding", () => {
-  expect(appBrandingForHostname("vaaradhi.mbrplatform.com").logoPath).toBe("/varadhi-icon-512.png");
+  expect(appBrandingForHostname("vaaradhi.mbrplatform.com").logoPath).toBe("/varadhi-icon-512-v2.png");
   expect(appBrandingForHostname("vaaradhi.mbrplatform.com").orgName).toBe("Vaaradhi");
 });
 
 it("launches Vaaradhi links and the Android shell on its dedicated domain", () => {
   expect(VARADHI_APP_URL).toBe("https://vaaradhi.mbrplatform.com/varadhi");
   expect(appForHostname(new URL(VARADHI_APP_URL).hostname)).toBe("varadhi");
+});
+it("installs the platform with its own manifest rather than the MBR manifest", () => {
+  expect(appManifestPath("mbrplatform.com")).toBe("/platform-manifest-v2.webmanifest");
+});
+it("retains direct MBR and Vaaradhi installation destinations", () => {
+  expect(appManifestPath("mbr.mbrplatform.com")).toBe("/mbr-manifest-v2.webmanifest");
+  expect(appManifestPath("vaaradhi.mbrplatform.com")).toBe("/varadhi-manifest-v2.webmanifest");
+  expect(appManifestPath("localhost", "/varadhi/auth")).toBe("/varadhi-manifest-v2.webmanifest");
 });
 
 it("opens MBR APP on its approved hostname", () => {

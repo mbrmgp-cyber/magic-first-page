@@ -1,6 +1,6 @@
 // Vaaradhi subscription receipt — printable PDF with Super Admin + District Admin signatures.
 import { printDocument, escapeHtml } from "@/lib/print-pdf";
-import varadhiLogo from "@/assets/logos/vaaradhi-logo-concept-1.png";
+import varadhiLogo from "@/assets/logos/vaaradhi-logo-english.png";
 import bhaskarSig from "@/assets/bhaskar-signature.png.asset.json";
 
 export type VaradhiReceipt = {

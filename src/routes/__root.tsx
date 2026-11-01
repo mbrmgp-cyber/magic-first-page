@@ -21,29 +21,8 @@ import { OrganizationShareBar } from "@/components/OrganizationShareBar";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import mbrLogoAsset from "../assets/mbr-logo.png.asset.json";
 import { currentAppHostname } from "@/lib/app-host-context";
-import { appBrandingForHostname, appForHostname } from "@/lib/app-hosts";
-
-const MBR_LOGO = mbrLogoAsset.url;
-const MBR_MANIFEST = `data:application/manifest+json;charset=utf-8,${encodeURIComponent(
-  JSON.stringify({
-    name: "MBR APP",
-    short_name: "MBR",
-    description: "MBR APP",
-    start_url: "/mbr",
-    scope: "/",
-    display: "standalone",
-    orientation: "portrait",
-    background_color: "#000000",
-    theme_color: "#000000",
-    icons: [
-      { src: MBR_LOGO, sizes: "192x192", type: "image/png", purpose: "any" },
-      { src: MBR_LOGO, sizes: "512x512", type: "image/png", purpose: "any" },
-      { src: MBR_LOGO, sizes: "512x512", type: "image/png", purpose: "maskable" },
-    ],
-  }),
-)}`;
+import { appBrandingForHostname, appForHostname, appManifestPath } from "@/lib/app-hosts";
 
 function NotFoundComponent() {
   return (
@@ -110,8 +89,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     const hostname = currentAppHostname();
     const branding = appBrandingForHostname(hostname);
     const app = appForHostname(hostname);
-    const favicon = app === "varadhi" ? "/varadhi-icon-192.png" : app === "mbr" ? "/mbr-favicon.ico" : "/platform-favicon.png";
-    const appleIcon = app === "varadhi" ? "/varadhi-apple-touch-icon.png" : app === "mbr" ? MBR_LOGO : "/platform-logo-512.png";
+    const prefix = app === "varadhi" ? "varadhi" : app === "mbr" ? "mbr" : "platform";
+    const favicon = `/${prefix}-icon-192-v2.png`;
+    const appleIcon = `/${prefix}-apple-v2.png`;
     return {
     meta: [
       { charSet: "utf-8" },
@@ -151,7 +131,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "shortcut icon", href: favicon },
       { rel: "apple-touch-icon", href: appleIcon },
       { rel: "apple-touch-icon", sizes: "180x180", href: appleIcon },
-      { rel: "manifest", href: appForHostname(currentAppHostname()) === "varadhi" ? "/varadhi-manifest.webmanifest" : MBR_MANIFEST },
+      { rel: "manifest", href: appManifestPath(hostname) },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
