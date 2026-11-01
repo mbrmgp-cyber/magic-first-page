@@ -1,6 +1,6 @@
 // Vaaradhi subscription receipt — printable PDF with Super Admin + District Admin signatures.
 import { printDocument, escapeHtml } from "@/lib/print-pdf";
-import varadhiLogo from "@/assets/varadhi-logo.jpg.asset.json";
+import varadhiLogo from "@/assets/logos/vaaradhi-logo-concept-1.png";
 import bhaskarSig from "@/assets/bhaskar-signature.png.asset.json";
 
 export type VaradhiReceipt = {
@@ -88,7 +88,7 @@ export function printVaradhiReceipt(r: VaradhiReceipt) {
     title: `Vaaradhi Receipt ${r.receipt_no}`,
     orgName: "వారధి (VAARADHI)",
     subtitle: "సబ్‌స్క్రిప్షన్ చెల్లింపు రసీదు",
-    logoUrl: varadhiLogo.url,
+    logoUrl: varadhiLogo,
     bodyHtml,
   });
 }

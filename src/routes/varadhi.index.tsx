@@ -9,7 +9,7 @@ import { listListings, getVaradhiTicker, type VaradhiListing } from "@/lib/varad
 import { useI18n, bi } from "@/lib/i18n";
 import { VARADHI_DEFAULT_TICKER } from "@/lib/varadhi-ticker-defaults";
 import { LanguageToggle } from "@/components/LanguageToggle";
-import varadhiLogo from "@/assets/varadhi-logo.jpg.asset.json";
+import varadhiLogo from "@/assets/logos/vaaradhi-logo-concept-1.png";
 import { HomeDiscovery } from "@/components/varadhi/HomeDiscovery";
 import { Button } from "@/components/ui/button";
 import { sharedTranslation } from "@/lib/language-support";
@@ -194,7 +194,7 @@ function VaradhiHome() {
       {/* Header */}
       <header className="mt-4 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-2 rounded-xl border border-market-brand/20 bg-market-header px-4 py-4 sm:gap-4 sm:px-6 sm:py-5">
         <div className="flex min-w-0 items-center gap-3">
-          <img src={varadhiLogo.url} alt="Vaaradhi" className="h-[72px] w-[72px] shrink-0 rounded-lg object-contain bg-market-surface shadow-market-card p-1 sm:h-20 sm:w-20" />
+          <img src={varadhiLogo} alt="Vaaradhi" className="h-[72px] w-[72px] shrink-0 rounded-lg object-contain bg-market-surface shadow-market-card p-1 sm:h-20 sm:w-20" />
           <div className="min-w-0">
             <h1 className="break-words text-xl font-bold text-market-ink sm:text-2xl">
               వారధి <span className="sr-only">— Telugu Local Marketplace for Buying, Selling, Transport & Services</span>

@@ -27,6 +27,8 @@ function upsertLink(rel: string, attrs: Record<string, string>) {
 export function StaticAppIcons() {
   useEffect(() => {
     if (typeof document === "undefined") return;
+    // The platform portal keeps its own server-rendered logo, not MBR APP icons.
+    if (window.location.pathname === "/" && appForHostname(window.location.hostname) === null) return;
     // Skip MBR icon/manifest injection on Varadhi routes so magic-link opens
     // don't flash MBR branding before Varadhi content mounts.
     if (typeof window !== "undefined" && (window.location.pathname.startsWith("/varadhi") || appForHostname(window.location.hostname) === "varadhi")) {

@@ -109,6 +109,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => {
     const hostname = currentAppHostname();
     const branding = appBrandingForHostname(hostname);
+    const app = appForHostname(hostname);
+    const favicon = app === "varadhi" ? "/varadhi-icon-192.png" : app === "mbr" ? "/mbr-favicon.ico" : "/platform-favicon.png";
+    const appleIcon = app === "varadhi" ? "/varadhi-apple-touch-icon.png" : app === "mbr" ? MBR_LOGO : "/platform-logo-512.png";
     return {
     meta: [
       { charSet: "utf-8" },
@@ -143,11 +146,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: appForHostname(currentAppHostname()) === "varadhi" ? "/varadhi-icon-512.png" : "/favicon.png", type: "image/png", sizes: "512x512" },
-      { rel: "icon", href: appForHostname(currentAppHostname()) === "varadhi" ? "/varadhi-icon-192.png" : "/favicon.ico" },
-      { rel: "shortcut icon", href: appForHostname(currentAppHostname()) === "varadhi" ? "/varadhi-icon-192.png" : "/favicon.ico" },
-      { rel: "apple-touch-icon", href: appForHostname(currentAppHostname()) === "varadhi" ? "/varadhi-apple-touch-icon.png" : MBR_LOGO },
-      { rel: "apple-touch-icon", sizes: "180x180", href: appForHostname(currentAppHostname()) === "varadhi" ? "/varadhi-apple-touch-icon.png" : MBR_LOGO },
+      { rel: "icon", href: branding.logoPath, type: "image/png", sizes: "512x512" },
+      { rel: "icon", href: favicon },
+      { rel: "shortcut icon", href: favicon },
+      { rel: "apple-touch-icon", href: appleIcon },
+      { rel: "apple-touch-icon", sizes: "180x180", href: appleIcon },
       { rel: "manifest", href: appForHostname(currentAppHostname()) === "varadhi" ? "/varadhi-manifest.webmanifest" : MBR_MANIFEST },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
