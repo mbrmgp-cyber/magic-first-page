@@ -1,3 +1,8 @@
+# Logo and installed icon corrections
+- [x] Use English lettering in the Vaaradhi logo and update both promotion versions.
+- [x] Separate platform installation manifest from MBR APP and provide complete safe-zone icons.
+- [x] Verify all three manifest identities, mobile logo, signed-in MBR ad bar/admin preview and voiced page playback; 15 regression tests pass and build OK. Not published; installed-device refresh and Google recrawl remain outside preview verification.
+
 # Selected domain logos
 - [x] Apply selected platform hexagon and Vaaradhi bridge/sunrise logos to visible pages, icons and share artwork, retaining original MBR APP assets; browser-loaded images and eight host-branding tests pass, build OK. Not published. Custom Host HTTP checks were rejected by the preview server, so live-domain verification awaits publication.
 

@@ -5,8 +5,8 @@ import { listMyOrgs } from "@/lib/org.functions";
 import { getActiveOrgId, onActiveOrgChange } from "@/lib/active-org";
 import { adVisibleInOrganization, adMediaKind, managedAds, PROMOTION_URL, resolveAdUrl, type GlobalAd } from "@/lib/mbr-ads";
 import { supabase } from "@/integrations/supabase/client";
-import promotionVideo from "@/assets/videos/vaaradhi-promotion-silent.mp4.asset.json";
-import promotionWebm from "@/assets/videos/vaaradhi-promotion-silent.webm.asset.json";
+import promotionVideo from "@/assets/videos/vaaradhi-promotion-logo-v2.mp4.asset.json";
+import promotionWebm from "@/assets/videos/vaaradhi-promotion-logo-v2.webm.asset.json";
 import { VARADHI_APP_URL } from "@/lib/app-hosts";
 
 type AdSlide = { id: string; src: string; label: string | null; kind: "video" | "image"; href?: string; builtin: boolean };

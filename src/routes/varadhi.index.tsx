@@ -9,7 +9,7 @@ import { listListings, getVaradhiTicker, type VaradhiListing } from "@/lib/varad
 import { useI18n, bi } from "@/lib/i18n";
 import { VARADHI_DEFAULT_TICKER } from "@/lib/varadhi-ticker-defaults";
 import { LanguageToggle } from "@/components/LanguageToggle";
-import varadhiLogo from "@/assets/logos/vaaradhi-logo-concept-1.png";
+import varadhiLogo from "@/assets/logos/vaaradhi-logo-english.png";
 import { HomeDiscovery } from "@/components/varadhi/HomeDiscovery";
 import { Button } from "@/components/ui/button";
 import { sharedTranslation } from "@/lib/language-support";

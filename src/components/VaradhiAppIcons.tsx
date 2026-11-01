@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 
-const VARADHI_MANIFEST = "/varadhi-manifest.webmanifest";
-const VARADHI_ICON_192 = "/varadhi-icon-192.png";
-const VARADHI_APPLE_ICON = "/varadhi-apple-touch-icon.png";
+const VARADHI_MANIFEST = "/varadhi-manifest-v2.webmanifest";
+const VARADHI_ICON_192 = "/varadhi-icon-192-v2.png";
+const VARADHI_APPLE_ICON = "/varadhi-apple-v2.png";
 const THEME_COLOR = "#1e3a8a";
 
 function upsertLink(rel: string, attrs: Record<string, string>) {

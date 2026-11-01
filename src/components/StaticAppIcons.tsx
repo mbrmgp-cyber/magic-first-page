@@ -1,11 +1,6 @@
 import { useEffect } from "react";
-import mbrLogoAsset from "@/assets/mbr-logo.png.asset.json";
-import { buildPaddedIconSet } from "@/lib/pad-icon";
-import { toManifestDataUrl } from "@/lib/manifest-url";
 import { getOrgBranding } from "@/lib/org-branding";
-import { appForHostname } from "@/lib/app-hosts";
-
-const MBR_LOGO_URL = mbrLogoAsset.url;
+import { appForHostname, appManifestPath } from "@/lib/app-hosts";
 
 function upsertLink(rel: string, attrs: Record<string, string>) {
   const selector = `link[rel="${rel}"]${attrs.sizes ? `[sizes="${attrs.sizes}"]` : ""}`;
@@ -37,38 +32,11 @@ export function StaticAppIcons() {
     // If the user's organization branding is already known, let it win.
     if (getOrgBranding()) return;
 
-    let cancelled = false;
-    (async () => {
-      const set = await buildPaddedIconSet(MBR_LOGO_URL, "#000000");
-      if (cancelled) return;
-
-      const manifest = {
-        name: "MBR APP",
-        short_name: "MBR",
-        description: "MBR APP",
-        start_url: "/mbr",
-        scope: "/",
-        display: "standalone",
-        orientation: "portrait",
-        background_color: "#000000",
-        theme_color: "#000000",
-        icons: [
-          { src: set.any192, sizes: "192x192", type: "image/png", purpose: "any" },
-          { src: set.any512, sizes: "512x512", type: "image/png", purpose: "any" },
-          { src: set.maskable512, sizes: "512x512", type: "image/png", purpose: "maskable" },
-        ],
-      };
-
-      upsertLink("manifest", { href: toManifestDataUrl(manifest) });
-      upsertLink("apple-touch-icon", { href: set.apple180 });
-      upsertLink("apple-touch-icon", { sizes: "180x180", href: set.apple180 });
-      upsertLink("icon", { href: set.any192, type: "image/png" });
-      upsertLink("shortcut icon", { href: set.any192 });
-    })();
-
-    return () => {
-      cancelled = true;
-    };
+    upsertLink("manifest", { href: appManifestPath(window.location.hostname, window.location.pathname) });
+    upsertLink("apple-touch-icon", { href: "/mbr-apple-v2.png" });
+    upsertLink("apple-touch-icon", { sizes: "180x180", href: "/mbr-apple-v2.png" });
+    upsertLink("icon", { href: "/mbr-icon-192-v2.png", type: "image/png" });
+    upsertLink("shortcut icon", { href: "/mbr-icon-192-v2.png" });
   }, []);
 
   return null;

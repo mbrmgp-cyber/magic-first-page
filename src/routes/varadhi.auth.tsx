@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { sendVaradhiLoginLink } from "@/lib/varadhi.functions";
 import { toast } from "sonner";
 import { Mail, KeyRound, Lock, UserPlus } from "lucide-react";
-import varadhiLogo from "@/assets/logos/vaaradhi-logo-concept-1.png";
+import varadhiLogo from "@/assets/logos/vaaradhi-logo-english.png";
 import { useI18n } from "@/lib/i18n";
 import { sharedTranslation } from "@/lib/language-support";
 import { currentAppPageUrl } from "@/lib/app-host-context";

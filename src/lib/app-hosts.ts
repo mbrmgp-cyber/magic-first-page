@@ -37,7 +37,7 @@ const MBR_BRANDING: AppBranding = {
     "MBR APP — సంఘాలు, సభ్యులు, చిట్టీలు, రుణాలు మరియు ఖాతాలను డిజిటల్‌గా నిర్వహించే Member Based Registry వేదిక.",
   orgName: "MBR APP",
   orgUrl: "https://mbr.mbrplatform.com",
-  logoPath: "/favicon.png",
+  logoPath: "/mbr-icon-512-v2.png",
 };
 
 const VARADHI_BRANDING: AppBranding = {
@@ -46,7 +46,7 @@ const VARADHI_BRANDING: AppBranding = {
     "వారధి అనేది స్థానిక కొనుగోళ్లు, అమ్మకాలు, రవాణా సౌకర్యాలు మరియు టెక్నీషియన్ సేవలను ఒకే చోట అందించే సమగ్ర వేదిక.",
   orgName: "Vaaradhi",
   orgUrl: "https://vaaradhi.mbrplatform.com",
-  logoPath: "/varadhi-icon-512.png",
+  logoPath: "/varadhi-icon-512-v2.png",
 };
 
 const PLATFORM_BRANDING: AppBranding = {
@@ -54,11 +54,19 @@ const PLATFORM_BRANDING: AppBranding = {
   description: "MBR Platform brings society and committee management through MBR APP and local business, services and transport through Vaaradhi.",
   orgName: "MBR Platform",
   orgUrl: "https://mbrplatform.com",
-  logoPath: "/platform-logo-512.png",
+  logoPath: "/platform-icon-512-v2.png",
 };
 
 /** Each approved hostname retains its own identity; other hosts use the platform. */
 export function appBrandingForHostname(hostname: string): AppBranding {
   const app = appForHostname(hostname);
   return app === "varadhi" ? VARADHI_BRANDING : app === "mbr" ? MBR_BRANDING : PLATFORM_BRANDING;
+}
+
+/** Default installs keep platform/app identities; society manifests may override these. */
+export function appManifestPath(hostname: string, pathname = "/"): string {
+  const app = appForHostname(hostname);
+  if (app === "varadhi" || pathname.startsWith("/varadhi")) return "/varadhi-manifest-v2.webmanifest";
+  if (app === "mbr" || pathname !== "/") return "/mbr-manifest-v2.webmanifest";
+  return "/platform-manifest-v2.webmanifest";
 }
