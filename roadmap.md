@@ -1,3 +1,7 @@
+# Vaaradhi WhatsApp logo correction
+- [x] Replace stale Telugu share artwork with the current English logo and version its public image URL; WhatsApp-user-agent SSR tags and 1200×630 image HTTP 200 verified, ten host tests pass, build OK.
+- [ ] Publish the corrected WhatsApp share artwork; this turn did not request publication. WhatsApp cache refresh remains controlled by WhatsApp.
+
 # Logo and installed icon corrections
 - [x] Use English lettering in the Vaaradhi logo and update both promotion versions.
 - [x] Separate platform installation manifest from MBR APP and provide complete safe-zone icons.

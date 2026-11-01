@@ -2,7 +2,7 @@
 export const VARADHI_APP_URL = "https://vaaradhi.mbrplatform.com/varadhi";
 
 /** 1200x630 share-card image for WhatsApp/social link previews of Vaaradhi pages. */
-export const VARADHI_SHARE_IMAGE = "https://vaaradhi.mbrplatform.com/varadhi-share.png";
+export const VARADHI_SHARE_IMAGE = "https://vaaradhi.mbrplatform.com/varadhi-share-v2.png";
 
 export function appForHostname(hostname: string): "mbr" | "varadhi" | null {
   switch (hostname.toLowerCase()) {
