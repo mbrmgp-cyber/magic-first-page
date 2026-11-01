@@ -259,15 +259,6 @@ function VaradhiHome() {
           </div>
         )}
       </div>
-
-
-
-
-
-
-      <p className="mt-8 text-center text-[10px] text-market-muted">
-        © MBR Platform · <Link to="/" className="underline">పోర్టల్‌కి తిరిగి</Link>
-      </p>
     </div>
   );
 }
