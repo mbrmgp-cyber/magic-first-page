@@ -214,7 +214,7 @@ function UpdateBoard() {
 
   return (
     <div className="mx-auto max-w-md px-4 pt-4 pb-8 space-y-4">
-      <h1 className="text-xl font-bold text-market-ink" data-no-translate>{sharedTranslation(lang, "Upload") ?? "Upload"}</h1>
+      <h1 className="rounded-xl border border-market-brand/20 bg-market-header px-4 py-3 text-xl font-bold text-market-ink" data-no-translate>{sharedTranslation(lang, "Upload") ?? "Upload"}</h1>
 
       {/* Greeting */}
       <div className="rounded-lg bg-primary p-4 text-primary-foreground shadow-sm">
