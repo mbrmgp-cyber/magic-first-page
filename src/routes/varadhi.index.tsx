@@ -212,12 +212,12 @@ function VaradhiHome() {
 
       {/* Running disclaimer ticker + small admin apply button */}
       <div className="mt-3 flex items-center gap-2">
-        <div className="relative min-w-0 flex-1 overflow-hidden rounded-md bg-market-notice px-3 py-2 ring-1 ring-market-border">
+        <div className="relative min-w-0 flex-1 overflow-hidden rounded-md bg-market-notice px-3 py-1 ring-1 ring-market-border">
           <div className="varadhi-marquee whitespace-nowrap text-[11px] font-semibold text-market-notice-ink" data-notranslit>
             {tickerText}
           </div>
         </div>
-        <Button asChild variant="ghost" className="h-auto shrink-0 whitespace-normal rounded-md bg-market-brand px-3 py-2 text-[11px] font-semibold text-market-on-brand hover:bg-market-brand/90 hover:text-market-on-brand"><Link
+        <Button asChild variant="ghost" className="h-auto shrink-0 whitespace-normal rounded-md bg-market-brand px-3 py-1 text-[11px] font-semibold text-market-on-brand hover:bg-market-brand/90 hover:text-market-on-brand"><Link
           to="/varadhi/admin-apply"
           data-notranslit
         >
