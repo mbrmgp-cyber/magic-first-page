@@ -13,7 +13,7 @@ import varadhiLogo from "@/assets/varadhi-logo.jpg.asset.json";
 import { HomeDiscovery } from "@/components/varadhi/HomeDiscovery";
 import { Button } from "@/components/ui/button";
 import { sharedTranslation } from "@/lib/language-support";
-import { Sparkles, ImageOff } from "lucide-react";
+import { Sparkles, ImageOff, Play } from "lucide-react";
 import { currentAppPageUrl } from "@/lib/app-host-context";
 import { VARADHI_SHARE_IMAGE } from "@/lib/app-hosts";
 
@@ -207,6 +207,12 @@ function VaradhiHome() {
 
       {/* Banner carousel */}
       <HomeDiscovery />
+
+      {/* Promotion video link */}
+      <Button asChild variant="outline" className="mt-3 h-auto w-full whitespace-normal rounded-md border-market-brand/40 bg-market-surface px-3 py-2 text-[12px] font-semibold text-market-brand">
+        <Link to="/varadhi/promotion"><Play className="h-4 w-4" />{bi("వారధి ప్రమోషన్ వీడియో చూడండి", "Watch the Vaaradhi promotion video", lang)}</Link>
+      </Button>
+
 
       {/* Running disclaimer ticker + small admin apply button */}
       <div className="mt-3 flex items-center gap-2">
