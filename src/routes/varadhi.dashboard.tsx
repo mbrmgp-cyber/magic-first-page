@@ -215,7 +215,7 @@ function UpdateBoard() {
   return (
     <div className="mx-auto max-w-md px-4 pt-4 pb-8 space-y-4">
       {/* Greeting */}
-      <div className="rounded-lg border border-market-notice-ink/15 bg-market-notice p-4 text-market-notice-ink shadow-sm">
+      <div className="rounded-lg border border-market-brand/20 bg-market-header p-4 text-market-ink shadow-sm">
         <p className="text-base font-semibold">🙏 {t("welcome")}{name ? `, ${name}` : ""}{name && lang === "te" ? " గారు" : ""}</p>
         <p className="text-[11px] opacity-90 mt-0.5">
           {hasProfile

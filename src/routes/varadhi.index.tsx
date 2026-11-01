@@ -212,7 +212,7 @@ function VaradhiHome() {
 
       {/* Running disclaimer ticker + small admin apply button */}
       <div className="mt-3 flex items-center gap-2">
-        <div className="relative min-w-0 flex-1 overflow-hidden rounded-md bg-market-notice px-3 py-2 ring-1 ring-market-border">
+        <div className="relative min-w-0 flex-1 overflow-hidden rounded-md bg-market-notice px-3 py-1 ring-1 ring-market-border">
           <div className="varadhi-marquee whitespace-nowrap text-[11px] font-semibold text-market-notice-ink" data-notranslit>
             {tickerText}
           </div>
