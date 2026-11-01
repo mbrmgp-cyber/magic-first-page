@@ -13,7 +13,7 @@ import varadhiLogo from "@/assets/varadhi-logo.jpg.asset.json";
 import { HomeDiscovery } from "@/components/varadhi/HomeDiscovery";
 import { Button } from "@/components/ui/button";
 import { sharedTranslation } from "@/lib/language-support";
-import { Sparkles, ImageOff, Play } from "lucide-react";
+import { Sparkles, ImageOff } from "lucide-react";
 import { currentAppPageUrl } from "@/lib/app-host-context";
 import { VARADHI_SHARE_IMAGE } from "@/lib/app-hosts";
 
