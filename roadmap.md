@@ -1,3 +1,6 @@
+# Vaaradhi page simplification
+- [ ] Remove the Upload title box, recolor welcome, keep one expandable Profile heading, and remove the admin header Language/Home controls; verify signed-in pages.
+
 # Vaaradhi home photo captions
 - [x] Add the requested localized photo captions and remove the Home promotion-video link; all four Telugu/English captions verified, mobile has no horizontal overflow, 24 language tests passed and build OK. Not published.
 
