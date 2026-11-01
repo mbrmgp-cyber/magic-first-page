@@ -1,3 +1,6 @@
+# Selected domain logos
+- [ ] Apply the selected platform hexagon and Vaaradhi bridge/sunrise logos, retaining the original MBR APP logo; verify visible logos and per-host icons.
+
 # Vaaradhi page simplification
 - [x] Remove the Upload title box, recolor welcome, keep one expandable Profile heading, and remove the admin header Language/Home controls; signed-in mobile pages, Profile expand/collapse, desktop Profile and no overflow verified; build OK. Not published.
 
