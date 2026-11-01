@@ -217,7 +217,7 @@ function VaradhiHome() {
             {tickerText}
           </div>
         </div>
-        <Button asChild variant="ghost" className="h-auto shrink-0 whitespace-normal rounded-md bg-market-brand px-3 py-2 text-[11px] font-semibold text-market-on-brand hover:bg-market-brand/90 hover:text-market-on-brand"><Link
+        <Button asChild variant="ghost" className="h-auto shrink-0 whitespace-normal rounded-md bg-market-brand px-3 py-1 text-[11px] font-semibold text-market-on-brand hover:bg-market-brand/90 hover:text-market-on-brand"><Link
           to="/varadhi/admin-apply"
           data-notranslit
         >
