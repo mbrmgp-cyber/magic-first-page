@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { sendVaradhiLoginLink } from "@/lib/varadhi.functions";
 import { toast } from "sonner";
 import { Mail, KeyRound, Lock, UserPlus } from "lucide-react";
-import varadhiLogo from "@/assets/varadhi-logo.jpg.asset.json";
+import varadhiLogo from "@/assets/logos/vaaradhi-logo-concept-1.png";
 import { useI18n } from "@/lib/i18n";
 import { sharedTranslation } from "@/lib/language-support";
 import { currentAppPageUrl } from "@/lib/app-host-context";
@@ -163,7 +163,7 @@ function VaradhiAuthPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1e3a8a] via-[#1e40af] to-[#3b5bdb] p-6">
       <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
         <div className="text-center">
-          <img src={varadhiLogo.url} alt="Vaaradhi" className="mx-auto h-16 w-16 rounded-2xl object-contain bg-white p-1 shadow" />
+          <img src={varadhiLogo} alt="Vaaradhi" className="mx-auto h-16 w-16 rounded-2xl object-contain bg-white p-1 shadow" />
           <h1 className="mt-3 text-2xl font-bold text-[#1e3a8a]">{ui("వారధి")}</h1>
           <p className="text-xs text-[#1e3a8a]/70">{ui("వారధి లాగిన్")}</p>
           <div className="mx-auto mt-2 h-1 w-16 rounded-full bg-[#f97316]" />

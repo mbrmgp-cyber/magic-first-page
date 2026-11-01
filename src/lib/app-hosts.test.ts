@@ -1,5 +1,18 @@
 import { expect, it } from "vitest";
-import { appEntryPath, appForHostname, appPageUrl, VARADHI_APP_URL } from "./app-hosts";
+import { appBrandingForHostname, appEntryPath, appForHostname, appPageUrl, VARADHI_APP_URL } from "./app-hosts";
+
+it("retains the old MBR APP logo on its own hostname", () => {
+  expect(appBrandingForHostname("mbr.mbrplatform.com").logoPath).toBe("/favicon.png");
+  expect(appBrandingForHostname("mbr.mbrplatform.com").orgName).toBe("MBR APP");
+});
+it("gives the main platform its selected separate logo", () => {
+  expect(appBrandingForHostname("mbrplatform.com").logoPath).toBe("/platform-logo-512.png");
+  expect(appBrandingForHostname("mbrplatform.com").orgName).toBe("MBR Platform");
+});
+it("uses Vaaradhi icons only for Vaaradhi branding", () => {
+  expect(appBrandingForHostname("vaaradhi.mbrplatform.com").logoPath).toBe("/varadhi-icon-512.png");
+  expect(appBrandingForHostname("vaaradhi.mbrplatform.com").orgName).toBe("Vaaradhi");
+});
 
 it("launches Vaaradhi links and the Android shell on its dedicated domain", () => {
   expect(VARADHI_APP_URL).toBe("https://vaaradhi.mbrplatform.com/varadhi");

@@ -3,7 +3,7 @@ import { currentAppHostname } from "@/lib/app-host-context";
 import { appEntryPath, VARADHI_APP_URL } from "@/lib/app-hosts";
 import { useEffect } from "react";
 import { ArrowRight, Building2, Sparkles, ShieldCheck, Layers, Globe2 } from "lucide-react";
-import logo from "@/assets/mbr-logo.png.asset.json";
+import logo from "@/assets/logos/mbr-platform-logo-concept-2.png";
 
 const FAQS = [
   {
@@ -54,6 +54,8 @@ export const Route = createFileRoute("/")({
           "Member registration, ID cards, committees, elections, accounts, loans and chit auctions on the MBR App — plus Vaaradhi, a Telugu local marketplace.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: "https://mbrplatform.com/platform-share.png" },
+      { name: "twitter:image", content: "https://mbrplatform.com/platform-share.png" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     scripts: [
@@ -135,9 +137,9 @@ function PlatformPortal() {
       <header className="relative z-10 flex items-center justify-between px-6 sm:px-10 pt-6">
         <div className="flex items-center gap-3">
           <img
-            src={logo.url}
+            src={logo}
             alt="MBR Platform"
-            className="h-9 w-9 rounded-md ring-1 ring-[#c9a84c]/40"
+            className="h-9 w-9 object-contain"
           />
           <div className="leading-tight">
             <div className="text-sm font-semibold tracking-wide text-[#f5f0e0]">

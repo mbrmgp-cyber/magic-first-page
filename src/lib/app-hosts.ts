@@ -49,7 +49,16 @@ const VARADHI_BRANDING: AppBranding = {
   logoPath: "/varadhi-icon-512.png",
 };
 
-/** Branding for the current hostname; defaults to MBR on the main domain. */
+const PLATFORM_BRANDING: AppBranding = {
+  title: "MBR Platform — Society Management & Local Marketplace",
+  description: "MBR Platform brings society and committee management through MBR APP and local business, services and transport through Vaaradhi.",
+  orgName: "MBR Platform",
+  orgUrl: "https://mbrplatform.com",
+  logoPath: "/platform-logo-512.png",
+};
+
+/** Each approved hostname retains its own identity; other hosts use the platform. */
 export function appBrandingForHostname(hostname: string): AppBranding {
-  return appForHostname(hostname) === "varadhi" ? VARADHI_BRANDING : MBR_BRANDING;
+  const app = appForHostname(hostname);
+  return app === "varadhi" ? VARADHI_BRANDING : app === "mbr" ? MBR_BRANDING : PLATFORM_BRANDING;
 }
