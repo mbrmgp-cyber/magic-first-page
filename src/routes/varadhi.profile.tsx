@@ -41,13 +41,11 @@ function VaradhiProfilePage() {
 
   return (
     <div className="mx-auto max-w-md px-4 pt-4 pb-8 space-y-3">
-      <h1 className="rounded-xl border border-market-brand/20 bg-market-header px-4 py-3 text-xl font-bold text-market-ink">నా ప్రొఫైల్</h1>
-
       <section aria-label="Vaaradhi registration / My profile" className="border-b border-border pb-5">
-        <Button className="w-full justify-start" variant="outline" aria-expanded={profileOpen} aria-controls="vaaradhi-profile-details" onClick={() => setProfileOpen(v => !v)}>
+        <h1><Button className="h-auto w-full justify-start whitespace-normal rounded-xl border-market-brand/20 bg-market-header px-4 py-3 text-xl font-bold text-market-ink hover:bg-market-header" variant="outline" aria-expanded={profileOpen} aria-controls="vaaradhi-profile-details" onClick={() => setProfileOpen(v => !v)}>
           <User className="h-4 w-4" /><span data-no-translate>{sharedTranslation(lang, "Profile") ?? "Profile"}</span>
           <ChevronDown className={`ml-auto h-4 w-4 transition-transform ${profileOpen ? "rotate-180" : ""}`} />
-        </Button>
+        </Button></h1>
         {profileOpen && <div id="vaaradhi-profile-details" className="mt-4"><VaradhiRegistrationForm showRewardsLink={false} /></div>}
       </section>
 
