@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { ChevronDown, Copy, Download, ImageIcon, Save, Upload, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { adMediaKind, managedAds, PROMOTION_ID, PROMOTION_URL, resolveAdUrl, type GlobalAd } from "@/lib/mbr-ads";
-import promotionWebm from "@/assets/videos/vaaradhi-promotion-silent.webm.asset.json";
+import promotionWebm from "@/assets/videos/vaaradhi-promotion-logo-v2.webm.asset.json";
 
 type Organization = { id: string; name: string; org_code?: string };
 async function previewUrl(url: string) {
