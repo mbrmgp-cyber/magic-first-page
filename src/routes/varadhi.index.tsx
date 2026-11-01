@@ -192,7 +192,7 @@ function VaradhiHome() {
   return (
     <div className="market-home mx-auto max-w-3xl px-4 pb-8 sm:px-6">
       {/* Header */}
-      <header className="-mx-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-market-brand/20 bg-market-header px-4 py-4 sm:-mx-6 sm:gap-4 sm:px-6 sm:py-5">
+      <header className="mt-4 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-2 rounded-xl border border-market-brand/20 bg-market-header px-4 py-4 sm:gap-4 sm:px-6 sm:py-5">
         <div className="flex min-w-0 items-center gap-3">
           <img src={varadhiLogo.url} alt="Vaaradhi" className="h-[72px] w-[72px] shrink-0 rounded-lg object-contain bg-market-surface shadow-market-card p-1 sm:h-20 sm:w-20" />
           <div className="min-w-0">
@@ -202,16 +202,12 @@ function VaradhiHome() {
             <p className="mt-1 text-xs font-medium leading-relaxed text-market-ink" data-no-translate data-notranslit>{t("Online Business & Services, Transport")}</p>
           </div>
         </div>
-        <LanguageToggle />
+        <LanguageToggle compact />
       </header>
 
       {/* Banner carousel */}
       <HomeDiscovery />
 
-      {/* Promotion video link */}
-      <Button asChild variant="outline" className="mt-3 h-auto w-full whitespace-normal rounded-md border-market-brand/40 bg-market-surface px-3 py-2 text-[12px] font-semibold text-market-brand">
-        <Link to="/varadhi/promotion"><Play className="h-4 w-4" />{bi("వారధి ప్రమోషన్ వీడియో చూడండి", "Watch the Vaaradhi promotion video", lang)}</Link>
-      </Button>
 
 
       {/* Running disclaimer ticker + small admin apply button */}
