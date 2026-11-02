@@ -1,5 +1,6 @@
 # Vaaradhi mobile OTP registration
-- [ ] Preserve pending email verification across reloads/new tabs, keep email return links on Vaaradhi, and verify OTP/password continuation.
+- [x] Preserve expiring pending email verification across reloads/new tabs and keep emailed return links on Vaaradhi; real OTP request, mobile reload/new-tab Home → Login continuation, Change email cleanup and authenticated password-stage reload verified; 39 regression tests pass, build OK.
+- [ ] Complete actual emailed-code verification/password save and confirm customer-device behavior after publication; mailbox code is unavailable, no existing password was changed, and publication was not requested this turn.
 
 # Vaaradhi WhatsApp logo correction
 - [x] Replace stale Telugu share artwork with the current English logo and version its public image URL; WhatsApp-user-agent SSR tags and 1200×630 image HTTP 200 verified, ten host tests pass, build OK.
