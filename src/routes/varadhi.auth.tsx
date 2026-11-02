@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { sendVaradhiLoginLink } from "@/lib/varadhi.functions";
 import { toast } from "sonner";
+import { MIN_PASSWORD_LENGTH, passwordUpdateErrorMessage } from "@/lib/password-errors";
 import { Mail, KeyRound, Lock, UserPlus } from "lucide-react";
 import varadhiLogo from "@/assets/logos/vaaradhi-logo-english.png";
 import { useI18n } from "@/lib/i18n";
@@ -147,8 +148,8 @@ function VaradhiAuthPage() {
 
   async function setNewPassword(e: React.FormEvent) {
     e.preventDefault();
-    if (password.length < 6) {
-      toast.error(ui("పాస్‌వర్డ్ కనీసం 6 అక్షరాలు ఉండాలి"));
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      toast.error(ui("Password must be at least 8 letters or digits"));
       return;
     }
     if (password !== password2) {
@@ -159,7 +160,7 @@ function VaradhiAuthPage() {
     const { error } = await supabase.auth.updateUser({ password });
     setBusy(false);
     if (error) {
-      toast.error(ui("Password update failed"));
+      toast.error(ui(passwordUpdateErrorMessage(error)), { duration: 8000 });
       return;
     }
     toast.success(ui("రిజిస్ట్రేషన్ పూర్తి! ఇక ఈమెయిల్ + పాస్‌వర్డ్‌తో లాగిన్ కావచ్చు."));
@@ -301,14 +302,15 @@ function VaradhiAuthPage() {
               <label className="block text-xs font-medium text-[#1e3a8a]/80 mb-1">{ui("కొత్త పాస్\u200cవర్డ్")}</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#1e3a8a]/50" />
-                <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" placeholder={ui("Minimum 6 characters")} className={inputCls} />
+                <input type="password" required minLength={MIN_PASSWORD_LENGTH} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" placeholder={ui("Minimum 8 letters or digits")} className={inputCls} />
               </div>
+              <p className="mt-1 text-xs text-market-muted">{ui("Avoid easy passwords like 12345678 or 11111111.")}</p>
             </div>
             <div>
               <label className="block text-xs font-medium text-[#1e3a8a]/80 mb-1">{ui("పాస్\u200cవర్డ్ మళ్లీ")}</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#1e3a8a]/50" />
-                <input type="password" required minLength={6} value={password2} onChange={(e) => setPassword2(e.target.value)} autoComplete="new-password" placeholder="••••••" className={inputCls} />
+                <input type="password" required minLength={MIN_PASSWORD_LENGTH} value={password2} onChange={(e) => setPassword2(e.target.value)} autoComplete="new-password" placeholder="••••••" className={inputCls} />
               </div>
             </div>
             <button type="submit" disabled={busy} className="w-full rounded-xl bg-[#f97316] py-3 font-semibold text-white shadow-lg disabled:opacity-60">
