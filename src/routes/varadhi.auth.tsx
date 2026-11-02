@@ -9,6 +9,7 @@ import varadhiLogo from "@/assets/logos/vaaradhi-logo-english.png";
 import { useI18n } from "@/lib/i18n";
 import { sharedTranslation } from "@/lib/language-support";
 import { currentAppPageUrl } from "@/lib/app-host-context";
+import { clearVaradhiAuthProgress, readVaradhiAuthProgress, saveVaradhiAuthProgress } from "@/lib/varadhi-auth-progress";
 
 export const Route = createFileRoute("/varadhi/auth")({
   head: () => ({
@@ -43,21 +44,28 @@ function VaradhiAuthPage() {
   const [otp, setOtp] = useState("");
   const [otpLength, setOtpLength] = useState(6);
   const [busy, setBusy] = useState(false);
-  const [allowRedirect, setAllowRedirect] = useState(true);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     let active = true;
-    supabase.auth.getSession().then(({ data }) => {
-      if (active && data.session?.user && allowRedirect) navigate({ to: "/varadhi/dashboard", replace: true });
-    });
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!allowRedirect) return;
-      if ((event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED") && session?.user) {
+    const pending = readVaradhiAuthProgress(window.localStorage);
+    if (pending) {
+      setTab("register");
+      setEmail(pending.email);
+      setOtpLength(pending.otpLength);
+      setStep("otp");
+    }
+    supabase.auth.getUser().then(({ data }) => {
+      if (!active) return;
+      if (pending?.step === "password" && data.user?.email?.toLowerCase() === pending.email) {
+        setStep("password");
+      } else if (data.user) {
+        clearVaradhiAuthProgress(window.localStorage);
         navigate({ to: "/varadhi/dashboard", replace: true });
       }
-    });
-    return () => { active = false; listener.subscription.unsubscribe(); };
-  }, [allowRedirect]);
+    }).finally(() => { if (active) setReady(true); });
+    return () => { active = false; };
+  }, [navigate]);
 
   async function doLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -71,14 +79,14 @@ function VaradhiAuthPage() {
       toast.error(ui("ఈమెయిల్ లేదా పాస్‌వర్డ్ సరికాదు. కొత్తవారైతే ముందు రిజిస్టర్ చేయండి."));
       return;
     }
-    // onAuthStateChange navigates
+    clearVaradhiAuthProgress(window.localStorage);
+    navigate({ to: "/varadhi/dashboard", replace: true });
   }
 
   async function requestOtp(e?: React.FormEvent) {
     e?.preventDefault();
     if (!email.trim()) return;
     setBusy(true);
-    setAllowRedirect(false);
     const res = await sendOtp({ data: { email: email.trim().toLowerCase(), mode: "otp" } }).catch((err) => ({
       sent: false as const,
       reason: err instanceof Error ? err.message : String(err),
@@ -88,7 +96,10 @@ function VaradhiAuthPage() {
       toast.error(ui("Could not send OTP"));
       return;
     }
-    setOtpLength(Number((res as any)?.otpLength) || 6);
+    const length = res.otpLength || 6;
+    saveVaradhiAuthProgress(window.localStorage, { email, step: "otp", otpLength: length });
+    setOtpLength(length);
+    setOtp("");
     setStep("otp");
     toast.success(ui("మీ ఈమెయిల్‌కు కోడ్ పంపాం"));
   }
@@ -108,6 +119,7 @@ function VaradhiAuthPage() {
       toast.error(ui("కోడ్ చెల్లదు లేదా గడువు ముగిసింది"));
       return;
     }
+    saveVaradhiAuthProgress(window.localStorage, { email, step: "password", otpLength });
     setStep("password");
   }
 
@@ -151,13 +163,15 @@ function VaradhiAuthPage() {
       return;
     }
     toast.success(ui("రిజిస్ట్రేషన్ పూర్తి! ఇక ఈమెయిల్ + పాస్‌వర్డ్‌తో లాగిన్ కావచ్చు."));
-    setAllowRedirect(true);
+    clearVaradhiAuthProgress(window.localStorage);
     navigate({ to: "/varadhi/dashboard", replace: true });
   }
 
 
   const inputCls =
     "w-full rounded-xl border border-[#1e3a8a]/20 bg-white pl-9 pr-3 py-2.5 text-sm outline-none focus:border-[#f97316]";
+
+  if (!ready) return <div className="min-h-screen flex items-center justify-center text-market-ink" role="status">{ui("Loading")}</div>;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1e3a8a] via-[#1e40af] to-[#3b5bdb] p-6">
@@ -233,7 +247,7 @@ function VaradhiAuthPage() {
             </p>
             <button
               type="button"
-              onClick={() => { setTab("login"); setOtp(""); }}
+              onClick={() => { clearVaradhiAuthProgress(window.localStorage); setTab("login"); setOtp(""); }}
               className="w-full text-center text-[11px] text-blue-600 hover:text-blue-700 underline"
             >
               {ui("Already have an account? Login")}
@@ -248,6 +262,7 @@ function VaradhiAuthPage() {
             </div>
             <input
               inputMode="numeric"
+              aria-label={ui("Send OTP Code")}
               pattern="[0-9]*"
               autoComplete="one-time-code"
               autoFocus
@@ -266,10 +281,10 @@ function VaradhiAuthPage() {
               {busy ? ui("వెరిఫై చేస్తున్నాం…") : ui("వెరిఫై చేయండి")}
             </button>
             <div className="flex justify-between text-xs">
-              <button type="button" onClick={() => { setStep("form"); setOtp(""); }} className="text-[#1e3a8a]/70 underline">
+              <button type="button" disabled={busy} onClick={() => { clearVaradhiAuthProgress(window.localStorage); setTab("register"); setStep("form"); setOtp(""); }} className="text-[#1e3a8a]/70 underline">
                 ← {ui("Change email")}
               </button>
-              <button type="button" onClick={() => requestOtp()} className="text-[#f97316] font-semibold">
+              <button type="button" disabled={busy} onClick={() => requestOtp()} className="text-[#f97316] font-semibold">
                 {ui("Resend code")}
               </button>
             </div>

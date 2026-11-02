@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { PUBLIC_APP_ORIGIN } from "@/lib/public-url";
+import { VARADHI_APP_URL } from "@/lib/app-hosts";
 import { VARADHI_PROFILE_SAFE_COLUMNS, VARADHI_LISTING_SAFE_COLUMNS } from "@/lib/db-columns";
 import { profileEditSchema, adminProfileEditSchema, isProfileLocked } from "@/lib/varadhi-profile";
 
@@ -35,7 +36,7 @@ export const sendVaradhiLoginLink = createServerFn({ method: "POST" })
       if (createError) throw new Error(createError.message);
     }
 
-    const redirectTo = `${PUBLIC_APP_ORIGIN}/varadhi/auth`;
+    const redirectTo = `${VARADHI_APP_URL}/auth`;
     // No magic links: only generate the one-time code, email points to the login page.
     const { data: link, error: linkErr } = await supabaseAdmin.auth.admin.generateLink({
       type: "magiclink",
