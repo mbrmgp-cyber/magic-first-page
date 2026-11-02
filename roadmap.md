@@ -1,3 +1,6 @@
+# Vaaradhi district admin appointments
+- [ ] Add approved-user selection and secure subordinate appointments within the district admin's active district; test permissions and verify the available signed-in flow.
+
 # Vaaradhi rental and lease form
 - [x] Switch rental/lease pricing to monthly amounts and replace stock fields with property availability; normalize old rental terms on edit/save and restore land units on sale selection. Four rule tests and 24 language tests pass; build OK.
 - [ ] Verify real rental save/reopen: the requesting user's signed-in account has no Vaaradhi profile, so the posting form is unavailable; no personal profile was created or altered. Preview-response simulation was inconclusive. Publication not requested.
