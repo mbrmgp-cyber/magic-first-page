@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatPrice, isFreeListing, stockLabel } from "@/lib/varadhi-format";
 import { useI18n } from "@/lib/i18n";
 import { sharedTranslation } from "@/lib/language-support";
+import { isRentalProperty, propertyTerms } from "@/lib/varadhi-property";
 
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -303,6 +304,7 @@ function PostSection({ postType }: { postType: string }) {
   const [saving, setSaving] = useState(false);
 
   const isLand = postType === "business" && form.item_condition === "realestate";
+  const isRental = isLand && isRentalProperty(form.item_condition, form.property_type);
   const unitList = isLand ? LAND_UNITS : UNITS;
 
   // ఒక సంవత్సరం లోపు / గరిష్టంగా 50 పోస్టులు
@@ -349,7 +351,7 @@ function PostSection({ postType }: { postType: string }) {
       price: l.price != null ? String(l.price) : "",
       photo: Array.isArray(l.images) ? (l.images[0] ?? "") : "",
       location_photo: Array.isArray(l.images) ? (l.images[1] ?? "") : "",
-      unit: l.unit ?? "కేజీ",
+      unit: propertyTerms(l.category ?? "", l.sub_category ?? "", l.unit ?? "కేజీ", l.stock_qty ?? "").unit,
       property_type: l.sub_category ?? "",
       pickup_location: l.pickup_location ?? "",
 
@@ -363,7 +365,7 @@ function PostSection({ postType }: { postType: string }) {
       pincode: l.pincode ?? "",
       contact_phone: l.contact_phone ?? "",
       stock_status: l.stock_status ?? "running",
-      stock_qty: l.stock_qty ?? "",
+      stock_qty: propertyTerms(l.category ?? "", l.sub_category ?? "", l.unit ?? "కేజీ", l.stock_qty ?? "").stock_qty,
       item_condition: l.category ?? l.item_condition ?? "new",
       description: l.description ?? "",
       service_cat: l.post_type !== "business" ? (l.category ?? "") : "",
@@ -393,7 +395,7 @@ function PostSection({ postType }: { postType: string }) {
           item_condition: postType === "business" ? (form.item_condition === "used" ? "used" : "new") : null,
           title: form.title.trim(),
           price: postType === "free" ? null : (form.price ? Number(form.price) : null),
-          unit: form.unit,
+          unit: isRental ? "నెలకు" : form.unit,
           sub_category: (isSvc ? form.service_cat : form.property_type) || null,
           images: [form.photo, form.location_photo].filter(Boolean),
 
@@ -415,7 +417,7 @@ function PostSection({ postType }: { postType: string }) {
           contact_phone: form.contact_phone.trim(),
           city: form.village.trim() || form.district.trim() || null,
           stock_status: form.stock_status,
-          stock_qty: form.stock_qty.trim() || null,
+          stock_qty: isRental ? null : (form.stock_qty.trim() || null),
           description: form.description.trim() || null,
         } as any,
       });
@@ -648,7 +650,8 @@ function PostSection({ postType }: { postType: string }) {
               <L n="1">ఆస్తి రకం</L>
               <div className="grid grid-cols-3 gap-1.5">
                 {PROPERTY_TYPES.map((p) => (
-                  <Button key={p} type="button" onClick={() => setForm({ ...form, property_type: p })}
+                  <Button key={p} type="button" onClick={() => setForm({ ...form, property_type: p,
+                    ...propertyTerms(form.item_condition, p, form.unit, form.stock_qty) })}
                     aria-pressed={form.property_type === p}
                     variant={form.property_type === p ? "default" : "outline"}
                     className="h-auto min-h-10 whitespace-normal rounded-lg px-2 py-2 text-[10px] font-semibold leading-snug">
@@ -677,12 +680,14 @@ function PostSection({ postType }: { postType: string }) {
           </div>
 
           {/* 2. రేటు + యూనిట్ + స్టాక్ */}
-          <div className="grid grid-cols-2 gap-2">
+          <div className={isRental ? "grid gap-2" : "grid grid-cols-2 gap-2"}>
             <div>
-              <L n="2">రేటు (రూ.)</L>
-              <input className={inp} type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
+              <L n="2">{ui(isRental ? (form.property_type === "లీజ్" ? "నెలవారీ లీజ్ మొత్తం (రూ.)" : "నెలవారీ అద్దె (రూ.)") : "రేటు (రూ.)")}</L>
+              <input className={inp} type="number" min="0" step="any"
+                aria-label={ui(isRental ? (form.property_type === "లీజ్" ? "నెలవారీ లీజ్ మొత్తం (రూ.)" : "నెలవారీ అద్దె (రూ.)") : "రేటు (రూ.)")}
+                value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
             </div>
-            <div>
+            {!isRental && <div>
               <L n="">యూనిట్ ఎంచుకోండి</L>
               <div className={`grid gap-1 ${unitList.length === 3 ? "grid-cols-3" : "grid-cols-3"}`}>
                 {unitList.map((u) => (
@@ -694,28 +699,28 @@ function PostSection({ postType }: { postType: string }) {
                   </button>
                 ))}
               </div>
-            </div>
+            </div>}
           </div>
-          <input className={inp} placeholder={ui("ఇతర యూనిట్ రాయండి (ఐచ్ఛికం)")}
+          {!isRental && <input className={inp} placeholder={ui("ఇతర యూనిట్ రాయండి (ఐచ్ఛికం)")}
             value={unitList.includes(form.unit) ? "" : form.unit}
-            onChange={(e) => setForm({ ...form, unit: e.target.value })} />
+            onChange={(e) => setForm({ ...form, unit: e.target.value })} />}
 
-          <div className="grid grid-cols-2 gap-2">
-            <div>
+          <div className={isRental ? "grid gap-2" : "grid grid-cols-2 gap-2"}>
+            {!isRental && <div>
               <L n="">అందుబాటులో ఉన్న స్టాక్</L>
               <input className={inp} placeholder={`${ui("Example:")} 50 ${ui(form.unit || "")}`}
                 value={form.stock_qty} onChange={(e) => setForm({ ...form, stock_qty: e.target.value })} />
-            </div>
+            </div>}
             <div>
-              <L n="">స్టాక్</L>
+              <L n="">{ui(isRental ? "అందుబాటు / ఖాళీ వివరాలు" : "స్టాక్")}</L>
               <div className="grid grid-cols-2 gap-1">
                 {(["running", "closed"] as const).map((s) => (
-                  <button key={s} onClick={() => setForm({ ...form, stock_status: s })}
-                    className={`rounded-lg py-2.5 text-[11px] font-semibold border ${
-                      form.stock_status === s ? "bg-[#16a34a] text-white border-[#16a34a]" : "bg-white text-[#1e3a8a] border-black/10"
-                    }`}>
-                    {ui(s === "running" ? "In stock" : "Out of stock")}
-                  </button>
+                  <Button key={s} type="button" onClick={() => setForm({ ...form, stock_status: s })}
+                    aria-pressed={form.stock_status === s}
+                    variant={form.stock_status === s ? "default" : "outline"}
+                    className="h-auto min-h-10 whitespace-normal rounded-lg px-2 py-2.5 text-[11px] font-semibold">
+                    {ui(isRental ? (s === "running" ? "అందుబాటులో ఉంది / ఖాళీగా ఉంది" : "అందుబాటులో లేదు / ఖాళీగా లేదు") : (s === "running" ? "In stock" : "Out of stock"))}
+                  </Button>
                 ))}
               </div>
             </div>
@@ -724,7 +729,7 @@ function PostSection({ postType }: { postType: string }) {
           {/* 3. పికప్ లొకేషన్ + కాంటాక్ట్ */}
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <L n="3">{ui(isLand ? "భూమి లొకేషన్" : "వస్తువు పికప్ లొకేషన్")}</L>
+              <L n="3">{ui(isRental ? "ఆస్తి లొకేషన్" : isLand ? "భూమి లొకేషన్" : "వస్తువు పికప్ లొకేషన్")}</L>
               <input className={inp} placeholder={ui("Google Maps link")}
                 value={form.pickup_location} onChange={(e) => setForm({ ...form, pickup_location: e.target.value })} />
             </div>
@@ -747,7 +752,7 @@ function PostSection({ postType }: { postType: string }) {
           </div>
 
           {/* 4. పికప్ చిరునామా */}
-          <L n="4">వస్తువు పికప్ చిరునామా</L>
+          <L n="4">{ui(isRental ? "ఆస్తి చిరునామా" : "వస్తువు పికప్ చిరునామా")}</L>
           <div className="grid grid-cols-2 gap-2">
             <input className={inp} placeholder={ui("ఇల్లు / షాప్ నెంబర్")} value={form.house_no} onChange={(e) => setForm({ ...form, house_no: e.target.value })} />
             <input className={inp} placeholder={ui("వీధి")} value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} />
