@@ -4,6 +4,7 @@ import { PUBLIC_APP_ORIGIN } from "@/lib/public-url";
 import { VARADHI_APP_URL } from "@/lib/app-hosts";
 import { VARADHI_PROFILE_SAFE_COLUMNS, VARADHI_LISTING_SAFE_COLUMNS } from "@/lib/db-columns";
 import { profileEditSchema, adminProfileEditSchema, isProfileLocked } from "@/lib/varadhi-profile";
+import { appointmentSearchArea } from "@/lib/varadhi-appointments";
 
 // -------- Varadhi-only login (completely independent of MBR auth flow)
 // mode: "link" sends a click-to-login magic link; "otp" sends a 6-digit code
@@ -933,7 +934,7 @@ export const adminListAreaAdmins = createServerFn({ method: "GET" })
       for (const x of (p ?? []) as any[]) profiles.set(x.user_id, x);
     }
     return {
-      admins: list.map((r) => ({ ...r, profile: profiles.get(r.user_id) ?? null })),
+      admins: list.map((r) => ({ ...r, profile: profiles.get(r.user_id) ?? null, canAppoint: r.is_active && r.level === "district_admin" && (scope.isSuper || r.user_id === context.userId) })),
       isSuper: scope.isSuper,
       scope: { level: scope.level, state: scope.state, district: scope.district, mandal: scope.mandal },
     };
@@ -1002,19 +1003,24 @@ export const adminSetAreaAdminActive = createServerFn({ method: "POST" })
   });
 
 
-// Candidate users (registered Vaaradhi profiles) the Super Admin can promote.
+// Approved candidates only; district admins may search their active districts.
 export const adminSearchVaradhiUsers = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { q?: string; state?: string; district?: string } = {}) => d)
   .handler(async ({ data, context }) => {
-    await assertVaradhiAdmin(context.supabase, context.userId, (context.claims as any)?.email);
+    const { data: role, error: roleError } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "varadhi_admin" });
+    if (roleError) throw new Error(roleError.message);
+    const { data: seats, error: seatsError } = await context.supabase.from("varadhi_area_admins").select("id, user_id, level, state, district, is_active").eq("user_id", context.userId).eq("is_active", true);
+    if (seatsError) throw new Error(seatsError.message);
+    const area = appointmentSearchArea(!!role, seats ?? [], data);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     let q = supabaseAdmin
       .from("varadhi_profiles")
       .select("user_id, full_name, phone, state, district, mandal, city")
+      .eq("verification_status", "approved")
       .order("created_at", { ascending: false });
-    if (data.state) q = q.eq("state", data.state);
-    if (data.district) q = q.eq("district", data.district);
+    if (area.state) q = q.eq("state", area.state);
+    if (area.district) q = q.eq("district", area.district);
     const qTerm = (data.q ?? "").replace(/[(),."\\%]/g, "").trim().slice(0, 80);
     if (qTerm) q = q.or(`full_name.ilike.%${qTerm}%,phone.ilike.%${qTerm}%`);
     const { data: rows, error } = await q.limit(50);
@@ -1022,41 +1028,16 @@ export const adminSearchVaradhiUsers = createServerFn({ method: "GET" })
     return { users: rows ?? [] };
   });
 
-// Super Admin assigns a Mandal Admin under a chosen District Admin.
+// Active district owners and super admins appoint through an atomic authorized RPC.
 export const adminAssignMandalAdmin = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { user_id: string; state: string; district: string; mandal: string; parent_admin_id: string }) => d)
   .handler(async ({ data, context }) => {
-    await assertVaradhiAdmin(context.supabase, context.userId, (context.claims as any)?.email);
-    if (!data.user_id || !data.state || !data.district || !(data.mandal ?? "").trim()) {
-      throw new Error("వివరాలు అసంపూర్ణం");
-    }
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: parent } = await supabaseAdmin
-      .from("varadhi_area_admins").select("id, level, state, district").eq("id", data.parent_admin_id).maybeSingle();
-    if (!parent || (parent as any).level !== "district_admin" || (parent as any).district !== data.district) {
-      throw new Error("ఎంచుకున్న జిల్లా అడ్మిన్ ఈ జిల్లాకు చెందినవారు కాదు");
-    }
-    const { error } = await supabaseAdmin.from("varadhi_area_admins").insert({
-      user_id: data.user_id,
-      level: "mandal_admin",
-      state: data.state,
-      district: data.district,
-      mandal: data.mandal.trim(),
-      parent_admin_id: data.parent_admin_id,
-      assigned_by: context.userId,
-    } as any);
-    if (error) throw new Error(error.message.includes("duplicate") ? "ఇప్పటికే కేటాయించబడింది" : error.message);
-    const { logAdminAudit } = await import("@/lib/varadhi-audit.server");
-    await logAdminAudit({
-      action: "mandal_admin_assigned",
-      actor_user_id: context.userId,
-      target_user_id: data.user_id,
-      state: data.state,
-      district: data.district,
-      mandal: data.mandal.trim(),
-      after_data: { level: "mandal_admin", parent_admin_id: data.parent_admin_id },
+    const { error } = await context.supabase.rpc("varadhi_appoint_mandal_admin", {
+      _user_id: data.user_id, _state: data.state, _district: data.district,
+      _mandal: data.mandal, _parent_admin_id: data.parent_admin_id,
     });
+    if (error) throw new Error(error.message);
     return { ok: true };
   });
 
@@ -1066,18 +1047,22 @@ export const adminListMandalOptions = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { state?: string; district?: string } = {}) => d)
   .handler(async ({ data, context }) => {
-    await assertVaradhiAdmin(context.supabase, context.userId);
+    const { data: role, error: roleError } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "varadhi_admin" });
+    if (roleError) throw new Error(roleError.message);
+    const { data: seats, error: seatsError } = await context.supabase.from("varadhi_area_admins").select("id, user_id, level, state, district, is_active").eq("user_id", context.userId).eq("is_active", true);
+    if (seatsError) throw new Error(seatsError.message);
+    const area = appointmentSearchArea(!!role, seats ?? [], data);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const out = new Set<string>();
     let pq = supabaseAdmin.from("varadhi_profiles").select("mandal").not("mandal", "is", null);
-    if (data.state) pq = pq.eq("state", data.state);
-    if (data.district) pq = pq.eq("district", data.district);
+    if (area.state) pq = pq.eq("state", area.state);
+    if (area.district) pq = pq.eq("district", area.district);
     const { data: p } = await pq.limit(1000);
     for (const r of (p ?? []) as any[]) if (r.mandal?.trim()) out.add(r.mandal.trim());
 
     let lq = supabaseAdmin.from("varadhi_listings").select("mandal").not("mandal", "is", null);
-    if (data.state) lq = lq.eq("state", data.state);
-    if (data.district) lq = lq.eq("district", data.district);
+    if (area.state) lq = lq.eq("state", area.state);
+    if (area.district) lq = lq.eq("district", area.district);
     const { data: l } = await lq.limit(1000);
     for (const r of (l ?? []) as any[]) if (r.mandal?.trim()) out.add(r.mandal.trim());
 
