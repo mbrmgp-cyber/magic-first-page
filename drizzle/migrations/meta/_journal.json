@@ -92,6 +92,13 @@
       "when": 1793348080488,
       "tag": "0012_mbr_promotion_settings_visibility",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1793603746312,
+      "tag": "0013_grant_varadhi_tables",
+      "breakpoints": true
     }
   ]
 }
