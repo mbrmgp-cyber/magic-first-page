@@ -1,5 +1,6 @@
 # Vaaradhi rental and lease form
-- [ ] Switch rental/lease pricing to monthly amounts and replace stock fields with property availability; preserve sale forms and verify tests and the signed-in posting flow.
+- [x] Switch rental/lease pricing to monthly amounts and replace stock fields with property availability; normalize old rental terms on edit/save and restore land units on sale selection. Four rule tests and 24 language tests pass; build OK.
+- [ ] Verify real rental save/reopen: the requesting user's signed-in account has no Vaaradhi profile, so the posting form is unavailable; no personal profile was created or altered. Preview-response simulation was inconclusive. Publication not requested.
 
 # Vaaradhi mobile OTP registration
 - [x] Preserve expiring pending email verification across reloads/new tabs and keep emailed return links on Vaaradhi; real OTP request, mobile reload/new-tab Home → Login continuation, Change email cleanup and authenticated password-stage reload verified; 39 regression tests pass, build OK.
