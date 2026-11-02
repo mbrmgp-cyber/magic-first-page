@@ -73,7 +73,7 @@ function ResetPasswordPage() {
     const { error } = await supabase.auth.updateUser({ password });
     if (error) {
       setBusy(false);
-      toast.error(lt("Password update failed", "పాస్‌వర్డ్ మార్చలేకపోయాం"));
+      toast.error(lt(passwordUpdateErrorMessage(error), passwordUpdateErrorMessage(error)));
       return;
     }
     await supabase.auth.signOut();
