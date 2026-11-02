@@ -445,17 +445,20 @@ export function AdminHierarchyPanel({ isSuper }: { isSuper: boolean }) {
       <Input className="h-9 text-xs" placeholder="పేరు / ఫోన్ వెతకండి" value={term} onChange={(e) => setTerm(e.target.value)} />
       <div className="max-h-52 overflow-auto space-y-1">
         {(usersQ.data?.users ?? []).map((u: any) => (
-          <button
+          <Button
             key={u.user_id}
+            variant="outline"
             disabled={busy}
             onClick={() => doAssign(u.user_id)}
-            className="w-full text-left px-2 py-1.5 rounded-md border hover:bg-muted text-xs"
+            className="w-full h-auto justify-start flex-wrap text-left px-2 py-1.5 text-xs whitespace-normal"
           >
             <span className="font-medium">{u.full_name}</span>
             <span className="text-muted-foreground"> · {[u.district, u.mandal].filter(Boolean).join(", ")}</span>
-          </button>
+          </Button>
         ))}
-        {(usersQ.data?.users ?? []).length === 0 && (
+        {usersQ.isLoading && <p className="text-xs text-muted-foreground">లోడ్…</p>}
+        {usersQ.isError && <p className="text-xs text-destructive">{usersQ.error.message}</p>}
+        {!usersQ.isLoading && !usersQ.isError && (usersQ.data?.users ?? []).length === 0 && (
           <p className="text-[11px] text-muted-foreground">వినియోగదారులు కనిపించలేదు.</p>
         )}
       </div>
@@ -467,7 +470,24 @@ export function AdminHierarchyPanel({ isSuper }: { isSuper: boolean }) {
 
   return (
     <div className="space-y-4">
-      {stateAdmins.length === 0 && (
+      {!isSuper && stateAdmins.length === 0 && districtAdmins.map((d: any) => (
+        <Card key={d.id} className="p-4 space-y-3">
+          <h2 className="font-semibold">{d.profile?.full_name ?? "జిల్లా అడ్మిన్"}</h2>
+          <p className="text-xs text-muted-foreground">{d.state} · {d.district}</p>
+          {mandalAdmins.filter((m: any) => m.parent_admin_id === d.id).map((m: any) => (
+            <div key={m.id} className="border-b py-2 text-sm">
+              {m.profile?.full_name ?? m.user_id.slice(0, 8)} · {m.mandal}
+              <Badge variant="secondary" className="ml-2">{m.is_active ? "యాక్టివ్" : "నిలిపివేత"}</Badge>
+            </div>
+          ))}
+          {d.canAppoint && (openFor === `district:${d.id}` ? AssignBox({ forKind: "district" }) : (
+            <Button variant="outline" size="sm" className="h-auto whitespace-normal" onClick={() => { closePanel(); setOpenFor(`district:${d.id}`); }}>
+              <UserPlus className="mr-1 h-4 w-4 shrink-0" /> మండల అడ్మిన్‌ను కేటాయించండి
+            </Button>
+          ))}
+        </Card>
+      ))}
+      {stateAdmins.length === 0 && districtAdmins.length === 0 && (
         <Card className="p-6 text-center text-sm text-muted-foreground">ఇంకా రాష్ట్ర అడ్మిన్లు లేరు.</Card>
       )}
 
@@ -544,9 +564,9 @@ export function AdminHierarchyPanel({ isSuper }: { isSuper: boolean }) {
                         </div>
                       ))}
 
-                      {isSuper && (
+                      {d.canAppoint && (
                         openFor === `district:${d.id}` ? (
-                          <AssignBox forKind="district" />
+                          AssignBox({ forKind: "district" })
                         ) : (
                           <Button size="sm" variant="outline" onClick={() => { closePanel(); setOpenFor(`district:${d.id}`); }}>
                             <UserPlus className="h-4 w-4 mr-1" /> మండల అడ్మిన్‌ను కేటాయించండి
@@ -560,7 +580,7 @@ export function AdminHierarchyPanel({ isSuper }: { isSuper: boolean }) {
 
               {isSuper && (
                 openFor === `state:${s.id}` ? (
-                  <AssignBox forKind="state" />
+                  AssignBox({ forKind: "state" })
                 ) : (
                   <Button size="sm" variant="outline" onClick={() => { closePanel(); setOpenFor(`state:${s.id}`); }}>
                     <UserPlus className="h-4 w-4 mr-1" /> జిల్లా అడ్మిన్‌ను కేటాయించండి
@@ -572,7 +592,7 @@ export function AdminHierarchyPanel({ isSuper }: { isSuper: boolean }) {
         );
       })}
 
-      {!isSuper && (
+      {!isSuper && !districtAdmins.some((d: any) => d.canAppoint) && (
         <p className="text-[11px] text-muted-foreground">కేటాయింపులు సూపర్ అడ్మిన్ మాత్రమే చేయగలరు.</p>
       )}
     </div>

@@ -3646,6 +3646,16 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      varadhi_appoint_mandal_admin: {
+        Args: {
+          _district: string
+          _mandal: string
+          _parent_admin_id: string
+          _state: string
+          _user_id: string
+        }
+        Returns: string
+      }
       varadhi_award_point: {
         Args: {
           _event_type: string
