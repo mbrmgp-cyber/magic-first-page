@@ -1,3 +1,6 @@
+# Vaaradhi rental and lease form
+- [ ] Switch rental/lease pricing to monthly amounts and replace stock fields with property availability; preserve sale forms and verify tests and the signed-in posting flow.
+
 # Vaaradhi mobile OTP registration
 - [x] Preserve expiring pending email verification across reloads/new tabs and keep emailed return links on Vaaradhi; real OTP request, mobile reload/new-tab Home → Login continuation, Change email cleanup and authenticated password-stage reload verified; 39 regression tests pass, build OK.
 - [ ] Complete actual emailed-code verification/password save and confirm customer-device behavior after publication; mailbox code is unavailable, no existing password was changed, and publication was not requested this turn.
