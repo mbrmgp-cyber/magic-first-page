@@ -132,10 +132,16 @@ const CUSTOMER_PLACE_LABEL: Record<string, string> = {
   food: "అవసరమైన చోటికి వస్తాం",
   emergency: "అవసరమైన చోటికి వస్తాం",
 };
+const ONLINE_CONSULT_CATS = ["doctor", "lawyer"];
 const serviceModes = (cat: string) => [
   OWN_PLACE_LABEL[cat] ?? "మా స్థలంలో మాత్రమే",
   CUSTOMER_PLACE_LABEL[cat] ?? "అవసరమైన చోటికి వస్తాం",
+  ...(ONLINE_CONSULT_CATS.includes(cat) ? ["ఆన్‌లైన్ కన్సల్టేషన్"] : []),
 ];
+const SERVICE_UNIT_DEFAULT: Record<string, string> = {
+  doctor: "కన్సల్టేషన్ ఫీజు (ఒకసారికి)",
+  lawyer: "ఒక కేసుకు / కన్సల్టేషన్‌కు",
+};
 const SERVICE_AREAS = ["మండలంలో", "MLA పరిధిలో", "జిల్లాలో", "ఎక్కడైనా"];
 
 
@@ -446,7 +452,7 @@ function PostSection({ postType }: { postType: string }) {
           {(postType === "free" ? FREE_CATS : SERVICE_CATS).map((c) => (
             <button key={c.id}
               onClick={() => {
-                setForm({ ...empty, service_cat: c.id, unit: "1 పనికి" });
+                setForm({ ...empty, service_cat: c.id, unit: SERVICE_UNIT_DEFAULT[c.id] ?? "1 పనికి" });
                 setOpen(true);
               }}
               style={{ background: c.color }}
