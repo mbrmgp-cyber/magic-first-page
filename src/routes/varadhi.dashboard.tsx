@@ -60,7 +60,7 @@ const BUSINESS_CATS = [
 
 const UNITS = ["కేజీ", "వస్తువు", "లీటర్"];
 const LAND_UNITS = ["సెంటు", "గజం", "అంకణం"];
-const PROPERTY_TYPES = ["ఇల్లు", "ప్లాట్", "ఇంటి స్థలం", "సాగు భూమి", "ఇతర"];
+const PROPERTY_TYPES = ["ఇల్లు", "ప్లాట్", "ఇంటి స్థలం", "సాగు భూమి", "ఇల్లు అద్దెకు (Rent)", "లీజ్", "ఇతర"];
 
 const SERVICE_CATS = [
   { id: "doctor", te: "డాక్టర్", color: "#dc2626" },
@@ -648,12 +648,12 @@ function PostSection({ postType }: { postType: string }) {
               <L n="1">ఆస్తి రకం</L>
               <div className="grid grid-cols-3 gap-1.5">
                 {PROPERTY_TYPES.map((p) => (
-                  <button key={p} onClick={() => setForm({ ...form, property_type: p })}
-                    className={`rounded-lg py-2 text-[10px] font-semibold border ${
-                      form.property_type === p ? "bg-[#7c3aed] text-white border-[#7c3aed]" : "bg-white text-[#1e3a8a] border-black/10"
-                    }`}>
+                  <Button key={p} type="button" onClick={() => setForm({ ...form, property_type: p })}
+                    aria-pressed={form.property_type === p}
+                    variant={form.property_type === p ? "default" : "outline"}
+                    className="h-auto min-h-10 whitespace-normal rounded-lg px-2 py-2 text-[10px] font-semibold leading-snug">
                     {ui(p)}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </>
