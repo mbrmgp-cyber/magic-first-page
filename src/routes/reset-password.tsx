@@ -2,6 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { passwordUpdateErrorMessage } from "@/lib/password-errors";
+import { sharedTranslation } from "@/lib/language-support";
 import { Lock, KeyRound } from "lucide-react";
 import { useI18n, localizeText } from "@/lib/i18n";
 
@@ -73,7 +75,8 @@ function ResetPasswordPage() {
     const { error } = await supabase.auth.updateUser({ password });
     if (error) {
       setBusy(false);
-      toast.error(lt(passwordUpdateErrorMessage(error), passwordUpdateErrorMessage(error)));
+      const reason = passwordUpdateErrorMessage(error);
+      toast.error(sharedTranslation(lang, reason) ?? reason, { duration: 8000 });
       return;
     }
     await supabase.auth.signOut();
