@@ -470,7 +470,7 @@ export function AdminHierarchyPanel({ isSuper }: { isSuper: boolean }) {
 
   return (
     <div className="space-y-4">
-      {!isSuper && districtAdmins.map((d: any) => (
+      {!isSuper && stateAdmins.length === 0 && districtAdmins.map((d: any) => (
         <Card key={d.id} className="p-4 space-y-3">
           <h2 className="font-semibold">{d.profile?.full_name ?? "జిల్లా అడ్మిన్"}</h2>
           <p className="text-xs text-muted-foreground">{d.state} · {d.district}</p>
@@ -491,7 +491,7 @@ export function AdminHierarchyPanel({ isSuper }: { isSuper: boolean }) {
         <Card className="p-6 text-center text-sm text-muted-foreground">ఇంకా రాష్ట్ర అడ్మిన్లు లేరు.</Card>
       )}
 
-      {(isSuper ? stateAdmins : []).map((s: any) => {
+      {stateAdmins.map((s: any) => {
         const kids = districtAdmins.filter((d: any) => d.parent_admin_id === s.id || (!d.parent_admin_id && norm(d.state) === norm(s.state)));
         return (
           <Card key={s.id} className="p-4 space-y-3">
@@ -564,7 +564,7 @@ export function AdminHierarchyPanel({ isSuper }: { isSuper: boolean }) {
                         </div>
                       ))}
 
-                      {isSuper && (
+                      {d.canAppoint && (
                         openFor === `district:${d.id}` ? (
                           AssignBox({ forKind: "district" })
                         ) : (
