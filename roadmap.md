@@ -1,5 +1,6 @@
 # Vaaradhi district admin appointments
-- [ ] Add approved-user selection and secure subordinate appointments within the district admin's active district; test permissions and verify the available signed-in flow.
+- [x] Add approved-user selection and atomic subordinate appointments within the district admin's active district, with audit logging; nine permission/profile/moderation tests pass and build OK. Signed-in super-admin hierarchy opens, real approved candidate search works and typed mandal is retained.
+- [ ] Verify appointment save/readback as a district admin: available session is super-admin, district-account authorization is unavailable; no real customer's admin role was changed. Publication not requested.
 
 # Vaaradhi rental and lease form
 - [x] Switch rental/lease pricing to monthly amounts and replace stock fields with property availability; normalize old rental terms on edit/save and restore land units on sale selection. Four rule tests and 24 language tests pass; build OK.
