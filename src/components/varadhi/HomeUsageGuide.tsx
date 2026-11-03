@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Play, ShieldCheck, UserRound } from "lucide-react";
+import { Play, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useI18n } from "@/lib/i18n";
@@ -13,6 +13,7 @@ export function HomeUsageGuide() {
   const t = (source: string) => sharedTranslation(lang, source) ?? source;
   const [videoOpen, setVideoOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const actionClassName = "h-8 min-w-0 gap-1.5 whitespace-normal bg-market-brand px-2 py-1 text-[11px] font-semibold leading-normal text-market-on-brand hover:bg-market-brand/90 [&_svg]:size-3.5";
 
   const startPlayback = () => {
     const video = videoRef.current;
@@ -26,7 +27,7 @@ export function HomeUsageGuide() {
           if (!open) videoRef.current?.pause();
           setVideoOpen(open);
         }}>
-          <Button variant="outline" onClick={() => setVideoOpen(true)} className="h-auto min-h-11 min-w-0 gap-1.5 whitespace-normal border-market-brand/30 bg-market-header px-2 py-2 text-xs font-semibold text-market-ink hover:bg-market-header/80 sm:text-sm">
+          <Button onClick={() => setVideoOpen(true)} className={actionClassName}>
             <Play className="h-4 w-4 shrink-0" aria-hidden="true" />
             {t("app manual video")}
           </Button>
@@ -37,13 +38,10 @@ export function HomeUsageGuide() {
             </video>
           </DialogContent>
         </Dialog>
-        <Button asChild className="h-auto min-h-11 min-w-0 gap-1.5 whitespace-normal bg-market-brand px-2 py-2 text-xs font-semibold text-market-on-brand hover:bg-market-brand/90 sm:text-sm">
+        <Button asChild className={actionClassName}>
           <Link to="/varadhi/admin-apply"><ShieldCheck className="h-4 w-4 shrink-0" aria-hidden="true" />{t("Admin Form")}</Link>
         </Button>
       </div>
-      <Button asChild variant="outline" className="mt-3 h-auto min-h-10 whitespace-normal border-market-border bg-market-surface text-market-ink hover:bg-market-header">
-        <Link to="/varadhi/profile"><UserRound className="h-4 w-4" aria-hidden="true" />{t("Open Profile")}</Link>
-      </Button>
     </div>
   );
 }
