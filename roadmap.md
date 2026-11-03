@@ -1,4 +1,6 @@
 # Vaaradhi home how-to guide
+- [x] Add the rendered 2:43 Telugu narrated all-sections video (including transport) to Home; no music, audio stream confirmed, 24 language tests pass, build OK, asset returns HTTP 200, sampled scenes inspected and mobile frame has no overflow. Not published.
+- [ ] Complete video playback and full motion/audio review: local browser media never reached metadata despite HTTP 200; sampled frames reveal delayed labels and brief blank transitions; full narration listening and small screenshot-text readability remain unverified. Upload/Profile/contact visuals are illustrative, not authenticated captures.
 - [x] Add a localized interactive photo guide for farmers, traders, service providers and workers; all four audience selections, next/previous steps, loaded photos, mobile overflow, search navigation and Telugu/English/Hindi checked in-browser; 24 language tests pass, build OK. Not published.
 
 # Vaaradhi district admin appointments
