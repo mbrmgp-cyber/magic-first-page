@@ -1,7 +1,7 @@
 # Vaaradhi compact home manual actions
-- [x] Remove Home Open Profile and match both action buttons to one color and ticker height (32px); mobile 361px and desktop 1280px verified without overflow, video dialog opens, build OK. Not published.
+- [x] Remove Home Open Profile and match both action buttons to one color and ticker height (32px); publication requested November 3 and live vaaradhi.mbrplatform.com/varadhi verified at 361px: both buttons 32px with identical background, no Open Profile, no overflow, video dialog opens, no page errors.
 - [x] Replace the inline guide with left manual-video/right admin-form buttons under the ticker and retain Open Profile; removed AI audience photos, tabs and text. Mobile 361px and desktop layout, dialog open/close, original video file and 24 language tests verified; build OK. Not published.
-- [ ] Confirm actual original-video playback: sandbox Chromium opens the dialog and requests autoplay but never reaches media metadata, including when served the downloaded original file; customer-browser playback remains unverified.
+- [ ] Confirm actual original-video playback: November 3 live custom-domain browser check opens the dialog and requests autoplay, but after 35 seconds readyState=0, currentTime=0 and videoWidth=0; live MP4 returns HTTP 206 with range support. Sandbox Chromium media limitation prevents playback confirmation; customer-device confirmation remains required.
 
 # Vaaradhi home how-to guide
 - [x] Add the rendered 2:43 Telugu narrated all-sections video (including transport) to Home; no music, audio stream confirmed, 24 language tests pass, build OK, asset returns HTTP 200, sampled scenes inspected and mobile frame has no overflow. Not published.
