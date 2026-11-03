@@ -9,7 +9,7 @@ import farmerPhoto from "@/assets/vaaradhi-guide-farmer.jpg";
 import traderPhoto from "@/assets/vaaradhi-guide-trader.jpg";
 import providerPhoto from "@/assets/vaaradhi-guide-provider.jpg";
 import workerPhoto from "@/assets/vaaradhi-guide-worker.jpg";
-import usageVideo from "@/assets/videos/vaaradhi-how-to-use-telugu-v2.mp4.asset.json";
+import usageVideo from "@/assets/videos/vaaradhi-how-to-use-telugu.mp4.asset.json";
 import guidePoster from "@/assets/varadhi-slide-transport.jpg";
 
 const registration = { title: "Complete your profile", detail: "Log in and open Profile to complete your registration and contact details before posting.", Icon: UserRound };
