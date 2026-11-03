@@ -1,5 +1,5 @@
 # Vaaradhi compact home manual actions
-- [ ] Remove Home Open Profile and match both action buttons to one color and ticker height; verify mobile and desktop.
+- [x] Remove Home Open Profile and match both action buttons to one color and ticker height (32px); mobile 361px and desktop 1280px verified without overflow, video dialog opens, build OK. Not published.
 - [x] Replace the inline guide with left manual-video/right admin-form buttons under the ticker and retain Open Profile; removed AI audience photos, tabs and text. Mobile 361px and desktop layout, dialog open/close, original video file and 24 language tests verified; build OK. Not published.
 - [ ] Confirm actual original-video playback: sandbox Chromium opens the dialog and requests autoplay but never reaches media metadata, including when served the downloaded original file; customer-browser playback remains unverified.
 
