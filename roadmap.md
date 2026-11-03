@@ -1,3 +1,7 @@
+# Vaaradhi compact home manual actions
+- [x] Replace the inline guide with left manual-video/right admin-form buttons under the ticker and retain Open Profile; removed AI audience photos, tabs and text. Mobile 361px and desktop layout, dialog open/close, original video file and 24 language tests verified; build OK. Not published.
+- [ ] Confirm actual original-video playback: sandbox Chromium opens the dialog and requests autoplay but never reaches media metadata, including when served the downloaded original file; customer-browser playback remains unverified.
+
 # Vaaradhi home how-to guide
 - [x] Add the rendered 2:43 Telugu narrated all-sections video (including transport) to Home; no music, audio stream confirmed, 24 language tests pass, build OK, asset returns HTTP 200, sampled scenes inspected and mobile frame has no overflow. Not published.
 - [ ] Complete video playback and full motion/audio review: local browser media never reached metadata despite HTTP 200; sampled frames reveal delayed labels and brief blank transitions; full narration listening and small screenshot-text readability remain unverified. Upload/Profile/contact visuals are illustrative, not authenticated captures.
