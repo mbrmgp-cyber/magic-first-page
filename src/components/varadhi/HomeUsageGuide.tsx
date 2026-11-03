@@ -13,7 +13,7 @@ export function HomeUsageGuide() {
   const t = (source: string) => sharedTranslation(lang, source) ?? source;
   const [videoOpen, setVideoOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const actionClassName = "h-auto min-w-0 gap-1.5 whitespace-normal bg-market-brand px-2 py-1 text-[11px] font-semibold leading-normal text-market-on-brand hover:bg-market-brand/90 [&_svg]:size-3.5";
+  const actionClassName = "h-8 min-w-0 gap-1.5 whitespace-normal bg-market-brand px-2 py-1 text-[11px] font-semibold leading-normal text-market-on-brand hover:bg-market-brand/90 [&_svg]:size-3.5";
 
   const startPlayback = () => {
     const video = videoRef.current;
