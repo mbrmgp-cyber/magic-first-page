@@ -7,11 +7,12 @@ import moderationCopy from "./locales/moderation.json";
 import itemFormCopy from "./locales/item-form.json";
 import profilePermissionsCopy from "./locales/profile-permissions.json";
 import homeMarketplaceCopy from "./locales/home-marketplace.json";
+import homeGuideCopy from "./locales/home-guide.json";
 
 // Match original Telugu as well as English and already-rendered Hindi when switching.
 const reviewedCopy = new Map<string, { en: string; te: string; hi: string }>();
 const copyKey = (source: string) => source.normalize("NFC").replace(/[\u200c\u200d]/g, "").trim();
-for (const entry of [...mbrCopy, ...vaaradhiCopy, ...recoveryCopy, ...moderationCopy, ...itemFormCopy, ...profilePermissionsCopy, ...homeMarketplaceCopy]) {
+for (const entry of [...mbrCopy, ...vaaradhiCopy, ...recoveryCopy, ...moderationCopy, ...itemFormCopy, ...profilePermissionsCopy, ...homeMarketplaceCopy, ...homeGuideCopy]) {
   for (const source of [entry.en, entry.te, entry.hi]) reviewedCopy.set(copyKey(source), entry);
 }
 
