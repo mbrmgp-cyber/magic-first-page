@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { listListings, getVaradhiTicker, type VaradhiListing } from "@/lib/varadhi.functions";
-import { useI18n, bi } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n";
 import { VARADHI_DEFAULT_TICKER } from "@/lib/varadhi-ticker-defaults";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import varadhiLogo from "@/assets/logos/vaaradhi-logo-english.png";
@@ -211,19 +211,13 @@ function VaradhiHome() {
 
 
 
-      {/* Running disclaimer ticker + small admin apply button */}
-      <div className="mt-3 flex items-center gap-2">
-        <div className="relative min-w-0 flex-1 overflow-hidden rounded-md bg-market-notice px-3 py-1 ring-1 ring-market-border">
+      {/* Running disclaimer ticker */}
+      <div className="mt-3">
+        <div className="relative overflow-hidden rounded-md bg-market-notice px-3 py-1 ring-1 ring-market-border">
           <div className="varadhi-marquee whitespace-nowrap text-[11px] font-semibold text-market-notice-ink" data-notranslit>
             {tickerText}
           </div>
         </div>
-        <Button asChild variant="ghost" className="h-auto shrink-0 whitespace-normal rounded-md bg-market-brand px-3 py-1 text-[11px] font-semibold text-market-on-brand hover:bg-market-brand/90 hover:text-market-on-brand"><Link
-          to="/varadhi/admin-apply"
-          data-notranslit
-        >
-          {bi("అడ్మిన్‌గా దరఖాస్తు చేయండి", "Apply as Admin", lang)}
-        </Link></Button>
       </div>
 
 
