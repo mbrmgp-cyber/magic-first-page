@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, BookOpen, Check, HandHeart, Search, Sprout, Store, Upload, UserRound, Wrench } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, Check, HandHeart, Search, ShieldCheck, Sprout, Store, Upload, UserRound, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useI18n } from "@/lib/i18n";
@@ -41,6 +41,9 @@ export function HomeUsageGuide() {
           <source src={usageVideo.url} type="video/mp4" />
         </video>
         <p className="mt-2 text-xs font-medium text-market-muted">{t("All sections · Telugu video")} · 2:43</p>
+        <Button asChild className="mt-3 h-auto min-h-11 w-full whitespace-normal bg-market-brand py-2.5 text-sm font-semibold text-market-on-brand hover:bg-market-brand/90">
+          <Link to="/varadhi/admin-apply"><ShieldCheck className="h-4 w-4" aria-hidden="true" />{t("Apply as Admin")}</Link>
+        </Button>
       </div>
       <Tabs value={audience} onValueChange={(value) => { setAudience(value); setStep(0); }}>
         <TabsList aria-label={t("Vaaradhi for everyone")} className="grid h-auto w-full grid-cols-2 gap-1 bg-market-header p-1 sm:grid-cols-4">
