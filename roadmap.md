@@ -118,3 +118,7 @@
 - [x] Match the displayed society card in the studio, including real member photo, designation, signature and footer; verified header edit/save/reopen and restored original design, four tests passed.
 - [x] Restore saved design loading and preserve saved styling in Design Studio; show the legacy society card when no design is stored.
 - [x] Verify signed-in Chitvel editing, save and reopen, desktop/mobile display and two regression tests; restore the original card after testing.
+
+# Admin apply button + video sync (Nov 3)
+- [x] Move "అడ్మిన్‌గా దరఖాస్తు చేయండి" button below the usage video in HomeUsageGuide (full-width, ShieldCheck icon, EN/TE/HI locale row added); removed the small ticker-row button; Telugu label and auth redirect verified in-browser; 24 language tests pass.
+- [ ] Re-render how-to video with narration-synced labels and no blank frames (agent sub_gnhrp7wp running); then swap CDN asset, verify, publish live.
