@@ -155,9 +155,9 @@ export function AdminPartnersPanel() {
         {partners.map((p: any) => (
           <div key={p.id} className="flex items-center justify-between gap-2 rounded-lg border p-2 text-xs">
             <div className="min-w-0">
-              <p className="font-semibold truncate">
-                {p.full_name ?? "—"} <Badge variant="secondary">{p.level}</Badge>{" "}
-                <span className="font-mono">{p.referral_code}</span>
+              <p className="font-semibold flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+                <span>{p.full_name ?? "—"}</span> <Badge variant="secondary">{p.level}</Badge>
+                <span className="font-mono break-all">{p.referral_code}</span>
               </p>
               <p className="text-muted-foreground">
                 📍 {[p.mandal, p.district, p.state].filter(Boolean).join(", ")} · {p.commission_pct}% · ఆదాయం {money(p.earned)} (చెల్లించినది {money(p.paid)})
