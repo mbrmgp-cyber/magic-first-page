@@ -9,7 +9,7 @@ import farmerPhoto from "@/assets/vaaradhi-guide-farmer.jpg";
 import traderPhoto from "@/assets/vaaradhi-guide-trader.jpg";
 import providerPhoto from "@/assets/vaaradhi-guide-provider.jpg";
 import workerPhoto from "@/assets/vaaradhi-guide-worker.jpg";
-import usageVideo from "@/assets/videos/vaaradhi-how-to-use-telugu.mp4.asset.json";
+import usageVideo from "@/assets/videos/vaaradhi-how-to-use-telugu-v2.mp4.asset.json";
 import guidePoster from "@/assets/varadhi-slide-transport.jpg";
 
 const registration = { title: "Complete your profile", detail: "Log in and open Profile to complete your registration and contact details before posting.", Icon: UserRound };
@@ -40,7 +40,7 @@ export function HomeUsageGuide() {
         <video controls playsInline preload="none" poster={guidePoster} aria-label={t("Vaaradhi usage video")} className="aspect-video w-full rounded-lg bg-market-header object-contain">
           <source src={usageVideo.url} type="video/mp4" />
         </video>
-        <p className="mt-2 text-xs font-medium text-market-muted">{t("All sections · Telugu video")} · 2:43</p>
+        <p className="mt-2 text-xs font-medium text-market-muted">{t("All sections · Telugu video")} · 2:42</p>
         <Button asChild className="mt-3 h-auto min-h-11 w-full whitespace-normal bg-market-brand py-2.5 text-sm font-semibold text-market-on-brand hover:bg-market-brand/90">
           <Link to="/varadhi/admin-apply"><ShieldCheck className="h-4 w-4" aria-hidden="true" />{t("Apply as Admin")}</Link>
         </Button>
