@@ -11,6 +11,7 @@ import { VARADHI_DEFAULT_TICKER } from "@/lib/varadhi-ticker-defaults";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import varadhiLogo from "@/assets/logos/vaaradhi-logo-english.png";
 import { HomeDiscovery } from "@/components/varadhi/HomeDiscovery";
+import { HomeUsageGuide } from "@/components/varadhi/HomeUsageGuide";
 import { Button } from "@/components/ui/button";
 import { sharedTranslation } from "@/lib/language-support";
 import { Sparkles, ImageOff } from "lucide-react";
@@ -226,6 +227,8 @@ function VaradhiHome() {
       </div>
 
 
+
+      <HomeUsageGuide />
 
       {/* CTA */}
       {signedIn === false && (

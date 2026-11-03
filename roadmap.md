@@ -1,3 +1,6 @@
+# Vaaradhi home how-to guide
+- [x] Add a localized interactive photo guide for farmers, traders, service providers and workers; all four audience selections, next/previous steps, loaded photos, mobile overflow, search navigation and Telugu/English/Hindi checked in-browser; 24 language tests pass, build OK. Not published.
+
 # Vaaradhi district admin appointments
 - [x] Add approved-user selection and atomic subordinate appointments within the district admin's active district, with audit logging; nine permission/profile/moderation tests pass and build OK. Signed-in super-admin hierarchy opens, real approved candidate search works and typed mandal is retained.
 - [ ] Verify appointment save/readback as a district admin: available session is super-admin, district-account authorization is unavailable; no real customer's admin role was changed. Publication not requested.
