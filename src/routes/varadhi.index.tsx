@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { listListings, getVaradhiTicker, type VaradhiListing } from "@/lib/varadhi.functions";
-import { useI18n, bi } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n";
 import { VARADHI_DEFAULT_TICKER } from "@/lib/varadhi-ticker-defaults";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import varadhiLogo from "@/assets/logos/vaaradhi-logo-english.png";
