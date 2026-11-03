@@ -121,4 +121,4 @@
 
 # Admin apply button + video sync (Nov 3)
 - [x] Move "అడ్మిన్‌గా దరఖాస్తు చేయండి" button below the usage video in HomeUsageGuide (full-width, ShieldCheck icon, EN/TE/HI locale row added); removed the small ticker-row button; Telugu label and auth redirect verified in-browser; 24 language tests pass.
-- [ ] Re-render how-to video with narration-synced labels and no blank frames (agent sub_gnhrp7wp running); then swap CDN asset, verify, publish live.
+- [x] Re-rendered how-to video v2 (2:42, voice-timed labels, crossfade transitions, 3884 frames scanned — no blanks; STT matched script 96.7-100%); swapped CDN asset, caption updated; publish requested. Headless-browser playback unverified (sandbox limitation); asset serves 200 with range support.
