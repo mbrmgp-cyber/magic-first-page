@@ -1,4 +1,5 @@
 # Vaaradhi home how-to guide
+- [ ] Create a clearly narrated Telugu video covering every main division including transport and add the completed video to the Home guide; awaiting video renderer result.
 - [x] Add a localized interactive photo guide for farmers, traders, service providers and workers; all four audience selections, next/previous steps, loaded photos, mobile overflow, search navigation and Telugu/English/Hindi checked in-browser; 24 language tests pass, build OK. Not published.
 
 # Vaaradhi district admin appointments
