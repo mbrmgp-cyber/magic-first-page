@@ -20,7 +20,7 @@ const categories = [
   { id: "fresh", title: "Fresh Items", Icon: Apple, tone: "market-fresh" },
   { id: "goods", title: "New / Used Goods", Icon: Package, tone: "market-goods" },
   { id: "realestate", title: "Real Estate", Icon: House, tone: "market-estate" },
-  { id: "transport", title: "Transport", Icon: Truck, tone: "market-transport" },
+  { id: "transport", title: "Machinery", Icon: Truck, tone: "market-transport" },
   { id: "services", title: "Services", Icon: Wrench, tone: "market-services" },
 ];
 

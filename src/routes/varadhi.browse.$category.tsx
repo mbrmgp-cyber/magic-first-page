@@ -5,7 +5,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { listListings, listProviders, type VaradhiListing, type VaradhiProvider } from "@/lib/varadhi.functions";
-import { ArrowLeft, Search, Apple, Package, Recycle, MapPin, Truck, Wrench, HeartHandshake, Boxes, ChevronDown, ImageOff } from "lucide-react";
+import { ArrowLeft, Search, Apple, Package, Recycle, MapPin, Truck, Wrench, HeartHandshake, Boxes, ChevronDown, ImageOff, Cog, Tractor } from "lucide-react";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { INDIA_STATES, indiaDistrictsFor } from "@/lib/india-locations";
@@ -19,7 +19,8 @@ const CATEGORY_META: Record<string, { title: string; desc: string }> = {
   new: { title: "New Items for Sale", desc: "కొత్త వస్తువులు మీ ప్రాంతంలో కొనండి, అమ్మండి." },
   used: { title: "Used & Second-hand Items", desc: "పాత వస్తువులు తక్కువ ధరకు కొనండి లేదా అమ్మండి." },
   realestate: { title: "Land, Houses & Rentals", desc: "స్థలాలు, ఇళ్లు మరియు అద్దె ప్రకటనలు మీ ప్రాంతంలో." },
-  transport: { title: "Transport Vehicles & Drivers", desc: "ఆటో, ట్రాక్టర్, లారీ మరియు ఇతర రవాణా సౌకర్యాలు." },
+  transport: { title: "Transport Vehicles & Drivers", desc: "బైక్, ఆటో, కారు, లారీ మరియు ఇతర రవాణా వాహనాలు." },
+  machinery: { title: "Work Machinery & Tools", desc: "వ్యవసాయ యంత్రాలు, JCB మరియు కార్మిక యంత్రాలు మీ ప్రాంతంలో." },
   services: { title: "Local Technicians & Services", desc: "ఎలక్ట్రీషియన్, ప్లంబర్, మెకానిక్ వంటి స్థానిక సేవలు." },
   all: { title: "All Listings", desc: "మీ ప్రాంతంలోని అన్ని ప్రకటనలు ఒకే చోట చూడండి." },
 };
@@ -62,6 +63,22 @@ const SERVICE_BOXES: Box[] = [
   { id: "freeservices", te: "ఫ్రీ సర్వీస్", color: "#0f9d58", Icon: HeartHandshake },
 ];
 
+const MACHINERY_BOXES: Box[] = [
+  { id: "transport", te: "రవాణా యంత్రాలు", color: "#0ea5e9", Icon: Truck },
+  { id: "machinery", te: "పని యంత్రాలు", color: "#0f766e", Icon: Tractor },
+];
+
+// Transport provider sub_type groups (see TRANSPORT_TYPES in varadhi.dashboard.tsx).
+const AGRI_SUBS = ["tractor", "jcb", "agri"];
+const TOOL_SUBS = ["tools"];
+const MACHINERY_SUBS = [...AGRI_SUBS, ...TOOL_SUBS];
+const WHEEL_FILTERS = [
+  { id: "w2", te: "2-వీలర్", subs: ["bike"] },
+  { id: "w3", te: "3-వీలర్", subs: ["auto"] },
+  { id: "w4", te: "4-వీలర్", subs: ["car"] },
+  { id: "w6", te: "6-వీలర్", subs: ["lorry"] },
+];
+
 type Group =
   | { kind: "single"; box: Box }
   | { kind: "group"; id: string; te: string; color: string; Icon: typeof Apple; boxes: Box[] };
@@ -70,7 +87,7 @@ const GROUPS: Group[] = [
   { kind: "single", box: { id: "realestate", te: "ప్లాట్లు & భూములు", color: "#7c3aed", Icon: MapPin } },
   { kind: "group", id: "items", te: "వస్తువులు", color: "#1e3a8a", Icon: Boxes, boxes: ITEM_BOXES },
   { kind: "group", id: "svc", te: "సర్వీసులు", color: "#dc2626", Icon: Wrench, boxes: SERVICE_BOXES },
-  { kind: "single", box: { id: "transport", te: "ట్రాన్స్‌పోర్ట్", color: "#0ea5e9", Icon: Truck } },
+  { kind: "group", id: "mach", te: "యంత్రాలు", color: "#0ea5e9", Icon: Cog, boxes: MACHINERY_BOXES },
 ];
 
 
@@ -104,8 +121,8 @@ function BrowsePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const isProviderPage = category === "transport" || category === "services";
-  const providerType = category === "transport" ? "transport" : "service";
+  const isProviderPage = category === "transport" || category === "services" || category === "machinery";
+  const providerType = category === "services" ? "service" : "transport";
 
   const [state, setState] = useState("");
   const [district, setDistrict] = useState("");
@@ -113,8 +130,11 @@ function BrowsePage() {
   const [openGroup, setOpenGroup] = useState<string | null>(() =>
     ITEM_BOXES.some((b) => b.id === category) ? "items"
       : SERVICE_BOXES.some((b) => b.id === category) ? "svc"
-        : null,
+        : MACHINERY_BOXES.some((b) => b.id === category) ? "mach"
+          : null,
   );
+  const [wheel, setWheel] = useState<string | null>(null);
+  const [machKind, setMachKind] = useState<"agri" | "tools">("agri");
 
 
   const uniq = (vals: (string | null | undefined)[]) =>
@@ -151,8 +171,14 @@ function BrowsePage() {
   const isFree = (l: VaradhiListing) => ((l as unknown as { post_type?: string }).post_type ?? "business") === "free";
 
   const countFor = (id: string) => {
-    if (id === "transport" || id === "services") {
-      return areaProviders.filter((p) => p.provider_type === (id === "transport" ? "transport" : "service")).length;
+    if (id === "services") {
+      return areaProviders.filter((p) => p.provider_type === "service").length;
+    }
+    if (id === "transport") {
+      return areaProviders.filter((p) => p.provider_type === "transport" && !MACHINERY_SUBS.includes(p.sub_type)).length;
+    }
+    if (id === "machinery") {
+      return areaProviders.filter((p) => p.provider_type === "transport" && MACHINERY_SUBS.includes(p.sub_type)).length;
     }
     if (id === "freeservices") return areaListings.filter(isFree).length;
     return areaListings.filter((l) => l.category === id && !isFree(l)).length;
@@ -165,8 +191,19 @@ function BrowsePage() {
       [l.title, l.description, l.sub_category, l.city, l.village, l.mandal, l.district, l.state].some((v) =>
         (v ?? "").toLowerCase().includes(needle)));
 
+  const wheelSubs = wheel ? WHEEL_FILTERS.find((w) => w.id === wheel)?.subs ?? null : null;
   const shownProviders = areaProviders
     .filter((p) => p.provider_type === providerType)
+    .filter((p) => {
+      if (category === "transport") {
+        if (MACHINERY_SUBS.includes(p.sub_type)) return false;
+        return !wheelSubs || wheelSubs.includes(p.sub_type);
+      }
+      if (category === "machinery") {
+        return (machKind === "agri" ? AGRI_SUBS : TOOL_SUBS).includes(p.sub_type);
+      }
+      return true;
+    })
     .filter((p) =>
       !needle || [p.title, p.description, p.sub_type, p.city].some((v) => (v ?? "").toLowerCase().includes(needle)));
 
@@ -335,6 +372,51 @@ function BrowsePage() {
               </div>
             </Link>
           ))}
+        </div>
+      )}
+
+      {!loading && category === "transport" && (
+        <div className="mt-3 grid grid-cols-4 gap-2">
+          {WHEEL_FILTERS.map((w) => {
+            const active = wheel === w.id;
+            return (
+              <button
+                key={w.id}
+                type="button"
+                onClick={() => setWheel(active ? null : w.id)}
+                className={`rounded-xl border py-2 text-[11px] font-semibold transition active:scale-[.98] ${
+                  active ? "border-transparent bg-[#0ea5e9] text-white shadow" : "border-black/5 bg-white text-[#1e3a8a]"
+                }`}
+              >
+                {w.te}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {!loading && category === "machinery" && (
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          {([
+            { id: "agri" as const, te: "వ్యవసాయ యంత్రాలు", Icon: Tractor, color: "#65a30d" },
+            { id: "tools" as const, te: "కార్మిక యంత్రాలు", Icon: Wrench, color: "#b45309" },
+          ]).map((m) => {
+            const active = machKind === m.id;
+            return (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => setMachKind(m.id)}
+                className={`flex items-center justify-center gap-1.5 rounded-xl border py-2.5 text-[11px] font-semibold transition active:scale-[.98] ${
+                  active ? "border-transparent text-white shadow" : "border-black/5 bg-white text-[#1e3a8a]"
+                }`}
+                style={active ? { background: m.color } : undefined}
+              >
+                <m.Icon className="h-4 w-4" />
+                {m.te}
+              </button>
+            );
+          })}
         </div>
       )}
 
