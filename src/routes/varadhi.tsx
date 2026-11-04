@@ -21,8 +21,6 @@ export const Route = createFileRoute("/varadhi")({
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Vaaradhi" },
       { property: "og:image", content: VARADHI_SHARE_IMAGE },
-      { property: "og:image:width", content: "1200" },
-      { property: "og:image:height", content: "630" },
       { property: "og:image:alt", content: "Vaaradhi (వారధి) logo" },
       { name: "twitter:image", content: VARADHI_SHARE_IMAGE },
       { name: "application-name", content: "Vaaradhi" },
