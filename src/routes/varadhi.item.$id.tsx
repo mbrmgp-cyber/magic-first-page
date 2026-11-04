@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { getListing, logClick, type VaradhiListing, type VaradhiProvider, type VaradhiProfile } from "@/lib/varadhi.functions";
+import { getListing, getListingShareMeta, logClick, type VaradhiListing, type VaradhiProvider, type VaradhiProfile } from "@/lib/varadhi.functions";
 import { useListingImage } from "@/lib/varadhi-image";
 import { PostModerationActions } from "@/components/varadhi/PostModerationActions";
 import { formatAmount, formatPrice, isFreeListing, noPriceLabel, stockLabel } from "@/lib/varadhi-format";
@@ -9,11 +9,32 @@ import { formatAmount, formatPrice, isFreeListing, noPriceLabel, stockLabel } fr
 import { ArrowLeft, Phone, MessageCircle, Truck, Share2 } from "lucide-react";
 
 export const Route = createFileRoute("/varadhi/item/$id")({
-  head: ({ params }) => {
-    const url = `https://mbrplatform.com/varadhi/item/${params.id}`;
-    const title = "Item Details — Vaaradhi (వారధి) Local Marketplace";
-    const desc =
-      "వారధిలో ఈ వస్తువు వివరాలు — ధర, ఫోటోలు, అమ్మకందారు సమాచారం మరియు సమీప రవాణా సౌకర్యాలు.";
+  loader: async ({ params }) => {
+    try {
+      const r = await getListingShareMeta({ data: { id: params.id } });
+      return r.share;
+    } catch {
+      return null;
+    }
+  },
+  head: ({ params, loaderData }) => {
+    const url = `https://vaaradhi.mbrplatform.com/varadhi/item/${params.id}`;
+    const share = loaderData as {
+      title: string; price: number | null; unit: string | null;
+      place: string; stock_status: string;
+    } | null;
+    const amount = share ? formatAmount(share.price) : null;
+    const unit = share?.unit === "కేజీలు" ? "కేజీ" : share?.unit;
+    const priceText = share
+      ? (isFreeListing(share) ? "ఉచిత సేవ" : amount ? `రేటు: Rs. ${amount}${unit ? ` / ${unit}` : ""}` : noPriceLabel(false))
+      : "";
+    const title = share
+      ? `${priceText ? `${priceText} — ` : ""}${share.title} | వారధి`
+      : "Item Details — Vaaradhi (వారధి) Local Marketplace";
+    const desc = share
+      ? `${share.place ? `📍 ${share.place} · ` : ""}వారధి స్థానిక మార్కెట్‌లో ఈ పోస్ట్ చూడండి — vaaradhi.mbrplatform.com`
+      : "వారధిలో ఈ వస్తువు వివరాలు — ధర, ఫోటోలు, అమ్మకందారు సమాచారం మరియు సమీప రవాణా సౌకర్యాలు.";
+    const image = `https://vaaradhi.mbrplatform.com/api/public/varadhi/item-image/${params.id}`;
     return {
       meta: [
         { title },
@@ -21,7 +42,9 @@ export const Route = createFileRoute("/varadhi/item/$id")({
         { property: "og:title", content: title },
         { property: "og:description", content: desc },
         { property: "og:type", content: "product" },
+        { property: "og:image", content: image },
         { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:image", content: image },
         { property: "og:url", content: url },
       ],
       links: [{ rel: "canonical", href: url }],
