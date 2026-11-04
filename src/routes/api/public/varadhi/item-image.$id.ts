@@ -21,10 +21,26 @@ export const Route = createFileRoute("/api/public/varadhi/item-image/$id")({
     if (/^https?:\/\//.test(path)) {
       return new Response(null, { status: 302, headers: { Location: path } });
     }
-    const { data: image, error: imageError } = await supabaseAdmin.storage.from("varadhi-listings").download(path);
-    if (imageError || !image || image.size > 8 * 1024 * 1024) return fallback();
+    // WhatsApp silently drops preview images larger than ~600 KB, so serve a
+    // resized share copy; never send the full-size phone photo.
+    const MAX_SHARE_BYTES = 550 * 1024;
+    const bucket = supabaseAdmin.storage.from("varadhi-listings");
+    let image: Blob | null = null;
+    for (const transform of [
+      { width: 800, height: 800, resize: "cover" as const, quality: 70 },
+      { width: 600, height: 600, resize: "cover" as const, quality: 55 },
+    ]) {
+      const { data, error: transformError } = await bucket.download(path, { transform });
+      if (!transformError && data && data.size > 0 && data.size <= MAX_SHARE_BYTES) { image = data; break; }
+    }
+    if (!image) {
+      const { data: original } = await bucket.download(path);
+      if (original && original.size <= MAX_SHARE_BYTES) image = original;
+    }
+    if (!image) return fallback();
+    const blobType = image.type && image.type.startsWith("image/") ? image.type : "";
     const extension = path.split(".").pop()?.toLowerCase();
-    const type = extension === "png" ? "image/png" : extension === "webp" ? "image/webp" : "image/jpeg";
+    const type = blobType || (extension === "png" ? "image/png" : extension === "webp" ? "image/webp" : "image/jpeg");
     return new Response(image, {
       headers: {
         "Content-Type": type,
