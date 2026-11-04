@@ -5,7 +5,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { listListings, listProviders, type VaradhiListing, type VaradhiProvider } from "@/lib/varadhi.functions";
-import { ArrowLeft, Search, Apple, Package, Recycle, MapPin, Truck, Wrench, HeartHandshake, Boxes, ChevronDown, ImageOff } from "lucide-react";
+import { ArrowLeft, Search, Apple, Package, Recycle, MapPin, Truck, Wrench, HeartHandshake, Boxes, ChevronDown, ImageOff, Cog, Tractor } from "lucide-react";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { INDIA_STATES, indiaDistrictsFor } from "@/lib/india-locations";
@@ -19,7 +19,8 @@ const CATEGORY_META: Record<string, { title: string; desc: string }> = {
   new: { title: "New Items for Sale", desc: "కొత్త వస్తువులు మీ ప్రాంతంలో కొనండి, అమ్మండి." },
   used: { title: "Used & Second-hand Items", desc: "పాత వస్తువులు తక్కువ ధరకు కొనండి లేదా అమ్మండి." },
   realestate: { title: "Land, Houses & Rentals", desc: "స్థలాలు, ఇళ్లు మరియు అద్దె ప్రకటనలు మీ ప్రాంతంలో." },
-  transport: { title: "Transport Vehicles & Drivers", desc: "ఆటో, ట్రాక్టర్, లారీ మరియు ఇతర రవాణా సౌకర్యాలు." },
+  transport: { title: "Transport Vehicles & Drivers", desc: "బైక్, ఆటో, కారు, లారీ మరియు ఇతర రవాణా వాహనాలు." },
+  machinery: { title: "Work Machinery & Tools", desc: "వ్యవసాయ యంత్రాలు, JCB మరియు కార్మిక యంత్రాలు మీ ప్రాంతంలో." },
   services: { title: "Local Technicians & Services", desc: "ఎలక్ట్రీషియన్, ప్లంబర్, మెకానిక్ వంటి స్థానిక సేవలు." },
   all: { title: "All Listings", desc: "మీ ప్రాంతంలోని అన్ని ప్రకటనలు ఒకే చోట చూడండి." },
 };
