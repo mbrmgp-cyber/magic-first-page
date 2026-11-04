@@ -121,8 +121,8 @@ function BrowsePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const isProviderPage = category === "transport" || category === "services";
-  const providerType = category === "transport" ? "transport" : "service";
+  const isProviderPage = category === "transport" || category === "services" || category === "machinery";
+  const providerType = category === "services" ? "service" : "transport";
 
   const [state, setState] = useState("");
   const [district, setDistrict] = useState("");
@@ -130,8 +130,11 @@ function BrowsePage() {
   const [openGroup, setOpenGroup] = useState<string | null>(() =>
     ITEM_BOXES.some((b) => b.id === category) ? "items"
       : SERVICE_BOXES.some((b) => b.id === category) ? "svc"
-        : null,
+        : MACHINERY_BOXES.some((b) => b.id === category) ? "mach"
+          : null,
   );
+  const [wheel, setWheel] = useState<string | null>(null);
+  const [machKind, setMachKind] = useState<"agri" | "tools">("agri");
 
 
   const uniq = (vals: (string | null | undefined)[]) =>
@@ -168,8 +171,14 @@ function BrowsePage() {
   const isFree = (l: VaradhiListing) => ((l as unknown as { post_type?: string }).post_type ?? "business") === "free";
 
   const countFor = (id: string) => {
-    if (id === "transport" || id === "services") {
-      return areaProviders.filter((p) => p.provider_type === (id === "transport" ? "transport" : "service")).length;
+    if (id === "services") {
+      return areaProviders.filter((p) => p.provider_type === "service").length;
+    }
+    if (id === "transport") {
+      return areaProviders.filter((p) => p.provider_type === "transport" && !MACHINERY_SUBS.includes(p.sub_type)).length;
+    }
+    if (id === "machinery") {
+      return areaProviders.filter((p) => p.provider_type === "transport" && MACHINERY_SUBS.includes(p.sub_type)).length;
     }
     if (id === "freeservices") return areaListings.filter(isFree).length;
     return areaListings.filter((l) => l.category === id && !isFree(l)).length;
@@ -182,8 +191,19 @@ function BrowsePage() {
       [l.title, l.description, l.sub_category, l.city, l.village, l.mandal, l.district, l.state].some((v) =>
         (v ?? "").toLowerCase().includes(needle)));
 
+  const wheelSubs = wheel ? WHEEL_FILTERS.find((w) => w.id === wheel)?.subs ?? null : null;
   const shownProviders = areaProviders
     .filter((p) => p.provider_type === providerType)
+    .filter((p) => {
+      if (category === "transport") {
+        if (MACHINERY_SUBS.includes(p.sub_type)) return false;
+        return !wheelSubs || wheelSubs.includes(p.sub_type);
+      }
+      if (category === "machinery") {
+        return (machKind === "agri" ? AGRI_SUBS : TOOL_SUBS).includes(p.sub_type);
+      }
+      return true;
+    })
     .filter((p) =>
       !needle || [p.title, p.description, p.sub_type, p.city].some((v) => (v ?? "").toLowerCase().includes(needle)));
 
