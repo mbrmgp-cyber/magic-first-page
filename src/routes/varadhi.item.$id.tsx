@@ -43,6 +43,7 @@ export const Route = createFileRoute("/varadhi/item/$id")({
         { property: "og:description", content: desc },
         { property: "og:type", content: "product" },
         { property: "og:image", content: image },
+        { property: "og:image:alt", content: share ? `${share.title} — వారధి పోస్ట్ ఫోటో` : "Vaaradhi (వారధి) logo" },
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:image", content: image },
         { property: "og:url", content: url },
