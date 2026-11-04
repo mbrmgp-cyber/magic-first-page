@@ -130,3 +130,7 @@
 # Admin apply button + video sync (Nov 3)
 - [x] Move "అడ్మిన్‌గా దరఖాస్తు చేయండి" button below the usage video in HomeUsageGuide (full-width, ShieldCheck icon, EN/TE/HI locale row added); removed the small ticker-row button; Telugu label and auth redirect verified in-browser; 24 language tests pass.
 - [x] Re-rendered how-to video v2 (2:42, voice-timed labels, crossfade transitions, 3884 frames scanned — no blanks; STT matched script 96.7-100%); swapped CDN asset, caption updated; publish requested. Headless-browser playback unverified (sandbox limitation); asset serves 200 with range support.
+
+# WhatsApp post share preview (Nov 4)
+- [x] Item page head now carries price-first og:title, place+link og:description, and og:image from the public item-image route; fallback to Vaaradhi logo share image for missing/removed/invalid posts; verified 200 image/jpeg on a real listing and 302 fallbacks; build OK.
+- [ ] Live publish pending; real WhatsApp preview rendering can only be confirmed by sharing a post link after publish.
