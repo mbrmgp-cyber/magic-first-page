@@ -40,7 +40,7 @@ const POST_TYPES = [
   { id: "business", te: "వ్యాపారం" },
   { id: "service", te: "సేవలు" },
   { id: "free", te: "ఉచిత సేవలు" },
-  { id: "transport", te: "ట్రాన్స్‌పోర్ట్" },
+  { id: "transport", te: "యంత్రాలు" },
 ];
 
 const TRANSPORT_GROUPS: { te: string; types: { id: string; te: string; color: string }[] }[] = [
@@ -944,7 +944,7 @@ function TransportSection() {
         <button
           onClick={() => { setForm(emptyT); setOpen(true); }}
           className="w-full rounded-xl bg-[#0ea5e9] py-2.5 text-sm font-semibold text-white shadow-sm flex items-center justify-center gap-1 active:scale-[.98]">
-          <Plus className="h-4 w-4" /> కొత్త ట్రాన్స్‌పోర్ట్ పోస్టు
+          <Plus className="h-4 w-4" /> కొత్త యంత్రాల పోస్టు
         </button>
       )}
 
