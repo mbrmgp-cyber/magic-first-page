@@ -43,16 +43,27 @@ const POST_TYPES = [
   { id: "transport", te: "ట్రాన్స్‌పోర్ట్" },
 ];
 
-const TRANSPORT_TYPES = [
-  { id: "auto", te: "ఆటో", color: "#0ea5e9" },
-  { id: "tractor", te: "ట్రాక్టర్", color: "#16a34a" },
-  { id: "lorry", te: "లారీ / DCM", color: "#f97316" },
-  { id: "car", te: "ట్యాక్సీ / కారు", color: "#7c3aed" },
-  { id: "bike", te: "బైక్ డెలివరీ", color: "#dc2626" },
-  { id: "jcb", te: "JCB / ప్రొక్లెయిన్", color: "#0f766e" },
-  { id: "agri", te: "వ్యవసాయ యంత్రాలు", color: "#65a30d" },
-  { id: "tools", te: "కార్మిక యంత్రాలు", color: "#b45309" },
+const TRANSPORT_GROUPS: { te: string; types: { id: string; te: string; color: string }[] }[] = [
+  {
+    te: "రవాణా యంత్రాలు",
+    types: [
+      { id: "bike", te: "బైక్ డెలివరీ (2-వీలర్)", color: "#dc2626" },
+      { id: "auto", te: "ఆటో (3-వీలర్)", color: "#0ea5e9" },
+      { id: "car", te: "ట్యాక్సీ / కారు (4-వీలర్)", color: "#7c3aed" },
+      { id: "lorry", te: "లారీ / DCM (6-వీలర్)", color: "#f97316" },
+    ],
+  },
+  {
+    te: "పని యంత్రాలు",
+    types: [
+      { id: "tractor", te: "ట్రాక్టర్", color: "#16a34a" },
+      { id: "jcb", te: "JCB / ప్రొక్లెయిన్", color: "#0f766e" },
+      { id: "agri", te: "వ్యవసాయ యంత్రాలు", color: "#65a30d" },
+      { id: "tools", te: "కార్మిక యంత్రాలు", color: "#b45309" },
+    ],
+  },
 ];
+const TRANSPORT_TYPES = TRANSPORT_GROUPS.flatMap((g) => g.types);
 
 const TRANSPORT_AREAS = ["మండలంలో", "జిల్లాలో", "రాష్ట్రంలో", "ఎక్కడైనా"];
 
