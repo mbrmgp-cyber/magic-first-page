@@ -36,7 +36,7 @@ export const Route = createFileRoute("/api/public/varadhi/item-image/$id")({
         const isJpeg = bytes[0] === 0xff && bytes[1] === 0xd8;
         const composed = isJpeg ? composeShareImage(bytes) : null;
         if (composed && composed.byteLength <= MAX_SHARE_BYTES) {
-          return new Response(composed, {
+          return new Response(new Blob([composed as BlobPart], { type: "image/jpeg" }), {
             headers: {
               "Content-Type": "image/jpeg",
               "Cache-Control": "public, max-age=3600",
