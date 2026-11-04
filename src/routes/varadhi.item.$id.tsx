@@ -21,7 +21,7 @@ export const Route = createFileRoute("/varadhi/item/$id")({
     const url = `https://vaaradhi.mbrplatform.com/varadhi/item/${params.id}`;
     const share = loaderData as {
       title: string; price: number | null; unit: string | null;
-      place: string; stock_status: string;
+      place: string; stock_status: string; post_type?: string;
     } | null;
     const amount = share ? formatAmount(share.price) : null;
     const unit = share?.unit === "కేజీలు" ? "కేజీ" : share?.unit;

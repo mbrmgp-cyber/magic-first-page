@@ -274,6 +274,7 @@ export const getListingShareMeta = createServerFn({ method: "GET" })
         price: l.price,
         unit: l.unit,
         category: l.category,
+        post_type: l.post_type,
         stock_status: l.stock_status,
         place: [l.village, l.mandal, l.district, l.state].filter(Boolean).join(", ") || l.city || "",
         has_image: Array.isArray(l.images) && l.images.length > 0,
