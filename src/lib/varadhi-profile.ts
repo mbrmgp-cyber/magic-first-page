@@ -17,6 +17,7 @@ export const profileEditSchema = z.object({
 });
 export const adminProfileEditSchema = z.object({ user_id: z.string().uuid(), changes: profileEditSchema });
 export function isProfileLocked(status: string | null | undefined) { return status === "approved"; }
+export function showUpdateRegistration(profile: object | null | undefined) { return profile == null; }
 export function registrationComplete(form: { full_name: string; phone: string; aadhaar_url: string; house_number: string; city: string; mandal: string; district: string; state: string; occupation: string }, other: string) {
   return !!form.full_name.trim() && !!form.aadhaar_url && form.phone.trim().length >= 10 &&
     [form.house_number, form.city, form.mandal, form.district, form.state, form.occupation].every(v => !!v.trim()) &&

@@ -1,3 +1,6 @@
+# Vaaradhi Update registration visibility
+- [ ] Show the existing registration form directly on Update until saved, then refresh posting controls; preserve saved Profile details and approval locks, test visibility and verify signed-in mobile form.
+
 # Vaaradhi compact home manual actions
 - [x] Remove Home Open Profile and match both action buttons to one color and ticker height (32px); publication requested November 3 and live vaaradhi.mbrplatform.com/varadhi verified at 361px: both buttons 32px with identical background, no Open Profile, no overflow, video dialog opens, no page errors.
 - [x] Replace the inline guide with left manual-video/right admin-form buttons under the ticker and retain Open Profile; removed AI audience photos, tabs and text. Mobile 361px and desktop layout, dialog open/close, original video file and 24 language tests verified; build OK. Not published.
