@@ -375,6 +375,51 @@ function BrowsePage() {
         </div>
       )}
 
+      {!loading && category === "transport" && (
+        <div className="mt-3 grid grid-cols-4 gap-2">
+          {WHEEL_FILTERS.map((w) => {
+            const active = wheel === w.id;
+            return (
+              <button
+                key={w.id}
+                type="button"
+                onClick={() => setWheel(active ? null : w.id)}
+                className={`rounded-xl border py-2 text-[11px] font-semibold transition active:scale-[.98] ${
+                  active ? "border-transparent bg-[#0ea5e9] text-white shadow" : "border-black/5 bg-white text-[#1e3a8a]"
+                }`}
+              >
+                {w.te}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {!loading && category === "machinery" && (
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          {([
+            { id: "agri" as const, te: "వ్యవసాయ యంత్రాలు", Icon: Tractor, color: "#65a30d" },
+            { id: "tools" as const, te: "కార్మిక యంత్రాలు", Icon: Wrench, color: "#b45309" },
+          ]).map((m) => {
+            const active = machKind === m.id;
+            return (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => setMachKind(m.id)}
+                className={`flex items-center justify-center gap-1.5 rounded-xl border py-2.5 text-[11px] font-semibold transition active:scale-[.98] ${
+                  active ? "border-transparent text-white shadow" : "border-black/5 bg-white text-[#1e3a8a]"
+                }`}
+                style={active ? { background: m.color } : undefined}
+              >
+                <m.Icon className="h-4 w-4" />
+                {m.te}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       {!loading && isProviderPage && (
         <div className="mt-4 space-y-3">
           {shownProviders.length === 0 && <EmptyState msg="ఈ ఏరియాలో ఏ సర్వీసులు లేవు" />}
