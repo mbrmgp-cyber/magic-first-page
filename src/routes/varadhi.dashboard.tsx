@@ -950,18 +950,23 @@ function TransportSection() {
 
       {open && (
         <div className="space-y-2 p-3 rounded-xl bg-[#f7f7fb]">
-          <L n="1">వాహన రకం</L>
-          <div className="grid grid-cols-3 gap-1.5">
-            {TRANSPORT_TYPES.map((t) => (
-              <button key={t.id} onClick={() => setForm({ ...form, sub_type: t.id })}
-                style={form.sub_type === t.id ? { background: t.color, borderColor: t.color } : undefined}
-                className={`rounded-lg py-2 text-[10px] font-semibold border leading-tight ${
-                  form.sub_type === t.id ? "text-white" : "bg-white text-[#1e3a8a] border-black/10"
-                }`}>
-                {t.te}
-              </button>
-            ))}
-          </div>
+          <L n="1">యంత్రం రకం</L>
+          {TRANSPORT_GROUPS.map((g) => (
+            <div key={g.te}>
+              <p className="text-[11px] font-bold text-[#1e3a8a] mb-1">{g.te}</p>
+              <div className="grid grid-cols-2 gap-1.5 mb-2">
+                {g.types.map((t) => (
+                  <button key={t.id} onClick={() => setForm({ ...form, sub_type: t.id })}
+                    style={form.sub_type === t.id ? { background: t.color, borderColor: t.color } : undefined}
+                    className={`rounded-lg py-2 text-[10px] font-semibold border leading-tight ${
+                      form.sub_type === t.id ? "text-white" : "bg-white text-[#1e3a8a] border-black/10"
+                    }`}>
+                    {t.te}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
 
           <div className="grid grid-cols-2 gap-2">
             <input className={inp} placeholder="సర్వీస్ పేరు"
