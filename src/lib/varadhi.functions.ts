@@ -253,6 +253,35 @@ export const getListing = createServerFn({ method: "GET" })
     return { listing: item as VaradhiListing, seller, nearby: (nearby ?? []) as VaradhiProvider[] };
   });
 
+// Public share metadata for link previews (WhatsApp/social crawlers have no session).
+// Returns only safe, already-public listing fields; removed posts are hidden.
+export const getListingShareMeta = createServerFn({ method: "GET" })
+  .inputValidator((d: { id: string }) => d)
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: item, error } = await supabaseAdmin
+      .from("varadhi_listings").select(VARADHI_LISTING_SAFE_COLUMNS as "*").eq("id", data.id).maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!item) return { share: null };
+    const { data: removal } = await supabaseAdmin
+      .from("varadhi_post_removals").select("id").eq("target_type", "listing").eq("target_id", data.id).maybeSingle();
+    if (removal) return { share: null };
+    const l = item as any;
+    return {
+      share: {
+        id: l.id,
+        title: l.title,
+        price: l.price,
+        unit: l.unit,
+        category: l.category,
+        post_type: l.post_type,
+        stock_status: l.stock_status,
+        place: [l.village, l.mandal, l.district, l.state].filter(Boolean).join(", ") || l.city || "",
+        has_image: Array.isArray(l.images) && l.images.length > 0,
+      },
+    };
+  });
+
 export const upsertListing = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: Partial<VaradhiListing> & { id?: string }) => d)

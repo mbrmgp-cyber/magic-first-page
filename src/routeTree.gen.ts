@@ -73,6 +73,7 @@ import { Route as VaradhiItemIdRouteImport } from './routes/varadhi.item.$id'
 import { Route as VaradhiProviderIdRouteImport } from './routes/varadhi.provider.$id'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
+import { Route as ApiPublicVaradhiItemImageIdRouteImport } from './routes/api/public/varadhi/item-image.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -413,6 +414,12 @@ const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
   path: '/lovable/email/auth/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicVaradhiItemImageIdRoute =
+  ApiPublicVaradhiItemImageIdRouteImport.update({
+    id: '/api/public/varadhi/item-image/$id',
+    path: '/api/public/varadhi/item-image/$id',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -478,6 +485,7 @@ export interface FileRoutesByFullPath {
   '/varadhi/provider/$id': typeof VaradhiProviderIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
+  '/api/public/varadhi/item-image/$id': typeof ApiPublicVaradhiItemImageIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -542,6 +550,7 @@ export interface FileRoutesByTo {
   '/varadhi/provider/$id': typeof VaradhiProviderIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
+  '/api/public/varadhi/item-image/$id': typeof ApiPublicVaradhiItemImageIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -609,6 +618,7 @@ export interface FileRoutesById {
   '/varadhi/provider/$id': typeof VaradhiProviderIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
+  '/api/public/varadhi/item-image/$id': typeof ApiPublicVaradhiItemImageIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -676,6 +686,7 @@ export interface FileRouteTypes {
     | '/varadhi/provider/$id'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
+    | '/api/public/varadhi/item-image/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -740,6 +751,7 @@ export interface FileRouteTypes {
     | '/varadhi/provider/$id'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
+    | '/api/public/varadhi/item-image/$id'
   id:
     | '__root__'
     | '/'
@@ -806,6 +818,7 @@ export interface FileRouteTypes {
     | '/varadhi/provider/$id'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
+    | '/api/public/varadhi/item-image/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -830,6 +843,7 @@ export interface RootRouteChildren {
   SocietyCodeLogoRoute: typeof SocietyCodeLogoRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
+  ApiPublicVaradhiItemImageIdRoute: typeof ApiPublicVaradhiItemImageIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1282,6 +1296,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/varadhi/item-image/$id': {
+      id: '/api/public/varadhi/item-image/$id'
+      path: '/api/public/varadhi/item-image/$id'
+      fullPath: '/api/public/varadhi/item-image/$id'
+      preLoaderRoute: typeof ApiPublicVaradhiItemImageIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1411,6 +1432,7 @@ const rootRouteChildren: RootRouteChildren = {
   SocietyCodeLogoRoute: SocietyCodeLogoRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
+  ApiPublicVaradhiItemImageIdRoute: ApiPublicVaradhiItemImageIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
