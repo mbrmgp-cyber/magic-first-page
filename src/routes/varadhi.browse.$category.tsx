@@ -63,6 +63,22 @@ const SERVICE_BOXES: Box[] = [
   { id: "freeservices", te: "ఫ్రీ సర్వీస్", color: "#0f9d58", Icon: HeartHandshake },
 ];
 
+const MACHINERY_BOXES: Box[] = [
+  { id: "transport", te: "రవాణా యంత్రాలు", color: "#0ea5e9", Icon: Truck },
+  { id: "machinery", te: "పని యంత్రాలు", color: "#0f766e", Icon: Tractor },
+];
+
+// Transport provider sub_type groups (see TRANSPORT_TYPES in varadhi.dashboard.tsx).
+const AGRI_SUBS = ["tractor", "jcb", "agri"];
+const TOOL_SUBS = ["tools"];
+const MACHINERY_SUBS = [...AGRI_SUBS, ...TOOL_SUBS];
+const WHEEL_FILTERS = [
+  { id: "w2", te: "2-వీలర్", subs: ["bike"] },
+  { id: "w3", te: "3-వీలర్", subs: ["auto"] },
+  { id: "w4", te: "4-వీలర్", subs: ["car"] },
+  { id: "w6", te: "6-వీలర్", subs: ["lorry"] },
+];
+
 type Group =
   | { kind: "single"; box: Box }
   | { kind: "group"; id: string; te: string; color: string; Icon: typeof Apple; boxes: Box[] };
@@ -71,7 +87,7 @@ const GROUPS: Group[] = [
   { kind: "single", box: { id: "realestate", te: "ప్లాట్లు & భూములు", color: "#7c3aed", Icon: MapPin } },
   { kind: "group", id: "items", te: "వస్తువులు", color: "#1e3a8a", Icon: Boxes, boxes: ITEM_BOXES },
   { kind: "group", id: "svc", te: "సర్వీసులు", color: "#dc2626", Icon: Wrench, boxes: SERVICE_BOXES },
-  { kind: "single", box: { id: "transport", te: "ట్రాన్స్‌పోర్ట్", color: "#0ea5e9", Icon: Truck } },
+  { kind: "group", id: "mach", te: "యంత్రాలు", color: "#0ea5e9", Icon: Cog, boxes: MACHINERY_BOXES },
 ];
 
 
