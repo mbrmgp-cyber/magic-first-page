@@ -34,7 +34,7 @@ export const Route = createFileRoute("/varadhi/item/$id")({
     const desc = share
       ? `${share.place ? `📍 ${share.place} · ` : ""}వారధి స్థానిక మార్కెట్‌లో ఈ పోస్ట్ చూడండి — vaaradhi.mbrplatform.com`
       : "వారధిలో ఈ వస్తువు వివరాలు — ధర, ఫోటోలు, అమ్మకందారు సమాచారం మరియు సమీప రవాణా సౌకర్యాలు.";
-    const image = `https://vaaradhi.mbrplatform.com/api/public/varadhi/item-image/${params.id}`;
+    const image = `https://vaaradhi.mbrplatform.com/api/public/varadhi/item-image/${params.id}?v=4`;
     return {
       meta: [
         { title },
@@ -179,15 +179,11 @@ function ItemDetail() {
           <button
             type="button"
             onClick={() => {
-              const text = [
-                item.title,
-                isFreeListing(item) ? "సంప్రదించండి" : `రేటు: ${formatPrice(item.price, item.unit)}`,
-                place ? `📍 ${place}` : "",
-                phone ? `📞 ${phone}` : "",
-                typeof window !== "undefined" ? window.location.href : "",
-              ].filter(Boolean).join("\n");
+              // Share only the link: WhatsApp builds one card (photo + price, logo strip, link)
+              // from the page's preview tags, so repeating the details would duplicate it.
+              const text = typeof window !== "undefined" ? window.location.href.split("?")[0] : "";
               if (typeof navigator !== "undefined" && (navigator as any).share) {
-                (navigator as any).share({ title: item.title, text }).catch(() => {
+                (navigator as any).share({ text }).catch(() => {
                   window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
                 });
                 return;

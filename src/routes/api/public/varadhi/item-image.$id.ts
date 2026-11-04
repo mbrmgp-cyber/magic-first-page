@@ -25,6 +25,29 @@ export const Route = createFileRoute("/api/public/varadhi/item-image/$id")({
     // resized share copy; never send the full-size phone photo.
     const MAX_SHARE_BYTES = 550 * 1024;
     const bucket = supabaseAdmin.storage.from("varadhi-listings");
+    // Preferred: 800x640 JPEG photo with the Vaaradhi logo strip stacked below.
+    try {
+      const { SHARE_PHOTO_WIDTH, SHARE_PHOTO_HEIGHT, composeShareImage } = await import("@/lib/varadhi-share-image.server");
+      const { data: photo, error: photoError } = await bucket.download(path, {
+        transform: { width: SHARE_PHOTO_WIDTH, height: SHARE_PHOTO_HEIGHT, resize: "cover", quality: 75, format: "origin" },
+      });
+      if (!photoError && photo && photo.size > 0 && photo.size <= 4 * 1024 * 1024) {
+        const bytes = new Uint8Array(await photo.arrayBuffer());
+        const isJpeg = bytes[0] === 0xff && bytes[1] === 0xd8;
+        const composed = isJpeg ? composeShareImage(bytes) : null;
+        if (composed && composed.byteLength <= MAX_SHARE_BYTES) {
+          return new Response(composed, {
+            headers: {
+              "Content-Type": "image/jpeg",
+              "Cache-Control": "public, max-age=3600",
+              "X-Content-Type-Options": "nosniff",
+            },
+          });
+        }
+      }
+    } catch (e) {
+      console.error("share image compose failed", e);
+    }
     let image: Blob | null = null;
     for (const transform of [
       { width: 800, height: 800, resize: "cover" as const, quality: 70 },
