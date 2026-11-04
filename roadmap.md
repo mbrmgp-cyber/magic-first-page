@@ -133,4 +133,4 @@
 
 # WhatsApp post share preview (Nov 4)
 - [x] Item page head now carries price-first og:title, place+link og:description, and og:image from the public item-image route; fallback to Vaaradhi logo share image for missing/removed/invalid posts; verified 200 image/jpeg on a real listing and 302 fallbacks; build OK.
-- [ ] Live publish pending; real WhatsApp preview rendering can only be confirmed by sharing a post link after publish.
+- [x] Published live; real WhatsApp preview rendering can only be confirmed by sharing a post link from a phone.
