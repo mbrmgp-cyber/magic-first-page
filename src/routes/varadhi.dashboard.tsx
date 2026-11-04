@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice, isFreeListing, stockLabel } from "@/lib/varadhi-format";
@@ -20,6 +20,8 @@ import { Plus, Trash2, Camera, Pencil, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { VaradhiOccupationPanel } from "@/components/varadhi/OccupationPanel";
 import { MyPostRemovals } from "@/components/varadhi/MyPostRemovals";
+import { VaradhiRegistrationForm } from "@/components/varadhi/RegistrationForm";
+import { showUpdateRegistration } from "@/lib/varadhi-profile";
 
 export const Route = createFileRoute("/varadhi/dashboard")({
   head: () => ({ meta: [
@@ -202,7 +204,7 @@ function UpdateBoard() {
     const r = await getProfile();
     const p: any = r.profile;
     setName(p?.full_name ?? "");
-    setHasProfile(!!p);
+    setHasProfile(!showUpdateRegistration(p));
     setStatus(p?.verification_status ?? null);
     setOccupation(p?.occupation ?? "");
     setReady(true);
@@ -232,9 +234,9 @@ function UpdateBoard() {
       </div>
 
       {!hasProfile && (
-        <Button asChild className="w-full">
-          <Link to="/varadhi/profile">ప్రొఫైల్</Link>
-        </Button>
+        <section aria-label="Vaaradhi registration" className="border-b border-border pb-5">
+          <VaradhiRegistrationForm showRewardsLink={false} onSaved={loadProfile} />
+        </section>
       )}
 
       {hasProfile && (

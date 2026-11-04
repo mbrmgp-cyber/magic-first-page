@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { adminProfileEditSchema, isProfileLocked, profileEditSchema, registrationComplete } from "./varadhi-profile";
+import { adminProfileEditSchema, isProfileLocked, profileEditSchema, registrationComplete, showUpdateRegistration } from "./varadhi-profile";
 
 describe("Vaaradhi profile permissions", () => {
+  it("shows registration on Update until a profile has been saved, not until admin approval", () => {
+    expect(showUpdateRegistration(null)).toBe(true);
+    expect(showUpdateRegistration(undefined)).toBe(true);
+    for (const verification_status of ["pending", "approved", "rejected"]) {
+      expect(showUpdateRegistration({ verification_status })).toBe(false);
+    }
+  });
   it("allows registration without a photo", () => {
     expect(registrationComplete({ full_name: "Test", phone: "9999999999", aadhaar_url: "proof.pdf", house_number: "1", city: "Village", mandal: "Mandal", district: "District", state: "State", occupation: "వ్యవసాయం" }, "")).toBe(true);
     expect(profileEditSchema.parse({ full_name: "Test", photo_url: "" }).photo_url).toBe("");
