@@ -4,6 +4,21 @@
 
 @custom-variant dark (&:is(.dark *));
 
+.machine-input {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid var(--input);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--foreground);
+  padding: 10px 12px;
+  font-size: 12px;
+  outline: none;
+}
+.machine-input:focus { border-color: var(--ring); }
+.machine-input::placeholder { color: var(--muted-foreground); }
+
 /*
  * Design system definition.
  *
@@ -70,12 +85,22 @@
   --color-market-fresh: var(--market-fresh);
   --color-market-notice: var(--market-notice);
   --color-market-notice-ink: var(--market-notice-ink);
+  --color-machine-transport: var(--machine-transport);
+  --color-machine-work: var(--machine-work);
+  --color-machine-agriculture: var(--machine-agriculture);
+  --color-machine-tools: var(--machine-tools);
+  --color-machine-lettering: var(--machine-lettering);
   --shadow-market: var(--market-shadow);
   --shadow-market-card: var(--market-card-shadow);
 }
 
 :root {
   --radius: 0.625rem;
+  --machine-transport: oklch(0.56 0.22 27);
+  --machine-work: oklch(0.59 0.12 210);
+  --machine-agriculture: oklch(0.53 0.15 149);
+  --machine-tools: oklch(0.52 0.2 298);
+  --machine-lettering: oklch(1 0 0);
   --market-canvas: oklch(0.98 0.006 160);
   --market-surface: oklch(1 0 0);
   --market-ink: oklch(0.28 0.032 165);

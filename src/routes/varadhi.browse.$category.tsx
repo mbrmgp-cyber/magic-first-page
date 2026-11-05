@@ -13,6 +13,7 @@ import { enState } from "@/lib/state-alias";
 
 import { indiaMandalsFor } from "@/lib/india-mandals";
 import { SearchSelect } from "@/components/varadhi/SearchSelect";
+import { Button } from "@/components/ui/button";
 
 const CATEGORY_META: Record<string, { title: string; desc: string }> = {
   fresh: { title: "Fresh Produce & Groceries", desc: "తాజా కూరగాయలు, పండ్లు మరియు నిత్యావసర వస్తువులు మీ ప్రాంతంలో." },
@@ -64,7 +65,7 @@ const SERVICE_BOXES: Box[] = [
 ];
 
 const MACHINERY_BOXES: Box[] = [
-  { id: "transport", te: "రవాణా యంత్రాలు", color: "#0ea5e9", Icon: Truck },
+  { id: "transport", te: "రవాణా వాహనాలు", color: "#0ea5e9", Icon: Truck },
   { id: "machinery", te: "పని యంత్రాలు", color: "#0f766e", Icon: Tractor },
 ];
 
@@ -265,23 +266,25 @@ function BrowsePage() {
       {(() => {
         const boxBtn = (b: Box, inGroup: boolean) => {
           const active = b.id === category;
+          const machinery = b.id === "transport" || b.id === "machinery";
           return (
-            <button
+            <Button
               key={b.id}
               type="button"
               onClick={() => {
                 if (!inGroup) setOpenGroup(null);
                 navigate({ to: "/varadhi/browse/$category", params: { category: b.id }, search: { q: term.trim() } });
               }}
-              className={`rounded-2xl border p-2 text-left transition active:scale-[.98] ${
-                active ? "border-transparent text-white shadow" : "border-black/5 bg-white text-[#1e3a8a]"
+              className={`h-auto min-h-14 flex-col items-start gap-0 rounded-lg border p-2 text-left transition active:scale-[.98] ${machinery
+                ? `border-transparent text-machine-lettering shadow-sm ${b.id === "transport" ? "bg-machine-transport hover:bg-machine-transport/90" : "bg-machine-work hover:bg-machine-work/90"} ${active ? "ring-2 ring-ring ring-offset-2" : ""}`
+                : active ? "border-transparent text-white shadow" : "border-black/5 bg-white text-[#1e3a8a]"
               }`}
-              style={active ? { background: b.color } : undefined}
+              style={active && !machinery ? { background: b.color } : undefined}
             >
-              <b.Icon className="h-4 w-4" style={active ? undefined : { color: b.color }} />
+              <b.Icon className="h-4 w-4" style={active || machinery ? undefined : { color: b.color }} />
               <p className="mt-1 text-[10px] font-semibold leading-tight">{b.te}</p>
-              <p className={`text-[10px] ${active ? "text-white/80" : "text-[#1e3a8a]/50"}`}>{countFor(b.id)}</p>
-            </button>
+              <p className={`text-[10px] ${machinery ? "text-machine-lettering/80" : active ? "text-white/80" : "text-[#1e3a8a]/50"}`}>{countFor(b.id)}</p>
+            </Button>
           );
         };
         return (
@@ -322,7 +325,7 @@ function BrowsePage() {
             </div>
 
             {GROUPS.filter((g): g is Extract<Group, { kind: "group" }> => g.kind === "group" && openGroup === g.id).map((g) => (
-              <div key={g.id} className="grid grid-cols-3 gap-2 rounded-2xl bg-white/60 p-2">
+              <div key={g.id} className={`grid gap-2 p-2 ${g.id === "mach" ? "grid-cols-2" : "grid-cols-3 rounded-2xl bg-white/60"}`}>
                 {g.boxes.map((b) => boxBtn(b, true))}
               </div>
             ))}
