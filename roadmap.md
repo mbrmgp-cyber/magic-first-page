@@ -1,3 +1,6 @@
+# Machinery rates and search address
+- [ ] Add kilometre/hour/day price choices and extra notes, preserve save/edit basis and display full Search addresses; verify rule tests and available UI flows.
+
 # Machinery reference design
 - [x] Match Upload to the supplied sketch with two prominent colored transport/work buttons, compact wheel selection and retained posting fields; Search buttons remain red/teal before selection. Mobile/desktop Search inspected without overflow or runtime errors, eight existing profile/property tests pass, build OK. Authenticated requesting account has no saved Vaaradhi profile, so Upload form interaction remains unverified behind the existing registration gate. Not published.
 
