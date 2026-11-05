@@ -1,5 +1,6 @@
 # Machinery rates and search address
-- [ ] Add kilometre/hour/day price choices and extra notes, preserve save/edit basis and display full Search addresses; verify rule tests and available UI flows.
+- [x] Add kilometre/hour/day price choices beside the amount, extra notes and shared legacy-compatible save/edit encoding; Search and detail show the correct basis, Search includes state and wraps full addresses. Fourteen rule/regression tests pass; signed-in Telugu mobile/desktop controls retain amount and notes on selection, real Search provider card inspected, no overflow/page errors and build OK. Not published.
+- [ ] Verify actual changed-rate save/reopen: no temporary real post submitted or existing customer's financial details changed; available Search provider has only a district address, so a real four-part saved address remains unverified. Complete-address formatting is covered by the rule test.
 
 # Machinery reference design
 - [x] Match Upload to the supplied sketch with two prominent colored transport/work buttons, compact wheel selection and retained posting fields; Search buttons remain red/teal before selection. Mobile/desktop Search inspected without overflow or runtime errors, eight existing profile/property tests pass, build OK. Authenticated requesting account has no saved Vaaradhi profile, so Upload form interaction remains unverified behind the existing registration gate. Not published.
