@@ -450,13 +450,18 @@ function PointsPanel() {
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-[#1e3a8a]">ఈ నెల వినియోగం</h2>
           <span className="text-xs text-muted-foreground">
-            {rows.length} మంది · మొత్తం {ov?.total_points ?? 0} పాయింట్లు
+            {overviewQ.isError || overviewQ.isLoading ? "—" : `${rows.length} మంది · మొత్తం ${ov?.total_points ?? 0} పాయింట్లు`}
           </span>
         </div>
       </Card>
 
       {overviewQ.isLoading ? (
         <p className="text-center text-sm py-8">లోడ్…</p>
+      ) : overviewQ.isError ? (
+        <div role="alert" className="space-y-2 p-4 text-sm text-destructive">
+          <p>యూజర్ల వివరాలు, పాయింట్లు లోడ్ కాలేదు. మళ్లీ ప్రయత్నించండి.</p>
+          <Button variant="outline" onClick={() => overviewQ.refetch()}>మళ్లీ ప్రయత్నించండి</Button>
+        </div>
       ) : rows.length === 0 ? (
         <Card className="p-8 text-center text-sm text-muted-foreground">ఈ ప్రాంతంలో రిజిస్టర్ అయినవారు లేరు.</Card>
       ) : (
@@ -467,7 +472,7 @@ function PointsPanel() {
                 <div className="min-w-0">
                   <p className="font-semibold truncate">{r.profile?.full_name ?? r.user_id.slice(0, 8)}</p>
                   <p className="text-xs text-muted-foreground truncate">
-                    {[r.profile?.phone, r.profile?.village, r.profile?.mandal, r.profile?.district, r.profile?.state]
+                    {[r.profile?.phone, r.profile?.city, r.profile?.mandal, r.profile?.district, r.profile?.state]
                       .filter(Boolean).join(" · ")}
                   </p>
                 </div>

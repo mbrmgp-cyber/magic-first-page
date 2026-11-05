@@ -636,30 +636,23 @@ export const adminPointsOverview = createServerFn({ method: "GET" })
     const pts = await import("@/lib/varadhi-points.server");
     const since = pts.monthStartIso();
 
-    const { data: settings } = await supabaseAdmin
+    const { data: settings, error: settingsError } = await supabaseAdmin
       .from("varadhi_point_settings").select("*").eq("id", 1).maybeSingle();
+    if (settingsError) throw new Error(settingsError.message);
     const freeLimit = (settings as any)?.free_monthly_points ?? 10;
 
     // Every registered Vaaradhi user (area filters applied server-side).
-    let pq = supabaseAdmin
-      .from("varadhi_profiles")
-      .select("user_id, full_name, phone, primary_role, village, mandal, district, state, verification_status")
-      .limit(2000);
-    if (data.state) pq = pq.eq("state", data.state);
-    if (data.district) pq = pq.eq("district", data.district);
-    if (data.mandal) pq = pq.eq("mandal", data.mandal);
-    const pqTerm = (data.q ?? "").replace(/[(),."\\%]/g, "").trim().slice(0, 80);
-    if (pqTerm) pq = pq.or(`full_name.ilike.%${pqTerm}%,phone.ilike.%${pqTerm}%`);
-    const { data: profs } = await pq;
-    const profiles = (profs ?? []) as any[];
+    const { readPointProfiles } = await import("@/lib/varadhi-points-overview.server");
+    const profiles = await readPointProfiles(supabaseAdmin, data) as any[];
     const ids = profiles.map((p) => p.user_id);
 
     const agg = new Map<string, { used: number; upload: number; contact: number; last: string | null }>();
     const allTime = new Map<string, number>();
     if (ids.length) {
-      const { data: events } = await supabaseAdmin
+      const { data: events, error: eventsError } = await supabaseAdmin
         .from("varadhi_point_events").select("user_id, points, event_type, created_at")
         .in("user_id", ids).limit(20000);
+      if (eventsError) throw new Error(eventsError.message);
       for (const e of (events ?? []) as any[]) {
         allTime.set(e.user_id, (allTime.get(e.user_id) ?? 0) + (e.points || 0));
         if (e.created_at < since) continue;
@@ -674,9 +667,10 @@ export const adminPointsOverview = createServerFn({ method: "GET" })
 
     let subs = new Map<string, any>();
     if (ids.length) {
-      const { data: srows } = await supabaseAdmin
+      const { data: srows, error: subsError } = await supabaseAdmin
         .from("varadhi_subscriptions").select("user_id, plan, status, expires_at")
         .in("user_id", ids).eq("status", "active").gt("expires_at", new Date().toISOString());
+      if (subsError) throw new Error(subsError.message);
       subs = new Map((srows ?? []).map((s: any) => [s.user_id, s]));
     }
 
@@ -696,8 +690,9 @@ export const adminPointsOverview = createServerFn({ method: "GET" })
     }).sort((x, y) => y.used - x.used || (x.profile.full_name ?? "").localeCompare(y.profile.full_name ?? ""));
 
     // Distinct area values for filter dropdowns (unfiltered by mandal/district).
-    const { data: areaRows } = await supabaseAdmin
+    const { data: areaRows, error: areasError } = await supabaseAdmin
       .from("varadhi_profiles").select("state, district, mandal").limit(5000);
+    if (areasError) throw new Error(areasError.message);
     const areas = { states: new Set<string>(), districts: new Set<string>(), mandals: new Set<string>() };
     for (const r of (areaRows ?? []) as any[]) {
       if (r.state) areas.states.add(r.state);
