@@ -1,5 +1,5 @@
 # Vaaradhi regional users and points
-- [ ] Fix the points overview's silent zero-user result, verify existing monthly points and regional filters in the authenticated admin page, and test query-error handling.
+- [x] Fix the points overview's silent zero-user result caused by querying nonexistent profile village instead of city; propagate overview read errors. Three regression tests pass; authenticated UI matches database: 9 users/108 monthly points, Tirupati 4/70, Chitvel 3/15; real history opens with 14 events, mobile has no overflow or page errors, build OK. Not published.
 
 # Machinery rates and search address
 - [x] Add kilometre/hour/day price choices beside the amount, extra notes and shared legacy-compatible save/edit encoding; Search and detail show the correct basis, Search includes state and wraps full addresses. Published November 5: signed-in live vaaradhi.mbrplatform.com mobile/desktop shows all three choices and extra notes, hour/day selection retains amount 500, real Search card shows Rs. 20 / kilometre and its saved Tirupati district address; no overflow/page errors. Six rate/address tests pass.
