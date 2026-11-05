@@ -1,5 +1,5 @@
 # Machinery reference design
-- [ ] Match the Upload machinery layout to the supplied sketch, with colored transport/work buttons on Search and Upload; preserve existing posting fields and permissions.
+- [x] Match Upload to the supplied sketch with two prominent colored transport/work buttons, compact wheel selection and retained posting fields; Search buttons remain red/teal before selection. Mobile/desktop Search inspected without overflow or runtime errors, eight existing profile/property tests pass, build OK. Authenticated requesting account has no saved Vaaradhi profile, so Upload form interaction remains unverified behind the existing registration gate. Not published.
 
 # Vaaradhi Update registration visibility
 - [x] Show the existing registration form directly on Update until saved, then refresh posting controls; four profile tests pass, build OK, signed-in real unregistered account shows eight inputs on desktop/mobile without overflow, input retained and form remains visible after reload; no page errors. No personal registration was submitted; actual save/readback remains unverified to avoid creating identity details. Not published.
