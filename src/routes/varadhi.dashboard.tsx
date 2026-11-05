@@ -22,6 +22,7 @@ import { VaradhiOccupationPanel } from "@/components/varadhi/OccupationPanel";
 import { MyPostRemovals } from "@/components/varadhi/MyPostRemovals";
 import { VaradhiRegistrationForm } from "@/components/varadhi/RegistrationForm";
 import { showUpdateRegistration } from "@/lib/varadhi-profile";
+import { MACHINERY_RATE_UNITS, machineryRateLabels, readMachineryRate, writeMachineryRate, type MachineryRateUnit } from "@/lib/varadhi-machinery-rate";
 
 export const Route = createFileRoute("/varadhi/dashboard")({
   head: () => ({ meta: [
@@ -857,15 +858,18 @@ type TForm = {
   contact_phone: string;
   photo_url: string;
   price_per_km: string;
+  rate_unit: MachineryRateUnit;
 };
 
 const emptyT: TForm = {
   sub_type: "auto", title: "", vehicle_details: "", service_areas: "మండలంలో", city: "", description: "",
-  contact_phone: "", photo_url: "", price_per_km: "",
+  contact_phone: "", photo_url: "", price_per_km: "", rate_unit: "km",
 };
 
 
 function TransportSection() {
+  const { lang } = useI18n();
+  const rateCopy = machineryRateLabels(lang);
   const fetchMine = useServerFn(listProviders);
   const upsert = useServerFn(upsertProvider);
   const toggle = useServerFn(toggleProviderAvailability);
@@ -888,10 +892,11 @@ function TransportSection() {
       vehicle_details: p.vehicle_details ?? "",
       service_areas: p.service_areas ?? "మండలంలో",
       city: p.city ?? "",
-      description: p.description ?? "",
+      description: readMachineryRate(p.description).notes,
       contact_phone: (p as any).contact_phone ?? "",
       photo_url: (p as any).photo_url ?? "",
       price_per_km: (p as any).price_per_km != null ? String((p as any).price_per_km) : "",
+      rate_unit: readMachineryRate(p.description).unit,
 
     });
     setOpen(true);
@@ -925,7 +930,7 @@ function TransportSection() {
           vehicle_details: form.vehicle_details.trim(),
           service_areas: form.service_areas || null,
           city: form.city.trim() || null,
-          description: form.description.trim() || null,
+          description: writeMachineryRate(form.rate_unit, form.description),
           contact_phone: form.contact_phone.replace(/\D/g, "").slice(-10),
           photo_url: form.photo_url || null,
           price_per_km: form.price_per_km.trim() ? Number(form.price_per_km) : null,
@@ -981,11 +986,25 @@ function TransportSection() {
           <input className="machine-input" aria-label="మోడల్ / సామర్థ్యం / వాహనం వివరాలు" placeholder="మోడల్ / సామర్థ్యం / వాహనం వివరాలు"
             value={form.vehicle_details} onChange={(e) => setForm({ ...form, vehicle_details: e.target.value })} />
 
-          <input className="machine-input" aria-label="ధర — కిలోమీటరుకు" inputMode="decimal" placeholder="ధర — కిలోమీటరుకు (Rs. / కి.మీ.)"
-            value={form.price_per_km}
-            onChange={(e) => setForm({ ...form, price_per_km: e.target.value.replace(/[^\d.]/g, "") })} />
-
-
+          <div className="space-y-2" data-no-translate>
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] items-stretch gap-2">
+              <input className="machine-input min-w-0" aria-label={rateCopy.price} inputMode="decimal" placeholder={`${rateCopy.price} (Rs.)`}
+                value={form.price_per_km}
+                onChange={(e) => setForm({ ...form, price_per_km: e.target.value.replace(/[^\d.]/g, "") })} />
+              <div className="grid grid-cols-3 gap-1" role="group" aria-label={rateCopy.price}>
+                {MACHINERY_RATE_UNITS.map((unit) => (
+                  <Button key={unit} type="button" aria-pressed={form.rate_unit === unit}
+                    variant={form.rate_unit === unit ? "default" : "outline"}
+                    className="h-auto min-h-11 min-w-0 whitespace-normal px-1 py-2 text-[10px] leading-snug"
+                    onClick={() => setForm({ ...form, rate_unit: unit })}>
+                    {rateCopy[unit]}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <textarea className="machine-input" aria-label={rateCopy.extra} placeholder={rateCopy.extra}
+              value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+          </div>
 
           <div className="grid grid-cols-2 gap-2">
             <input className="machine-input" aria-label="ఫోన్ / వాట్సాప్ నంబర్" inputMode="numeric" maxLength={10} placeholder="ఫోన్ / వాట్సాప్ నంబర్"
@@ -1009,9 +1028,6 @@ function TransportSection() {
               </Button>
             ))}
           </div>
-
-          <textarea className="machine-input" placeholder="వివరణ / ఛార్జీలు (ఐచ్ఛికం)"
-            value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
 
           <div className="grid grid-cols-3 gap-2">
             <Button variant="outline" onClick={() => { setOpen(false); setForm(emptyT); }}
