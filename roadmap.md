@@ -1,3 +1,6 @@
+# Vaaradhi regional users and points
+- [ ] Fix the points overview's silent zero-user result, verify existing monthly points and regional filters in the authenticated admin page, and test query-error handling.
+
 # Machinery rates and search address
 - [x] Add kilometre/hour/day price choices beside the amount, extra notes and shared legacy-compatible save/edit encoding; Search and detail show the correct basis, Search includes state and wraps full addresses. Published November 5: signed-in live vaaradhi.mbrplatform.com mobile/desktop shows all three choices and extra notes, hour/day selection retains amount 500, real Search card shows Rs. 20 / kilometre and its saved Tirupati district address; no overflow/page errors. Six rate/address tests pass.
 - [ ] Verify actual changed-rate save/reopen: no temporary real post submitted or existing customer's financial details changed; available Search provider has only a district address, so a real four-part saved address remains unverified. Complete-address formatting is covered by the rule test.
