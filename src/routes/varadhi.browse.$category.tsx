@@ -277,14 +277,14 @@ function BrowsePage() {
                 if (!inGroup) setOpenGroup(null);
                 navigate({ to: "/varadhi/browse/$category", params: { category: b.id }, search: { q: term.trim() } });
               }}
-              className={`h-auto min-h-14 flex-col items-start gap-0 rounded-lg border p-2 text-left transition active:scale-[.98] ${machinery
+              className={`h-auto min-h-14 w-full flex-col items-start gap-0 whitespace-normal rounded-lg border p-2 text-left transition active:scale-[.98] ${machinery
                 ? `border-transparent text-machine-lettering shadow-sm ${b.id === "transport" ? "bg-machine-transport hover:bg-machine-transport/90" : "bg-machine-work hover:bg-machine-work/90"} ${active ? "ring-2 ring-ring ring-offset-2" : ""}`
                 : active ? "border-transparent text-white shadow" : "border-black/5 bg-white text-[#1e3a8a]"
               }`}
               style={active && !machinery ? { background: b.color } : undefined}
             >
               <b.Icon className="h-4 w-4" style={active || machinery ? undefined : { color: b.color }} />
-              <p className="mt-1 text-[10px] font-semibold leading-tight">{b.te}</p>
+              <p className="mt-1 w-full break-words text-[10px] font-semibold leading-tight">{b.te}</p>
               <p className={`text-[10px] ${machinery ? "text-machine-lettering/80" : active ? "text-white/80" : "text-[#1e3a8a]/50"}`}>{countFor(b.id)}</p>
             </Button>
           );
