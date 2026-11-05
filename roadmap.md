@@ -1,3 +1,6 @@
+# Machinery reference design
+- [ ] Match the Upload machinery layout to the supplied sketch, with colored transport/work buttons on Search and Upload; preserve existing posting fields and permissions.
+
 # Vaaradhi Update registration visibility
 - [x] Show the existing registration form directly on Update until saved, then refresh posting controls; four profile tests pass, build OK, signed-in real unregistered account shows eight inputs on desktop/mobile without overflow, input retained and form remains visible after reload; no page errors. No personal registration was submitted; actual save/readback remains unverified to avoid creating identity details. Not published.
 
