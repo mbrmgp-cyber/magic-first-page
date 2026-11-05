@@ -13,6 +13,7 @@ import { enState } from "@/lib/state-alias";
 
 import { indiaMandalsFor } from "@/lib/india-mandals";
 import { SearchSelect } from "@/components/varadhi/SearchSelect";
+import { Button } from "@/components/ui/button";
 
 const CATEGORY_META: Record<string, { title: string; desc: string }> = {
   fresh: { title: "Fresh Produce & Groceries", desc: "తాజా కూరగాయలు, పండ్లు మరియు నిత్యావసర వస్తువులు మీ ప్రాంతంలో." },
