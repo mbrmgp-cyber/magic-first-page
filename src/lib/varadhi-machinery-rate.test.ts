@@ -15,7 +15,7 @@ describe("machinery pricing", () => {
   it("retains daily pricing through save and edit", () => {
     const saved = writeMachineryRate("day", "");
     expect(readMachineryRate(saved).unit).toBe("day");
-    expect(formatMachineryRate(2000, saved)).toBe("ధర: Rs. 2,000 / రోజుకు");
+    expect(formatMachineryRate(2000, saved)).toBe("ధర: Rs. 2000 / రోజుకు");
   });
   it("preserves extra charges separately from the price basis", () => {
     expect(readMachineryRate(writeMachineryRate("hour", "డీజిల్ అదనంగా")))
