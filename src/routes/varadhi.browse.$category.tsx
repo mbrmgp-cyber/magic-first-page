@@ -14,6 +14,8 @@ import { enState } from "@/lib/state-alias";
 import { indiaMandalsFor } from "@/lib/india-mandals";
 import { SearchSelect } from "@/components/varadhi/SearchSelect";
 import { Button } from "@/components/ui/button";
+import { formatMachineryRate, readMachineryRate, searchAddress } from "@/lib/varadhi-machinery-rate";
+import { useI18n } from "@/lib/i18n";
 
 const CATEGORY_META: Record<string, { title: string; desc: string }> = {
   fresh: { title: "Fresh Produce & Groceries", desc: "తాజా కూరగాయలు, పండ్లు మరియు నిత్యావసర వస్తువులు మీ ప్రాంతంలో." },
@@ -160,7 +162,7 @@ function BrowsePage() {
   const inArea = (l: VaradhiListing) =>
     (!state || enState(l.state) === state) && (!district || l.district === district) && (!mandal || l.mandal === mandal);
   const providerInArea = (p: VaradhiProvider) => {
-    const hay = `${p.city ?? ""} ${p.service_areas ?? ""}`.toLowerCase();
+    const hay = `${p.location_full ?? ""} ${p.city ?? ""} ${p.service_areas ?? ""}`.toLowerCase();
     return [state, district, mandal].every((v) => !v || hay.includes(v.toLowerCase()));
   };
 
@@ -206,7 +208,7 @@ function BrowsePage() {
       return true;
     })
     .filter((p) =>
-      !needle || [p.title, p.description, p.sub_type, p.city].some((v) => (v ?? "").toLowerCase().includes(needle)));
+      !needle || [p.title, readMachineryRate(p.description).notes, p.sub_type, p.city, p.location_full].some((v) => (v ?? "").toLowerCase().includes(needle)));
 
 
   return (
@@ -351,9 +353,9 @@ function BrowsePage() {
                       {new Date(l.created_at).toLocaleDateString("te-IN", { day: "2-digit", month: "short" })}
                     </span>
                   </div>
-                  {(l.village || l.mandal || l.district || l.city) && (
-                    <p className="text-[11px] text-[#1e3a8a]/60 truncate">
-                      📍 {[l.village, l.mandal, l.district].filter(Boolean).join(", ") || l.city}
+                  {searchAddress(l) && (
+                    <p className="break-words text-[11px] leading-relaxed text-muted-foreground">
+                      📍 {searchAddress(l)}
                     </p>
                   )}
                    <div className="mt-1 flex flex-wrap items-baseline gap-x-1.5">
@@ -456,10 +458,11 @@ function ListingThumb({ src, alt }: { src?: string | null; alt?: string }) {
 }
 
 function ProviderCard({ p }: { p: VaradhiProvider }) {
+  const { lang } = useI18n();
   const [failed, setFailed] = useState(false);
   const photo = useListingImage(p.photo_url);
   const showImg = !!photo && !failed;
-  const rate = formatAmount(p.price_per_km as any);
+  const notes = readMachineryRate(p.description).notes;
   const online = p.availability_status === "online";
   const place = p.location_full || p.city || "—";
 
@@ -490,10 +493,10 @@ function ProviderCard({ p }: { p: VaradhiProvider }) {
         </p>
 
         <p className="mt-1 text-[12px] font-extrabold text-[#16a34a]">
-          {rate ? `ధర: Rs. ${rate} / కి.మీ.` : "ధర సంప్రదించండి"}
+          {formatMachineryRate(p.price_per_km, p.description, lang)}
         </p>
-
-        <p className="mt-0.5 line-clamp-2 text-[10px] leading-tight text-[#1e3a8a]/65">📍 {place}</p>
+        {notes && <p className="mt-0.5 break-words text-[11px] text-muted-foreground">{notes}</p>}
+        <p className="mt-1 break-words text-[11px] leading-relaxed text-muted-foreground">📍 {place}</p>
       </div>
     </Link>
   );

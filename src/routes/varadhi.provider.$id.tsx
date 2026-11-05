@@ -6,6 +6,8 @@ import { useListingImage } from "@/lib/varadhi-image";
 import { PostModerationActions } from "@/components/varadhi/PostModerationActions";
 import { ArrowLeft, Phone, MessageCircle, Share2, Truck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { formatMachineryRate, readMachineryRate } from "@/lib/varadhi-machinery-rate";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/varadhi/provider/$id")({
   head: ({ params }) => {
@@ -29,6 +31,7 @@ export const Route = createFileRoute("/varadhi/provider/$id")({
 });
 
 function ProviderDetail() {
+  const { lang } = useI18n();
   const { id } = Route.useParams();
   const fetchAll = useServerFn(listProviders);
   const click = useServerFn(logClick);
@@ -56,7 +59,7 @@ function ProviderDetail() {
           (data as any)?.district,
           (data as any)?.state,
         ].filter(Boolean);
-        setPlace(parts.join(", "));
+        setPlace(found.location_full || parts.join(", "));
         click({ data: { target_type: "provider", target_id: id } }).catch(() => {});
       }
       } finally { setLoading(false); }
@@ -122,11 +125,9 @@ function ProviderDetail() {
             {p.availability_status === "online" ? "అందుబాటులో" : "ఖాళీ లేదు"}
           </span>
         </div>
-        {p.description && <p className="text-sm">{p.description}</p>}
+        {readMachineryRate(p.description).notes && <p className="text-sm">{readMachineryRate(p.description).notes}</p>}
         <p className="text-base font-extrabold text-[#16a34a]">
-          {p.price_per_km != null && p.price_per_km !== ""
-            ? `ధర: Rs. ${p.price_per_km} / కి.మీ.`
-            : "ధర సంప్రదించండి"}
+          {formatMachineryRate(p.price_per_km, p.description, lang)}
         </p>
         {p.vehicle_details && <p className="text-xs text-[#1e3a8a]/70">🚚 {p.vehicle_details}</p>}
         {place && <p className="text-sm font-medium text-[#1e3a8a]">📍 {place}</p>}
