@@ -4,6 +4,21 @@
 
 @custom-variant dark (&:is(.dark *));
 
+.machine-input {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid var(--input);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--foreground);
+  padding: 10px 12px;
+  font-size: 12px;
+  outline: none;
+}
+.machine-input:focus { border-color: var(--ring); }
+.machine-input::placeholder { color: var(--muted-foreground); }
+
 /*
  * Design system definition.
  *
