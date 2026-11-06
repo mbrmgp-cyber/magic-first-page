@@ -13,6 +13,10 @@ import { currentAppPageUrl } from "@/lib/app-host-context";
 import { clearVaradhiAuthProgress, readVaradhiAuthProgress, saveVaradhiAuthProgress } from "@/lib/varadhi-auth-progress";
 
 export const Route = createFileRoute("/varadhi/auth")({
+  validateSearch: (search: Record<string, unknown>): { email?: string } => {
+    const email = typeof search.email === "string" ? search.email.trim().toLowerCase() : "";
+    return email ? { email } : {};
+  },
   head: () => ({
     meta: [
       { title: "Vaaradhi — Login" },
