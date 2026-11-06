@@ -5,6 +5,7 @@ import { getListing, getListingShareMeta, logClick, type VaradhiListing, type Va
 import { useListingImage } from "@/lib/varadhi-image";
 import { PostModerationActions } from "@/components/varadhi/PostModerationActions";
 import { formatAmount, formatPrice, isFreeListing, noPriceLabel, stockLabel } from "@/lib/varadhi-format";
+import { priceLabel } from "@/lib/varadhi-property";
 
 import { ArrowLeft, Phone, MessageCircle, Truck, Share2 } from "lucide-react";
 
@@ -116,7 +117,7 @@ function ItemDetail() {
       <div className="mt-3 rounded-2xl bg-white p-4 shadow-sm space-y-2">
         <p className="text-base font-bold text-[#1e3a8a]">{item.title}</p>
         <div className="rounded-xl border border-green-200 bg-green-50 px-3 py-2">
-          <p className="text-xs font-semibold text-green-700">{isFreeListing(item) ? "ఉచిత సేవ" : "వస్తువు రేటు"}</p>
+          <p className="text-xs font-semibold text-green-700">{isFreeListing(item) ? "ఉచిత సేవ" : priceLabel(item.category, item.sub_category ?? "")}</p>
           <p className="mt-0.5 text-2xl font-extrabold text-[#16a34a]">
             {amount ? `Rs. ${amount}${unit ? ` / ${unit}` : ""}` : noPriceLabel(isFreeListing(item))}
           </p>

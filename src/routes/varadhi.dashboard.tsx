@@ -77,7 +77,7 @@ const BUSINESS_CATS = [
 
 const UNITS = ["కేజీ", "వస్తువు", "లీటర్"];
 const LAND_UNITS = ["సెంటు", "గజం", "అంకణం"];
-const PROPERTY_TYPES = ["ఇల్లు", "ప్లాట్", "ఇంటి స్థలం", "సాగు భూమి", "ఇల్లు అద్దెకు (Rent)", "లీజ్", "ఇతర"];
+const PROPERTY_TYPES = ["ఇల్లు", "ప్లాట్", "ఇంటి స్థలం", "సాగు భూమి", "ఇల్లు అద్దెకు (Rent)", "స్థలం/భూమి అద్దెకు (Site/Land Rent)", "లీజ్", "ఇతర"];
 
 const SERVICE_CATS = [
   { id: "doctor", te: "డాక్టర్", color: "#dc2626" },
