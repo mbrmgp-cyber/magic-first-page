@@ -38,6 +38,7 @@ type Step = "form" | "otp" | "password";
 
 function VaradhiAuthPage() {
   const navigate = useNavigate();
+  const { email: emailFromLink } = Route.useSearch();
   const { lang } = useI18n();
   const ui = (source: string) => sharedTranslation(lang, source) ?? source;
   const sendOtp = useServerFn(sendVaradhiLoginLink);
@@ -59,6 +60,13 @@ function VaradhiAuthPage() {
       setEmail(pending.email);
       setOtpLength(pending.otpLength);
       setStep("otp");
+    } else if (emailFromLink) {
+      // Arrived from the Login button in the OTP email (possibly another
+      // browser): show the code entry step with the email prefilled.
+      setTab("register");
+      setEmail(emailFromLink);
+      setOtpLength(8);
+      setStep("otp");
     }
     supabase.auth.getUser().then(({ data }) => {
       if (!active) return;
@@ -70,7 +78,7 @@ function VaradhiAuthPage() {
       }
     }).finally(() => { if (active) setReady(true); });
     return () => { active = false; };
-  }, [navigate]);
+  }, [navigate, emailFromLink]);
 
   async function doLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -282,7 +290,7 @@ function VaradhiAuthPage() {
               placeholder={"1".repeat(otpLength)}
               className="w-full rounded-xl border border-[#1e3a8a]/20 bg-white px-3 py-3 text-center text-2xl tracking-[0.5em] font-bold text-[#1e3a8a] outline-none focus:border-[#f97316]"
             />
-            <button type="submit" disabled={busy || otp.length !== otpLength} className="w-full rounded-xl bg-[#f97316] py-3 font-semibold text-white shadow-lg disabled:opacity-60">
+            <button type="submit" disabled={busy || otp.length < 6} className="w-full rounded-xl bg-[#f97316] py-3 font-semibold text-white shadow-lg disabled:opacity-60">
               {busy ? ui("వెరిఫై చేస్తున్నాం…") : ui("వెరిఫై చేయండి")}
             </button>
             <div className="flex justify-between text-xs">
