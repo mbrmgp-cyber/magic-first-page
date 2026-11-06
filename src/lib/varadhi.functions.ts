@@ -45,7 +45,9 @@ export const sendVaradhiLoginLink = createServerFn({ method: "POST" })
       options: { redirectTo },
     });
     if (linkErr) throw new Error(linkErr.message);
-    const confirmationUrl = redirectTo;
+    // Email button opens the OTP entry step with the email prefilled, so the
+    // user can type the code and reach the password-setup page in any browser.
+    const confirmationUrl = `${redirectTo}?email=${encodeURIComponent(email)}`;
     const emailOtp = (link?.properties as any)?.email_otp as string | undefined;
     if (!emailOtp) throw new Error("Could not generate OTP");
 
