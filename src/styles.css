@@ -92,6 +92,10 @@
   --color-machine-lettering: var(--machine-lettering);
   --color-blood-donor: var(--blood-donor);
   --color-blood-wanted: var(--blood-wanted);
+  --color-stock-on: var(--stock-on);
+  --color-stock-on-ink: var(--stock-on-ink);
+  --color-stock-off: var(--stock-off);
+  --color-stock-off-ink: var(--stock-off-ink);
   --shadow-market: var(--market-shadow);
   --shadow-market-card: var(--market-card-shadow);
 }
@@ -105,6 +109,10 @@
   --machine-lettering: oklch(1 0 0);
   --blood-donor: oklch(0.42 0.12 145);
   --blood-wanted: oklch(0.48 0.19 27);
+  --stock-on: oklch(0.9 0.1 145);
+  --stock-on-ink: oklch(0.36 0.11 150);
+  --stock-off: oklch(0.72 0.18 55);
+  --stock-off-ink: oklch(1 0 0);
   --market-canvas: oklch(0.98 0.006 160);
   --market-surface: oklch(1 0 0);
   --market-ink: oklch(0.28 0.032 165);
