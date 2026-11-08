@@ -12,7 +12,7 @@ describe("blood donation choice", () => {
   });
 
   it("only accepts the two choices", () => {
-    expect(isBloodNeed("రక్తదాత")).toBe(true);
+    expect(isBloodNeed("దాత")).toBe(true);
     expect(isBloodNeed("కేజీ")).toBe(false);
   });
 });

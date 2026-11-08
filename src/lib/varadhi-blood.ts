@@ -2,7 +2,7 @@
 // The donor / wanted choice is kept in the listing's existing `unit` field
 // (free posts have no price), so no data schema change is needed.
 
-export const BLOOD_DONOR = "రక్తదాత";
+export const BLOOD_DONOR = "దాత";
 export const BLOOD_WANTED = "రక్తం కావాలి";
 export const BLOOD_NEEDS = [BLOOD_DONOR, BLOOD_WANTED] as const;
 export type BloodNeed = (typeof BLOOD_NEEDS)[number];
