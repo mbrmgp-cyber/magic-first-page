@@ -109,7 +109,7 @@ function ListingCard({ l, note }: { l: VaradhiListing; note?: string }) {
         <div className="mt-0.5 flex flex-wrap items-center gap-1">
           <span
             className={`rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${
-              inStock ? "bg-market-fresh/10 text-market-fresh" : "bg-market-border text-market-muted"
+              inStock ? "bg-stock-on text-stock-on-ink" : "bg-stock-off text-stock-off-ink"
             }`}
           >
             {inStock && stockQty && !isFreeListing(l)
