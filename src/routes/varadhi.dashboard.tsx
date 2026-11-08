@@ -17,7 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getMyAreaAdminStats } from "@/lib/varadhi-partner.functions";
 import { toast } from "sonner";
 import { Plus, Trash2, Camera, Pencil, Save, Check } from "lucide-react";
-import { BLOOD_DONOR, BLOOD_NEEDS, bloodDetailPlaceholder, bloodNeedOf } from "@/lib/varadhi-blood";
+import { BLOOD_DONOR, BLOOD_NEEDS, bloodDetailPlaceholder, bloodNeedOf, bloodStatusLabel } from "@/lib/varadhi-blood";
 import { Button } from "@/components/ui/button";
 import { VaradhiOccupationPanel } from "@/components/varadhi/OccupationPanel";
 import { MyPostRemovals } from "@/components/varadhi/MyPostRemovals";
@@ -861,7 +861,7 @@ function PostSection({ postType }: { postType: string }) {
                 className={`text-[10px] px-2 py-1 rounded-full font-bold ${
                   l.stock_status === "running" ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600"
                 }`}>
-                {stockLabel(l.stock_status === "running", isFreeListing(l))}
+                {isFreeListing(l) && l.sub_category === "blood" ? bloodStatusLabel(l.unit, l.stock_status === "running") : stockLabel(l.stock_status === "running", isFreeListing(l))}
               </button>
               <button onClick={() => edit(l)} className="p-1.5 text-[#1e3a8a]"><Pencil className="h-4 w-4" /></button>
               <button onClick={() => del({ data: { id: l.id } }).then(load)} className="p-1.5 text-red-500">
