@@ -1,5 +1,6 @@
 import { useListingImage } from "@/lib/varadhi-image";
 import { formatAmount, isFreeListing, stockLabel } from "@/lib/varadhi-format";
+import { serviceCardSummary, serviceChargeText } from "@/lib/varadhi-service-details";
 import { bloodStatusLabel } from "@/lib/varadhi-blood";
 
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
@@ -71,6 +72,7 @@ function ListingCard({ l, note }: { l: VaradhiListing; note?: string }) {
 
   const stockQty = (l as unknown as { stock_qty?: number | string | null }).stock_qty;
   const inStock = l.stock_status !== "closed";
+  const summary = serviceCardSummary(l);
   return (
     <Link
       to="/varadhi/item/$id"
@@ -99,7 +101,7 @@ function ListingCard({ l, note }: { l: VaradhiListing; note?: string }) {
         </div>
         <div className="mt-0.5 flex flex-wrap items-baseline gap-x-1">
           <p className="text-[12px] font-extrabold text-market-fresh">
-            {amount ? `రేటు: Rs. ${amount}` : isFreeListing(l) ? "సంప్రదించండి" : "రేటు: ధర సంప్రదించండి"}
+            {amount ? `రేటు: Rs. ${amount}` : isFreeListing(l) ? "సంప్రదించండి" : serviceChargeText(l) ? `రేటు: ${serviceChargeText(l)}` : "రేటు: ధర సంప్రదించండి"}
           </p>
           {amount && unit && (
             <span className="text-[10px] font-semibold text-market-fresh">/ {unit}</span>
@@ -117,9 +119,9 @@ function ListingCard({ l, note }: { l: VaradhiListing; note?: string }) {
               : isFreeListing(l) && l.sub_category === "blood" ? bloodStatusLabel(l.unit, inStock) : stockLabel(inStock, isFreeListing(l))}
           </span>
         </div>
-        {isFreeListing(l) && l.sub_category === "blood" && l.experience?.trim() && (
+        {summary && (
           <p className="mt-0.5 line-clamp-2 break-words text-[10px] leading-snug text-market-ink">
-            {l.experience.trim()}
+            {summary}
           </p>
         )}
         <p className="truncate text-[10px] text-market-muted">

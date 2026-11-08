@@ -120,7 +120,7 @@ function ItemDetail() {
         <div className="rounded-xl border border-green-200 bg-green-50 px-3 py-2">
           <p className="text-xs font-semibold text-green-700">{isFreeListing(item) ? "ఉచిత సేవ" : priceLabel(item.category, item.sub_category ?? "")}</p>
           <p className="mt-0.5 text-2xl font-extrabold text-[#16a34a]">
-            {amount ? `Rs. ${amount}${unit ? ` / ${unit}` : ""}` : noPriceLabel(isFreeListing(item))}
+            {amount ? `Rs. ${amount}${unit ? ` / ${unit}` : ""}` : serviceChargeText(item as any) ?? noPriceLabel(isFreeListing(item))}
           </p>
         </div>
 
@@ -150,6 +150,12 @@ function ItemDetail() {
         </div>
 
         <dl className="mt-1 divide-y divide-black/5 text-sm">
+          {serviceDetailRows(item as any).map((row) => (
+            <div key={row.label} className="flex justify-between gap-3 py-1.5">
+              <dt className="shrink-0 text-[#1e3a8a]/60">{row.label}</dt>
+              <dd className="text-right font-medium break-words">{row.value}</dd>
+            </div>
+          ))}
           {place && (
             <div className="flex justify-between gap-3 py-1.5">
               <dt className="text-[#1e3a8a]/60">📍 ప్రాంతం</dt><dd className="text-right font-medium">{place}</dd>
