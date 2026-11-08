@@ -117,6 +117,11 @@ function ListingCard({ l, note }: { l: VaradhiListing; note?: string }) {
               : isFreeListing(l) && l.sub_category === "blood" ? bloodStatusLabel(l.unit, inStock) : stockLabel(inStock, isFreeListing(l))}
           </span>
         </div>
+        {isFreeListing(l) && l.sub_category === "blood" && l.experience?.trim() && (
+          <p className="mt-0.5 line-clamp-2 break-words text-[10px] leading-snug text-market-ink">
+            {l.experience.trim()}
+          </p>
+        )}
         <p className="truncate text-[10px] text-market-muted">
           📍 {[l.village, l.mandal, l.district].filter(Boolean).join(", ") || l.city || "—"}
           {note ? ` · ${note}` : ""}
