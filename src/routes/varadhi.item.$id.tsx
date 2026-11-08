@@ -7,7 +7,7 @@ import { useListingImage } from "@/lib/varadhi-image";
 import { PostModerationActions } from "@/components/varadhi/PostModerationActions";
 import { formatAmount, formatPrice, isFreeListing, noPriceLabel, stockLabel } from "@/lib/varadhi-format";
 import { priceLabel } from "@/lib/varadhi-property";
-import { serviceChargeText, serviceDetailRows } from "@/lib/varadhi-service-details";
+import { isServiceListing, serviceChargeText, serviceDetailRows } from "@/lib/varadhi-service-details";
 
 import { ArrowLeft, Phone, MessageCircle, Truck, Share2 } from "lucide-react";
 
@@ -128,7 +128,7 @@ function ItemDetail() {
 
         <div className="flex flex-wrap gap-1.5">
           <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${inStock ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600"}`}>
-            {isFreeListing(item) && item.sub_category === "blood" ? bloodStatusLabel(item.unit, inStock) : stockLabel(inStock, isFreeListing(item))}
+            {isFreeListing(item) && item.sub_category === "blood" ? bloodStatusLabel(item.unit, inStock) : stockLabel(inStock, isServiceListing(item as any))}
           </span>
           {(item as any).stock_qty && (
             <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-[#1e3a8a]">

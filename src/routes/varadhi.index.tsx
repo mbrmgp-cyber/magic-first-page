@@ -1,6 +1,6 @@
 import { useListingImage } from "@/lib/varadhi-image";
 import { formatAmount, isFreeListing, stockLabel } from "@/lib/varadhi-format";
-import { serviceCardSummary, serviceChargeText } from "@/lib/varadhi-service-details";
+import { isServiceListing, serviceCardSummary, serviceChargeText } from "@/lib/varadhi-service-details";
 import { bloodStatusLabel } from "@/lib/varadhi-blood";
 
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
@@ -116,7 +116,7 @@ function ListingCard({ l, note }: { l: VaradhiListing; note?: string }) {
           >
             {inStock && stockQty && !isFreeListing(l)
               ? `స్టాక్: ${stockQty}${unit ? ` ${unit}` : ""}`
-              : isFreeListing(l) && l.sub_category === "blood" ? bloodStatusLabel(l.unit, inStock) : stockLabel(inStock, isFreeListing(l))}
+              : isFreeListing(l) && l.sub_category === "blood" ? bloodStatusLabel(l.unit, inStock) : stockLabel(inStock, isServiceListing(l))}
           </span>
         </div>
         {summary && (
@@ -125,7 +125,7 @@ function ListingCard({ l, note }: { l: VaradhiListing; note?: string }) {
           </p>
         )}
         <p className="truncate text-[10px] text-market-muted">
-          📍 {[l.village, l.mandal, l.district].filter(Boolean).join(", ") || l.city || "—"}
+          📍 {[l.village, l.mandal, l.district].filter(Boolean).join(", ") || l.city || l.state || "—"}
           {note ? ` · ${note}` : ""}
         </p>
       </div>
