@@ -470,7 +470,8 @@ function PostSection({ postType }: { postType: string }) {
           {(postType === "free" ? FREE_CATS : SERVICE_CATS).map((c) => (
             <button key={c.id}
               onClick={() => {
-                setForm({ ...empty, service_cat: c.id, unit: SERVICE_UNIT_DEFAULT[c.id] ?? "1 పనికి" });
+                setForm({ ...empty, service_cat: c.id,
+                  unit: postType === "free" && c.id === "blood" ? BLOOD_DONOR : (SERVICE_UNIT_DEFAULT[c.id] ?? "1 పనికి") });
                 setOpen(true);
               }}
               style={{ background: c.color }}
@@ -499,12 +500,19 @@ function PostSection({ postType }: { postType: string }) {
                 const cat = cats.find((c) => c.id === form.service_cat);
                 return (
                   <>
-                    <p className="text-[11px] font-semibold text-white inline-block rounded-full px-3 py-1"
-                      style={{ background: cat?.color ?? "#1e3a8a" }}>
-                      {cat?.te ?? "సేవ"}
-                    </p>
+                    {isBlood ? (
+                      <p className="inline-block rounded-full px-5 py-1.5 text-base font-extrabold tracking-wide text-white shadow-sm"
+                        style={{ background: cat?.color ?? "#dc2626" }}>
+                        {ui("రక్తం")}
+                      </p>
+                    ) : (
+                      <p className="text-[11px] font-semibold text-white inline-block rounded-full px-3 py-1"
+                        style={{ background: cat?.color ?? "#1e3a8a" }}>
+                        {cat?.te ?? "సేవ"}
+                      </p>
+                    )}
 
-                    <L n="1">{postType === "free" ? "చేయగల ఉచిత సేవ" : "చేయగల పని / నైపుణ్యం"}</L>
+                    <L n="1">{isBlood ? "రక్తదాన వివరాలు" : postType === "free" ? "చేయగల ఉచిత సేవ" : "చేయగల పని / నైపుణ్యం"}</L>
                     <input className={inp}
                       placeholder={ex[form.service_cat] ?? "ఉదా: జనరల్ డాక్టర్, ఎలక్ట్రీషియన్…"}
                       value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
@@ -519,9 +527,35 @@ function PostSection({ postType }: { postType: string }) {
 
 
 
-              <L n="2">అనుభవం & ఆధారాలు</L>
-              <input className={inp} placeholder="అనుభవం (ఉదా: 5 సంవత్సరాలు)"
-                value={form.experience} onChange={(e) => setForm({ ...form, experience: e.target.value })} />
+              {isBlood ? (
+                <>
+                  <div className="flex items-start gap-2 pt-1">
+                    <span className="pt-2 text-[11px] font-semibold text-[#1e3a8a]/70">2.</span>
+                    <div className="grid flex-1 grid-cols-2 gap-2" role="radiogroup" aria-label={ui("రక్తదాన వివరాలు")}>
+                      {BLOOD_NEEDS.map((need) => {
+                        const selected = bloodNeedOf(form.unit) === need;
+                        return (
+                          <Button key={need} type="button" role="radio" aria-checked={selected}
+                            onClick={() => setForm({ ...form, unit: need })}
+                            className={`h-auto min-h-10 whitespace-normal rounded-md px-2 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition ${
+                              need === BLOOD_DONOR ? "bg-blood-donor hover:bg-blood-donor/90" : "bg-blood-wanted hover:bg-blood-wanted/90"
+                            } ${selected ? "ring-2 ring-offset-2 ring-foreground/70" : "opacity-80"}`}>
+                            {selected && <Check className="h-4 w-4" />} {ui(need)}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <input className={inp} placeholder={ui(bloodDetailPlaceholder(bloodNeedOf(form.unit)))}
+                    value={form.experience} onChange={(e) => setForm({ ...form, experience: e.target.value })} />
+                </>
+              ) : (
+                <>
+                  <L n="2">అనుభవం & ఆధారాలు</L>
+                  <input className={inp} placeholder="అనుభవం (ఉదా: 5 సంవత్సరాలు)"
+                    value={form.experience} onChange={(e) => setForm({ ...form, experience: e.target.value })} />
+                </>
+              )}
               <div className="grid grid-cols-2 gap-2">
                 <label className="flex items-center justify-center gap-1.5 rounded-lg border border-dashed border-[#1e3a8a]/30 bg-white px-2 py-2.5 text-[11px] text-[#1e3a8a]">
                   <Camera className="h-4 w-4" />
@@ -529,12 +563,26 @@ function PostSection({ postType }: { postType: string }) {
                   <input type="file" accept="image/*" className="hidden"
                     onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0], "photo")} />
                 </label>
-                <label className="flex items-center justify-center gap-1.5 rounded-lg border border-dashed border-[#1e3a8a]/30 bg-white px-2 py-2.5 text-[11px] text-[#1e3a8a]">
-                  <Camera className="h-4 w-4" />
-                  {form.location_photo ? "ఆధారాలు ✓" : "ఆధారాల ఫోటో"}
-                  <input type="file" accept="image/*,application/pdf" className="hidden"
-                    onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0], "location_photo")} />
-                </label>
+                {isBlood ? (
+                  <select
+                    aria-label={ui("బ్లడ్ గ్రూప్")}
+                    className="w-full rounded-lg border border-dashed border-[#1e3a8a]/30 bg-white px-2 py-2.5 text-[11px] text-[#1e3a8a] outline-none focus:border-[#1e3a8a]"
+                    value={form.blood_group}
+                    onChange={(e) => setForm({ ...form, blood_group: e.target.value })}
+                  >
+                    <option value="">{ui("బ్లడ్ గ్రూప్")}</option>
+                    {BLOOD_GROUPS.map((g) => (
+                      <option key={g} value={g}>{g}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <label className="flex items-center justify-center gap-1.5 rounded-lg border border-dashed border-[#1e3a8a]/30 bg-white px-2 py-2.5 text-[11px] text-[#1e3a8a]">
+                    <Camera className="h-4 w-4" />
+                    {form.location_photo ? "ఆధారాలు ✓" : "ఆధారాల ఫోటో"}
+                    <input type="file" accept="image/*,application/pdf" className="hidden"
+                      onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0], "location_photo")} />
+                  </label>
+                )}
               </div>
 
               {postType === "free" ? (
@@ -544,31 +592,17 @@ function PostSection({ postType }: { postType: string }) {
                     placeholder="ఉదా: 24/7, వారాంతాల్లో మాత్రమే, ఉదయం 9 – రాత్రి 8"
                     value={form.service_timing}
                     onChange={(e) => setForm({ ...form, service_timing: e.target.value })} />
-                  <div className="flex flex-wrap gap-1.5">
-                    {FREE_TIMINGS.map((t) => (
-                      <button key={t} type="button" onClick={() => setForm({ ...form, service_timing: t })}
-                        className={`rounded-full px-2.5 py-1.5 text-[10px] font-semibold border ${
-                          form.service_timing === t ? "bg-[#16a34a] text-white border-[#16a34a]" : "bg-white text-[#1e3a8a] border-black/10"
-                        }`}>
-                        {t}
-                      </button>
-                    ))}
-                  </div>
-
-                  {form.service_cat === "blood" && (
-                    <>
-                      <L n="3b">బ్లడ్ గ్రూప్</L>
-                      <select
-                        className={inp}
-                        value={form.blood_group}
-                        onChange={(e) => setForm({ ...form, blood_group: e.target.value })}
-                      >
-                        <option value="">బ్లడ్ గ్రూప్ ఎంచుకోండి</option>
-                        {BLOOD_GROUPS.map((g) => (
-                          <option key={g} value={g}>{g}</option>
-                        ))}
-                      </select>
-                    </>
+                  {!isBlood && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {FREE_TIMINGS.map((t) => (
+                        <button key={t} type="button" onClick={() => setForm({ ...form, service_timing: t })}
+                          className={`rounded-full px-2.5 py-1.5 text-[10px] font-semibold border ${
+                            form.service_timing === t ? "bg-[#16a34a] text-white border-[#16a34a]" : "bg-white text-[#1e3a8a] border-black/10"
+                          }`}>
+                          {t}
+                        </button>
+                      ))}
+                    </div>
                   )}
 
                   <L n="4">సేవా విధానం</L>
