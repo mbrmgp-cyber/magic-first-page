@@ -1,1 +1,2 @@
 - Keep the Vaaradhi blood-post Donor/Wanted choice in the existing listing unit field through the browser-safe varadhi-blood helper — why: free posts carry no price, so no schema change is needed and older blood posts read as donor posts.
+- Derive Vaaradhi service/free-service post details (experience, charge method, mode, timing, area) for Home cards and post pages through the browser-safe varadhi-service-details helper — why: every option the Upload form asks for must appear on the post, and Upload must not ask for fields that are never shown.
