@@ -90,6 +90,8 @@
   --color-machine-agriculture: var(--machine-agriculture);
   --color-machine-tools: var(--machine-tools);
   --color-machine-lettering: var(--machine-lettering);
+  --color-blood-donor: var(--blood-donor);
+  --color-blood-wanted: var(--blood-wanted);
   --shadow-market: var(--market-shadow);
   --shadow-market-card: var(--market-card-shadow);
 }
@@ -101,6 +103,8 @@
   --machine-agriculture: oklch(0.53 0.15 149);
   --machine-tools: oklch(0.52 0.2 298);
   --machine-lettering: oklch(1 0 0);
+  --blood-donor: oklch(0.42 0.12 145);
+  --blood-wanted: oklch(0.48 0.19 27);
   --market-canvas: oklch(0.98 0.006 160);
   --market-surface: oklch(1 0 0);
   --market-ink: oklch(0.28 0.032 165);

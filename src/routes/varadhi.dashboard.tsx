@@ -16,7 +16,8 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { getMyAreaAdminStats } from "@/lib/varadhi-partner.functions";
 import { toast } from "sonner";
-import { Plus, Trash2, Camera, Pencil, Save } from "lucide-react";
+import { Plus, Trash2, Camera, Pencil, Save, Check } from "lucide-react";
+import { BLOOD_DONOR, BLOOD_NEEDS, bloodDetailPlaceholder, bloodNeedOf } from "@/lib/varadhi-blood";
 import { Button } from "@/components/ui/button";
 import { VaradhiOccupationPanel } from "@/components/varadhi/OccupationPanel";
 import { MyPostRemovals } from "@/components/varadhi/MyPostRemovals";
@@ -321,6 +322,7 @@ function PostSection({ postType }: { postType: string }) {
 
   const isLand = postType === "business" && form.item_condition === "realestate";
   const isRental = isLand && isRentalProperty(form.item_condition, form.property_type);
+  const isBlood = postType === "free" && form.service_cat === "blood";
   const unitList = isLand ? LAND_UNITS : UNITS;
 
   // ఒక సంవత్సరం లోపు / గరిష్టంగా 50 పోస్టులు
@@ -411,7 +413,7 @@ function PostSection({ postType }: { postType: string }) {
           item_condition: postType === "business" ? (form.item_condition === "used" ? "used" : "new") : null,
           title: form.title.trim(),
           price: postType === "free" ? null : (form.price ? Number(form.price) : null),
-          unit: isRental ? "నెలకు" : form.unit,
+          unit: isRental ? "నెలకు" : isBlood ? bloodNeedOf(form.unit) : form.unit,
           sub_category: (isSvc ? form.service_cat : form.property_type) || null,
           images: [form.photo, form.location_photo].filter(Boolean),
 
@@ -537,7 +539,7 @@ function PostSection({ postType }: { postType: string }) {
                         return (
                           <Button key={need} type="button" role="radio" aria-checked={selected}
                             onClick={() => setForm({ ...form, unit: need })}
-                            className={`h-auto min-h-10 whitespace-normal rounded-md px-2 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition ${
+                            className={`h-auto min-h-10 whitespace-normal rounded-md px-2 py-2 text-sm font-semibold text-machine-lettering shadow-sm transition ${
                               need === BLOOD_DONOR ? "bg-blood-donor hover:bg-blood-donor/90" : "bg-blood-wanted hover:bg-blood-wanted/90"
                             } ${selected ? "ring-2 ring-offset-2 ring-foreground/70" : "opacity-80"}`}>
                             {selected && <Check className="h-4 w-4" />} {ui(need)}
@@ -589,7 +591,7 @@ function PostSection({ postType }: { postType: string }) {
                 <>
                   <L n="3">సేవ సమయం / అందుబాటు</L>
                   <input className={inp}
-                    placeholder="ఉదా: 24/7, వారాంతాల్లో మాత్రమే, ఉదయం 9 – రాత్రి 8"
+                    placeholder={ui("ఉదా: 24/7, వారాంతాల్లో మాత్రమే, ఉదయం 9 – రాత్రి 8")}
                     value={form.service_timing}
                     onChange={(e) => setForm({ ...form, service_timing: e.target.value })} />
                   {!isBlood && (
