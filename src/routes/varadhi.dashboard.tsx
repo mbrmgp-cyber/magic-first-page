@@ -401,7 +401,6 @@ function PostSection({ postType }: { postType: string }) {
     const isSvc = postType !== "business";
     if (!form.title.trim()) return toast.error(isSvc ? "చేయగల పని అవసరం" : "వస్తువు పేరు అవసరం");
     if (postType === "business" && (!form.price.trim() || Number(form.price) <= 0)) return toast.error("వస్తువు రేటు తప్పనిసరిగా నమోదు చేయండి");
-    if (!form.contact_phone.trim()) return toast.error("కాంటాక్ట్ ఫోన్ నెంబరు అవసరం");
     if (isSvc && !form.service_cat) return toast.error("సేవ రకం ఎంచుకోండి");
     setSaving(true);
     try {
@@ -432,7 +431,9 @@ function PostSection({ postType }: { postType: string }) {
           district: form.district.trim() || null,
           state: form.state.trim() || null,
           pincode: form.pincode.trim() || null,
-          contact_phone: form.contact_phone.trim(),
+          // Visitors call the poster's registered profile phone; the per-post number is
+          // never shown, so the form no longer asks for it and older values are kept.
+          contact_phone: form.contact_phone.trim() || null,
           city: form.village.trim() || form.district.trim() || null,
           stock_status: form.stock_status,
           stock_qty: isRental ? null : (form.stock_qty.trim() || null),
@@ -646,12 +647,10 @@ function PostSection({ postType }: { postType: string }) {
               )}
 
 
-              <L n={isBlood ? "3" : "5"}>లొకేషన్ & కాంటాక్ట్ నెంబర్</L>
-              <input className={inp} placeholder="లొకేషన్ లేదా Google Maps లింక్"
-                value={form.pickup_location} onChange={(e) => setForm({ ...form, pickup_location: e.target.value })} />
+              <L n={isBlood ? "3" : "5"}>లొకేషన్</L>
               <button type="button" onClick={useCurrentLocation}
                 className="w-full rounded-lg border border-[#1e3a8a]/20 bg-white px-2 py-2.5 text-[11px] font-semibold text-[#1e3a8a]">
-                📍 ప్రస్తుత లొకేషన్
+                📍 {form.pickup_location ? "ప్రస్తుత లొకేషన్ ✓" : "ప్రస్తుత లొకేషన్"}
               </button>
               <div className="grid grid-cols-2 gap-2">
                 <input className={inp} placeholder="గ్రామం" value={form.village}
@@ -665,8 +664,6 @@ function PostSection({ postType }: { postType: string }) {
                 <input className={inp} placeholder="రాష్ట్రం" value={form.state}
                   onChange={(e) => setForm({ ...form, state: e.target.value })} />
               </div>
-              <input className={inp} inputMode="tel" placeholder="కాంటాక్ట్ ఫోన్ నెంబరు"
-                value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} />
 
               <L n={isBlood ? "4" : "6"}>సేవ పరిధి</L>
               <div className="grid grid-cols-4 gap-1.5">
@@ -779,16 +776,10 @@ function PostSection({ postType }: { postType: string }) {
           </div>
 
           {/* 3. పికప్ లొకేషన్ + కాంటాక్ట్ */}
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <L n="3">{ui(isRental ? "ఆస్తి లొకేషన్" : isLand ? "భూమి లొకేషన్" : "వస్తువు పికప్ లొకేషన్")}</L>
-              <input className={inp} placeholder={ui("Google Maps link")}
-                value={form.pickup_location} onChange={(e) => setForm({ ...form, pickup_location: e.target.value })} />
-            </div>
-            <div>
-              <L n="">కాంటాక్ట్ ఫోన్ నెంబరు</L>
-              <input className={inp} inputMode="tel" value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} />
-            </div>
+          <div>
+            <L n="3">{ui(isRental ? "ఆస్తి లొకేషన్" : isLand ? "భూమి లొకేషన్" : "వస్తువు పికప్ లొకేషన్")}</L>
+            <input className={inp} placeholder={ui("Google Maps link")}
+              value={form.pickup_location} onChange={(e) => setForm({ ...form, pickup_location: e.target.value })} />
           </div>
           <div className="grid grid-cols-2 gap-2">
             <label className="flex items-center justify-center gap-1.5 rounded-lg border border-dashed border-[#1e3a8a]/30 bg-white px-2 py-2.5 text-[11px] text-[#1e3a8a]">
@@ -806,10 +797,6 @@ function PostSection({ postType }: { postType: string }) {
           {/* 4. పికప్ చిరునామా */}
           <L n="4">{ui(isRental ? "ఆస్తి చిరునామా" : "వస్తువు పికప్ చిరునామా")}</L>
           <div className="grid grid-cols-2 gap-2">
-            <input className={inp} placeholder={ui("ఇల్లు / షాప్ నెంబర్")} value={form.house_no} onChange={(e) => setForm({ ...form, house_no: e.target.value })} />
-            <input className={inp} placeholder={ui("వీధి")} value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} />
-          </div>
-          <div className="grid grid-cols-2 gap-2">
             <input className={inp} placeholder={ui("ఏరియా / గ్రామం")} value={form.village} onChange={(e) => setForm({ ...form, village: e.target.value })} />
             <input className={inp} placeholder={ui("మండలం")} value={form.mandal} onChange={(e) => setForm({ ...form, mandal: e.target.value })} />
           </div>
@@ -817,10 +804,7 @@ function PostSection({ postType }: { postType: string }) {
             <input className={inp} placeholder={ui("జిల్లా")} value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value })} />
             <input className={inp} placeholder={ui("రాష్ట్రం")} value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <input className={inp} placeholder={ui("పిన్‌కోడ్")} inputMode="numeric" value={form.pincode} onChange={(e) => setForm({ ...form, pincode: e.target.value })} />
-            <input className={inp} placeholder={ui("తాలూకా (ఐచ్ఛికం)")} value={form.taluk} onChange={(e) => setForm({ ...form, taluk: e.target.value })} />
-          </div>
+          <input className={inp} placeholder={ui("పిన్‌కోడ్")} inputMode="numeric" value={form.pincode} onChange={(e) => setForm({ ...form, pincode: e.target.value })} />
 
           {/* 5. వివరణ */}
           <L n="5">వివరణ</L>

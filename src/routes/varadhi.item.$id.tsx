@@ -7,6 +7,7 @@ import { useListingImage } from "@/lib/varadhi-image";
 import { PostModerationActions } from "@/components/varadhi/PostModerationActions";
 import { formatAmount, formatPrice, isFreeListing, noPriceLabel, stockLabel } from "@/lib/varadhi-format";
 import { priceLabel } from "@/lib/varadhi-property";
+import { serviceChargeText, serviceDetailRows } from "@/lib/varadhi-service-details";
 
 import { ArrowLeft, Phone, MessageCircle, Truck, Share2 } from "lucide-react";
 
