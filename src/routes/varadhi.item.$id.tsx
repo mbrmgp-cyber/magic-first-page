@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BLOOD_DONOR, bloodNeedOf } from "@/lib/varadhi-blood";
+import { BLOOD_DONOR, bloodNeedOf, bloodPosterLabel } from "@/lib/varadhi-blood";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { getListing, getListingShareMeta, logClick, type VaradhiListing, type VaradhiProvider, type VaradhiProfile } from "@/lib/varadhi.functions";
@@ -177,7 +177,7 @@ function ItemDetail() {
 
       {seller && (
         <div className="mt-3 rounded-2xl bg-white p-4 shadow-sm">
-          <p className="text-xs text-[#1e3a8a]/60">అమ్మకందారు</p>
+          <p className="text-xs text-[#1e3a8a]/60">{isFreeListing(item) && item.sub_category === "blood" ? bloodPosterLabel(item.unit) : "అమ్మకందారు"}</p>
           <p className="text-sm font-semibold text-[#1e3a8a]">{(seller as any).business_name || (seller as any).full_name}</p>
           {(seller as any).address && <p className="text-xs text-[#1e3a8a]/70">{(seller as any).address}</p>}
           <div className="mt-3 grid grid-cols-2 gap-2">

@@ -21,3 +21,8 @@ export function bloodDetailPlaceholder(need: BloodNeed): string {
     ? "ఎవరికి, ఏ ఆసుపత్రిలో, ఎన్ని యూనిట్లు, ఎప్పటికి అవసరం"
     : "చివరిసారి రక్తదానం చేసిన తేదీ / ఎన్నిసార్లు చేశారు";
 }
+
+/** Heading above the poster's name on a blood post (never "seller"). */
+export function bloodPosterLabel(unit: string | null | undefined): string {
+  return bloodNeedOf(unit) === BLOOD_WANTED ? "రక్తం కావలసినవారు" : "రక్తదాత";
+}
