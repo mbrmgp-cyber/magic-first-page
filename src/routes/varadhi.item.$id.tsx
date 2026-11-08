@@ -136,6 +136,16 @@ function ItemDetail() {
           {item.sub_category && (
             <span className="rounded-full bg-orange-50 px-2.5 py-1 text-[11px] font-semibold text-[#f97316]">{item.sub_category}</span>
           )}
+          {isFreeListing(item) && item.sub_category === "blood" && (
+            <>
+              <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold text-machine-lettering ${
+                bloodNeedOf(item.unit) === BLOOD_DONOR ? "bg-blood-donor" : "bg-blood-wanted"
+              }`}>{bloodNeedOf(item.unit)}</span>
+              {(item as any).blood_group && (
+                <span className="rounded-full bg-blood-wanted/10 px-2.5 py-1 text-[11px] font-bold text-blood-wanted">🩸 {(item as any).blood_group}</span>
+              )}
+            </>
+          )}
         </div>
 
         <dl className="mt-1 divide-y divide-black/5 text-sm">
