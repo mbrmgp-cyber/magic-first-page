@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BLOOD_DONOR, BLOOD_WANTED, bloodNeedOf, bloodPosterLabel, isBloodNeed } from "./varadhi-blood";
+import { BLOOD_DONOR, BLOOD_WANTED, bloodNeedOf, bloodPlaceLabel, bloodPosterLabel, bloodStatusLabel, isBloodNeed } from "./varadhi-blood";
 
 describe("blood donation choice", () => {
   it("keeps the Wanted choice saved on a post", () => {
@@ -20,5 +20,16 @@ describe("blood donation choice", () => {
     expect(bloodPosterLabel("దాత")).toBe("రక్తదాత");
     expect(bloodPosterLabel(null)).toBe("రక్తదాత");
     expect(bloodPosterLabel("రక్తం కావాలి")).toBe("రక్తం కావలసినవారు");
+  });
+
+  it("says needed, not available, on wanted blood posts", () => {
+    expect(bloodStatusLabel("రక్తం కావాలి", true)).toBe("అవసరం ఉంది");
+    expect(bloodStatusLabel("రక్తం కావాలి", false)).toBe("అవసరం లేదు");
+    expect(bloodStatusLabel("దాత", true)).toBe("అందుబాటులో ఉంది");
+  });
+
+  it("names the place where blood is needed on wanted posts", () => {
+    expect(bloodPlaceLabel("రక్తం కావాలి")).toBe("కావలసిన చోటు");
+    expect(bloodPlaceLabel("దాత")).toBe("దొరుకు చోటు");
   });
 });

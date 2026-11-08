@@ -26,3 +26,14 @@ export function bloodDetailPlaceholder(need: BloodNeed): string {
 export function bloodPosterLabel(unit: string | null | undefined): string {
   return bloodNeedOf(unit) === BLOOD_WANTED ? "రక్తం కావలసినవారు" : "రక్తదాత";
 }
+
+/** Status chip on a blood post: wanted posts say "needed", donor posts keep "available". */
+export function bloodStatusLabel(unit: string | null | undefined, active: boolean): string {
+  if (bloodNeedOf(unit) === BLOOD_WANTED) return active ? "అవసరం ఉంది" : "అవసరం లేదు";
+  return active ? "అందుబాటులో ఉంది" : "అందుబాటులో లేదు";
+}
+
+/** Place row heading on a blood post: wanted posts name where blood is needed. */
+export function bloodPlaceLabel(unit: string | null | undefined): string {
+  return bloodNeedOf(unit) === BLOOD_WANTED ? "కావలసిన చోటు" : "దొరుకు చోటు";
+}

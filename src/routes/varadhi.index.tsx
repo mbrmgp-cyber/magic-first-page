@@ -1,5 +1,6 @@
 import { useListingImage } from "@/lib/varadhi-image";
 import { formatAmount, isFreeListing, stockLabel } from "@/lib/varadhi-format";
+import { bloodStatusLabel } from "@/lib/varadhi-blood";
 
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -113,7 +114,7 @@ function ListingCard({ l, note }: { l: VaradhiListing; note?: string }) {
           >
             {inStock && stockQty && !isFreeListing(l)
               ? `స్టాక్: ${stockQty}${unit ? ` ${unit}` : ""}`
-              : stockLabel(inStock, isFreeListing(l))}
+              : isFreeListing(l) && l.sub_category === "blood" ? bloodStatusLabel(l.unit, inStock) : stockLabel(inStock, isFreeListing(l))}
           </span>
         </div>
         <p className="truncate text-[10px] text-market-muted">

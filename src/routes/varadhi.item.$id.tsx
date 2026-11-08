@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BLOOD_DONOR, bloodNeedOf, bloodPosterLabel } from "@/lib/varadhi-blood";
+import { BLOOD_DONOR, bloodNeedOf, bloodPlaceLabel, bloodPosterLabel, bloodStatusLabel } from "@/lib/varadhi-blood";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { getListing, getListingShareMeta, logClick, type VaradhiListing, type VaradhiProvider, type VaradhiProfile } from "@/lib/varadhi.functions";
@@ -127,7 +127,7 @@ function ItemDetail() {
 
         <div className="flex flex-wrap gap-1.5">
           <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${inStock ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600"}`}>
-            {stockLabel(inStock, isFreeListing(item))}
+            {isFreeListing(item) && item.sub_category === "blood" ? bloodStatusLabel(item.unit, inStock) : stockLabel(inStock, isFreeListing(item))}
           </span>
           {(item as any).stock_qty && (
             <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-[#1e3a8a]">
@@ -157,7 +157,7 @@ function ItemDetail() {
           )}
           {(item as any).pickup_location && (
             <div className="flex justify-between gap-3 py-1.5">
-              <dt className="text-[#1e3a8a]/60">దొరుకు చోటు</dt><dd className="text-right font-medium">{(item as any).pickup_location}</dd>
+              <dt className="text-[#1e3a8a]/60">{isFreeListing(item) && item.sub_category === "blood" ? bloodPlaceLabel(item.unit) : "దొరుకు చోటు"}</dt><dd className="text-right font-medium">{(item as any).pickup_location}</dd>
             </div>
           )}
           {(item as any).pincode && (
