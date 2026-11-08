@@ -121,6 +121,7 @@ export type VaradhiListing = {
   click_count: number;
   created_at: string;
   blood_group?: string | null;
+  experience?: string | null;
   village?: string | null;
   mandal?: string | null;
   district?: string | null;

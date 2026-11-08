@@ -418,8 +418,8 @@ function PostSection({ postType }: { postType: string }) {
           images: [form.photo, form.location_photo].filter(Boolean),
 
           experience: isSvc ? (form.experience.trim() || null) : null,
-          service_mode: isSvc ? (form.service_mode || null) : null,
-          service_timing: isSvc ? (form.service_timing.trim() || null) : null,
+          service_mode: isSvc && !isBlood ? (form.service_mode || null) : null,
+          service_timing: isSvc && !isBlood ? (form.service_timing.trim() || null) : null,
           service_area: isSvc ? (form.service_area || null) : null,
           blood_group: postType === "free" && form.service_cat === "blood" ? (form.blood_group.trim() || null) : null,
 
@@ -587,7 +587,7 @@ function PostSection({ postType }: { postType: string }) {
                 )}
               </div>
 
-              {postType === "free" ? (
+              {isBlood ? null : postType === "free" ? (
                 <>
                   <L n="3">సేవ సమయం / అందుబాటు</L>
                   <input className={inp}
@@ -646,7 +646,7 @@ function PostSection({ postType }: { postType: string }) {
               )}
 
 
-              <L n="5">లొకేషన్ & కాంటాక్ట్ నెంబర్</L>
+              <L n={isBlood ? "3" : "5"}>లొకేషన్ & కాంటాక్ట్ నెంబర్</L>
               <input className={inp} placeholder="లొకేషన్ లేదా Google Maps లింక్"
                 value={form.pickup_location} onChange={(e) => setForm({ ...form, pickup_location: e.target.value })} />
               <button type="button" onClick={useCurrentLocation}
@@ -668,7 +668,7 @@ function PostSection({ postType }: { postType: string }) {
               <input className={inp} inputMode="tel" placeholder="కాంటాక్ట్ ఫోన్ నెంబరు"
                 value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} />
 
-              <L n="6">సేవ పరిధి</L>
+              <L n={isBlood ? "4" : "6"}>సేవ పరిధి</L>
               <div className="grid grid-cols-4 gap-1.5">
                 {SERVICE_AREAS.map((a) => (
                   <button key={a} onClick={() => setForm({ ...form, service_area: a })}
@@ -680,7 +680,7 @@ function PostSection({ postType }: { postType: string }) {
                 ))}
               </div>
 
-              <L n="7">అందుబాటు</L>
+              <L n={isBlood ? "5" : "7"}>అందుబాటు</L>
               <div className="grid grid-cols-2 gap-2">
                 {(["running", "closed"] as const).map((s) => (
                   <button key={s} onClick={() => setForm({ ...form, stock_status: s })}
