@@ -118,8 +118,8 @@ function AdminAccessPage() {
           <h1 className="text-lg font-bold">{lt("Admin Role & Access Management", "అడ్మిన్ పాత్రలు & అనుమతులు")}</h1>
           <p className="text-xs text-white/60 mt-1">
             {lt(
-              "Check each committee member's position and qualifications, then tick only the sections that person may open and press Save.",
-              "ప్రతి కమిటీ సభ్యుని పదవి, అర్హత చూసి, ఆ వ్యక్తి తెరవాల్సిన భాగాలను మాత్రమే టిక్ చేసి సేవ్ చేయండి."
+              "Tap a committee member's name to see their position, qualifications and access, then tick only the sections that person may open and press Save.",
+              "కమిటీ సభ్యుని పేరు నొక్కితే వారి పదవి, అర్హత, అనుమతులు కనపడతాయి. ఆ వ్యక్తి తెరవాల్సిన భాగాలను మాత్రమే టిక్ చేసి సేవ్ చేయండి."
             )}
           </p>
         </Card>
