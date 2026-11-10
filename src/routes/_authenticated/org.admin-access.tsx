@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, ShieldCheck, Save, Trash2, User, Award } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Save, Trash2, User, Award, ChevronDown } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -41,6 +41,8 @@ function AdminAccessPage() {
   // Local editable state keyed by user_id.
   const [draft, setDraft] = useState<Record<string, { modules: Set<AdminModuleKey> }>>({});
   const [savingUser, setSavingUser] = useState<string | null>(null);
+  // Only one committee member's permission details are open at a time.
+  const [openId, setOpenId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!q.data?.rows) return;
@@ -116,8 +118,8 @@ function AdminAccessPage() {
           <h1 className="text-lg font-bold">{lt("Admin Role & Access Management", "అడ్మిన్ పాత్రలు & అనుమతులు")}</h1>
           <p className="text-xs text-white/60 mt-1">
             {lt(
-              "Check each committee member's position and qualifications, then tick only the sections that person may open and press Save.",
-              "ప్రతి కమిటీ సభ్యుని పదవి, అర్హత చూసి, ఆ వ్యక్తి తెరవాల్సిన భాగాలను మాత్రమే టిక్ చేసి సేవ్ చేయండి."
+              "Tap a committee member's name to see their position, qualifications and access, then tick only the sections that person may open and press Save.",
+              "కమిటీ సభ్యుని పేరు నొక్కితే వారి పదవి, అర్హత, అనుమతులు కనపడతాయి. ఆ వ్యక్తి తెరవాల్సిన భాగాలను మాత్రమే టిక్ చేసి సేవ్ చేయండి."
             )}
           </p>
         </Card>
@@ -139,10 +141,24 @@ function AdminAccessPage() {
 
         {rows.map((r: any) => {
           const uid = r.user_id as string | null;
+          const isOpen = openId === r.committee_id;
+          const onToggleOpen = () => setOpenId(isOpen ? null : r.committee_id);
           if (!uid) {
             return (
-              <Card key={r.committee_id} className="p-3 bg-zinc-950 border-white/10 text-xs text-amber-200">
-                {r.name} — {lt("no login yet; ask them to sign in once before granting access.", "ఇంకా లాగిన్ చేయలేదు; అనుమతి ఇచ్చేముందు ఒకసారి లాగిన్ చేయమని అడగండి.")}
+              <Card key={r.committee_id} className="bg-zinc-950 border-white/10 overflow-hidden">
+                <PersonHeader
+                  name={r.name}
+                  photoUrl={r.photo_url}
+                  role={committeeRoleLabel(r.committee_role, lang === "te" ? "te" : "en")}
+                  open={isOpen}
+                  onClick={onToggleOpen}
+                  badge={lt("No login", "లాగిన్ లేదు")}
+                />
+                {isOpen && (
+                  <p className="px-3 pb-3 text-xs text-amber-200">
+                    {lt("No login yet; ask them to sign in once before granting access.", "ఇంకా లాగిన్ చేయలేదు; అనుమతి ఇచ్చేముందు ఒకసారి లాగిన్ చేయమని అడగండి.")}
+                  </p>
+                )}
               </Card>
             );
           }
@@ -151,6 +167,8 @@ function AdminAccessPage() {
           return (
             <PersonCard
               key={r.committee_id}
+              open={isOpen}
+              onToggleOpen={onToggleOpen}
               name={r.name}
               email={r.email}
               photoUrl={r.photo_url}
@@ -171,7 +189,47 @@ function AdminAccessPage() {
   );
 }
 
+function PersonHeader(props: {
+  name: string;
+  photoUrl: string | null;
+  role: string;
+  open: boolean;
+  onClick: () => void;
+  badge: string;
+}) {
+  const [broken, setBroken] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={props.onClick}
+      aria-expanded={props.open}
+      className="w-full flex items-center gap-3 p-3 text-left hover:bg-white/5 transition"
+    >
+      {props.photoUrl && !broken ? (
+        <img
+          src={props.photoUrl}
+          alt={props.name}
+          onError={() => setBroken(true)}
+          className="w-12 h-12 rounded-full object-cover border border-white/15 shrink-0"
+        />
+      ) : (
+        <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+          <User className="w-6 h-6 text-white/60" />
+        </div>
+      )}
+      <div className="flex-1 min-w-0">
+        <p className="font-semibold text-white leading-tight break-words">{props.name}</p>
+        {props.role && <p className="text-xs text-[#ff8c28] mt-0.5">{props.role}</p>}
+      </div>
+      <span className="text-xs text-white/60 shrink-0">{props.badge}</span>
+      <ChevronDown className={`w-5 h-5 text-white/60 shrink-0 transition-transform ${props.open ? "rotate-180" : ""}`} />
+    </button>
+  );
+}
+
 function PersonCard(props: {
+  open: boolean;
+  onToggleOpen: () => void;
   name: string;
   email: string;
   photoUrl: string | null;
@@ -188,25 +246,20 @@ function PersonCard(props: {
   const lt = (en: string, te: string) => (props.lang === "te" ? te : en);
   const modules = useMemo(() => ADMIN_MODULES, []);
   return (
-    <Card className="p-4 bg-zinc-950 border-white/10 space-y-3">
-      <div className="flex items-center gap-3">
-        {props.photoUrl ? (
-          <img src={props.photoUrl} alt="" className="w-10 h-10 rounded-full object-cover border border-white/10" />
-        ) : (
-          <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-            <User className="w-5 h-5 text-white/60" />
-          </div>
-        )}
-        <div className="flex-1 min-w-0">
-          <p className="font-semibold text-white truncate">{props.name}</p>
-          <p className="text-xs text-white/50 truncate">{props.email}</p>
-        </div>
-        <span className="text-xs text-white/60 shrink-0">
-          {props.count} / {modules.length}
-        </span>
-      </div>
+    <Card className="bg-zinc-950 border-white/10 overflow-hidden">
+      <PersonHeader
+        name={props.name}
+        photoUrl={props.photoUrl}
+        role={props.role}
+        open={props.open}
+        onClick={props.onToggleOpen}
+        badge={`${props.count} / ${modules.length}`}
+      />
 
+      {props.open && (
+      <div className="px-3 pb-3 space-y-3 border-t border-white/10 pt-3">
       <div className="rounded-md border border-white/10 bg-white/5 p-2.5 space-y-1">
+        {props.email && <p className="text-xs text-white/50 break-all">{props.email}</p>}
         <p className="text-xs text-white/60">
           {lt("Position", "పదవి")}:{" "}
           <span className="font-semibold text-[#ff8c28]">{props.role || lt("Not set", "లేదు")}</span>
@@ -265,6 +318,8 @@ function PersonCard(props: {
           <Trash2 className="w-4 h-4 mr-1" /> {lt("Revoke All", "మొత్తం తీసివేయి")}
         </Button>
       </div>
+      </div>
+      )}
     </Card>
   );
 }
