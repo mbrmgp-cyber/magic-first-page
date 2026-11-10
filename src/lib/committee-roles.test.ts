@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { COMMITTEE_ROLES, parseCommitteeRole } from "./committee-roles";
+import { COMMITTEE_ROLES, committeeRoleLabel, parseCommitteeRole } from "./committee-roles";
 
 describe("executive committee appointment positions", () => {
   it("allows founders in the appointment list and validator", () => {
@@ -15,5 +15,10 @@ describe("executive committee appointment positions", () => {
       expect(parseCommitteeRole(role)).toBe(role);
     }
     expect(() => parseCommitteeRole("admin")).toThrow();
+  });
+  it("shows the position name in Telugu and English", () => {
+    expect(committeeRoleLabel("treasurer", "te")).toBe("కోశాధికారి");
+    expect(committeeRoleLabel("president", "en")).toBe("President");
+    expect(committeeRoleLabel("legacy_role", "te")).toBe("legacy_role");
   });
 });

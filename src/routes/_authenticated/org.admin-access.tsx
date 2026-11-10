@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, ShieldCheck, Save, RotateCcw, Trash2, User } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Save, Trash2, User, Award } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -10,13 +10,12 @@ import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n";
 import {
   ADMIN_MODULES,
-  PRESET_MODULES,
   listOrgAdminAccess,
   setAdminAccess,
   revokeAdminAccess,
   type AdminModuleKey,
-  type AdminPreset,
 } from "@/lib/admin-permissions.functions";
+import { committeeRoleLabel } from "@/lib/committee-roles";
 
 export const Route = createFileRoute("/_authenticated/org/admin-access")({
   head: () => ({
@@ -40,7 +39,7 @@ function AdminAccessPage() {
   const revoke = useServerFn(revokeAdminAccess);
 
   // Local editable state keyed by user_id.
-  const [draft, setDraft] = useState<Record<string, { modules: Set<AdminModuleKey>; preset: AdminPreset }>>({});
+  const [draft, setDraft] = useState<Record<string, { modules: Set<AdminModuleKey> }>>({});
   const [savingUser, setSavingUser] = useState<string | null>(null);
 
   useEffect(() => {
@@ -50,7 +49,6 @@ function AdminAccessPage() {
       if (!r.user_id) continue;
       next[r.user_id] = {
         modules: new Set(r.modules as AdminModuleKey[]),
-        preset: (r.preset as AdminPreset) ?? "custom",
       };
     }
     setDraft(next);
@@ -59,20 +57,13 @@ function AdminAccessPage() {
 
   const rows = q.data?.rows ?? [];
 
-  const applyPreset = (uid: string, preset: Exclude<AdminPreset, "custom">) => {
-    setDraft((d) => ({
-      ...d,
-      [uid]: { modules: new Set(PRESET_MODULES[preset]), preset },
-    }));
-  };
-
   const toggle = (uid: string, key: AdminModuleKey) => {
     setDraft((d) => {
-      const cur = d[uid] ?? { modules: new Set<AdminModuleKey>(), preset: "custom" as AdminPreset };
+      const cur = d[uid] ?? { modules: new Set<AdminModuleKey>() };
       const s = new Set(cur.modules);
       if (s.has(key)) s.delete(key);
       else s.add(key);
-      return { ...d, [uid]: { modules: s, preset: "custom" } };
+      return { ...d, [uid]: { modules: s } };
     });
   };
 
@@ -81,7 +72,7 @@ function AdminAccessPage() {
     if (!cur) return;
     setSavingUser(uid);
     try {
-      await save({ data: { user_id: uid, modules: Array.from(cur.modules), preset: cur.preset } });
+      await save({ data: { user_id: uid, modules: Array.from(cur.modules), preset: "custom" } });
       toast.success(lt("Access saved", "అనుమతులు సేవ్ అయ్యాయి"));
       await qc.invalidateQueries({ queryKey: ["admin-access-list"] });
     } catch (e: any) {
@@ -96,7 +87,7 @@ function AdminAccessPage() {
     try {
       await revoke({ data: { user_id: uid } });
       toast.success(lt("Access revoked", "అనుమతులు తీసివేయబడ్డాయి"));
-      setDraft((d) => ({ ...d, [uid]: { modules: new Set(), preset: "custom" } }));
+      setDraft((d) => ({ ...d, [uid]: { modules: new Set() } }));
       await qc.invalidateQueries({ queryKey: ["admin-access-list"] });
     } catch (e: any) {
       toast.error(e?.message ?? "Revoke failed");
@@ -125,8 +116,8 @@ function AdminAccessPage() {
           <h1 className="text-lg font-bold">{lt("Admin Role & Access Management", "అడ్మిన్ పాత్రలు & అనుమతులు")}</h1>
           <p className="text-xs text-white/60 mt-1">
             {lt(
-              "Assign module-level permissions to each committee member. President and Treasurer presets are pre-filled but you can adjust any checkbox per person.",
-              "ప్రతి కమిటీ సభ్యునికి మాడ్యూల్-స్థాయి అనుమతులు కేటాయించండి. అధ్యక్షుడు మరియు కోశాధికారి ప్రీసెట్‌లు ముందుగా నింపబడతాయి, కానీ ప్రతి వ్యక్తికి ఏ చెక్‌బాక్స్‌ను అయినా మార్చవచ్చు."
+              "Check each committee member's position and qualifications, then tick only the sections that person may open and press Save.",
+              "ప్రతి కమిటీ సభ్యుని పదవి, అర్హత చూసి, ఆ వ్యక్తి తెరవాల్సిన భాగాలను మాత్రమే టిక్ చేసి సేవ్ చేయండి."
             )}
           </p>
         </Card>
@@ -155,29 +146,23 @@ function AdminAccessPage() {
               </Card>
             );
           }
-          const cur = draft[uid] ?? { modules: new Set<AdminModuleKey>(), preset: "custom" as AdminPreset };
+          const cur = draft[uid] ?? { modules: new Set<AdminModuleKey>() };
           const count = cur.modules.size;
-          const isPres = r.committee_role === "president";
-          const isTreas = r.committee_role === "treasurer";
           return (
             <PersonCard
               key={r.committee_id}
               name={r.name}
               email={r.email}
               photoUrl={r.photo_url}
-              role={r.committee_role}
-              preset={cur.preset}
+              role={committeeRoleLabel(r.committee_role, lang === "te" ? "te" : "en")}
+              qualifications={r.qualifications ?? null}
               modules={cur.modules}
               count={count}
               saving={savingUser === uid}
               onToggle={(k) => toggle(uid, k)}
-              onPresetPresident={() => applyPreset(uid, "president")}
-              onPresetTreasurer={() => applyPreset(uid, "treasurer")}
               onSave={() => saveRow(uid)}
               onRevoke={() => revokeRow(uid)}
               lang={lang === "te" ? "te" : "en"}
-              highlightPresident={isPres}
-              highlightTreasurer={isTreas}
             />
           );
         })}
@@ -191,18 +176,14 @@ function PersonCard(props: {
   email: string;
   photoUrl: string | null;
   role: string;
-  preset: AdminPreset;
+  qualifications: string | null;
   modules: Set<AdminModuleKey>;
   count: number;
   saving: boolean;
   onToggle: (k: AdminModuleKey) => void;
-  onPresetPresident: () => void;
-  onPresetTreasurer: () => void;
   onSave: () => void;
   onRevoke: () => void;
   lang: "en" | "te";
-  highlightPresident: boolean;
-  highlightTreasurer: boolean;
 }) {
   const lt = (en: string, te: string) => (props.lang === "te" ? te : en);
   const modules = useMemo(() => ADMIN_MODULES, []);
@@ -218,35 +199,27 @@ function PersonCard(props: {
         )}
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-white truncate">{props.name}</p>
-          <p className="text-xs text-white/50 truncate">{props.email} · {props.role}</p>
+          <p className="text-xs text-white/50 truncate">{props.email}</p>
         </div>
         <span className="text-xs text-white/60 shrink-0">
           {props.count} / {modules.length}
         </span>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={props.onPresetPresident}
-          className={`text-xs h-8 border-white/20 bg-white/5 text-white hover:bg-white/10 ${props.highlightPresident ? "ring-1 ring-[#ff8c28]" : ""}`}
-        >
-          {lt("Preset: President", "ప్రీసెట్: అధ్యక్షుడు")}
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={props.onPresetTreasurer}
-          className={`text-xs h-8 border-white/20 bg-white/5 text-white hover:bg-white/10 ${props.highlightTreasurer ? "ring-1 ring-emerald-400" : ""}`}
-        >
-          {lt("Preset: Treasurer", "ప్రీసెట్: కోశాధికారి")}
-        </Button>
-        <span className="text-[10px] uppercase tracking-wide text-white/40 self-center ml-auto">
-          {props.preset === "custom" ? lt("Custom", "కస్టమ్") : props.preset === "president" ? lt("President preset", "అధ్యక్ష ప్రీసెట్") : lt("Treasurer preset", "కోశాధికారి ప్రీసెట్")}
-        </span>
+      <div className="rounded-md border border-white/10 bg-white/5 p-2.5 space-y-1">
+        <p className="text-xs text-white/60">
+          {lt("Position", "పదవి")}:{" "}
+          <span className="font-semibold text-[#ff8c28]">{props.role || lt("Not set", "లేదు")}</span>
+        </p>
+        <p className="flex items-start gap-1.5 text-xs text-white/60">
+          <Award className="w-3.5 h-3.5 mt-0.5 shrink-0 text-[#ff8c28]" />
+          <span>
+            {lt("Qualifications", "అర్హత")}:{" "}
+            <span className="text-white whitespace-pre-wrap break-words">
+              {props.qualifications ?? lt("Not entered in the committee appointment", "కమిటీ నియామకంలో అర్హత నమోదు చేయలేదు")}
+            </span>
+          </span>
+        </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1">
@@ -290,14 +263,6 @@ function PersonCard(props: {
           className="border-red-500/40 bg-red-500/10 text-red-200 hover:bg-red-500/20"
         >
           <Trash2 className="w-4 h-4 mr-1" /> {lt("Revoke All", "మొత్తం తీసివేయి")}
-        </Button>
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => props.onToggle("__reset__" as any) /* noop guard */}
-          className="hidden"
-        >
-          <RotateCcw className="w-4 h-4" />
         </Button>
       </div>
     </Card>
