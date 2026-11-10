@@ -23,12 +23,6 @@ export const ADMIN_MODULES = [
 export type AdminModuleKey = (typeof ADMIN_MODULES)[number]["key"];
 export type AdminPreset = "president" | "treasurer" | "custom";
 
-export const PRESET_MODULES: Record<Exclude<AdminPreset, "custom">, AdminModuleKey[]> = {
-  // President: everything EXCEPT the Disciplinary module.
-  president: ADMIN_MODULES.map((m) => m.key).filter((k) => k !== "disciplinary") as AdminModuleKey[],
-  // Treasurer: only Accounts Hub + Live Chits.
-  treasurer: ["accounts", "auction"],
-};
 
 async function resolveOrg(supabase: any, userId: string): Promise<string | null> {
   const picked = getRequest().headers.get(ACTIVE_ORG_HEADER);
@@ -118,7 +112,7 @@ export const listOrgAdminAccess = createServerFn({ method: "GET" })
     // All active committee seats in this org, with the member profile.
     const { data: cmRows } = await supabase
       .from("committee_members")
-      .select("id, role, member_id, members(id, name, email, photo_url, user_id)")
+      .select("id, role, member_id, qualifications, members(id, name, email, photo_url, user_id)")
       .eq("org_id", orgId)
       .eq("is_active", true)
       .order("position_number", { ascending: true });
@@ -148,6 +142,7 @@ export const listOrgAdminAccess = createServerFn({ method: "GET" })
       return {
         committee_id: r.id,
         committee_role: r.role,
+        qualifications: (r.qualifications as string | null)?.trim() || null,
         member_id: r.member_id,
         user_id: uid ?? null,
         name: r.members?.name ?? "",
