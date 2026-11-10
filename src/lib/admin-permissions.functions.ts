@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { getRequest } from "@tanstack/react-start/server";
 import { ACTIVE_ORG_HEADER } from "@/lib/active-org";
+import { resolveMemberPhoto } from "@/lib/member-photo";
 
 // Canonical list of modules the Super Admin can toggle per admin.
 // Keys are stable strings stored in admin_module_access.modules.
@@ -136,7 +137,8 @@ export const listOrgAdminAccess = createServerFn({ method: "GET" })
       }
     }
 
-    const rows = (cmRows ?? []).map((r: any) => {
+    // Storage paths are not browser URLs; sign them with the caller's storage access.
+    const rows = await Promise.all((cmRows ?? []).map(async (r: any) => {
       const uid = r.members?.user_id as string | undefined;
       const access = uid ? accessByUser.get(uid) : undefined;
       return {
@@ -147,12 +149,12 @@ export const listOrgAdminAccess = createServerFn({ method: "GET" })
         user_id: uid ?? null,
         name: r.members?.name ?? "",
         email: r.members?.email ?? "",
-        photo_url: r.members?.photo_url ?? null,
+        photo_url: await resolveMemberPhoto(supabase, r.members?.photo_url ?? null),
         modules: access?.modules ?? [],
         preset: access?.preset ?? null,
         has_login: !!uid,
       };
-    });
+    }));
 
     return { orgId, rows };
   });
